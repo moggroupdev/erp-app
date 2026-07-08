@@ -11,7 +11,7 @@ export default function NotFound({ dashboard }: { dashboard?: boolean }) {
 
   return (
     <div className="flex-center h-full flex-1 flex-col gap-5 p-4 pb-20">
-      <Image src={"/images/no-content.png"} alt="404" width={112} height={112} />
+      <Image src={"/images/no-content.png"} alt="404" width={112} height={112} loading="eager" />
       <h1 className="text-3xl">{translate("Page not found", "الصفحة غير موجودة")}</h1>
       <p>{translate("The page you're looking for doesn't exist.", "الصفحة التي تبحث عنها غير موجودة.")}</p>
       <Link href={dashboard ? getLocalizedHref("/dashboard") : getLocalizedHref("/")}>
