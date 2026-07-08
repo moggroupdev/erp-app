@@ -23,7 +23,7 @@ export default function Logo({
       }}
     >
       <Image src={"/images/logo.png"} alt={title} width={38} height={38} className="rounded" />
-      {title && <span className={`text-lg font-bold`}>{title}</span>}
+      {title && <span className={`text-lg font-bold text-nowrap`}>{title}</span>}
     </button>
   );
 }

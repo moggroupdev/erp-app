@@ -14,7 +14,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Button } from "@mantine/core";
 import { Pencil } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
-import AdminLayoutBox from "@/components/ui/admin-layout-box";
+import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import VendorModal from "@/components/global/vendor-modal";
@@ -53,7 +53,7 @@ export default function Page() {
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
 
   return (
-    <AdminLayoutBox
+    <LayoutBox
       header={{
         title: translate("Vendor Data", "بيانات المورد"),
         backLink: true,
@@ -120,6 +120,6 @@ export default function Page() {
           </>
         )
       )}
-    </AdminLayoutBox>
+    </LayoutBox>
   );
 }

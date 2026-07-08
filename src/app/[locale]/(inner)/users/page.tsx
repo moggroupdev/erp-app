@@ -1,7 +1,7 @@
 import type { LocalePageProps } from "@/lib/i18n/types";
 import { getI18nFromParams } from "@/lib/i18n/utils";
 import { buildPageMetadata } from "@/lib/helpers/build-metadata";
-import AdminLayoutBox from "@/components/ui/admin-layout-box";
+import LayoutBox from "@/components/ui/layout-box";
 
 const PAGE_TITLE = {
   en: "Users",
@@ -22,8 +22,8 @@ export default async function Page({ params }: LocalePageProps) {
   const { translate, translation } = await getI18nFromParams(params);
 
   return (
-    <AdminLayoutBox header={{ title: translate(PAGE_TITLE.en, PAGE_TITLE.ar) }}>
+    <LayoutBox header={{ title: translate(PAGE_TITLE.en, PAGE_TITLE.ar) }}>
       <p>{translation.underConstruction}</p>
-    </AdminLayoutBox>
+    </LayoutBox>
   );
 }

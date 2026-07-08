@@ -19,7 +19,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
-import AdminLayoutBox from "@/components/ui/admin-layout-box";
+import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -147,9 +147,9 @@ export default function Page() {
   }
 
   return (
-    <AdminLayoutBox
+    <LayoutBox
       header={{
-        backLink: getLocalizedHref("@TODO/home"),
+        backLink: getLocalizedHref("/dashboard"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <PermissionGuard permission={PERMISSIONS.ADD_VENDOR}>
@@ -216,7 +216,7 @@ export default function Page() {
                   {paginatedVendors.data.map((vendor) => (
                     <Table.Tr key={vendor.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
-                        <Link href={getLocalizedHref(`@TODO/home/vendors/${vendor.id}`)} className="hover:underline">
+                        <Link href={getLocalizedHref(`/vendors/${vendor.id}`)} className="hover:underline">
                           {vendor.name}
                         </Link>
                       </Table.Td>
@@ -275,6 +275,6 @@ export default function Page() {
           });
         }}
       />
-    </AdminLayoutBox>
+    </LayoutBox>
   );
 }

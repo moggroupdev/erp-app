@@ -14,7 +14,7 @@ import { Customer } from "@/types/customer";
 import { Button } from "@mantine/core";
 import { Pencil, Plus } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
-import AdminLayoutBox from "@/components/ui/admin-layout-box";
+import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import CustomerModal from "@/components/global/customer-modal";
@@ -54,7 +54,7 @@ export default function Page() {
   const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] = useDisclosure(false);
 
   return (
-    <AdminLayoutBox
+    <LayoutBox
       header={{
         title: translate("Customer Data", "ملف العميل"),
         backLink: true,
@@ -119,13 +119,7 @@ export default function Page() {
                   <h4>{translate("Addresses", "العناوين")}</h4>
 
                   <PermissionGuard permission={PERMISSIONS.ADD_CUSTOMER}>
-                    <Button
-                      onClick={openAddressModal}
-                      variant="light"
-                      color="teal"
-                      radius="md"
-                      leftSection={<Plus />}
-                    >
+                    <Button onClick={openAddressModal} variant="light" color="teal" radius="md" leftSection={<Plus />}>
                       {translate("Add New Address", "إضافة عنوان جديد")}
                     </Button>
                   </PermissionGuard>
@@ -143,6 +137,6 @@ export default function Page() {
           </>
         )
       )}
-    </AdminLayoutBox>
+    </LayoutBox>
   );
 }

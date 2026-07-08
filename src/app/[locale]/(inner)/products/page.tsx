@@ -15,7 +15,7 @@ import { type PaginatedData } from "@/types/global";
 import { type Product } from "@/types/product";
 import { Button, Table, TextInput } from "@mantine/core";
 import { Filter, Search, X } from "lucide-react";
-import AdminLayoutBox from "@/components/ui/admin-layout-box";
+import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -152,9 +152,9 @@ export default function Page() {
   }, [activePage, debouncedKeyword, seasonFilter, categoryFilter, subcategoryFilter]);
 
   return (
-    <AdminLayoutBox
+    <LayoutBox
       header={{
-        backLink: getLocalizedHref("@TODO/home"),
+        backLink: getLocalizedHref("/dashboard"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
       }}
     >
@@ -253,6 +253,6 @@ export default function Page() {
           </>
         ))
       )}
-    </AdminLayoutBox>
+    </LayoutBox>
   );
 }

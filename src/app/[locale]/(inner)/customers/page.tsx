@@ -18,7 +18,7 @@ import { Customer } from "@/types/customer";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
-import AdminLayoutBox from "@/components/ui/admin-layout-box";
+import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -144,7 +144,7 @@ export default function Page() {
   }
 
   return (
-    <AdminLayoutBox
+    <LayoutBox
       header={{
         title: translate("Customers", "العملاء"),
         sideElements: (
@@ -215,7 +215,7 @@ export default function Page() {
                     return (
                       <Table.Tr key={customer.id} className="text-gray-600">
                         <Table.Td className="font-semibold text-gray-800">
-                          <Link href={getLocalizedHref(`/@TODO/customers/${customer.id}`)} className="hover:underline">
+                          <Link href={getLocalizedHref(`/customers/${customer.id}`)} className="hover:underline">
                             {customer.name}
                           </Link>
                         </Table.Td>
@@ -277,6 +277,6 @@ export default function Page() {
           });
         }}
       />
-    </AdminLayoutBox>
+    </LayoutBox>
   );
 }

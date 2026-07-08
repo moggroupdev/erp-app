@@ -24,6 +24,23 @@ export const PERMISSION_VALUES = [
   "list_customers",
   "add_customer",
   "update_customer",
+  "list_inquiries",
+  "list_previews",
+  "list_offers",
+  "list_contracts",
+  "list_receptions",
+  "list_boms",
+  "list_production_plans",
+  "list_production_routing",
+  "list_materials",
+  "list_inventory_transactions",
+  "list_material_purchase_orders",
+  "list_product_purchase_orders",
+  "list_trips",
+  "list_deliveries",
+  "list_installations",
+  "list_service_agreements",
+  "list_maintenance_orders",
 ] as const;
 
 export type Permission = (typeof PERMISSION_VALUES)[number];
@@ -189,6 +206,125 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Customer",
       ar: "تحديث العميل",
+    },
+  },
+  list_inquiries: {
+    value: "list_inquiries",
+    label: {
+      en: "List Inquiries",
+      ar: "عرض الاستفسارات",
+    },
+  },
+  list_previews: {
+    value: "list_previews",
+    label: {
+      en: "List Previews",
+      ar: "عرض المعاينات",
+    },
+  },
+  list_offers: {
+    value: "list_offers",
+    label: {
+      en: "List Offers",
+      ar: "عرض العروض",
+    },
+  },
+  list_contracts: {
+    value: "list_contracts",
+    label: {
+      en: "List Contracts",
+      ar: "عرض العقود",
+    },
+  },
+  list_receptions: {
+    value: "list_receptions",
+    label: {
+      en: "List Receptions",
+      ar: "عرض الاستلامات",
+    },
+  },
+  list_boms: {
+    value: "list_boms",
+    label: {
+      en: "List BOMs",
+      ar: "عرض قوائم المواد",
+    },
+  },
+  list_production_plans: {
+    value: "list_production_plans",
+    label: {
+      en: "List Production Plans",
+      ar: "عرض خطط الإنتاج",
+    },
+  },
+  list_production_routing: {
+    value: "list_production_routing",
+    label: {
+      en: "List Production Routing",
+      ar: "عرض مسارات الإنتاج",
+    },
+  },
+  list_materials: {
+    value: "list_materials",
+    label: {
+      en: "List Materials",
+      ar: "عرض المواد",
+    },
+  },
+  list_inventory_transactions: {
+    value: "list_inventory_transactions",
+    label: {
+      en: "List Inventory Transactions",
+      ar: "عرض حركات المخزون",
+    },
+  },
+  list_material_purchase_orders: {
+    value: "list_material_purchase_orders",
+    label: {
+      en: "List Material Purchase Orders",
+      ar: "عرض أوامر شراء المواد",
+    },
+  },
+  list_product_purchase_orders: {
+    value: "list_product_purchase_orders",
+    label: {
+      en: "List Product Purchase Orders",
+      ar: "عرض أوامر شراء المنتجات",
+    },
+  },
+  list_trips: {
+    value: "list_trips",
+    label: {
+      en: "List Trips",
+      ar: "عرض الرحلات",
+    },
+  },
+  list_deliveries: {
+    value: "list_deliveries",
+    label: {
+      en: "List Deliveries",
+      ar: "عرض التسليمات",
+    },
+  },
+  list_installations: {
+    value: "list_installations",
+    label: {
+      en: "List Installations",
+      ar: "عرض التركيبات",
+    },
+  },
+  list_service_agreements: {
+    value: "list_service_agreements",
+    label: {
+      en: "List Service Agreements",
+      ar: "عرض اتفاقيات الخدمة",
+    },
+  },
+  list_maintenance_orders: {
+    value: "list_maintenance_orders",
+    label: {
+      en: "List Maintenance Orders",
+      ar: "عرض أوامر الصيانة",
     },
   },
 };
