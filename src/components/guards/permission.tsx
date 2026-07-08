@@ -49,7 +49,7 @@ function UnauthorizedAccess() {
       <p className="text-center">
         {translate("You don't have permission to access this page.", "ليس لديك إذن للوصول إلى هذه الصفحة.")}
       </p>
-      <Link href={getLocalizedHref("/dashboard/home")}>
+      <Link href={getLocalizedHref("@TODO/home")}>
         <Button variant="light">{translate("Home", "الصفحة الرئيسية")}</Button>
       </Link>
     </div>

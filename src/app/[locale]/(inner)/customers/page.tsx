@@ -146,7 +146,6 @@ export default function Page() {
   return (
     <AdminLayoutBox
       header={{
-        backLink: getLocalizedHref("/dashboard/home"),
         title: translate("Customers", "العملاء"),
         sideElements: (
           <PermissionGuard permission={PERMISSIONS.ADD_CUSTOMER}>
@@ -216,10 +215,7 @@ export default function Page() {
                     return (
                       <Table.Tr key={customer.id} className="text-gray-600">
                         <Table.Td className="font-semibold text-gray-800">
-                          <Link
-                            href={getLocalizedHref(`/dashboard/home/customers/${customer.id}`)}
-                            className="hover:underline"
-                          >
+                          <Link href={getLocalizedHref(`/@TODO/customers/${customer.id}`)} className="hover:underline">
                             {customer.name}
                           </Link>
                         </Table.Td>

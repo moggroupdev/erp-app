@@ -149,7 +149,7 @@ export default function Page() {
   return (
     <AdminLayoutBox
       header={{
-        backLink: getLocalizedHref("/dashboard/home"),
+        backLink: getLocalizedHref("@TODO/home"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <PermissionGuard permission={PERMISSIONS.ADD_VENDOR}>
@@ -216,7 +216,7 @@ export default function Page() {
                   {paginatedVendors.data.map((vendor) => (
                     <Table.Tr key={vendor.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
-                        <Link href={getLocalizedHref(`/dashboard/home/vendors/${vendor.id}`)} className="hover:underline">
+                        <Link href={getLocalizedHref(`@TODO/home/vendors/${vendor.id}`)} className="hover:underline">
                           {vendor.name}
                         </Link>
                       </Table.Td>

@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
@@ -13,12 +11,10 @@ import productsApi from "@/lib/api/products";
 import handleRequest from "@/lib/helpers/handle-request";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
-import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type PaginatedData } from "@/types/global";
 import { type Product } from "@/types/product";
 import { Button, Table, TextInput } from "@mantine/core";
-import PermissionGuard from "@/components/guards/permission";
-import { ArrowUp, BadgePercent, Barcode, Filter, Plus, Search, X } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
 import AdminLayoutBox from "@/components/ui/admin-layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -155,54 +151,11 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePage, debouncedKeyword, seasonFilter, categoryFilter, subcategoryFilter]);
 
-  // ========== Handle Modals ==========
-
-  const [importModalOpened, { open: openImportModal, close: closeImportModal }] = useDisclosure(false);
-  const [discountModalOpened, { open: openDiscountModal, close: closeDiscountModal }] = useDisclosure(false);
-
   return (
     <AdminLayoutBox
       header={{
-        backLink: getLocalizedHref("/dashboard/home"),
+        backLink: getLocalizedHref("@TODO/home"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: (
-          <div className="flex items-center gap-2">
-            <Link href={getLocalizedHref(`/dashboard/home/products/variants`)}>
-              <Button variant="light" color="grape" leftSection={<Barcode />} radius="md">
-                {translate("Variants", "الأصناف")}
-              </Button>
-            </Link>
-            <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
-              <Button
-                onClick={openDiscountModal}
-                variant="light"
-                color="pink"
-                radius="md"
-                leftSection={<BadgePercent />}
-              >
-                {translate("Global Discounts", "خصم عام")}
-              </Button>
-            </PermissionGuard>
-            <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT}>
-              <>
-                <Button
-                  onClick={openImportModal}
-                  variant="light"
-                  color="teal"
-                  radius="md"
-                  leftSection={<ArrowUp />}
-                >
-                  {translate("Import", "استيراد")}
-                </Button>
-                <Link href={getLocalizedHref(`/dashboard/home/products/add`)}>
-                  <Button variant="light" color="teal" leftSection={<Plus />} radius="md">
-                    {translate("Add New Product", "إضافة منتج جديد")}
-                  </Button>
-                </Link>
-              </>
-            </PermissionGuard>
-          </div>
-        ),
       }}
     >
       {/* Filters */}
