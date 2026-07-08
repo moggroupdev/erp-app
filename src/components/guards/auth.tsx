@@ -4,7 +4,7 @@ import { redirect, RedirectType } from "next/navigation";
 import { useUser } from "@/contexts/user/hook";
 import { FROM_QUERY_PARAM } from "@/lib/constants/global";
 
-const HOME_PATH = "/";
+const HOME_PATH = "/dashboard";
 
 export default function AuthenticationGuard({
   access,
