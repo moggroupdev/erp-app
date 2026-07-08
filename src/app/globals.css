@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --animate-fade-in: fade-in 0.35s ease-out;
+}
+
+@layer utilities {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+  /* For the grand parent elements of the home layout pages and (MOBILE admin layout pages) */
+  .root-flex-1 {
+    @apply flex-1;
+  }
+  .product-details-box {
+    @apply flex flex-col gap-3 rounded-xl bg-white p-4 shadow sm:p-6;
+  }
+}
+
+@layer base {
+  * {
+    font-family: var(--font-tajawal);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-gray-800;
+  }
+  h1 {
+    @apply text-2xl sm:text-3xl;
+  }
+  h2 {
+    @apply text-xl sm:text-2xl;
+  }
+  h3 {
+    @apply text-lg sm:text-xl;
+  }
+  p {
+    @apply text-xs text-gray-600 sm:text-sm lg:text-base;
+  }
+  button {
+    @apply cursor-pointer;
+  }
+}
+
+/* --------------- Animations ---------------  */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

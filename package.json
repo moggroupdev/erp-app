@@ -1,0 +1,35 @@
+{
+  "name": "erp-app",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "next build",
+    "start": "next start -p 1725",
+    "dev": "next dev -p 1725",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@mantine/core": "^8.3.10",
+    "@mantine/hooks": "^8.3.10",
+    "lucide-react": "^1.23.0",
+    "next": "^16.2.10",
+    "react": "^19.2.1",
+    "react-barcode": "^1.6.1",
+    "react-dom": "^19.2.1",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "baseline-browser-mapping": "^2.10.42",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.7",
+    "postcss": "^8.5.6",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
