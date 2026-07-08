@@ -4,8 +4,8 @@ import { buildPageMetadata } from "@/lib/helpers/build-metadata";
 import LayoutBox from "@/components/ui/layout-box";
 
 const title = {
-  en: "Analytics",
-  ar: "التحليلات",
+  en: "Dashboard",
+  ar: "لوحة التحكم",
 };
 
 export async function generateMetadata({ params }: LocalePageProps) {
@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: LocalePageProps) {
 
   return buildPageMetadata({
     title: translate(title.en, title.ar),
-    pathname: "dashboard/analytics",
+    pathname: "dashboard",
     locale,
   });
 }
