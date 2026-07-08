@@ -2,7 +2,7 @@ import "@mantine/core/styles.css";
 import "@/app/globals.css";
 
 import type { LocaleLayoutProps } from "@/lib/i18n/types";
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import { MantineProvider, mantineHtmlProps } from "@mantine/core";
 import { getI18nFromParams } from "@/lib/i18n/utils";
 import { locales } from "@/lib/i18n/config";
 import { Tajawal } from "next/font/google";
@@ -16,6 +16,14 @@ const tajawal = Tajawal({
   variable: "--font-tajawal",
 });
 
+// Server-rendered substitute for Mantine ColorSchemeScript (its client <script> trips React 19 on soft nav).
+const MANTINE_COLOR_SCHEME_SCRIPT = `try {
+  var _colorScheme = window.localStorage.getItem("mantine-color-scheme-value");
+  var colorScheme = _colorScheme === "light" || _colorScheme === "dark" || _colorScheme === "auto" ? _colorScheme : "light";
+  var computedColorScheme = colorScheme !== "auto" ? colorScheme : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.setAttribute("data-mantine-color-scheme", computedColorScheme);
+} catch (e) {}`;
+
 // Generate static paths for each locale at build time (SSG)
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -27,7 +35,7 @@ export default async function RootLayout({ params, children }: Readonly<LocaleLa
   return (
     <html lang={locale} dir={translation.dir} {...mantineHtmlProps} className={tajawal.variable}>
       <head>
-        <ColorSchemeScript />
+        <script dangerouslySetInnerHTML={{ __html: MANTINE_COLOR_SCHEME_SCRIPT }} />
       </head>
       <body style={{ height: "101vh" }}>
         <LocationsProvider>

@@ -2,7 +2,7 @@
 
 import type { Locale } from "./types";
 import { getLocaleFromPathname, createTranslator, getTranslation } from "./utils";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { getPathnameWithoutLocale } from "@/lib/i18n/utils";
 import { locales } from "@/lib/i18n/config";
 import { NEXT_LOCALE_COOKIE } from "@/lib/constants/global";
@@ -30,7 +30,6 @@ export function useLocaleHref() {
 
 export function useLocaleSwitch() {
   const locale = useLocale();
-  const router = useRouter();
   const pathname = usePathname();
 
   const currentIndex = locales.indexOf(locale);
@@ -42,7 +41,8 @@ export function useLocaleSwitch() {
     const newPath = `/${nextLocale}${pathnameWithoutLocale}${queryString}`;
     document.cookie = `${NEXT_LOCALE_COOKIE}=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
     callback?.();
-    router.push(newPath);
+    // Full reload so <html lang/dir> update from SSR (avoids React 19 script-in-component warning).
+    window.location.assign(newPath);
   };
 
   return { nextLocale, switchLocale };
