@@ -149,7 +149,7 @@ export default function Page() {
         title: translate("Customers", "العملاء"),
         sideElements: (
           <PermissionGuard permission={PERMISSIONS.ADD_CUSTOMER}>
-            <Button onClick={openModal} variant="light" color="teal" leftSection={<Plus />}>
+            <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus />}>
               {translate("Add New Customer", "إضافة عميل جديد")}
             </Button>
           </PermissionGuard>
@@ -170,6 +170,7 @@ export default function Page() {
               </button>
             )
           }
+          radius="md"
         />
       </div>
 

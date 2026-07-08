@@ -21,6 +21,7 @@ export default function DataSelect({
 
   return (
     <Select
+      radius="md"
       {...mantineProps}
       data={data}
       value={value}

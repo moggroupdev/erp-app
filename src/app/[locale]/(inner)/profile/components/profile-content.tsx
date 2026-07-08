@@ -26,7 +26,7 @@ export default function ProfileContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Button onClick={handleLoadProfile} variant="light" disabled={loading}>
+      <Button onClick={handleLoadProfile} variant="light" radius="md" disabled={loading}>
         {translate("Load Profile", "تحميل الملف الشخصي")}
       </Button>
 

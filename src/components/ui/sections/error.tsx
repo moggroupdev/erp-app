@@ -17,7 +17,7 @@ export default function ErrorSection({ errorTitle, errorMessage, button, classNa
         <span className="max-w-[500px] text-center">{errorMessage}</span>
       </div>
       {button && (
-        <Button variant="light" color="dark" onClick={button.onClick}>
+        <Button variant="light" color="dark" radius="md" onClick={button.onClick}>
           {button.text}
         </Button>
       )}

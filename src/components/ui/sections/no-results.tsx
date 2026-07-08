@@ -23,7 +23,11 @@ export default function NoResultsSection({ keyword, image = null, useDefaultImg 
         <Image src="/images/landscape.png" alt={alt} height={50} width={50} />
       ) : null}
       <p className="text-gray-800">{translate(`No results found for "${keyword}"`, `لا توجد نتائج لـ"${keyword}"`)}</p>
-      {button && <Button onClick={button.onClick}>{button.text}</Button>}
+      {button && (
+        <Button onClick={button.onClick} radius="md">
+          {button.text}
+        </Button>
+      )}
     </section>
   );
 }

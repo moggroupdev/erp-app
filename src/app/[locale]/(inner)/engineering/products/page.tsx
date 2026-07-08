@@ -173,11 +173,13 @@ export default function Page() {
                 </button>
               )
             }
+            radius="md"
           />
         </div>
 
         <Button
           variant="light"
+          radius="md"
           onClick={() => {
             if (filtersSectionOpened) {
               setFiltersSectionOpened(false);

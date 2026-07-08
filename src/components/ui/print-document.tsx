@@ -63,7 +63,7 @@ export default function PrintDocument({
           {title}
         </Button>
       ) : (
-        <Button onClick={handlePrint} variant="transparent" title={title} size="xs" px={3}>
+        <Button onClick={handlePrint} variant="transparent" title={title} size="xs" px={3} radius="md">
           {icon}
         </Button>
       )}

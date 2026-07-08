@@ -24,6 +24,7 @@ export default function MoneyInput({
       decimalScale={2}
       allowNegative={false}
       min={0}
+      radius="md"
     />
   );
 }

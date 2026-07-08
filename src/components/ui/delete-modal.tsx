@@ -40,10 +40,10 @@ export default function DeleteModal({
         {children}
 
         <div className="flex gap-2">
-          <Button variant="light" color="dark" onClick={onClose} fullWidth>
+          <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" color="red" loading={loading} disabled={disabled} fullWidth>
+          <Button type="submit" color="red" loading={loading} disabled={disabled} radius="md" fullWidth>
             {translation.confirm}
           </Button>
         </div>

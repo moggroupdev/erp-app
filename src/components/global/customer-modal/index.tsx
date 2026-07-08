@@ -112,6 +112,7 @@ export default function CustomerModal({
           placeholder={translate("Enter Customer Name", "أدخل اسم العميل")}
           required
           autoFocus
+          radius="md"
         />
 
         <TextInput
@@ -120,6 +121,7 @@ export default function CustomerModal({
           onChange={(e) => setPhone(e.target.value)}
           label={translate("Phone", "الهاتف")}
           placeholder={translate("Enter Phone", "أدخل الهاتف")}
+          radius="md"
         />
 
         <TextInput
@@ -128,6 +130,7 @@ export default function CustomerModal({
           onChange={(e) => setEmail(e.target.value)}
           label={translate("Email (Optional)", "البريد الإلكتروني (اختياري)")}
           placeholder={translate("Enter Email", "أدخل البريد الإلكتروني")}
+          radius="md"
         />
 
         <Textarea
@@ -135,13 +138,14 @@ export default function CustomerModal({
           onChange={(e) => setNotes(e.target.value)}
           label={translate("Notes", "الملاحظات")}
           placeholder={translate("Enter Notes", "أدخل الملاحظات")}
+          radius="md"
         />
 
         <div className="flex gap-2">
-          <Button onClick={handleClose} variant="light" color="dark" fullWidth>
+          <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} fullWidth>
+          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} radius="md" fullWidth>
             {title}
           </Button>
         </div>

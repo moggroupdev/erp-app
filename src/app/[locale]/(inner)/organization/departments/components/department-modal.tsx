@@ -96,6 +96,7 @@ export default function DepartmentModal({
           value={nameEn}
           onChange={(e) => setNameEn(e.target.value)}
           required
+          radius="md"
         />
 
         <TextInput
@@ -104,13 +105,14 @@ export default function DepartmentModal({
           value={nameAr}
           onChange={(e) => setNameAr(e.target.value)}
           required
+          radius="md"
         />
 
         <div className="flex gap-2">
-          <Button onClick={handleClose} variant="light" color="dark" fullWidth>
+          <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} fullWidth>
+          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} radius="md" fullWidth>
             {title}
           </Button>
         </div>

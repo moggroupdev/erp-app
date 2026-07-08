@@ -49,7 +49,7 @@ export default function Page() {
         </div>
 
         <PermissionGuard permission={PERMISSIONS.ADD_DEPARTMENT}>
-          <Button color="blue" variant="light" onClick={openModal}>
+          <Button color="blue" variant="light" radius="md" onClick={openModal}>
             {translate("Add New Department", "إضافة قسم جديد")}
           </Button>
         </PermissionGuard>
