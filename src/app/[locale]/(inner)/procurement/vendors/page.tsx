@@ -33,7 +33,7 @@ const PAGE_TITLE = { en: "Vendors", ar: "الموردون" };
 const VENDORS_PER_PAGE = 25;
 
 export default function Page() {
-  const { locale, translate, translation } = useI18n();
+  const { locale, translate } = useI18n();
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
