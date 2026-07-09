@@ -116,9 +116,8 @@ export default function VendorModal({
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          label={translate("Phone", "الهاتف")}
+          label={translate("Phone (Optional)", "الهاتف (اختياري)")}
           placeholder={translate("Enter Phone", "أدخل الهاتف")}
-          required
           radius="md"
         />
 
@@ -134,9 +133,10 @@ export default function VendorModal({
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          label={translate("Notes", "الملاحظات")}
+          label={translate("Notes (Optional)", "الملاحظات (اختياري)")}
           placeholder={translate("Enter Notes", "أدخل الملاحظات")}
           radius="md"
+          autosize
         />
 
         <div className="flex gap-2">

@@ -25,6 +25,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
+import CopyButton from "@/components/ui/copy-button";
 import VendorModal from "@/components/global/vendor-modal";
 
 const PAGE_TITLE = { en: "Vendors", ar: "الموردون" };
@@ -149,11 +150,11 @@ export default function Page() {
   return (
     <LayoutBox
       header={{
-        backLink: getLocalizedHref("/dashboard"),
+        backLink: getLocalizedHref("/procurement"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <PermissionGuard permission={PERMISSIONS.ADD_VENDOR}>
-            <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus />}>
+            <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
               {translate("Add New Vendor", "إضافة مورد جديد")}
             </Button>
           </PermissionGuard>
@@ -161,22 +162,21 @@ export default function Page() {
       }}
     >
       {/* Filters */}
-      <div className="flex gap-2">
-        <TextInput
-          value={keyword}
-          onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-          placeholder={translate("Search for a vendor...", "ابحث عن مورد...")}
-          leftSection={<Search />}
-          rightSection={
-            keyword && (
-              <button onClick={() => setImmediateKeyword("")}>
-                <X />
-              </button>
-            )
-          }
-          radius="md"
-        />
-      </div>
+
+      <TextInput
+        value={keyword}
+        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+        placeholder={translate("Search for a vendor...", "ابحث عن مورد...")}
+        leftSection={<Search size={15} />}
+        radius="md"
+        rightSection={
+          keyword && (
+            <button onClick={() => setImmediateKeyword("")}>
+              <X size={15} />
+            </button>
+          )
+        }
+      />
 
       {/* Content */}
       {loading ? (
@@ -205,8 +205,8 @@ export default function Page() {
               <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Name", "الاسم")}</Table.Th>
+                    <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Phone", "الهاتف")}</Table.Th>
                     <Table.Th>{translate("Email", "البريد الإلكتروني")}</Table.Th>
                     <Table.Th>{translate("Registration Date", "تاريخ التسجيل")}</Table.Th>
@@ -217,11 +217,16 @@ export default function Page() {
                   {paginatedVendors.data.map((vendor) => (
                     <Table.Tr key={vendor.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
-                        <Link href={getLocalizedHref(`/vendors/${vendor.id}`)} className="hover:underline">
+                        <Link href={getLocalizedHref(`/procurement/vendors/${vendor.id}`)} className="hover:underline">
                           {vendor.name}
                         </Link>
                       </Table.Td>
-                      <Table.Td>{vendor.code}</Table.Td>
+                      <Table.Td>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono">{vendor.code}</span>
+                          <CopyButton text={vendor.code} />
+                        </div>
+                      </Table.Td>
                       <Table.Td>{vendor.phone}</Table.Td>
                       <Table.Td>{vendor.email}</Table.Td>
                       <Table.Td>{formatDateAndTime(vendor.createdAt, locale)}</Table.Td>
@@ -229,9 +234,9 @@ export default function Page() {
                         <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
                           <button
                             onClick={() => handleOpenUpdateModal(vendor)}
-                            className="rounded-lg bg-gray-100 px-2 py-1 transition-colors hover:bg-gray-200"
+                            className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
                           >
-                            <Pencil />
+                            <Pencil size={14} />
                           </button>
                         </PermissionGuard>
                       </Table.Td>
