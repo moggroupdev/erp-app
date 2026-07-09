@@ -90,6 +90,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         icon: ReceiptText,
         requiredPermission: PERMISSIONS.LIST_RECEPTIONS,
       },
+      {
+        label: { en: "Complaints", ar: "الشكاوي" },
+        href: "/sales/complaints",
+        icon: FileSearch,
+        requiredPermission: PERMISSIONS.LIST_COMPLAINTS,
+      },
     ],
   },
   {

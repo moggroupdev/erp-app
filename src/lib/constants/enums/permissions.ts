@@ -29,6 +29,7 @@ export const PERMISSION_VALUES = [
   "list_offers",
   "list_contracts",
   "list_receptions",
+  "list_complaints",
   "list_boms",
   "list_production_plans",
   "list_production_routing",
@@ -234,6 +235,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "List Contracts",
       ar: "عرض العقود",
+    },
+  },
+  list_complaints: {
+    value: "list_complaints",
+    label: {
+      en: "List Complaints",
+      ar: "عرض الشكاوي",
     },
   },
   list_receptions: {
