@@ -1,5 +1,5 @@
 import type { ApiRequestOptions, Dictionary } from "@/types/api";
-import { getLocaleFromPathname } from "@/lib/i18n/utils";
+import { getLocaleFromPathname, translate } from "@/lib/i18n/utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,6 +14,8 @@ export default async function apiRequest<T>({
   download,
   filename,
 }: ApiRequestOptions): Promise<T> {
+  const locale = getLocaleFromPathname(window.location.pathname);
+
   try {
     // Serialize and append params to URL if any
     if (Object.keys(params).length) {
@@ -24,7 +26,7 @@ export default async function apiRequest<T>({
     // Prepare body and headers
     let body: ApiRequestOptions["data"] = null;
     let finalHeaders: ApiRequestOptions["headers"] = {
-      "Accept-Language": getLocaleFromPathname(window.location.pathname),
+      "Accept-Language": locale,
       ...headers,
     };
 
@@ -60,7 +62,8 @@ export default async function apiRequest<T>({
     // If it's ok, return the response as an object
     return (await response.json()) as T;
   } catch (error) {
-    if (error instanceof TypeError && error.message === "Failed to fetch") throw new Error("عذرًا! حدث خطأ أثناء الاتصال.");
+    if (error instanceof TypeError && error.message === "Failed to fetch")
+      throw new Error(translate(locale, "Sorry! A connection error occurred.", "عذرًا! حدث خطأ أثناء الاتصال."));
     throw error;
   }
 }
