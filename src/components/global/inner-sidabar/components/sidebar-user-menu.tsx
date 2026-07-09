@@ -81,7 +81,7 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
               <div className="truncate text-xs text-gray-500">{user.code}</div>
             </div>
 
-            <ChevronDown size={15} className={`shrink-0 text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+            <ChevronDown size={15} className={`shrink-0 text-gray-500 transition-transform ${isOpen ? "" : "rotate-180"}`} />
           </button>
 
           <Collapse in={isOpen}>

@@ -131,7 +131,7 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     ],
   },
   {
-    label: { en: "Warehouse", ar: "المستودع" },
+    label: { en: "Warehouse", ar: "المخازن" },
     href: "/warehouse",
     icon: Boxes,
     items: [
@@ -180,13 +180,13 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     icon: Truck,
     items: [
       {
-        label: { en: "Trips", ar: "الرحلات" },
+        label: { en: "Trips", ar: "المأموريات" },
         href: "/fulfillment/trips",
         icon: Truck,
         requiredPermission: PERMISSIONS.LIST_TRIPS,
       },
       {
-        label: { en: "Deliveries", ar: "التوصيلات" },
+        label: { en: "Deliveries", ar: "النقل والتشوين" },
         href: "/fulfillment/deliveries",
         icon: ReceiptText,
         requiredPermission: PERMISSIONS.LIST_DELIVERIES,
@@ -205,7 +205,7 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     icon: Wrench,
     items: [
       {
-        label: { en: "Service Agreements", ar: "اتفاقيات الخدمة" },
+        label: { en: "Service Agreements", ar: "عقود الصيانة" },
         href: "/maintenance/agreements",
         icon: FileText,
         requiredPermission: PERMISSIONS.LIST_SERVICE_AGREEMENTS,
