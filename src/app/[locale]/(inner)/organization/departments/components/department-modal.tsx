@@ -47,8 +47,9 @@ export default function DepartmentModal({
     e.preventDefault();
 
     // Validation Layer
-    if (!nameEn.trim()) return setError(translate("Please enter department name", "يرجي إدخال اسم القسم"));
-    if (!nameAr.trim()) return setError(translate("Please enter department name (Arabic)", "يرجي إدخال اسم القسم بالعربية"));
+    if (!nameEn.trim())
+      return setError(translate("Please enter department English name ", "يرجي إدخال اسم القسم بالانجليزية"));
+    if (!nameAr.trim()) return setError(translate("Please enter department Arabic name", "يرجي إدخال اسم القسم بالعربية"));
 
     handleRequest(locale, setLoading, setError, async () => {
       const response = departmentToUpdate
@@ -91,21 +92,21 @@ export default function DepartmentModal({
     <Modal opened={opened} onClose={handleClose} title={title}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <TextInput
-          label={translate("Name", "الاسم")}
-          placeholder={translate("Enter Name", "أدخل الاسم")}
+          label={translate("Name (English)", "الاسم (الانجليزية)")}
+          placeholder={translate("Enter the English name of the department", "أدخل اسم القسم بالانجليزية")}
           value={nameEn}
           onChange={(e) => setNameEn(e.target.value)}
-          required
           radius="md"
+          required
         />
 
         <TextInput
           label={translate("Name (Arabic)", "الاسم (العربية)")}
-          placeholder={translate("Enter Name (Arabic)", "أدخل الاسم (العربية)")}
+          placeholder={translate("Enter the Arabic name of the department", "أدخل اسم القسم بالعربية")}
           value={nameAr}
           onChange={(e) => setNameAr(e.target.value)}
-          required
           radius="md"
+          required
         />
 
         <div className="flex gap-2">

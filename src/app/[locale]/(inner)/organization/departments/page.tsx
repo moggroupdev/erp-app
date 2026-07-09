@@ -10,11 +10,11 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Department } from "@/types/departments";
 import { Button } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import DepartmentModal from "./components/department-modal";
 import DepartmentCard from "./components/department-card";
+import DepartmentsLoadingSkeleton from "./components/departments-loading-skeleton";
 
 const title = { en: "Departments", ar: "الأقسام" };
 
@@ -44,7 +44,7 @@ export default function Page() {
         <div className="flex flex-col gap-2">
           <h1>{translate(title.en, title.ar)}</h1>
           <p className="text-gray-500">
-            {translate("Manage your departments and their locations.", "إدارة الأقسام ومواقعها.")}
+            {translate("Manage your departments and their managers.", "إدارة الأقسام والمدراء.")}
           </p>
         </div>
 
@@ -56,10 +56,7 @@ export default function Page() {
       </header>
 
       {loading ? (
-        <LoadingSection
-          message={translate("Loading departments...", "جاري تحميل الأقسام...")}
-          className="rounded-lg bg-white shadow"
-        />
+        <DepartmentsLoadingSkeleton />
       ) : error ? (
         <ErrorSection
           errorTitle={translate("Error loading departments", "خطأ في تحميل الأقسام")}
