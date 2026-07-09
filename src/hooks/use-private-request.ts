@@ -6,8 +6,18 @@ import apiRequest from "@/lib/helpers/api-request";
 import toUserState from "@/lib/helpers/to-user-state";
 
 // These error messages should match those returned by the API
-const accessTokenErrors = ["Access denied: No access token provided.", "Access denied: Invalid access token."];
-const refreshTokenErrors = ["Access denied: No refresh token provided.", "Access denied: Invalid refresh token."];
+const accessTokenErrors = [
+  "Access denied: No access token provided.",
+  "تم رفض الوصول: لم يتم توفير رمز الوصول.",
+  "Access denied: Invalid access token.",
+  "تم رفض الوصول: رمز الوصول غير صالح.",
+];
+const refreshTokenErrors = [
+  "Access denied: No refresh token provided.",
+  "تم رفض الوصول: لم يتم توفير رمز التحديث.",
+  "Access denied: Invalid refresh token.",
+  "تم رفض الوصول: رمز التحديث غير صالح.",
+];
 
 export default function usePrivateRequest(): PrivateRequest {
   const { user, setUser } = useUser();
