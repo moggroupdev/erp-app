@@ -3,7 +3,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <PermissionGuard permission={PERMISSIONS.LIST_VENDORS} isForPage>
+    <PermissionGuard permission={PERMISSIONS.READ_VENDORS} isForPage>
       {children}
     </PermissionGuard>
   );

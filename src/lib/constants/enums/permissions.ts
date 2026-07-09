@@ -3,45 +3,45 @@ import { translate } from "@/lib/i18n/utils";
 
 export const PERMISSION_VALUES = [
   "add_user",
-  "list_users",
+  "read_users",
   "update_user",
   "delete_user",
   "add_role",
-  "list_roles",
+  "read_roles",
   "update_role",
   "delete_role",
-  "show_analytics",
-  "list_departments",
+  "read_departments",
   "add_department",
   "update_department",
-  "list_vendors",
+  "read_vendors",
   "add_vendor",
   "update_vendor",
-  "list_products",
+  "read_products",
   "add_product",
   "update_product",
   "delete_product",
-  "list_customers",
+  "read_customers",
   "add_customer",
   "update_customer",
-  "list_inquiries",
-  "list_previews",
-  "list_offers",
-  "list_contracts",
-  "list_receptions",
-  "list_complaints",
-  "list_boms",
-  "list_production_plans",
-  "list_production_routing",
-  "list_materials",
-  "list_inventory_transactions",
-  "list_material_purchase_orders",
-  "list_product_purchase_orders",
-  "list_trips",
-  "list_deliveries",
-  "list_installations",
-  "list_service_agreements",
-  "list_maintenance_orders",
+  "read_inquiries",
+  "read_previews",
+  "read_offers",
+  "read_contracts",
+  "read_receptions",
+  "read_complaints",
+  "read_boms",
+  "read_production_plans",
+  "read_production_routing",
+  "read_materials",
+  "read_inventory_transactions",
+  "read_material_purchase_orders",
+  "read_product_purchase_orders",
+  "read_trips",
+  "read_deliveries",
+  "read_installations",
+  "read_service_agreements",
+  "read_maintenance_orders",
+  "show_analytics",
 ] as const;
 
 export type Permission = (typeof PERMISSION_VALUES)[number];
@@ -62,10 +62,10 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "إضافة مستخدم",
     },
   },
-  list_users: {
-    value: "list_users",
+  read_users: {
+    value: "read_users",
     label: {
-      en: "List Users",
+      en: "Read Users",
       ar: "عرض المستخدمين",
     },
   },
@@ -90,10 +90,10 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "إضافة الدور",
     },
   },
-  list_roles: {
-    value: "list_roles",
+  read_roles: {
+    value: "read_roles",
     label: {
-      en: "List Roles",
+      en: "Read Roles",
       ar: "عرض الدور",
     },
   },
@@ -118,10 +118,10 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض التحليلات",
     },
   },
-  list_departments: {
-    value: "list_departments",
+  read_departments: {
+    value: "read_departments",
     label: {
-      en: "List Departments",
+      en: "Read Departments",
       ar: "عرض الأقسام",
     },
   },
@@ -139,10 +139,10 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث القسم",
     },
   },
-  list_vendors: {
-    value: "list_vendors",
+  read_vendors: {
+    value: "read_vendors",
     label: {
-      en: "List Vendors",
+      en: "Read Vendors",
       ar: "عرض الموردين",
     },
   },
@@ -160,10 +160,10 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث المورد",
     },
   },
-  list_products: {
-    value: "list_products",
+  read_products: {
+    value: "read_products",
     label: {
-      en: "List Products",
+      en: "Read Products",
       ar: "عرض المنتجات",
     },
   },
@@ -188,10 +188,10 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "حذف المنتج",
     },
   },
-  list_customers: {
-    value: "list_customers",
+  read_customers: {
+    value: "read_customers",
     label: {
-      en: "List Customers",
+      en: "Read Customers",
       ar: "عرض العملاء",
     },
   },
@@ -209,129 +209,129 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث العميل",
     },
   },
-  list_inquiries: {
-    value: "list_inquiries",
+  read_inquiries: {
+    value: "read_inquiries",
     label: {
-      en: "List Inquiries",
+      en: "Read Inquiries",
       ar: "عرض الاستفسارات",
     },
   },
-  list_previews: {
-    value: "list_previews",
+  read_previews: {
+    value: "read_previews",
     label: {
-      en: "List Previews",
+      en: "Read Previews",
       ar: "عرض المعاينات",
     },
   },
-  list_offers: {
-    value: "list_offers",
+  read_offers: {
+    value: "read_offers",
     label: {
-      en: "List Offers",
+      en: "Read Offers",
       ar: "عرض العروض",
     },
   },
-  list_contracts: {
-    value: "list_contracts",
+  read_contracts: {
+    value: "read_contracts",
     label: {
-      en: "List Contracts",
+      en: "Read Contracts",
       ar: "عرض العقود",
     },
   },
-  list_complaints: {
-    value: "list_complaints",
+  read_complaints: {
+    value: "read_complaints",
     label: {
-      en: "List Complaints",
+      en: "Read Complaints",
       ar: "عرض الشكاوي",
     },
   },
-  list_receptions: {
-    value: "list_receptions",
+  read_receptions: {
+    value: "read_receptions",
     label: {
-      en: "List Receptions",
+      en: "Read Receptions",
       ar: "عرض الاستلامات",
     },
   },
-  list_boms: {
-    value: "list_boms",
+  read_boms: {
+    value: "read_boms",
     label: {
-      en: "List BOMs",
+      en: "Read BOMs",
       ar: "عرض قوائم المواد",
     },
   },
-  list_production_plans: {
-    value: "list_production_plans",
+  read_production_plans: {
+    value: "read_production_plans",
     label: {
-      en: "List Production Plans",
+      en: "Read Production Plans",
       ar: "عرض خطط الإنتاج",
     },
   },
-  list_production_routing: {
-    value: "list_production_routing",
+  read_production_routing: {
+    value: "read_production_routing",
     label: {
-      en: "List Production Routing",
+      en: "Read Production Routing",
       ar: "عرض مسارات الإنتاج",
     },
   },
-  list_materials: {
-    value: "list_materials",
+  read_materials: {
+    value: "read_materials",
     label: {
-      en: "List Materials",
+      en: "Read Materials",
       ar: "عرض المواد",
     },
   },
-  list_inventory_transactions: {
-    value: "list_inventory_transactions",
+  read_inventory_transactions: {
+    value: "read_inventory_transactions",
     label: {
-      en: "List Inventory Transactions",
+      en: "Read Inventory Transactions",
       ar: "عرض حركات المخزون",
     },
   },
-  list_material_purchase_orders: {
-    value: "list_material_purchase_orders",
+  read_material_purchase_orders: {
+    value: "read_material_purchase_orders",
     label: {
-      en: "List Material Purchase Orders",
+      en: "Read Material Purchase Orders",
       ar: "عرض أوامر شراء المواد",
     },
   },
-  list_product_purchase_orders: {
-    value: "list_product_purchase_orders",
+  read_product_purchase_orders: {
+    value: "read_product_purchase_orders",
     label: {
-      en: "List Product Purchase Orders",
+      en: "Read Product Purchase Orders",
       ar: "عرض أوامر شراء المنتجات",
     },
   },
-  list_trips: {
-    value: "list_trips",
+  read_trips: {
+    value: "read_trips",
     label: {
-      en: "List Trips",
+      en: "Read Trips",
       ar: "عرض الرحلات",
     },
   },
-  list_deliveries: {
-    value: "list_deliveries",
+  read_deliveries: {
+    value: "read_deliveries",
     label: {
-      en: "List Deliveries",
+      en: "Read Deliveries",
       ar: "عرض التسليمات",
     },
   },
-  list_installations: {
-    value: "list_installations",
+  read_installations: {
+    value: "read_installations",
     label: {
-      en: "List Installations",
+      en: "Read Installations",
       ar: "عرض التركيبات",
     },
   },
-  list_service_agreements: {
-    value: "list_service_agreements",
+  read_service_agreements: {
+    value: "read_service_agreements",
     label: {
-      en: "List Service Agreements",
+      en: "Read Service Agreements",
       ar: "عرض اتفاقيات الخدمة",
     },
   },
-  list_maintenance_orders: {
-    value: "list_maintenance_orders",
+  read_maintenance_orders: {
+    value: "read_maintenance_orders",
     label: {
-      en: "List Maintenance Orders",
+      en: "Read Maintenance Orders",
       ar: "عرض أوامر الصيانة",
     },
   },
