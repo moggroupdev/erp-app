@@ -1,4 +1,3 @@
-import apiRequest from "@/lib/helpers/api-request";
 import type { PrivateRequest } from "@/types/api";
 import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from "@/types/departments";
 
@@ -7,12 +6,12 @@ const departmentsApi = {
     return await privateRequest<Department>({ method: "POST", url: "departments", data: dto });
   },
 
-  async list() {
-    return await apiRequest<Department[]>({ url: "departments" });
+  async list({ privateRequest }: { privateRequest: PrivateRequest }) {
+    return await privateRequest<Department[]>({ url: "departments" });
   },
 
-  async get(id: string) {
-    return await apiRequest<Department>({ url: `departments/${id}` });
+  async get({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<Department>({ url: `departments/${id}` });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateDepartmentDto }) {

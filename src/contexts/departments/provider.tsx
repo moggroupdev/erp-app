@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
+import useUser from "@/contexts/user/hook";
 import { useLocale } from "@/lib/i18n/hooks";
 import { type Department } from "@/types/departments";
 import useDataHandler from "@/hooks/use-data-handler";
@@ -10,21 +11,25 @@ import DepartmentsContext from "./context";
 
 export default function DepartmentsProvider({ children }: { children: React.ReactNode }) {
   const locale = useLocale();
+  const { isInitializing, user } = useUser();
 
-  const { loading, setLoading, error, setError, data, setData } = useDataHandler<Department[]>({
+  const { privateRequest, loading, setLoading, error, setError, data, setData } = useDataHandler<Department[]>({
     initialData: [],
     initialLoading: true,
   });
 
-  const getDepartments = useCallback(() => {
+  function getDepartments() {
     handleRequest(locale, setLoading, setError, async () => {
-      setData(await departmentsApi.list());
+      setData(await departmentsApi.list({ privateRequest }));
     });
-  }, [locale, setLoading, setError, setData]);
+  }
 
   useEffect(() => {
+    if (isInitializing) return;
+    if (!user) return setLoading(false);
+
     getDepartments();
-  }, [getDepartments]);
+  }, [isInitializing, user]);
 
   return (
     <DepartmentsContext.Provider value={{ data, setData, loading, error, reload: getDepartments }}>
