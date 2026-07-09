@@ -10,7 +10,7 @@ type Props = {
 
 export default function ErrorSection({ errorTitle, errorMessage, button, className = "" }: Props) {
   return (
-    <section className={`flex-center flex-1 flex-col gap-4 rounded-lg bg-red-50 p-10 text-red-600 ${className}`}>
+    <section className={`flex-center flex-1 flex-col gap-4 rounded-xl bg-red-50 p-10 text-red-600 ${className}`}>
       <CircleAlert size={23.5} />
       <div className="flex-center flex-col gap-2">
         <span className="max-w-[500px] text-center font-bold">{errorTitle}</span>

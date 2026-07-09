@@ -5,7 +5,7 @@ export default function LoadingSection({ message, className = "" }: { message?: 
   const { translation } = useI18n();
 
   return (
-    <section className={`flex-center flex-1 flex-col gap-4 rounded-lg bg-gray-100 p-10 ${className}`}>
+    <section className={`flex-center flex-1 flex-col gap-4 rounded-xl bg-gray-100 p-10 ${className}`}>
       <div className="animate-spin text-gray-600">{<Loader2 size={20} />}</div>
       <p>{message || translation.loading}</p>
     </section>

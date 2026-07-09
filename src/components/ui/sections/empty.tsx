@@ -19,7 +19,7 @@ export default function EmptySection({
   const { translate } = useI18n();
 
   return (
-    <section className={`flex-center flex-1 flex-col gap-4 rounded-lg bg-gray-100 p-10 ${className}`}>
+    <section className={`flex-center flex-1 flex-col gap-4 rounded-xl bg-gray-100 p-10 ${className}`}>
       {img ? (
         <Image src={img} alt={message || translate("Empty", "فارغ")} height={65} width={65} />
       ) : useDefaultImg ? (

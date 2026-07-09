@@ -16,7 +16,7 @@ export default function NoResultsSection({ keyword, image = null, useDefaultImg 
   const alt = translate("No results found", "لا توجد نتائج");
 
   return (
-    <section className={`flex-center flex-1 flex-col gap-4 rounded-lg bg-gray-100 p-10 ${className}`}>
+    <section className={`flex-center flex-1 flex-col gap-4 rounded-xl bg-gray-100 p-10 ${className}`}>
       {image ? (
         <Image src={image} alt={alt} height={65} width={65} />
       ) : useDefaultImg ? (

@@ -44,7 +44,7 @@ export default function LayoutBox({
                   h={40}
                   w={40}
                 >
-                  <ArrowLeft style={{ transform: `rotateY(${translate("0", "180deg")})` }} />
+                  <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0", "180deg")})` }} />
                 </Button>
               )}
               <h1>{header.title}</h1>
