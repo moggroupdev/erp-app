@@ -72,24 +72,24 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
           <button
             type="button"
             onClick={() => setIsOpen((current) => !current)}
-            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start text-gray-800 transition-colors hover:bg-gray-200 ${isOpen ? "bg-gray-200/85" : ""}`}
+            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-start text-gray-800 transition-colors hover:bg-gray-200 ${isOpen ? "bg-gray-200/75" : ""}`}
           >
-            <UserCircle2 size={20} className="mx-1" />
+            <UserCircle2 size={21} className="mx-1" />
 
-            <div className="flex-1">
-              <div className="truncate text-sm font-semibold text-gray-900">{user.name}</div>
-              <div className="truncate text-xs text-gray-500">{user.code}</div>
+            <div className="flex flex-1 flex-col gap-1">
+              <div className="truncate text-sm font-semibold text-gray-800">{user.name}</div>
+              <div className="truncate font-mono text-xs text-gray-500">{user.code}</div>
             </div>
 
             <ChevronDown size={15} className={`shrink-0 text-gray-500 transition-transform ${isOpen ? "" : "rotate-180"}`} />
           </button>
 
           <Collapse in={isOpen}>
-            <div className="mt-2 flex flex-col gap-2 overflow-hidden rounded-xl bg-white">
+            <div className="ms-5 mt-2 flex flex-col gap-2 border-s border-gray-200 bg-white ps-3">
               <Button
                 title={localeNames[nextLocale]}
                 type="button"
-                variant="light"
+                variant="subtle"
                 color="dark"
                 radius="md"
                 fullWidth
@@ -103,7 +103,7 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
               <Link href={getLocalizedHref("/profile")} onClick={() => setIsOpen(false)}>
                 <Button
                   type="button"
-                  variant="light"
+                  variant="subtle"
                   color="dark"
                   radius="md"
                   fullWidth
@@ -116,7 +116,7 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
 
               <Button
                 type="button"
-                variant="light"
+                variant="subtle"
                 color="red"
                 radius="md"
                 fullWidth

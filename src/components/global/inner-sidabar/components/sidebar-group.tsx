@@ -53,7 +53,7 @@ export default function SidebarGroup({
       </Link>
 
       {!collapsed && expanded && (
-        <div className="ms-4 flex flex-col gap-1 border-s border-gray-200 ps-2">
+        <div className="ms-4.5 flex flex-col gap-1 border-s border-gray-200 ps-2">
           {group.items.map((item) => (
             <SidebarItem
               key={item.href}
