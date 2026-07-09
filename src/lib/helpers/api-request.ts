@@ -1,4 +1,5 @@
 import type { ApiRequestOptions, Dictionary } from "@/types/api";
+import { getLocaleFromPathname } from "@/lib/i18n/utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,13 +23,16 @@ export default async function apiRequest<T>({
 
     // Prepare body and headers
     let body: ApiRequestOptions["data"] = null;
-    let finalHeaders = headers;
+    let finalHeaders: ApiRequestOptions["headers"] = {
+      "Accept-Language": getLocaleFromPathname(window.location.pathname),
+      ...headers,
+    };
 
     if (data)
       if (data instanceof FormData) body = data;
       else {
         body = JSON.stringify(data);
-        finalHeaders = { ...headers, "Content-Type": "application/json" };
+        finalHeaders = { ...finalHeaders, "Content-Type": "application/json" };
       }
 
     // Prepare final options
