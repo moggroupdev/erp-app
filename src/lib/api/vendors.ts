@@ -1,6 +1,13 @@
 import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
-import type { Vendor, CreateVendorDto, UpdateVendorDto } from "@/types/vendor";
+import type {
+  Vendor,
+  VendorAddress,
+  VendorWithAddresses,
+  CreateVendorDto,
+  CreateVendorAddressDto,
+  UpdateVendorDto,
+} from "@/types/vendor";
 
 const vendorsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateVendorDto }) {
@@ -23,8 +30,28 @@ const vendorsApi = {
     return await privateRequest<Vendor>({ url: `vendors/${id}` });
   },
 
+  async getWithAddresses({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<VendorWithAddresses>({ url: `vendors/${id}/with-addresses` });
+  },
+
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateVendorDto }) {
     return await privateRequest<Vendor>({ method: "PUT", url: `vendors/${id}`, data: dto });
+  },
+
+  async getAddresses({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<VendorAddress[]>({ url: `vendors/${id}/addresses` });
+  },
+
+  async addAddress({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: CreateVendorAddressDto;
+  }) {
+    return await privateRequest<VendorAddress>({ method: "POST", url: `vendors/${id}/addresses`, data: dto });
   },
 };
 

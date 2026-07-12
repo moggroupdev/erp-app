@@ -17,7 +17,7 @@ function EmptyValue() {
 
 function DetailsTable({ rows }: { rows: DetailRow[] }) {
   return (
-    <div className="overflow-x-auto rounded-xl bg-gray-100">
+    <div className="overflow-x-auto rounded-xl bg-gray-100 p-2">
       <Table verticalSpacing="sm" horizontalSpacing="md">
         <Table.Tbody>
           {rows.map((row) => (
@@ -26,7 +26,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
                 {row.key}
               </Table.Th>
               <Table.Td className={`font-medium text-gray-900`}>
-                <div className={`flex flex-wrap items-center gap-1.5 ${row.mono ? "font-mono" : ""}`}>
+                <div className={`flex items-center gap-1.5 ${row.mono ? "font-mono" : ""}`}>
                   {row.value}
                   {row.copyText && <CopyButton text={row.copyText} />}
                 </div>
@@ -78,10 +78,10 @@ export default function VendorDetails({ vendor }: { vendor: Vendor }) {
   ];
 
   return (
-    <section className="flex flex-1 flex-col gap-4 rounded-xl">
+    <section className="flex flex-col gap-4 rounded-xl">
       <Divider variant="dashed" />
 
-      <header className="flex flex-col gap-3 rounded-xl bg-gray-100 p-4">
+      <header className="flex flex-col gap-3 rounded-xl bg-gray-100 p-5">
         <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">{vendor.name}</h2>
 
         {isDeleted && (

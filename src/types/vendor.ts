@@ -10,6 +10,17 @@ export type Vendor = {
   createdBy: { id: string; name: string };
 };
 
+export type VendorAddress = {
+  id: string;
+  vendorId: string;
+  countryId: string;
+  cityId: string | null; // Null if country is not Egypt
+  addressLine: string | null;
+  isDefault: boolean;
+};
+
+export type VendorWithAddresses = Vendor & { addresses: VendorAddress[] };
+
 // ==================== DTOs ====================
 
 export type CreateVendorDto = {
@@ -20,3 +31,10 @@ export type CreateVendorDto = {
 };
 
 export type UpdateVendorDto = Partial<CreateVendorDto>;
+
+export type CreateVendorAddressDto = {
+  countryId: string;
+  cityId: string | null;
+  addressLine: string | null;
+  isDefault: boolean;
+};
