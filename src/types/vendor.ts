@@ -19,8 +19,6 @@ export type VendorAddress = {
   isDefault: boolean;
 };
 
-export type VendorWithAddresses = Vendor & { addresses: VendorAddress[] };
-
 // ==================== DTOs ====================
 
 export type CreateVendorDto = {

@@ -1,13 +1,6 @@
 import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
-import type {
-  Vendor,
-  VendorAddress,
-  VendorWithAddresses,
-  CreateVendorDto,
-  CreateVendorAddressDto,
-  UpdateVendorDto,
-} from "@/types/vendor";
+import type { Vendor, VendorAddress, CreateVendorDto, CreateVendorAddressDto, UpdateVendorDto } from "@/types/vendor";
 
 const vendorsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateVendorDto }) {
@@ -28,10 +21,6 @@ const vendorsApi = {
 
   async get({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
     return await privateRequest<Vendor>({ url: `vendors/${id}` });
-  },
-
-  async getWithAddresses({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<VendorWithAddresses>({ url: `vendors/${id}/with-addresses` });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateVendorDto }) {
