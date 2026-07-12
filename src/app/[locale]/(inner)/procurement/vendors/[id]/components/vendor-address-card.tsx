@@ -1,16 +1,17 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import useLocations from "@/contexts/locations/hook";
+import useLocationHelpers from "@/hooks/use-location-helpers";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
 import { type VendorAddress } from "@/types/vendor";
 import { MapPin } from "lucide-react";
 
 export default function VendorAddressCard({ address }: { address: VendorAddress }) {
   const { translate } = useI18n();
-  const { data: locations } = useLocations();
 
-  const country = locations?.countries.find((item) => item.id === address.countryId);
-  const city = address.cityId ? locations?.cities.find((item) => item.id === address.cityId) : null;
-  const governorate = city ? locations?.governorates.find((item) => item.id === city.governorateId) : null;
+  const { getCountryById, getCityById, getGovernorateOfCity } = useLocationHelpers();
+
+  const country = getCountryById(address.countryId);
+  const city = getCityById(address.cityId);
+  const governorate = getGovernorateOfCity(address.cityId);
 
   const countryName = country ? translate(country.nameEn, country.nameAr) : null;
   const cityName = city ? translate(city.nameEn, city.nameAr) : null;
