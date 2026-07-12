@@ -23,53 +23,39 @@ import EmptySection from "@/components/ui/sections/empty";
 
 const PAGE_TITLE = { en: "Vendor Data", ar: "ملف المورد" };
 
+type PageData = { vendor: Vendor | null; addresses: VendorAddress[] };
+
 export default function Page() {
   const { locale, translate } = useI18n();
 
   const { id } = useParams<{ id: string }>();
 
-  const {
-    privateRequest,
-    loading,
-    setLoading,
-    error,
-    setError,
-    data: vendor,
-    setData: setVendor,
-  } = useDataHandler<Vendor | null>({ initialData: null, initialLoading: true });
+  const { privateRequest, loading, setLoading, error, setError, data, setData } = useDataHandler<PageData>({
+    initialData: { vendor: null, addresses: [] },
+    initialLoading: true,
+  });
 
-  const {
-    loading: addressesLoading,
-    setLoading: setAddressesLoading,
-    error: addressesError,
-    setError: setAddressesError,
-    data: addresses,
-    setData: setAddresses,
-  } = useDataHandler<VendorAddress[]>({ initialData: [], initialLoading: true });
+  const { vendor, addresses } = data;
+
+  function setVendor(value: React.SetStateAction<Vendor | null>) {
+    setData((prev) => ({ ...prev, vendor: typeof value === "function" ? value(prev.vendor) : value }));
+  }
 
   useDocumentTitle(`${vendor?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Vendors", "الموردون")}`);
 
-  function handleLoadVendor() {
+  function handleLoadData() {
     handleRequest(locale, setLoading, setError, async () => {
-      const response = await vendorsApi.get({ privateRequest, id });
-      setVendor(response);
-    });
-  }
+      const [vendorResponse, addressesResponse] = await Promise.all([
+        vendorsApi.get({ privateRequest, id }),
+        vendorsApi.getAddresses({ privateRequest, id }),
+      ]);
 
-  function handleLoadAddresses() {
-    handleRequest(locale, setAddressesLoading, setAddressesError, async () => {
-      const response = await vendorsApi.getAddresses({ privateRequest, id });
-      setAddresses(response);
+      setData({ vendor: vendorResponse, addresses: addressesResponse });
     });
-  }
-
-  function handleLoadPage() {
-    handleLoadVendor();
-    handleLoadAddresses();
   }
 
   useEffect(() => {
-    handleLoadPage();
+    handleLoadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -97,7 +83,7 @@ export default function Page() {
         <ErrorSection
           errorTitle={translate("An error occurred while loading vendor data", "حدث خطأ أثناء تحميل ملف المورد")}
           errorMessage={error}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleLoadPage }}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleLoadData }}
         />
       ) : (
         vendor && (
@@ -123,15 +109,7 @@ export default function Page() {
                 </PermissionGuard>
               </div>
 
-              {addressesLoading ? (
-                <LoadingSection message={translate("Loading addresses", "جاري تحميل العناوين")} />
-              ) : addressesError ? (
-                <ErrorSection
-                  errorTitle={translate("An error occurred while loading addresses", "حدث خطأ أثناء تحميل العناوين")}
-                  errorMessage={addressesError}
-                  button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleLoadAddresses }}
-                />
-              ) : addresses.length === 0 ? (
+              {addresses.length === 0 ? (
                 <EmptySection message={translate("No addresses added", "لا توجد عناوين مسجلة")} />
               ) : (
                 <div className={`grid gap-3 ${addresses.length > 1 ? "md:grid-cols-2" : ""}`}>
