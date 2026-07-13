@@ -7,6 +7,7 @@ export const ar: Translation = {
   appDescription:
     "يساعد نظام MOG ERP على إدارة المخزون والمبيعات والمشتريات والتخطيط الإنتاجي والعمليات التشغيلية من خلال منصة موحدة تسهّل متابعة أعمالك وتحسين كفاءتها.",
   underConstruction: "هذه الصفحة لا تزال قيد الإنشاء.",
+  noDataAvailable: "لا يوجد بيانات متاحة",
   dashboard: "لوحة التحكم",
   currency: "جنيه",
   continue: "متابعة",

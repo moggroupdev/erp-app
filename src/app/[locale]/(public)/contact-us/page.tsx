@@ -24,7 +24,7 @@ export default async function Page({ params }: LocalePageProps) {
     <div className="root-flex-1">
       <div className="container mx-auto px-4 py-12">
         <h1 className="mb-4">{translate(title.en, title.ar)}</h1>
-        <p>{translation.underConstruction}</p>
+        <p>{translation.noDataAvailable}</p>
       </div>
     </div>
   );

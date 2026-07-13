@@ -18,22 +18,13 @@ export async function generateMetadata({ params }: LocalePageProps) {
 }
 
 export default async function Page({ params }: LocalePageProps) {
-  const { translate } = await getI18nFromParams(params);
+  const { translate, translation } = await getI18nFromParams(params);
 
   return (
     <div className="root-flex-1">
       <div className="container mx-auto px-4 py-12">
         <h1 className="mb-4">{translate(title.en, title.ar)}</h1>
-        <section id="privacy-intro" className="mb-8">
-          <p>
-            {translate(
-              "This Privacy Policy outlines how we collect, use, and protect your personal information when you visit our website or use our services.",
-              "توضح سياسة الخصوصية هذه كيفية جمعنا واستخدامنا وحمايتنا لمعلوماتك الشخصية عندما تزور موقعنا الإلكتروني أو تستخدم خدماتنا.",
-            )}
-          </p>
-        </section>
-
-        <hr className="mb-8 border-gray-200" />
+        <p>{translation.noDataAvailable}</p>
       </div>
     </div>
   );

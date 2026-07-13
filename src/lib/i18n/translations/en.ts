@@ -5,6 +5,7 @@ export const en = {
   appDescription:
     "MOG ERP streamlines your business operations with integrated inventory management, sales, purchasing, production planning, accounting, and workflow automation in one centralized platform.",
   underConstruction: "This page is currently under construction.",
+  noDataAvailable: "No data available",
   dashboard: "Dashboard",
   currency: "EGP", // Needs to be a list
   continue: "Continue",
