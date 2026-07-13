@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDataHandler from "@/hooks/use-data-handler";
+import useHasPermission from "@/hooks/use-has-permission";
 import vendorsApi from "@/lib/api/vendors";
 import handleRequest from "@/lib/helpers/handle-request";
 import { type Vendor, type VendorAddress } from "@/types/vendor";
@@ -30,6 +31,8 @@ export default function Page() {
   const { locale, translate } = useI18n();
 
   const { id } = useParams<{ id: string }>();
+
+  const canUpdateVendor = useHasPermission(PERMISSIONS.UPDATE_VENDOR);
 
   const { privateRequest, loading, setLoading, error, setError, data, setData } = useDataHandler<PageData>({
     initialData: { vendor: null, addresses: [] },
@@ -57,6 +60,11 @@ export default function Page() {
 
       setData({ vendor: vendorResponse, addresses: addressesResponse });
     });
+  }
+
+  async function handleSetDefaultAddress(addressId: string) {
+    const response = await vendorsApi.setDefaultAddress({ privateRequest, id, addressId });
+    setAddresses((prev) => [response, ...prev.filter((a) => a.id !== response.id).map((a) => ({ ...a, isDefault: false }))]);
   }
 
   useEffect(() => {
@@ -132,7 +140,11 @@ export default function Page() {
               ) : (
                 <div className={`grid gap-3 ${addresses.length > 1 ? "md:grid-cols-2" : ""}`}>
                   {addresses.map((address) => (
-                    <AddressCard key={address.id} address={address} />
+                    <AddressCard
+                      key={address.id}
+                      address={address}
+                      onSetDefault={canUpdateVendor ? handleSetDefaultAddress : undefined}
+                    />
                   ))}
                 </div>
               )}

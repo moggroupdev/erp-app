@@ -42,6 +42,21 @@ const vendorsApi = {
   }) {
     return await privateRequest<VendorAddress>({ method: "POST", url: `vendors/${id}/addresses`, data: dto });
   },
+
+  async setDefaultAddress({
+    privateRequest,
+    id,
+    addressId,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    addressId: string;
+  }) {
+    return await privateRequest<VendorAddress>({
+      method: "PUT",
+      url: `vendors/${id}/addresses/${addressId}/default`,
+    });
+  },
 };
 
 export default vendorsApi;
