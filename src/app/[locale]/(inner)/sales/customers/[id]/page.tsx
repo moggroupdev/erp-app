@@ -49,7 +49,7 @@ export default function Page() {
     setData((prev) => ({ ...prev, addresses: typeof value === "function" ? value(prev.addresses) : value }));
   }
 
-  useDocumentTitle(`${customer?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Customers", "العميلون")}`);
+  useDocumentTitle(`${customer?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Customers", "العملاء")}`);
 
   function handleLoadData() {
     handleRequest(locale, setLoading, setError, async () => {
