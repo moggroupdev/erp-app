@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
 import handleRequest from "@/lib/helpers/handle-request";
 import useDataHandler from "@/hooks/use-data-handler";
+import customersApi from "@/lib/api/customers";
 import vendorsApi from "@/lib/api/vendors";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
+import { type CustomerAddress } from "@/types/customer";
 import { type VendorAddress } from "@/types/vendor";
 import { Button, Checkbox, SegmentedControl, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -14,19 +16,24 @@ import SelectCountry from "@/components/global/select-country";
 
 type LocationScope = "in-egypt" | "outside-egypt";
 
-export default function AddressModal({
-  opened,
-  close,
-  vendorId,
-  isFirstAddress,
-  callback,
-}: {
+type AddressModalProps = {
   opened: boolean;
   close: () => void;
-  vendorId: string;
   isFirstAddress: boolean;
-  callback: (address: VendorAddress) => void;
-}) {
+} & (
+  | {
+      entityType: "customer";
+      entityId: string;
+      callback: (address: CustomerAddress) => void;
+    }
+  | {
+      entityType: "vendor";
+      entityId: string;
+      callback: (address: VendorAddress) => void;
+    }
+);
+
+export default function AddressModal({ opened, close, entityType, entityId, isFirstAddress, callback }: AddressModalProps) {
   const { locale, translate, translation } = useI18n();
 
   const [locationScope, setLocationScope] = useState<LocationScope>("in-egypt");
@@ -72,18 +79,22 @@ export default function AddressModal({
         return setError(translate("Please select a country outside Egypt.", "يرجى اختيار دولة خارج مصر."));
     }
 
+    const dto = {
+      countryId: isInEgypt ? EGYPT_COUNTRY_ID : countryId!,
+      cityId: isInEgypt ? cityId : null,
+      addressLine: addressLine.trim() || null,
+      isDefault: isFirstAddress || isDefault,
+    };
+
     handleRequest(locale, setLoading, setError, async () => {
-      const response = await vendorsApi.addAddress({
-        privateRequest,
-        id: vendorId,
-        dto: {
-          countryId: isInEgypt ? EGYPT_COUNTRY_ID : countryId!,
-          cityId: isInEgypt ? cityId : null,
-          addressLine: addressLine.trim() || null,
-          isDefault: isFirstAddress || isDefault,
-        },
-      });
-      callback(response);
+      if (entityType === "customer") {
+        const response = await customersApi.addAddress({ privateRequest, id: entityId, dto });
+        callback(response);
+      } else {
+        const response = await vendorsApi.addAddress({ privateRequest, id: entityId, dto });
+        callback(response);
+      }
+
       handleClose();
     });
   }
