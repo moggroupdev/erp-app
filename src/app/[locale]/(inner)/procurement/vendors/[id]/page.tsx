@@ -18,6 +18,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import VendorModal from "@/components/global/vendor-modal";
+import VendorAddressModal from "@/components/global/vendor-address-modal";
 import AddressCard from "@/components/global/address-card";
 import VendorDetails from "./components/vendor-details";
 
@@ -41,6 +42,10 @@ export default function Page() {
     setData((prev) => ({ ...prev, vendor: typeof value === "function" ? value(prev.vendor) : value }));
   }
 
+  function setAddresses(value: React.SetStateAction<VendorAddress[]>) {
+    setData((prev) => ({ ...prev, addresses: typeof value === "function" ? value(prev.addresses) : value }));
+  }
+
   useDocumentTitle(`${vendor?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Vendors", "الموردون")}`);
 
   function handleLoadData() {
@@ -62,6 +67,7 @@ export default function Page() {
   // ========================= MODAL HANDLERS =========================
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
+  const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] = useDisclosure(false);
 
   return (
     <LayoutBox
@@ -96,6 +102,16 @@ export default function Page() {
               callback={(response) => setVendor(response)}
             />
 
+            <VendorAddressModal
+              opened={addressModalOpened}
+              close={closeAddressModal}
+              vendorId={vendor.id}
+              isFirstAddress={addresses.length === 0}
+              callback={(response) =>
+                setAddresses((prev) => (response.isDefault ? [response, ...prev.map((a) => ({ ...a, isDefault: false }))] : [...prev, response]))
+              }
+            />
+
             <VendorDetails vendor={vendor} />
 
             <section className="mt-4 flex flex-col gap-4">
@@ -103,7 +119,7 @@ export default function Page() {
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Addresses", "العناوين")}</h4>
 
                 <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
-                  <Button variant="light" color="teal" radius="md">
+                  <Button onClick={openAddressModal} variant="light" color="teal" radius="md">
                     {translate("Add New Address", "إضافة عنوان جديد")}
                   </Button>
                 </PermissionGuard>

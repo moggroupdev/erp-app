@@ -29,6 +29,7 @@ export default function DataSelect({
       rightSection={
         value && clearable ? (
           <CircleX
+            size={15}
             className="cursor-pointer text-red-400 hover:text-red-500"
             onClick={(e) => {
               e.stopPropagation(); // Prevents the dropdown from opening
