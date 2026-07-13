@@ -16,10 +16,10 @@ import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
-import VendorModal from "@/components/global/vendor-modal";
-import VendorDetails from "./components/vendor-details";
-import VendorAddressCard from "./components/vendor-address-card";
 import EmptySection from "@/components/ui/sections/empty";
+import VendorModal from "@/components/global/vendor-modal";
+import AddressCard from "@/components/global/address-card";
+import VendorDetails from "./components/vendor-details";
 
 const PAGE_TITLE = { en: "Vendor Data", ar: "ملف المورد" };
 
@@ -114,7 +114,7 @@ export default function Page() {
               ) : (
                 <div className={`grid gap-3 ${addresses.length > 1 ? "md:grid-cols-2" : ""}`}>
                   {addresses.map((address) => (
-                    <VendorAddressCard key={address.id} address={address} />
+                    <AddressCard key={address.id} address={address} />
                   ))}
                 </div>
               )}

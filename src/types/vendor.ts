@@ -1,3 +1,5 @@
+import { Address } from "./address";
+
 export type Vendor = {
   id: string;
   code: string;
@@ -10,14 +12,7 @@ export type Vendor = {
   createdBy: { id: string; name: string };
 };
 
-export type VendorAddress = {
-  id: string;
-  vendorId: string;
-  countryId: string;
-  cityId: string | null; // Null if country is not Egypt
-  addressLine: string | null;
-  isDefault: boolean;
-};
+export type VendorAddress = Address & { vendorId: string };
 
 // ==================== DTOs ====================
 

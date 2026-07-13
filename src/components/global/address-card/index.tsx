@@ -1,10 +1,10 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import useLocationHelpers from "@/hooks/use-location-helpers";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
-import { type VendorAddress } from "@/types/vendor";
+import { type Address } from "@/types/address";
 import { MapPin } from "lucide-react";
 
-export default function VendorAddressCard({ address }: { address: VendorAddress }) {
+export default function AddressCard({ address }: { address: Address }) {
   const { translate } = useI18n();
 
   const { getCountryById, getCityById, getGovernorateOfCity } = useLocationHelpers();
@@ -72,7 +72,7 @@ export default function VendorAddressCard({ address }: { address: VendorAddress 
         </div>
 
         {locationText && (
-          <div className="flex flex-col gap-1 border-t border-gray-200 pt-3">
+          <div className="flex flex-col gap-1.5 border-t border-gray-200 pt-3">
             <span className="text-xs font-medium tracking-wide text-gray-500 uppercase">
               {translate("Location", "الموقع")}
             </span>
