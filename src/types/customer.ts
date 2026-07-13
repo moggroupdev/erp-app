@@ -1,3 +1,5 @@
+import { Address } from "./address";
+
 export type Customer = {
   id: string;
   code: string;
@@ -10,6 +12,8 @@ export type Customer = {
   createdBy: { id: string; name: string };
 };
 
+export type CustomerAddress = Address & { customerId: string };
+
 // ==================== DTOs ====================
 
 export type CreateCustomerDto = {
@@ -20,3 +24,10 @@ export type CreateCustomerDto = {
 };
 
 export type UpdateCustomerDto = Partial<CreateCustomerDto>;
+
+export type CreateCustomerAddressDto = {
+  countryId: string;
+  cityId: string | null; // Required if the country is Egypt
+  addressLine: string | null;
+  isDefault: boolean;
+};

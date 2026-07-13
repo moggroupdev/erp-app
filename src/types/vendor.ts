@@ -27,7 +27,7 @@ export type UpdateVendorDto = Partial<CreateVendorDto>;
 
 export type CreateVendorAddressDto = {
   countryId: string;
-  cityId: string | null;
+  cityId: string | null; // Required if the country is Egypt
   addressLine: string | null;
   isDefault: boolean;
 };
