@@ -7,9 +7,9 @@ import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDataHandler from "@/hooks/use-data-handler";
 import useHasPermission from "@/hooks/use-has-permission";
-import vendorsApi from "@/lib/api/vendors";
+import customersApi from "@/lib/api/customers";
 import handleRequest from "@/lib/helpers/handle-request";
-import { type Vendor, type VendorAddress } from "@/types/vendor";
+import { type Customer, type CustomerAddress } from "@/types/customer";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button } from "@mantine/core";
 import { Pencil } from "lucide-react";
@@ -18,52 +18,52 @@ import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
-import VendorModal from "@/components/global/vendor-modal";
+import CustomerModal from "@/components/global/customer-modal";
 import AddressModal from "@/components/global/address-modal";
 import AddressCard from "@/components/global/address-card";
-import VendorDetails from "./components/vendor-details";
+import CustomerDetails from "./components/customer-details";
 
-const PAGE_TITLE = { en: "Vendor Data", ar: "ملف المورد" };
+const PAGE_TITLE = { en: "Customer Data", ar: "ملف العميل" };
 
-type PageData = { vendor: Vendor | null; addresses: VendorAddress[] };
+type PageData = { customer: Customer | null; addresses: CustomerAddress[] };
 
 export default function Page() {
   const { locale, translate } = useI18n();
 
   const { id } = useParams<{ id: string }>();
 
-  const canUpdateVendor = useHasPermission(PERMISSIONS.UPDATE_VENDOR);
+  const canUpdateCustomer = useHasPermission(PERMISSIONS.UPDATE_CUSTOMER);
 
   const { privateRequest, loading, setLoading, error, setError, data, setData } = useDataHandler<PageData>({
-    initialData: { vendor: null, addresses: [] },
+    initialData: { customer: null, addresses: [] },
     initialLoading: true,
   });
 
-  const { vendor, addresses } = data;
+  const { customer, addresses } = data;
 
-  function setVendor(value: React.SetStateAction<Vendor | null>) {
-    setData((prev) => ({ ...prev, vendor: typeof value === "function" ? value(prev.vendor) : value }));
+  function setCustomer(value: React.SetStateAction<Customer | null>) {
+    setData((prev) => ({ ...prev, customer: typeof value === "function" ? value(prev.customer) : value }));
   }
 
-  function setAddresses(value: React.SetStateAction<VendorAddress[]>) {
+  function setAddresses(value: React.SetStateAction<CustomerAddress[]>) {
     setData((prev) => ({ ...prev, addresses: typeof value === "function" ? value(prev.addresses) : value }));
   }
 
-  useDocumentTitle(`${vendor?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Vendors", "الموردون")}`);
+  useDocumentTitle(`${customer?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Customers", "العميلون")}`);
 
   function handleLoadData() {
     handleRequest(locale, setLoading, setError, async () => {
-      const [vendorResponse, addressesResponse] = await Promise.all([
-        vendorsApi.get({ privateRequest, id }),
-        vendorsApi.listAddresses({ privateRequest, id }),
+      const [customerResponse, addressesResponse] = await Promise.all([
+        customersApi.get({ privateRequest, id }),
+        customersApi.listAddresses({ privateRequest, id }),
       ]);
 
-      setData({ vendor: vendorResponse, addresses: addressesResponse });
+      setData({ customer: customerResponse, addresses: addressesResponse });
     });
   }
 
   async function handleSetDefaultAddress(addressId: string) {
-    const response = await vendorsApi.setDefaultAddress({ privateRequest, id, addressId });
+    const response = await customersApi.setDefaultAddress({ privateRequest, id, addressId });
     setAddresses((prev) => [response, ...prev.filter((a) => a.id !== response.id).map((a) => ({ ...a, isDefault: false }))]);
   }
 
@@ -82,8 +82,8 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: vendor && (
-          <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
+        sideElements: customer && (
+          <PermissionGuard permission={PERMISSIONS.UPDATE_CUSTOMER}>
             <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
               {translate("Edit", "تعديل")}
             </Button>
@@ -92,29 +92,29 @@ export default function Page() {
       }}
     >
       {loading ? (
-        <LoadingSection message={translate("Loading vendor data", "جاري تحميل ملف المورد")} />
+        <LoadingSection message={translate("Loading customer data", "جاري تحميل ملف العميل")} />
       ) : error ? (
         <ErrorSection
-          errorTitle={translate("An error occurred while loading vendor data", "حدث خطأ أثناء تحميل ملف المورد")}
+          errorTitle={translate("An error occurred while loading customer data", "حدث خطأ أثناء تحميل ملف العميل")}
           errorMessage={error}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleLoadData }}
         />
       ) : (
-        vendor && (
+        customer && (
           <>
-            <VendorModal
+            <CustomerModal
               opened={updateModalOpened}
               close={closeUpdateModal}
-              vendorToUpdate={vendor}
-              setVendorToUpdate={setVendor}
-              callback={(response) => setVendor(response)}
+              customerToUpdate={customer}
+              setCustomerToUpdate={setCustomer}
+              callback={(response) => setCustomer(response)}
             />
 
             <AddressModal
               opened={addressModalOpened}
               close={closeAddressModal}
-              entityType="vendor"
-              entityId={vendor.id}
+              entityType="customer"
+              entityId={customer.id}
               isFirstAddress={addresses.length === 0}
               callback={(response) =>
                 setAddresses((prev) =>
@@ -123,13 +123,13 @@ export default function Page() {
               }
             />
 
-            <VendorDetails vendor={vendor} />
+            <CustomerDetails customer={customer} />
 
             <section className="mt-4 flex flex-col gap-4">
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Addresses", "العناوين")}</h4>
 
-                <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
+                <PermissionGuard permission={PERMISSIONS.UPDATE_CUSTOMER}>
                   <Button onClick={openAddressModal} variant="light" color="teal" radius="md">
                     {translate("Add New Address", "إضافة عنوان جديد")}
                   </Button>
@@ -144,7 +144,7 @@ export default function Page() {
                     <AddressCard
                       key={address.id}
                       address={address}
-                      onSetDefault={canUpdateVendor ? handleSetDefaultAddress : undefined}
+                      onSetDefault={canUpdateCustomer ? handleSetDefaultAddress : undefined}
                     />
                   ))}
                 </div>
