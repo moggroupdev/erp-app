@@ -85,7 +85,7 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
           </button>
 
           <Collapse in={isOpen}>
-            <div className="ms-5 mt-2 flex flex-col gap-2 border-s border-gray-200 bg-white ps-3">
+            <div className="ms-6 mt-2 flex flex-col gap-2 border-s border-gray-200 bg-white ps-3">
               <Button
                 title={localeNames[nextLocale]}
                 type="button"
