@@ -14,7 +14,7 @@ import SelectCountry from "@/components/global/select-country";
 
 type LocationScope = "in-egypt" | "outside-egypt";
 
-export default function VendorAddressModal({
+export default function AddressModal({
   opened,
   close,
   vendorId,

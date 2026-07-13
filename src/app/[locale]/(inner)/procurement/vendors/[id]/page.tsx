@@ -18,7 +18,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import VendorModal from "@/components/global/vendor-modal";
-import VendorAddressModal from "@/components/global/vendor-address-modal";
+import AddressModal from "@/components/global/address-modal";
 import AddressCard from "@/components/global/address-card";
 import VendorDetails from "./components/vendor-details";
 
@@ -102,13 +102,15 @@ export default function Page() {
               callback={(response) => setVendor(response)}
             />
 
-            <VendorAddressModal
+            <AddressModal
               opened={addressModalOpened}
               close={closeAddressModal}
               vendorId={vendor.id}
               isFirstAddress={addresses.length === 0}
               callback={(response) =>
-                setAddresses((prev) => (response.isDefault ? [response, ...prev.map((a) => ({ ...a, isDefault: false }))] : [...prev, response]))
+                setAddresses((prev) =>
+                  response.isDefault ? [response, ...prev.map((a) => ({ ...a, isDefault: false }))] : [...prev, response],
+                )
               }
             />
 
