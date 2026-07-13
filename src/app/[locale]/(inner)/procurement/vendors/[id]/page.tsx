@@ -55,7 +55,7 @@ export default function Page() {
     handleRequest(locale, setLoading, setError, async () => {
       const [vendorResponse, addressesResponse] = await Promise.all([
         vendorsApi.get({ privateRequest, id }),
-        vendorsApi.getAddresses({ privateRequest, id }),
+        vendorsApi.listAddresses({ privateRequest, id }),
       ]);
 
       setData({ vendor: vendorResponse, addresses: addressesResponse });

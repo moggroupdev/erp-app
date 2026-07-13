@@ -27,9 +27,7 @@ const vendorsApi = {
     return await privateRequest<Vendor>({ method: "PUT", url: `vendors/${id}`, data: dto });
   },
 
-  async getAddresses({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<VendorAddress[]>({ url: `vendors/${id}/addresses` });
-  },
+  // ========================= Addresses =========================
 
   async addAddress({
     privateRequest,
@@ -41,6 +39,10 @@ const vendorsApi = {
     dto: CreateVendorAddressDto;
   }) {
     return await privateRequest<VendorAddress>({ method: "POST", url: `vendors/${id}/addresses`, data: dto });
+  },
+
+  async listAddresses({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<VendorAddress[]>({ url: `vendors/${id}/addresses` });
   },
 
   async setDefaultAddress({
