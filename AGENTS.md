@@ -221,5 +221,6 @@ Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSecti
 - Submit loading: `mutation.isPending` on Mantine `Button loading`.
 - Document title: `useDocumentTitle` with bilingual titles.
 - Icons: prefer `lucide-react`.
+- Do **not** use heavy hover translate/lift (`translate-y`, etc.) or heavy hover shadow changes on cards and list items. Prefer quiet hover.
 
 Match existing CRUD pages (vendors, customers, departments) when adding new ones.
