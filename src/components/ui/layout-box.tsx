@@ -27,7 +27,7 @@ export default function LayoutBox({
   return (
     <div className="root-flex-1 flex min-h-full flex-col gap-4 rounded-[20px] bg-white p-4 shadow-lg sm:p-6">
       {header && (
-        <header className="flex flex-wrap items-center justify-between gap-2">
+        <header className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               {header.backLink && (
