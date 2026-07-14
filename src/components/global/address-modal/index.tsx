@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
-import handleRequest from "@/lib/helpers/handle-request";
-import useDataHandler from "@/hooks/use-data-handler";
+import usePrivateRequest from "@/hooks/use-private-request";
 import customersApi from "@/lib/api/customers";
 import vendorsApi from "@/lib/api/vendors";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
-import { type CustomerAddress } from "@/types/customer";
-import { type VendorAddress } from "@/types/vendor";
 import { Button, Checkbox, SegmentedControl, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -20,21 +20,14 @@ type AddressModalProps = {
   opened: boolean;
   close: () => void;
   isFirstAddress: boolean;
-} & (
-  | {
-      entityType: "customer";
-      entityId: string;
-      callback: (address: CustomerAddress) => void;
-    }
-  | {
-      entityType: "vendor";
-      entityId: string;
-      callback: (address: VendorAddress) => void;
-    }
-);
+} & ({ entityType: "customer"; entityId: string } | { entityType: "vendor"; entityId: string });
 
-export default function AddressModal({ opened, close, entityType, entityId, isFirstAddress, callback }: AddressModalProps) {
+export default function AddressModal({ opened, close, entityType, entityId, isFirstAddress }: AddressModalProps) {
   const { locale, translate, translation } = useI18n();
+
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
+  const [validationError, setValidationError] = useState("");
 
   const [locationScope, setLocationScope] = useState<LocationScope>("in-egypt");
   const [countryId, setCountryId] = useState<string | null>(null);
@@ -66,44 +59,54 @@ export default function AddressModal({ opened, close, entityType, entityId, isFi
     setCityId(null);
   }, [governorateId]);
 
-  const { privateRequest, loading, setLoading, error, setError } = useDataHandler({ initialData: null });
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const dto = {
+        countryId: isInEgypt ? EGYPT_COUNTRY_ID : countryId!,
+        cityId: isInEgypt ? cityId : null,
+        addressLine: addressLine.trim() || null,
+        isDefault: isFirstAddress || isDefault,
+      };
+      if (entityType === "customer") return await customersApi.addAddress({ privateRequest, id: entityId, dto });
+      if (entityType === "vendor") return await vendorsApi.addAddress({ privateRequest, id: entityId, dto });
+      return null;
+    },
+    onSuccess: async () => {
+      const addressesKey =
+        entityType === "customer"
+          ? queryKeys.customers.addresses(entityId)
+          : entityType === "vendor"
+            ? queryKeys.vendors.addresses(entityId)
+            : null;
+      if (addressesKey) await queryClient.invalidateQueries({ queryKey: addressesKey });
+      handleClose();
+    },
+  });
+
+  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setValidationError("");
 
+    // Validation
     if (isInEgypt) {
-      if (!cityId) return setError(translate("Please select a city.", "يرجى اختيار المدينة."));
+      if (!cityId) return setValidationError(translate("Please select a city.", "يرجى اختيار المدينة."));
     } else {
-      if (!countryId) return setError(translate("Please select a country.", "يرجى اختيار الدولة."));
+      if (!countryId) return setValidationError(translate("Please select a country.", "يرجى اختيار الدولة."));
       if (countryId === EGYPT_COUNTRY_ID)
-        return setError(translate("Please select a country outside Egypt.", "يرجى اختيار دولة خارج مصر."));
+        return setValidationError(translate("Please select a country outside Egypt.", "يرجى اختيار دولة خارج مصر."));
     }
 
-    const dto = {
-      countryId: isInEgypt ? EGYPT_COUNTRY_ID : countryId!,
-      cityId: isInEgypt ? cityId : null,
-      addressLine: addressLine.trim() || null,
-      isDefault: isFirstAddress || isDefault,
-    };
-
-    handleRequest(locale, setLoading, setError, async () => {
-      if (entityType === "customer") {
-        const response = await customersApi.addAddress({ privateRequest, id: entityId, dto });
-        callback(response);
-      } else {
-        const response = await vendorsApi.addAddress({ privateRequest, id: entityId, dto });
-        callback(response);
-      }
-
-      handleClose();
-    });
+    mutation.mutate();
   }
 
   function handleClose() {
     close();
     setTimeout(() => {
       reset();
-      setError("");
+      setValidationError("");
+      mutation.reset();
     }, 250);
   }
 
@@ -179,7 +182,7 @@ export default function AddressModal({ opened, close, entityType, entityId, isFi
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} radius="md" fullWidth>
+          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
             {title}
           </Button>
         </div>

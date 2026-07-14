@@ -1,5 +1,5 @@
 import LocalizedSelect, { LocalizedSelectProps } from "@/components/ui/localized-select";
-import useLocations from "@/contexts/locations/hook";
+import useLocations from "@/hooks/use-locations";
 
 export type SelectGovernorateProps = Omit<LocalizedSelectProps, "labelsList">;
 

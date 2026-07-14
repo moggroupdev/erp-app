@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
-import useDataHandler from "@/hooks/use-data-handler";
-import useDepartments from "@/contexts/departments/hook";
-import handleRequest from "@/lib/helpers/handle-request";
+import usePrivateRequest from "@/hooks/use-private-request";
 import departmentsApi from "@/lib/api/departments";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
 import { type Department } from "@/types/departments";
 import { Button, TextInput } from "@mantine/core";
-
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 
@@ -23,7 +23,9 @@ export default function DepartmentModal({
 }) {
   const { locale, translate, translation } = useI18n();
 
-  const { setData: setDepartments } = useDepartments();
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
+  const [validationError, setValidationError] = useState("");
 
   const [nameEn, setNameEn] = useState("");
   const [nameAr, setNameAr] = useState("");
@@ -41,29 +43,31 @@ export default function DepartmentModal({
     } else reset();
   }, [departmentToUpdate]);
 
-  const { privateRequest, loading, setLoading, error, setError } = useDataHandler({ initialData: null });
+  const mutation = useMutation({
+    mutationFn: async () => {
+      return departmentToUpdate
+        ? await departmentsApi.update({ privateRequest, id: departmentToUpdate.id, dto: { nameEn, nameAr } })
+        : await departmentsApi.create({ privateRequest, dto: { nameEn, nameAr } });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.departments.all });
+      handleClose();
+    },
+  });
+
+  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setValidationError("");
 
-    // Validation Layer
+    // Validation
     if (!nameEn.trim())
-      return setError(translate("Please enter department English name ", "يرجي إدخال اسم القسم بالانجليزية"));
-    if (!nameAr.trim()) return setError(translate("Please enter department Arabic name", "يرجي إدخال اسم القسم بالعربية"));
+      return setValidationError(translate("Please enter department English name ", "يرجي إدخال اسم القسم بالانجليزية"));
+    if (!nameAr.trim())
+      return setValidationError(translate("Please enter department Arabic name", "يرجي إدخال اسم القسم بالعربية"));
 
-    handleRequest(locale, setLoading, setError, async () => {
-      const response = departmentToUpdate
-        ? await departmentsApi.update({ privateRequest, id: departmentToUpdate.id, dto: { nameEn, nameAr } })
-        : await departmentsApi.create({ privateRequest, dto: { nameEn, nameAr } });
-
-      setDepartments((prev) =>
-        departmentToUpdate
-          ? prev.map((department) => (department.id === departmentToUpdate.id ? response : department))
-          : [...prev, response],
-      );
-
-      handleClose();
-    });
+    mutation.mutate();
   }
 
   function handleClose() {
@@ -71,7 +75,8 @@ export default function DepartmentModal({
     setTimeout(() => {
       if (departmentToUpdate) setDepartmentToUpdate(null);
       else reset();
-      setError("");
+      setValidationError("");
+      mutation.reset();
     }, 250);
   }
 
@@ -113,7 +118,7 @@ export default function DepartmentModal({
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} radius="md" fullWidth>
+          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
             {title}
           </Button>
         </div>

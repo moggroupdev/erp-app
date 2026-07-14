@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { Customer } from "@/types/customer";
-import handleRequest from "@/lib/helpers/handle-request";
-import useDataHandler from "@/hooks/use-data-handler";
+import usePrivateRequest from "@/hooks/use-private-request";
 import customersApi from "@/lib/api/customers";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
 import { validationRegex } from "@/lib/constants/regex";
 import { TextInput, Button, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -15,16 +17,20 @@ export default function CustomerModal({
   customerToUpdate,
   setCustomerToUpdate,
   isForList = false,
-  callback,
+  onSuccess,
 }: {
   opened: boolean;
   close: () => void;
   customerToUpdate: Customer | null;
   setCustomerToUpdate: React.Dispatch<React.SetStateAction<Customer | null>>;
   isForList?: boolean;
-  callback: (customer: Customer) => void;
+  onSuccess?: () => void;
 }) {
   const { locale, translate, translation } = useI18n();
+
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
+  const [validationError, setValidationError] = useState("");
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -48,36 +54,46 @@ export default function CustomerModal({
     } else reset();
   }, [customerToUpdate]);
 
-  const { privateRequest, loading, setLoading, error, setError } = useDataHandler({ initialData: null });
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const dto = { name, phone: phone || null, email: email || null, notes: notes || null };
+      return customerToUpdate
+        ? await customersApi.update({ privateRequest, id: customerToUpdate.id, dto })
+        : await customersApi.create({ privateRequest, dto });
+    },
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
+      if (customerToUpdate) queryClient.setQueryData(queryKeys.customers.detail(customerToUpdate.id), response);
+      onSuccess?.();
+      handleClose();
+    },
+  });
+
+  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setValidationError("");
 
-    // Validation Layer
-    if (!name.trim()) return setError(translate("Please enter the customer's name.", "يرجى إدخال اسم العميل."));
+    // Validation
+    if (!name.trim()) return setValidationError(translate("Please enter the customer's name.", "يرجى إدخال اسم العميل."));
     if (!validationRegex.name.test(name))
-      return setError(translate("The customer's name contains invalid characters.", "اسم العميل يحتوي على أحرف غير صالحة."));
+      return setValidationError(
+        translate("The customer's name contains invalid characters.", "اسم العميل يحتوي على أحرف غير صالحة."),
+      );
     if (phone && !validationRegex.globalPhone.test(phone))
-      return setError(translate("Please enter a valid phone number.", "يرجى إدخال رقم هاتف صالح."));
+      return setValidationError(translate("Please enter a valid phone number.", "يرجى إدخال رقم هاتف صالح."));
     if (email && !validationRegex.email.test(email))
-      return setError(translate("Please enter a valid email address.", "يرجى إدخال عنوان بريد إلكتروني صالح."));
+      return setValidationError(translate("Please enter a valid email address.", "يرجى إدخال عنوان بريد إلكتروني صالح."));
 
-    handleRequest(locale, setLoading, setError, async () => {
-      const dto = { name, phone: phone || null, email: email || null, notes: notes || null };
-
-      const response = customerToUpdate
-        ? await customersApi.update({ privateRequest, id: customerToUpdate.id, dto })
-        : await customersApi.create({ privateRequest, dto });
-
-      callback(response);
-      handleClose();
-    });
+    mutation.mutate();
   }
 
   function handleClose() {
     close();
     setTimeout(() => {
-      setError("");
+      setValidationError("");
+      mutation.reset();
       if (isForList) {
         if (customerToUpdate) setCustomerToUpdate(null);
         else reset();
@@ -146,7 +162,7 @@ export default function CustomerModal({
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} radius="md" fullWidth>
+          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
             {title}
           </Button>
         </div>

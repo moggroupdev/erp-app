@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { Vendor } from "@/types/vendor";
-import handleRequest from "@/lib/helpers/handle-request";
-import useDataHandler from "@/hooks/use-data-handler";
+import usePrivateRequest from "@/hooks/use-private-request";
 import vendorsApi from "@/lib/api/vendors";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
 import { validationRegex } from "@/lib/constants/regex";
 import { TextInput, Button, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -15,16 +17,20 @@ export default function VendorModal({
   vendorToUpdate,
   setVendorToUpdate,
   isForList = false,
-  callback,
+  onSuccess,
 }: {
   opened: boolean;
   close: () => void;
   vendorToUpdate: Vendor | null;
   setVendorToUpdate: React.Dispatch<React.SetStateAction<Vendor | null>>;
   isForList?: boolean;
-  callback: (vendor: Vendor) => void;
+  onSuccess?: () => void;
 }) {
   const { locale, translate, translation } = useI18n();
+
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
+  const [validationError, setValidationError] = useState("");
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -48,36 +54,46 @@ export default function VendorModal({
     } else reset();
   }, [vendorToUpdate]);
 
-  const { privateRequest, loading, setLoading, error, setError } = useDataHandler({ initialData: null });
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const dto = { name, phone: phone || null, email: email || null, notes: notes || null };
+      return vendorToUpdate
+        ? await vendorsApi.update({ privateRequest, id: vendorToUpdate.id, dto })
+        : await vendorsApi.create({ privateRequest, dto });
+    },
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.vendors.all });
+      if (vendorToUpdate) queryClient.setQueryData(queryKeys.vendors.detail(vendorToUpdate.id), response);
+      onSuccess?.();
+      handleClose();
+    },
+  });
+
+  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setValidationError("");
 
-    // Validation Layer
-    if (!name.trim()) return setError(translate("Please enter the vendor's name.", "يرجى إدخال اسم المورد."));
+    // Validation
+    if (!name.trim()) return setValidationError(translate("Please enter the vendor's name.", "يرجى إدخال اسم المورد."));
     if (!validationRegex.name.test(name))
-      return setError(translate("The vendor's name contains invalid characters.", "اسم المورد يحتوي على أحرف غير صالحة."));
+      return setValidationError(
+        translate("The vendor's name contains invalid characters.", "اسم المورد يحتوي على أحرف غير صالحة."),
+      );
     if (phone && !validationRegex.globalPhone.test(phone))
-      return setError(translate("Please enter a valid phone number.", "يرجى إدخال رقم هاتف صالح."));
+      return setValidationError(translate("Please enter a valid phone number.", "يرجى إدخال رقم هاتف صالح."));
     if (email && !validationRegex.email.test(email))
-      return setError(translate("Please enter a valid email address.", "يرجى إدخال عنوان بريد إلكتروني صالح."));
+      return setValidationError(translate("Please enter a valid email address.", "يرجى إدخال عنوان بريد إلكتروني صالح."));
 
-    handleRequest(locale, setLoading, setError, async () => {
-      const dto = { name, phone: phone || null, email: email || null, notes: notes || null };
-
-      const response = vendorToUpdate
-        ? await vendorsApi.update({ privateRequest, id: vendorToUpdate.id, dto })
-        : await vendorsApi.create({ privateRequest, dto });
-
-      callback(response);
-      handleClose();
-    });
+    mutation.mutate();
   }
 
   function handleClose() {
     close();
     setTimeout(() => {
-      setError("");
+      setValidationError("");
+      mutation.reset();
       if (isForList) {
         if (vendorToUpdate) setVendorToUpdate(null);
         else reset();
@@ -143,7 +159,7 @@ export default function VendorModal({
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={loading} disabled={!isReadyToSubmit} radius="md" fullWidth>
+          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
             {title}
           </Button>
         </div>

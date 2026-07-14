@@ -1,9 +1,9 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n/hooks";
+import { useMutation } from "@tanstack/react-query";
 import useLocationHelpers from "@/hooks/use-location-helpers";
-import useDataHandler from "@/hooks/use-data-handler";
-import handleRequest from "@/lib/helpers/handle-request";
+import getErrorMessage from "@/lib/helpers/get-error-message";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
 import { type Address } from "@/types/address";
 import { Button, Tooltip } from "@mantine/core";
@@ -25,7 +25,10 @@ export default function AddressCard({
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
-  const { loading, setLoading, error, setError } = useDataHandler({ initialData: null });
+  const mutation = useMutation({
+    mutationFn: () => onSetDefault!(address.id),
+    onSuccess: () => handleCloseModal(),
+  });
 
   const country = getCountryById(address.countryId);
   const governorate = getGovernorateOfCity(address.cityId);
@@ -42,20 +45,17 @@ export default function AddressCard({
 
   const canSetDefault = !!onSetDefault && !address.isDefault;
 
+  const error = mutation.error ? getErrorMessage(locale, mutation.error) : "";
+
   function handleCloseModal() {
     closeModal();
-    setError("");
+    mutation.reset();
   }
 
   function handleConfirmSettingAsDefault(e: React.FormEvent) {
     e.preventDefault();
-
     if (!onSetDefault) return;
-
-    handleRequest(locale, setLoading, setError, async () => {
-      await onSetDefault(address.id);
-      handleCloseModal();
-    });
+    mutation.mutate();
   }
 
   return (
@@ -128,7 +128,6 @@ export default function AddressCard({
         </div>
       </article>
 
-      {/* Set as default address confirmation modal */}
       <Modal
         opened={modalOpened}
         onClose={handleCloseModal}
@@ -146,7 +145,7 @@ export default function AddressCard({
             <Button variant="light" color="dark" radius="md" onClick={handleCloseModal} fullWidth>
               {translation.cancel}
             </Button>
-            <Button type="submit" color="teal" loading={loading} radius="md" fullWidth>
+            <Button type="submit" color="teal" loading={mutation.isPending} radius="md" fullWidth>
               {translation.confirm}
             </Button>
           </div>
