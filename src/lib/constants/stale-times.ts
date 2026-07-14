@@ -6,4 +6,5 @@ export const staleTimes = {
   customers: 5 * MINUTE,
   locations: Infinity,
   departments: Infinity,
+  roles: Infinity,
 } as const;

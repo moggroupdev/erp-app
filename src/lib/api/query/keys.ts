@@ -21,6 +21,13 @@ export const queryKeys = {
   departments: {
     all: ["departments"] as const,
   },
+  roles: {
+    all: ["roles"] as const,
+    lists: () => [...queryKeys.roles.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.roles.lists(), filters] as const,
+    details: () => [...queryKeys.roles.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.roles.details(), id] as const,
+  },
   vendors: {
     all: ["vendors"] as const,
     lists: () => [...queryKeys.vendors.all, "list"] as const,
