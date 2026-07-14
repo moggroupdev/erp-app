@@ -1,37 +1,34 @@
 "use client";
 
-import { useLocale } from "@/lib/i18n/hooks";
-import { createTranslator } from "@/lib/i18n/utils";
-import useDataHandler from "@/hooks/use-data-handler";
-import handleRequest from "@/lib/helpers/handle-request";
-import { User } from "@/types/user";
+import { useQuery } from "@tanstack/react-query";
+import { useI18n } from "@/lib/i18n/hooks";
+import usePrivateRequest from "@/hooks/use-private-request";
 import authApi from "@/lib/api/auth";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
 import { Button } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 
 export default function ProfileContent() {
-  const locale = useLocale();
-  const translate = createTranslator(locale);
+  const { locale, translate } = useI18n();
+  const privateRequest = usePrivateRequest();
 
-  const { privateRequest, loading, setLoading, error, setError, data, setData } = useDataHandler<User | null>({
-    initialData: null,
+  const { data, isFetching, error, refetch } = useQuery({
+    queryKey: queryKeys.profile.all,
+    queryFn: () => authApi.getProfile({ privateRequest }),
+    enabled: false,
   });
 
-  async function handleLoadProfile() {
-    handleRequest(locale, setLoading, setError, async () => {
-      const user = await authApi.getProfile({ privateRequest });
-      setData(user);
-    });
-  }
+  const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   return (
     <div className="flex flex-col gap-6">
-      <Button onClick={handleLoadProfile} variant="light" radius="md" disabled={loading}>
+      <Button onClick={() => refetch()} variant="light" radius="md" disabled={isFetching}>
         {translate("Load Profile", "تحميل الملف الشخصي")}
       </Button>
 
-      {error ? (
-        <ErrorAlert error={error} fade />
+      {errorMessage ? (
+        <ErrorAlert error={errorMessage} fade />
       ) : (
         data && (
           <div className="space-y-2 rounded-lg border border-gray-100 bg-gray-50 p-6">

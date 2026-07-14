@@ -5,13 +5,14 @@ import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useHasPermission from "@/hooks/use-has-permission";
-import useDepartments from "@/contexts/departments/hook";
+import useDepartments from "@/hooks/use-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Department } from "@/types/departments";
 import { Button } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
+import RefetchButton from "@/components/ui/refetch-button";
 import DepartmentModal from "./components/department-modal";
 import DepartmentCard from "./components/department-card";
 import DepartmentsLoadingSkeleton from "./components/departments-loading-skeleton";
@@ -27,7 +28,7 @@ export default function Page() {
 
   const canUpdateDepartments = useHasPermission(PERMISSIONS.UPDATE_DEPARTMENT);
 
-  // ========== Handle Modals ==========
+  // ========================= MODALS =========================
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
@@ -48,11 +49,14 @@ export default function Page() {
           </p>
         </div>
 
-        <PermissionGuard permission={PERMISSIONS.ADD_DEPARTMENT}>
-          <Button color="blue" variant="light" radius="md" onClick={openModal}>
-            {translate("Add New Department", "إضافة قسم جديد")}
-          </Button>
-        </PermissionGuard>
+        <div className="flex gap-2">
+          <RefetchButton isFetching={loading} onRefetch={reload} />
+          <PermissionGuard permission={PERMISSIONS.ADD_DEPARTMENT}>
+            <Button color="blue" variant="light" radius="md" onClick={openModal}>
+              {translate("Add New Department", "إضافة قسم جديد")}
+            </Button>
+          </PermissionGuard>
+        </div>
       </header>
 
       {loading ? (

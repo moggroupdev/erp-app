@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
-import useDataHandler from "@/hooks/use-data-handler";
+import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
 import customersApi from "@/lib/api/customers";
-import handleRequest from "@/lib/helpers/handle-request";
-import { type Customer, type CustomerAddress } from "@/types/customer";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
+import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button } from "@mantine/core";
 import { Pencil } from "lucide-react";
@@ -25,54 +26,46 @@ import CustomerDetails from "./components/customer-details";
 
 const PAGE_TITLE = { en: "Customer Data", ar: "ملف العميل" };
 
-type PageData = { customer: Customer | null; addresses: CustomerAddress[] };
-
 export default function Page() {
   const { locale, translate } = useI18n();
-
   const { id } = useParams<{ id: string }>();
+  const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
 
   const canUpdateCustomer = useHasPermission(PERMISSIONS.UPDATE_CUSTOMER);
 
-  const { privateRequest, loading, setLoading, error, setError, data, setData } = useDataHandler<PageData>({
-    initialData: { customer: null, addresses: [] },
-    initialLoading: true,
+  const customerQuery = useQuery({
+    queryKey: queryKeys.customers.detail(id),
+    queryFn: ({ signal }) => customersApi.get({ privateRequest, id, signal }),
+    staleTime: staleTimes.customers,
   });
 
-  const { customer, addresses } = data;
+  const addressesQuery = useQuery({
+    queryKey: queryKeys.customers.addresses(id),
+    queryFn: ({ signal }) => customersApi.listAddresses({ privateRequest, id, signal }),
+    staleTime: staleTimes.customers,
+  });
 
-  function setCustomer(value: React.SetStateAction<Customer | null>) {
-    setData((prev) => ({ ...prev, customer: typeof value === "function" ? value(prev.customer) : value }));
-  }
+  const customer = customerQuery.data || null;
+  const addresses = addressesQuery.data || [];
 
-  function setAddresses(value: React.SetStateAction<CustomerAddress[]>) {
-    setData((prev) => ({ ...prev, addresses: typeof value === "function" ? value(prev.addresses) : value }));
-  }
+  const loading = customerQuery.isFetching || addressesQuery.isFetching;
+  const queryError = customerQuery.error || addressesQuery.error;
+  const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
 
   useDocumentTitle(`${customer?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Customers", "العملاء")}`);
 
-  function handleLoadData() {
-    handleRequest(locale, setLoading, setError, async () => {
-      const [customerResponse, addressesResponse] = await Promise.all([
-        customersApi.get({ privateRequest, id }),
-        customersApi.listAddresses({ privateRequest, id }),
-      ]);
+  const setDefaultAddressMutation = useMutation({
+    mutationFn: (addressId: string) => customersApi.setDefaultAddress({ privateRequest, id, addressId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.customers.addresses(id) }),
+  });
 
-      setData({ customer: customerResponse, addresses: addressesResponse });
-    });
+  function handleRetry() {
+    customerQuery.refetch();
+    addressesQuery.refetch();
   }
 
-  async function handleSetDefaultAddress(addressId: string) {
-    const response = await customersApi.setDefaultAddress({ privateRequest, id, addressId });
-    setAddresses((prev) => [response, ...prev.filter((a) => a.id !== response.id).map((a) => ({ ...a, isDefault: false }))]);
-  }
-
-  useEffect(() => {
-    handleLoadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ========================= MODAL HANDLERS =========================
+  // ========================= MODALS =========================
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] = useDisclosure(false);
@@ -93,11 +86,11 @@ export default function Page() {
     >
       {loading ? (
         <LoadingSection message={translate("Loading customer data", "جاري تحميل ملف العميل")} />
-      ) : error ? (
+      ) : errorMessage ? (
         <ErrorSection
           errorTitle={translate("An error occurred while loading customer data", "حدث خطأ أثناء تحميل ملف العميل")}
-          errorMessage={error}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleLoadData }}
+          errorMessage={errorMessage}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleRetry }}
         />
       ) : (
         customer && (
@@ -106,26 +99,21 @@ export default function Page() {
               opened={updateModalOpened}
               close={closeUpdateModal}
               customerToUpdate={customer}
-              setCustomerToUpdate={setCustomer}
-              callback={(response) => setCustomer(response)}
-            />
-
-            <AddressModal
-              opened={addressModalOpened}
-              close={closeAddressModal}
-              entityType="customer"
-              entityId={customer.id}
-              isFirstAddress={addresses.length === 0}
-              callback={(response) =>
-                setAddresses((prev) =>
-                  response.isDefault ? [response, ...prev.map((a) => ({ ...a, isDefault: false }))] : [...prev, response],
-                )
-              }
+              setCustomerToUpdate={() => {}}
             />
 
             <CustomerDetails customer={customer} />
 
+            {/* Addresses Section */}
             <section className="mt-4 flex flex-col gap-4">
+              <AddressModal
+                opened={addressModalOpened}
+                close={closeAddressModal}
+                entityType="customer"
+                entityId={customer.id}
+                isFirstAddress={addresses.length === 0}
+              />
+
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Addresses", "العناوين")}</h4>
 
@@ -144,7 +132,13 @@ export default function Page() {
                     <AddressCard
                       key={address.id}
                       address={address}
-                      onSetDefault={canUpdateCustomer ? handleSetDefaultAddress : undefined}
+                      onSetDefault={
+                        canUpdateCustomer
+                          ? async (addressId) => {
+                              await setDefaultAddressMutation.mutateAsync(addressId);
+                            }
+                          : undefined
+                      }
                     />
                   ))}
                 </div>

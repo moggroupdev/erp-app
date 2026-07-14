@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
-import useDataHandler from "@/hooks/use-data-handler";
+import usePrivateRequest from "@/hooks/use-private-request";
 import customersApi from "@/lib/api/customers";
-import handleRequest from "@/lib/helpers/handle-request";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
+import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { type PaginatedData } from "@/types/global";
 import { type Customer } from "@/types/customer";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Button, Table, TextInput } from "@mantine/core";
@@ -26,6 +28,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
+import RefetchButton from "@/components/ui/refetch-button";
 import CustomerModal from "@/components/global/customer-modal";
 
 const PAGE_TITLE = { en: "Customers", ar: "العملاء" };
@@ -40,8 +43,8 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
+  const privateRequest = usePrivateRequest();
 
-  // State management for filters
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
     value: keyword,
@@ -51,11 +54,13 @@ export default function Page() {
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
   const [typeFilter, setTypeFilter] = useState<string | null>(urlSearchParams.get("type") || null);
 
-  const params = {
+  const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
     type: typeFilter,
   };
+
+  const params = { limit: CUSTOMERS_PER_PAGE, ...removeEmptyParams(urlParams) };
 
   const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || typeFilter);
 
@@ -65,58 +70,25 @@ export default function Page() {
     setTypeFilter(null);
   };
 
-  // Track the previous filters and check if they have changed to reset the active page to 1.
   const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword, typeFilter });
 
   const {
-    privateRequest,
-    loading,
-    setLoading,
-    error,
-    setError,
     data: paginatedCustomers,
-    setData: setPaginatedCustomers,
-  } = useDataHandler<PaginatedData<Customer> | null>({ initialData: null, initialLoading: true });
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.customers.list(params),
+    queryFn: ({ signal }) => customersApi.list({ privateRequest, params, signal }),
+    staleTime: staleTimes.customers,
+    placeholderData: keepPreviousData,
+  });
 
-  // Handle previous requests abortion
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const cancellationRef = useRef({ canceled: false });
-  const abortPreviousRequest = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      cancellationRef.current.canceled = true;
-    }
-  };
-
-  function handleLoadCustomers() {
-    // Cancel any existing request before starting a new one
-    abortPreviousRequest();
-
-    // Create new controller and canceled flag for this request
-    abortControllerRef.current = new AbortController();
-    cancellationRef.current = { canceled: false };
-
-    handleRequest(
-      locale,
-      setLoading,
-      setError,
-      async () => {
-        const response = await customersApi.list({
-          privateRequest,
-          params: { limit: CUSTOMERS_PER_PAGE, ...removeEmptyParams(params) },
-          signal: abortControllerRef.current!.signal,
-        });
-        if (!cancellationRef.current.canceled) setPaginatedCustomers(response);
-      },
-      cancellationRef.current,
-    );
-  }
+  const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useEffect(() => {
-    // Sync URL search params with filters
-    router.replace(`?` + new URLSearchParams(removeEmptyParams(params)), { scroll: false });
+    router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    // If the filters have changed, reset the active page to 1.
     const newFilters = { debouncedKeyword, typeFilter };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
@@ -127,19 +99,12 @@ export default function Page() {
     }
 
     window.scrollTo({ top: 0, behavior: "instant" });
-
-    handleLoadCustomers();
-
-    // Abort request when component unmounts or dependencies change
-    return () => abortPreviousRequest();
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePage, debouncedKeyword, typeFilter]);
 
-  // ========== Handle Modals ==========
+  // ========================= MODALS =========================
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
-
   const [customerToUpdate, setCustomerToUpdate] = useState<Customer | null>(null);
 
   function handleOpenUpdateModal(customer: Customer) {
@@ -153,16 +118,17 @@ export default function Page() {
         backLink: getLocalizedHref("/procurement"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <PermissionGuard permission={PERMISSIONS.ADD_CUSTOMER}>
-            <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
-              {translate("Add New Customer", "إضافة عميل جديد")}
-            </Button>
-          </PermissionGuard>
+          <div className="flex gap-2">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <PermissionGuard permission={PERMISSIONS.ADD_CUSTOMER}>
+              <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
+                {translate("Add New Customer", "إضافة عميل جديد")}
+              </Button>
+            </PermissionGuard>
+          </div>
         ),
       }}
     >
-      {/* Filters */}
-
       <TextInput
         value={keyword}
         onChange={(e) => setPendingKeyword(e.currentTarget.value)}
@@ -178,14 +144,13 @@ export default function Page() {
         }
       />
 
-      {/* Content */}
-      {loading ? (
+      {isFetching ? (
         <LoadingSection message={translate("Loading customers...", "جاري تحميل العملاء...")} />
-      ) : error ? (
+      ) : errorMessage ? (
         <ErrorSection
           errorTitle={translate("Error loading customers", "خطأ في تحميل العملاء")}
-          errorMessage={error}
-          button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: handleLoadCustomers }}
+          errorMessage={errorMessage}
+          button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
       ) : (
         paginatedCustomers &&
@@ -200,7 +165,6 @@ export default function Page() {
           )
         ) : (
           <>
-            {/* Table */}
             <div className="overflow-x-auto">
               <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
                 <Table.Thead>
@@ -246,7 +210,6 @@ export default function Page() {
               </Table>
             </div>
 
-            {/* Pagination */}
             <PaginationHandler<Customer>
               paginatedData={paginatedCustomers}
               activePage={activePage}
@@ -256,32 +219,14 @@ export default function Page() {
         ))
       )}
 
-      {/* Modals */}
       <CustomerModal
         opened={modalOpened}
         close={closeModal}
         customerToUpdate={customerToUpdate}
         setCustomerToUpdate={setCustomerToUpdate}
         isForList={true}
-        callback={(result) => {
-          setPaginatedCustomers((prev) => {
-            if (!prev) return null;
-            // In case of updating
-            if (customerToUpdate)
-              return {
-                ...prev,
-                data: prev.data.map((customer) => (customer.id === customerToUpdate.id ? result : customer)),
-              };
-            // In case of adding
-            if (hasActiveFilters) {
-              // If filters are applied, reset them to trigger refetch
-              resetAllFilters();
-              return prev; // Return current data to prevents TS errors, refetch will handle the update
-            } else {
-              // If no filters, optimistically add the new entry
-              return { ...prev, data: [result, ...prev.data] };
-            }
-          });
+        onSuccess={() => {
+          if (!customerToUpdate && hasActiveFilters) resetAllFilters();
         }}
       />
     </LayoutBox>

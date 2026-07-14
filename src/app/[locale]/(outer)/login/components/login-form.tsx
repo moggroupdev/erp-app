@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import useDataHandler from "@/hooks/use-data-handler";
-import useUser from "@/contexts/user/hook";
-import { LOGGED_IN_FLAG } from "@/lib/constants/global";
-import authApi from "@/lib/api/auth";
-import handleRequest from "@/lib/helpers/handle-request";
-import toUserState from "@/lib/helpers/to-user-state";
 import Link from "next/link";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import useUser from "@/contexts/user/hook";
+import authApi from "@/lib/api/auth";
+import { LOGGED_IN_FLAG } from "@/lib/constants/global";
+import toUserState from "@/lib/helpers/to-user-state";
 import { Button, PasswordInput, TextInput } from "@mantine/core";
 import { Loader2 } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -26,24 +26,29 @@ export default function LoginForm() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
-  const { loading, setLoading, error, setError } = useDataHandler({ initialData: null });
-
-  const identifier = method === "email" ? email : phone;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleRequest(locale, setLoading, setError, async () => {
-      const response = await authApi.login({
+  const mutation = useMutation({
+    mutationFn: () =>
+      authApi.login({
         dto: {
           email: method === "email" ? email : null,
           phone: method === "phone" ? phone : null,
           password,
         },
-      });
+      }),
+    onSuccess: (response) => {
       setUser(toUserState(response));
       localStorage.setItem(LOGGED_IN_FLAG, "true");
-    });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    mutation.mutate();
   };
+
+  const identifier = method === "email" ? email : phone;
+
+  const error = mutation.error ? getErrorMessage(locale, mutation.error) : "";
 
   return (
     <form onSubmit={handleSubmit} className="animate-fade-in mx-auto flex w-[450px] max-w-full flex-col gap-4">
@@ -86,8 +91,8 @@ export default function LoginForm() {
         {translate("Forgot password?", "نسيت كلمة المرور؟")}
       </Link>
 
-      <Button size="md" radius="md" type="submit" disabled={!identifier || !password || loading}>
-        {loading ? <Loader2 className="animate-spin" /> : translate("Login", "تسجيل الدخول")}
+      <Button size="md" radius="md" type="submit" disabled={!identifier || !password || mutation.isPending}>
+        {mutation.isPending ? <Loader2 className="animate-spin" /> : translate("Login", "تسجيل الدخول")}
       </Button>
 
       {error && <ErrorAlert error={error} fade />}

@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
-import useDataHandler from "@/hooks/use-data-handler";
+import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
 import vendorsApi from "@/lib/api/vendors";
-import handleRequest from "@/lib/helpers/handle-request";
-import { type Vendor, type VendorAddress } from "@/types/vendor";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query/keys";
+import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button } from "@mantine/core";
 import { Pencil } from "lucide-react";
@@ -25,54 +26,46 @@ import VendorDetails from "./components/vendor-details";
 
 const PAGE_TITLE = { en: "Vendor Data", ar: "ملف المورد" };
 
-type PageData = { vendor: Vendor | null; addresses: VendorAddress[] };
-
 export default function Page() {
   const { locale, translate } = useI18n();
-
   const { id } = useParams<{ id: string }>();
+  const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
 
   const canUpdateVendor = useHasPermission(PERMISSIONS.UPDATE_VENDOR);
 
-  const { privateRequest, loading, setLoading, error, setError, data, setData } = useDataHandler<PageData>({
-    initialData: { vendor: null, addresses: [] },
-    initialLoading: true,
+  const vendorQuery = useQuery({
+    queryKey: queryKeys.vendors.detail(id),
+    queryFn: ({ signal }) => vendorsApi.get({ privateRequest, id, signal }),
+    staleTime: staleTimes.vendors,
   });
 
-  const { vendor, addresses } = data;
+  const addressesQuery = useQuery({
+    queryKey: queryKeys.vendors.addresses(id),
+    queryFn: ({ signal }) => vendorsApi.listAddresses({ privateRequest, id, signal }),
+    staleTime: staleTimes.vendors,
+  });
 
-  function setVendor(value: React.SetStateAction<Vendor | null>) {
-    setData((prev) => ({ ...prev, vendor: typeof value === "function" ? value(prev.vendor) : value }));
-  }
+  const vendor = vendorQuery.data || null;
+  const addresses = addressesQuery.data || [];
 
-  function setAddresses(value: React.SetStateAction<VendorAddress[]>) {
-    setData((prev) => ({ ...prev, addresses: typeof value === "function" ? value(prev.addresses) : value }));
-  }
+  const loading = vendorQuery.isFetching || addressesQuery.isFetching;
+  const queryError = vendorQuery.error || addressesQuery.error;
+  const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
 
   useDocumentTitle(`${vendor?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Vendors", "الموردون")}`);
 
-  function handleLoadData() {
-    handleRequest(locale, setLoading, setError, async () => {
-      const [vendorResponse, addressesResponse] = await Promise.all([
-        vendorsApi.get({ privateRequest, id }),
-        vendorsApi.listAddresses({ privateRequest, id }),
-      ]);
+  const setDefaultAddressMutation = useMutation({
+    mutationFn: (addressId: string) => vendorsApi.setDefaultAddress({ privateRequest, id, addressId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.vendors.addresses(id) }),
+  });
 
-      setData({ vendor: vendorResponse, addresses: addressesResponse });
-    });
+  function handleRetry() {
+    vendorQuery.refetch();
+    addressesQuery.refetch();
   }
 
-  async function handleSetDefaultAddress(addressId: string) {
-    const response = await vendorsApi.setDefaultAddress({ privateRequest, id, addressId });
-    setAddresses((prev) => [response, ...prev.filter((a) => a.id !== response.id).map((a) => ({ ...a, isDefault: false }))]);
-  }
-
-  useEffect(() => {
-    handleLoadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ========================= MODAL HANDLERS =========================
+  // ========================= MODALS =========================
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] = useDisclosure(false);
@@ -93,11 +86,11 @@ export default function Page() {
     >
       {loading ? (
         <LoadingSection message={translate("Loading vendor data", "جاري تحميل ملف المورد")} />
-      ) : error ? (
+      ) : errorMessage ? (
         <ErrorSection
           errorTitle={translate("An error occurred while loading vendor data", "حدث خطأ أثناء تحميل ملف المورد")}
-          errorMessage={error}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleLoadData }}
+          errorMessage={errorMessage}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleRetry }}
         />
       ) : (
         vendor && (
@@ -106,26 +99,21 @@ export default function Page() {
               opened={updateModalOpened}
               close={closeUpdateModal}
               vendorToUpdate={vendor}
-              setVendorToUpdate={setVendor}
-              callback={(response) => setVendor(response)}
-            />
-
-            <AddressModal
-              opened={addressModalOpened}
-              close={closeAddressModal}
-              entityType="vendor"
-              entityId={vendor.id}
-              isFirstAddress={addresses.length === 0}
-              callback={(response) =>
-                setAddresses((prev) =>
-                  response.isDefault ? [response, ...prev.map((a) => ({ ...a, isDefault: false }))] : [...prev, response],
-                )
-              }
+              setVendorToUpdate={() => {}}
             />
 
             <VendorDetails vendor={vendor} />
 
+            {/* Addresses Section */}
             <section className="mt-4 flex flex-col gap-4">
+              <AddressModal
+                opened={addressModalOpened}
+                close={closeAddressModal}
+                entityType="vendor"
+                entityId={vendor.id}
+                isFirstAddress={addresses.length === 0}
+              />
+
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Addresses", "العناوين")}</h4>
 
@@ -144,7 +132,13 @@ export default function Page() {
                     <AddressCard
                       key={address.id}
                       address={address}
-                      onSetDefault={canUpdateVendor ? handleSetDefaultAddress : undefined}
+                      onSetDefault={
+                        canUpdateVendor
+                          ? async (addressId) => {
+                              await setDefaultAddressMutation.mutateAsync(addressId);
+                            }
+                          : undefined
+                      }
                     />
                   ))}
                 </div>
