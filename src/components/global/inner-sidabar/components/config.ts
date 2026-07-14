@@ -16,6 +16,7 @@ import {
   ReceiptText,
   Route,
   Settings2,
+  Shield,
   ShoppingCart,
   Truck,
   UserCog,
@@ -235,6 +236,13 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         href: "/organization/users",
         icon: UserCog,
         requiredPermission: PERMISSIONS.READ_USERS,
+        adminOnly: true,
+      },
+      {
+        label: { en: "Roles", ar: "الأدوار" },
+        href: "/organization/roles",
+        icon: Shield,
+        requiredPermission: PERMISSIONS.READ_ROLES,
         adminOnly: true,
       },
       {
