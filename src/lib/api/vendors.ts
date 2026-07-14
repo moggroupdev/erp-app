@@ -19,8 +19,8 @@ const vendorsApi = {
     return await privateRequest<PaginatedData<Vendor>>({ url: "vendors", params, signal });
   },
 
-  async get({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<Vendor>({ url: `vendors/${id}` });
+  async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
+    return await privateRequest<Vendor>({ url: `vendors/${id}`, signal });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateVendorDto }) {
@@ -41,8 +41,16 @@ const vendorsApi = {
     return await privateRequest<VendorAddress>({ method: "POST", url: `vendors/${id}/addresses`, data: dto });
   },
 
-  async listAddresses({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<VendorAddress[]>({ url: `vendors/${id}/addresses` });
+  async listAddresses({
+    privateRequest,
+    id,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<VendorAddress[]>({ url: `vendors/${id}/addresses`, signal });
   },
 
   async setDefaultAddress({

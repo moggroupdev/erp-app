@@ -6,8 +6,8 @@ const departmentsApi = {
     return await privateRequest<Department>({ method: "POST", url: "departments", data: dto });
   },
 
-  async list({ privateRequest }: { privateRequest: PrivateRequest }) {
-    return await privateRequest<Department[]>({ url: "departments" });
+  async list({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
+    return await privateRequest<Department[]>({ url: "departments", signal });
   },
 
   async get({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {

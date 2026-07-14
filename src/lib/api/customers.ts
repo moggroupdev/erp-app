@@ -25,8 +25,8 @@ const customersApi = {
     return await privateRequest<PaginatedData<Customer>>({ url: "customers", params, signal });
   },
 
-  async get({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<Customer>({ url: `customers/${id}` });
+  async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
+    return await privateRequest<Customer>({ url: `customers/${id}`, signal });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateCustomerDto }) {
@@ -47,8 +47,16 @@ const customersApi = {
     return await privateRequest<CustomerAddress>({ method: "POST", url: `customers/${id}/addresses`, data: dto });
   },
 
-  async listAddresses({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<CustomerAddress[]>({ url: `customers/${id}/addresses` });
+  async listAddresses({
+    privateRequest,
+    id,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<CustomerAddress[]>({ url: `customers/${id}/addresses`, signal });
   },
 
   async setDefaultAddress({

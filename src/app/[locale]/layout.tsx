@@ -8,8 +8,7 @@ import { getI18nFromParams } from "@/lib/i18n/utils";
 import { locales } from "@/lib/i18n/config";
 import { Alexandria } from "next/font/google";
 import UserProvider from "@/contexts/user/provider";
-import LocationsProvider from "@/contexts/locations/provider";
-import DepartmentsProvider from "@/contexts/departments/provider";
+import QueryProvider from "@/contexts/query/provider";
 
 const alexandria = Alexandria({
   subsets: ["arabic", "latin"],
@@ -40,13 +39,11 @@ export default async function RootLayout({ params, children }: Readonly<LocaleLa
         <MantineColorSchemeScript />
       </head>
       <body style={{ height: "101vh" }}>
-        <LocationsProvider>
+        <QueryProvider>
           <UserProvider>
-            <DepartmentsProvider>
-              <MantineProvider theme={theme}>{children}</MantineProvider>
-            </DepartmentsProvider>
+            <MantineProvider theme={theme}>{children}</MantineProvider>
           </UserProvider>
-        </LocationsProvider>
+        </QueryProvider>
       </body>
     </html>
   );

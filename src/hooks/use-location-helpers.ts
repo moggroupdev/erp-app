@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import useLocations from "@/contexts/locations/hook";
 import type { City, Country, Governorate } from "@/types/locations";
+import useLocations from "@/hooks/use-locations";
 
 export default function useLocationHelpers() {
   const { data: locations } = useLocations();
