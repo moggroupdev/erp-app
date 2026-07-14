@@ -75,6 +75,26 @@ export default function RoleForm({
     };
   }
 
+  function permissionsEqual(a: Permission[], b: Permission[]) {
+    if (a.length !== b.length) return false;
+    const set = new Set(a);
+    return b.every((permission) => set.has(permission));
+  }
+
+  function hasChanges() {
+    if (!isEdit || !initialValues) return true;
+    const dto = buildDto();
+    return (
+      dto.name !== initialValues.name.trim() ||
+      dto.description !== (initialValues.description?.trim() || null) ||
+      dto.maxDiscountPct !== initialValues.maxDiscountPct ||
+      dto.departmentId !== initialValues.departmentId ||
+      !permissionsEqual(dto.permissions, initialValues.permissions)
+    );
+  }
+
+  const isDirty = hasChanges();
+
   const mutation = useMutation({
     mutationFn: async () => {
       const dto = buildDto();
@@ -114,6 +134,7 @@ export default function RoleForm({
     if (!validate()) return;
 
     if (isEdit) {
+      if (!isDirty) return;
       openConfirm();
       return;
     }
@@ -357,7 +378,12 @@ export default function RoleForm({
             >
               {translation.cancel}
             </Button>
-            <Button type="submit" loading={!isEdit && mutation.isPending} disabled={!name.trim()} radius="md">
+            <Button
+              type="submit"
+              loading={!isEdit && mutation.isPending}
+              disabled={!name.trim() || (isEdit && !isDirty)}
+              radius="md"
+            >
               {isEdit ? translate("Save Changes", "حفظ التغييرات") : translate("Create Role", "إنشاء الدور")}
             </Button>
           </div>
