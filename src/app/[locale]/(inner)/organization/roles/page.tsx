@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +25,8 @@ import EmptySection from "@/components/ui/sections/empty";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import RefetchButton from "@/components/ui/refetch-button";
 import RoleCard from "./components/role-card";
+import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
+import SelectDepartment from "@/components/global/select-department";
 
 const PAGE_TITLE = { en: "Roles", ar: "الأدوار" };
 
@@ -45,9 +47,16 @@ export default function Page() {
     setPendingValue: setPendingKeyword,
     setImmediateValue: setImmediateKeyword,
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
+  const [departmentFilter, setDepartmentFilter] = useState<string | null>(urlSearchParams.get("departmentId") || null);
 
-  const urlParams = { keyword: debouncedKeyword };
+  const urlParams = { keyword: debouncedKeyword, departmentId: departmentFilter };
+
   const params = removeEmptyParams(urlParams);
+
+  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
+    debouncedKeyword,
+    departmentFilter,
+  });
 
   const {
     data: roles,
@@ -72,8 +81,16 @@ export default function Page() {
 
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
+
+    const newFilters = { debouncedKeyword, departmentFilter };
+    if (filtersChanged(newFilters)) {
+      updatePreviousFilters(newFilters);
+    }
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedKeyword]);
+  }, [debouncedKeyword, departmentFilter]);
 
   return (
     <LayoutBox
@@ -102,20 +119,32 @@ export default function Page() {
         ),
       }}
     >
-      <TextInput
-        value={keyword}
-        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-        placeholder={translate("Search roles by name or description...", "ابحث عن الأدوار بالاسم أو الوصف...")}
-        leftSection={<Search size={15} />}
-        radius="md"
-        rightSection={
-          keyword ? (
-            <button type="button" onClick={() => setImmediateKeyword("")}>
-              <X size={15} />
-            </button>
-          ) : undefined
-        }
-      />
+      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-5">
+        <div className="col-span-1 md:col-span-4">
+          <TextInput
+            value={keyword}
+            onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+            placeholder={translate("Search roles by name or description...", "ابحث عن الأدوار بالاسم أو الوصف...")}
+            leftSection={<Search size={15} />}
+            radius="md"
+            rightSection={
+              keyword ? (
+                <button type="button" onClick={() => setImmediateKeyword("")}>
+                  <X size={15} />
+                </button>
+              ) : undefined
+            }
+          />
+        </div>
+
+        <SelectDepartment
+          value={departmentFilter}
+          setValue={setDepartmentFilter}
+          placeholder={translate("Select department...", "اختر القسم...")}
+          clearable
+          radius="md"
+        />
+      </div>
 
       {isFetching ? (
         <LoadingSection message={translate("Loading roles...", "جاري تحميل الأدوار...")} />
