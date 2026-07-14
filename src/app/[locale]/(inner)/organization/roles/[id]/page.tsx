@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
@@ -9,6 +10,10 @@ import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { Button } from "@mantine/core";
+import { Pencil } from "lucide-react";
+import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -45,7 +50,24 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref("/organization/roles"),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: (
+          <div className="flex items-center gap-2">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            {role && (
+              <PermissionGuard permission={PERMISSIONS.UPDATE_ROLE}>
+                <Button
+                  component={Link}
+                  href={getLocalizedHref(`/organization/roles/${id}/edit`)}
+                  variant="light"
+                  radius="md"
+                  leftSection={<Pencil size={15} />}
+                >
+                  {translate("Edit", "تعديل")}
+                </Button>
+              </PermissionGuard>
+            )}
+          </div>
+        ),
       }}
     >
       {isFetching ? (

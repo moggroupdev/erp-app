@@ -5,7 +5,7 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import { Button } from "@mantine/core";
 import { ArrowLeft } from "lucide-react";
-import CreateRoleForm from "./components/create-role-form";
+import RoleForm from "../components/role-form";
 
 const PAGE_TITLE = { en: "Create Role", ar: "إنشاء دور" };
 
@@ -42,7 +42,7 @@ export default function Page() {
         </p>
       </header>
 
-      <CreateRoleForm />
+      <RoleForm mode="create" />
     </div>
   );
 }
