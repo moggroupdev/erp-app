@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -12,9 +13,11 @@ import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import { TextInput } from "@mantine/core";
-import { Search, X } from "lucide-react";
+import { Button, TextInput } from "@mantine/core";
+import { Plus, Search, X } from "lucide-react";
+import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -27,6 +30,7 @@ const PAGE_TITLE = { en: "Roles", ar: "الأدوار" };
 
 export default function Page() {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -71,8 +75,6 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedKeyword]);
 
-  const rolesCount = roles?.length ?? 0;
-
   return (
     <LayoutBox
       header={{
@@ -84,6 +86,18 @@ export default function Page() {
         sideElements: (
           <div className="flex items-center gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <PermissionGuard permission={PERMISSIONS.ADD_ROLE}>
+              <Button
+                component={Link}
+                href={getLocalizedHref("/organization/roles/new")}
+                variant="light"
+                color="teal"
+                radius="md"
+                leftSection={<Plus size={15} />}
+              >
+                {translate("Add Role", "إضافة دور")}
+              </Button>
+            </PermissionGuard>
           </div>
         ),
       }}

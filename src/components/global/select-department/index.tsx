@@ -21,7 +21,7 @@ export default function SelectDepartment(props: SelectDepartmentProps) {
       data={data}
       disabled={loading}
       error={error}
-      rightIcon={<Building2 className="pointer-events-none text-gray-400" />}
+      rightIcon={<Building2 size={15} className="pointer-events-none text-gray-400" />}
     />
   );
 }

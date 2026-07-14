@@ -354,3 +354,99 @@ export function getPermissionLabel(permission: Permission, locale: Locale) {
 export function isValidPermission(permission: string): permission is Permission {
   return PERMISSION_VALUES.includes(permission as Permission);
 }
+
+// ================ Domains ================
+
+export type PermissionDomain =
+  | "organization"
+  | "sales"
+  | "engineering"
+  | "production"
+  | "warehouse"
+  | "procurement"
+  | "fulfillment"
+  | "maintenance"
+  | "analytics";
+
+export type PermissionDomainGroup = {
+  domain: PermissionDomain;
+  label: { en: string; ar: string };
+  permissions: Permission[];
+};
+
+/** Permission groups aligned with sidebar domains. */
+export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
+  {
+    domain: "organization",
+    label: { en: "Organization", ar: "المؤسسة" },
+    permissions: [
+      "add_user",
+      "read_users",
+      "update_user",
+      "delete_user",
+      "add_role",
+      "read_roles",
+      "update_role",
+      "delete_role",
+      "add_department",
+      "read_departments",
+      "update_department",
+    ],
+  },
+  {
+    domain: "sales",
+    label: { en: "Sales & Customers", ar: "المبيعات والعملاء" },
+    permissions: [
+      "add_customer",
+      "read_customers",
+      "update_customer",
+      "read_inquiries",
+      "read_previews",
+      "read_offers",
+      "read_contracts",
+      "read_receptions",
+      "read_complaints",
+    ],
+  },
+  {
+    domain: "engineering",
+    label: { en: "Products & Engineering", ar: "المنتجات والهندسة" },
+    permissions: ["read_products", "add_product", "update_product", "delete_product", "read_boms"],
+  },
+  {
+    domain: "production",
+    label: { en: "Production", ar: "الإنتاج" },
+    permissions: ["read_production_plans", "read_production_routing"],
+  },
+  {
+    domain: "warehouse",
+    label: { en: "Warehouse", ar: "المخازن" },
+    permissions: ["read_materials", "read_inventory_transactions"],
+  },
+  {
+    domain: "procurement",
+    label: { en: "Procurement", ar: "المشتريات" },
+    permissions: [
+      "add_vendor",
+      "read_vendors",
+      "update_vendor",
+      "read_material_purchase_orders",
+      "read_product_purchase_orders",
+    ],
+  },
+  {
+    domain: "fulfillment",
+    label: { en: "Delivery & Installation", ar: "التسليم والتركيب" },
+    permissions: ["read_trips", "read_deliveries", "read_installations"],
+  },
+  {
+    domain: "maintenance",
+    label: { en: "Maintenance & Service", ar: "الصيانة والخدمة" },
+    permissions: ["read_service_agreements", "read_maintenance_orders"],
+  },
+  {
+    domain: "analytics",
+    label: { en: "Analytics", ar: "التحليلات" },
+    permissions: ["show_analytics"],
+  },
+];
