@@ -1,5 +1,19 @@
 export type ListFilters = Record<string, string | number | boolean | null | undefined>;
 
+/**
+ * Central React Query cache keys for the app.
+ *
+ * Keys form a hierarchy so you can invalidate a broad group or one exact query:
+ *
+ * - `all`       - prefix for everything under a resource (e.g. all vendor caches)
+ * - `lists()`   - prefix for every list query of that resource
+ * - `list(f)`   - one list for a specific filter set (page, search, …)
+ * - `details()` - prefix for every single-item (detail) query
+ * - `detail(id)`- one item by id
+ *
+ * Example: invalidating `queryKeys.vendors.all` refreshes lists, details, and addresses.
+ * Invalidating `queryKeys.vendors.detail(id)` refreshes only that vendor (and nested keys that start with it).
+ */
 export const queryKeys = {
   locations: {
     all: ["locations"] as const,
