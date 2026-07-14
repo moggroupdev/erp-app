@@ -16,6 +16,7 @@ import { Button } from "@mantine/core";
 import { Pencil } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
+import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -75,12 +76,17 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: vendor && (
-          <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
-            <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-              {translate("Edit", "تعديل")}
-            </Button>
-          </PermissionGuard>
+        sideElements: (
+          <div className="flex gap-2">
+            <RefetchButton isFetching={loading} onRefetch={handleRetry} />
+            {vendor && (
+              <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
+                <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
+                  {translate("Edit", "تعديل")}
+                </Button>
+              </PermissionGuard>
+            )}
+          </div>
         ),
       }}
     >
