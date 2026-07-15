@@ -3,10 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { User } from "@/types/user";
 import { PRODUCTION_DEPARTMENT_ID } from "@/lib/constants/global";
-import {
-  ProductionSubDepartment,
-  PRODUCTION_SUB_DEPARTMENT_LABELS_LIST,
-} from "@/lib/constants/enums/production-sub-departments";
+import { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useRoles from "@/hooks/use-roles";
 import usersApi from "@/lib/api/users";
@@ -17,8 +14,8 @@ import { TextInput, Button, PasswordInput, Checkbox } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import SelectDepartment from "@/components/global/select-department";
+import SelectProductionSubDepartment from "@/components/global/select-production-sub-department";
 import SelectRole from "@/components/global/select-role";
-import LocalizedSelect from "@/components/ui/localized-select";
 
 export default function UserModal({
   opened,
@@ -233,10 +230,9 @@ export default function UserModal({
         />
 
         {isProductionDepartment && (
-          <LocalizedSelect
+          <SelectProductionSubDepartment
             value={productionSubDepartment}
             setValue={setProductionSubDepartment}
-            labelsList={PRODUCTION_SUB_DEPARTMENT_LABELS_LIST}
             label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
             placeholder={translate("Select sub-department", "اختر القسم الفرعي")}
             searchable
