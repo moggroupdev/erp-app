@@ -1,5 +1,3 @@
-import { ContextProps } from "./global";
-
 export type Country = {
   id: string;
   code: string;
@@ -26,7 +24,3 @@ export type Locations = {
   governorates: Governorate[];
   cities: City[];
 };
-
-// ==================== Context ====================
-
-export type LocationsContextProps = ContextProps<Locations | null>;

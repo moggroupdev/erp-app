@@ -1,5 +1,3 @@
-import { ContextProps } from "./global";
-
 export type Department = {
   id: string;
   nameEn: string;
