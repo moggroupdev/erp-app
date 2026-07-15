@@ -1,6 +1,7 @@
 "use client";
 
-import { redirect, RedirectType } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useUser } from "@/contexts/user/hook";
 import { FROM_QUERY_PARAM } from "@/lib/constants/global";
 
@@ -14,23 +15,32 @@ export default function AuthenticationGuard({
   children: React.ReactNode;
 }) {
   const { isInitializing, user } = useUser();
-
-  if (isInitializing) return null;
+  const router = useRouter();
 
   // For inner pages that require authentication
-  if (access === "authenticated" && !user) {
-    const currentPath = typeof window !== "undefined" ? window.location.pathname + (window.location.search || "") : "/";
-    redirect(`/login?${FROM_QUERY_PARAM}=${encodeURIComponent(currentPath)}`, RedirectType.replace);
-  }
-
+  const shouldRedirectToLogin = !isInitializing && access === "authenticated" && !user;
   // For outer pages that require unauthenticated users
-  if (access === "guest" && user) {
-    const redirectTo =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get(FROM_QUERY_PARAM) || HOME_PATH
-        : HOME_PATH;
-    redirect(redirectTo, RedirectType.replace);
-  }
+  const shouldRedirectToHome = !isInitializing && access === "guest" && !!user;
+
+  // Navigation must happen in an effect, not during render - calling router
+  // methods (or `redirect()`) synchronously in the render body can desync
+  // React's hook bookkeeping and throw "Rendered more hooks than during the
+  // previous render" from the internal Next.js Router component.
+  useEffect(() => {
+    if (shouldRedirectToLogin) {
+      const currentPath = typeof window !== "undefined" ? window.location.pathname + (window.location.search || "") : "/";
+      router.replace(`/login?${FROM_QUERY_PARAM}=${encodeURIComponent(currentPath)}`);
+    } else if (shouldRedirectToHome) {
+      const redirectTo =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get(FROM_QUERY_PARAM) || HOME_PATH
+          : HOME_PATH;
+      router.replace(redirectTo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldRedirectToLogin, shouldRedirectToHome]);
+
+  if (isInitializing || shouldRedirectToLogin || shouldRedirectToHome) return null;
 
   return children;
 }
