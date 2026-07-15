@@ -1,6 +1,6 @@
 import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
-import type { User, CreateUserDto, UpdateUserDto } from "@/types/user";
+import type { User, UserWithCreator, CreateUserDto, UpdateUserDto } from "@/types/user";
 
 const usersApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateUserDto }) {
@@ -20,7 +20,7 @@ const usersApi = {
   },
 
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
-    return await privateRequest<User>({ url: `users/${id}`, signal });
+    return await privateRequest<UserWithCreator>({ url: `users/${id}`, signal });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateUserDto }) {

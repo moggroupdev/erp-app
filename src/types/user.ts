@@ -15,8 +15,12 @@ export type User = {
   roleId: string | null;
   createdAt: Date;
   deletedAt: Date | null;
-  createdBy: { id: string; name: string } | null;
+  createdBy: string | null;
 };
+
+export type UserWithCreator = User & { createdBy: { id: string; name: string } };
+
+// ==================== Authentication Context ====================
 
 export type UserWithExtendedRole = User & { role: RoleWithPermissions };
 
@@ -24,8 +28,6 @@ export type AuthenticationResponse = {
   accessToken: string;
   user: UserWithExtendedRole;
 };
-
-// ==================== Context ====================
 
 // This is the type of the user object that is stored in the context
 export type UserState = UserWithExtendedRole & { accessToken: string };
