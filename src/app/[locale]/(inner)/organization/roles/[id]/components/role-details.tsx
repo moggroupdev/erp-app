@@ -45,13 +45,12 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
 
 export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
   const { locale, translate } = useI18n();
-  const { data: departments } = useDepartments();
+  const { helpers: departmentHelpers } = useDepartments();
 
   const departmentName = useMemo(() => {
-    if (!role.departmentId) return null;
-    const department = departments.find((d) => d.id === role.departmentId);
+    const department = departmentHelpers.getDepartmentById(role.departmentId);
     return department ? translate(department.nameEn, department.nameAr) : null;
-  }, [departments, role.departmentId, translate]);
+  }, [departmentHelpers, role.departmentId, translate]);
 
   const permissions = role.permissions ?? [];
   const permissionSet = useMemo(() => new Set(permissions), [permissions]);

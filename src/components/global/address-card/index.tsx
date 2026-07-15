@@ -2,7 +2,7 @@
 
 import { useI18n } from "@/lib/i18n/hooks";
 import { useMutation } from "@tanstack/react-query";
-import useLocationHelpers from "@/hooks/use-location-helpers";
+import useLocations from "@/hooks/use-locations";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
 import { type Address } from "@/types/address";
@@ -21,7 +21,7 @@ export default function AddressCard({
 }) {
   const { locale, translate, translation } = useI18n();
 
-  const { getCountryById, getCityById, getGovernorateOfCity } = useLocationHelpers();
+  const { helpers } = useLocations();
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
@@ -30,9 +30,9 @@ export default function AddressCard({
     onSuccess: () => handleCloseModal(),
   });
 
-  const country = getCountryById(address.countryId);
-  const governorate = getGovernorateOfCity(address.cityId);
-  const city = getCityById(address.cityId);
+  const country = helpers.getCountryById(address.countryId);
+  const governorate = helpers.getGovernorateOfCity(address.cityId);
+  const city = helpers.getCityById(address.cityId);
 
   const countryName = country ? translate(country.nameEn, country.nameAr) : null;
   const governorateName = governorate ? translate(governorate.nameEn, governorate.nameAr) : null;

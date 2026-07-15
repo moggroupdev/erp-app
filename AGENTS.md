@@ -99,7 +99,29 @@ Current stale times: vendors `10m`, customers `5m`, locations/departments `Infin
 - Paginated lists: `placeholderData: keepPreviousData`.
 - **Loading UI:** drive from `isFetching` (full loading on every fetch/refetch), not `isPending` alone.
 - Manual refresh: `RefetchButton` in `LayoutBox` header `sideElements` + `refetch()` / shared retry handler.
-- Rarely changing shared data: `useLocations()` / `useDepartments()` - **do not** reintroduce Locations/Departments context providers.
+- Rarely changing shared data: `useLocations()` / `useDepartments()` / `useRoles()` - **do not** reintroduce Locations/Departments/Roles context providers.
+
+### Shared resource hooks (`helpers`)
+
+Cached reference data hooks live under `src/hooks/` and return query state plus a nested `helpers` object for id lookups. Do **not** inline `.find()` against the list in pages/components, and do **not** add separate `use-*-helpers` files.
+
+| Hook               | Path                           | `helpers`                                                                                               |
+| ------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `useLocations()`   | `src/hooks/use-locations.ts`   | `getCountryById`, `getGovernorateById`, `getCityById`, `getGovernorateOfCity`, `getCitiesOfGovernorate` |
+| `useDepartments()` | `src/hooks/use-departments.ts` | `getDepartmentById`                                                                                     |
+| `useRoles()`       | `src/hooks/use-roles.ts`       | `getRoleById`                                                                                           |
+
+Each returns `{ data, loading, error, reload, helpers }`.
+
+```ts
+const { data: departments, loading, helpers } = useDepartments();
+const department = helpers.getDepartmentById(departmentId);
+
+const { helpers: locationHelpers } = useLocations();
+const city = locationHelpers.getCityById(cityId);
+```
+
+**New shared resource hook:** add lookup helpers on that hook under `helpers` - keep the same shape (`data` / `loading` / `error` / `reload` / `helpers`).
 
 ### Mutations & cache
 
@@ -108,10 +130,6 @@ Current stale times: vendors `10m`, customers `5m`, locations/departments `Infin
 | Create / update entity             | `invalidateQueries({ queryKey: queryKeys.<resource>.all })`                                 |
 | Update when API returns the entity | also `setQueryData(queryKeys.<resource>.detail(id), response)` (see vendor/customer modals) |
 | Nested collection only (addresses) | `invalidateQueries` on that nested key                                                      |
-
-Prefer invalidation for correctness; `setQueryData` is an optional detail patch when the response is complete.
-
-**Do not** revive deleted helpers: `use-data-handler.ts`, `handle-request.ts`.
 
 ---
 
