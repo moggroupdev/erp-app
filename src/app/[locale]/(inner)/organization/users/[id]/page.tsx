@@ -12,7 +12,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { Button, TextInput } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
@@ -50,10 +50,9 @@ export default function Page() {
   // ========================= MODALS =========================
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
 
   const [dangerZoneOpen, setDangerZoneOpen] = useState(false);
-  const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
-  const [confirmCode, setConfirmCode] = useState("");
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -67,22 +66,10 @@ export default function Page() {
   });
 
   const deleteError = deleteMutation.error ? getErrorMessage(locale, deleteMutation.error) : "";
-  const isConfirmCodeMatched = !!user && confirmCode.trim() === user.code;
 
-  function resetDeleteFlow() {
-    setDeleteStep(0);
-    setConfirmCode("");
-    deleteMutation.reset();
-  }
-
-  function handleCloseDeleteStep1() {
-    setDeleteStep(0);
-  }
-
-  function handleCloseDeleteStep2() {
-    setDeleteStep(0);
+  function handleCloseDeleteModal() {
+    closeDeleteModal();
     setTimeout(() => {
-      setConfirmCode("");
       deleteMutation.reset();
     }, 250);
   }
@@ -149,8 +136,8 @@ export default function Page() {
                         radius="md"
                         leftSection={<Trash2 size={15} />}
                         onClick={() => {
-                          resetDeleteFlow();
-                          setDeleteStep(1);
+                          deleteMutation.reset();
+                          openDeleteModal();
                         }}
                       >
                         {translate("Delete this user", "حذف هذا المستخدم")}
@@ -162,40 +149,18 @@ export default function Page() {
             )}
 
             <DeleteModal
-              opened={deleteStep === 1}
-              onClose={handleCloseDeleteStep1}
+              opened={deleteModalOpened}
+              onClose={handleCloseDeleteModal}
               title={translate("Delete user?", "حذف المستخدم؟")}
               subTitle={translate(
-                `You're about to delete "${user.name}". This removes them from active lists. Continue to the next confirmation step?`,
-                `أنت على وشك حذف "${user.name}". سيُزال من القوائم النشطة. هل تريد المتابعة إلى خطوة التأكيد التالية؟`,
+                `You're about to delete "${user.name}". This removes them from active lists.`,
+                `أنت على وشك حذف "${user.name}". سيُزال من القوائم النشطة.`,
               )}
-              action={() => setDeleteStep(2)}
-              loading={false}
-              error={""}
-            />
-
-            <DeleteModal
-              opened={deleteStep === 2}
-              onClose={handleCloseDeleteStep2}
-              title={translate("Confirm deletion", "تأكيد الحذف")}
-              subTitle={translate(
-                `Type the user code "${user.code}" to permanently confirm deleting this account.`,
-                `اكتب كود المستخدم "${user.code}" لتأكيد حذف هذا الحساب نهائيًا.`,
-              )}
+              warning={translate("This action cannot be undone.", "هذا الإجراء لا يمكن التراجع عنه.")}
               action={() => deleteMutation.mutate()}
               loading={deleteMutation.isPending}
               error={deleteError}
-              disabled={!isConfirmCodeMatched}
-            >
-              <TextInput
-                value={confirmCode}
-                onChange={(e) => setConfirmCode(e.currentTarget.value)}
-                label={translate("User code", "كود المستخدم")}
-                placeholder={user.code}
-                radius="md"
-                autoFocus
-              />
-            </DeleteModal>
+            />
           </>
         )
       )}

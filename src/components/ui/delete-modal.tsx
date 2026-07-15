@@ -1,5 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { Button } from "@mantine/core";
+import { AlertCircle } from "lucide-react";
+import { Alert, Button } from "@mantine/core";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
 
@@ -8,6 +9,7 @@ export default function DeleteModal({
   onClose,
   title,
   subTitle,
+  warning,
   action,
   loading,
   error,
@@ -18,6 +20,7 @@ export default function DeleteModal({
   onClose: () => void;
   title: string;
   subTitle: string;
+  warning?: string;
   action: () => void;
   loading: boolean;
   error: string;
@@ -25,7 +28,6 @@ export default function DeleteModal({
   children?: React.ReactNode;
 }) {
   const { translation } = useI18n();
-
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,6 +40,12 @@ export default function DeleteModal({
         <p>{subTitle}</p>
 
         {children}
+
+        {warning && (
+          <Alert color="red" radius="md" icon={<AlertCircle size={15} />}>
+            {warning}
+          </Alert>
+        )}
 
         <div className="flex gap-2">
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>
