@@ -1,4 +1,3 @@
-import { Permission } from "@/lib/constants/enums/permissions";
 import { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import { RoleWithPermissions } from "./roles";
 
@@ -10,9 +9,10 @@ export type User = {
   isPhoneVerified: boolean;
   email: string | null;
   isEmailVerified: boolean;
-  isAdmin: boolean;
   departmentId: string | null;
   productionSubDepartment: ProductionSubDepartment | null;
+  isAdmin: boolean;
+  roleId: string | null;
   createdAt: Date;
   deletedAt: Date | null;
   createdBy: { id: string; name: string } | null;
@@ -43,3 +43,15 @@ export type LoginDto = {
   phone: string | null;
   password: string;
 };
+
+export type CreateUserDto = {
+  name: string;
+  phone: string | null;
+  email: string | null;
+  password: string;
+  departmentId: string | null;
+  productionSubDepartment: ProductionSubDepartment | null;
+  roleId: string;
+};
+
+export type UpdateUserDto = Partial<CreateUserDto>;
