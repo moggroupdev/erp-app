@@ -2,10 +2,11 @@ import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type {
   Customer,
+  CustomerWithCreator,
   CustomerAddress,
   CreateCustomerDto,
-  CreateCustomerAddressDto,
   UpdateCustomerDto,
+  CreateCustomerAddressDto,
 } from "@/types/customer";
 
 const customersApi = {
@@ -26,7 +27,7 @@ const customersApi = {
   },
 
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
-    return await privateRequest<Customer>({ url: `customers/${id}`, signal });
+    return await privateRequest<CustomerWithCreator>({ url: `customers/${id}`, signal });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateCustomerDto }) {
@@ -47,15 +48,7 @@ const customersApi = {
     return await privateRequest<CustomerAddress>({ method: "POST", url: `customers/${id}/addresses`, data: dto });
   },
 
-  async listAddresses({
-    privateRequest,
-    id,
-    signal,
-  }: {
-    privateRequest: PrivateRequest;
-    id: string;
-    signal?: AbortSignal;
-  }) {
+  async listAddresses({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<CustomerAddress[]>({ url: `customers/${id}/addresses`, signal });
   },
 

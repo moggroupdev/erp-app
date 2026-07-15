@@ -2,11 +2,11 @@ import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type {
   Vendor,
-  VendorWithCreatedBy,
+  VendorWithCreator,
   VendorAddress,
   CreateVendorDto,
-  CreateVendorAddressDto,
   UpdateVendorDto,
+  CreateVendorAddressDto,
 } from "@/types/vendor";
 
 const vendorsApi = {
@@ -27,7 +27,7 @@ const vendorsApi = {
   },
 
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
-    return await privateRequest<VendorWithCreatedBy>({ url: `vendors/${id}`, signal });
+    return await privateRequest<VendorWithCreator>({ url: `vendors/${id}`, signal });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateVendorDto }) {

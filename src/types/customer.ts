@@ -7,10 +7,12 @@ export type Customer = {
   phone: string | null;
   email: string | null;
   notes: string | null;
-  createdAt: Date;
   deletedAt: Date | null;
-  createdBy: { id: string; name: string };
+  createdAt: Date;
+  createdBy: string;
 };
+
+export type CustomerWithCreator = Customer & { createdBy: { id: string; name: string } };
 
 export type CustomerAddress = Address & { customerId: string };
 

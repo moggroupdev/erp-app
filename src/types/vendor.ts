@@ -12,7 +12,7 @@ export type Vendor = {
   createdBy: string;
 };
 
-export type VendorWithCreatedBy = Vendor & { createdBy: { id: string; name: string } };
+export type VendorWithCreator = Vendor & { createdBy: { id: string; name: string } };
 
 export type VendorAddress = Address & { vendorId: string };
 
