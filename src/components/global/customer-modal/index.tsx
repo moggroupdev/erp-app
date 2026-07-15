@@ -61,9 +61,8 @@ export default function CustomerModal({
         ? await customersApi.update({ privateRequest, id: customerToUpdate.id, dto })
         : await customersApi.create({ privateRequest, dto });
     },
-    onSuccess: async (response) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
-      if (customerToUpdate) queryClient.setQueryData(queryKeys.customers.detail(customerToUpdate.id), response);
       onSuccess?.();
       handleClose();
     },

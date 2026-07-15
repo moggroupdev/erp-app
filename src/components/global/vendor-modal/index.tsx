@@ -61,9 +61,8 @@ export default function VendorModal({
         ? await vendorsApi.update({ privateRequest, id: vendorToUpdate.id, dto })
         : await vendorsApi.create({ privateRequest, dto });
     },
-    onSuccess: async (response) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.vendors.all });
-      if (vendorToUpdate) queryClient.setQueryData(queryKeys.vendors.detail(vendorToUpdate.id), response);
       onSuccess?.();
       handleClose();
     },
