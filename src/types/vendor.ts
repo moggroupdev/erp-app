@@ -7,10 +7,12 @@ export type Vendor = {
   phone: string | null;
   email: string | null;
   notes: string | null;
-  createdAt: Date;
   deletedAt: Date | null;
-  createdBy: { id: string; name: string };
+  createdAt: Date;
+  createdBy: string;
 };
+
+export type VendorWithCreatedBy = Vendor & { createdBy: { id: string; name: string } };
 
 export type VendorAddress = Address & { vendorId: string };
 

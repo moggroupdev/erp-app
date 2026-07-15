@@ -1,6 +1,13 @@
 import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
-import type { Vendor, VendorAddress, CreateVendorDto, CreateVendorAddressDto, UpdateVendorDto } from "@/types/vendor";
+import type {
+  Vendor,
+  VendorWithCreatedBy,
+  VendorAddress,
+  CreateVendorDto,
+  CreateVendorAddressDto,
+  UpdateVendorDto,
+} from "@/types/vendor";
 
 const vendorsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateVendorDto }) {
@@ -20,7 +27,7 @@ const vendorsApi = {
   },
 
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
-    return await privateRequest<Vendor>({ url: `vendors/${id}`, signal });
+    return await privateRequest<VendorWithCreatedBy>({ url: `vendors/${id}`, signal });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateVendorDto }) {
@@ -41,15 +48,7 @@ const vendorsApi = {
     return await privateRequest<VendorAddress>({ method: "POST", url: `vendors/${id}/addresses`, data: dto });
   },
 
-  async listAddresses({
-    privateRequest,
-    id,
-    signal,
-  }: {
-    privateRequest: PrivateRequest;
-    id: string;
-    signal?: AbortSignal;
-  }) {
+  async listAddresses({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<VendorAddress[]>({ url: `vendors/${id}/addresses`, signal });
   },
 
