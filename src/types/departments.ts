@@ -4,12 +4,10 @@ export type Department = {
   id: string;
   nameEn: string;
   nameAr: string;
-  manager: { id: string; name: string } | null;
+  managerId: string | null;
 };
 
-// ==================== Context ====================
-
-export type DepartmentsContextProps = ContextProps<Department[]>;
+export type DepartmentWithManager = Department & { manager: { id: string; name: string } | null };
 
 // ==================== DTOs ====================
 
@@ -19,5 +17,3 @@ export type CreateDepartmentDto = {
 };
 
 export type UpdateDepartmentDto = Partial<CreateDepartmentDto>;
-
-export type UpdateDepartmentManagerDto = { managerId: string };

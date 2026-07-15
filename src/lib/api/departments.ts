@@ -1,5 +1,5 @@
 import type { PrivateRequest } from "@/types/api";
-import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from "@/types/departments";
+import type { Department, DepartmentWithManager, CreateDepartmentDto, UpdateDepartmentDto } from "@/types/departments";
 
 const departmentsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateDepartmentDto }) {
@@ -7,11 +7,11 @@ const departmentsApi = {
   },
 
   async list({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
-    return await privateRequest<Department[]>({ url: "departments", signal });
+    return await privateRequest<DepartmentWithManager[]>({ url: "departments", signal });
   },
 
   async get({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<Department>({ url: `departments/${id}` });
+    return await privateRequest<DepartmentWithManager>({ url: `departments/${id}` });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateDepartmentDto }) {
