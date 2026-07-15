@@ -53,7 +53,8 @@ export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
     return department ? translate(department.nameEn, department.nameAr) : null;
   }, [departments, role.departmentId, translate]);
 
-  const permissionSet = useMemo(() => new Set(role.permissions), [role.permissions]);
+  const permissions = role.permissions ?? [];
+  const permissionSet = useMemo(() => new Set(permissions), [permissions]);
 
   const permissionGroups = useMemo(() => {
     const grouped: { domain: string; label: { en: string; ar: string }; permissions: Permission[] }[] =
@@ -64,7 +65,7 @@ export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
       })).filter((group) => group.permissions.length > 0);
 
     const known = new Set(PERMISSION_DOMAIN_GROUPS.flatMap((group) => group.permissions));
-    const unmatched = role.permissions.filter((permission) => !known.has(permission));
+    const unmatched = permissions.filter((permission) => !known.has(permission));
     if (unmatched.length > 0) {
       grouped.push({
         domain: "other",
@@ -74,7 +75,7 @@ export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
     }
 
     return grouped;
-  }, [permissionSet, role.permissions]);
+  }, [permissionSet, permissions]);
 
   const rows: DetailRow[] = [
     { key: translate("Role ID", "معرف الدور"), value: role.id, mono: true, copyText: role.id },
@@ -129,7 +130,7 @@ export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
         </div>
 
         <Badge size="lg" variant="light" color="blue" radius="md" leftSection={<KeyRound size={14} />}>
-          {translate(`${role.permissions.length} Permissions`, `${role.permissions.length} صلاحيات`)}
+          {translate(`${permissions.length} Permissions`, `${permissions.length} صلاحيات`)}
         </Badge>
       </header>
 
@@ -155,7 +156,7 @@ export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
           </div>
 
           <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
-            {translate(`${role.permissions.length} selected`, `${role.permissions.length} محددة`)}
+            {translate(`${permissions.length} selected`, `${permissions.length} محددة`)}
           </span>
         </header>
 

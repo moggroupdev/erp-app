@@ -106,7 +106,6 @@ export default function RoleForm({
     onSuccess: async (response) => {
       closeConfirm();
       await queryClient.invalidateQueries({ queryKey: queryKeys.roles.all });
-      queryClient.setQueryData(queryKeys.roles.detail(response.id), response);
       router.push(getLocalizedHref(`/organization/roles/${response.id}`));
     },
   });
