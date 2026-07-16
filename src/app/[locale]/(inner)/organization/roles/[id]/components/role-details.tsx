@@ -3,7 +3,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import useDepartments from "@/hooks/use-departments";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getPermissionLabel, PERMISSION_DOMAIN_GROUPS, type Permission } from "@/lib/constants/enums/permissions";
-import { type RoleWithPermissions } from "@/types/roles";
+import { type RoleWithCreatorWithPermissions } from "@/types/roles";
 import { Badge, Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
 import { Building2, Home, KeyRound, Percent, Shield } from "lucide-react";
@@ -43,7 +43,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
   );
 }
 
-export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
+export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermissions }) {
   const { locale, translate } = useI18n();
   const { helpers: departmentHelpers } = useDepartments();
 

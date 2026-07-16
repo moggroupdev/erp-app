@@ -1,9 +1,9 @@
 import type { PrivateRequest, Dictionary } from "@/types/api";
-import type { Role, RoleWithPermissions, CreateRoleDto, UpdateRoleDto } from "@/types/roles";
+import type { Role, RoleWithCreatorWithPermissions, CreateRoleDto, UpdateRoleDto } from "@/types/roles";
 
 const rolesApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateRoleDto }) {
-    return await privateRequest<RoleWithPermissions>({ method: "POST", url: "roles", data: dto });
+    return await privateRequest<Role>({ method: "POST", url: "roles", data: dto });
   },
 
   async list({
@@ -19,11 +19,11 @@ const rolesApi = {
   },
 
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
-    return await privateRequest<RoleWithPermissions>({ url: `roles/${id}`, signal });
+    return await privateRequest<RoleWithCreatorWithPermissions>({ url: `roles/${id}`, signal });
   },
 
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateRoleDto }) {
-    return await privateRequest<RoleWithPermissions>({ method: "PUT", url: `roles/${id}`, data: dto });
+    return await privateRequest<Role>({ method: "PUT", url: `roles/${id}`, data: dto });
   },
 };
 

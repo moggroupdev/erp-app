@@ -8,10 +8,14 @@ export type Role = {
   departmentId: string | null;
   homeUrl: string | null;
   createdAt: Date;
-  createdBy: { id: string; name: string };
+  createdBy: string;
 };
 
+export type RoleWithCreator = Role & { createdBy: { id: string; name: string } };
+
 export type RoleWithPermissions = Role & { permissions: Permission[] };
+
+export type RoleWithCreatorWithPermissions = RoleWithCreator & { permissions: Permission[] };
 
 // ==================== DTOs ====================
 
@@ -20,7 +24,7 @@ export type CreateRoleDto = {
   description: string | null;
   maxDiscountPct: number | null;
   departmentId: string | null;
-  homeUrl: string;
+  homeUrl: string; // Required here
   permissions: Permission[];
 };
 
