@@ -8,4 +8,5 @@ export const staleTimes = {
   locations: Infinity,
   departments: Infinity,
   roles: Infinity,
+  categories: Infinity,
 } as const;

@@ -18,6 +18,11 @@ export const queryKeys = {
   locations: {
     all: ["locations"] as const,
   },
+  categories: {
+    all: ["categories"] as const,
+    material: ["categories", "material"] as const,
+    product: ["categories", "product"] as const,
+  },
   departments: {
     all: ["departments"] as const,
   },
