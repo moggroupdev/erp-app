@@ -107,6 +107,7 @@ export default function RoleFormPage({ mode }: { mode: "create" | "edit" }) {
                 description: role.description,
                 maxDiscountPct: role.maxDiscountPct,
                 departmentId: role.departmentId,
+                homeUrl: role.homeUrl,
                 permissions: role.permissions,
               }}
             />

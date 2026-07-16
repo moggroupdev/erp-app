@@ -3,9 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/contexts/user/hook";
-import { FROM_QUERY_PARAM } from "@/lib/constants/global";
-
-const HOME_PATH = "/dashboard";
+import { DEFAULT_HOME_HREF, FROM_QUERY_PARAM } from "@/lib/constants/global";
 
 export default function AuthenticationGuard({
   access,
@@ -31,10 +29,9 @@ export default function AuthenticationGuard({
       const currentPath = typeof window !== "undefined" ? window.location.pathname + (window.location.search || "") : "/";
       router.replace(`/login?${FROM_QUERY_PARAM}=${encodeURIComponent(currentPath)}`);
     } else if (shouldRedirectToHome) {
-      const redirectTo =
-        typeof window !== "undefined"
-          ? new URLSearchParams(window.location.search).get(FROM_QUERY_PARAM) || HOME_PATH
-          : HOME_PATH;
+      const fromParam =
+        typeof window !== "undefined" ? new URLSearchParams(window.location.search).get(FROM_QUERY_PARAM) : null;
+      const redirectTo = fromParam || user?.role?.homeUrl || DEFAULT_HOME_HREF;
       router.replace(redirectTo);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

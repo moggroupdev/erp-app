@@ -6,7 +6,7 @@ import { getPermissionLabel, PERMISSION_DOMAIN_GROUPS, type Permission } from "@
 import { type RoleWithPermissions } from "@/types/roles";
 import { Badge, Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
-import { Building2, KeyRound, Percent, Shield } from "lucide-react";
+import { Building2, Home, KeyRound, Percent, Shield } from "lucide-react";
 
 type DetailRow = {
   key: string;
@@ -101,6 +101,17 @@ export default function RoleDetails({ role }: { role: RoleWithPermissions }) {
         <span className="inline-flex items-center gap-1.5">
           <Building2 size={14} className="text-violet-600" />
           {departmentName}
+        </span>
+      ) : (
+        <EmptyValue />
+      ),
+    },
+    {
+      key: translate("Home Page", "الصفحة الرئيسية"),
+      value: role.homeUrl ? (
+        <span className="inline-flex items-center gap-1.5 font-mono">
+          <Home size={14} className="text-blue-600" />
+          {role.homeUrl}
         </span>
       ) : (
         <EmptyValue />

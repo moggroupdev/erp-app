@@ -6,6 +6,7 @@ export type Role = {
   description: string | null;
   maxDiscountPct: number | null;
   departmentId: string | null;
+  homeUrl: string | null;
   createdAt: Date;
   createdBy: { id: string; name: string };
 };
@@ -19,6 +20,7 @@ export type CreateRoleDto = {
   description: string | null;
   maxDiscountPct: number | null;
   departmentId: string | null;
+  homeUrl: string;
   permissions: Permission[];
 };
 

@@ -10,6 +10,7 @@ import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
 import { SALES_DEPARTMENT_ID } from "@/lib/constants/global";
+import { validationRegex } from "@/lib/constants/regex";
 import {
   PERMISSION_DOMAIN_GROUPS,
   PERMISSION_LABELS,
@@ -28,6 +29,7 @@ type RoleFormValues = {
   description: string | null;
   maxDiscountPct: number | null;
   departmentId: string | null;
+  homeUrl: string | null;
   permissions: Permission[];
 };
 
@@ -52,6 +54,7 @@ export default function RoleForm({
   const [description, setDescription] = useState(initialValues?.description ?? "");
   const [maxDiscountPct, setMaxDiscountPct] = useState<number | string>(initialValues?.maxDiscountPct ?? "");
   const [departmentId, setDepartmentId] = useState<string | null>(initialValues?.departmentId ?? null);
+  const [homeUrl, setHomeUrl] = useState(initialValues?.homeUrl ?? "");
   const [permissions, setPermissions] = useState<Permission[]>(initialValues?.permissions ?? []);
 
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
@@ -71,6 +74,7 @@ export default function RoleForm({
       description: description.trim() || null,
       maxDiscountPct: isSalesDepartment && maxDiscountPct !== "" ? Number(maxDiscountPct) : null,
       departmentId,
+      homeUrl: homeUrl.trim(),
       permissions,
     };
   }
@@ -89,6 +93,7 @@ export default function RoleForm({
       dto.description !== (initialValues.description?.trim() || null) ||
       dto.maxDiscountPct !== initialValues.maxDiscountPct ||
       dto.departmentId !== initialValues.departmentId ||
+      dto.homeUrl !== (initialValues.homeUrl?.trim() ?? "") ||
       !permissionsEqual(dto.permissions, initialValues.permissions)
     );
   }
@@ -122,6 +127,21 @@ export default function RoleForm({
 
     if (isSalesDepartment && maxDiscountPct !== "" && (Number(maxDiscountPct) < 0 || Number(maxDiscountPct) > 100)) {
       setValidationError(translate("Max discount must be between 0 and 100.", "يجب أن يكون أقصى خصم بين 0 و 100."));
+      return false;
+    }
+
+    const trimmedHomeUrl = homeUrl.trim();
+    if (!trimmedHomeUrl) {
+      setValidationError(translate("Please enter the home page path.", "يرجى إدخال مسار الصفحة الرئيسية."));
+      return false;
+    }
+    if (!validationRegex.path.test(trimmedHomeUrl)) {
+      setValidationError(
+        translate(
+          'Home page must be a relative path starting with "/".',
+          'يجب أن تكون الصفحة الرئيسية مسارًا نسبيًا يبدأ بـ "/".',
+        ),
+      );
       return false;
     }
 
@@ -203,6 +223,20 @@ export default function RoleForm({
                   placeholder={translate("Enter a short description", "أدخل وصفًا مختصرًا")}
                   radius="md"
                   minRows={3}
+                  className="sm:col-span-2"
+                />
+
+                <TextInput
+                  value={homeUrl}
+                  onChange={(e) => setHomeUrl(e.currentTarget.value)}
+                  label={translate("Home Page", "الصفحة الرئيسية")}
+                  description={translate(
+                    "Where users with this role land after login.",
+                    "الصفحة التي ينتقل إليها المستخدمون بهذا الدور بعد تسجيل الدخول.",
+                  )}
+                  placeholder="/dashboard"
+                  required
+                  radius="md"
                   className="sm:col-span-2"
                 />
               </div>
@@ -380,7 +414,7 @@ export default function RoleForm({
             <Button
               type="submit"
               loading={!isEdit && mutation.isPending}
-              disabled={!name.trim() || (isEdit && !isDirty)}
+              disabled={!name.trim() || !homeUrl.trim() || (isEdit && !isDirty)}
               radius="md"
             >
               {isEdit ? translate("Save Changes", "حفظ التغييرات") : translate("Create Role", "إنشاء الدور")}

@@ -6,4 +6,5 @@ export const validationRegex = {
   egyptianPhone: /^01[0125][0-9]{8}$/,
   globalPhone: /^\+?[0-9\s\-().]{7,20}$/,
   password: /^.{8,}$/,
+  path: /^\/[a-zA-Z0-9\-_/]*$/,
 };
