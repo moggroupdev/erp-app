@@ -31,7 +31,6 @@ export type SidebarLeafConfig = {
   href: string;
   icon: LucideIcon;
   requiredPermission?: Permission;
-  adminOnly?: boolean;
 };
 
 export type SidebarGroupConfig = SidebarLeafConfig & {
@@ -229,28 +228,24 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     label: { en: "Organization", ar: "المؤسسة" },
     href: "/organization",
     icon: Building2,
-    adminOnly: true,
     items: [
       {
         label: { en: "Users", ar: "المستخدمون" },
         href: "/organization/users",
         icon: UserCog,
         requiredPermission: PERMISSIONS.READ_USERS,
-        adminOnly: true,
       },
       {
         label: { en: "Roles", ar: "الأدوار" },
         href: "/organization/roles",
         icon: Shield,
         requiredPermission: PERMISSIONS.READ_ROLES,
-        adminOnly: true,
       },
       {
         label: { en: "Departments", ar: "الأقسام" },
         href: "/organization/departments",
         icon: Building2,
         requiredPermission: PERMISSIONS.READ_DEPARTMENTS,
-        adminOnly: true,
       },
     ],
   },
@@ -265,7 +260,6 @@ export function isSidebarGroup(entry: SidebarEntryConfig): entry is SidebarGroup
 export function canAccessEntry(entry: SidebarEntryConfig, user: UserState): boolean {
   if (!user) return false;
   if (user.isAdmin) return true;
-  if (entry.adminOnly) return false;
   if (isSidebarGroup(entry)) return entry.items.some((item) => canAccessEntry(item, user));
   if (entry.requiredPermission) return user.role.permissions.includes(entry.requiredPermission);
   return true;
