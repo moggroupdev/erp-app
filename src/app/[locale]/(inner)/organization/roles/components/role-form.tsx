@@ -9,8 +9,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
-import { SALES_DEPARTMENT_ID } from "@/lib/constants/global";
-import { validationRegex } from "@/lib/constants/regex";
+import { SALES_DEPARTMENT_ID, BASE_URL } from "@/lib/constants/global";
 import {
   PERMISSION_DOMAIN_GROUPS,
   PERMISSION_LABELS,
@@ -18,6 +17,7 @@ import {
   type Permission,
 } from "@/lib/constants/enums/permissions";
 import { type CreateRoleDto } from "@/types/roles";
+import toAppRelativePath, { toAppHomeUrlInput } from "@/lib/helpers/to-app-relative-path";
 import { Button, Checkbox, Divider, NumberInput, TextInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -54,7 +54,7 @@ export default function RoleForm({
   const [description, setDescription] = useState(initialValues?.description ?? "");
   const [maxDiscountPct, setMaxDiscountPct] = useState<number | string>(initialValues?.maxDiscountPct ?? "");
   const [departmentId, setDepartmentId] = useState<string | null>(initialValues?.departmentId ?? null);
-  const [homeUrl, setHomeUrl] = useState(initialValues?.homeUrl ?? "");
+  const [homeUrl, setHomeUrl] = useState(toAppHomeUrlInput(initialValues?.homeUrl, locale));
   const [permissions, setPermissions] = useState<Permission[]>(initialValues?.permissions ?? []);
 
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
@@ -69,12 +69,15 @@ export default function RoleForm({
   }
 
   function buildDto(): CreateRoleDto {
+    const relativeHomeUrl = toAppRelativePath(homeUrl);
+    if (!relativeHomeUrl) throw new Error("Home page path is invalid.");
+
     return {
       name: name.trim(),
       description: description.trim() || null,
       maxDiscountPct: isSalesDepartment && maxDiscountPct !== "" ? Number(maxDiscountPct) : null,
       departmentId,
-      homeUrl: homeUrl.trim(),
+      homeUrl: relativeHomeUrl,
       permissions,
     };
   }
@@ -87,14 +90,17 @@ export default function RoleForm({
 
   function hasChanges() {
     if (!isEdit || !initialValues) return true;
-    const dto = buildDto();
+
+    const relativeHomeUrl = toAppRelativePath(homeUrl);
+    const initialHomeUrl = initialValues.homeUrl?.trim() ?? "";
+
     return (
-      dto.name !== initialValues.name.trim() ||
-      dto.description !== (initialValues.description?.trim() || null) ||
-      dto.maxDiscountPct !== initialValues.maxDiscountPct ||
-      dto.departmentId !== initialValues.departmentId ||
-      dto.homeUrl !== (initialValues.homeUrl?.trim() ?? "") ||
-      !permissionsEqual(dto.permissions, initialValues.permissions)
+      name.trim() !== initialValues.name.trim() ||
+      (description.trim() || null) !== (initialValues.description?.trim() || null) ||
+      (isSalesDepartment && maxDiscountPct !== "" ? Number(maxDiscountPct) : null) !== initialValues.maxDiscountPct ||
+      departmentId !== initialValues.departmentId ||
+      relativeHomeUrl !== initialHomeUrl ||
+      !permissionsEqual(permissions, initialValues.permissions)
     );
   }
 
@@ -130,16 +136,16 @@ export default function RoleForm({
       return false;
     }
 
-    const trimmedHomeUrl = homeUrl.trim();
-    if (!trimmedHomeUrl) {
-      setValidationError(translate("Please enter the home page path.", "يرجى إدخال مسار الصفحة الرئيسية."));
+    if (!homeUrl.trim()) {
+      setValidationError(translate("Please enter the home page URL.", "يرجى إدخال رابط الصفحة الرئيسية."));
       return false;
     }
-    if (!validationRegex.path.test(trimmedHomeUrl)) {
+
+    if (!toAppRelativePath(homeUrl)) {
       setValidationError(
         translate(
-          'Home page must be a relative path starting with "/".',
-          'يجب أن تكون الصفحة الرئيسية مسارًا نسبيًا يبدأ بـ "/".',
+          "Enter a full app link or a relative path (e.g. https://app.moggroup.net/ar/dashboard).",
+          "أدخل رابطًا كاملًا للتطبيق أو مسارًا نسبيًا (مثال: https://app.moggroup.net/ar/dashboard).",
         ),
       );
       return false;
@@ -231,10 +237,10 @@ export default function RoleForm({
                   onChange={(e) => setHomeUrl(e.currentTarget.value)}
                   label={translate("Home Page", "الصفحة الرئيسية")}
                   description={translate(
-                    "Where users with this role land after login.",
-                    "الصفحة التي ينتقل إليها المستخدمون بهذا الدور بعد تسجيل الدخول.",
+                    "Paste a full app link. Locale is removed automatically before saving.",
+                    "الصق رابط التطبيق الكامل. تُزال اللغة تلقائيًا قبل الحفظ.",
                   )}
-                  placeholder="/dashboard"
+                  placeholder={`${BASE_URL}/${locale}/dashboard`}
                   required
                   radius="md"
                   className="sm:col-span-2"
