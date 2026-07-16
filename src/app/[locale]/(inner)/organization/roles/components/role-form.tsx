@@ -237,8 +237,8 @@ export default function RoleForm({
                   onChange={(e) => setHomeUrl(e.currentTarget.value)}
                   label={translate("Home Page", "الصفحة الرئيسية")}
                   description={translate(
-                    "Paste a full app link. Locale is removed automatically before saving.",
-                    "الصق رابط التطبيق الكامل. تُزال اللغة تلقائيًا قبل الحفظ.",
+                    "The page users with this role open after signing in. You can paste a full link from the address bar.",
+                    "الصفحة التي يفتحها المستخدمون بهذا الدور بعد تسجيل الدخول. يمكنك لصق الرابط الكامل من شريط العنوان.",
                   )}
                   placeholder={`${BASE_URL}/${locale}/dashboard`}
                   required
