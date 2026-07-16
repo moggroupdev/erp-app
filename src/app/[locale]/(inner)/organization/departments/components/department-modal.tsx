@@ -5,7 +5,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import departmentsApi from "@/lib/api/departments";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
-import { type Department } from "@/types/departments";
+import { type DepartmentWithManager } from "@/types/departments";
 import { Button, TextInput } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -18,8 +18,8 @@ export default function DepartmentModal({
 }: {
   opened: boolean;
   close: () => void;
-  departmentToUpdate: Department | null;
-  setDepartmentToUpdate: React.Dispatch<React.SetStateAction<Department | null>>;
+  departmentToUpdate: DepartmentWithManager | null;
+  setDepartmentToUpdate: React.Dispatch<React.SetStateAction<DepartmentWithManager | null>>;
 }) {
   const { locale, translate, translation } = useI18n();
 

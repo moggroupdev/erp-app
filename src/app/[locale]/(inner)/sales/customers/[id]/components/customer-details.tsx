@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { type Customer } from "@/types/customer";
+import { type CustomerWithCreator } from "@/types/customer";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
 
@@ -39,7 +39,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
   );
 }
 
-export default function CustomerDetails({ customer }: { customer: Customer }) {
+export default function CustomerDetails({ customer }: { customer: CustomerWithCreator }) {
   const { locale, translate } = useI18n();
 
   const isDeleted = !!customer.deletedAt;

@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { type Vendor } from "@/types/vendor";
+import { type VendorWithCreator } from "@/types/vendor";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
 
@@ -39,7 +39,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
   );
 }
 
-export default function VendorDetails({ vendor }: { vendor: Vendor }) {
+export default function VendorDetails({ vendor }: { vendor: VendorWithCreator }) {
   const { locale, translate } = useI18n();
 
   const isDeleted = !!vendor.deletedAt;

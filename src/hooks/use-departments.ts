@@ -7,9 +7,9 @@ import departmentsApi from "@/lib/api/departments";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import type { Department } from "@/types/departments";
+import type { DepartmentWithManager } from "@/types/departments";
 
-const EMPTY_DEPARTMENTS: Department[] = [];
+const EMPTY_DEPARTMENTS: DepartmentWithManager[] = [];
 
 export default function useDepartments() {
   const locale = useLocale();
@@ -26,7 +26,7 @@ export default function useDepartments() {
   const data = query.data ?? EMPTY_DEPARTMENTS;
 
   const getDepartmentById = useCallback(
-    (id: string | null | undefined): Department | null => {
+    (id: string | null | undefined): DepartmentWithManager | null => {
       if (!id) return null;
       return data.find((item) => item.id === id) ?? null;
     },

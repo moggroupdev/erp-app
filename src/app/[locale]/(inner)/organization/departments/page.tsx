@@ -7,7 +7,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useHasPermission from "@/hooks/use-has-permission";
 import useDepartments from "@/hooks/use-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { type Department } from "@/types/departments";
+import { type DepartmentWithManager } from "@/types/departments";
 import { Button } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import ErrorSection from "@/components/ui/sections/error";
@@ -32,9 +32,9 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
-  const [departmentToUpdate, setDepartmentToUpdate] = useState<Department | null>(null);
+  const [departmentToUpdate, setDepartmentToUpdate] = useState<DepartmentWithManager | null>(null);
 
-  function handleOpenUpdateModal(department: Department) {
+  function handleOpenUpdateModal(department: DepartmentWithManager) {
     setDepartmentToUpdate(department);
     openModal();
   }
@@ -76,7 +76,7 @@ export default function Page() {
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {departments.map((department: Department) => (
+          {departments.map((department) => (
             <DepartmentCard
               key={department.id}
               department={department}

@@ -1,14 +1,14 @@
 import Image from "next/image";
 import { Tooltip } from "@mantine/core";
 import { useI18n } from "@/lib/i18n/hooks";
-import { type Department } from "@/types/departments";
+import { type DepartmentWithManager } from "@/types/departments";
 import { Pencil, UserRound } from "lucide-react";
 
 export default function DepartmentCard({
   department,
   openUpdateModal,
 }: {
-  department: Department;
+  department: DepartmentWithManager;
   openUpdateModal: (() => void) | null;
 }) {
   const { translate } = useI18n();
