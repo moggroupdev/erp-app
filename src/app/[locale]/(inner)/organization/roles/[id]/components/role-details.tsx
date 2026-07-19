@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
-import useDepartments from "@/hooks/use-departments";
+import useDepartments from "@/hooks/reference/use-departments";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getPermissionLabel, PERMISSION_DOMAIN_GROUPS, type Permission } from "@/lib/constants/enums/permissions";
 import { type RoleWithCreatorWithPermissions } from "@/types/roles";

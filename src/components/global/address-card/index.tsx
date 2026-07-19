@@ -2,7 +2,7 @@
 
 import { useI18n } from "@/lib/i18n/hooks";
 import { useMutation } from "@tanstack/react-query";
-import useLocations from "@/hooks/use-locations";
+import useLocations from "@/hooks/reference/use-locations";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
 import { type Address } from "@/types/address";

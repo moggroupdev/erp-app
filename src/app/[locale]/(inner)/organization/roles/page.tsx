@@ -8,7 +8,7 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import usePrivateRequest from "@/hooks/use-private-request";
-import useDepartments from "@/hooks/use-departments";
+import useDepartments from "@/hooks/reference/use-departments";
 import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";

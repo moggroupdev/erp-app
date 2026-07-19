@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
-import useRoles from "@/hooks/use-roles";
+import useRoles from "@/hooks/reference/use-roles";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
 import { Shield } from "lucide-react";
 

@@ -5,7 +5,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useHasPermission from "@/hooks/use-has-permission";
-import useDepartments from "@/hooks/use-departments";
+import useDepartments from "@/hooks/reference/use-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type DepartmentWithManager } from "@/types/departments";
 import { Button } from "@mantine/core";

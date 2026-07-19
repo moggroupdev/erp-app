@@ -1,5 +1,5 @@
 import LocalizedSelect, { LocalizedSelectProps } from "@/components/ui/localized-select";
-import useLocations from "@/hooks/use-locations";
+import useLocations from "@/hooks/reference/use-locations";
 import { City } from "@/types/locations";
 
 export type SelectCityProps = Omit<LocalizedSelectProps, "labelsList"> & {

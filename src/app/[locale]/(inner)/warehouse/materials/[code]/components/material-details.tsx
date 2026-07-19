@@ -2,7 +2,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import useMaterialCategories from "@/hooks/use-material-categories";
+import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import { type MaterialWithCreator } from "@/types/material";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";

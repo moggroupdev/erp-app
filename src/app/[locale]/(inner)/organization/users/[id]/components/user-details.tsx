@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import useDepartments from "@/hooks/use-departments";
-import useRoles from "@/hooks/use-roles";
+import useDepartments from "@/hooks/reference/use-departments";
+import useRoles from "@/hooks/reference/use-roles";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { UserWithCreator } from "@/types/user";

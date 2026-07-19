@@ -10,7 +10,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
-import useMaterialCategories from "@/hooks/use-material-categories";
+import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";

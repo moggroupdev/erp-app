@@ -5,7 +5,7 @@ import { User } from "@/types/user";
 import { PRODUCTION_DEPARTMENT_ID } from "@/lib/constants/global";
 import { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import usePrivateRequest from "@/hooks/use-private-request";
-import useRoles from "@/hooks/use-roles";
+import useRoles from "@/hooks/reference/use-roles";
 import usersApi from "@/lib/api/users";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";

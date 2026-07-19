@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import useDepartments from "@/hooks/use-departments";
+import useDepartments from "@/hooks/reference/use-departments";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
 import { Building2 } from "lucide-react";
 

@@ -1,5 +1,5 @@
 import LocalizedSelect, { LocalizedSelectProps } from "@/components/ui/localized-select";
-import useMaterialCategories from "@/hooks/use-material-categories";
+import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import { MaterialCategorySub } from "@/types/categories";
 
 export type SelectMaterialSubProps = Omit<LocalizedSelectProps, "labelsList"> & {

@@ -1,5 +1,5 @@
 import LocalizedSelect, { LocalizedSelectProps } from "@/components/ui/localized-select";
-import useProductCategories from "@/hooks/use-product-categories";
+import useProductCategories from "@/hooks/reference/use-product-categories";
 
 export type SelectProductMainProps = Omit<LocalizedSelectProps, "labelsList">;
 
