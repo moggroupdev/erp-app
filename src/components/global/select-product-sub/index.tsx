@@ -1,5 +1,5 @@
 import LocalizedSelect, { LocalizedSelectProps } from "@/components/ui/localized-select";
-import useCategories from "@/hooks/use-categories";
+import useProductCategories from "@/hooks/use-product-categories";
 import { ProductCategorySub } from "@/types/categories";
 
 export type SelectProductSubProps = Omit<LocalizedSelectProps, "labelsList"> & {
@@ -22,7 +22,7 @@ const filterProductSubsByScope = (
 };
 
 export default function SelectProductSub({ mainCategoryScope, ...props }: SelectProductSubProps) {
-  const { data, loading, error } = useCategories();
+  const { data, loading, error } = useProductCategories();
 
   const filteredSubs = filterProductSubsByScope(data?.productCategorySubs || [], mainCategoryScope);
 

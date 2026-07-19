@@ -5,7 +5,7 @@ import type { Material, MaterialWithCreator } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import usePrivateRequest from "@/hooks/use-private-request";
-import useCategories from "@/hooks/use-categories";
+import useMaterialCategories from "@/hooks/use-material-categories";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
@@ -35,7 +35,7 @@ export default function MaterialModal({
   onSuccess?: () => void;
 }) {
   const { locale, translate, translation } = useI18n();
-  const { helpers } = useCategories();
+  const { helpers } = useMaterialCategories();
 
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();

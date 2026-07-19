@@ -1,5 +1,5 @@
 import LocalizedSelect, { LocalizedSelectProps } from "@/components/ui/localized-select";
-import useCategories from "@/hooks/use-categories";
+import useMaterialCategories from "@/hooks/use-material-categories";
 import { MaterialCategorySub } from "@/types/categories";
 
 export type SelectMaterialSubProps = Omit<LocalizedSelectProps, "labelsList"> & {
@@ -22,7 +22,7 @@ const filterMaterialSubsByScope = (
 };
 
 export default function SelectMaterialSub({ mainCategoryScope, ...props }: SelectMaterialSubProps) {
-  const { data, loading, error } = useCategories();
+  const { data, loading, error } = useMaterialCategories();
 
   const filteredSubs = filterMaterialSubsByScope(data?.materialCategorySubs || [], mainCategoryScope);
 

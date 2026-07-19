@@ -1,10 +1,10 @@
 import LocalizedSelect, { LocalizedSelectProps } from "@/components/ui/localized-select";
-import useCategories from "@/hooks/use-categories";
+import useMaterialCategories from "@/hooks/use-material-categories";
 
 export type SelectMaterialMainProps = Omit<LocalizedSelectProps, "labelsList">;
 
 export default function SelectMaterialMain(props: SelectMaterialMainProps) {
-  const { data, loading, error } = useCategories();
+  const { data, loading, error } = useMaterialCategories();
 
   const labelsList = data
     ? data.materialCategoryMains.map((main) => ({

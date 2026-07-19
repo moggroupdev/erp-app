@@ -99,17 +99,19 @@ Current stale times: vendors `10m`, customers `5m`, locations/departments `Infin
 - Paginated lists: `placeholderData: keepPreviousData`.
 - **Loading UI:** drive from `isFetching` (full loading on every fetch/refetch), not `isPending` alone.
 - Manual refresh: `RefetchButton` in `LayoutBox` header `sideElements` + `refetch()` / shared retry handler.
-- Rarely changing shared data: `useLocations()` / `useDepartments()` / `useRoles()` - **do not** reintroduce Locations/Departments/Roles context providers.
+- Rarely changing shared data: `useLocations()` / `useDepartments()` / `useRoles()` / `useMaterialCategories()` / `useProductCategories()` - **do not** reintroduce Locations/Departments/Roles context providers.
 
 ### Shared resource hooks (`helpers`)
 
 Cached reference data hooks live under `src/hooks/` and return query state plus a nested `helpers` object for id lookups. Do **not** inline `.find()` against the list in pages/components, and do **not** add separate `use-*-helpers` files.
 
-| Hook               | Path                           | `helpers`                                                                                               |
-| ------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `useLocations()`   | `src/hooks/use-locations.ts`   | `getCountryById`, `getGovernorateById`, `getCityById`, `getGovernorateOfCity`, `getCitiesOfGovernorate` |
-| `useDepartments()` | `src/hooks/use-departments.ts` | `getDepartmentById`                                                                                     |
-| `useRoles()`       | `src/hooks/use-roles.ts`       | `getRoleById`                                                                                           |
+| Hook                       | Path                                   | `helpers`                                                                                                                               |
+| -------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `useLocations()`           | `src/hooks/use-locations.ts`           | `getCountryById`, `getGovernorateById`, `getCityById`, `getGovernorateOfCity`, `getCitiesOfGovernorate`                                 |
+| `useDepartments()`         | `src/hooks/use-departments.ts`         | `getDepartmentById`                                                                                                                     |
+| `useRoles()`               | `src/hooks/use-roles.ts`               | `getRoleById`                                                                                                                           |
+| `useMaterialCategories()`  | `src/hooks/use-material-categories.ts` | `getMaterialCategoryMainById`, `getMaterialCategorySubById`, `getMaterialSubcategoriesOfMain`                                           |
+| `useProductCategories()`   | `src/hooks/use-product-categories.ts`  | `getProductCategoryMainById`, `getProductCategorySubById`, `getProductSubcategoriesOfMain`                                              |
 
 Each returns `{ data, loading, error, reload, helpers }`.
 

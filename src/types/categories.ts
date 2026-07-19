@@ -24,9 +24,12 @@ export type ProductCategorySub = {
   mainCategoryId: string;
 };
 
-export type Categories = {
+export type MaterialCategories = {
   materialCategoryMains: MaterialCategoryMain[];
   materialCategorySubs: MaterialCategorySub[];
+};
+
+export type ProductCategories = {
   productCategoryMains: ProductCategoryMain[];
   productCategorySubs: ProductCategorySub[];
 };

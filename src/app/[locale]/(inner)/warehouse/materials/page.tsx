@@ -10,7 +10,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
-import useCategories from "@/hooks/use-categories";
+import useMaterialCategories from "@/hooks/use-material-categories";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
@@ -50,7 +50,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
-  const { helpers } = useCategories();
+  const { helpers } = useMaterialCategories();
 
   function getCategoryLabels(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
