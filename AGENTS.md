@@ -23,12 +23,13 @@ src/
 │   ├── mantine/             # Mantine setup helpers
 │   └── ui/                  # Reusable primitives (LayoutBox, sections, …)
 ├── contexts/
-│   ├── user/                # Auth user state
-│   └── query/               # React Query client + Devtools
+│   └── user/                # Auth user state
+├── providers/
+│   └── query.tsx            # React Query client + Devtools
 ├── hooks/                   # Shared hooks (private request, permissions, …)
 │   └── reference/           # Cached reference data (locations, departments, roles, categories)
 ├── lib/
-│   ├── api/                 # Domain API modules + query/keys.ts
+│   ├── api/                 # Domain API modules + query-keys/
 │   ├── constants/           # Enums, stale times, global flags
 │   ├── helpers/             # api-request, get-error-message, metadata, …
 │   └── i18n/                # Locales, hooks, utils, dictionaries
@@ -71,8 +72,8 @@ All live under `src/app/[locale]/`. The group name is **not** in the URL - only 
 
 | Piece       | Path                                   |
 | ----------- | -------------------------------------- |
-| Provider    | `src/contexts/query/provider.tsx`      |
-| Query keys  | `src/lib/api/query/keys.ts`            |
+| Provider    | `src/providers/query.tsx`              |
+| Query keys  | `src/lib/api/query-keys/index.ts`      |
 | Stale times | `src/lib/constants/stale-times.ts`     |
 | Errors      | `src/lib/helpers/get-error-message.ts` |
 
@@ -82,7 +83,7 @@ Defaults: `retry: 0`, `staleTime: 0`, `refetchOnWindowFocus: false`. Override `s
 
 Use `queryKeys` only - never hardcode key arrays in pages/modals.
 
-Hierarchy (see JSDoc on `keys.ts`):
+Hierarchy (see JSDoc on `query-keys/index.ts`):
 
 - `all` → everything under a resource
 - `lists()` / `list(filters)` → all lists vs one filtered list

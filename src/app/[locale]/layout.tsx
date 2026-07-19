@@ -7,8 +7,8 @@ import { MantineColorSchemeScript } from "@/components/mantine/color-scheme-scri
 import { getI18nFromParams } from "@/lib/i18n/utils";
 import { locales } from "@/lib/i18n/config";
 import { Alexandria } from "next/font/google";
+import QueryProvider from "@/providers/query";
 import UserProvider from "@/contexts/user/provider";
-import QueryProvider from "@/contexts/query/provider";
 
 const alexandria = Alexandria({
   subsets: ["arabic", "latin"],
