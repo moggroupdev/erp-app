@@ -61,14 +61,8 @@ export default function MaterialModal({
     setMinimumStock("");
   }
 
-  function handleMainCategoryChange(id: string | null) {
-    setMainCategoryId(id);
-    setSubCategoryId(null);
-  }
-
   useEffect(() => {
     if (materialToUpdate) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTitle(materialToUpdate.title);
       setDescription(materialToUpdate.description || "");
       setSubCategoryId(materialToUpdate.subCategoryId);
@@ -80,6 +74,14 @@ export default function MaterialModal({
       setMinimumStock(materialToUpdate.minimumStock ?? "");
     } else reset();
   }, [materialToUpdate, helpers]);
+
+  // Clear subcategory only when main category changes to one it no longer belongs to
+  useEffect(() => {
+    if (!subCategoryId || !mainCategoryId) return;
+    const sub = helpers.getMaterialCategorySubById(subCategoryId);
+    if (sub && sub.mainCategoryId !== mainCategoryId) setSubCategoryId(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainCategoryId, subCategoryId]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -113,14 +115,11 @@ export default function MaterialModal({
     e.preventDefault();
     setValidationError("");
 
-    if (!title.trim())
-      return setValidationError(translate("Please enter the material title.", "يرجى إدخال عنوان المادة."));
+    if (!title.trim()) return setValidationError(translate("Please enter the material title.", "يرجى إدخال عنوان المادة."));
     if (!mainCategoryId)
       return setValidationError(translate("Please select a main category.", "يرجى اختيار الفئة الرئيسية."));
-    if (!subCategoryId)
-      return setValidationError(translate("Please select a subcategory.", "يرجى اختيار الفئة الفرعية."));
-    if (!materialType)
-      return setValidationError(translate("Please select a material type.", "يرجى اختيار نوع المادة."));
+    if (!subCategoryId) return setValidationError(translate("Please select a subcategory.", "يرجى اختيار الفئة الفرعية."));
+    if (!materialType) return setValidationError(translate("Please select a material type.", "يرجى اختيار نوع المادة."));
     if (!unit) return setValidationError(translate("Please select a unit.", "يرجى اختيار الوحدة."));
 
     const normalizedMinimumStock =
@@ -169,7 +168,7 @@ export default function MaterialModal({
   const isReadyToSubmit = isRequiredInputFilled && (materialToUpdate ? isDataChanged : true);
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={titleLabel}>
+    <Modal opened={opened} onClose={handleClose} title={titleLabel} size="xl">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <TextInput
           value={title}
@@ -190,60 +189,62 @@ export default function MaterialModal({
           autosize
         />
 
-        <SelectMaterialMain
-          value={mainCategoryId}
-          setValue={handleMainCategoryChange}
-          label={translate("Main Category", "الفئة الرئيسية")}
-          placeholder={translate("Select main category", "اختر الفئة الرئيسية")}
-          searchable
-          required
-        />
+        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+          <SelectMaterialMain
+            value={mainCategoryId}
+            setValue={setMainCategoryId}
+            label={translate("Main Category", "الفئة الرئيسية")}
+            placeholder={translate("Select main category", "اختر الفئة الرئيسية")}
+            searchable
+            required
+          />
 
-        <SelectMaterialSub
-          value={subCategoryId}
-          setValue={setSubCategoryId}
-          mainCategoryScope={mainCategoryId}
-          label={translate("Subcategory", "الفئة الفرعية")}
-          placeholder={translate("Select subcategory", "اختر الفئة الفرعية")}
-          searchable
-          required
-        />
+          <SelectMaterialSub
+            value={subCategoryId}
+            setValue={setSubCategoryId}
+            mainCategoryScope={mainCategoryId}
+            label={translate("Subcategory", "الفئة الفرعية")}
+            placeholder={translate("Select subcategory", "اختر الفئة الفرعية")}
+            searchable
+            required
+          />
 
-        <SelectMaterialType
-          value={materialType}
-          setValue={setMaterialType}
-          label={translate("Material Type", "نوع المادة")}
-          placeholder={translate("Select material type", "اختر نوع المادة")}
-          required
-        />
+          <SelectMaterialType
+            value={materialType}
+            setValue={setMaterialType}
+            label={translate("Material Type", "نوع المادة")}
+            placeholder={translate("Select material type", "اختر نوع المادة")}
+            required
+          />
 
-        <SelectMaterialUnit
-          value={unit}
-          setValue={setUnit}
-          label={translate("Unit", "الوحدة")}
-          placeholder={translate("Select unit", "اختر الوحدة")}
-          searchable
-          required
-        />
+          <SelectMaterialUnit
+            value={unit}
+            setValue={setUnit}
+            label={translate("Unit", "الوحدة")}
+            placeholder={translate("Select unit", "اختر الوحدة")}
+            searchable
+            required
+          />
 
-        <TextInput
-          value={legacyCode}
-          onChange={(e) => setLegacyCode(e.target.value)}
-          label={translate("Legacy Code (Optional)", "الكود القديم (اختياري)")}
-          placeholder={translate("Enter legacy code", "أدخل الكود القديم")}
-          radius="md"
-        />
+          <TextInput
+            value={legacyCode}
+            onChange={(e) => setLegacyCode(e.target.value)}
+            label={translate("Legacy Code (Optional)", "الكود القديم (اختياري)")}
+            placeholder={translate("Enter legacy code", "أدخل الكود القديم")}
+            radius="md"
+          />
 
-        <NumberInput
-          value={minimumStock}
-          onChange={setMinimumStock}
-          label={translate("Minimum Stock (Optional)", "الحد الأدنى للمخزون (اختياري)")}
-          placeholder={translate("Enter minimum stock", "أدخل الحد الأدنى للمخزون")}
-          min={0}
-          allowNegative={false}
-          decimalScale={3}
-          radius="md"
-        />
+          <NumberInput
+            value={minimumStock}
+            onChange={setMinimumStock}
+            label={translate("Minimum Stock (Optional)", "الحد الأدنى للمخزون (اختياري)")}
+            placeholder={translate("Enter minimum stock", "أدخل الحد الأدنى للمخزون")}
+            min={0}
+            allowNegative={false}
+            decimalScale={3}
+            radius="md"
+          />
+        </div>
 
         <div className="flex gap-2">
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
