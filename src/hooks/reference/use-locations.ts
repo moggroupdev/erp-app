@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocale } from "@/lib/i18n/hooks";
 import locationsApi from "@/lib/api/locations";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import type { City, Country, Governorate } from "@/types/locations";
 

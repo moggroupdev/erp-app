@@ -10,7 +10,7 @@ import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
 import productsApi from "@/lib/api/products";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { type Product } from "@/types/product";

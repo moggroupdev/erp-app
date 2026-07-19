@@ -8,7 +8,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { TextInput, Button, Textarea, NumberInput } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";

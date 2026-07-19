@@ -5,7 +5,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import customersApi from "@/lib/api/customers";
 import vendorsApi from "@/lib/api/vendors";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
 import { Button, Checkbox, SegmentedControl, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";

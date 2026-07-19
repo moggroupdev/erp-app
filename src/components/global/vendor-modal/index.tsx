@@ -5,7 +5,7 @@ import { Vendor } from "@/types/vendor";
 import usePrivateRequest from "@/hooks/use-private-request";
 import vendorsApi from "@/lib/api/vendors";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { validationRegex } from "@/lib/constants/regex";
 import { TextInput, Button, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";

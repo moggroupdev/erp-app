@@ -5,7 +5,7 @@ import { Customer } from "@/types/customer";
 import usePrivateRequest from "@/hooks/use-private-request";
 import customersApi from "@/lib/api/customers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { validationRegex } from "@/lib/constants/regex";
 import { TextInput, Button, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";

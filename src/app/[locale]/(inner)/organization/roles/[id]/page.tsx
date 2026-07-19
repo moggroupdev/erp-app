@@ -8,7 +8,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button } from "@mantine/core";
@@ -41,9 +41,7 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
-  useDocumentTitle(
-    `${role?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Roles", "الأدوار")}`,
-  );
+  useDocumentTitle(`${role?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Roles", "الأدوار")}`);
 
   return (
     <LayoutBox

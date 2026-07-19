@@ -5,7 +5,7 @@ import { useLocale } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import departmentsApi from "@/lib/api/departments";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import type { DepartmentWithManager } from "@/types/departments";
 

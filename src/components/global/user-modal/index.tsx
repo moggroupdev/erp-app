@@ -8,7 +8,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import useRoles from "@/hooks/reference/use-roles";
 import usersApi from "@/lib/api/users";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { validationRegex } from "@/lib/constants/regex";
 import { TextInput, Button, PasswordInput, Checkbox } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";

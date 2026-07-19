@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import authApi from "@/lib/api/auth";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { Button } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 

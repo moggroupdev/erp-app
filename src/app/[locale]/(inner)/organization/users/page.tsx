@@ -14,7 +14,7 @@ import useDepartments from "@/hooks/reference/use-departments";
 import useRoles from "@/hooks/reference/use-roles";
 import usersApi from "@/lib/api/users";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";

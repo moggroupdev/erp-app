@@ -4,7 +4,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import departmentsApi from "@/lib/api/departments";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { type DepartmentWithManager } from "@/types/departments";
 import { Button, TextInput } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";

@@ -8,7 +8,7 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query/keys";
+import { queryKeys } from "@/lib/api/query-keys";
 import { SALES_DEPARTMENT_ID, BASE_URL } from "@/lib/constants/global";
 import {
   PERMISSION_DOMAIN_GROUPS,
