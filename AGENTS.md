@@ -10,35 +10,35 @@ Path alias: `@/*` → `./src/*`.
 
 ```
 src/
-├── app/[locale]/           # All routes are locale-prefixed (/en/…, /ar/…)
-│   ├── layout.tsx           # Root providers + <html lang/dir>
-│   ├── (inner)/             # Authenticated ERP app (sidebar shell)
-│   ├── (outer)/             # Guest-only (e.g. login)
-│   ├── (public)/            # Public pages (no auth gate)
+├── app/[locale]/             # All routes are locale-prefixed (/en/…, /ar/…)
+│   ├── layout.tsx             # Root providers + <html lang/dir>
+│   ├── (inner)/               # Authenticated ERP app (sidebar shell)
+│   ├── (outer)/               # Guest-only (e.g. login)
+│   ├── (public)/              # Public pages (no auth gate)
 │   └── [...not-found]/
 ├── components/
-│   ├── global/              # Cross-feature (sidebar, selections, …)
-│   │   ├── data-modals/     # Shared create/edit entity modals (user, vendor, …)
-│   │   └── selections/      # Shared LocalizedSelect wrappers
-│   │       ├── enum-based/  # Options from `lib/constants/enums`
-│   │       └── query-based/ # Options from `@/hooks/reference` (API/React Query)
-│   ├── guards/              # Auth + permission guards
-│   ├── layouts/             # Inner shell / page chrome
-│   ├── mantine/             # Mantine setup helpers
-│   └── ui/                  # Reusable primitives (LayoutBox, sections, …)
+│   ├── global/                # Cross-feature UI (sidebar, logo, address-card, …)
+│   │   ├── data-modals/       # Shared create/edit entity modals
+│   │   └── selections/        # Shared LocalizedSelect wrappers
+│   │       ├── enum-based/    # Options from `lib/constants/enums`
+│   │       └── query-based/   # Options from `@/hooks/reference`
+│   ├── guards/                # Auth + permission guards
+│   ├── layouts/               # Inner shell / page chrome
+│   ├── mantine/               # Mantine setup helpers
+│   └── ui/                    # Reusable primitives (LayoutBox, sections, …)
 ├── contexts/
-│   └── user/                # Auth user state
+│   └── user/                  # Auth user state (context + provider + hook)
 ├── providers/
-│   └── query.tsx            # React Query client + Devtools
-├── hooks/                   # Shared hooks (private request, permissions, …)
-│   └── reference/           # Cached reference data (locations, departments, roles, categories)
+│   └── query.tsx              # React Query client + Devtools
+├── hooks/                     # Shared hooks (private request, permissions, …)
+│   └── reference/             # Cached reference data hooks
 ├── lib/
-│   ├── api/                 # Domain API modules + query-keys/
-│   ├── constants/           # Enums, stale times, global flags
-│   ├── helpers/             # api-request, get-error-message, metadata, …
-│   └── i18n/                # Locales, hooks, utils, dictionaries
-├── middlewares/             # Localization (used from proxy.ts)
-└── types/                   # Shared DTOs / domain types
+│   ├── api/                   # Domain API modules + query-keys/
+│   ├── constants/             # Enums, stale times, global flags
+│   ├── helpers/               # api-request, get-error-message, metadata, …
+│   └── i18n/                  # Locales, hooks, utils, dictionaries
+├── middlewares/               # Localization (used from proxy.ts)
+└── types/                     # Shared DTOs / domain types
 ```
 
 Providers in `src/app/[locale]/layout.tsx`:
@@ -53,7 +53,7 @@ Locale routing: `src/proxy.ts` → `src/middlewares/localization.middleware.ts` 
 
 ## Route groups: `(inner)` / `(outer)` / `(public)`
 
-All live under `src/app/[locale]/`. The group name is **not** in the URL - only `[locale]` and the page path are.
+All live under `src/app/[locale]/`. The group name is **not** in the URL — only `[locale]` and the page path are.
 
 | Group      | Auth               | Layout behavior                                                        | When to use                                  |
 | ---------- | ------------------ | ---------------------------------------------------------------------- | -------------------------------------------- |
@@ -61,12 +61,12 @@ All live under `src/app/[locale]/`. The group name is **not** in the URL - only 
 | `(outer)`  | Must be logged out | `AuthenticationGuard access="guest"`                                   | Login and other guest-only flows             |
 | `(public)` | Anyone             | No auth guard (no group layout today)                                  | Marketing/legal: privacy, terms, contact     |
 
-**Behavior details:**
+**Behavior:**
 
 - Unauthenticated visit to `(inner)` → redirect to `/login?from=<currentPath>`.
 - Authenticated visit to `(outer)` → redirect to `from` query or `/dashboard`.
 - `(public)` is reachable signed in or out; do **not** wrap it with `AuthenticationGuard` unless requirements change.
-- Permission checks (`PermissionGuard` / layout `PERMISSIONS.`\*) apply inside `(inner)` feature areas - they are separate from auth.
+- Permission checks (`PermissionGuard` / layout `PERMISSIONS.*`) apply inside `(inner)` feature areas — separate from auth.
 
 **Do** place new pages in the correct group by access model. **Don’t** put login under `(inner)`, or put authenticated CRUD under `(public)`.
 
@@ -81,22 +81,20 @@ All live under `src/app/[locale]/`. The group name is **not** in the URL - only 
 | Stale times | `src/lib/constants/stale-times.ts`     |
 | Errors      | `src/lib/helpers/get-error-message.ts` |
 
-Defaults: `retry: 0`, `staleTime: 0`, `refetchOnWindowFocus: false`. Override `staleTime` per resource via `staleTimes`.
+Defaults (in `QueryProvider`): `retry: 0`, `staleTime: 0`, `refetchOnWindowFocus: false`. Override `staleTime` per resource via `staleTimes`.
 
 ### Query keys
 
-Use `queryKeys` only - never hardcode key arrays in pages/modals.
+Import from `@/lib/api/query-keys`. Use `queryKeys` only — never hardcode key arrays in pages/modals.
 
 Hierarchy (see JSDoc on `query-keys/index.ts`):
 
 - `all` → everything under a resource
 - `lists()` / `list(filters)` → all lists vs one filtered list
-- `details()` / `detail(id)` → all details vs one item
+- `details()` / `detail(id)` → all details vs one item (materials use `detail(code)`)
 - Nested keys (e.g. `addresses(id)`) hang off `detail(id)`
 
 **New resource:** add entries to `queryKeys` (+ `staleTimes` when caching should differ from default).
-
-Current stale times: vendors `10m`, customers `5m`, locations/departments `Infinity` (until full reload).
 
 ### Queries
 
@@ -105,11 +103,25 @@ Current stale times: vendors `10m`, customers `5m`, locations/departments `Infin
 - Paginated lists: `placeholderData: keepPreviousData`.
 - **Loading UI:** drive from `isFetching` (full loading on every fetch/refetch), not `isPending` alone.
 - Manual refresh: `RefetchButton` in `LayoutBox` header `sideElements` + `refetch()` / shared retry handler.
-- Rarely changing shared data: import from `@/hooks/reference/` (`useLocations()`, `useDepartments()`, `useRoles()`, `useMaterialCategories()`, `useProductCategories()`) - **do not** reintroduce Locations/Departments/Roles context providers.
 
-### Shared resource hooks (`helpers`)
+### Mutations & cache
 
-Cached reference data hooks live under `src/hooks/reference/` and return query state plus a nested `helpers` object for id lookups. Do **not** inline `.find()` against the list in pages/components, and do **not** add separate `use-*-helpers` files.
+| After write                        | Prefer                                                                |
+| ---------------------------------- | --------------------------------------------------------------------- |
+| Create / update entity             | `invalidateQueries({ queryKey: queryKeys.<resource>.all })`           |
+| Nested collection only (addresses) | `invalidateQueries` on that nested key (e.g. `vendors.addresses(id)`) |
+
+---
+
+## Reference data hooks
+
+Cached, rarely changing shared data lives under `src/hooks/reference/`. Each hook returns `{ data, loading, error, reload, helpers }`.
+
+Do **not**:
+
+- Inline `.find()` against the list in pages/components
+- Add separate `use-*-helpers` files
+- Reintroduce Locations / Departments / Roles (or categories) context providers
 
 | Hook                      | Path                                             | `helpers`                                                                                               |
 | ------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
@@ -118,8 +130,6 @@ Cached reference data hooks live under `src/hooks/reference/` and return query s
 | `useRoles()`              | `src/hooks/reference/use-roles.ts`               | `getRoleById`                                                                                           |
 | `useMaterialCategories()` | `src/hooks/reference/use-material-categories.ts` | `getMaterialCategoryMainById`, `getMaterialCategorySubById`, `getMaterialSubcategoriesOfMain`           |
 | `useProductCategories()`  | `src/hooks/reference/use-product-categories.ts`  | `getProductCategoryMainById`, `getProductCategorySubById`, `getProductSubcategoriesOfMain`              |
-
-Each returns `{ data, loading, error, reload, helpers }`.
 
 ```ts
 import useDepartments from "@/hooks/reference/use-departments";
@@ -132,15 +142,9 @@ const { helpers: locationHelpers } = useLocations();
 const city = locationHelpers.getCityById(cityId);
 ```
 
-**New shared resource hook:** add it under `src/hooks/reference/` with lookup helpers under `helpers` - keep the same shape (`data` / `loading` / `error` / `reload` / `helpers`).
+**New reference hook:** add it under `src/hooks/reference/` with the same return shape and lookup helpers under `helpers`.
 
-### Mutations & cache
-
-| After write                        | Prefer                                                                           |
-| ---------------------------------- | -------------------------------------------------------------------------------- |
-| Create / update entity             | `invalidateQueries({ queryKey: queryKeys.<resource>.all })`                      |
-| Update when API returns the entity | also `setQueryData(queryKeys.<resource>.detail(id), response)` (see data-modals) |
-| Nested collection only (addresses) | `invalidateQueries` on that nested key                                           |
+Query-based selects under `components/global/selections/query-based/` should use these hooks (not fetch ad hoc).
 
 ---
 
@@ -150,12 +154,13 @@ const city = locationHelpers.getCityById(cityId);
 | ---------------- | ------------------------------------------------- |
 | HTTP wrapper     | `src/lib/helpers/api-request.ts`                  |
 | Domain APIs      | `src/lib/api/<domain>.ts` (default-export object) |
+| Query keys       | `src/lib/api/query-keys/`                         |
 | Types            | `src/types/api.ts` (`PrivateRequest`, options)    |
 | Private requests | `src/hooks/use-private-request.ts`                |
 
-- Public endpoints (login, locations): call via `apiRequest` / domain API without bearer injection.
+- Public endpoints (login, locations, categories): call via `apiRequest` / domain API without bearer injection.
 - Protected endpoints: API methods accept `{ privateRequest, … }` and call `privateRequest(...)`.
-- Pages/modals must not set `Authorization` themselves - `usePrivateRequest` does.
+- Pages/modals must not set `Authorization` themselves — `usePrivateRequest` does.
 - Base URL: `NEXT_PUBLIC_API_URL`. Pass React Query `signal` through for cancellation.
 - Surface errors with `getErrorMessage(locale, error)` (mutations: often with `ErrorAlert`).
 
@@ -171,7 +176,7 @@ const city = locationHelpers.getCityById(cityId);
 | Permission hook   | `src/hooks/use-has-permission.ts`                        |
 | Permission values | `src/lib/constants/enums/permissions.ts` → `PERMISSIONS` |
 
-- Use `PERMISSIONS.`\* constants only - never invent permission strings.
+- Use `PERMISSIONS.*` constants only — never invent permission strings.
 - Page access: layout-level `<PermissionGuard permission={…} isForPage>`.
 - Buttons/actions: wrap with `PermissionGuard` or gate with `useHasPermission`.
 - Admins (`user.isAdmin`) bypass permission checks.
@@ -190,9 +195,10 @@ All domain enums live under `src/lib/constants/enums/` (same pattern as existing
 
 **Rules:**
 
-1. Define new enums in `src/lib/constants/enums/<name>.ts` first - values, TypeScript type, `SCREAMING_MAP`, and bilingual labels when needed.
+1. Define new enums in `src/lib/constants/enums/<name>.ts` first — values, TypeScript type, `SCREAMING_MAP`, and bilingual labels when needed.
 2. Import those constants in pages/components/API code.
 3. **Never** hardcode enum strings (permission names, source types, …) directly in components or pages.
+4. Enum-backed selects belong under `components/global/selections/enum-based/`.
 
 Permissions are part of this rule: always `PERMISSIONS.READ_VENDORS`, never `"read_vendors"` inline.
 
@@ -200,15 +206,15 @@ Permissions are part of this rule: always `PERMISSIONS.READ_VENDORS`, never `"re
 
 ## i18n
 
-Locales: `en` `ar` (default `**ar`). Config: `src/lib/i18n/config.ts`.
+Locales: `en` `ar` (default `ar`). Config: `src/lib/i18n/config.ts`.
 
 ### Primary helpers
 
 | Helper                           | Where                   | Use for                                                      |
 | -------------------------------- | ----------------------- | ------------------------------------------------------------ |
-| `useI18n()`                      | `src/lib/i18n/hooks.ts` | **Client** components - `{ locale, translate, translation }` |
+| `useI18n()`                      | `src/lib/i18n/hooks.ts` | **Client** components — `{ locale, translate, translation }` |
 | `getI18nFromParams(params)`      | `src/lib/i18n/utils.ts` | **Server** components / pages / `generateMetadata`           |
-| `useLocaleHref()`                | `src/lib/i18n/hooks.ts` | **Client** links - returns `(path) => /${locale}${path}`     |
+| `useLocaleHref()`                | `src/lib/i18n/hooks.ts` | **Client** links — returns `(path) => /${locale}${path}`     |
 | `getLocalizedHref(locale, path)` | `src/lib/i18n/utils.ts` | **Server** links / redirects                                 |
 
 ### Usage
@@ -235,17 +241,17 @@ const url = getLocalizedHref(locale, "/privacy-policy");
 
 ## UI patterns
 
-| Pattern                 | Path                                                                       |
-| ----------------------- | -------------------------------------------------------------------------- |
-| Page shell              | `src/components/ui/layout-box.tsx`                                         |
-| Loading / error / empty | `src/components/ui/sections/{loading,error,empty}.tsx`                     |
-| No search results       | `src/components/ui/sections/no-results.tsx`                                |
-| Refetch control         | `src/components/ui/refetch-button.tsx`                                     |
-| Modal shell             | `src/components/ui/modal.tsx`                                              |
-| Data modals             | `src/components/global/data-modals/*-modal`                                |
-| Page-local modals       | Feature page `components/` (e.g. department modal)                         |
-| Enum-based selects      | `src/components/global/selections/enum-based/*`                            |
-| Query-based selects     | `src/components/global/selections/query-based/*` (use `@/hooks/reference`) |
+| Pattern                 | Path                                                   |
+| ----------------------- | ------------------------------------------------------ |
+| Page shell              | `src/components/ui/layout-box.tsx`                     |
+| Loading / error / empty | `src/components/ui/sections/{loading,error,empty}.tsx` |
+| No search results       | `src/components/ui/sections/no-results.tsx`            |
+| Refetch control         | `src/components/ui/refetch-button.tsx`                 |
+| Modal shell             | `src/components/ui/modal.tsx`                          |
+| Data modals             | `src/components/global/data-modals/*-modal`            |
+| Page-local modals       | Feature page `components/` (e.g. department modal)     |
+| Enum-based selects      | `src/components/global/selections/enum-based/*`        |
+| Query-based selects     | `src/components/global/selections/query-based/*`       |
 
 Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSection` (retry) → else empty/no-results → else content.
 
@@ -254,6 +260,7 @@ Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSecti
 - Document title: `useDocumentTitle` with bilingual titles.
 - Icons: prefer `lucide-react`.
 - Do **not** use heavy hover translate/lift (`translate-y`, etc.) or heavy hover shadow changes on cards and list items. Prefer quiet hover.
-- Shared selects: put enum-backed ones under `selections/enum-based/`, and reference-data ones (locations, departments, roles, categories, …) under `selections/query-based/`.
 
-Match existing CRUD pages (vendors, customers, departments) when adding new ones.
+**Selects:** enum options → `selections/enum-based/`; reference-hook options (locations, departments, roles, categories, …) → `selections/query-based/`. Do not leave new shared selects at `components/global/select-*`.
+
+Match existing CRUD pages (vendors, customers, materials, departments) when adding new ones.
