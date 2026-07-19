@@ -20,8 +20,8 @@ import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
-import VendorModal from "@/components/global/vendor-modal";
-import AddressModal from "@/components/global/address-modal";
+import VendorModal from "@/components/global/data-modals/vendor-modal";
+import AddressModal from "@/components/global/data-modals/address-modal";
 import AddressCard from "@/components/global/address-card";
 import VendorDetails from "./components/vendor-details";
 

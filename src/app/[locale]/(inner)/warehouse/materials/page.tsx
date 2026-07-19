@@ -31,7 +31,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
-import MaterialModal from "@/components/global/material-modal";
+import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/select-material-type";
 import SelectMaterialMain from "@/components/global/select-material-main";
 import SelectMaterialSub from "@/components/global/select-material-sub";

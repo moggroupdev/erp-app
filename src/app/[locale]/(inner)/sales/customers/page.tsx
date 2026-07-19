@@ -29,7 +29,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
-import CustomerModal from "@/components/global/customer-modal";
+import CustomerModal from "@/components/global/data-modals/customer-modal";
 
 const PAGE_TITLE = { en: "Customers", ar: "العملاء" };
 

@@ -18,7 +18,7 @@ import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
-import MaterialModal from "@/components/global/material-modal";
+import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialDetails from "./components/material-details";
 
 const PAGE_TITLE = { en: "Material Details", ar: "تفاصيل المادة" };

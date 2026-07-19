@@ -20,8 +20,8 @@ import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
-import CustomerModal from "@/components/global/customer-modal";
-import AddressModal from "@/components/global/address-modal";
+import CustomerModal from "@/components/global/data-modals/customer-modal";
+import AddressModal from "@/components/global/data-modals/address-modal";
 import AddressCard from "@/components/global/address-card";
 import CustomerDetails from "./components/customer-details";
 

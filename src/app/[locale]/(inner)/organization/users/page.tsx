@@ -34,7 +34,7 @@ import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import SelectDepartment from "@/components/global/select-department";
 import SelectRole from "@/components/global/select-role";
-import UserModal from "@/components/global/user-modal";
+import UserModal from "@/components/global/data-modals/user-modal";
 
 const PAGE_TITLE = { en: "Users", ar: "المستخدمون" };
 

@@ -20,7 +20,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import DeleteModal from "@/components/ui/delete-modal";
-import UserModal from "@/components/global/user-modal";
+import UserModal from "@/components/global/data-modals/user-modal";
 import UserDetails from "./components/user-details";
 
 const PAGE_TITLE = { en: "User Data", ar: "ملف المستخدم" };

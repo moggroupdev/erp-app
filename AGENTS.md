@@ -17,7 +17,8 @@ src/
 │   ├── (public)/            # Public pages (no auth gate)
 │   └── [...not-found]/
 ├── components/
-│   ├── global/              # Cross-feature (modals, sidebar, selects, …)
+│   ├── global/              # Cross-feature (sidebar, selects, …)
+│   │   └── data-modals/     # Shared create/edit entity modals (user, vendor, …)
 │   ├── guards/              # Auth + permission guards
 │   ├── layouts/             # Inner shell / page chrome
 │   ├── mantine/             # Mantine setup helpers
@@ -135,7 +136,7 @@ const city = locationHelpers.getCityById(cityId);
 | After write                        | Prefer                                                                                      |
 | ---------------------------------- | ------------------------------------------------------------------------------------------- |
 | Create / update entity             | `invalidateQueries({ queryKey: queryKeys.<resource>.all })`                                 |
-| Update when API returns the entity | also `setQueryData(queryKeys.<resource>.detail(id), response)` (see vendor/customer modals) |
+| Update when API returns the entity | also `setQueryData(queryKeys.<resource>.detail(id), response)` (see data-modals) |
 | Nested collection only (addresses) | `invalidateQueries` on that nested key                                                      |
 
 ---
@@ -237,8 +238,9 @@ const url = getLocalizedHref(locale, "/privacy-policy");
 | Loading / error / empty | `src/components/ui/sections/{loading,error,empty}.tsx` |
 | No search results       | `src/components/ui/sections/no-results.tsx`            |
 | Refetch control         | `src/components/ui/refetch-button.tsx`                 |
-| Modal shell             | `src/components/ui/modal.tsx`                          |
-| Feature modals          | `src/components/global/*-modal` or page `components/`  |
+| Modal shell             | `src/components/ui/modal.tsx`                                   |
+| Data modals             | `src/components/global/data-modals/*-modal`                      |
+| Page-local modals       | Feature page `components/` (e.g. department modal)              |
 
 Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSection` (retry) → else empty/no-results → else content.
 
