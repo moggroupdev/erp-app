@@ -61,6 +61,13 @@ export const queryKeys = {
     lists: () => [...queryKeys.products.all, "list"] as const,
     list: (filters: ListFilters) => [...queryKeys.products.lists(), filters] as const,
   },
+  materials: {
+    all: ["materials"] as const,
+    lists: () => [...queryKeys.materials.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.materials.lists(), filters] as const,
+    details: () => [...queryKeys.materials.all, "detail"] as const,
+    detail: (code: string) => [...queryKeys.materials.details(), code] as const,
+  },
   profile: {
     all: ["profile"] as const,
   },

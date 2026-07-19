@@ -26,6 +26,9 @@ export const PERMISSION_VALUES = [
   "read_customers",
   "add_customer",
   "update_customer",
+  "read_materials",
+  "add_material",
+  "update_material",
   "read_inquiries",
   "read_previews",
   "read_offers",
@@ -35,7 +38,6 @@ export const PERMISSION_VALUES = [
   "read_boms",
   "read_production_plans",
   "read_production_routing",
-  "read_materials",
   "read_inventory_transactions",
   "read_material_purchase_orders",
   "read_product_purchase_orders",
@@ -282,6 +284,20 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض المواد",
     },
   },
+  add_material: {
+    value: "add_material",
+    label: {
+      en: "Add Material",
+      ar: "إضافة مادة",
+    },
+  },
+  update_material: {
+    value: "update_material",
+    label: {
+      en: "Update Material",
+      ar: "تحديث المادة",
+    },
+  },
   read_inventory_transactions: {
     value: "read_inventory_transactions",
     label: {
@@ -421,7 +437,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "warehouse",
     label: { en: "Warehouse", ar: "المخازن" },
-    permissions: ["read_materials", "read_inventory_transactions"],
+    permissions: ["read_materials", "add_material", "update_material", "read_inventory_transactions"],
   },
   {
     domain: "procurement",
