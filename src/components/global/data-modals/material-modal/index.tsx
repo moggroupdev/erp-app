@@ -15,7 +15,7 @@ import Modal from "@/components/ui/modal";
 import SelectMaterialMain from "@/components/global/select-material-main";
 import SelectMaterialSub from "@/components/global/select-material-sub";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
-import SelectMaterialUnit from "@/components/global/select-material-unit";
+import SelectMaterialUnit from "@/components/global/selections/enum-based/select-material-unit";
 
 type MaterialFormEntity = Material | MaterialWithCreator;
 
