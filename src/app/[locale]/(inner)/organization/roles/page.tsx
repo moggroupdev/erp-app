@@ -26,7 +26,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import RefetchButton from "@/components/ui/refetch-button";
 import RoleCard from "./components/role-card";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
-import SelectDepartment from "@/components/global/select-department";
+import SelectDepartment from "@/components/global/selections/query-based/select-department";
 
 const PAGE_TITLE = { en: "Roles", ar: "الأدوار" };
 

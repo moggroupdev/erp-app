@@ -32,8 +32,8 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
-import SelectDepartment from "@/components/global/select-department";
-import SelectRole from "@/components/global/select-role";
+import SelectDepartment from "@/components/global/selections/query-based/select-department";
+import SelectRole from "@/components/global/selections/query-based/select-role";
 import UserModal from "@/components/global/data-modals/user-modal";
 
 const PAGE_TITLE = { en: "Users", ar: "المستخدمون" };
