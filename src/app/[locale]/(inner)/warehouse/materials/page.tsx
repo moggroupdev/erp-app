@@ -32,6 +32,9 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import MaterialModal from "@/components/global/material-modal";
+import SelectMaterialType from "@/components/global/select-material-type";
+import SelectMaterialMain from "@/components/global/select-material-main";
+import SelectMaterialSub from "@/components/global/select-material-sub";
 import MoneyViewer from "@/components/ui/money-viewer";
 
 const PAGE_TITLE = { en: "Materials & Spare Parts", ar: "الخامات وقطع الغيار" };
@@ -62,22 +65,42 @@ export default function Page() {
     setPendingValue: setPendingKeyword,
     setImmediateValue: setImmediateKeyword,
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
+  const [materialTypeFilter, setMaterialTypeFilter] = useState<string | null>(urlSearchParams.get("materialType") || null);
+  const [mainCategoryFilter, setMainCategoryFilter] = useState<string | null>(urlSearchParams.get("mainCategoryId") || null);
+  const [subCategoryFilter, setSubCategoryFilter] = useState<string | null>(urlSearchParams.get("subCategoryId") || null);
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
+    materialType: materialTypeFilter,
+    mainCategoryId: mainCategoryFilter,
+    subCategoryId: subCategoryFilter,
   };
 
   const params = { limit: MATERIALS_PER_PAGE, ...removeEmptyParams(urlParams) };
 
-  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword);
+  const hasActiveFilters: boolean = !!(
+    activePage !== 1 ||
+    debouncedKeyword ||
+    materialTypeFilter ||
+    mainCategoryFilter ||
+    subCategoryFilter
+  );
 
   const resetAllFilters = () => {
     setActivePage(1);
     setImmediateKeyword("");
+    setMaterialTypeFilter(null);
+    setMainCategoryFilter(null);
+    setSubCategoryFilter(null);
   };
 
-  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword });
+  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
+    debouncedKeyword,
+    materialTypeFilter,
+    mainCategoryFilter,
+    subCategoryFilter,
+  });
 
   const {
     data: paginatedMaterials,
@@ -96,7 +119,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword };
+    const newFilters = { debouncedKeyword, materialTypeFilter, mainCategoryFilter, subCategoryFilter };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -107,7 +130,13 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword]);
+  }, [activePage, debouncedKeyword, materialTypeFilter, mainCategoryFilter, subCategoryFilter]);
+
+  function handleMainCategoryFilterChange(value: React.SetStateAction<string | null>) {
+    const next = typeof value === "function" ? value(mainCategoryFilter) : value;
+    setMainCategoryFilter(next);
+    setSubCategoryFilter(null);
+  }
 
   // ========================= MODALS =========================
 
@@ -136,20 +165,49 @@ export default function Page() {
         ),
       }}
     >
-      <TextInput
-        value={keyword}
-        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-        placeholder={translate("Search for a material...", "ابحث عن مادة...")}
-        leftSection={<Search size={15} />}
-        radius="md"
-        rightSection={
-          keyword && (
-            <button onClick={() => setImmediateKeyword("")}>
-              <X size={15} />
-            </button>
-          )
-        }
-      />
+      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
+        <div className="col-span-1 md:col-span-3">
+          <TextInput
+            value={keyword}
+            onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+            placeholder={translate("Search for a material...", "ابحث عن مادة...")}
+            leftSection={<Search size={15} />}
+            radius="md"
+            rightSection={
+              keyword ? (
+                <button type="button" onClick={() => setImmediateKeyword("")}>
+                  <X size={15} />
+                </button>
+              ) : undefined
+            }
+          />
+        </div>
+
+        <SelectMaterialType
+          value={materialTypeFilter}
+          setValue={setMaterialTypeFilter}
+          placeholder={translate("Select type...", "اختر النوع...")}
+          clearable
+          radius="md"
+        />
+
+        <SelectMaterialMain
+          value={mainCategoryFilter}
+          setValue={handleMainCategoryFilterChange}
+          placeholder={translate("Select main category...", "اختر الفئة الرئيسية...")}
+          clearable
+          radius="md"
+        />
+
+        <SelectMaterialSub
+          value={subCategoryFilter}
+          setValue={setSubCategoryFilter}
+          mainCategoryScope={mainCategoryFilter ?? undefined}
+          placeholder={translate("Select subcategory...", "اختر الفئة الفرعية...")}
+          clearable
+          radius="md"
+        />
+      </div>
 
       {isFetching ? (
         <LoadingSection message={translate("Loading materials...", "جاري تحميل المواد...")} />
@@ -162,10 +220,10 @@ export default function Page() {
       ) : (
         paginatedMaterials &&
         (paginatedMaterials.data.length === 0 ? (
-          debouncedKeyword ? (
+          debouncedKeyword || materialTypeFilter || mainCategoryFilter || subCategoryFilter ? (
             <NoResultsSection
-              keyword={debouncedKeyword}
-              button={{ text: translate("View All", "عرض الكل"), onClick: () => setImmediateKeyword("") }}
+              keyword={debouncedKeyword || translate("selected filters", "الفلاتر المحددة")}
+              button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
             />
           ) : (
             <EmptySection useDefaultImg message={translate("No materials found", "لا توجد مواد")} />
