@@ -10,9 +10,9 @@ import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
 import { Button, Checkbox, SegmentedControl, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectGovernorate from "@/components/global/select-governorate";
-import SelectCity from "@/components/global/select-city";
-import SelectCountry from "@/components/global/select-country";
+import SelectGovernorate from "@/components/global/selections/query-based/select-governorate";
+import SelectCity from "@/components/global/selections/query-based/select-city";
+import SelectCountry from "@/components/global/selections/query-based/select-country";
 
 type LocationScope = "in-egypt" | "outside-egypt";
 

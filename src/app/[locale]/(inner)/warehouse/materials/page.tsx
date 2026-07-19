@@ -33,8 +33,8 @@ import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
-import SelectMaterialMain from "@/components/global/select-material-main";
-import SelectMaterialSub from "@/components/global/select-material-sub";
+import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
+import SelectMaterialSub from "@/components/global/selections/query-based/select-material-sub";
 import MoneyViewer from "@/components/ui/money-viewer";
 
 const PAGE_TITLE = { en: "Materials & Spare Parts", ar: "الخامات وقطع الغيار" };
