@@ -14,7 +14,7 @@ import { TextInput, Button, PasswordInput, Checkbox } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import SelectDepartment from "@/components/global/select-department";
-import SelectProductionSubDepartment from "@/components/global/select-production-sub-department";
+import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectRole from "@/components/global/select-role";
 
 export default function UserModal({

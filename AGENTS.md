@@ -17,8 +17,11 @@ src/
 │   ├── (public)/            # Public pages (no auth gate)
 │   └── [...not-found]/
 ├── components/
-│   ├── global/              # Cross-feature (sidebar, selects, …)
-│   │   └── data-modals/     # Shared create/edit entity modals (user, vendor, …)
+│   ├── global/              # Cross-feature (sidebar, selections, …)
+│   │   ├── data-modals/     # Shared create/edit entity modals (user, vendor, …)
+│   │   └── selections/      # Shared LocalizedSelect wrappers
+│   │       ├── enum-based/  # Options from `lib/constants/enums`
+│   │       └── query-based/ # Options from `@/hooks/reference` (API/React Query)
 │   ├── guards/              # Auth + permission guards
 │   ├── layouts/             # Inner shell / page chrome
 │   ├── mantine/             # Mantine setup helpers
@@ -133,11 +136,11 @@ const city = locationHelpers.getCityById(cityId);
 
 ### Mutations & cache
 
-| After write                        | Prefer                                                                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------------------- |
-| Create / update entity             | `invalidateQueries({ queryKey: queryKeys.<resource>.all })`                                 |
+| After write                        | Prefer                                                                           |
+| ---------------------------------- | -------------------------------------------------------------------------------- |
+| Create / update entity             | `invalidateQueries({ queryKey: queryKeys.<resource>.all })`                      |
 | Update when API returns the entity | also `setQueryData(queryKeys.<resource>.detail(id), response)` (see data-modals) |
-| Nested collection only (addresses) | `invalidateQueries` on that nested key                                                      |
+| Nested collection only (addresses) | `invalidateQueries` on that nested key                                           |
 
 ---
 
@@ -232,15 +235,17 @@ const url = getLocalizedHref(locale, "/privacy-policy");
 
 ## UI patterns
 
-| Pattern                 | Path                                                   |
-| ----------------------- | ------------------------------------------------------ |
-| Page shell              | `src/components/ui/layout-box.tsx`                     |
-| Loading / error / empty | `src/components/ui/sections/{loading,error,empty}.tsx` |
-| No search results       | `src/components/ui/sections/no-results.tsx`            |
-| Refetch control         | `src/components/ui/refetch-button.tsx`                 |
-| Modal shell             | `src/components/ui/modal.tsx`                                   |
-| Data modals             | `src/components/global/data-modals/*-modal`                      |
-| Page-local modals       | Feature page `components/` (e.g. department modal)              |
+| Pattern                 | Path                                                                       |
+| ----------------------- | -------------------------------------------------------------------------- |
+| Page shell              | `src/components/ui/layout-box.tsx`                                         |
+| Loading / error / empty | `src/components/ui/sections/{loading,error,empty}.tsx`                     |
+| No search results       | `src/components/ui/sections/no-results.tsx`                                |
+| Refetch control         | `src/components/ui/refetch-button.tsx`                                     |
+| Modal shell             | `src/components/ui/modal.tsx`                                              |
+| Data modals             | `src/components/global/data-modals/*-modal`                                |
+| Page-local modals       | Feature page `components/` (e.g. department modal)                         |
+| Enum-based selects      | `src/components/global/selections/enum-based/*`                            |
+| Query-based selects     | `src/components/global/selections/query-based/*` (use `@/hooks/reference`) |
 
 Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSection` (retry) → else empty/no-results → else content.
 
@@ -249,5 +254,6 @@ Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSecti
 - Document title: `useDocumentTitle` with bilingual titles.
 - Icons: prefer `lucide-react`.
 - Do **not** use heavy hover translate/lift (`translate-y`, etc.) or heavy hover shadow changes on cards and list items. Prefer quiet hover.
+- Shared selects: put enum-backed ones under `selections/enum-based/`, and reference-data ones (locations, departments, roles, categories, …) under `selections/query-based/`.
 
 Match existing CRUD pages (vendors, customers, departments) when adding new ones.

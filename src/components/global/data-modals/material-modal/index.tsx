@@ -14,7 +14,7 @@ import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import SelectMaterialMain from "@/components/global/select-material-main";
 import SelectMaterialSub from "@/components/global/select-material-sub";
-import SelectMaterialType from "@/components/global/select-material-type";
+import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
 import SelectMaterialUnit from "@/components/global/select-material-unit";
 
 type MaterialFormEntity = Material | MaterialWithCreator;
