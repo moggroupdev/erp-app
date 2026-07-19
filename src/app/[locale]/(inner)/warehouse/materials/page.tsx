@@ -196,6 +196,7 @@ export default function Page() {
           setValue={handleMainCategoryFilterChange}
           placeholder={translate("Select main category...", "اختر الفئة الرئيسية...")}
           clearable
+          searchable
           radius="md"
         />
 
@@ -205,6 +206,7 @@ export default function Page() {
           mainCategoryScope={mainCategoryFilter ?? undefined}
           placeholder={translate("Select subcategory...", "اختر الفئة الفرعية...")}
           clearable
+          searchable
           radius="md"
         />
       </div>

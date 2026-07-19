@@ -88,19 +88,32 @@ export default function MaterialModal({
       const normalizedMinimumStock =
         minimumStock === "" || minimumStock === null || minimumStock === undefined ? null : Number(minimumStock);
 
-      const dto = {
-        title: title.trim(),
-        description: description.trim() || null,
-        subCategoryId: subCategoryId!,
-        materialType: materialType as MaterialType,
-        unit: unit as MaterialUnit,
-        legacyCode: legacyCode.trim() || null,
-        minimumStock: normalizedMinimumStock,
-      };
+      if (materialToUpdate) {
+        return await materialsApi.update({
+          privateRequest,
+          code: materialToUpdate.code,
+          dto: {
+            title: title.trim(),
+            description: description.trim() || null,
+            subCategoryId: subCategoryId!,
+            unit: unit as MaterialUnit,
+            minimumStock: normalizedMinimumStock,
+          },
+        });
+      }
 
-      return materialToUpdate
-        ? await materialsApi.update({ privateRequest, code: materialToUpdate.code, dto })
-        : await materialsApi.create({ privateRequest, dto });
+      return await materialsApi.create({
+        privateRequest,
+        dto: {
+          title: title.trim(),
+          description: description.trim() || null,
+          subCategoryId: subCategoryId!,
+          materialType: materialType as MaterialType,
+          unit: unit as MaterialUnit,
+          legacyCode: legacyCode.trim() || null,
+          minimumStock: normalizedMinimumStock,
+        },
+      });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.materials.all });
@@ -119,7 +132,8 @@ export default function MaterialModal({
     if (!mainCategoryId)
       return setValidationError(translate("Please select a main category.", "يرجى اختيار الفئة الرئيسية."));
     if (!subCategoryId) return setValidationError(translate("Please select a subcategory.", "يرجى اختيار الفئة الفرعية."));
-    if (!materialType) return setValidationError(translate("Please select a material type.", "يرجى اختيار نوع المادة."));
+    if (!materialToUpdate && !materialType)
+      return setValidationError(translate("Please select a material type.", "يرجى اختيار نوع المادة."));
     if (!unit) return setValidationError(translate("Please select a unit.", "يرجى اختيار الوحدة."));
 
     const normalizedMinimumStock =
@@ -153,15 +167,19 @@ export default function MaterialModal({
   const normalizedMinimumStock =
     minimumStock === "" || minimumStock === null || minimumStock === undefined ? null : Number(minimumStock);
 
-  const isRequiredInputFilled = !!(title.trim() && mainCategoryId && subCategoryId && materialType && unit);
+  const isRequiredInputFilled = !!(
+    title.trim() &&
+    mainCategoryId &&
+    subCategoryId &&
+    (materialToUpdate || materialType) &&
+    unit
+  );
 
   const isDataChanged = materialToUpdate
     ? title.trim() !== materialToUpdate.title ||
       (description.trim() || null) !== materialToUpdate.description ||
       subCategoryId !== materialToUpdate.subCategoryId ||
-      materialType !== materialToUpdate.materialType ||
       unit !== materialToUpdate.unit ||
-      (legacyCode.trim() || null) !== materialToUpdate.legacyCode ||
       normalizedMinimumStock !== materialToUpdate.minimumStock
     : false;
 
@@ -209,13 +227,15 @@ export default function MaterialModal({
             required
           />
 
-          <SelectMaterialType
-            value={materialType}
-            setValue={setMaterialType}
-            label={translate("Material Type", "نوع المادة")}
-            placeholder={translate("Select material type", "اختر نوع المادة")}
-            required
-          />
+          {!materialToUpdate && (
+            <SelectMaterialType
+              value={materialType}
+              setValue={setMaterialType}
+              label={translate("Material Type", "نوع المادة")}
+              placeholder={translate("Select material type", "اختر نوع المادة")}
+              required
+            />
+          )}
 
           <SelectMaterialUnit
             value={unit}
@@ -226,13 +246,15 @@ export default function MaterialModal({
             required
           />
 
-          <TextInput
-            value={legacyCode}
-            onChange={(e) => setLegacyCode(e.target.value)}
-            label={translate("Legacy Code (Optional)", "الكود القديم (اختياري)")}
-            placeholder={translate("Enter legacy code", "أدخل الكود القديم")}
-            radius="md"
-          />
+          {!materialToUpdate && (
+            <TextInput
+              value={legacyCode}
+              onChange={(e) => setLegacyCode(e.target.value)}
+              label={translate("Legacy Code (Optional)", "الكود القديم (اختياري)")}
+              placeholder={translate("Enter legacy code", "أدخل الكود القديم")}
+              radius="md"
+            />
+          )}
 
           <NumberInput
             value={minimumStock}
