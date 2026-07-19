@@ -10,6 +10,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useCategories from "@/hooks/use-categories";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query/keys";
@@ -19,7 +20,6 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { type Material } from "@/types/material";
-import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
@@ -47,6 +47,13 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
+  const { helpers } = useCategories();
+
+  function getCategoryLabels(subCategoryId: string) {
+    const sub = helpers.getMaterialCategorySubById(subCategoryId);
+    const main = sub ? helpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
+    return { main: main?.title || "-", sub: sub?.title || "-" };
+  }
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
@@ -171,47 +178,52 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Title", "العنوان")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                    <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
+                    <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
                     <Table.Th>{translate("Type", "النوع")}</Table.Th>
                     <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
                     <Table.Th>{translate("Unit Cost", "تكلفة الوحدة")}</Table.Th>
                     <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
-                    <Table.Th>{translate("Registration Date", "تاريخ التسجيل")}</Table.Th>
                     <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {paginatedMaterials.data.map((material) => (
-                    <Table.Tr key={material.code} className="text-gray-600">
-                      <Table.Td className="font-semibold text-gray-800">
-                        <Link href={getLocalizedHref(`/warehouse/materials/${material.code}`)} className="hover:underline">
-                          {material.title}
-                        </Link>
-                      </Table.Td>
-                      <Table.Td>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-mono">{material.code}</span>
-                          <CopyButton text={material.code} />
-                        </div>
-                      </Table.Td>
-                      <Table.Td>{getMaterialTypeLabel(material.materialType, locale)}</Table.Td>
-                      <Table.Td>{getMaterialUnitLabel(material.unit, locale)}</Table.Td>
-                      <Table.Td>
-                        <MoneyViewer amount={material.unitCost} currency={translate("EGP", "ج.م")} />
-                      </Table.Td>
-                      <Table.Td>{material.quantity}</Table.Td>
-                      <Table.Td>{formatDateAndTime(material.createdAt, locale)}</Table.Td>
-                      <Table.Td w={0}>
-                        <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
-                          <button
-                            onClick={() => handleOpenUpdateModal(material)}
-                            className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                        </PermissionGuard>
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
+                  {paginatedMaterials.data.map((material) => {
+                    const categories = getCategoryLabels(material.subCategoryId);
+                    return (
+                      <Table.Tr key={material.code} className="text-gray-600">
+                        <Table.Td className="font-semibold text-gray-800">
+                          <Link href={getLocalizedHref(`/warehouse/materials/${material.code}`)} className="hover:underline">
+                            {material.title}
+                          </Link>
+                        </Table.Td>
+                        <Table.Td>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono">{material.code}</span>
+                            <CopyButton text={material.code} />
+                          </div>
+                        </Table.Td>
+                        <Table.Td>{categories.main}</Table.Td>
+                        <Table.Td>{categories.sub}</Table.Td>
+                        <Table.Td>{getMaterialTypeLabel(material.materialType, locale)}</Table.Td>
+                        <Table.Td>{getMaterialUnitLabel(material.unit, locale)}</Table.Td>
+                        <Table.Td>
+                          <MoneyViewer amount={material.unitCost} currency={translate("EGP", "ج.م")} />
+                        </Table.Td>
+                        <Table.Td>{material.quantity}</Table.Td>
+                        <Table.Td w={0}>
+                          <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
+                            <button
+                              onClick={() => handleOpenUpdateModal(material)}
+                              className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                          </PermissionGuard>
+                        </Table.Td>
+                      </Table.Tr>
+                    );
+                  })}
                 </Table.Tbody>
               </Table>
             </div>
