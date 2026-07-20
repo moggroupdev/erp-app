@@ -11,15 +11,15 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { FolderKanban, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
-import EmptySection from "@/components/ui/sections/empty";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
 import OverviewStats from "../inventory-summary/components/overview-stats";
 import ReportSkeleton from "../inventory-summary/components/report-skeleton";
 import MaterialTypeChart from "../inventory-summary/components/material-type-chart";
 import StockStatusChart from "../inventory-summary/components/stock-status-chart";
 import TopMaterialsTable from "../inventory-summary/components/top-materials-table";
 import LowStockMaterialsTable from "../inventory-summary/components/low-stock-materials-table";
+import CategoryPicker from "./components/category-picker";
+import CategoryStatsEmpty from "./components/category-stats-empty";
 import SubCategoryTable from "./components/sub-category-table";
 
 const PAGE_TITLE = { en: "Materials Category Stats", ar: "إحصائيات فئة المواد" };
@@ -39,8 +39,7 @@ export default function Page() {
 
   const mainCategoryId = searchParams.get("mainCategoryId");
 
-  function setMainCategoryId(value: React.SetStateAction<string | null>) {
-    const next = typeof value === "function" ? value(mainCategoryId) : value;
+  function setMainCategoryId(next: string | null) {
     const params = new URLSearchParams(searchParams.toString());
     if (next) params.set("mainCategoryId", next);
     else params.delete("mainCategoryId");
@@ -87,23 +86,11 @@ export default function Page() {
         }
       />
 
-      <div className="rounded-2xl bg-white p-4 sm:p-5">
-        <SelectMaterialMain
-          label={translate("Main category", "الفئة الرئيسية")}
-          placeholder={translate("Select a main category", "اختر فئة رئيسية")}
-          value={mainCategoryId}
-          setValue={setMainCategoryId}
-          clearable
-          searchable
-        />
-      </div>
+      <CategoryPicker value={mainCategoryId} onChange={setMainCategoryId} />
 
       <main>
         {!mainCategoryId ? (
-          <EmptySection
-            message={translate("Select a main category to load stats.", "اختر فئة رئيسية لعرض الإحصائيات.")}
-            className="bg-white"
-          />
+          <CategoryStatsEmpty />
         ) : isFetching ? (
           <ReportSkeleton />
         ) : errorMessage ? (
@@ -116,11 +103,6 @@ export default function Page() {
         ) : (
           data && (
             <div className="flex flex-col gap-6">
-              <p className="text-sm text-stone-600">
-                {translate("Showing stats for", "عرض إحصائيات")}{" "}
-                <span className="font-semibold text-stone-800">{data.category.title}</span>
-              </p>
-
               <OverviewStats overview={data.overview} />
 
               <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
