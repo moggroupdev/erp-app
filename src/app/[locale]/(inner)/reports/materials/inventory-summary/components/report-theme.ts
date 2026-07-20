@@ -10,7 +10,6 @@ export const reportTheme = {
       out_of_stock: "#a8a29e",
       low_stock: "#d97706",
       in_stock: "#059669",
-      no_minimum_set: "#0284c7",
     },
     categoryBar: "#0f766e",
     categoryBarHover: "#115e59",

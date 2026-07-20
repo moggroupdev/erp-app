@@ -1,7 +1,7 @@
 import type { Locale, LocalizedEntity } from "@/lib/i18n/types";
 import { translate } from "@/lib/i18n/utils";
 
-export const STOCK_STATUS_VALUES = ["out_of_stock", "low_stock", "in_stock", "no_minimum_set"] as const;
+export const STOCK_STATUS_VALUES = ["out_of_stock", "low_stock", "in_stock"] as const;
 
 export type StockStatus = (typeof STOCK_STATUS_VALUES)[number];
 
@@ -31,13 +31,6 @@ export const STOCK_STATUS_LABELS: LocalizedEntity<StockStatus> = {
     label: {
       en: "In Stock",
       ar: "متوفر",
-    },
-  },
-  no_minimum_set: {
-    value: "no_minimum_set",
-    label: {
-      en: "No Minimum Set",
-      ar: "بدون حد طلب",
     },
   },
 };
