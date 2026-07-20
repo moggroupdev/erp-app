@@ -47,6 +47,7 @@ export const PERMISSION_VALUES = [
   "read_service_agreements",
   "read_maintenance_orders",
   "show_analytics",
+  "read_material_reports",
 ] as const;
 
 export type Permission = (typeof PERMISSION_VALUES)[number];
@@ -298,6 +299,7 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث المادة",
     },
   },
+
   read_inventory_transactions: {
     value: "read_inventory_transactions",
     label: {
@@ -354,6 +356,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض أوامر الصيانة",
     },
   },
+  read_material_reports: {
+    value: "read_material_reports",
+    label: {
+      en: "Read Material Reports",
+      ar: "عرض تقارير المواد",
+    },
+  },
 };
 
 export const PERMISSION_LABELS_LIST = Object.values(PERMISSION_LABELS);
@@ -382,6 +391,7 @@ export type PermissionDomain =
   | "procurement"
   | "fulfillment"
   | "maintenance"
+  | "reports"
   | "analytics";
 
 export type PermissionDomainGroup = {
@@ -459,6 +469,11 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
     domain: "maintenance",
     label: { en: "Maintenance & Service", ar: "الصيانة والخدمة" },
     permissions: ["read_service_agreements", "read_maintenance_orders"],
+  },
+  {
+    domain: "reports",
+    label: { en: "Reports", ar: "التقارير" },
+    permissions: ["read_material_reports"],
   },
   {
     domain: "analytics",

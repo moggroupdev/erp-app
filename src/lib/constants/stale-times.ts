@@ -6,6 +6,9 @@ export const staleTimes = {
   customers: 5 * MINUTE,
   users: 30 * MINUTE,
   materials: 10 * MINUTE,
+  reports: {
+    materialsInventorySummary: 5 * MINUTE,
+  },
   locations: Infinity,
   departments: Infinity,
   roles: Infinity,

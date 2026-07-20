@@ -68,6 +68,13 @@ export const queryKeys = {
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
   },
+  reports: {
+    all: ["reports"] as const,
+    materials: {
+      all: ["reports", "materials"] as const,
+      inventorySummary: () => [...queryKeys.reports.materials.all, "inventory-summary"] as const,
+    },
+  },
   profile: {
     all: ["profile"] as const,
   },

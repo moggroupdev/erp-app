@@ -34,11 +34,11 @@ src/
 │   └── reference/             # Cached reference data hooks
 ├── lib/
 │   ├── api/                   # Domain API modules + query-keys/
-│   ├── constants/             # Enums, stale times, global flags
+│   ├── constants/             # Enums (incl. derived/), stale times, global flags
 │   ├── helpers/               # api-request, get-error-message, metadata, …
 │   └── i18n/                  # Locales, hooks, utils, dictionaries
 ├── middlewares/               # Localization (used from proxy.ts)
-└── types/                     # Shared DTOs / domain types
+└── types/                     # Shared DTOs / domain types (+ reports/ for aggregate shapes)
 ```
 
 Providers in `src/app/[locale]/layout.tsx`:
@@ -82,6 +82,16 @@ All live under `src/app/[locale]/`. The group name is **not** in the URL — onl
 | Errors      | `src/lib/helpers/get-error-message.ts` |
 
 Defaults (in `QueryProvider`): `retry: 0`, `staleTime: 0`, `refetchOnWindowFocus: false`. Override `staleTime` per resource via `staleTimes`.
+
+### Stale times
+
+Most resources use a flat entry (`staleTimes.materials`). When a domain has **multiple caches with different lifetimes** (reports), nest by feature:
+
+```ts
+staleTimes.reports.materialsInventorySummary;
+```
+
+Do **not** share one stale time across all reports — each report gets its own key under `staleTimes.reports`.
 
 ### Query keys
 
@@ -166,6 +176,23 @@ Query-based selects under `components/global/selections/query-based/` should use
 
 ---
 
+## Reports
+
+Reports differ from CRUD domains: response shapes are custom aggregates, not entity DTOs.
+
+| Piece       | Path                                                                 |
+| ----------- | -------------------------------------------------------------------- |
+| API         | `src/lib/api/reports.ts` — nest by domain (`reportsApi.materials.*`) |
+| Types       | `src/types/reports/<domain>.ts` + barrel `index.ts`                  |
+| Query keys  | `queryKeys.reports.<domain>.…`                                       |
+| Stale times | `staleTimes.reports.<reportName>` (per report, not one shared value) |
+
+**Types:** do **not** put report shapes in a flat `src/types/<domain>.ts` CRUD file. Use `src/types/reports/<domain>.ts` (e.g. `materials.ts`) and re-export from `src/types/reports/index.ts`. Import via `@/types/reports`.
+
+**New report:** add types under the matching domain file, API method under `reportsApi.<domain>`, query key, and a dedicated `staleTimes.reports.<reportName>` entry.
+
+---
+
 ## Auth & permissions
 
 | Piece             | Path                                                     |
@@ -185,20 +212,23 @@ Query-based selects under `components/global/selections/query-based/` should use
 
 ## Enums & constants
 
-All domain enums live under `src/lib/constants/enums/` (same pattern as existing files).
+Domain enums live under `src/lib/constants/enums/`. Most mirror DB-backed values from the server (`erp-server` `src/utils/constants.ts`).
 
-| Concern                  | Where                                                                                           |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| Values + typed map       | e.g. `PERMISSION_VALUES` → `PERMISSIONS`, `PRODUCT_SOURCE_TYPE_VALUES` → `PRODUCT_SOURCE_TYPES` |
-| Labels / lists / helpers | Same file (`*_LABELS`, `get*Label`, …)                                                          |
-| Other constants          | `src/lib/constants/` (`stale-times.ts`, `global.ts`, `regex.ts`, …)                             |
+| Concern                  | Where                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| DB-backed enums          | `src/lib/constants/enums/<name>.ts` (e.g. material types, permissions)                                       |
+| Derived / app-only enums | `src/lib/constants/enums/derived/<name>.ts` — no DB enum counterpart (e.g. stock status computed in reports) |
+| Values + typed map       | e.g. `PERMISSION_VALUES` → `PERMISSIONS`, `PRODUCT_SOURCE_TYPE_VALUES` → `PRODUCT_SOURCE_TYPES`              |
+| Labels / lists / helpers | Same file (`*_LABELS`, `get*Label`, …)                                                                       |
+| Other constants          | `src/lib/constants/` (`stale-times.ts`, `global.ts`, `regex.ts`, …)                                          |
 
 **Rules:**
 
-1. Define new enums in `src/lib/constants/enums/<name>.ts` first — values, TypeScript type, `SCREAMING_MAP`, and bilingual labels when needed.
-2. Import those constants in pages/components/API code.
-3. **Never** hardcode enum strings (permission names, source types, …) directly in components or pages.
-4. Enum-backed selects belong under `components/global/selections/enum-based/`.
+1. Define new **DB-backed** enums in `src/lib/constants/enums/<name>.ts` first — values, TypeScript type, `SCREAMING_MAP`, and bilingual labels when needed. Keep them aligned with the server constants.
+2. Define **derived** enums (computed classifications, report-only statuses, anything with no DB enum) under `src/lib/constants/enums/derived/` — same file pattern, different folder.
+3. Import those constants in pages/components/API code.
+4. **Never** hardcode enum strings (permission names, source types, …) directly in components or pages.
+5. Enum-backed selects belong under `components/global/selections/enum-based/`.
 
 Permissions are part of this rule: always `PERMISSIONS.READ_VENDORS`, never `"read_vendors"` inline.
 
