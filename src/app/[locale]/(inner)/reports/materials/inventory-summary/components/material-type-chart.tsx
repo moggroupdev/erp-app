@@ -12,9 +12,9 @@ import MoneyViewer from "@/components/ui/money-viewer";
 import { formatMoney } from "@/lib/helpers/format-money";
 
 export default function MaterialTypeChart({ data }: { data: MaterialsInventoryByMaterialType[] }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const dir = localeDirections[locale];
-  const currency = translate("EGP", "ج.م");
+  const currency = translation.currency;
 
   const chartData = data
     .filter((item) => item.count > 0)

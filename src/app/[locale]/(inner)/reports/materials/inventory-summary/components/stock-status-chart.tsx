@@ -11,9 +11,9 @@ import { reportTheme } from "./report-theme";
 import { formatMoney } from "@/lib/helpers/format-money";
 
 export default function StockStatusChart({ data }: { data: MaterialsInventoryStockStatus[] }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const dir = localeDirections[locale];
-  const currency = translate("EGP", "ج.م");
+  const currency = translation.currency;
 
   const chartData = data
     .filter((item) => item.count > 0)

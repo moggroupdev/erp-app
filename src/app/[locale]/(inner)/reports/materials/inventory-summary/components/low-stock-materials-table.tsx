@@ -8,7 +8,7 @@ import type { MaterialsInventoryLowStockMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
 
 export default function LowStockMaterialsTable({ data }: { data: MaterialsInventoryLowStockMaterial[] }) {
-  const { locale, translate, translation } = useI18n();
+  const { translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
   return (

@@ -7,9 +7,9 @@ import type { MaterialsInventoryOverview } from "@/types/reports";
 import { reportTheme } from "./report-theme";
 
 export default function OverviewStats({ overview }: { overview: MaterialsInventoryOverview }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
 
-  const currency = translate("EGP", "ج.م");
+  const currency = translation.currency;
 
   const valueChangePositive = overview.valueChangeAmount >= 0;
   const ValueChangeIcon = valueChangePositive ? ArrowUpRight : ArrowDownRight;
