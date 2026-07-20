@@ -266,6 +266,7 @@ const url = getLocalizedHref(locale, "/privacy-policy");
 - Never hardcode `/en/...` or `/ar/...` in hrefs.
 - Inline bilingual UI copy via `translate("English", "العربية")`.
 - Dictionary strings (dir, shared messages) via `translation` when appropriate.
+- Do **not** use the em dash character (`—`) in UI copy or string literals.
 
 ---
 
