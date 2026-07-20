@@ -5,6 +5,7 @@ import {
   BadgeDollarSign,
   Boxes,
   Building2,
+  ChartNoAxesCombined,
   ClipboardList,
   Factory,
   FileSearch,
@@ -48,6 +49,19 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     icon: Home,
     requiredPermission: PERMISSIONS.SHOW_ANALYTICS,
     items: [],
+  },
+  {
+    label: { en: "Reports", ar: "التقارير" },
+    href: "/reports",
+    icon: ChartNoAxesCombined,
+    items: [
+      {
+        label: { en: "Materials", ar: "المواد" },
+        href: "/reports/materials",
+        icon: Boxes,
+        requiredPermission: PERMISSIONS.READ_MATERIAL_REPORTS,
+      },
+    ],
   },
   {
     label: { en: "Sales & Customers", ar: "المبيعات والعملاء" },

@@ -5,9 +5,7 @@ export const STOCK_STATUS_VALUES = ["out_of_stock", "low_stock", "in_stock", "no
 
 export type StockStatus = (typeof STOCK_STATUS_VALUES)[number];
 
-export const STOCK_STATUSES = Object.fromEntries(
-  STOCK_STATUS_VALUES.map((status) => [status.toUpperCase(), status]),
-) as {
+export const STOCK_STATUSES = Object.fromEntries(STOCK_STATUS_VALUES.map((status) => [status.toUpperCase(), status])) as {
   [K in Uppercase<StockStatus>]: Lowercase<K>;
 };
 
@@ -39,7 +37,7 @@ export const STOCK_STATUS_LABELS: LocalizedEntity<StockStatus> = {
     value: "no_minimum_set",
     label: {
       en: "No Minimum Set",
-      ar: "بدون حد أدنى",
+      ar: "بدون حد طلب",
     },
   },
 };

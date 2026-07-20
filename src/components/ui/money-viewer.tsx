@@ -1,3 +1,5 @@
+import { formatMoney } from "@/lib/helpers/format-money";
+
 export default function MoneyViewer({
   amount,
   currency,
@@ -7,5 +9,5 @@ export default function MoneyViewer({
   currency: string;
   className?: string;
 }) {
-  return <span className={className}>{`${amount.toFixed(2)} ${currency}`}</span>;
+  return <span className={className}>{formatMoney(amount, currency)}</span>;
 }
