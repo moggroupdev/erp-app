@@ -27,7 +27,7 @@ export default function Page() {
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
       />
 
-      <main className="mx-auto max-w-7xl px-6 sm:px-8">
+      <main>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ReportLinkCard
             report={{

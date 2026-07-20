@@ -3,7 +3,7 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import { Boxes, ChartNoAxesCombined } from "lucide-react";
+import { Boxes } from "lucide-react";
 import ReportLinkCard from "../components/report-link-card";
 
 const PAGE_TITLE = {
@@ -34,7 +34,7 @@ export default function Page() {
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
       />
 
-      <main className="mx-auto max-w-7xl px-6 sm:px-8">
+      <main>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ReportLinkCard
             report={{

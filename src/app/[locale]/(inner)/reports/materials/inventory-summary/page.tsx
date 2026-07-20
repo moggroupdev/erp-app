@@ -62,7 +62,7 @@ export default function Page() {
           </button>
         }
       />
-      <main className="mx-auto max-w-7xl px-6 sm:px-8">
+      <main>
         {isFetching ? (
           <ReportSkeleton />
         ) : errorMessage ? (
