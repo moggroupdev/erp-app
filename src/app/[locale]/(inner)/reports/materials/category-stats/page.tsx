@@ -1,0 +1,140 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { useI18n } from "@/lib/i18n/hooks";
+import useDocumentTitle from "@/hooks/use-document-title";
+import usePrivateRequest from "@/hooks/use-private-request";
+import reportsApi from "@/lib/api/reports";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query-keys";
+import { staleTimes } from "@/lib/constants/stale-times";
+import { FolderKanban, RefreshCw } from "lucide-react";
+import ErrorSection from "@/components/ui/sections/error";
+import EmptySection from "@/components/ui/sections/empty";
+import ReportPageHeader from "@/components/ui/report-page-header";
+import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
+import OverviewStats from "../inventory-summary/components/overview-stats";
+import ReportSkeleton from "../inventory-summary/components/report-skeleton";
+import MaterialTypeChart from "../inventory-summary/components/material-type-chart";
+import StockStatusChart from "../inventory-summary/components/stock-status-chart";
+import TopMaterialsTable from "../inventory-summary/components/top-materials-table";
+import LowStockMaterialsTable from "../inventory-summary/components/low-stock-materials-table";
+import SubCategoryTable from "./components/sub-category-table";
+
+const PAGE_TITLE = { en: "Materials Category Stats", ar: "إحصائيات فئة المواد" };
+
+const PAGE_SUBTITLE = {
+  en: "Select a main category to see inventory value, composition by type, stock health, and subcategory breakdown.",
+  ar: "اختر فئة رئيسية لعرض قيمة المخزون، والتكوين حسب النوع، وصحة المخزون، وتفصيل الفئات الفرعية.",
+};
+
+export default function Page() {
+  const { locale, translate } = useI18n();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const privateRequest = usePrivateRequest();
+
+  useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
+
+  const mainCategoryId = searchParams.get("mainCategoryId");
+
+  function setMainCategoryId(value: React.SetStateAction<string | null>) {
+    const next = typeof value === "function" ? value(mainCategoryId) : value;
+    const params = new URLSearchParams(searchParams.toString());
+    if (next) params.set("mainCategoryId", next);
+    else params.delete("mainCategoryId");
+    const query = params.toString();
+    router.replace(query ? `?${query}` : "?", { scroll: false });
+  }
+
+  const { data, isFetching, error, refetch } = useQuery({
+    queryKey: queryKeys.reports.materials.categoryStats(mainCategoryId ?? ""),
+    queryFn: ({ signal }) =>
+      reportsApi.materials.getCategoryStats({
+        privateRequest,
+        mainCategoryId: mainCategoryId!,
+        signal,
+      }),
+    staleTime: staleTimes.reports.materialsCategoryStats,
+    enabled: Boolean(mainCategoryId),
+  });
+
+  const errorMessage = error ? getErrorMessage(locale, error) : "";
+
+  return (
+    <div className="space-y-6">
+      <ReportPageHeader
+        breadcrumbs={[
+          { label: { en: "Dashboard", ar: "الرئيسية" }, href: "/dashboard" },
+          { label: { en: "Reports", ar: "التقارير" }, href: "/reports" },
+          { label: { en: "Materials Reports", ar: "تقارير المواد" }, href: "/reports/materials" },
+          { label: PAGE_TITLE },
+        ]}
+        icon={FolderKanban}
+        title={translate(PAGE_TITLE.en, PAGE_TITLE.ar)}
+        subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
+        sideElement={
+          mainCategoryId ? (
+            <button
+              disabled={isFetching}
+              onClick={() => refetch()}
+              className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
+            </button>
+          ) : undefined
+        }
+      />
+
+      <div className="rounded-2xl bg-white p-4 sm:p-5">
+        <SelectMaterialMain
+          label={translate("Main category", "الفئة الرئيسية")}
+          placeholder={translate("Select a main category", "اختر فئة رئيسية")}
+          value={mainCategoryId}
+          setValue={setMainCategoryId}
+          clearable
+          searchable
+        />
+      </div>
+
+      <main>
+        {!mainCategoryId ? (
+          <EmptySection
+            message={translate("Select a main category to load stats.", "اختر فئة رئيسية لعرض الإحصائيات.")}
+            className="bg-white"
+          />
+        ) : isFetching ? (
+          <ReportSkeleton />
+        ) : errorMessage ? (
+          <ErrorSection
+            errorTitle={translate("Error loading report", "خطأ في تحميل التقرير")}
+            errorMessage={errorMessage}
+            button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
+            className="bg-white"
+          />
+        ) : (
+          data && (
+            <div className="flex flex-col gap-6">
+              <p className="text-sm text-stone-600">
+                {translate("Showing stats for", "عرض إحصائيات")}{" "}
+                <span className="font-semibold text-stone-800">{data.category.title}</span>
+              </p>
+
+              <OverviewStats overview={data.overview} />
+
+              <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+                <MaterialTypeChart data={data.byMaterialType} />
+                <StockStatusChart data={data.stockStatus} />
+              </div>
+
+              <SubCategoryTable data={data.bySubCategory} />
+              <TopMaterialsTable data={data.topMaterialsByValue} />
+              <LowStockMaterialsTable data={data.lowStockMaterials} />
+            </div>
+          )
+        )}
+      </main>
+    </div>
+  );
+}

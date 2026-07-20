@@ -43,6 +43,16 @@ export default function Page() {
               href: "/reports/materials/inventory-summary",
             }}
           />
+          <ReportLinkCard
+            report={{
+              label: { en: "Category Stats", ar: "إحصائيات الفئة" },
+              description: {
+                en: "Stats for materials in a selected main category",
+                ar: "إحصائيات المواد ضمن فئة رئيسية محددة",
+              },
+              href: "/reports/materials/category-stats",
+            }}
+          />
         </div>
       </main>
     </div>

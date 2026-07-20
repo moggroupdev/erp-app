@@ -56,7 +56,7 @@ export default function Page() {
           <button
             disabled={isFetching}
             onClick={() => refetch()}
-            className="rounded-md text-xs text-white hover:text-white/75 disabled:opacity-50"
+            className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
           >
             <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
           </button>
