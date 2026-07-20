@@ -73,6 +73,8 @@ export const queryKeys = {
     materials: {
       all: ["reports", "materials"] as const,
       inventorySummary: () => [...queryKeys.reports.materials.all, "inventory-summary"] as const,
+      categoryStats: (mainCategoryId: string) =>
+        [...queryKeys.reports.materials.all, "category-stats", mainCategoryId] as const,
     },
   },
   profile: {

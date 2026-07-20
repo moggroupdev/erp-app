@@ -2,8 +2,6 @@ import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { StockStatus } from "@/lib/constants/enums/derived/stock-statuses";
 
-// ==================== Materials Inventory Summary ====================
-
 export type MaterialsInventoryOverview = {
   totalMaterials: number;
   totalInventoryValue: number;
@@ -25,6 +23,13 @@ export type MaterialsInventoryByMaterialType = {
 export type MaterialsInventoryByMainCategory = {
   mainCategoryId: string;
   mainCategoryTitle: string;
+  count: number;
+  totalValue: number;
+};
+
+export type MaterialsCategoryStatsBySubCategory = {
+  subCategoryId: string;
+  subCategoryTitle: string;
   count: number;
   totalValue: number;
 };
@@ -57,6 +62,16 @@ export type MaterialsInventorySummary = {
   byMaterialType: MaterialsInventoryByMaterialType[];
   byMainCategory: MaterialsInventoryByMainCategory[];
   stockStatus: MaterialsInventoryStockStatus[];
+  topMaterialsByValue: MaterialsInventoryTopMaterial[];
+  lowStockMaterials: MaterialsInventoryLowStockMaterial[];
+};
+
+export type MaterialsCategoryStats = {
+  category: { id: string; title: string };
+  overview: MaterialsInventoryOverview;
+  byMaterialType: MaterialsInventoryByMaterialType[];
+  stockStatus: MaterialsInventoryStockStatus[];
+  bySubCategory: MaterialsCategoryStatsBySubCategory[];
   topMaterialsByValue: MaterialsInventoryTopMaterial[];
   lowStockMaterials: MaterialsInventoryLowStockMaterial[];
 };
