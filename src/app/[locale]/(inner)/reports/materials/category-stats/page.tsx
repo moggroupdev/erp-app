@@ -12,15 +12,15 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { FolderKanban, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import OverviewStats from "../inventory-summary/components/overview-stats";
-import ReportSkeleton from "../inventory-summary/components/report-skeleton";
-import MaterialTypeChart from "../inventory-summary/components/material-type-chart";
-import StockStatusChart from "../inventory-summary/components/stock-status-chart";
-import TopMaterialsTable from "../inventory-summary/components/top-materials-table";
-import LowStockMaterialsTable from "../inventory-summary/components/low-stock-materials-table";
+import OverviewStats from "../components/overview-stats";
+import ReportSkeleton from "../components/report-skeleton";
+import MaterialTypeChart from "../components/material-type-chart";
+import StockStatusChart from "../components/stock-status-chart";
+import CategoryValueTable from "../components/category-value-table";
+import TopMaterialsTable from "../components/top-materials-table";
+import LowStockMaterialsTable from "../components/low-stock-materials-table";
 import CategoryPicker from "./components/category-picker";
 import CategoryStatsEmpty from "./components/category-stats-empty";
-import SubCategoryTable from "./components/sub-category-table";
 
 const PAGE_TITLE = { en: "Materials Category Stats", ar: "إحصائيات فئة المواد" };
 
@@ -110,7 +110,7 @@ export default function Page() {
                 <StockStatusChart data={data.stockStatus} />
               </div>
 
-              <SubCategoryTable data={data.bySubCategory} />
+              <CategoryValueTable level="sub" data={data.bySubCategory} />
               <TopMaterialsTable data={data.topMaterialsByValue} />
               <LowStockMaterialsTable data={data.lowStockMaterials} />
             </div>

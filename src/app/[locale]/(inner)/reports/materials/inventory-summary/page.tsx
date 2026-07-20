@@ -11,13 +11,13 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { BarChart3, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import OverviewStats from "./components/overview-stats";
-import ReportSkeleton from "./components/report-skeleton";
-import MaterialTypeChart from "./components/material-type-chart";
-import StockStatusChart from "./components/stock-status-chart";
-import MainCategoryTable from "./components/main-category-table";
-import TopMaterialsTable from "./components/top-materials-table";
-import LowStockMaterialsTable from "./components/low-stock-materials-table";
+import OverviewStats from "../components/overview-stats";
+import ReportSkeleton from "../components/report-skeleton";
+import MaterialTypeChart from "../components/material-type-chart";
+import StockStatusChart from "../components/stock-status-chart";
+import CategoryValueTable from "../components/category-value-table";
+import TopMaterialsTable from "../components/top-materials-table";
+import LowStockMaterialsTable from "../components/low-stock-materials-table";
 
 const PAGE_TITLE = { en: "Materials Inventory Summary", ar: "ملخص مخزون المواد" };
 
@@ -82,7 +82,7 @@ export default function Page() {
                 <StockStatusChart data={data.stockStatus} />
               </div>
 
-              <MainCategoryTable data={data.byMainCategory} />
+              <CategoryValueTable level="main" data={data.byMainCategory} />
               <TopMaterialsTable data={data.topMaterialsByValue} />
               <LowStockMaterialsTable data={data.lowStockMaterials} />
             </div>
