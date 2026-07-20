@@ -9,10 +9,10 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { BarChart3, RefreshCw } from "lucide-react";
-import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import ReportPageHeader from "@/components/ui/report-page-header";
 import OverviewStats from "./components/overview-stats";
+import ReportSkeleton from "./components/report-skeleton";
 import MaterialTypeChart from "./components/material-type-chart";
 import StockStatusChart from "./components/stock-status-chart";
 import MainCategoryTable from "./components/main-category-table";
@@ -64,10 +64,7 @@ export default function Page() {
       />
       <main className="mx-auto max-w-7xl px-6 sm:px-8">
         {isFetching ? (
-          <LoadingSection
-            message={translate("Loading report...", "جاري تحميل التقرير...")}
-            className="rounded-2xl border border-stone-200 bg-white"
-          />
+          <ReportSkeleton />
         ) : errorMessage ? (
           <ErrorSection
             errorTitle={translate("Error loading report", "خطأ في تحميل التقرير")}
