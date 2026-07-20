@@ -47,7 +47,6 @@ export default function MaterialModal({
   const [subCategoryId, setSubCategoryId] = useState<string | null>(null);
   const [materialType, setMaterialType] = useState<string | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
-  const [legacyCode, setLegacyCode] = useState("");
   const [minimumStock, setMinimumStock] = useState<number | string>("");
 
   function reset() {
@@ -57,7 +56,6 @@ export default function MaterialModal({
     setSubCategoryId(null);
     setMaterialType(null);
     setUnit(null);
-    setLegacyCode("");
     setMinimumStock("");
   }
 
@@ -70,7 +68,6 @@ export default function MaterialModal({
       setMainCategoryId(sub?.mainCategoryId ?? null);
       setMaterialType(materialToUpdate.materialType);
       setUnit(materialToUpdate.unit);
-      setLegacyCode(materialToUpdate.legacyCode || "");
       setMinimumStock(materialToUpdate.minimumStock ?? "");
     } else reset();
   }, [materialToUpdate, helpers]);
@@ -110,7 +107,7 @@ export default function MaterialModal({
           subCategoryId: subCategoryId!,
           materialType: materialType as MaterialType,
           unit: unit as MaterialUnit,
-          legacyCode: legacyCode.trim() || null,
+          legacyCode: null,
           minimumStock: normalizedMinimumStock,
         },
       });
@@ -245,16 +242,6 @@ export default function MaterialModal({
             searchable
             required
           />
-
-          {!materialToUpdate && (
-            <TextInput
-              value={legacyCode}
-              onChange={(e) => setLegacyCode(e.target.value)}
-              label={translate("Legacy Code (Optional)", "الكود القديم (اختياري)")}
-              placeholder={translate("Enter legacy code", "أدخل الكود القديم")}
-              radius="md"
-            />
-          )}
 
           <NumberInput
             value={minimumStock}

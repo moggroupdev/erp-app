@@ -238,12 +238,12 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Title", "العنوان")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                    <Table.Th>{translate("Type", "النوع")}</Table.Th>
                     <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                     <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
-                    <Table.Th>{translate("Type", "النوع")}</Table.Th>
-                    <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
                     <Table.Th>{translate("Unit Cost", "تكلفة الوحدة")}</Table.Th>
                     <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
+                    <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
                     <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
@@ -263,14 +263,14 @@ export default function Page() {
                             <CopyButton text={material.code} />
                           </div>
                         </Table.Td>
+                        <Table.Td>{getMaterialTypeLabel(material.materialType, locale)}</Table.Td>
                         <Table.Td>{categories.main}</Table.Td>
                         <Table.Td>{categories.sub}</Table.Td>
-                        <Table.Td>{getMaterialTypeLabel(material.materialType, locale)}</Table.Td>
-                        <Table.Td>{getMaterialUnitLabel(material.unit, locale)}</Table.Td>
                         <Table.Td>
                           <MoneyViewer amount={material.unitCost} currency={translate("EGP", "ج.م")} />
                         </Table.Td>
                         <Table.Td>{material.quantity}</Table.Td>
+                        <Table.Td>{getMaterialUnitLabel(material.unit, locale)}</Table.Td>
                         <Table.Td w={0}>
                           <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
                             <button
