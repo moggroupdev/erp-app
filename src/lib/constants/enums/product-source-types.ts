@@ -18,7 +18,7 @@ export const PRODUCT_SOURCE_TYPE_LABELS: LocalizedEntity<ProductSourceType> = {
     value: "manufactured",
     label: {
       en: "Manufactured",
-      ar: "مصنع",
+      ar: "مُصنع",
     },
   },
   imported: {
