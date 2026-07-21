@@ -31,12 +31,12 @@ export default function TopMaterialsTable({ data }: { data: MaterialsInventoryTo
             <Table.Thead className="bg-stone-50">
               <Table.Tr>
                 <Table.Th className="text-stone-600">#</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Title", "العنوان")}</Table.Th>
+                <Table.Th className="text-stone-600">{translate("Item Name", "اسم الصنف")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Qty", "الكمية")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Unit", "الوحدة")}</Table.Th>
+                <Table.Th className="text-stone-600">{translate("Qty", "الكمية")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Unit Cost", "تكلفة الوحدة")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Value", "القيمة")}</Table.Th>
+                <Table.Th className="text-stone-600">{translate("Total Value", "القيمة الإجمالية")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -53,8 +53,8 @@ export default function TopMaterialsTable({ data }: { data: MaterialsInventoryTo
                     </Link>
                   </Table.Td>
                   <Table.Td className="font-mono text-xs text-stone-500">{material.code}</Table.Td>
-                  <Table.Td>{material.quantity}</Table.Td>
                   <Table.Td>{getMaterialUnitLabel(material.unit, locale)}</Table.Td>
+                  <Table.Td>{material.quantity}</Table.Td>
                   <Table.Td>
                     <MoneyViewer amount={material.unitCost} currency={translation.currency} />
                   </Table.Td>

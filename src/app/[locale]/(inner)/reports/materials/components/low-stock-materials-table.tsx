@@ -13,7 +13,7 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
 
   return (
     <ReportCard
-      title={translate("Materials Below Minimum", "مواد دون الحد الأدنى")}
+      title={translate("Materials Below Minimum", "مواد دون حد الطلب")}
       description={translate(
         "Materials at or below their configured minimum stock, ordered by largest deficit first.",
         "المواد التي بلغت أو تجاوزت الحد الأدنى للمخزون، مرتبة حسب أكبر عجز أولاً.",
@@ -42,7 +42,7 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
                 <Table.Th className="text-stone-600">{translate("Title", "العنوان")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Code", "الكود")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Qty", "الكمية")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Minimum", "الحد الأدنى")}</Table.Th>
+                <Table.Th className="text-stone-600">{translate("Minimum", "حد الطلب")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Deficit", "العجز")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
