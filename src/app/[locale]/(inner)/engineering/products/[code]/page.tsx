@@ -64,6 +64,7 @@ export default function Page() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.dimensions(code) });
       queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(code) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
     },
   });
 

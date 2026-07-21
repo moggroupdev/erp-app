@@ -63,6 +63,7 @@ export default function ProductDimensionModal({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(productCode) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.dimensions(productCode) });
+      if (isFirstDimension || isDefault) await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
       handleClose();
     },
   });
