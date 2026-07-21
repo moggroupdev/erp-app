@@ -1,6 +1,14 @@
 import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
-import type { Product, CreateProductDto, UpdateProductDto } from "@/types/product";
+import type {
+  Product,
+  ProductWithCreator,
+  ProductWithDimensions,
+  ProductDimension,
+  CreateProductDto,
+  UpdateProductDto,
+  CreateProductDimensionDto,
+} from "@/types/product";
 
 const productsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateProductDto }) {
@@ -16,18 +24,55 @@ const productsApi = {
     params: Dictionary;
     signal: AbortSignal;
   }) {
-    return await privateRequest<PaginatedData<Product>>({ url: "products", params, signal });
+    return await privateRequest<PaginatedData<ProductWithDimensions>>({ url: "products", params, signal });
   },
 
-  async get({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<Product>({ url: `products/${id}` });
+  async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
+    return await privateRequest<ProductWithCreator>({ url: `products/${code}`, signal });
   },
 
-  async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateProductDto }) {
-    return await privateRequest<Product>({
+  async update({ privateRequest, code, dto }: { privateRequest: PrivateRequest; code: string; dto: UpdateProductDto }) {
+    return await privateRequest<Product>({ method: "PUT", url: `products/${code}`, data: dto });
+  },
+
+  // ========================= Dimensions =========================
+
+  async addDimension({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: CreateProductDimensionDto;
+  }) {
+    return await privateRequest<ProductDimension>({ method: "POST", url: `products/${code}/dimensions`, data: dto });
+  },
+
+  async listDimensions({
+    privateRequest,
+    code,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<ProductDimension[]>({ url: `products/${code}/dimensions`, signal });
+  },
+
+  async setDefaultDimension({
+    privateRequest,
+    code,
+    dimensionId,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dimensionId: string;
+  }) {
+    return await privateRequest<ProductDimension>({
       method: "PUT",
-      url: `products/${id}`,
-      data: dto,
+      url: `products/${code}/dimensions/${dimensionId}/default`,
     });
   },
 };
