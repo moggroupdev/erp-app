@@ -36,7 +36,7 @@ import SelectProductSourceType from "@/components/global/selections/enum-based/s
 import SelectProductMain from "@/components/global/selections/query-based/select-product-main";
 import SelectProductSub from "@/components/global/selections/query-based/select-product-sub";
 
-const PAGE_TITLE = { en: "Products", ar: "المنتجات" };
+const PAGE_TITLE = { en: "Products Catalog", ar: "كتالوج المنتجات" };
 
 const PRODUCTS_PER_PAGE = 25;
 
@@ -64,15 +64,15 @@ export default function Page() {
     setPendingValue: setPendingKeyword,
     setImmediateValue: setImmediateKeyword,
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
-  const [mainCategoryFilter, setMainCategoryFilter] = useState<string | null>(urlSearchParams.get("categoryId") || null);
-  const [subCategoryFilter, setSubCategoryFilter] = useState<string | null>(urlSearchParams.get("subcategoryId") || null);
+  const [mainCategoryFilter, setMainCategoryFilter] = useState<string | null>(urlSearchParams.get("mainCategoryId") || null);
+  const [subCategoryFilter, setSubCategoryFilter] = useState<string | null>(urlSearchParams.get("subCategoryId") || null);
   const [sourceTypeFilter, setSourceTypeFilter] = useState<string | null>(urlSearchParams.get("sourceType") || null);
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
-    categoryId: mainCategoryFilter,
-    subcategoryId: subCategoryFilter,
+    mainCategoryId: mainCategoryFilter,
+    subCategoryId: subCategoryFilter,
     sourceType: sourceTypeFilter,
   };
 
