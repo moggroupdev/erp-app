@@ -184,7 +184,7 @@ export default function MaterialModal({
   const isReadyToSubmit = isRequiredInputFilled && (materialToUpdate ? isDataChanged : true);
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={titleLabel} size="xl">
+    <Modal opened={opened} onClose={handleClose} title={titleLabel}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <TextInput
           value={title}
@@ -205,56 +205,54 @@ export default function MaterialModal({
           autosize
         />
 
-        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-          <SelectMaterialMain
-            value={mainCategoryId}
-            setValue={setMainCategoryId}
-            label={translate("Main Category", "الفئة الرئيسية")}
-            placeholder={translate("Select main category", "اختر الفئة الرئيسية")}
-            searchable
+        <SelectMaterialMain
+          value={mainCategoryId}
+          setValue={setMainCategoryId}
+          label={translate("Main Category", "الفئة الرئيسية")}
+          placeholder={translate("Select main category", "اختر الفئة الرئيسية")}
+          searchable
+          required
+        />
+
+        <SelectMaterialSub
+          value={subCategoryId}
+          setValue={setSubCategoryId}
+          mainCategoryScope={mainCategoryId}
+          label={translate("Subcategory", "الفئة الفرعية")}
+          placeholder={translate("Select subcategory", "اختر الفئة الفرعية")}
+          searchable
+          required
+        />
+
+        {!materialToUpdate && (
+          <SelectMaterialType
+            value={materialType}
+            setValue={setMaterialType}
+            label={translate("Material Type", "نوع المادة")}
+            placeholder={translate("Select material type", "اختر نوع المادة")}
             required
           />
+        )}
 
-          <SelectMaterialSub
-            value={subCategoryId}
-            setValue={setSubCategoryId}
-            mainCategoryScope={mainCategoryId}
-            label={translate("Subcategory", "الفئة الفرعية")}
-            placeholder={translate("Select subcategory", "اختر الفئة الفرعية")}
-            searchable
-            required
-          />
+        <SelectMaterialUnit
+          value={unitOfMeasurement}
+          setValue={setUnitOfMeasurement}
+          label={translate("Unit of Measurement", "وحدة القياس")}
+          placeholder={translate("Select unit of measurement", "اختر وحدة القياس")}
+          searchable
+          required
+        />
 
-          {!materialToUpdate && (
-            <SelectMaterialType
-              value={materialType}
-              setValue={setMaterialType}
-              label={translate("Material Type", "نوع المادة")}
-              placeholder={translate("Select material type", "اختر نوع المادة")}
-              required
-            />
-          )}
-
-          <SelectMaterialUnit
-            value={unitOfMeasurement}
-            setValue={setUnitOfMeasurement}
-            label={translate("Unit of Measurement", "وحدة القياس")}
-            placeholder={translate("Select unit of measurement", "اختر وحدة القياس")}
-            searchable
-            required
-          />
-
-          <NumberInput
-            value={minimumStock}
-            onChange={setMinimumStock}
-            label={translate("Minimum Stock (Optional)", "الحد الأدنى للمخزون (اختياري)")}
-            placeholder={translate("Enter minimum stock", "أدخل الحد الأدنى للمخزون")}
-            min={0}
-            allowNegative={false}
-            decimalScale={3}
-            radius="md"
-          />
-        </div>
+        <NumberInput
+          value={minimumStock}
+          onChange={setMinimumStock}
+          label={translate("Minimum Stock", "الحد الأدنى للمخزون (حد الطلب)")}
+          placeholder={translate("Enter minimum stock", "أدخل الحد الأدنى للمخزون")}
+          min={0}
+          allowNegative={false}
+          decimalScale={3}
+          radius="md"
+        />
 
         <div className="flex gap-2">
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
