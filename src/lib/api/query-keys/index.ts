@@ -71,6 +71,11 @@ export const queryKeys = {
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
   },
+  boms: {
+    all: ["boms"] as const,
+    details: () => [...queryKeys.boms.all, "detail"] as const,
+    detail: (dimensionId: string) => [...queryKeys.boms.details(), dimensionId] as const,
+  },
   reports: {
     all: ["reports"] as const,
     materials: {

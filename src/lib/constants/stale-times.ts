@@ -7,6 +7,7 @@ export const staleTimes = {
   users: 30 * MINUTE,
   materials: 10 * MINUTE,
   products: 30 * MINUTE,
+  boms: 10 * MINUTE,
   reports: {
     materialsInventorySummary: 5 * MINUTE,
     materialsCategoryStats: 5 * MINUTE,

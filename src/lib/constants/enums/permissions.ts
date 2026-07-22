@@ -23,6 +23,9 @@ export const PERMISSION_VALUES = [
   "add_product",
   "update_product",
   "delete_product",
+  "add_product_bom",
+  "read_product_boms",
+  "update_product_bom",
   "read_customers",
   "add_customer",
   "update_customer",
@@ -35,7 +38,6 @@ export const PERMISSION_VALUES = [
   "read_contracts",
   "read_receptions",
   "read_complaints",
-  "read_boms",
   "read_production_plans",
   "read_production_routing",
   "read_inventory_transactions",
@@ -194,6 +196,27 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "حذف المنتج",
     },
   },
+  add_product_bom: {
+    value: "add_product_bom",
+    label: {
+      en: "Add BOM",
+      ar: "إضافة قائمة مواد",
+    },
+  },
+  read_product_boms: {
+    value: "read_product_boms",
+    label: {
+      en: "Read BOMs",
+      ar: "عرض قوائم المواد",
+    },
+  },
+  update_product_bom: {
+    value: "update_product_bom",
+    label: {
+      en: "Update BOM",
+      ar: "تحديث قائمة المواد",
+    },
+  },
   read_customers: {
     value: "read_customers",
     label: {
@@ -255,13 +278,6 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Read Receptions",
       ar: "عرض الاستلامات",
-    },
-  },
-  read_boms: {
-    value: "read_boms",
-    label: {
-      en: "Read BOMs",
-      ar: "عرض قوائم المواد",
     },
   },
   read_production_plans: {
@@ -437,7 +453,15 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "engineering",
     label: { en: "Products & Engineering", ar: "المنتجات والهندسة" },
-    permissions: ["read_products", "add_product", "update_product", "delete_product", "read_boms"],
+    permissions: [
+      "read_products",
+      "add_product",
+      "update_product",
+      "delete_product",
+      "add_product_bom",
+      "read_product_boms",
+      "update_product_bom",
+    ],
   },
   {
     domain: "production",
