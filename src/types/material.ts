@@ -8,10 +8,10 @@ export type Material = {
   description: string | null;
   subCategoryId: string;
   materialType: MaterialType;
-  unit: MaterialUnit;
-  unitCost: number;
+  unitOfMeasurement: MaterialUnit;
+  unitPrice: number;
   quantity: number;
-  openingUnitCost: number | null;
+  openingUnitPrice: number | null;
   openingQuantity: number | null;
   minimumStock: number | null;
   deletedAt: Date | null;
@@ -28,7 +28,7 @@ export type CreateMaterialDto = {
   description: string | null;
   subCategoryId: string;
   materialType: MaterialType;
-  unit: MaterialUnit;
+  unitOfMeasurement: MaterialUnit;
   legacyCode: string | null;
   minimumStock: number | null;
 };

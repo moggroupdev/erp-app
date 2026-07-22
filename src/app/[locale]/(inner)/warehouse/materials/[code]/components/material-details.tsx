@@ -86,11 +86,11 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
       value: getMaterialTypeLabel(material.materialType, locale),
     },
     {
-      key: translate("Unit", "الوحدة"),
-      value: getMaterialUnitLabel(material.unit, locale),
+      key: translate("Unit of Measurement", "وحدة القياس"),
+      value: getMaterialUnitLabel(material.unitOfMeasurement, locale),
     },
     { key: translate("Quantity", "الكمية"), value: material.quantity },
-    { key: translate("Unit Cost", "تكلفة الوحدة"), value: material.unitCost },
+    { key: translate("Unit Price", "سعر الوحدة"), value: material.unitPrice },
     {
       key: translate("Minimum Stock", "الحد الأدنى للمخزون"),
       value: material.minimumStock ?? <EmptyValue />,

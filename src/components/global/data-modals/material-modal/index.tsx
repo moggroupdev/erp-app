@@ -46,7 +46,7 @@ export default function MaterialModal({
   const [mainCategoryId, setMainCategoryId] = useState<string | null>(null);
   const [subCategoryId, setSubCategoryId] = useState<string | null>(null);
   const [materialType, setMaterialType] = useState<string | null>(null);
-  const [unit, setUnit] = useState<string | null>(null);
+  const [unitOfMeasurement, setUnitOfMeasurement] = useState<string | null>(null);
   const [minimumStock, setMinimumStock] = useState<number | string>("");
 
   function reset() {
@@ -55,7 +55,7 @@ export default function MaterialModal({
     setMainCategoryId(null);
     setSubCategoryId(null);
     setMaterialType(null);
-    setUnit(null);
+    setUnitOfMeasurement(null);
     setMinimumStock("");
   }
 
@@ -67,7 +67,7 @@ export default function MaterialModal({
       const sub = helpers.getMaterialCategorySubById(materialToUpdate.subCategoryId);
       setMainCategoryId(sub?.mainCategoryId ?? null);
       setMaterialType(materialToUpdate.materialType);
-      setUnit(materialToUpdate.unit);
+      setUnitOfMeasurement(materialToUpdate.unitOfMeasurement);
       setMinimumStock(materialToUpdate.minimumStock ?? "");
     } else reset();
   }, [materialToUpdate, helpers]);
@@ -93,7 +93,7 @@ export default function MaterialModal({
             title: title.trim(),
             description: description.trim() || null,
             subCategoryId: subCategoryId!,
-            unit: unit as MaterialUnit,
+            unitOfMeasurement: unitOfMeasurement as MaterialUnit,
             minimumStock: normalizedMinimumStock,
           },
         });
@@ -106,7 +106,7 @@ export default function MaterialModal({
           description: description.trim() || null,
           subCategoryId: subCategoryId!,
           materialType: materialType as MaterialType,
-          unit: unit as MaterialUnit,
+          unitOfMeasurement: unitOfMeasurement as MaterialUnit,
           legacyCode: null,
           minimumStock: normalizedMinimumStock,
         },
@@ -131,7 +131,8 @@ export default function MaterialModal({
     if (!subCategoryId) return setValidationError(translate("Please select a subcategory.", "يرجى اختيار الفئة الفرعية."));
     if (!materialToUpdate && !materialType)
       return setValidationError(translate("Please select a material type.", "يرجى اختيار نوع المادة."));
-    if (!unit) return setValidationError(translate("Please select a unit.", "يرجى اختيار الوحدة."));
+    if (!unitOfMeasurement)
+      return setValidationError(translate("Please select a unit of measurement.", "يرجى اختيار وحدة القياس."));
 
     const normalizedMinimumStock =
       minimumStock === "" || minimumStock === null || minimumStock === undefined ? null : Number(minimumStock);
@@ -169,14 +170,14 @@ export default function MaterialModal({
     mainCategoryId &&
     subCategoryId &&
     (materialToUpdate || materialType) &&
-    unit
+    unitOfMeasurement
   );
 
   const isDataChanged = materialToUpdate
     ? title.trim() !== materialToUpdate.title ||
       (description.trim() || null) !== materialToUpdate.description ||
       subCategoryId !== materialToUpdate.subCategoryId ||
-      unit !== materialToUpdate.unit ||
+      unitOfMeasurement !== materialToUpdate.unitOfMeasurement ||
       normalizedMinimumStock !== materialToUpdate.minimumStock
     : false;
 
@@ -235,10 +236,10 @@ export default function MaterialModal({
           )}
 
           <SelectMaterialUnit
-            value={unit}
-            setValue={setUnit}
-            label={translate("Unit", "الوحدة")}
-            placeholder={translate("Select unit", "اختر الوحدة")}
+            value={unitOfMeasurement}
+            setValue={setUnitOfMeasurement}
+            label={translate("Unit of Measurement", "وحدة القياس")}
+            placeholder={translate("Select unit of measurement", "اختر وحدة القياس")}
             searchable
             required
           />

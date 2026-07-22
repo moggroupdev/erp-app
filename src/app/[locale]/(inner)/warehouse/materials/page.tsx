@@ -241,9 +241,9 @@ export default function Page() {
                     <Table.Th>{translate("Type", "النوع")}</Table.Th>
                     <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                     <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
-                    <Table.Th>{translate("Unit Cost", "تكلفة الوحدة")}</Table.Th>
+                    <Table.Th>{translate("Unit Price", "سعر الوحدة")}</Table.Th>
                     <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
-                    <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
+                    <Table.Th>{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
                     <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
@@ -267,10 +267,10 @@ export default function Page() {
                         <Table.Td>{categories.main}</Table.Td>
                         <Table.Td>{categories.sub}</Table.Td>
                         <Table.Td>
-                          <MoneyViewer amount={material.unitCost} currency={translate("EGP", "ج.م")} />
+                          <MoneyViewer amount={material.unitPrice} currency={translate("EGP", "ج.م")} />
                         </Table.Td>
                         <Table.Td>{material.quantity}</Table.Td>
-                        <Table.Td>{getMaterialUnitLabel(material.unit, locale)}</Table.Td>
+                        <Table.Td>{getMaterialUnitLabel(material.unitOfMeasurement, locale)}</Table.Td>
                         <Table.Td w={0}>
                           <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
                             <button

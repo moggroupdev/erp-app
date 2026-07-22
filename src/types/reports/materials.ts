@@ -43,9 +43,9 @@ export type MaterialsInventoryStockStatus = {
 export type MaterialsInventoryTopMaterial = {
   code: string;
   title: string;
-  unit: MaterialUnit;
+  unitOfMeasurement: MaterialUnit;
   quantity: number;
-  unitCost: number;
+  unitPrice: number;
   value: number;
 };
 

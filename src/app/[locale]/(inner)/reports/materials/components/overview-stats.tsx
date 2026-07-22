@@ -22,8 +22,8 @@ export default function OverviewStats({ overview }: { overview: MaterialsInvento
           label={translate("Total Inventory Value", "إجمالي قيمة المخزون")}
           value={<MoneyViewer amount={overview.totalInventoryValue} currency={currency} />}
           hint={translate(
-            "Current stock value based on quantity × unit cost.",
-            "قيمة المخزون الحالية بناءً على الكمية × تكلفة الوحدة.",
+            "Current stock value based on quantity × unit price.",
+            "قيمة المخزون الحالية بناءً على الكمية × سعر الوحدة.",
           )}
           icon={<Wallet size={20} />}
           valueClassName={reportTheme.kpi.value}

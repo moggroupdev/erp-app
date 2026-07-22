@@ -17,8 +17,8 @@ export default function TopMaterialsTable({ data }: { data: MaterialsInventoryTo
     <ReportCard
       title={translate("Highest-Value Materials", "أعلى المواد قيمة")}
       description={translate(
-        "The ten materials with the largest inventory value (quantity × unit cost). Click a title to open details.",
-        "أعلى عشر مواد من حيث قيمة المخزون (الكمية × تكلفة الوحدة). انقر على العنوان لفتح التفاصيل.",
+        "The ten materials with the largest inventory value (quantity × unit price). Click a title to open details.",
+        "أعلى عشر مواد من حيث قيمة المخزون (الكمية × سعر الوحدة). انقر على العنوان لفتح التفاصيل.",
       )}
       icon={Trophy}
       accent="sky"
@@ -33,9 +33,9 @@ export default function TopMaterialsTable({ data }: { data: MaterialsInventoryTo
                 <Table.Th className="text-stone-600">#</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Item Name", "اسم الصنف")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Unit", "الوحدة")}</Table.Th>
+                <Table.Th className="text-stone-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Qty", "الكمية")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Unit Cost", "تكلفة الوحدة")}</Table.Th>
+                <Table.Th className="text-stone-600">{translate("Unit Price", "سعر الوحدة")}</Table.Th>
                 <Table.Th className="text-stone-600">{translate("Total Value", "القيمة الإجمالية")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -53,10 +53,10 @@ export default function TopMaterialsTable({ data }: { data: MaterialsInventoryTo
                     </Link>
                   </Table.Td>
                   <Table.Td className="font-mono text-xs text-stone-500">{material.code}</Table.Td>
-                  <Table.Td>{getMaterialUnitLabel(material.unit, locale)}</Table.Td>
+                  <Table.Td>{getMaterialUnitLabel(material.unitOfMeasurement, locale)}</Table.Td>
                   <Table.Td>{material.quantity}</Table.Td>
                   <Table.Td>
-                    <MoneyViewer amount={material.unitCost} currency={translation.currency} />
+                    <MoneyViewer amount={material.unitPrice} currency={translation.currency} />
                   </Table.Td>
                   <Table.Td className="font-semibold text-stone-800">
                     <MoneyViewer amount={material.value} currency={translation.currency} />
