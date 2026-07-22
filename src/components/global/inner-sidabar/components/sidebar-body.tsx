@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useUser } from "@/contexts/user/hook";
 import { getPathnameWithoutLocale } from "@/lib/i18n/utils";
-import { canAccessEntry, isPathActive, isSidebarGroup, sidebarConfig } from "./config";
+import { canAccessEntry, getSidebarEntryKey, isPathActive, isSidebarGroup, sidebarConfig } from "./config";
 import SidebarGroup from "./sidebar-group";
 import SidebarItem from "./sidebar-item";
 import SidebarUserMenu from "./sidebar-user-menu";
@@ -29,7 +29,8 @@ export default function SidebarBody({ collapsed }: { collapsed: boolean }) {
     setExpandedGroups((current) => {
       const next = { ...current };
       for (const entry of visibleEntries)
-        if (isSidebarGroup(entry) && entry.items.some((item) => isPathActive(pathname, item.href))) next[entry.href] = true;
+        if (isSidebarGroup(entry) && entry.items.some((item) => isPathActive(pathname, item.href)))
+          next[getSidebarEntryKey(entry)] = true;
       return next;
     });
   }, [pathname, visibleEntries]);
@@ -54,20 +55,23 @@ export default function SidebarBody({ collapsed }: { collapsed: boolean }) {
               );
             }
 
-            const isActive = pathname === entry.href || entry.items.some((item) => isPathActive(pathname, item.href));
+            const entryKey = getSidebarEntryKey(entry);
+            const isActive =
+              (entry.href ? pathname === entry.href : false) ||
+              entry.items.some((item) => isPathActive(pathname, item.href));
             const activeChild = entry.items.find((item) => isPathActive(pathname, item.href));
-            const expanded = collapsed ? false : (expandedGroups[entry.href] ?? isActive);
+            const expanded = collapsed ? false : (expandedGroups[entryKey] ?? isActive);
 
             return (
               <SidebarGroup
-                key={entry.href}
+                key={entryKey}
                 group={entry}
                 collapsed={collapsed}
                 expanded={expanded}
                 isActive={isActive}
                 activeChildHref={activeChild?.href}
                 onToggle={() =>
-                  setExpandedGroups((current) => ({ ...current, [entry.href]: !(current[entry.href] ?? isActive) }))
+                  setExpandedGroups((current) => ({ ...current, [entryKey]: !(current[entryKey] ?? isActive) }))
                 }
               />
             );

@@ -34,7 +34,11 @@ export type SidebarLeafConfig = {
   requiredPermission?: Permission;
 };
 
-export type SidebarGroupConfig = SidebarLeafConfig & {
+export type SidebarGroupConfig = {
+  label: { en: string; ar: string };
+  href?: string;
+  icon: LucideIcon;
+  requiredPermission?: Permission;
   items: SidebarLeafConfig[];
 };
 
@@ -65,7 +69,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
   },
   {
     label: { en: "Sales & Customers", ar: "المبيعات والعملاء" },
-    href: "/sales",
     icon: BadgeDollarSign,
     items: [
       {
@@ -113,8 +116,7 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     ],
   },
   {
-    label: { en: "Products & Engineering", ar: "المنتجات والهندسة" },
-    href: "/engineering",
+    label: { en: "Products Details", ar: "تفاصيل المنتجات" },
     icon: Settings2,
     items: [
       {
@@ -133,7 +135,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
   },
   {
     label: { en: "Production", ar: "الإنتاج" },
-    href: "/production",
     icon: Factory,
     items: [
       {
@@ -152,7 +153,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
   },
   {
     label: { en: "Warehouse", ar: "المخازن" },
-    href: "/warehouse",
     icon: Boxes,
     items: [
       {
@@ -171,7 +171,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
   },
   {
     label: { en: "Procurement", ar: "المشتريات" },
-    href: "/procurement",
     icon: ShoppingCart,
     items: [
       {
@@ -196,7 +195,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
   },
   {
     label: { en: "Delivery & Installation", ar: "التسليم والتركيب" },
-    href: "/fulfillment",
     icon: Truck,
     items: [
       {
@@ -221,7 +219,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
   },
   {
     label: { en: "Maintenance & Service", ar: "الصيانة والخدمة" },
-    href: "/maintenance",
     icon: Wrench,
     items: [
       {
@@ -240,7 +237,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
   },
   {
     label: { en: "Organization", ar: "المؤسسة" },
-    href: "/organization",
     icon: Building2,
     items: [
       {
@@ -269,6 +265,11 @@ export const sidebarConfig: SidebarEntryConfig[] = [
 
 export function isSidebarGroup(entry: SidebarEntryConfig): entry is SidebarGroupConfig {
   return "items" in entry;
+}
+
+export function getSidebarEntryKey(entry: SidebarEntryConfig): string {
+  if (isSidebarGroup(entry)) return entry.href ?? entry.label.en;
+  return entry.href;
 }
 
 export function canAccessEntry(entry: SidebarEntryConfig, user: UserState): boolean {
