@@ -131,6 +131,11 @@ export default function RoleForm({
       return false;
     }
 
+    if (!departmentId) {
+      setValidationError(translate("Please select a department.", "يرجى اختيار قسم."));
+      return false;
+    }
+
     if (isSalesDepartment && maxDiscountPct !== "" && (Number(maxDiscountPct) < 0 || Number(maxDiscountPct) > 100)) {
       setValidationError(translate("Max discount must be between 0 and 100.", "يجب أن يكون أقصى خصم بين 0 و 100."));
       return false;
@@ -144,8 +149,8 @@ export default function RoleForm({
     if (!toAppRelativePath(homeUrl)) {
       setValidationError(
         translate(
-          "Enter a full app link or a relative path (e.g. https://app.moggroup.net/ar/dashboard).",
-          "أدخل رابطًا كاملًا للتطبيق أو مسارًا نسبيًا (مثال: https://app.moggroup.net/ar/dashboard).",
+          "Enter a full app link or a relative path (e.g. https://app.moggroup.net/ar/dashboard) in the home page URL field.",
+          "أدخل رابطًا كاملًا للتطبيق أو مسارًا نسبيًا (مثال: https://app.moggroup.net/ar/dashboard) في حقل رابط الصفحة الرئيسية.",
         ),
       );
       return false;
@@ -257,8 +262,8 @@ export default function RoleForm({
                   <h3 className="text-base font-semibold text-gray-900">{translate("Department", "القسم")}</h3>
                   <p className="mt-0.5 text-sm text-gray-500">
                     {translate(
-                      "Optionally link the role to a department. Sales roles can also set a negotiation discount ceiling.",
-                      "اربط الدور اختياريًا بقسم. أدوار المبيعات يمكنها أيضًا تحديد سقف خصم التفاوض.",
+                      "Link the role to a department. Sales roles can also set a negotiation discount ceiling.",
+                      "اربط الدور بقسم. أدوار المبيعات يمكنها أيضًا تحديد سقف خصم التفاوض.",
                     )}
                   </p>
                 </div>
@@ -267,14 +272,11 @@ export default function RoleForm({
               <SelectDepartment
                 value={departmentId}
                 setValue={handleDepartmentChange}
-                label={translate("Department (Optional)", "القسم (اختياري)")}
-                description={translate(
-                  "Associates this role with a specific team. Leave empty for organization-wide roles.",
-                  "يربط هذا الدور بفريق معيّن. اتركه فارغًا للأدوار على مستوى المؤسسة.",
-                )}
+                label={translate("Department", "القسم")}
+                description={translate("Associates this role with a specific team.", "يربط هذا الدور بفريق معيّن.")}
                 placeholder={translate("Select department", "اختر القسم")}
                 searchable
-                clearable
+                required
               />
 
               {isSalesDepartment && (
@@ -394,6 +396,8 @@ export default function RoleForm({
 
         <Divider variant="dashed" />
 
+        {error && !confirmOpened && <ErrorAlert error={error} />}
+
         <div className="flex flex-col gap-3 md:flex-row md:justify-between">
           <p className="text-sm text-gray-500">
             {isEdit
@@ -420,15 +424,13 @@ export default function RoleForm({
             <Button
               type="submit"
               loading={!isEdit && mutation.isPending}
-              disabled={!name.trim() || !homeUrl.trim() || (isEdit && !isDirty)}
+              disabled={isEdit && (!name.trim() || !departmentId || !homeUrl.trim() || !isDirty)}
               radius="md"
             >
               {isEdit ? translate("Save Changes", "حفظ التغييرات") : translate("Create Role", "إنشاء الدور")}
             </Button>
           </div>
         </div>
-
-        {error && !confirmOpened && <ErrorAlert error={error} />}
       </form>
 
       <Modal opened={confirmOpened} onClose={closeConfirm} title={translate("Confirm role update", "تأكيد تحديث الدور")}>
