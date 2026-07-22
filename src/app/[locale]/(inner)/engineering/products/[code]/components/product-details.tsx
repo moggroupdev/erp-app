@@ -1,50 +1,12 @@
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import useProductCategories from "@/hooks/reference/use-product-categories";
 import { type ProductWithCreator } from "@/types/product";
-import { Divider, Table } from "@mantine/core";
-import CopyButton from "@/components/ui/copy-button";
-import Link from "next/link";
-
-type DetailRow = {
-  key: string;
-  value: React.ReactNode;
-  mono?: boolean;
-  copyText?: string;
-};
-
-function EmptyValue() {
-  return <span className="text-gray-400">-</span>;
-}
-
-function DetailsTable({ rows }: { rows: DetailRow[] }) {
-  return (
-    <div className="overflow-x-auto rounded-xl bg-gray-100 p-2">
-      <Table verticalSpacing="sm" horizontalSpacing="md">
-        <Table.Tbody>
-          {rows.map((row) => (
-            <Table.Tr key={row.key}>
-              <Table.Th w="30%" className="text-gray-600">
-                {row.key}
-              </Table.Th>
-              <Table.Td className="font-medium text-gray-900">
-                <div className={`flex items-center gap-1.5 ${row.mono ? "font-mono" : ""}`}>
-                  {row.value}
-                  {row.copyText && <CopyButton text={row.copyText} />}
-                </div>
-              </Table.Td>
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </div>
-  );
-}
+import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
 export default function ProductDetails({ product }: { product: ProductWithCreator }) {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const { helpers } = useProductCategories();
 
   const isDeleted = !!product.deletedAt;
@@ -88,11 +50,7 @@ export default function ProductDetails({ product }: { product: ProductWithCreato
     },
     {
       key: translate("Created By", "أنشئ بواسطة"),
-      value: (
-        <Link href={getLocalizedHref(`/organization/users/${product.createdBy.id}`)} className="hover:underline">
-          {product.createdBy.name}
-        </Link>
-      ),
+      value: <CreatorLink creator={product.createdBy} />,
     },
     {
       key: translate("Registration Date", "تاريخ التسجيل"),
@@ -103,23 +61,5 @@ export default function ProductDetails({ product }: { product: ProductWithCreato
       : []),
   ];
 
-  return (
-    <section className="flex flex-col gap-4 rounded-xl">
-      <Divider variant="dashed" />
-
-      <header className="flex flex-col gap-3 rounded-xl bg-gray-100 p-5">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">{product.title}</h2>
-
-        {isDeleted && (
-          <p className="text-sm font-medium text-red-600">
-            {translate("Deleted", "محذوف")} - {formatDateAndTime(product.deletedAt!, locale)}
-          </p>
-        )}
-      </header>
-
-      <Divider variant="dashed" />
-
-      <DetailsTable rows={rows} />
-    </section>
-  );
+  return <EntityDetails title={product.title} deletedAt={product.deletedAt} rows={rows} />;
 }

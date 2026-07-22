@@ -1,52 +1,15 @@
 import { useMemo } from "react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDepartments from "@/hooks/reference/use-departments";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getPermissionLabel, PERMISSION_DOMAIN_GROUPS, type Permission } from "@/lib/constants/enums/permissions";
 import { type RoleWithCreatorWithPermissions } from "@/types/roles";
-import { Badge, Divider, Table } from "@mantine/core";
-import CopyButton from "@/components/ui/copy-button";
-import Link from "next/link";
+import { Badge, Divider } from "@mantine/core";
+import { CreatorLink, DetailsTable, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import { Building2, Home, KeyRound, Percent, Shield } from "lucide-react";
-
-type DetailRow = {
-  key: string;
-  value: React.ReactNode;
-  mono?: boolean;
-  copyText?: string;
-};
-
-function EmptyValue() {
-  return <span className="text-gray-400">-</span>;
-}
-
-function DetailsTable({ rows }: { rows: DetailRow[] }) {
-  return (
-    <div className="overflow-x-auto rounded-xl bg-gray-50 p-2">
-      <Table verticalSpacing="sm" horizontalSpacing="md">
-        <Table.Tbody>
-          {rows.map((row) => (
-            <Table.Tr key={row.key}>
-              <Table.Th w="30%" className="text-gray-600">
-                {row.key}
-              </Table.Th>
-              <Table.Td className="font-medium text-gray-900">
-                <div className={`flex items-center gap-1.5 ${row.mono ? "font-mono" : ""}`}>
-                  {row.value}
-                  {row.copyText && <CopyButton text={row.copyText} />}
-                </div>
-              </Table.Td>
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </div>
-  );
-}
 
 export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermissions }) {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const { helpers: departmentHelpers } = useDepartments();
 
   const departmentName = useMemo(() => {
@@ -120,11 +83,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
     },
     {
       key: translate("Created By", "أنشئ بواسطة"),
-      value: (
-        <Link href={getLocalizedHref(`/organization/users/${role.createdBy.id}`)} className="hover:underline">
-          {role.createdBy.name}
-        </Link>
-      ),
+      value: <CreatorLink creator={role.createdBy} />,
     },
     {
       key: translate("Created At", "تاريخ الإنشاء"),
