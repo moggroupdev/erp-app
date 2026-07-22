@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDepartments from "@/hooks/reference/use-departments";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getPermissionLabel, PERMISSION_DOMAIN_GROUPS, type Permission } from "@/lib/constants/enums/permissions";
 import { type RoleWithCreatorWithPermissions } from "@/types/roles";
 import { Badge, Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
+import Link from "next/link";
 import { Building2, Home, KeyRound, Percent, Shield } from "lucide-react";
 
 type DetailRow = {
@@ -45,6 +46,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
 
 export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermissions }) {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
   const { helpers: departmentHelpers } = useDepartments();
 
   const departmentName = useMemo(() => {
@@ -77,7 +79,6 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
   }, [permissionSet, permissions]);
 
   const rows: DetailRow[] = [
-    { key: translate("Role ID", "معرف الدور"), value: role.id, mono: true, copyText: role.id },
     { key: translate("Name", "الاسم"), value: role.name },
     {
       key: translate("Description", "الوصف"),
@@ -117,7 +118,14 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
         <EmptyValue />
       ),
     },
-    { key: translate("Created By", "أنشئ بواسطة"), value: role.createdBy.name },
+    {
+      key: translate("Created By", "أنشئ بواسطة"),
+      value: (
+        <Link href={getLocalizedHref(`/organization/users/${role.createdBy.id}`)} className="hover:underline">
+          {role.createdBy.name}
+        </Link>
+      ),
+    },
     {
       key: translate("Created At", "تاريخ الإنشاء"),
       value: formatDateAndTime(role.createdAt, locale),

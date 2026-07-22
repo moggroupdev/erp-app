@@ -1,4 +1,4 @@
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
@@ -6,6 +6,7 @@ import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import { type MaterialWithCreator } from "@/types/material";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
+import Link from "next/link";
 
 type DetailRow = {
   key: string;
@@ -44,6 +45,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
 
 export default function MaterialDetails({ material }: { material: MaterialWithCreator }) {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
 
   const isDeleted = !!material.deletedAt;
@@ -56,14 +58,6 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
       key: translate("Legacy Code", "الكود القديم"),
       value: material.legacyCode ? <span className="font-mono">{material.legacyCode}</span> : <EmptyValue />,
       copyText: material.legacyCode || undefined,
-    },
-    {
-      key: translate("Status", "الحالة"),
-      value: isDeleted ? (
-        <span className="text-red-600">{translate("Deleted", "محذوف")}</span>
-      ) : (
-        <span className="text-teal-600">{translate("Active", "نشط")}</span>
-      ),
     },
     {
       key: translate("Description", "الوصف"),
@@ -95,7 +89,14 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
       key: translate("Minimum Stock", "الحد الأدنى للمخزون"),
       value: material.minimumStock ?? <EmptyValue />,
     },
-    { key: translate("Created By", "أنشئ بواسطة"), value: material.createdBy.name },
+    {
+      key: translate("Created By", "أنشئ بواسطة"),
+      value: (
+        <Link href={getLocalizedHref(`/organization/users/${material.createdBy.id}`)} className="hover:underline">
+          {material.createdBy.name}
+        </Link>
+      ),
+    },
     {
       key: translate("Registration Date", "تاريخ التسجيل"),
       value: formatDateAndTime(material.createdAt, locale),

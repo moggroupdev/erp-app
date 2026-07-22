@@ -1,8 +1,9 @@
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type VendorWithCreator } from "@/types/vendor";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
+import Link from "next/link";
 
 type DetailRow = {
   key: string;
@@ -41,20 +42,12 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
 
 export default function VendorDetails({ vendor }: { vendor: VendorWithCreator }) {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
 
   const isDeleted = !!vendor.deletedAt;
 
   const rows: DetailRow[] = [
-    { key: translate("Vendor ID", "معرف المورد"), value: vendor.id, mono: true, copyText: vendor.id },
     { key: translate("Code", "الكود"), value: vendor.code, mono: true, copyText: vendor.code },
-    {
-      key: translate("Status", "الحالة"),
-      value: isDeleted ? (
-        <span className="text-red-600">{translate("Deleted", "محذوف")}</span>
-      ) : (
-        <span className="text-teal-600">{translate("Active", "نشط")}</span>
-      ),
-    },
     {
       key: translate("Phone", "الهاتف"),
       value: vendor.phone ? <a href={`tel:${vendor.phone}`}>{vendor.phone}</a> : <EmptyValue />,
@@ -67,7 +60,14 @@ export default function VendorDetails({ vendor }: { vendor: VendorWithCreator })
       key: translate("Notes", "الملاحظات"),
       value: vendor.notes ? <span className="font-normal whitespace-pre-wrap">{vendor.notes}</span> : <EmptyValue />,
     },
-    { key: translate("Created By", "أنشئ بواسطة"), value: vendor.createdBy.name },
+    {
+      key: translate("Created By", "أنشئ بواسطة"),
+      value: (
+        <Link href={getLocalizedHref(`/organization/users/${vendor.createdBy.id}`)} className="hover:underline">
+          {vendor.createdBy.name}
+        </Link>
+      ),
+    },
     {
       key: translate("Registration Date", "تاريخ التسجيل"),
       value: formatDateAndTime(vendor.createdAt, locale),

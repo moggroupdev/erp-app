@@ -1,8 +1,9 @@
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type CustomerWithCreator } from "@/types/customer";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
+import Link from "next/link";
 
 type DetailRow = {
   key: string;
@@ -41,20 +42,12 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
 
 export default function CustomerDetails({ customer }: { customer: CustomerWithCreator }) {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
 
   const isDeleted = !!customer.deletedAt;
 
   const rows: DetailRow[] = [
-    { key: translate("Customer ID", "معرف العميل"), value: customer.id, mono: true, copyText: customer.id },
     { key: translate("Code", "الكود"), value: customer.code, mono: true, copyText: customer.code },
-    {
-      key: translate("Status", "الحالة"),
-      value: isDeleted ? (
-        <span className="text-red-600">{translate("Deleted", "محذوف")}</span>
-      ) : (
-        <span className="text-teal-600">{translate("Active", "نشط")}</span>
-      ),
-    },
     {
       key: translate("Phone", "الهاتف"),
       value: customer.phone ? <a href={`tel:${customer.phone}`}>{customer.phone}</a> : <EmptyValue />,
@@ -67,7 +60,14 @@ export default function CustomerDetails({ customer }: { customer: CustomerWithCr
       key: translate("Notes", "الملاحظات"),
       value: customer.notes ? <span className="font-normal whitespace-pre-wrap">{customer.notes}</span> : <EmptyValue />,
     },
-    { key: translate("Created By", "أنشئ بواسطة"), value: customer.createdBy.name },
+    {
+      key: translate("Created By", "أنشئ بواسطة"),
+      value: (
+        <Link href={getLocalizedHref(`/organization/users/${customer.createdBy.id}`)} className="hover:underline">
+          {customer.createdBy.name}
+        </Link>
+      ),
+    },
     {
       key: translate("Registration Date", "تاريخ التسجيل"),
       value: formatDateAndTime(customer.createdAt, locale),

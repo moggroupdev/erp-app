@@ -1,10 +1,11 @@
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import useProductCategories from "@/hooks/reference/use-product-categories";
 import { type ProductWithCreator } from "@/types/product";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
+import Link from "next/link";
 
 type DetailRow = {
   key: string;
@@ -43,6 +44,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
 
 export default function ProductDetails({ product }: { product: ProductWithCreator }) {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
   const { helpers } = useProductCategories();
 
   const isDeleted = !!product.deletedAt;
@@ -84,7 +86,14 @@ export default function ProductDetails({ product }: { product: ProductWithCreato
       key: translate("Pricing Factor", "معامل التسعير"),
       value: product.pricingFactor,
     },
-    { key: translate("Created By", "أنشئ بواسطة"), value: product.createdBy.name },
+    {
+      key: translate("Created By", "أنشئ بواسطة"),
+      value: (
+        <Link href={getLocalizedHref(`/organization/users/${product.createdBy.id}`)} className="hover:underline">
+          {product.createdBy.name}
+        </Link>
+      ),
+    },
     {
       key: translate("Registration Date", "تاريخ التسجيل"),
       value: formatDateAndTime(product.createdAt, locale),

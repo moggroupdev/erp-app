@@ -1,4 +1,4 @@
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDepartments from "@/hooks/reference/use-departments";
 import useRoles from "@/hooks/reference/use-roles";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
@@ -45,6 +45,7 @@ function DetailsTable({ rows }: { rows: DetailRow[] }) {
 
 export default function UserDetails({ user }: { user: UserWithCreator }) {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
   const { helpers: departmentHelpers } = useDepartments();
   const { helpers: roleHelpers } = useRoles();
 
@@ -54,16 +55,7 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
   const role = roleHelpers.getRoleById(user.roleId);
 
   const rows: DetailRow[] = [
-    { key: translate("User ID", "معرف المستخدم"), value: user.id, mono: true, copyText: user.id },
     { key: translate("Code", "الكود"), value: user.code, mono: true, copyText: user.code },
-    {
-      key: translate("Status", "الحالة"),
-      value: isDeleted ? (
-        <span className="text-red-600">{translate("Deleted", "محذوف")}</span>
-      ) : (
-        <span className="text-teal-600">{translate("Active", "نشط")}</span>
-      ),
-    },
     {
       key: translate("Phone", "الهاتف"),
       value: user.phone ? <a href={`tel:${user.phone}`}>{user.phone}</a> : <EmptyValue />,
@@ -107,7 +99,7 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
     {
       key: translate("Created By", "أنشئ بواسطة"),
       value: user.createdBy ? (
-        <Link href={`/organization/users/${user.createdBy.id}`} className="hover:underline">
+        <Link href={getLocalizedHref(`/organization/users/${user.createdBy.id}`)} className="hover:underline">
           {user.createdBy.name}
         </Link>
       ) : (
