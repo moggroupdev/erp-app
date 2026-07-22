@@ -116,22 +116,10 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     ],
   },
   {
-    label: { en: "Products Details", ar: "تفاصيل المنتجات" },
-    icon: Settings2,
-    items: [
-      {
-        label: { en: "Product Catalog", ar: "كتالوج المنتجات" },
-        href: "/engineering/products",
-        icon: PackageSearch,
-        requiredPermission: PERMISSIONS.READ_PRODUCTS,
-      },
-      {
-        label: { en: "BOMs / Material Recipes", ar: "قوائم المواد" },
-        href: "/engineering/boms",
-        icon: Boxes,
-        requiredPermission: PERMISSIONS.READ_BOMS,
-      },
-    ],
+    label: { en: "Product Catalog", ar: "كتالوج المنتجات" },
+    href: "/products",
+    icon: PackageSearch,
+    items: [],
   },
   {
     label: { en: "Production", ar: "الإنتاج" },

@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -32,6 +33,7 @@ const PAGE_TITLE = { en: "Product Details", ar: "تفاصيل المنتج" };
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
+  const getLocalizedHref = useLocaleHref();
   const { code } = useParams<{ code: string }>();
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
@@ -195,6 +197,7 @@ export default function Page() {
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {translate("Default", "افتراضي")}
                         </Table.Th>
+                        <Table.Th />
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -239,6 +242,18 @@ export default function Page() {
                                 </Tooltip>
                               )
                             )}
+                          </Table.Td>
+                          <Table.Td w={0}>
+                            <Button
+                              component={Link}
+                              href={getLocalizedHref(`/engineering/products/${code}/boms/${dimension.id}`)}
+                              variant="light"
+                              // color="cyan"
+                              size="xs"
+                              radius="md"
+                            >
+                              {translate("View BOM", "عرض قائمة المواد")}
+                            </Button>
                           </Table.Td>
                         </Table.Tr>
                       ))}

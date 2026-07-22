@@ -235,7 +235,7 @@ export default function Page() {
               <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{translate("Title", "العنوان")}</Table.Th>
+                    <Table.Th>{translate("Product Name", "اسم المنتج")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                     <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
