@@ -16,7 +16,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { Badge, Button, FloatingPosition, Table, Tooltip } from "@mantine/core";
-import { Box, Pencil, Star } from "lucide-react";
+import { Box, Pencil, Plus, Star } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -28,6 +28,7 @@ import ErrorAlert from "@/components/ui/error-alert";
 import ProductModal from "@/components/global/data-modals/product-modal";
 import ProductDimensionModal from "@/components/global/data-modals/product-dimension-modal";
 import ProductDetails from "./components/product-details";
+import { isManufactured } from "@/lib/constants/enums/product-source-types";
 
 const PAGE_TITLE = { en: "Product Details", ar: "تفاصيل المنتج" };
 
@@ -168,7 +169,13 @@ export default function Page() {
                 </div>
 
                 <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
-                  <Button onClick={openDimensionModal} variant="light" color="teal" radius="md">
+                  <Button
+                    onClick={openDimensionModal}
+                    variant="light"
+                    color="teal"
+                    radius="md"
+                    leftSection={<Plus size={15} />}
+                  >
                     {translate("Add New Dimension", "إضافة مقاس جديد")}
                   </Button>
                 </PermissionGuard>
@@ -197,7 +204,7 @@ export default function Page() {
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {translate("Default", "افتراضي")}
                         </Table.Th>
-                        <Table.Th />
+                        {isManufactured(product.sourceType) && <Table.Th />}
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -243,18 +250,20 @@ export default function Page() {
                               )
                             )}
                           </Table.Td>
-                          <Table.Td w={0}>
-                            <Button
-                              component={Link}
-                              href={getLocalizedHref(`/products/${code}/boms/${dimension.id}`)}
-                              variant="light"
-                              // color="cyan"
-                              size="xs"
-                              radius="md"
-                            >
-                              {translate("View BOM", "عرض قائمة المواد")}
-                            </Button>
-                          </Table.Td>
+                          {isManufactured(product.sourceType) && (
+                            <Table.Td w={0}>
+                              <Button
+                                component={Link}
+                                href={getLocalizedHref(`/products/${code}/boms/${dimension.id}`)}
+                                variant="light"
+                                color="teal"
+                                size="xs"
+                                radius="md"
+                              >
+                                {translate("View BOM", "عرض قائمة المواد")}
+                              </Button>
+                            </Table.Td>
+                          )}
                         </Table.Tr>
                       ))}
                     </Table.Tbody>
