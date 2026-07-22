@@ -25,8 +25,8 @@ import CategoryStatsEmpty from "./components/category-stats-empty";
 const PAGE_TITLE = { en: "Materials Category Stats", ar: "إحصائيات فئة المواد" };
 
 const PAGE_SUBTITLE = {
-  en: "Select a main category to see inventory value, composition by type, stock health, and subcategory breakdown.",
-  ar: "اختر فئة رئيسية لعرض قيمة المخزون، والتكوين حسب النوع، وصحة المخزون، وتفصيل الفئات الفرعية.",
+  en: "Analysis scoped to one product family, with subcategory comparison, stock health, and high-value or understocked items within the selected main category.",
+  ar: "تحليل ضمن عائلة منتجات واحدة، يشمل مقارنة الفئات الفرعية وصحة المخزون والمواد عالية القيمة أو التي تعاني من نقص ضمن الفئة الرئيسية المختارة.",
 };
 
 export default function Page() {

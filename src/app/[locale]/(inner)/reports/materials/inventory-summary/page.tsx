@@ -22,8 +22,8 @@ import LowStockMaterialsTable from "../components/low-stock-materials-table";
 const PAGE_TITLE = { en: "Materials Inventory Summary", ar: "ملخص مخزون المواد" };
 
 const PAGE_SUBTITLE = {
-  en: "A snapshot of warehouse materials: total value, composition by type and category, stock health, and items that need attention.",
-  ar: "لمحة عن مواد المخزن: القيمة الإجمالية، التكوين حسب النوع والفئة، صحة المخزون، والمواد التي تحتاج متابعة.",
+  en: "Executive view of the full materials inventory, including capital in stock, distribution across types and categories, and items requiring reorder.",
+  ar: "نظرة تنفيذية على مخزون المواد بالكامل، تشمل رأس المال المخزّن والتوزيع بين الأنواع والفئات والمواد التي تحتاج إعادة طلب.",
 };
 
 export default function Page() {

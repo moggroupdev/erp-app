@@ -12,8 +12,8 @@ const PAGE_TITLE = {
 };
 
 const PAGE_SUBTITLE = {
-  en: "A snapshot of warehouse materials. Total value, composition by type and category, stock health, and items that need attention.",
-  ar: "لمحة عن مواد المخزن. القيمة الإجمالية، التكوين حسب النوع والفئة، صحة المخزون، والمواد التي تحتاج متابعة.",
+  en: "Inventory analytics for raw materials and spare parts, covering inventory value, stock health, and performance within a specific category.",
+  ar: "تحليلات مخزون للمواد الخام وقطع الغيار، تشمل قيمة وصحة المخزون والأداء ضمن فئة محددة.",
 };
 
 export default function Page() {
@@ -39,7 +39,10 @@ export default function Page() {
           <ReportLinkCard
             report={{
               label: { en: "Materials Summary", ar: "ملخص المواد" },
-              description: { en: "View a summary of materials in the warehouse", ar: "عرض ملخص للمواد في المخزن" },
+              description: {
+                en: "Full warehouse overview with total inventory value, breakdown by type and category, and items requiring replenishment.",
+                ar: "نظرة شاملة على المستودع تشمل إجمالي قيمة المخزون والتوزيع حسب النوع والفئة والمواد التي تحتاج إعادة تزويد.",
+              },
               href: "/reports/materials/inventory-summary",
             }}
           />
@@ -47,8 +50,8 @@ export default function Page() {
             report={{
               label: { en: "Category Stats", ar: "إحصائيات الفئة" },
               description: {
-                en: "Stats for materials in a selected main category",
-                ar: "إحصائيات المواد ضمن فئة رئيسية محددة",
+                en: "Analysis within one main category, covering subcategory comparison, low-stock items, and highest-value materials.",
+                ar: "تحليل ضمن فئة رئيسية واحدة يشمل مقارنة الفئات الفرعية ومواد منخفضة المخزون وأعلى المواد قيمة.",
               },
               href: "/reports/materials/category-stats",
             }}

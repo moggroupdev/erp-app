@@ -9,8 +9,8 @@ import ReportLinkCard from "./components/report-link-card";
 const PAGE_TITLE = { en: "Reports", ar: "التقارير" };
 
 const PAGE_SUBTITLE = {
-  en: "Browse reports by business domain. Select a domain to see available reports.",
-  ar: "تصفح التقارير حسب مجال العمل. اختر مجالاً لعرض التقارير المتاحة.",
+  en: "Operational and financial insights organized by business area, with reports grouped by domain.",
+  ar: "رؤى تشغيلية ومالية مرتبة حسب مجال العمل، مع تقارير مصنّفة حسب المجال.",
 };
 
 export default function Page() {
@@ -32,7 +32,10 @@ export default function Page() {
           <ReportLinkCard
             report={{
               label: { en: "Materials Reports", ar: "تقارير المواد" },
-              description: { en: "View reports about materials", ar: "عرض تقارير عن المواد" },
+              description: {
+                en: "Inventory value, stock levels, and category performance across warehouse materials.",
+                ar: "قيمة المخزون ومستوياته وأداء الفئات المختلفة عبر المواد المخزنة.",
+              },
               href: "/reports/materials",
             }}
           />
