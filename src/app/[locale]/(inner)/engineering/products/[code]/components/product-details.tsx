@@ -3,6 +3,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import useProductCategories from "@/hooks/reference/use-product-categories";
 import { type ProductWithCreator } from "@/types/product";
+import { PackageSearch } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
 export default function ProductDetails({ product }: { product: ProductWithCreator }) {
@@ -61,5 +62,5 @@ export default function ProductDetails({ product }: { product: ProductWithCreato
       : []),
   ];
 
-  return <EntityDetails title={product.title} deletedAt={product.deletedAt} rows={rows} />;
+  return <EntityDetails title={product.title} icon={PackageSearch} deletedAt={product.deletedAt} rows={rows} />;
 }

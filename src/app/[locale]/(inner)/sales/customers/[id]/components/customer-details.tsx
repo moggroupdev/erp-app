@@ -1,6 +1,7 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type CustomerWithCreator } from "@/types/customer";
+import { Users } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
 export default function CustomerDetails({ customer }: { customer: CustomerWithCreator }) {
@@ -35,5 +36,5 @@ export default function CustomerDetails({ customer }: { customer: CustomerWithCr
       : []),
   ];
 
-  return <EntityDetails title={customer.name} deletedAt={customer.deletedAt} rows={rows} />;
+  return <EntityDetails title={customer.name} icon={Users} deletedAt={customer.deletedAt} rows={rows} />;
 }

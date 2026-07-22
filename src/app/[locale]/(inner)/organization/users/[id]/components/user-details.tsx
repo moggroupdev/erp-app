@@ -5,6 +5,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { UserWithCreator } from "@/types/user";
 import { Badge } from "@mantine/core";
+import { UserCog } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
 export default function UserDetails({ user }: { user: UserWithCreator }) {
@@ -75,6 +76,7 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
   return (
     <EntityDetails
       title={user.name}
+      icon={UserCog}
       titleAside={
         user.isAdmin ? (
           <Badge size="lg" variant="light" color="dark">

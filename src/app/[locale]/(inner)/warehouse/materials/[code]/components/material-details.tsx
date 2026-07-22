@@ -4,6 +4,7 @@ import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import { type MaterialWithCreator } from "@/types/material";
+import { PackageSearch } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
 export default function MaterialDetails({ material }: { material: MaterialWithCreator }) {
@@ -64,5 +65,5 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
       : []),
   ];
 
-  return <EntityDetails title={material.title} deletedAt={material.deletedAt} rows={rows} />;
+  return <EntityDetails title={material.title} icon={PackageSearch} deletedAt={material.deletedAt} rows={rows} />;
 }

@@ -1,6 +1,7 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type VendorWithCreator } from "@/types/vendor";
+import { HandCoins } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
 export default function VendorDetails({ vendor }: { vendor: VendorWithCreator }) {
@@ -35,5 +36,5 @@ export default function VendorDetails({ vendor }: { vendor: VendorWithCreator })
       : []),
   ];
 
-  return <EntityDetails title={vendor.name} deletedAt={vendor.deletedAt} rows={rows} />;
+  return <EntityDetails title={vendor.name} icon={HandCoins} deletedAt={vendor.deletedAt} rows={rows} />;
 }
