@@ -1,0 +1,144 @@
+import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useI18n } from "@/lib/i18n/hooks";
+import usePrivateRequest from "@/hooks/use-private-request";
+import bomsApi from "@/lib/api/boms";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query-keys";
+import type { BomItemWithMaterial } from "@/types/bom";
+import { Button, NumberInput, TextInput, Textarea } from "@mantine/core";
+import ErrorAlert from "@/components/ui/error-alert";
+import Modal from "@/components/ui/modal";
+
+export default function UpdateBomItemModal({
+  opened,
+  close,
+  dimensionId,
+  itemToUpdate,
+  setItemToUpdate,
+}: {
+  opened: boolean;
+  close: () => void;
+  dimensionId: string;
+  itemToUpdate: BomItemWithMaterial | null;
+  setItemToUpdate: React.Dispatch<React.SetStateAction<BomItemWithMaterial | null>>;
+}) {
+  const { locale, translate, translation } = useI18n();
+
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
+  const [validationError, setValidationError] = useState("");
+
+  const [quantityRequired, setQuantityRequired] = useState<number | string>("");
+  const [notes, setNotes] = useState("");
+
+  function reset() {
+    setQuantityRequired("");
+    setNotes("");
+  }
+
+  useEffect(() => {
+    if (itemToUpdate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQuantityRequired(itemToUpdate.quantityRequired);
+      setNotes(itemToUpdate.notes || "");
+    } else reset();
+  }, [itemToUpdate]);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      return await bomsApi.updateItem({
+        privateRequest,
+        itemId: itemToUpdate!.id,
+        dto: {
+          quantityRequired: Number(quantityRequired),
+          notes: notes.trim() || null,
+        },
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionId) });
+      handleClose();
+    },
+  });
+
+  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setValidationError("");
+
+    const normalizedQuantity = Number(quantityRequired);
+    if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
+      return setValidationError(
+        translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."),
+      );
+    }
+
+    mutation.mutate();
+  }
+
+  function handleClose() {
+    close();
+    setTimeout(() => {
+      setValidationError("");
+      mutation.reset();
+      setItemToUpdate(null);
+      reset();
+    }, 250);
+  }
+
+  const title = translate("Edit BOM Item", "تعديل بند قائمة المواد");
+
+  const isDataChanged = itemToUpdate
+    ? Number(quantityRequired) !== itemToUpdate.quantityRequired || (notes.trim() || null) !== itemToUpdate.notes
+    : false;
+
+  const isReadyToSubmit =
+    !!itemToUpdate && quantityRequired !== "" && Number(quantityRequired) > 0 && isDataChanged;
+
+  return (
+    <Modal opened={opened} onClose={handleClose} title={title} size="lg">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <TextInput
+          value={itemToUpdate ? `${itemToUpdate.material.title} (${itemToUpdate.material.code})` : ""}
+          label={translate("Material", "المادة")}
+          readOnly
+          radius="md"
+        />
+
+        <NumberInput
+          value={quantityRequired}
+          onChange={setQuantityRequired}
+          label={translate("Quantity Required", "الكمية المطلوبة")}
+          placeholder={translate("Enter quantity", "أدخل الكمية")}
+          min={0}
+          allowNegative={false}
+          decimalScale={4}
+          required
+          radius="md"
+        />
+
+        <Textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          label={translate("Notes (Optional)", "الملاحظات (اختياري)")}
+          placeholder={translate("Enter notes", "أدخل الملاحظات")}
+          radius="md"
+          autosize
+        />
+
+        <div className="flex gap-2">
+          <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
+            {translation.cancel}
+          </Button>
+          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
+            {title}
+          </Button>
+        </div>
+
+        {error && <ErrorAlert error={error} />}
+      </form>
+    </Modal>
+  );
+}
