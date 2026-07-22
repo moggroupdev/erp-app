@@ -150,7 +150,6 @@ export default function Page() {
   return (
     <LayoutBox
       header={{
-        backLink: getLocalizedHref("/engineering"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <div className="flex gap-2">
@@ -251,7 +250,7 @@ export default function Page() {
                     return (
                       <Table.Tr key={product.code} className="text-gray-600">
                         <Table.Td className="font-semibold text-gray-800">
-                          <Link href={getLocalizedHref(`/engineering/products/${product.code}`)} className="hover:underline">
+                          <Link href={getLocalizedHref(`/products/${product.code}`)} className="hover:underline">
                             {product.title}
                           </Link>
                         </Table.Td>

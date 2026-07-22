@@ -246,7 +246,7 @@ export default function Page() {
                           <Table.Td w={0}>
                             <Button
                               component={Link}
-                              href={getLocalizedHref(`/engineering/products/${code}/boms/${dimension.id}`)}
+                              href={getLocalizedHref(`/products/${code}/boms/${dimension.id}`)}
                               variant="light"
                               // color="cyan"
                               size="xs"
