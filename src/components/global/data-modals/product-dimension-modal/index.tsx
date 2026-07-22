@@ -29,14 +29,14 @@ export default function ProductDimensionModal({
   const [validationError, setValidationError] = useState("");
 
   const [length, setLength] = useState<number | string>("");
-  const [width, setWidth] = useState<number | string>("");
+  const [depth, setDepth] = useState<number | string>("");
   const [height, setHeight] = useState<number | string>("");
   const [dimensionUnit, setDimensionUnit] = useState<string | null>(null);
   const [isDefault, setIsDefault] = useState(false);
 
   function reset() {
     setLength("");
-    setWidth("");
+    setDepth("");
     setHeight("");
     setDimensionUnit(null);
     setIsDefault(isFirstDimension);
@@ -53,7 +53,7 @@ export default function ProductDimensionModal({
         code: productCode,
         dto: {
           length: Number(length),
-          width: Number(width),
+          depth: Number(depth),
           height: Number(height),
           dimensionUnit: dimensionUnit as DimensionUnit,
           isDefault: isFirstDimension || isDefault,
@@ -75,13 +75,13 @@ export default function ProductDimensionModal({
     setValidationError("");
 
     const normalizedLength = Number(length);
-    const normalizedWidth = Number(width);
+    const normalizedDepth = Number(depth);
     const normalizedHeight = Number(height);
 
     if (Number.isNaN(normalizedLength) || normalizedLength < 0)
       return setValidationError(translate("Length must be a non-negative number.", "يجب أن يكون الطول رقماً غير سالب."));
-    if (Number.isNaN(normalizedWidth) || normalizedWidth < 0)
-      return setValidationError(translate("Width must be a non-negative number.", "يجب أن يكون العرض رقماً غير سالب."));
+    if (Number.isNaN(normalizedDepth) || normalizedDepth < 0)
+      return setValidationError(translate("Depth must be a non-negative number.", "يجب أن يكون العمق رقماً غير سالب."));
     if (Number.isNaN(normalizedHeight) || normalizedHeight < 0)
       return setValidationError(translate("Height must be a non-negative number.", "يجب أن يكون الارتفاع رقماً غير سالب."));
     if (!dimensionUnit) return setValidationError(translate("Please select a unit.", "يرجى اختيار الوحدة."));
@@ -100,7 +100,7 @@ export default function ProductDimensionModal({
 
   const title = translate("Add New Dimension", "إضافة مقاس جديد");
 
-  const isReadyToSubmit = length !== "" && width !== "" && height !== "" && !!dimensionUnit;
+  const isReadyToSubmit = length !== "" && depth !== "" && height !== "" && !!dimensionUnit;
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
@@ -119,10 +119,10 @@ export default function ProductDimensionModal({
           />
 
           <NumberInput
-            value={width}
-            onChange={setWidth}
-            label={translate("Width", "العرض")}
-            placeholder={translate("Enter width", "أدخل العرض")}
+            value={depth}
+            onChange={setDepth}
+            label={translate("Depth", "العمق")}
+            placeholder={translate("Enter depth", "أدخل العمق")}
             min={0}
             allowNegative={false}
             decimalScale={4}

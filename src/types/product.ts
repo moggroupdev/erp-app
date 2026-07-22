@@ -20,7 +20,7 @@ export type ProductDimension = {
   id: string;
   productCode: string;
   length: number;
-  width: number;
+  depth: number;
   height: number;
   dimensionUnit: DimensionUnit;
   isDefault: boolean;
@@ -45,7 +45,7 @@ export type UpdateProductDto = Partial<CreateProductDto>;
 
 export type CreateProductDimensionDto = {
   length: number;
-  width: number;
+  depth: number;
   height: number;
   dimensionUnit: DimensionUnit;
   isDefault: boolean | null;

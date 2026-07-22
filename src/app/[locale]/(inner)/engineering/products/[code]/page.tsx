@@ -184,7 +184,7 @@ export default function Page() {
                           {translate("Length", "الطول")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Width", "العرض")}
+                          {translate("Depth", "العمق")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {translate("Height", "الارتفاع")}
@@ -202,7 +202,7 @@ export default function Page() {
                         <Table.Tr key={dimension.id} className={dimension.isDefault ? "bg-teal-50/60" : "text-gray-600"}>
                           <Table.Td className="text-gray-600">{product.title}</Table.Td>
                           <Table.Td className="font-medium text-gray-800">{dimension.length}</Table.Td>
-                          <Table.Td className="font-medium text-gray-800">{dimension.width}</Table.Td>
+                          <Table.Td className="font-medium text-gray-800">{dimension.depth}</Table.Td>
                           <Table.Td className="font-medium text-gray-800">{dimension.height}</Table.Td>
                           <Table.Td>
                             <Badge size="sm" variant="light" color="gray" radius="md">
@@ -266,7 +266,7 @@ export default function Page() {
                         {translate("Selected dimension", "المقاس المحدد")}
                       </span>
                       <p className="mt-1 text-sm font-medium text-gray-800">
-                        {pendingDefaultDimension.length} × {pendingDefaultDimension.width} × {pendingDefaultDimension.height}{" "}
+                        {pendingDefaultDimension.length} × {pendingDefaultDimension.depth} × {pendingDefaultDimension.height}{" "}
                         {getDimensionUnitLabel(pendingDefaultDimension.dimensionUnit, locale)}
                       </p>
                     </div>

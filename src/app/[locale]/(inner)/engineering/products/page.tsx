@@ -266,7 +266,7 @@ export default function Page() {
                         <Table.Td>{getProductSourceTypeLabel(product.sourceType, locale)}</Table.Td>
                         <Table.Td className="text-sm">
                           {defaultDimension
-                            ? `${defaultDimension.length} × ${defaultDimension.width} × ${defaultDimension.height} ${getDimensionUnitLabel(defaultDimension.dimensionUnit, locale)}`
+                            ? `${defaultDimension.length} × ${defaultDimension.depth} × ${defaultDimension.height} ${getDimensionUnitLabel(defaultDimension.dimensionUnit, locale)}`
                             : ""}
                         </Table.Td>
                         <Table.Td w={0}>
