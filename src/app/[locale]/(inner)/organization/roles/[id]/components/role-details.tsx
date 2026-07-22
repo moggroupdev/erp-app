@@ -42,7 +42,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
   }, [permissionSet, permissions]);
 
   const rows: DetailRow[] = [
-    { key: translate("Name", "الاسم"), value: role.name },
+    { key: translate("Role Name", "اسم الدور"), value: role.name },
     {
       key: translate("Description", "الوصف"),
       value: role.description ? <span className="font-normal whitespace-pre-wrap">{role.description}</span> : <EmptyValue />,
