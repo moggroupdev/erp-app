@@ -20,7 +20,7 @@ const PAGE_COPY = {
     title: { en: "Create Role", ar: "إنشاء دور" },
     subtitle: {
       en: "Set up the role details, optional department link, and the permissions users will inherit.",
-      ar: "حدّد تفاصيل الدور، وربط القسم الاختياري، والصلاحيات التي سيرثها المستخدمون.",
+      ar: "حدّد تفاصيل الدور والصلاحيات التي سيرثها المستخدمون.",
     },
   },
   edit: {
