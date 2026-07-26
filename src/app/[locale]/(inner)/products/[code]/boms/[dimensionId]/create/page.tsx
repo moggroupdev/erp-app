@@ -32,9 +32,13 @@ type BomDraftRow = {
   notes: string;
 };
 
+function createRowKey() {
+  return `bom-row-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function createEmptyRow(): BomDraftRow {
   return {
-    key: crypto.randomUUID(),
+    key: createRowKey(),
     materialCode: null,
     materialTitle: "",
     unitPrice: 0,
