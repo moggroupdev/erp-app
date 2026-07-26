@@ -9,19 +9,22 @@ import type { BomItemWithMaterial } from "@/types/bom";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
+import SelectMaterial from "@/components/global/selections/query-based/select-material";
 
-export default function UpdateBomItemModal({
+export default function BomItemModal({
   opened,
   close,
   dimensionId,
   itemToUpdate,
   setItemToUpdate,
+  excludeMaterialCodes = [],
 }: {
   opened: boolean;
   close: () => void;
   dimensionId: string;
   itemToUpdate: BomItemWithMaterial | null;
   setItemToUpdate: React.Dispatch<React.SetStateAction<BomItemWithMaterial | null>>;
+  excludeMaterialCodes?: string[];
 }) {
   const { locale, translate, translation } = useI18n();
 
@@ -29,10 +32,14 @@ export default function UpdateBomItemModal({
   const privateRequest = usePrivateRequest();
   const [validationError, setValidationError] = useState("");
 
+  const [materialCode, setMaterialCode] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
   const [notes, setNotes] = useState("");
 
+  const isUpdate = !!itemToUpdate;
+
   function reset() {
+    setMaterialCode(null);
     setQuantityRequired("");
     setNotes("");
   }
@@ -47,10 +54,22 @@ export default function UpdateBomItemModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      return await bomsApi.updateItem({
+      if (itemToUpdate) {
+        return await bomsApi.updateItem({
+          privateRequest,
+          itemId: itemToUpdate.id,
+          dto: {
+            quantityRequired: Number(quantityRequired),
+            notes: notes.trim() || null,
+          },
+        });
+      }
+
+      return await bomsApi.appendItem({
         privateRequest,
-        itemId: itemToUpdate!.id,
+        dimensionId,
         dto: {
+          materialCode: materialCode!,
           quantityRequired: Number(quantityRequired),
           notes: notes.trim() || null,
         },
@@ -67,6 +86,10 @@ export default function UpdateBomItemModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidationError("");
+
+    if (!isUpdate && !materialCode) {
+      return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
+    }
 
     const normalizedQuantity = Number(quantityRequired);
     if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
@@ -86,24 +109,40 @@ export default function UpdateBomItemModal({
     }, 250);
   }
 
-  const title = translate("Edit BOM Item", "تعديل بند قائمة المواد");
+  const title = isUpdate
+    ? translate("Edit BOM Item", "تعديل بند قائمة المواد")
+    : translate("Add BOM Item", "إضافة بند لقائمة المواد");
 
   const isDataChanged = itemToUpdate
     ? Number(quantityRequired) !== itemToUpdate.quantityRequired || (notes.trim() || null) !== itemToUpdate.notes
-    : false;
+    : true;
 
-  const isReadyToSubmit = !!itemToUpdate && quantityRequired !== "" && Number(quantityRequired) > 0 && isDataChanged;
+  const isReadyToSubmit =
+    quantityRequired !== "" &&
+    Number(quantityRequired) > 0 &&
+    isDataChanged &&
+    (isUpdate || !!materialCode);
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {itemToUpdate && (
+        {isUpdate && itemToUpdate ? (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
             <p className="truncate text-sm font-medium text-gray-800">{itemToUpdate.material.title}</p>
             <Badge size="sm" variant="light" color="gray" radius="md" className="font-mono">
               {itemToUpdate.material.code}
             </Badge>
           </div>
+        ) : (
+          <SelectMaterial
+            value={materialCode}
+            setValue={setMaterialCode}
+            excludeCodes={excludeMaterialCodes}
+            label={translate("Material", "المادة")}
+            placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
+            required
+            withBrowseModal
+          />
         )}
 
         <NumberInput

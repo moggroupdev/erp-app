@@ -29,8 +29,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import MoneyViewer from "@/components/ui/money-viewer";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
-import AppendBomItemModal from "@/components/global/data-modals/append-bom-item-modal";
-import UpdateBomItemModal from "@/components/global/data-modals/update-bom-item-modal";
+import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 
@@ -53,13 +52,17 @@ export default function Page() {
 
   useDocumentTitle(`${bom?.product.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("BOM", "قائمة المواد")}`);
 
-  const [appendModalOpened, { open: openAppendModal, close: closeAppendModal }] = useDisclosure(false);
-  const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
+  const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
+
+  function handleOpenAppendModal() {
+    setItemToUpdate(null);
+    openModal();
+  }
 
   function handleOpenUpdateModal(item: BomItemWithMaterial) {
     setItemToUpdate(item);
-    openUpdateModal();
+    openModal();
   }
 
   const items = bom?.standardBoms ?? [];
@@ -194,7 +197,7 @@ export default function Page() {
 
                   <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
                     <Button
-                      onClick={openAppendModal}
+                      onClick={handleOpenAppendModal}
                       variant="light"
                       color="teal"
                       radius="md"
@@ -274,19 +277,13 @@ export default function Page() {
                   </Table>
                 </div>
 
-                <AppendBomItemModal
-                  opened={appendModalOpened}
-                  close={closeAppendModal}
-                  dimensionId={dimensionId}
-                  excludeMaterialCodes={excludeMaterialCodes}
-                />
-
-                <UpdateBomItemModal
-                  opened={updateModalOpened}
-                  close={closeUpdateModal}
+                <BomItemModal
+                  opened={modalOpened}
+                  close={closeModal}
                   dimensionId={dimensionId}
                   itemToUpdate={itemToUpdate}
                   setItemToUpdate={setItemToUpdate}
+                  excludeMaterialCodes={excludeMaterialCodes}
                 />
               </section>
             )}
