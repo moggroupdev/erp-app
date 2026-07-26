@@ -17,8 +17,9 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
+import { formatMoney } from "@/lib/helpers/format-money";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { Badge, Button, Table } from "@mantine/core";
+import { Badge, Button, Divider, Table } from "@mantine/core";
 import { Calculator, Layers, Pencil, Plus, Wallet } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
@@ -50,9 +51,7 @@ export default function Page() {
   const loading = bomQuery.isFetching;
   const errorMessage = bomQuery.error ? getErrorMessage(locale, bomQuery.error) : "";
 
-  useDocumentTitle(
-    `${bom?.product.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("BOM", "قائمة المواد")}`,
-  );
+  useDocumentTitle(`${bom?.product.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("BOM", "قائمة المواد")}`);
 
   const [appendModalOpened, { open: openAppendModal, close: closeAppendModal }] = useDisclosure(false);
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
@@ -67,10 +66,7 @@ export default function Page() {
   const hasBom = items.length > 0;
 
   const totals = useMemo(() => {
-    const totalMaterialCost = items.reduce(
-      (sum, item) => sum + item.quantityRequired * item.material.unitPrice,
-      0,
-    );
+    const totalMaterialCost = items.reduce((sum, item) => sum + item.quantityRequired * item.material.unitPrice, 0);
     const estimatedUnitPrice = totalMaterialCost * (bom?.product.pricingFactor ?? 0);
     return { totalMaterialCost, estimatedUnitPrice, itemCount: items.length };
   }, [items, bom?.product.pricingFactor]);
@@ -111,8 +107,7 @@ export default function Page() {
         },
         {
           key: translate("Subcategory", "الفئة الفرعية"),
-          value:
-            productCategoryHelpers.getProductCategorySubById(bom.product.subCategoryId)?.title || <EmptyValue />,
+          value: productCategoryHelpers.getProductCategorySubById(bom.product.subCategoryId)?.title || <EmptyValue />,
         },
         {
           key: translate("Source Type", "نوع المصدر"),
@@ -147,7 +142,9 @@ export default function Page() {
             <EntityDetails title={bom.product.title} icon={Layers} rows={detailRows} />
 
             {!hasBom ? (
-              <EmptySection message={translate("No BOM defined for this dimension yet", "لا توجد قائمة مواد لهذا المقاس بعد")}>
+              <EmptySection
+                message={translate("No BOM defined for this dimension yet.", "لا توجد قائمة مواد لهذا المقاس بعد.")}
+              >
                 <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
                   <Button
                     component={Link}
@@ -162,19 +159,15 @@ export default function Page() {
                 </PermissionGuard>
               </EmptySection>
             ) : (
-              <section className="mt-2 flex flex-col gap-4">
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              <section className="flex flex-col gap-4">
+                <Divider variant="dashed" />
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <CalculationCard
                     label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
                     value={<MoneyViewer amount={totals.totalMaterialCost} currency={currency} />}
                     hint={translate("Sum of quantity × unit price for all items", "مجموع الكمية × سعر الوحدة لكل البنود")}
                     icon={<Wallet size={18} />}
-                  />
-                  <CalculationCard
-                    label={translate("BOM Items", "بنود قائمة المواد")}
-                    value={totals.itemCount}
-                    hint={translate("Number of distinct materials in this BOM", "عدد المواد المميزة في قائمة المواد")}
-                    icon={<Layers size={18} />}
                   />
                   <CalculationCard
                     label={translate("Estimated Unit Price", "السعر التقديري للوحدة")}
@@ -187,15 +180,15 @@ export default function Page() {
                   />
                 </div>
 
+                <Divider variant="dashed" />
+
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
                       <Layers size={16} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-lg font-semibold text-gray-900">
-                        {translate("BOM Items", "بنود قائمة المواد")}
-                      </h4>
+                      <h4 className="text-lg font-semibold text-gray-900">{translate("BOM Items", "بنود قائمة المواد")}</h4>
                       <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                         {items.length}
                       </span>
@@ -216,11 +209,14 @@ export default function Page() {
                 </div>
 
                 <div className="overflow-x-auto rounded-xl border border-gray-200">
-                  <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
+                  <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
                     <Table.Thead className="bg-gray-50">
-                      <Table.Tr>
+                      <Table.Tr className="h-10">
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Material", "المادة")}
+                          {translate("Material Code", "كود المادة")}
+                        </Table.Th>
+                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                          {translate("Material Name", "اسم المادة")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {translate("Unit", "الوحدة")}
@@ -229,10 +225,10 @@ export default function Page() {
                           {translate("Quantity", "الكمية")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Unit Price", "سعر الوحدة")}
+                          {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Line Cost", "تكلفة البند")}
+                          {translate("Line Cost (EGP)", "تكلفة البند (ج.م)")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {translate("Notes", "الملاحظات")}
@@ -246,10 +242,10 @@ export default function Page() {
                         return (
                           <Table.Tr key={item.id} className="text-gray-600">
                             <Table.Td>
-                              <div className="flex flex-col gap-0.5">
-                                <span className="font-medium text-gray-800">{item.material.title}</span>
-                                <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
-                              </div>
+                              <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
+                            </Table.Td>
+                            <Table.Td>
+                              <span className="font-medium text-gray-800">{item.material.title}</span>
                             </Table.Td>
                             <Table.Td>
                               <Badge size="sm" variant="light" color="gray" radius="md">
@@ -257,26 +253,20 @@ export default function Page() {
                               </Badge>
                             </Table.Td>
                             <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
-                            <Table.Td>
-                              <MoneyViewer amount={item.material.unitPrice} currency={currency} />
-                            </Table.Td>
-                            <Table.Td className="font-medium text-gray-800">
-                              <MoneyViewer amount={lineCost} currency={currency} />
-                            </Table.Td>
-                            <Table.Td className="max-w-48 truncate text-gray-500">
-                              {item.notes || <EmptyValue />}
-                            </Table.Td>
+                            <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
+                            <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
+                            <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
                             <Table.Td w={0}>
                               <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
                                 <Button
                                   onClick={() => handleOpenUpdateModal(item)}
-                                  variant="subtle"
-                                  color="dark"
+                                  variant="light"
+                                  color="gray"
                                   size="xs"
                                   radius="md"
                                   p={6}
                                 >
-                                  <Pencil size={14} />
+                                  <Pencil size={12} />
                                 </Button>
                               </PermissionGuard>
                             </Table.Td>
@@ -322,16 +312,11 @@ function CalculationCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-white to-teal-50/40 p-4 sm:p-5">
-      <div className="absolute -end-2 -top-2 opacity-[0.08]">{icon}</div>
-      <div className="relative flex flex-col gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">{icon}</div>
-        <div>
-          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
-          <p className="mt-1 text-xl font-semibold text-gray-900">{value}</p>
-          {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
-        </div>
-      </div>
+    <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-white to-teal-50/40 p-4 sm:p-5">
+      <div className="flex h-10 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">{icon}</div>
+      <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
+      <p className="text-xl font-semibold text-gray-900">{value}</p>
+      {hint && <p className="text-xs text-gray-500">{hint}</p>}
     </div>
   );
 }
