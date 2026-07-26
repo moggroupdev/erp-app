@@ -137,16 +137,32 @@ export default function Page() {
     setValidationError("");
     setDuplicateCodes(new Set());
 
-    for (const row of rows) {
-      if (!row.materialCode) {
-        return setValidationError(translate("Every row must have a material selected.", "يجب اختيار مادة لكل صف."));
-      }
+    // Validation Layer
+    for (let index = 0; index < rows.length; index++) {
+      const row = rows[index];
+      const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
+
+      if (!row.materialCode)
+        return setValidationError(translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
+
+      if (row.quantityRequired === "")
+        return setValidationError(translate(`${rowLabel}: quantity is required.`, `${rowLabel}: الكمية مطلوبة.`));
+
       const qty = Number(row.quantityRequired);
-      if (row.quantityRequired === "" || Number.isNaN(qty) || qty <= 0) {
+      if (Number.isNaN(qty))
         return setValidationError(
-          translate("Every row must have a positive quantity.", "يجب أن تكون الكمية موجبة في كل صف."),
+          translate(`${rowLabel}: quantity must be a valid number.`, `${rowLabel}: يجب أن تكون الكمية رقماً صالحاً.`),
         );
-      }
+
+      if (qty < 0)
+        return setValidationError(
+          translate(`${rowLabel}: quantity cannot be negative.`, `${rowLabel}: لا يمكن أن تكون الكمية سالبة.`),
+        );
+
+      if (qty === 0)
+        return setValidationError(
+          translate(`${rowLabel}: quantity must be greater than zero.`, `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`),
+        );
     }
 
     const seen = new Set<string>();

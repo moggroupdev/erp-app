@@ -173,9 +173,9 @@ export default function Page() {
                     icon={<Wallet size={18} />}
                   />
                   <CalculationCard
-                    label={translate("Estimated Unit Price", "السعر التقديري للوحدة")}
+                    label={translate("Estimated Product Price", "السعر التقديري للمنتج")}
                     value={<MoneyViewer amount={totals.estimatedUnitPrice} currency={currency} />}
-                    hint={translate(`Material cost × pricing factor`, `تكلفة المواد × معامل التسعير`)}
+                    hint={translate(`Total material cost × pricing factor`, `إجمالي تكلفة المواد × معامل التسعير`)}
                     icon={<Calculator size={18} />}
                   />
                 </div>
@@ -228,7 +228,7 @@ export default function Page() {
                           {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Line Cost (EGP)", "تكلفة البند (ج.م)")}
+                          {translate("Total (EGP)", "الإجمالي (ج.م)")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {translate("Notes", "الملاحظات")}
