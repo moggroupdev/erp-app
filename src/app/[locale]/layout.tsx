@@ -18,6 +18,14 @@ const alexandria = Alexandria({
 const theme = createTheme({
   fontFamily: "var(--font-alexandria)",
   headings: { fontFamily: "var(--font-alexandria)" },
+  components: {
+    Badge: {
+      styles: {
+        root: { overflow: "visible", flexShrink: 0 },
+        label: { overflow: "visible", textOverflow: "clip", whiteSpace: "nowrap" },
+      },
+    },
+  },
 });
 
 // Generate static paths for each locale at build time (SSG)
