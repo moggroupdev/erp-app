@@ -160,10 +160,7 @@ export default function Page() {
     if (duplicates.size > 0) {
       setDuplicateCodes(duplicates);
       return setValidationError(
-        translate(
-          "Duplicate materials are not allowed in the same BOM.",
-          "لا يُسمح بتكرار المواد في نفس قائمة المواد.",
-        ),
+        translate("Duplicate materials are not allowed in the same BOM.", "لا يُسمح بتكرار المواد في نفس قائمة المواد."),
       );
     }
 
@@ -201,11 +198,10 @@ export default function Page() {
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <Table verticalSpacing="sm" horizontalSpacing="sm">
+        <div className="overflow-x-auto rounded-xl">
+          <Table withColumnBorders>
             <Table.Thead className="bg-gray-50">
-              <Table.Tr>
-                <Table.Th className="w-10 text-xs font-medium tracking-wide text-gray-500 uppercase">#</Table.Th>
+              <Table.Tr className="h-12">
                 <Table.Th className="min-w-64 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Material", "المادة")}
                 </Table.Th>
@@ -232,8 +228,7 @@ export default function Page() {
 
                 return (
                   <Table.Tr key={row.key} className={isDuplicate ? "bg-red-50/70" : undefined}>
-                    <Table.Td className="text-gray-400">{index + 1}</Table.Td>
-                    <Table.Td>
+                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
                       <SelectMaterial
                         value={row.materialCode}
                         setValue={(next) => {
@@ -243,11 +238,13 @@ export default function Page() {
                         }}
                         onMaterialSelect={(material) => handleMaterialSelect(row.key, material)}
                         excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
-                        placeholder={translate("Search material...", "ابحث عن مادة...")}
-                        error={isDuplicate ? translate("Duplicate", "مكرر") : undefined}
+                        placeholder={translate("Enter material...", "أدخل المادة...")}
+                        variant="unstyled"
+                        radius={0}
+                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
                       <NumberInput
                         value={row.quantityRequired}
                         onChange={(value) => updateRow(row.key, { quantityRequired: value === "" ? "" : Number(value) })}
@@ -255,8 +252,10 @@ export default function Page() {
                         allowNegative={false}
                         decimalScale={4}
                         hideControls
-                        radius="md"
-                        placeholder="0"
+                        variant="unstyled"
+                        radius={0}
+                        placeholder={translate("Enter quantity...", "أدخل الكمية...")}
+                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
                     <Table.Td>
@@ -265,29 +264,31 @@ export default function Page() {
                       </span>
                     </Table.Td>
                     <Table.Td>
-                      <span className="text-sm font-medium text-gray-800">
+                      <span className="text-sm font-medium text-gray-600">
                         {row.materialCode ? formatMoney(lineTotal, currency) : "-"}
                       </span>
                     </Table.Td>
-                    <Table.Td>
+                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
                       <TextInput
                         value={row.notes}
                         onChange={(e) => updateRow(row.key, { notes: e.target.value })}
                         placeholder={translate("Optional", "اختياري")}
-                        radius="md"
+                        variant="unstyled"
+                        radius={0}
+                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
                     <Table.Td>
                       <Button
                         type="button"
                         variant="subtle"
-                        color="red"
+                        color="gray"
                         size="xs"
                         radius="md"
                         p={6}
                         disabled={rows.length <= 1}
                         onClick={() => removeRow(row.key)}
-                        aria-label={translate("Remove row", "حذف الصف")}
+                        title={translate("Remove row", "حذف الصف")}
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -297,8 +298,8 @@ export default function Page() {
               })}
             </Table.Tbody>
             <Table.Tfoot className="bg-gray-50">
-              <Table.Tr>
-                <Table.Td colSpan={3}>
+              <Table.Tr className="h-12">
+                <Table.Td colSpan={2}>
                   <Button
                     type="button"
                     variant="light"
@@ -312,18 +313,21 @@ export default function Page() {
                   </Button>
                 </Table.Td>
                 <Table.Td>
-                  <Badge size="sm" variant="light" color="teal" radius="md">
+                  <Badge size="sm" variant="light" color="dark" radius="md">
                     {translate("Total", "الإجمالي")}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <span className="text-sm font-semibold text-teal-700">{formatMoney(grandTotal, currency)}</span>
+                  <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal, currency)}</span>
                 </Table.Td>
-                <Table.Td colSpan={2} />
+                <Table.Td />
+                <Table.Td />
               </Table.Tr>
             </Table.Tfoot>
           </Table>
         </div>
+
+        {error && <ErrorAlert error={error} />}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-gray-500">
@@ -332,24 +336,21 @@ export default function Page() {
               "أضف كل المواد المطلوبة لتصنيع وحدة واحدة من هذا المقاس.",
             )}
           </p>
-          <div className="flex gap-2 sm:min-w-72">
+          <div className="flex gap-2">
             <Button
               type="button"
               variant="light"
               color="dark"
               radius="md"
-              fullWidth
               onClick={() => router.push(getLocalizedHref(`/products/${code}/boms/${dimensionId}`))}
             >
               {translation.cancel}
             </Button>
-            <Button type="submit" loading={mutation.isPending} radius="md" color="teal" fullWidth>
+            <Button type="submit" loading={mutation.isPending} radius="md" color="teal">
               {translate("Create BOM", "إنشاء قائمة المواد")}
             </Button>
           </div>
         </div>
-
-        {error && <ErrorAlert error={error} />}
       </form>
     </LayoutBox>
   );

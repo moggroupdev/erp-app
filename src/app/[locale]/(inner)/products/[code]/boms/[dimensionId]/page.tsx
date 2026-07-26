@@ -172,10 +172,7 @@ export default function Page() {
                   <CalculationCard
                     label={translate("Estimated Unit Price", "السعر التقديري للوحدة")}
                     value={<MoneyViewer amount={totals.estimatedUnitPrice} currency={currency} />}
-                    hint={translate(
-                      `Material cost × pricing factor (${bom.product.pricingFactor})`,
-                      `تكلفة المواد × معامل التسعير (${bom.product.pricingFactor})`,
-                    )}
+                    hint={translate(`Material cost × pricing factor`, `تكلفة المواد × معامل التسعير`)}
                     icon={<Calculator size={18} />}
                   />
                 </div>
