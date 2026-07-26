@@ -242,6 +242,7 @@ export default function Page() {
                         variant="unstyled"
                         radius={0}
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+                        withBrowseModal
                       />
                     </Table.Td>
                     <Table.Td className="transition-colors focus-within:bg-teal-50/60">

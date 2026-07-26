@@ -1,7 +1,14 @@
 "use client";
 
+/**
+ * Unlike other query-based selectors,
+ * SelectMaterial searches a live entity list via materialsApi and optionally
+ * opens a detail-browse modal (search + category filters + results table).
+ */
+
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -10,7 +17,10 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import type { Material } from "@/types/material";
+import { ActionIcon, Tooltip } from "@mantine/core";
+import { Table2 } from "lucide-react";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
+import BrowseMaterialsModal from "./browse-materials-modal";
 
 export type SelectMaterialProps = Omit<GenericDataSelectProps, "data" | "value" | "setValue" | "onChange"> & {
   value: string | null;
@@ -18,6 +28,8 @@ export type SelectMaterialProps = Omit<GenericDataSelectProps, "data" | "value" 
   onMaterialSelect?: (material: Material | null) => void;
   /** Material codes to hide from the options list (e.g. already on the BOM). */
   excludeCodes?: string[];
+  /** Show a button that opens a detail-browse modal for picking a material. */
+  withBrowseModal?: boolean;
 };
 
 export default function SelectMaterial({
@@ -25,22 +37,21 @@ export default function SelectMaterial({
   setValue,
   onMaterialSelect,
   excludeCodes = [],
+  withBrowseModal = false,
   searchable = true,
   clearable = true,
   ...props
 }: SelectMaterialProps) {
   const { translate } = useI18n();
+
   const privateRequest = usePrivateRequest();
 
   const { debouncedValue: debouncedSearch, setPendingValue: setSearch } = useDebouncedState("");
 
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  const [browseOpened, { open: openBrowse, close: closeBrowse }] = useDisclosure(false);
 
-  const listParams = removeEmptyParams({
-    page: "1",
-    limit: "20",
-    keyword: debouncedSearch,
-  });
+  const listParams = removeEmptyParams({ page: "1", limit: "20", keyword: debouncedSearch });
 
   const materialsQuery = useQuery({
     queryKey: queryKeys.materials.list(listParams),
@@ -58,6 +69,7 @@ export default function SelectMaterial({
     }
 
     const fromResults = materials.find((material) => material.code === value);
+
     if (fromResults) {
       setSelectedMaterial(fromResults);
       return;
@@ -66,6 +78,7 @@ export default function SelectMaterial({
     if (selectedMaterial?.code === value) return;
 
     let cancelled = false;
+
     materialsApi
       .get({ privateRequest, code: value })
       .then((material) => {
@@ -86,17 +99,13 @@ export default function SelectMaterial({
   const data = useMemo(() => {
     const byCode = new Map<string, Material>();
 
-    for (const material of materials) {
-      if (!excludeSet.has(material.code)) byCode.set(material.code, material);
-    }
+    for (const material of materials) if (!excludeSet.has(material.code)) byCode.set(material.code, material);
 
-    if (selectedMaterial && !excludeSet.has(selectedMaterial.code)) {
-      byCode.set(selectedMaterial.code, selectedMaterial);
-    }
+    if (selectedMaterial && !excludeSet.has(selectedMaterial.code)) byCode.set(selectedMaterial.code, selectedMaterial);
 
     return Array.from(byCode.values()).map((material) => ({
       value: material.code,
-      label: `${material.title} (${material.code})`,
+      label: `${material.title} - ${material.code}`,
     }));
   }, [materials, selectedMaterial, excludeSet]);
 
@@ -115,12 +124,17 @@ export default function SelectMaterial({
     if (material) {
       setSelectedMaterial(material);
       onMaterialSelect?.(material);
-    } else {
-      onMaterialSelect?.(null);
-    }
+    } else onMaterialSelect?.(null);
   }
 
-  return (
+  function handleBrowseSelect(material: Material) {
+    setSelectedMaterial(material);
+    setValue(material.code);
+    onMaterialSelect?.(material);
+    closeBrowse();
+  }
+
+  const select = (
     <DataSelect
       {...props}
       value={value}
@@ -129,7 +143,6 @@ export default function SelectMaterial({
       searchable={searchable}
       clearable={clearable}
       onSearchChange={setSearch}
-      filter={({ options }) => options}
       nothingFoundMessage={
         materialsQuery.isFetching
           ? translate("Searching...", "جاري البحث...")
@@ -137,5 +150,27 @@ export default function SelectMaterial({
       }
       disabled={props.disabled || (materialsQuery.isFetching && data.length === 0)}
     />
+  );
+
+  if (!withBrowseModal) return select;
+
+  return (
+    <>
+      <div className="flex items-end gap-2">
+        <div className="flex-1">{select}</div>
+        <Tooltip label={translate("Browse materials", "تصفح المواد")} withArrow>
+          <ActionIcon variant="light" color="teal" radius="md" size={36} onClick={openBrowse} disabled={props.disabled}>
+            <Table2 size={15} />
+          </ActionIcon>
+        </Tooltip>
+      </div>
+
+      <BrowseMaterialsModal
+        opened={browseOpened}
+        close={closeBrowse}
+        onSelect={handleBrowseSelect}
+        excludeCodes={excludeCodes}
+      />
+    </>
   );
 }

@@ -65,9 +65,7 @@ export default function AppendBomItemModal({
 
     const normalizedQuantity = Number(quantityRequired);
     if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
-      return setValidationError(
-        translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."),
-      );
+      return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
     }
 
     mutation.mutate();
@@ -96,6 +94,7 @@ export default function AppendBomItemModal({
           label={translate("Material", "المادة")}
           placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
           required
+          withBrowseModal
         />
 
         <NumberInput
