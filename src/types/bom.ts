@@ -22,6 +22,7 @@ export type BomItemWithMaterial = {
   material: {
     code: string;
     title: string;
+    subCategoryId: string;
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
   };

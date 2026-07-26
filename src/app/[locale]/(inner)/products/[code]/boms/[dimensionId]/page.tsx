@@ -9,6 +9,7 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useProductCategories from "@/hooks/reference/use-product-categories";
+import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -19,8 +20,8 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { Badge, Button, Divider, Table } from "@mantine/core";
-import { Calculator, Layers, Pencil, Plus, Wallet } from "lucide-react";
+import { Badge, Button, Divider, Progress, Table } from "@mantine/core";
+import { Calculator, FolderKanban, Layers, Pencil, Plus, Wallet } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -32,6 +33,16 @@ import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entit
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
+const UNCATEGORIZED_ID = "__uncategorized__";
+
+type CategoryBreakdown = {
+  mainCategoryId: string;
+  title: string;
+  itemCount: number;
+  totalCost: number;
+  sharePercent: number;
+  items: BomItemWithMaterial[];
+};
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -39,6 +50,7 @@ export default function Page() {
   const { code, dimensionId } = useParams<{ code: string; dimensionId: string }>();
   const privateRequest = usePrivateRequest();
   const { helpers: productCategoryHelpers } = useProductCategories();
+  const { helpers: materialCategoryHelpers } = useMaterialCategories();
 
   const bomQuery = useQuery({
     queryKey: queryKeys.boms.detail(dimensionId),
@@ -73,6 +85,44 @@ export default function Page() {
     const estimatedUnitPrice = totalMaterialCost * (bom?.product.pricingFactor ?? 0);
     return { totalMaterialCost, estimatedUnitPrice, itemCount: items.length };
   }, [items, bom?.product.pricingFactor]);
+
+  const categoryBreakdown = useMemo((): CategoryBreakdown[] => {
+    const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
+    const groups = new Map<string, CategoryBreakdown>();
+
+    for (const item of items) {
+      const sub = materialCategoryHelpers.getMaterialCategorySubById(item.material.subCategoryId);
+      const main = sub ? materialCategoryHelpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
+      const mainCategoryId = main?.id ?? UNCATEGORIZED_ID;
+      const title = main?.title ?? uncategorizedTitle;
+      const lineCost = item.quantityRequired * item.material.unitPrice;
+
+      const existing = groups.get(mainCategoryId);
+      if (existing) {
+        existing.itemCount += 1;
+        existing.totalCost += lineCost;
+        existing.items.push(item);
+      } else {
+        groups.set(mainCategoryId, {
+          mainCategoryId,
+          title,
+          itemCount: 1,
+          totalCost: lineCost,
+          sharePercent: 0,
+          items: [item],
+        });
+      }
+    }
+
+    const totalCost = totals.totalMaterialCost;
+    const rows = Array.from(groups.values()).map((group) => ({
+      ...group,
+      sharePercent: totalCost > 0 ? (group.totalCost / totalCost) * 100 : 0,
+    }));
+
+    rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
+    return rows;
+  }, [items, totals.totalMaterialCost, materialCategoryHelpers, translate, locale]);
 
   const excludeMaterialCodes = useMemo(() => items.map((item) => item.materialCode), [items]);
 
@@ -208,73 +258,91 @@ export default function Page() {
                   </PermissionGuard>
                 </div>
 
-                <div className="overflow-x-auto rounded-xl border border-gray-200">
-                  <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
-                    <Table.Thead className="bg-gray-50">
-                      <Table.Tr className="h-10">
-                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Material Code", "كود المادة")}
-                        </Table.Th>
-                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Material Name", "اسم المادة")}
-                        </Table.Th>
-                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Unit", "الوحدة")}
-                        </Table.Th>
-                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Quantity", "الكمية")}
-                        </Table.Th>
-                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
-                        </Table.Th>
-                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Total (EGP)", "الإجمالي (ج.م)")}
-                        </Table.Th>
-                        <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Notes", "الملاحظات")}
-                        </Table.Th>
-                        <Table.Th />
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {items.map((item) => {
-                        const lineCost = item.quantityRequired * item.material.unitPrice;
-                        return (
-                          <Table.Tr key={item.id} className="text-gray-600">
-                            <Table.Td>
-                              <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
-                            </Table.Td>
-                            <Table.Td>
-                              <span className="font-medium text-gray-800">{item.material.title}</span>
-                            </Table.Td>
-                            <Table.Td>
-                              <Badge size="sm" variant="light" color="gray" radius="md">
-                                {getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}
-                              </Badge>
-                            </Table.Td>
-                            <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
-                            <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
-                            <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
-                            <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
-                            <Table.Td w={0}>
-                              <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
-                                <Button
-                                  onClick={() => handleOpenUpdateModal(item)}
-                                  variant="light"
-                                  color="gray"
-                                  size="xs"
-                                  radius="md"
-                                  p={6}
-                                >
-                                  <Pencil size={12} />
-                                </Button>
-                              </PermissionGuard>
-                            </Table.Td>
-                          </Table.Tr>
-                        );
-                      })}
-                    </Table.Tbody>
-                  </Table>
+                <div className="flex flex-col gap-4">
+                  {categoryBreakdown.map((group) => (
+                    <div key={group.mainCategoryId} className="flex flex-col gap-3">
+                      <div className="flex flex-wrap items-center gap-2 px-0.5">
+                        <h5 className="text-sm font-semibold text-gray-800">{group.title}</h5>
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                          {group.itemCount}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          <MoneyViewer amount={group.totalCost} currency={currency} />
+                          {" · "}
+                          {group.sharePercent.toFixed(1)}%
+                        </span>
+                      </div>
+
+                      <div className="overflow-x-auto rounded-xl border border-gray-200">
+                        <Table className="text-nowrap" highlightOnHover>
+                          <Table.Thead className="bg-gray-50">
+                            <Table.Tr className="h-10">
+                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Material Code", "كود المادة")}
+                              </Table.Th>
+                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Material Name", "اسم المادة")}
+                              </Table.Th>
+                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Unit", "الوحدة")}
+                              </Table.Th>
+                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Quantity", "الكمية")}
+                              </Table.Th>
+                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
+                              </Table.Th>
+                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Total (EGP)", "الإجمالي (ج.م)")}
+                              </Table.Th>
+                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Notes", "الملاحظات")}
+                              </Table.Th>
+                              <Table.Th />
+                            </Table.Tr>
+                          </Table.Thead>
+                          <Table.Tbody>
+                            {group.items.map((item) => {
+                              const lineCost = item.quantityRequired * item.material.unitPrice;
+                              return (
+                                <Table.Tr key={item.id} className="text-gray-600">
+                                  <Table.Td>
+                                    <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
+                                  </Table.Td>
+                                  <Table.Td>
+                                    <span className="font-medium text-gray-800">{item.material.title}</span>
+                                  </Table.Td>
+                                  <Table.Td>
+                                    <Badge size="sm" variant="light" color="gray" radius="md">
+                                      {getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}
+                                    </Badge>
+                                  </Table.Td>
+                                  <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
+                                  <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
+                                  <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
+                                  <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
+                                  <Table.Td w={0}>
+                                    <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
+                                      <Button
+                                        onClick={() => handleOpenUpdateModal(item)}
+                                        variant="light"
+                                        color="gray"
+                                        size="xs"
+                                        radius="md"
+                                        p={6}
+                                      >
+                                        <Pencil size={12} />
+                                      </Button>
+                                    </PermissionGuard>
+                                  </Table.Td>
+                                </Table.Tr>
+                              );
+                            })}
+                          </Table.Tbody>
+                        </Table>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <BomItemModal
