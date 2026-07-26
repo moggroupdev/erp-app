@@ -18,6 +18,7 @@ const alexandria = Alexandria({
 const theme = createTheme({
   fontFamily: "var(--font-alexandria)",
   headings: { fontFamily: "var(--font-alexandria)" },
+  defaultRadius: "md",
   components: {
     Badge: {
       styles: {
