@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDebouncedState from "@/hooks/use-debounced-state";
@@ -57,6 +57,7 @@ export default function SelectMaterial({
     queryKey: queryKeys.materials.list(listParams),
     queryFn: ({ signal }) => materialsApi.list({ privateRequest, params: listParams, signal }),
     staleTime: staleTimes.materials,
+    placeholderData: keepPreviousData,
   });
 
   const materials = materialsQuery.data?.data ?? [];
@@ -143,12 +144,14 @@ export default function SelectMaterial({
       searchable={searchable}
       clearable={clearable}
       onSearchChange={setSearch}
+      disabled={props.disabled}
+      // Server already filters by keyword (title, code, legacyCode); skip client-side label matching.
+      filter={({ options }) => options}
       nothingFoundMessage={
         materialsQuery.isFetching
           ? translate("Searching...", "جاري البحث...")
           : translate("No materials found", "لا توجد مواد")
       }
-      disabled={props.disabled || (materialsQuery.isFetching && data.length === 0)}
     />
   );
 
