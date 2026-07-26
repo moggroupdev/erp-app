@@ -6,7 +6,7 @@ import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { Button, NumberInput, TextInput, Textarea } from "@mantine/core";
+import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 
@@ -70,9 +70,7 @@ export default function UpdateBomItemModal({
 
     const normalizedQuantity = Number(quantityRequired);
     if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
-      return setValidationError(
-        translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."),
-      );
+      return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
     }
 
     mutation.mutate();
@@ -94,18 +92,19 @@ export default function UpdateBomItemModal({
     ? Number(quantityRequired) !== itemToUpdate.quantityRequired || (notes.trim() || null) !== itemToUpdate.notes
     : false;
 
-  const isReadyToSubmit =
-    !!itemToUpdate && quantityRequired !== "" && Number(quantityRequired) > 0 && isDataChanged;
+  const isReadyToSubmit = !!itemToUpdate && quantityRequired !== "" && Number(quantityRequired) > 0 && isDataChanged;
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <TextInput
-          value={itemToUpdate ? `${itemToUpdate.material.title} (${itemToUpdate.material.code})` : ""}
-          label={translate("Material", "المادة")}
-          readOnly
-          radius="md"
-        />
+        {itemToUpdate && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
+            <p className="truncate text-sm font-medium text-gray-800">{itemToUpdate.material.title}</p>
+            <Badge size="sm" variant="light" color="gray" radius="md" className="font-mono">
+              {itemToUpdate.material.code}
+            </Badge>
+          </div>
+        )}
 
         <NumberInput
           value={quantityRequired}
