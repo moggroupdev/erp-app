@@ -9,8 +9,9 @@ import reportsApi from "@/lib/api/reports";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { FolderKanban, RefreshCw } from "lucide-react";
+import { FolderKanban, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
+import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
 import OverviewStats from "../components/overview-stats";
 import ReportSkeleton from "../components/report-skeleton";
@@ -19,6 +20,7 @@ import StockStatusChart from "../components/stock-status-chart";
 import CategoryValueTable from "../components/category-value-table";
 import TopMaterialsTable from "../components/top-materials-table";
 import LowStockMaterialsTable from "../components/low-stock-materials-table";
+import MaterialsReportPrintDocument from "../components/materials-report-print-document";
 import CategoryPicker from "./components/category-picker";
 import CategoryStatsEmpty from "./components/category-stats-empty";
 
@@ -60,6 +62,11 @@ export default function Page() {
   });
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
+  const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
+  const shortDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB");
+  const printTitle = data?.category.title
+    ? `${translate("Report", "تقرير")} - ${reportTitle} - ${data.category.title} (${shortDate})`
+    : `${translate("Report", "تقرير")} - ${reportTitle} (${shortDate})`;
 
   return (
     <div className="space-y-6">
@@ -71,17 +78,45 @@ export default function Page() {
           { label: PAGE_TITLE },
         ]}
         icon={FolderKanban}
-        title={translate(PAGE_TITLE.en, PAGE_TITLE.ar)}
+        title={reportTitle}
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
           mainCategoryId ? (
-            <button
-              disabled={isFetching}
-              onClick={() => refetch()}
-              className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
-            >
-              <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
-            </button>
+            <div className="flex items-center gap-4">
+              {data && !isFetching && !errorMessage && (
+                <PrintDocument
+                  title={printTitle}
+                  buttonType="icon"
+                  paperWidth={210}
+                  paperHeight={297}
+                  icon={<Printer size={14} />}
+                >
+                  <MaterialsReportPrintDocument
+                    title={reportTitle}
+                    scopeLabel={data.category.title}
+                    overview={data.overview}
+                    byMaterialType={data.byMaterialType}
+                    stockStatus={data.stockStatus}
+                    categoryRows={data.bySubCategory.map((category) => ({
+                      id: category.subCategoryId,
+                      title: category.subCategoryTitle,
+                      count: category.count,
+                      totalValue: category.totalValue,
+                    }))}
+                    categoryLevel="sub"
+                    topMaterialsByValue={data.topMaterialsByValue}
+                    lowStockMaterials={data.lowStockMaterials}
+                  />
+                </PrintDocument>
+              )}
+              <button
+                disabled={isFetching}
+                onClick={() => refetch()}
+                className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
+              >
+                <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
+              </button>
+            </div>
           ) : undefined
         }
       />
