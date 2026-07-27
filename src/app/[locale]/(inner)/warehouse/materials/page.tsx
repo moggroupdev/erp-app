@@ -19,6 +19,7 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { formatMoney } from "@/lib/helpers/format-money";
 import { type Material } from "@/types/material";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
@@ -35,14 +36,13 @@ import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
 import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
 import SelectMaterialSub from "@/components/global/selections/query-based/select-material-sub";
-import MoneyViewer from "@/components/ui/money-viewer";
 
 const PAGE_TITLE = { en: "Materials & Spare Parts", ar: "الخامات وقطع الغيار" };
 
 const MATERIALS_PER_PAGE = 25;
 
 export default function Page() {
-  const { locale, translate } = useI18n();
+  const { locale, translation, translate } = useI18n();
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -241,9 +241,11 @@ export default function Page() {
                     <Table.Th>{translate("Type", "النوع")}</Table.Th>
                     <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                     <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
-                    <Table.Th>{translate("Unit Price", "سعر الوحدة")}</Table.Th>
-                    <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
                     <Table.Th>{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
+                    <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
+                    <Table.Th>
+                      {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+                    </Table.Th>
                     <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
@@ -266,11 +268,9 @@ export default function Page() {
                         <Table.Td>{getMaterialTypeLabel(material.materialType, locale)}</Table.Td>
                         <Table.Td>{categories.main}</Table.Td>
                         <Table.Td>{categories.sub}</Table.Td>
-                        <Table.Td>
-                          <MoneyViewer amount={material.unitPrice} currency={translate("EGP", "ج.م")} />
-                        </Table.Td>
-                        <Table.Td>{material.quantity}</Table.Td>
                         <Table.Td>{getMaterialUnitLabel(material.unitOfMeasurement, locale)}</Table.Td>
+                        <Table.Td>{material.quantity}</Table.Td>
+                        <Table.Td>{formatMoney(material.unitPrice)}</Table.Td>
                         <Table.Td w={0}>
                           <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
                             <button

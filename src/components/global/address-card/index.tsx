@@ -96,7 +96,6 @@ export default function AddressCard({
                 type="button"
                 onClick={openModal}
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-teal-100 hover:text-teal-600"
-                aria-label={translate("Set as default address", "تعيين كعنوان افتراضي")}
               >
                 <Star size={14} />
               </button>

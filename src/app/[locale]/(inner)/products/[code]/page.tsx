@@ -242,7 +242,6 @@ export default function Page() {
                                     type="button"
                                     onClick={() => handleOpenDefaultModal(dimension.id)}
                                     className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-teal-100 hover:text-teal-600"
-                                    aria-label={translate("Set as default dimension", "تعيين كمقاس افتراضي")}
                                   >
                                     <Star size={14} />
                                   </button>
