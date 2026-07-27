@@ -20,7 +20,7 @@ import StockStatusChart from "../components/stock-status-chart";
 import CategoryValueTable from "../components/category-value-table";
 import TopMaterialsTable from "../components/top-materials-table";
 import LowStockMaterialsTable from "../components/low-stock-materials-table";
-import MaterialsReportPrintDocument from "../components/materials-report-print-document";
+import MaterialsReportPrintDocument from "@/components/documents/materials-report-print-document";
 import CategoryPicker from "./components/category-picker";
 import CategoryStatsEmpty from "./components/category-stats-empty";
 

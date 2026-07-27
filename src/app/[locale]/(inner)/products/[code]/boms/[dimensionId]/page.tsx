@@ -32,7 +32,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import MoneyViewer from "@/components/ui/money-viewer";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
-import BomPrintDocument from "./components/bom-print-document";
+import BomPrintDocument from "@/components/documents/bom-print-document";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 const UNCATEGORIZED_ID = "__uncategorized__";
