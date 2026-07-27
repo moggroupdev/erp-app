@@ -65,7 +65,7 @@ export default function Page() {
   const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
   const shortDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB");
   const printTitle = data?.category.title
-    ? `${translate("Report", "تقرير")} - ${reportTitle} - ${data.category.title} (${shortDate})`
+    ? `${translate("Report", "تقرير")} - ${reportTitle} - ${data.category.title} - ${shortDate}`
     : `${translate("Report", "تقرير")} - ${reportTitle} (${shortDate})`;
 
   return (

@@ -95,9 +95,15 @@ export default function PrintDocument({
           {label}
         </Button>
       ) : (
-        <Button onClick={handlePrint} variant="transparent" title={label} size="xs" px={3} radius="md">
-          {icon}
-        </Button>
+        <>
+          <button
+            title={label}
+            onClick={handlePrint}
+            className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
+          >
+            {icon}
+          </button>
+        </>
       )}
 
       <div ref={printRef} className="hidden">
