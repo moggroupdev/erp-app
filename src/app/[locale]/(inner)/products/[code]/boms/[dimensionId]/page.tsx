@@ -285,17 +285,7 @@ export default function Page() {
                 <div className="flex flex-col gap-4">
                   {categoryBreakdown.map((group) => (
                     <div key={group.mainCategoryId} className="flex flex-col gap-3">
-                      <div className="flex flex-wrap items-center gap-2 px-0.5">
-                        <h5 className="text-sm font-semibold text-gray-800">{group.title}</h5>
-                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                          {group.itemCount}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          <MoneyViewer amount={group.totalCost} currency={currency} />
-                          {" · "}
-                          {group.sharePercent.toFixed(1)}%
-                        </span>
-                      </div>
+                      <h5 className="px-0.5 text-sm font-semibold text-gray-800">{group.title}</h5>
 
                       <div className="overflow-x-auto rounded-xl border border-gray-200">
                         <Table className="text-nowrap" highlightOnHover>
@@ -363,6 +353,22 @@ export default function Page() {
                               );
                             })}
                           </Table.Tbody>
+                          <Table.Tfoot className="bg-gray-50">
+                            <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
+                              <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
+                              <Table.Td colSpan={4} className="text-gray-500">
+                                {group.itemCount} {translate("Items", "بند")}
+                              </Table.Td>
+                              <Table.Td>{formatMoney(group.totalCost)}</Table.Td>
+                              <Table.Td
+                                className="text-gray-500"
+                                title={translate("Share Percentage", "النسبة المئوية للإجمالي")}
+                              >
+                                {group.sharePercent.toFixed(1)}%
+                              </Table.Td>
+                              <Table.Td />
+                            </Table.Tr>
+                          </Table.Tfoot>
                         </Table>
                       </div>
                     </div>
