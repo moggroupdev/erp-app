@@ -20,17 +20,19 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { Badge, Button, Divider, Progress, Table } from "@mantine/core";
-import { Calculator, FolderKanban, Layers, Pencil, Plus, Wallet } from "lucide-react";
+import { Badge, Button, Divider, Table } from "@mantine/core";
+import { Calculator, Layers, Pencil, Plus, Printer, Wallet } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import MoneyViewer from "@/components/ui/money-viewer";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
+import BomPrintDocument from "./components/bom-print-document";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 const UNCATEGORIZED_ID = "__uncategorized__";
@@ -128,6 +130,11 @@ export default function Page() {
 
   const currency = translation.currency;
 
+  const productSubCategory = bom ? productCategoryHelpers.getProductCategorySubById(bom.product.subCategoryId) : null;
+  const productMainCategory = productSubCategory
+    ? productCategoryHelpers.getProductCategoryMainById(productSubCategory.mainCategoryId)
+    : null;
+
   const detailRows: DetailRow[] = bom
     ? [
         {
@@ -152,15 +159,11 @@ export default function Page() {
         },
         {
           key: translate("Main Category", "الفئة الرئيسية"),
-          value: (() => {
-            const sub = productCategoryHelpers.getProductCategorySubById(bom.product.subCategoryId);
-            const main = sub ? productCategoryHelpers.getProductCategoryMainById(sub.mainCategoryId) : null;
-            return main?.title || <EmptyValue />;
-          })(),
+          value: productMainCategory?.title || <EmptyValue />,
         },
         {
           key: translate("Subcategory", "الفئة الفرعية"),
-          value: productCategoryHelpers.getProductCategorySubById(bom.product.subCategoryId)?.title || <EmptyValue />,
+          value: productSubCategory?.title || <EmptyValue />,
         },
         {
           key: translate("Source Type", "نوع المصدر"),
@@ -178,7 +181,28 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} />,
+        sideElements: (
+          <div className="flex items-center gap-2">
+            {bom && hasBom && (
+              <PrintDocument
+                title={`${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${bom.length}×${bom.depth}×${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`}
+                buttonLabel={translate("Print", "طباعة")}
+                buttonType="button"
+                paperWidth={210}
+                paperHeight={297}
+                icon={<Printer size={14} />}
+              >
+                <BomPrintDocument
+                  bom={bom}
+                  totals={totals}
+                  categoryBreakdown={categoryBreakdown}
+                  mainCategoryTitle={productMainCategory?.title || null}
+                />
+              </PrintDocument>
+            )}
+            <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} />
+          </div>
+        ),
       }}
     >
       {loading ? (

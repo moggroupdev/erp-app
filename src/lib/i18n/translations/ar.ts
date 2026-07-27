@@ -9,7 +9,7 @@ export const ar: Translation = {
   underConstruction: "هذه الصفحة لا تزال قيد الإنشاء.",
   noDataAvailable: "لا يوجد بيانات متاحة",
   dashboard: "لوحة التحكم",
-  currency: "جنيه",
+  currency: "ج.م",
   continue: "متابعة",
   back: "عودة",
   confirm: "تأكيد",
