@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
@@ -12,24 +13,7 @@ import type {
   MaterialsInventoryTopMaterial,
 } from "@/types/reports";
 
-type CategoryRow = {
-  id: string;
-  title: string;
-  count: number;
-  totalValue: number;
-};
-
-type MaterialsReportPrintDocumentProps = {
-  title: string;
-  scopeLabel?: string | null;
-  overview: MaterialsInventoryOverview;
-  byMaterialType: MaterialsInventoryByMaterialType[];
-  stockStatus: MaterialsInventoryStockStatus[];
-  categoryRows: CategoryRow[];
-  categoryLevel: "main" | "sub";
-  topMaterialsByValue: MaterialsInventoryTopMaterial[];
-  lowStockMaterials: MaterialsInventoryLowStockMaterial[];
-};
+type CategoryRow = { id: string; title: string; count: number; totalValue: number };
 
 export default function MaterialsReportPrintDocument({
   title,
@@ -41,12 +25,21 @@ export default function MaterialsReportPrintDocument({
   categoryLevel,
   topMaterialsByValue,
   lowStockMaterials,
-}: MaterialsReportPrintDocumentProps) {
+}: {
+  title: string;
+  scopeLabel?: string | null;
+  overview: MaterialsInventoryOverview;
+  byMaterialType: MaterialsInventoryByMaterialType[];
+  stockStatus: MaterialsInventoryStockStatus[];
+  categoryRows: CategoryRow[];
+  categoryLevel: "main" | "sub";
+  topMaterialsByValue: MaterialsInventoryTopMaterial[];
+  lowStockMaterials: MaterialsInventoryLowStockMaterial[];
+}) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
-  const valueChangePositive = overview.valueChangeAmount >= 0;
-  const printedAt = new Date().toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "full" });
+  const printedAt = formatDate(new Date(), locale);
 
   const categorySectionTitle =
     categoryLevel === "main"

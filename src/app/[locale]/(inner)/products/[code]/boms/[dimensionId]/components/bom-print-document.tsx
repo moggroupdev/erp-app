@@ -1,6 +1,7 @@
 import type { Bom, BomItemWithMaterial } from "@/types/bom";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
 
@@ -25,6 +26,7 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
 
   const dimensionLabel = `${bom.length} × ${bom.depth} × ${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
+  const printedAt = formatDate(new Date(), locale);
 
   return (
     <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
@@ -143,8 +145,7 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
       </section>
 
       <footer className="mt-2 border-t border-gray-300 pt-2.5 text-[10px] text-gray-500">
-        {translate("Printed on", "تاريخ الطباعة")}:{" "}
-        {new Date().toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "full" })}
+        {translate("Printed on", "تاريخ الطباعة")} {printedAt}
       </footer>
     </div>
   );
