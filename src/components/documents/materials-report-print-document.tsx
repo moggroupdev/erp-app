@@ -48,6 +48,12 @@ export default function MaterialsReportPrintDocument({
 
   const categoryColumnLabel =
     categoryLevel === "main" ? translate("Category", "الفئة") : translate("Subcategory", "الفئة الفرعية");
+  const totalCategoryCount = categoryRows.reduce((sum, row) => sum + row.count, 0);
+  const totalCategoryValue = categoryRows.reduce((sum, row) => sum + row.totalValue, 0);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   return (
     <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
@@ -159,13 +165,27 @@ export default function MaterialsReportPrintDocument({
           }
         />
         <PrintTable
-          headers={["#", categoryColumnLabel, translate("Items", "العناصر"), translate("Value", "القيمة")]}
+          headers={[
+            "#",
+            categoryColumnLabel,
+            translate("Items", "العناصر"),
+            translate(`Value (${translation.currency})`, `القيمة (${translation.currency})`),
+            translate("Percentage", "النسبة"),
+          ]}
           rows={categoryRows.map((row, index) => [
             String(index + 1),
             row.title,
             String(row.count),
-            formatMoney(row.totalValue, currency),
+            formatMoney(row.totalValue),
+            `${percentageFormatter.format(totalCategoryValue === 0 ? 0 : (row.totalValue / totalCategoryValue) * 100)}%`,
           ])}
+          footerRow={[
+            "",
+            translate("Total", "الإجمالي"),
+            String(totalCategoryCount),
+            formatMoney(totalCategoryValue),
+            `${percentageFormatter.format(categoryRows.length === 0 ? 0 : 100)}%`,
+          ]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>
@@ -268,11 +288,13 @@ function PrintTable({
   rows,
   emptyLabel,
   monoColumnIndexes = [],
+  footerRow,
 }: {
   headers: string[];
   rows: string[][];
   emptyLabel: string;
   monoColumnIndexes?: number[];
+  footerRow?: string[];
 }) {
   if (rows.length === 0) {
     return <p className="py-2 text-[10px] text-gray-500">{emptyLabel}</p>;
@@ -303,6 +325,20 @@ function PrintTable({
           </tr>
         ))}
       </tbody>
+      {footerRow ? (
+        <tfoot>
+          <tr className="bg-gray-50 font-semibold text-gray-700">
+            {footerRow.map((cell, cellIndex) => (
+              <td
+                key={`footer-${cellIndex}`}
+                className={`px-2.5 py-2 ${monoColumnIndexes.includes(cellIndex) ? "font-mono" : ""}`}
+              >
+                {cell}
+              </td>
+            ))}
+          </tr>
+        </tfoot>
+      ) : null}
     </table>
   );
 }
