@@ -63,6 +63,7 @@ export type MaterialsInventorySummary = {
   byMainCategory: MaterialsInventoryByMainCategory[];
   stockStatus: MaterialsInventoryStockStatus[];
   topMaterialsByValue: MaterialsInventoryTopMaterial[];
+  topMaterialsByQuantity: MaterialsInventoryTopMaterial[];
   lowStockMaterials: MaterialsInventoryLowStockMaterial[];
 };
 
@@ -73,5 +74,6 @@ export type MaterialsCategoryStats = {
   stockStatus: MaterialsInventoryStockStatus[];
   bySubCategory: MaterialsCategoryStatsBySubCategory[];
   topMaterialsByValue: MaterialsInventoryTopMaterial[];
+  topMaterialsByQuantity: MaterialsInventoryTopMaterial[];
   lowStockMaterials: MaterialsInventoryLowStockMaterial[];
 };

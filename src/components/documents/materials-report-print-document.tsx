@@ -24,6 +24,7 @@ export default function MaterialsReportPrintDocument({
   categoryRows,
   categoryLevel,
   topMaterialsByValue,
+  topMaterialsByQuantity,
   lowStockMaterials,
 }: {
   title: string;
@@ -34,6 +35,7 @@ export default function MaterialsReportPrintDocument({
   categoryRows: CategoryRow[];
   categoryLevel: "main" | "sub";
   topMaterialsByValue: MaterialsInventoryTopMaterial[];
+  topMaterialsByQuantity: MaterialsInventoryTopMaterial[];
   lowStockMaterials: MaterialsInventoryLowStockMaterial[];
 }) {
   const { locale, translate, translation } = useI18n();
@@ -215,6 +217,40 @@ export default function MaterialsReportPrintDocument({
             translate(`Total Value (${translation.currency})`, `القيمة الإجمالية (${translation.currency})`),
           ]}
           rows={topMaterialsByValue.map((material, index) => [
+            String(index + 1),
+            material.title,
+            material.code,
+            getMaterialUnitLabel(material.unitOfMeasurement, locale),
+            String(material.quantity),
+            formatMoney(material.unitPrice),
+            formatMoney(material.value),
+          ])}
+          monoColumnIndexes={[2]}
+          emptyLabel={translate("No data available", "لا توجد بيانات")}
+        />
+      </section>
+
+      <section className="flex break-inside-avoid flex-col gap-2.5">
+        <SectionHeading
+          title={
+            <>
+              {translate("Highest-Quantity Materials", "أعلى المواد كمية")}
+              <span className="ms-2 text-xs font-normal text-gray-500">({topMaterialsByQuantity.length})</span>
+            </>
+          }
+          subtitle={translate("Largest on-hand quantity.", "أكبر كمية متوفرة في المخزون.")}
+        />
+        <PrintTable
+          headers={[
+            "#",
+            translate("Item Name", "اسم الصنف"),
+            translate("Code", "الكود"),
+            translate("Unit", "الوحدة"),
+            translate("Qty", "الكمية"),
+            translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`),
+            translate(`Total Value (${translation.currency})`, `القيمة الإجمالية (${translation.currency})`),
+          ]}
+          rows={topMaterialsByQuantity.map((material, index) => [
             String(index + 1),
             material.title,
             material.code,

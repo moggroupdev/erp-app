@@ -10,19 +10,36 @@ import type { MaterialsInventoryTopMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
 import { formatMoney } from "@/lib/helpers/format-money";
 
-export default function TopMaterialsTable({ data }: { data: MaterialsInventoryTopMaterial[] }) {
+type TopMaterialsTableProps = {
+  data: MaterialsInventoryTopMaterial[];
+  rankBy?: "value" | "quantity";
+};
+
+export default function TopMaterialsTable({ data, rankBy = "value" }: TopMaterialsTableProps) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
+  const byQuantity = rankBy === "quantity";
 
   return (
     <ReportCard
-      title={translate("Highest-Value Materials", "أعلى المواد قيمة")}
-      description={translate(
-        "The ten materials with the largest inventory value (quantity × unit price). Click a title to open details.",
-        "أعلى عشر مواد من حيث قيمة المخزون (الكمية × سعر الوحدة). انقر على العنوان لفتح التفاصيل.",
-      )}
+      title={
+        byQuantity
+          ? translate("Highest-Quantity Materials", "أعلى المواد كمية")
+          : translate("Highest-Value Materials", "أعلى المواد قيمة")
+      }
+      description={
+        byQuantity
+          ? translate(
+              "The ten materials with the largest on-hand quantity. Click a title to open details.",
+              "أعلى عشر مواد من حيث الكمية المتوفرة. انقر على العنوان لفتح التفاصيل.",
+            )
+          : translate(
+              "The ten materials with the largest inventory value (quantity × unit price). Click a title to open details.",
+              "أعلى عشر مواد من حيث قيمة المخزون (الكمية × سعر الوحدة). انقر على العنوان لفتح التفاصيل.",
+            )
+      }
       icon={Trophy}
-      accent="sky"
+      accent={byQuantity ? "amber" : "sky"}
     >
       {data.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>

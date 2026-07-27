@@ -105,6 +105,7 @@ export default function Page() {
                     }))}
                     categoryLevel="sub"
                     topMaterialsByValue={data.topMaterialsByValue}
+                    topMaterialsByQuantity={data.topMaterialsByQuantity}
                     lowStockMaterials={data.lowStockMaterials}
                   />
                 </PrintDocument>
@@ -147,6 +148,7 @@ export default function Page() {
 
               <CategoryValueTable level="sub" data={data.bySubCategory} />
               <TopMaterialsTable data={data.topMaterialsByValue} />
+              <TopMaterialsTable data={data.topMaterialsByQuantity} rankBy="quantity" />
               <LowStockMaterialsTable data={data.lowStockMaterials} />
             </div>
           )
