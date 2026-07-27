@@ -113,13 +113,13 @@ export default function MaterialsReportPrintDocument({
             translate("Type", "النوع"),
             translate("Items", "العناصر"),
             translate("Quantity", "الكمية"),
-            translate("Value", "القيمة"),
+            translate(`Value (${translation.currency})`, `القيمة (${translation.currency})`),
           ]}
           rows={byMaterialType.map((row) => [
             getMaterialTypeLabel(row.materialType, locale),
             String(row.count),
             String(row.totalQuantity),
-            formatMoney(row.totalValue, currency),
+            formatMoney(row.totalValue),
           ])}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
@@ -134,11 +134,15 @@ export default function MaterialsReportPrintDocument({
           )}
         />
         <PrintTable
-          headers={[translate("Status", "الحالة"), translate("Items", "العناصر"), translate("Value", "القيمة")]}
+          headers={[
+            translate("Status", "الحالة"),
+            translate("Items", "العناصر"),
+            translate(`Value (${translation.currency})`, `القيمة (${translation.currency})`),
+          ]}
           rows={stockStatus.map((row) => [
             getStockStatusLabel(row.status, locale),
             String(row.count),
-            formatMoney(row.totalValue, currency),
+            formatMoney(row.totalValue),
           ])}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
@@ -169,7 +173,7 @@ export default function MaterialsReportPrintDocument({
             "#",
             categoryColumnLabel,
             translate("Items", "العناصر"),
-            translate(`Value (${translation.currency})`, `القيمة (${translation.currency})`),
+            translate(`Total Value (${translation.currency})`, `القيمة الإجمالية (${translation.currency})`),
             translate("Percentage", "النسبة"),
           ]}
           rows={categoryRows.map((row, index) => [
@@ -207,8 +211,8 @@ export default function MaterialsReportPrintDocument({
             translate("Code", "الكود"),
             translate("Unit", "الوحدة"),
             translate("Qty", "الكمية"),
-            translate("Unit Price", "سعر الوحدة"),
-            translate("Total Value", "القيمة الإجمالية"),
+            translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`),
+            translate(`Total Value (${translation.currency})`, `القيمة الإجمالية (${translation.currency})`),
           ]}
           rows={topMaterialsByValue.map((material, index) => [
             String(index + 1),
@@ -216,8 +220,8 @@ export default function MaterialsReportPrintDocument({
             material.code,
             getMaterialUnitLabel(material.unitOfMeasurement, locale),
             String(material.quantity),
-            formatMoney(material.unitPrice, currency),
-            formatMoney(material.value, currency),
+            formatMoney(material.unitPrice),
+            formatMoney(material.value),
           ])}
           monoColumnIndexes={[2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
@@ -305,7 +309,7 @@ function PrintTable({
       <thead>
         <tr className="border-b border-gray-300 bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
           {headers.map((header) => (
-            <th key={header} className="px-2.5 py-2 text-start">
+            <th key={header} className="px-2.5 py-2 text-start text-nowrap">
               {header}
             </th>
           ))}
