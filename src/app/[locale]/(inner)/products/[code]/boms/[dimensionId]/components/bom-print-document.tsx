@@ -52,17 +52,68 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
         />
       </section>
 
-      <section className="flex flex-col gap-2.5">
-        <h2 className="text-base font-semibold">
-          {translate("Cost by Category", "التكلفة حسب الفئة")}
-          <span className="ms-2 text-xs font-normal text-gray-500">({categoryBreakdown.length})</span>
-        </h2>
-        <table className="w-full border-collapse text-[10px]">
+      <hr className="border-gray-300" />
+
+      <section className="flex flex-col gap-8">
+        {categoryBreakdown.map((group) => (
+          <div key={group.mainCategoryId} className="flex break-inside-avoid flex-col gap-2">
+            <h3 className="text-sm font-semibold">{group.title}</h3>
+
+            <table className="w-full border-collapse text-[10px]">
+              <thead>
+                <tr className="border-b border-gray-300 bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
+                  <th className="px-2.5 py-2 text-start">{translate("Material Code", "كود المادة")}</th>
+                  <th className="px-2.5 py-2 text-start">{translate("Material Name", "اسم المادة")}</th>
+                  <th className="px-2.5 py-2 text-start">{translate("Unit", "الوحدة")}</th>
+                  <th className="px-2.5 py-2 text-start">{translate("Quantity", "الكمية")}</th>
+                  <th className="px-2.5 py-2 text-start">
+                    {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+                  </th>
+                  <th className="px-2.5 py-2 text-start">
+                    {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
+                  </th>
+                  <th className="px-2.5 py-2 text-start">{translate("Notes", "الملاحظات")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {group.items.map((item) => {
+                  const lineCost = item.quantityRequired * item.material.unitPrice;
+                  return (
+                    <tr key={item.id} className="border-b border-gray-200">
+                      <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{item.material.code}</td>
+                      <td className="px-2.5 py-2 font-medium">{item.material.title}</td>
+                      <td className="px-2.5 py-2">{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</td>
+                      <td className="px-2.5 py-2">{item.quantityRequired}</td>
+                      <td className="px-2.5 py-2">{formatMoney(item.material.unitPrice)}</td>
+                      <td className="px-2.5 py-2 font-medium">{formatMoney(lineCost)}</td>
+                      <td className="px-2.5 py-2 text-gray-600">{item.notes || "-"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-gray-300 bg-gray-50 font-medium">
+                  <td className="px-2.5 py-2">{translate("Total", "الإجمالي")}</td>
+                  <td colSpan={4} className="px-2.5 py-2 text-gray-600">
+                    {group.itemCount} {translate("Items", "بند")}
+                  </td>
+                  <td className="px-2.5 py-2">{formatMoney(group.totalCost)}</td>
+                  <td className="px-2.5 py-2 text-gray-600">{group.sharePercent.toFixed(1)}%</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        ))}
+      </section>
+
+      <section className="mt-8 flex break-inside-avoid flex-col gap-2.5">
+        <h2 className="text-base font-semibold">{translate("Summary", "الملخص")}</h2>
+        <table className="w-full border-collapse break-inside-avoid text-[10px]">
           <thead>
             <tr className="border-b border-gray-300 bg-gray-50 text-start text-[9px] font-medium tracking-wide text-gray-500 uppercase">
               <th className="px-2.5 py-2 text-start">{translate("Category", "الفئة")}</th>
-              <th className="px-2.5 py-2 text-start">{translate("Items", "البنود")}</th>
-              <th className="px-2.5 py-2 text-start">{translate("Cost", "التكلفة")}</th>
+              <th className="px-2.5 py-2 text-start">{translate("Items Count", "عدد البنود")}</th>
+              <th className="px-2.5 py-2 text-start">{translate("Total Price", "السعر الإجمالي")}</th>
               <th className="px-2.5 py-2 text-start">{translate("Share", "الحصة")}</th>
             </tr>
           </thead>
@@ -71,7 +122,7 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
               <tr key={group.mainCategoryId} className="border-b border-gray-200">
                 <td className="px-2.5 py-2 font-medium">{group.title}</td>
                 <td className="px-2.5 py-2">{group.itemCount}</td>
-                <td className="px-2.5 py-2">{formatMoney(group.totalCost, translation.currency)}</td>
+                <td className="px-2.5 py-2">{formatMoney(group.totalCost)}</td>
                 <td className="px-2.5 py-2">
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-14 overflow-hidden rounded-full bg-gray-200">
@@ -86,67 +137,21 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr className="border-t border-gray-300 bg-gray-50 font-medium">
+              <td className="px-2.5 py-2">{translate("Total", "الإجمالي")}</td>
+              <td className="px-2.5 py-2 text-gray-600">
+                {totals.itemCount} {translate("Items", "بند")}
+              </td>
+              <td className="px-2.5 py-2">{formatMoney(totals.totalMaterialCost, translation.currency)}</td>
+              <td className="px-2.5 py-2 text-gray-600">100%</td>
+            </tr>
+          </tfoot>
         </table>
       </section>
 
-      <section className="flex flex-col gap-4">
-        {categoryBreakdown.map((group, index) => (
-          <div key={group.mainCategoryId} className="flex break-inside-avoid flex-col gap-2">
-            {index === 0 && (
-              <h2 className="break-after-avoid text-base font-semibold">
-                {translate("BOM Items", "بنود قائمة المواد")}
-                <span className="ms-2 text-xs font-normal text-gray-500">({totals.itemCount})</span>
-              </h2>
-            )}
-
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-baseline gap-2 text-xs">
-                <h3 className="text-sm font-semibold">{group.title}</h3>
-                <span className="text-gray-500">
-                  {formatMoney(group.totalCost, translation.currency)} · {group.sharePercent.toFixed(1)}%
-                </span>
-              </div>
-
-              <span className="rounded-lg bg-gray-100 px-1.5 py-[2.5px] text-[7.5px]! text-gray-600">
-                {group.itemCount} {translate("Items", "بنود")}
-              </span>
-            </div>
-
-            <table className="w-full border-collapse text-[10px]">
-              <thead>
-                <tr className="border-b border-gray-300 bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
-                  <th className="px-2.5 py-2 text-start">{translate("Material Code", "كود المادة")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Material Name", "اسم المادة")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Unit", "الوحدة")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Quantity", "الكمية")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Unit Price", "سعر الوحدة")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Total", "الإجمالي")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Notes", "الملاحظات")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {group.items.map((item) => {
-                  const lineCost = item.quantityRequired * item.material.unitPrice;
-                  return (
-                    <tr key={item.id} className="border-b border-gray-200">
-                      <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{item.material.code}</td>
-                      <td className="px-2.5 py-2 font-medium">{item.material.title}</td>
-                      <td className="px-2.5 py-2">{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</td>
-                      <td className="px-2.5 py-2">{item.quantityRequired}</td>
-                      <td className="px-2.5 py-2">{formatMoney(item.material.unitPrice, translation.currency)}</td>
-                      <td className="px-2.5 py-2 font-medium">{formatMoney(lineCost, translation.currency)}</td>
-                      <td className="px-2.5 py-2 text-gray-600">{item.notes || "-"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ))}
-      </section>
-
       <footer className="mt-2 border-t border-gray-300 pt-2.5 text-[10px] text-gray-500">
-        {translate("Printed at", "تاريخ الطباعة")}:{" "}
+        {translate("Printed on", "تاريخ الطباعة")}:{" "}
         {new Date().toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "full" })}
       </footer>
     </div>
