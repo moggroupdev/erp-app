@@ -113,7 +113,9 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
             <tr className="border-b border-gray-300 bg-gray-50 text-start text-[9px] font-medium tracking-wide text-gray-500 uppercase">
               <th className="px-2.5 py-2 text-start">{translate("Category", "الفئة")}</th>
               <th className="px-2.5 py-2 text-start">{translate("Items Count", "عدد البنود")}</th>
-              <th className="px-2.5 py-2 text-start">{translate("Total Price", "السعر الإجمالي")}</th>
+              <th className="px-2.5 py-2 text-start">
+                {translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}
+              </th>
               <th className="px-2.5 py-2 text-start">{translate("Share", "الحصة")}</th>
             </tr>
           </thead>
@@ -123,17 +125,7 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
                 <td className="px-2.5 py-2 font-medium">{group.title}</td>
                 <td className="px-2.5 py-2">{group.itemCount}</td>
                 <td className="px-2.5 py-2">{formatMoney(group.totalCost)}</td>
-                <td className="px-2.5 py-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-14 overflow-hidden rounded-full bg-gray-200">
-                      <div
-                        className="h-full rounded-full bg-teal-600"
-                        style={{ width: `${Math.min(group.sharePercent, 100)}%` }}
-                      />
-                    </div>
-                    <span>{group.sharePercent.toFixed(1)}%</span>
-                  </div>
-                </td>
+                <ShareCell value={group.sharePercent} />
               </tr>
             ))}
           </tbody>
@@ -143,8 +135,8 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
               <td className="px-2.5 py-2 text-gray-600">
                 {totals.itemCount} {translate("Items", "بند")}
               </td>
-              <td className="px-2.5 py-2">{formatMoney(totals.totalMaterialCost, translation.currency)}</td>
-              <td className="px-2.5 py-2 text-gray-600">100%</td>
+              <td className="px-2.5 py-2">{formatMoney(totals.totalMaterialCost)}</td>
+              <ShareCell value={100} className="text-gray-800" />
             </tr>
           </tfoot>
         </table>
@@ -164,5 +156,18 @@ function Detail({ label, value }: { label: string; value: string }) {
       <span className="text-[10px] text-gray-500">{label}</span>
       <span className="text-xs font-medium">{value}</span>
     </div>
+  );
+}
+
+function ShareCell({ value, className }: { value: number; className?: string }) {
+  return (
+    <td className="px-2.5 py-2">
+      <div className="flex items-center gap-2">
+        <div className="h-1.5 w-14 overflow-hidden rounded-full bg-gray-200">
+          <div className="h-full rounded-full bg-teal-600" style={{ width: `${Math.min(value, 100)}%` }} />
+        </div>
+        <span className={className}>{value.toFixed(1)}%</span>
+      </div>
+    </td>
   );
 }
