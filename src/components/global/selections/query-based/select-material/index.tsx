@@ -51,16 +51,18 @@ export default function SelectMaterial({
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [browseOpened, { open: openBrowse, close: closeBrowse }] = useDisclosure(false);
 
-  const listParams = removeEmptyParams({ page: "1", limit: "20", keyword: debouncedSearch });
+  const trimmedSearch = debouncedSearch.trim();
+  const listParams = removeEmptyParams({ page: "1", limit: "20", keyword: trimmedSearch });
 
   const materialsQuery = useQuery({
     queryKey: queryKeys.materials.list(listParams),
     queryFn: ({ signal }) => materialsApi.list({ privateRequest, params: listParams, signal }),
     staleTime: staleTimes.materials,
     placeholderData: keepPreviousData,
+    enabled: trimmedSearch.length > 0,
   });
 
-  const materials = materialsQuery.data?.data ?? [];
+  const materials = trimmedSearch.length > 0 ? (materialsQuery.data?.data ?? []) : [];
 
   // Keep the currently selected material available for the label even when search results change
   useEffect(() => {
@@ -135,6 +137,19 @@ export default function SelectMaterial({
     closeBrowse();
   }
 
+  // Mantine syncs the search input to the selected option label after change.
+  // Ignore that so we do not fire another materials list request.
+  function handleSearchChange(search: string) {
+    const selectedLabel =
+      selectedMaterial && selectedMaterial.code === value
+        ? `${selectedMaterial.title} - ${selectedMaterial.code}`
+        : data.find((option) => option.value === value)?.label;
+
+    if (selectedLabel && search === selectedLabel) return;
+
+    setSearch(search);
+  }
+
   const select = (
     <DataSelect
       {...props}
@@ -143,14 +158,16 @@ export default function SelectMaterial({
       data={data}
       searchable={searchable}
       clearable={clearable}
-      onSearchChange={setSearch}
+      onSearchChange={handleSearchChange}
       disabled={props.disabled}
       // Server already filters by keyword (title, code, legacyCode); skip client-side label matching.
       filter={({ options }) => options}
       nothingFoundMessage={
-        materialsQuery.isFetching
-          ? translate("Searching...", "جاري البحث...")
-          : translate("No materials found", "لا توجد مواد")
+        !trimmedSearch
+          ? translate("Type to search materials", "اكتب للبحث عن المواد")
+          : materialsQuery.isFetching
+            ? translate("Searching...", "جاري البحث...")
+            : translate("No materials found", "لا توجد مواد")
       }
     />
   );
