@@ -4,6 +4,7 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
+import { PrintDetail } from "./components";
 
 export type BomPrintCategoryGroup = {
   mainCategoryId: string;
@@ -45,12 +46,12 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
       </header>
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
-        <Detail label={translate("Dimension", "المقاس")} value={dimensionLabel} />
-        <Detail
+        <PrintDetail label={translate("Dimension", "المقاس")} value={dimensionLabel} />
+        <PrintDetail
           label={translate("Product Category", "فئة المنتج")}
           value={mainCategoryTitle || translate("Uncategorized", "غير مصنف")}
         />
-        <Detail
+        <PrintDetail
           label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
           value={formatMoney(totals.totalMaterialCost, translation.currency)}
         />
@@ -145,15 +146,6 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
           </tfoot>
         </table>
       </section>
-    </div>
-  );
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-[10px] text-gray-500">{label}</span>
-      <span className="text-xs font-medium">{value}</span>
     </div>
   );
 }
