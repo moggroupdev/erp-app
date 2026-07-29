@@ -50,3 +50,15 @@ export function getMaterialTypeLabel(materialType: MaterialType, locale: Locale)
 export function isValidMaterialType(materialType: string): materialType is MaterialType {
   return MATERIAL_TYPE_VALUES.includes(materialType as MaterialType);
 }
+
+export function isRawMaterial(materialType: MaterialType) {
+  return materialType === MATERIAL_TYPES.RAW_MATERIALS;
+}
+
+export function isSparePart(materialType: MaterialType) {
+  return materialType === MATERIAL_TYPES.SPARE_PARTS;
+}
+
+export function isManufacturedMaterial(materialType: MaterialType) {
+  return materialType === MATERIAL_TYPES.MANUFACTURED_MATERIAL;
+}

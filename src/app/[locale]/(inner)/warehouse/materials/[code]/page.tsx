@@ -11,6 +11,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
 import { Button } from "@mantine/core";
 import { Pencil } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
@@ -20,6 +21,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialDetails from "./components/material-details";
+import MaterialBomSection from "./components/material-bom-section";
 
 const PAGE_TITLE = { en: "Material Details", ar: "تفاصيل المادة" };
 
@@ -83,6 +85,8 @@ export default function Page() {
             />
 
             <MaterialDetails material={material} />
+
+            {isManufacturedMaterial(material.materialType) && <MaterialBomSection material={material} />}
           </>
         )
       )}

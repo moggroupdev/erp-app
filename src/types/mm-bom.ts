@@ -20,6 +20,7 @@ export type MmBomItemWithMaterial = {
   material: {
     code: string;
     title: string;
+    subCategoryId: string;
     materialType: MaterialType;
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
