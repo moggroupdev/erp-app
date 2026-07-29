@@ -37,7 +37,7 @@ import SelectMaterialType from "@/components/global/selections/enum-based/select
 import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
 import SelectMaterialSub from "@/components/global/selections/query-based/select-material-sub";
 
-const PAGE_TITLE = { en: "Materials & Spare Parts", ar: "الخامات وقطع الغيار" };
+const PAGE_TITLE = { en: "Materials List", ar: "قائمة المواد" };
 
 const MATERIALS_PER_PAGE = 25;
 

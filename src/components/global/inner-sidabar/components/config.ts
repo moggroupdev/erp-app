@@ -144,7 +144,7 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     icon: Boxes,
     items: [
       {
-        label: { en: "Materials & Spare Parts", ar: "الخامات وقطع الغيار" },
+        label: { en: "Materials List", ar: "قائمة المواد" },
         href: "/warehouse/materials",
         icon: PackageSearch,
         requiredPermission: PERMISSIONS.READ_MATERIALS,
