@@ -32,6 +32,8 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
+import MaterialsListPrintDocument from "@/components/documents/materials-list-print-document";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
 import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
@@ -50,7 +52,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
-  const { helpers } = useMaterialCategories();
+  const { data: categoriesData, helpers } = useMaterialCategories();
 
   function getCategoryLabels(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -114,6 +116,14 @@ export default function Page() {
     placeholderData: keepPreviousData,
   });
 
+  // Only used for printing
+  const { data: allMaterials, refetch: fetchAllMaterials } = useQuery({
+    queryKey: queryKeys.materials.list({ limit: "list-all-to-print" }),
+    queryFn: ({ signal }) => materialsApi.listAllToPrint({ privateRequest, signal }),
+    staleTime: staleTimes.materials,
+    enabled: false, // Disabled by default, will be enabled when the print button is clicked
+  });
+
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useEffect(() => {
@@ -154,7 +164,24 @@ export default function Page() {
         backLink: getLocalizedHref("/warehouse"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <div className="flex-center px-1">
+              <PrintDocument
+                buttonType="icon"
+                title={translate("Materials List", "قائمة المواد")}
+                onBeforePrint={async () => {
+                  if (!allMaterials) await fetchAllMaterials();
+                }}
+              >
+                {allMaterials && categoriesData && (
+                  <MaterialsListPrintDocument
+                    materials={allMaterials}
+                    mainCategories={categoriesData.materialCategoryMains}
+                    getSubCategory={helpers.getMaterialCategorySubById}
+                  />
+                )}
+              </PrintDocument>
+            </div>
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL}>
               <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>

@@ -19,6 +19,16 @@ const materialsApi = {
     return await privateRequest<PaginatedData<Material>>({ url: "materials", params, signal });
   },
 
+  async listAllToPrint({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
+    const result = await privateRequest<PaginatedData<Material>>({
+      url: "materials",
+      params: { limit: Infinity, sort: "title" },
+      signal,
+    });
+
+    return result.data;
+  },
+
   async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
     return await privateRequest<MaterialWithCreator>({ url: `materials/${code}`, signal });
   },
