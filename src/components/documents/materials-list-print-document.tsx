@@ -74,8 +74,8 @@ export default function MaterialsListPrintDocument({
       </header>
 
       {groups.map((group) => (
-        <section key={group.mainCategory.id} className="mb-1.5 flex flex-col gap-2.5">
-          <div className="w-full rounded-md bg-gray-100 px-3 py-2 text-center">
+        <section key={group.mainCategory.id} className="mb-4 space-y-2.5">
+          <div className="w-full break-after-avoid rounded-md bg-gray-100 px-3 py-2 text-center">
             <h2 className="text-sm font-semibold text-gray-900">
               {group.mainCategory.title}
               <span className="ms-2 text-xs font-normal text-gray-600">({group.materials.length})</span>
@@ -86,28 +86,30 @@ export default function MaterialsListPrintDocument({
             rows={materialRows(group.materials)}
             monoColumnIndexes={[0, 1]}
             noWrapIndexes={[0, 1, 3, 4, 5]}
-            tableClassName="text-[9px]"
+            tableClassName="break-before-avoid text-[9px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
           />
         </section>
       ))}
 
       {uncategorized.length > 0 && (
-        <section className="flex break-inside-avoid flex-col gap-2.5">
-          <PrintSectionHeading
-            title={
-              <>
-                {translate("Uncategorized", "غير مصنف")}
-                <span className="ms-2 text-xs font-normal text-gray-500">({uncategorized.length})</span>
-              </>
-            }
-          />
+        <section className="mb-4 space-y-2.5">
+          <div className="break-after-avoid">
+            <PrintSectionHeading
+              title={
+                <>
+                  {translate("Uncategorized", "غير مصنف")}
+                  <span className="ms-2 text-xs font-normal text-gray-500">({uncategorized.length})</span>
+                </>
+              }
+            />
+          </div>
           <PrintTable
             headers={headers}
             rows={materialRows(uncategorized)}
             monoColumnIndexes={[0, 1]}
             noWrapIndexes={[0, 1, 3, 4, 5]}
-            tableClassName="text-[9px]"
+            tableClassName="break-before-avoid text-[9px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
           />
         </section>
