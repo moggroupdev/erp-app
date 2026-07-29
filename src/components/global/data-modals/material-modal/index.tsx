@@ -3,7 +3,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Material, MaterialWithCreator } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
+import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import { MATERIAL_UNITS } from "@/lib/constants/enums/material-units";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialsApi from "@/lib/api/materials";
@@ -72,6 +74,12 @@ export default function MaterialModal({
     } else reset();
   }, [materialToUpdate, helpers]);
 
+  // Non-raw materials always use count as the unit of measurement
+  useEffect(() => {
+    if (!materialType || isRawMaterial(materialType as MaterialType)) return;
+    setUnitOfMeasurement(MATERIAL_UNITS.COUNT);
+  }, [materialType]);
+
   // Clear subcategory only when main category changes to one it no longer belongs to
   useEffect(() => {
     if (!subCategoryId || !mainCategoryId) return;
@@ -79,6 +87,8 @@ export default function MaterialModal({
     if (sub && sub.mainCategoryId !== mainCategoryId) setSubCategoryId(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainCategoryId, subCategoryId]);
+
+  const isUnitLockedToCount = !!materialType && !isRawMaterial(materialType as MaterialType);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -241,6 +251,7 @@ export default function MaterialModal({
           placeholder={translate("Select unit of measurement", "اختر وحدة القياس")}
           searchable
           required
+          disabled={isUnitLockedToCount}
         />
 
         <NumberInput
