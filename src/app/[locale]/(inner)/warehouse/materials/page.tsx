@@ -167,23 +167,25 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <div className="flex items-center gap-2">
-            <div className="flex-center px-1">
-              <PrintDocument
-                buttonType="icon"
-                title={translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)}
-                onBeforePrint={async () => {
-                  if (!allMaterials) await fetchAllMaterials();
-                }}
-              >
-                {allMaterials && categoriesData && (
-                  <MaterialsListPrintDocument
-                    materials={allMaterials}
-                    mainCategories={categoriesData.materialCategoryMains}
-                    getSubCategory={helpers.getMaterialCategorySubById}
-                  />
-                )}
-              </PrintDocument>
-            </div>
+            <PermissionGuard permission={PERMISSIONS.PRINT_MATERIALS_LIST}>
+              <div className="flex-center px-1">
+                <PrintDocument
+                  buttonType="icon"
+                  title={translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)}
+                  onBeforePrint={async () => {
+                    if (!allMaterials) await fetchAllMaterials();
+                  }}
+                >
+                  {allMaterials && categoriesData && (
+                    <MaterialsListPrintDocument
+                      materials={allMaterials}
+                      mainCategories={categoriesData.materialCategoryMains}
+                      getSubCategory={helpers.getMaterialCategorySubById}
+                    />
+                  )}
+                </PrintDocument>
+              </div>
+            </PermissionGuard>
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL}>
               <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>

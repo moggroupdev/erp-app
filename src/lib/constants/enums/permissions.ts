@@ -32,6 +32,7 @@ export const PERMISSION_VALUES = [
   "read_materials",
   "add_material",
   "update_material",
+  "print_materials_list",
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
   "update_manufactured_material_bom",
@@ -318,6 +319,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث المادة",
     },
   },
+  print_materials_list: {
+    value: "print_materials_list",
+    label: {
+      en: "Print Materials List",
+      ar: "طباعة قائمة المواد",
+    },
+  },
   add_manufactured_material_bom: {
     value: "add_manufactured_material_bom",
     label: {
@@ -499,6 +507,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_materials",
       "add_material",
       "update_material",
+      "print_materials_list",
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",
       "update_manufactured_material_bom",
