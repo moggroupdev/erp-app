@@ -1,7 +1,6 @@
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 
-// Full row shape
 export type MmBomItem = {
   id: string;
   manufacturedMaterialCode: string;
@@ -47,9 +46,6 @@ export type CreateMmBomItemDto = {
   notes: string | null;
 };
 
-export type CreateMmBomDto = {
-  manufacturedMaterialCode: string;
-  items: CreateMmBomItemDto[];
-};
+export type CreateMmBomDto = { items: CreateMmBomItemDto[] };
 
 export type UpdateMmBomItemDto = Partial<Pick<CreateMmBomItemDto, "quantityRequired" | "notes">>;

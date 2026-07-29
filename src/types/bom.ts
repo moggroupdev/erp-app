@@ -2,7 +2,6 @@ import type { ProductSourceType } from "@/lib/constants/enums/product-source-typ
 import type { DimensionUnit } from "@/lib/constants/enums/dimension-units";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 
-// Full row shape
 export type BomItem = {
   id: string;
   productDimensionId: string;
@@ -55,9 +54,6 @@ export type CreateBomItemDto = {
   notes: string | null;
 };
 
-export type CreateBomDto = {
-  productDimensionId: string;
-  items: CreateBomItemDto[];
-};
+export type CreateBomDto = { items: CreateBomItemDto[] };
 
 export type UpdateBomItemDto = Partial<Pick<CreateBomItemDto, "quantityRequired" | "notes">>;

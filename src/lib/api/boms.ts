@@ -2,8 +2,16 @@ import type { PrivateRequest } from "@/types/api";
 import type { BomItem, Bom, CreateBomDto, CreateBomItemDto, UpdateBomItemDto } from "@/types/bom";
 
 const bomsApi = {
-  async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateBomDto }) {
-    return await privateRequest<BomItem[]>({ method: "POST", url: "boms", data: dto });
+  async create({
+    privateRequest,
+    dimensionId,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    dimensionId: string;
+    dto: CreateBomDto;
+  }) {
+    return await privateRequest<BomItem[]>({ method: "POST", url: `boms/${dimensionId}`, data: dto });
   },
 
   async getByDimension({
@@ -27,7 +35,7 @@ const bomsApi = {
     dimensionId: string;
     dto: CreateBomItemDto;
   }) {
-    return await privateRequest<BomItem>({ method: "POST", url: `boms/${dimensionId}/items`, data: dto });
+    return await privateRequest<BomItem>({ method: "POST", url: `boms/${dimensionId}/append`, data: dto });
   },
 
   async updateItem({
@@ -39,7 +47,7 @@ const bomsApi = {
     itemId: string;
     dto: UpdateBomItemDto;
   }) {
-    return await privateRequest<BomItem>({ method: "PATCH", url: `boms/items/${itemId}`, data: dto });
+    return await privateRequest<BomItem>({ method: "PATCH", url: `boms/${itemId}`, data: dto });
   },
 };
 

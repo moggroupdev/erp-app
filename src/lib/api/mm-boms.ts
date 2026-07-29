@@ -2,8 +2,20 @@ import type { PrivateRequest } from "@/types/api";
 import type { MmBomItem, MmBom, CreateMmBomDto, CreateMmBomItemDto, UpdateMmBomItemDto } from "@/types/mm-bom";
 
 const mmBomsApi = {
-  async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateMmBomDto }) {
-    return await privateRequest<MmBomItem[]>({ method: "POST", url: "mm-boms", data: dto });
+  async create({
+    privateRequest,
+    manufacturedMaterialCode,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    manufacturedMaterialCode: string;
+    dto: CreateMmBomDto;
+  }) {
+    return await privateRequest<MmBomItem[]>({
+      method: "POST",
+      url: `mm-boms/${manufacturedMaterialCode}`,
+      data: dto,
+    });
   },
 
   async getByMaterial({
@@ -29,7 +41,7 @@ const mmBomsApi = {
   }) {
     return await privateRequest<MmBomItem>({
       method: "POST",
-      url: `mm-boms/${manufacturedMaterialCode}/items`,
+      url: `mm-boms/${manufacturedMaterialCode}/append`,
       data: dto,
     });
   },
@@ -43,7 +55,7 @@ const mmBomsApi = {
     itemId: string;
     dto: UpdateMmBomItemDto;
   }) {
-    return await privateRequest<MmBomItem>({ method: "PATCH", url: `mm-boms/items/${itemId}`, data: dto });
+    return await privateRequest<MmBomItem>({ method: "PATCH", url: `mm-boms/${itemId}`, data: dto });
   },
 };
 

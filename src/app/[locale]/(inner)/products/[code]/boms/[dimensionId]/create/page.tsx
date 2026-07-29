@@ -80,8 +80,8 @@ export default function Page() {
     mutationFn: async () => {
       return await bomsApi.create({
         privateRequest,
+        dimensionId,
         dto: {
-          productDimensionId: dimensionId,
           items: rows.map((row) => ({
             materialCode: row.materialCode!,
             quantityRequired: Number(row.quantityRequired),
