@@ -43,7 +43,7 @@ export default function MaterialsListPrintDocument({
   const headers = [
     translate("Code", "الكود"),
     translate("Legacy Code", "الكود السابق"),
-    translate("Title", "العنوان"),
+    translate("Material Name", "اسم المادة"),
     translate("Unit", "الوحدة"),
     translate("Qty", "الكمية"),
     translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`),
