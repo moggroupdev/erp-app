@@ -1,4 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+"use client";
+
+import { useCallback, useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button, Menu } from "@mantine/core";
 import { Printer } from "lucide-react";
 
@@ -36,67 +39,47 @@ export default function PrintDocument({
   }) => React.ReactNode;
 }) {
   const label = buttonLabel ?? title;
-  const printRef = useRef<HTMLDivElement>(null);
+  const printId = `print-doc-${useId().replace(/:/g, "")}`;
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const executePrint = useCallback(() => {
-    if (!printRef.current) return;
+    const previousTitle = document.title;
+    document.title = title;
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+    const style = document.createElement("style");
+    style.setAttribute("data-print-document", printId);
+    style.textContent = `
+      @media print {
+        @page { margin: ${paperMarginY}mm ${paperMarginX}mm; size: ${paperWidth}mm ${paperHeight}mm; }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body > *:not(#${printId}) { display: none !important; }
+        #${printId} {
+          display: block !important;
+          width: 100%;
+        }
+      }
+    `;
+    document.head.appendChild(style);
 
-    const printContent = printRef.current.innerHTML;
-    const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-      .map((el) => el.outerHTML)
-      .join("\n");
-    const htmlClass = document.documentElement.className;
-    const htmlLang = document.documentElement.lang || "en";
-    const htmlDir = document.documentElement.dir || "ltr";
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      document.title = previousTitle;
+      style.remove();
+      window.removeEventListener("afterprint", cleanup);
+    };
 
-    printWindow.document.open();
-    printWindow.document.write(`
-      <html lang="${htmlLang}" dir="${htmlDir}" class="${htmlClass}">
-        <head>
-          <title>${title}</title>
-          ${stylesheets}
-          <style>
-            *, *::before, *::after { box-sizing: border-box; }
-            html, body { margin: 0; }
-            body { display: none; font-family: var(--font-alexandria), sans-serif; }
-            @media print {
-              @page { margin: ${paperMarginY}mm ${paperMarginX}mm; size: ${paperWidth}mm ${paperHeight}mm; }
-              body { display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body>
-          ${printContent}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-
-    const links = Array.from(printWindow.document.querySelectorAll('link[rel="stylesheet"]'));
-    const waitForStyles = Promise.all(
-      links.map(
-        (link) =>
-          new Promise<void>((resolve) => {
-            if ((link as HTMLLinkElement).sheet) {
-              resolve();
-              return;
-            }
-            link.addEventListener("load", () => resolve(), { once: true });
-            link.addEventListener("error", () => resolve(), { once: true });
-          }),
-      ),
-    );
-
-    waitForStyles.then(() => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    });
-  }, [title, paperWidth, paperHeight, paperMarginX, paperMarginY]);
+    window.addEventListener("afterprint", cleanup);
+    window.print();
+    // Some browsers may not fire afterprint reliably
+    setTimeout(cleanup, 1000);
+  }, [title, printId, paperWidth, paperHeight, paperMarginX, paperMarginY]);
 
   const handlePrint = useCallback(async () => {
     if (onBeforePrint) {
@@ -114,40 +97,45 @@ export default function PrintDocument({
 
   const loadingIcon = loading ? <Printer size={15} className="animate-pulse" /> : icon;
 
+  const trigger = renderTrigger ? (
+    renderTrigger({
+      onClick: () => {
+        void handlePrint();
+      },
+      loading,
+      disabled: loading,
+      label,
+      icon: loadingIcon,
+    })
+  ) : buttonType === "menu" ? (
+    <Menu.Item onClick={handlePrint} leftSection={loadingIcon} disabled={loading}>
+      {label}
+    </Menu.Item>
+  ) : buttonType === "button" ? (
+    <Button onClick={handlePrint} leftSection={loadingIcon} color="dark" variant="light" radius="md" disabled={loading}>
+      {label}
+    </Button>
+  ) : (
+    <button
+      title={label}
+      onClick={handlePrint}
+      disabled={loading}
+      className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
+    >
+      {loadingIcon}
+    </button>
+  );
+
   return (
     <>
-      {renderTrigger ? (
-        renderTrigger({
-          onClick: () => {
-            void handlePrint();
-          },
-          loading,
-          disabled: loading,
-          label,
-          icon: loadingIcon,
-        })
-      ) : buttonType === "menu" ? (
-        <Menu.Item onClick={handlePrint} leftSection={loadingIcon} disabled={loading}>
-          {label}
-        </Menu.Item>
-      ) : buttonType === "button" ? (
-        <Button onClick={handlePrint} leftSection={loadingIcon} color="dark" variant="light" radius="md" disabled={loading}>
-          {label}
-        </Button>
-      ) : (
-        <button
-          title={label}
-          onClick={handlePrint}
-          disabled={loading}
-          className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
-        >
-          {loadingIcon}
-        </button>
-      )}
-
-      <div ref={printRef} className="hidden">
-        {children}
-      </div>
+      {trigger}
+      {mounted &&
+        createPortal(
+          <div id={printId} className="hidden">
+            {children}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
