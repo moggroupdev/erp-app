@@ -15,6 +15,7 @@ import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
@@ -45,6 +46,7 @@ const MATERIALS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translation, translate } = useI18n();
+  const printDate = formatDate(new Date(), locale);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -168,7 +170,7 @@ export default function Page() {
             <div className="flex-center px-1">
               <PrintDocument
                 buttonType="icon"
-                title={translate("Materials List", "قائمة المواد")}
+                title={translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)}
                 onBeforePrint={async () => {
                   if (!allMaterials) await fetchAllMaterials();
                 }}

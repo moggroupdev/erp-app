@@ -73,23 +73,14 @@ export default function MaterialsListPrintDocument({
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
-      <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
-        <PrintDetail label={translate("Total Materials", "إجمالي المواد")} value={String(materials.length)} />
-        <PrintDetail label={translate("Categories", "الفئات")} value={String(groups.length)} />
-      </section>
-
-      <hr className="border-gray-300" />
-
       {groups.map((group) => (
-        <section key={group.mainCategory.id} className="flex break-inside-avoid flex-col gap-2.5">
-          <PrintSectionHeading
-            title={
-              <>
-                {group.mainCategory.title}
-                <span className="ms-2 text-xs font-normal text-gray-500">({group.materials.length})</span>
-              </>
-            }
-          />
+        <section key={group.mainCategory.id} className="mb-1.5 flex flex-col gap-2.5">
+          <div className="w-full rounded-md bg-gray-100 px-3 py-2 text-center">
+            <h2 className="text-sm font-semibold text-gray-900">
+              {group.mainCategory.title}
+              <span className="ms-2 text-xs font-normal text-gray-600">({group.materials.length})</span>
+            </h2>
+          </div>
           <PrintTable
             headers={headers}
             rows={materialRows(group.materials)}
