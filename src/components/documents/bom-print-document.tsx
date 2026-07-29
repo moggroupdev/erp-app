@@ -1,7 +1,7 @@
 import type { Bom, BomItemWithMaterial } from "@/types/bom";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import { formatDate } from "@/lib/helpers/date-formaters";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
 
@@ -26,17 +26,19 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
 
   const dimensionLabel = `${bom.length} × ${bom.depth} × ${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
-  const printedAt = formatDate(new Date(), locale);
+  const printedAt = formatDateAndTime(new Date(), locale);
 
   return (
     <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
       <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
         <div className="flex flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
-            {translate("Bill of Materials", "قائمة المواد")}
+            <span>{translate("Bill of Materials", "قائمة المواد")}</span>
+            <span> - </span>
+            <span className="font-mono text-xs">{bom.product.code}</span>
           </p>
           <h1 className="text-2xl font-semibold">{bom.product.title}</h1>
-          <p className="font-mono text-[11px] text-gray-600">{bom.product.code}</p>
+          <p className="text-[10px] text-gray-500">{printedAt}</p>
         </div>
 
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
@@ -143,10 +145,6 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
           </tfoot>
         </table>
       </section>
-
-      <footer className="mt-2 border-t border-gray-300 pt-2.5 text-[10px] text-gray-500">
-        {translate("Printed on", "تاريخ الطباعة")} {printedAt}
-      </footer>
     </div>
   );
 }

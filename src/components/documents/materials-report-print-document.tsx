@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
-import { formatDate } from "@/lib/helpers/date-formaters";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
@@ -41,7 +41,7 @@ export default function MaterialsReportPrintDocument({
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
-  const printedAt = formatDate(new Date(), locale);
+  const printedAt = formatDateAndTime(new Date(), locale);
 
   const categorySectionTitle =
     categoryLevel === "main"
@@ -64,8 +64,10 @@ export default function MaterialsReportPrintDocument({
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             {translate("Materials Report", "تقرير المواد")}
           </p>
-          <h1 className="text-2xl font-semibold">{title}</h1>
-          {scopeLabel && <p className="text-[11px] text-gray-600">{scopeLabel}</p>}
+          <h1 className="text-2xl font-semibold">
+            {title}
+            {scopeLabel && <span> - {scopeLabel}</span>}
+          </h1>
           <p className="text-[10px] text-gray-500">{printedAt}</p>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
