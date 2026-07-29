@@ -3,20 +3,33 @@ export default function PrintTable({
   rows,
   emptyLabel,
   monoColumnIndexes = [],
+  noWrapIndexes,
   footerRow,
+  tableClassName,
 }: {
   headers: string[];
   rows: string[][];
   emptyLabel: string;
   monoColumnIndexes?: number[];
+  /** Column indexes that get `text-nowrap`. When omitted, all columns wrap normally. */
+  noWrapIndexes?: number[];
   footerRow?: string[];
+  /** Override the default table font-size class (e.g. `"text-[9px]"`). */
+  tableClassName?: string;
 }) {
   if (rows.length === 0) {
     return <p className="py-2 text-[10px] text-gray-500">{emptyLabel}</p>;
   }
 
+  function cellClasses(cellIndex: number) {
+    const parts = ["px-2.5 py-2"];
+    if (monoColumnIndexes.includes(cellIndex)) parts.push("font-mono text-gray-600");
+    if (noWrapIndexes?.includes(cellIndex)) parts.push("text-nowrap");
+    return parts.join(" ");
+  }
+
   return (
-    <table className="w-full border-collapse text-[10px]">
+    <table className={`w-full border-collapse ${tableClassName ?? "text-[10px]"}`}>
       <thead>
         <tr className="border-b border-gray-300 bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
           {headers.map((header) => (
@@ -30,10 +43,7 @@ export default function PrintTable({
         {rows.map((row, rowIndex) => (
           <tr key={rowIndex} className="border-b border-gray-200">
             {row.map((cell, cellIndex) => (
-              <td
-                key={`${rowIndex}-${cellIndex}`}
-                className={`px-2.5 py-2 ${monoColumnIndexes.includes(cellIndex) ? "font-mono text-gray-600" : ""}`}
-              >
+              <td key={`${rowIndex}-${cellIndex}`} className={cellClasses(cellIndex)}>
                 {cell}
               </td>
             ))}
