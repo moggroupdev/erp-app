@@ -15,7 +15,6 @@ export default function MmBomItemModal({
   opened,
   close,
   manufacturedMaterialCode,
-  hasExistingBom,
   itemToUpdate,
   setItemToUpdate,
   excludeMaterialCodes = [],
@@ -23,7 +22,6 @@ export default function MmBomItemModal({
   opened: boolean;
   close: () => void;
   manufacturedMaterialCode: string;
-  hasExistingBom: boolean;
   itemToUpdate: MmBomItemWithMaterial | null;
   setItemToUpdate: React.Dispatch<React.SetStateAction<MmBomItemWithMaterial | null>>;
   excludeMaterialCodes?: string[];
@@ -72,24 +70,14 @@ export default function MmBomItemModal({
         });
       }
 
-      const itemDto = {
-        materialCode: materialCode!,
-        quantityRequired: Number(quantityRequired),
-        notes: notes.trim() || null,
-      };
-
-      if (!hasExistingBom) {
-        return await mmBomsApi.create({
-          privateRequest,
-          manufacturedMaterialCode,
-          dto: { items: [itemDto] },
-        });
-      }
-
       return await mmBomsApi.appendItem({
         privateRequest,
         manufacturedMaterialCode,
-        dto: itemDto,
+        dto: {
+          materialCode: materialCode!,
+          quantityRequired: Number(quantityRequired),
+          notes: notes.trim() || null,
+        },
       });
     },
     onSuccess: async () => {

@@ -231,7 +231,6 @@ export default function MaterialBomSection({ material }: { material: MaterialWit
               opened={modalOpened}
               close={closeModal}
               manufacturedMaterialCode={material.code}
-              hasExistingBom={hasBom}
               itemToUpdate={itemToUpdate}
               setItemToUpdate={setItemToUpdate}
               excludeMaterialCodes={excludeMaterialCodes}

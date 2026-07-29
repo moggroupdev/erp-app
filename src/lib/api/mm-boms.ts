@@ -1,23 +1,7 @@
 import type { PrivateRequest } from "@/types/api";
-import type { MmBomItem, MmBom, CreateMmBomDto, CreateMmBomItemDto, UpdateMmBomItemDto } from "@/types/mm-bom";
+import type { MmBomItem, MmBom, CreateMmBomItemDto, UpdateMmBomItemDto } from "@/types/mm-bom";
 
 const mmBomsApi = {
-  async create({
-    privateRequest,
-    manufacturedMaterialCode,
-    dto,
-  }: {
-    privateRequest: PrivateRequest;
-    manufacturedMaterialCode: string;
-    dto: CreateMmBomDto;
-  }) {
-    return await privateRequest<MmBomItem[]>({
-      method: "POST",
-      url: `mm-boms/${manufacturedMaterialCode}`,
-      data: dto,
-    });
-  },
-
   async getByMaterial({
     privateRequest,
     manufacturedMaterialCode,

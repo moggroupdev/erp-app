@@ -47,6 +47,4 @@ export type CreateMmBomItemDto = {
   notes: string | null;
 };
 
-export type CreateMmBomDto = { items: CreateMmBomItemDto[] };
-
 export type UpdateMmBomItemDto = Partial<Pick<CreateMmBomItemDto, "quantityRequired" | "notes">>;
