@@ -44,16 +44,30 @@ export default function MaterialsListPrintDocument({
     translate("Code", "الكود"),
     translate("Legacy Code", "الكود السابق"),
     translate("Material Name", "اسم المادة"),
+    translate("Subcategory", "الفئة الفرعية"),
     translate("Unit", "الوحدة"),
     translate("Qty", "الكمية"),
     translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`),
   ];
 
+  function sortMaterials(list: Material[]) {
+    return [...list].sort((a, b) => {
+      const aSubTitle = getSubCategory(a.subCategoryId)?.title ?? "";
+      const bSubTitle = getSubCategory(b.subCategoryId)?.title ?? "";
+
+      const bySubcategory = aSubTitle.localeCompare(bSubTitle, locale);
+      if (bySubcategory !== 0) return bySubcategory;
+
+      return a.title.localeCompare(b.title, locale);
+    });
+  }
+
   function materialRows(list: Material[]): string[][] {
-    return list.map((m) => [
+    return sortMaterials(list).map((m) => [
       m.code,
       m.legacyCode || "-",
       m.title,
+      getSubCategory(m.subCategoryId)?.title ?? "-",
       getMaterialUnitLabel(m.unitOfMeasurement, locale),
       String(m.quantity),
       formatMoney(m.unitPrice),
@@ -85,8 +99,8 @@ export default function MaterialsListPrintDocument({
             headers={headers}
             rows={materialRows(group.materials)}
             monoColumnIndexes={[0, 1]}
-            noWrapIndexes={[0, 1, 3, 4, 5]}
-            tableClassName="break-before-avoid text-[9px]"
+            noWrapIndexes={[0, 1, 3, 4, 5, 6]}
+            tableClassName="break-before-avoid text-[8px] [&_thead_tr]:text-[8px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
           />
         </section>
@@ -108,8 +122,8 @@ export default function MaterialsListPrintDocument({
             headers={headers}
             rows={materialRows(uncategorized)}
             monoColumnIndexes={[0, 1]}
-            noWrapIndexes={[0, 1, 3, 4, 5]}
-            tableClassName="break-before-avoid text-[9px]"
+            noWrapIndexes={[0, 1, 3, 4, 5, 6]}
+            tableClassName="break-before-avoid text-[8px] [&_thead_tr]:text-[8px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
           />
         </section>
