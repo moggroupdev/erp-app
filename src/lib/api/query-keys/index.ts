@@ -71,6 +71,11 @@ export const queryKeys = {
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
   },
+  mmBoms: {
+    all: ["mm-boms"] as const,
+    details: () => [...queryKeys.mmBoms.all, "detail"] as const,
+    detail: (manufacturedMaterialCode: string) => [...queryKeys.mmBoms.details(), manufacturedMaterialCode] as const,
+  },
   boms: {
     all: ["boms"] as const,
     details: () => [...queryKeys.boms.all, "detail"] as const,

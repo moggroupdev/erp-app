@@ -1,13 +1,11 @@
 import type { Locale, LocalizedEntity } from "@/lib/i18n/types";
 import { translate } from "@/lib/i18n/utils";
 
-export const MATERIAL_TYPE_VALUES = ["raw_materials", "spare_parts"] as const;
+export const MATERIAL_TYPE_VALUES = ["raw_materials", "spare_parts", "manufactured_material"] as const;
 
 export type MaterialType = (typeof MATERIAL_TYPE_VALUES)[number];
 
-export const MATERIAL_TYPES = Object.fromEntries(
-  MATERIAL_TYPE_VALUES.map((type) => [type.toUpperCase(), type]),
-) as {
+export const MATERIAL_TYPES = Object.fromEntries(MATERIAL_TYPE_VALUES.map((type) => [type.toUpperCase(), type])) as {
   [K in Uppercase<MaterialType>]: Lowercase<K>;
 };
 
@@ -26,6 +24,13 @@ export const MATERIAL_TYPE_LABELS: LocalizedEntity<MaterialType> = {
     label: {
       en: "Spare Parts",
       ar: "قطع غيار",
+    },
+  },
+  manufactured_material: {
+    value: "manufactured_material",
+    label: {
+      en: "Manufactured Material",
+      ar: "مادة مصنعة",
     },
   },
 };

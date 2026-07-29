@@ -32,6 +32,9 @@ export const PERMISSION_VALUES = [
   "read_materials",
   "add_material",
   "update_material",
+  "add_manufactured_material_bom",
+  "read_manufactured_material_boms",
+  "update_manufactured_material_bom",
   "read_inquiries",
   "read_previews",
   "read_offers",
@@ -315,6 +318,27 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث المادة",
     },
   },
+  add_manufactured_material_bom: {
+    value: "add_manufactured_material_bom",
+    label: {
+      en: "Add Manufactured Material BOM",
+      ar: "إضافة قائمة مواد مادة مصنعة",
+    },
+  },
+  read_manufactured_material_boms: {
+    value: "read_manufactured_material_boms",
+    label: {
+      en: "Read Manufactured Material BOMs",
+      ar: "عرض قوائم مواد المواد المصنعة",
+    },
+  },
+  update_manufactured_material_bom: {
+    value: "update_manufactured_material_bom",
+    label: {
+      en: "Update Manufactured Material BOM",
+      ar: "تحديث قائمة مواد مادة مصنعة",
+    },
+  },
 
   read_inventory_transactions: {
     value: "read_inventory_transactions",
@@ -471,7 +495,15 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "warehouse",
     label: { en: "Warehouse", ar: "المخازن" },
-    permissions: ["read_materials", "add_material", "update_material", "read_inventory_transactions"],
+    permissions: [
+      "read_materials",
+      "add_material",
+      "update_material",
+      "add_manufactured_material_bom",
+      "read_manufactured_material_boms",
+      "update_manufactured_material_bom",
+      "read_inventory_transactions",
+    ],
   },
   {
     domain: "procurement",
