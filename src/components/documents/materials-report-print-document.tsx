@@ -73,36 +73,18 @@ export default function MaterialsReportPrintDocument({
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
-      <section className="flex break-inside-avoid flex-col gap-2.5">
-        <SectionHeading
-          title={translate("Overview", "نظرة عامة")}
-          subtitle={translate(
-            "Key totals and stock health counts for the selected scope.",
-            "إجماليات أساسية وأعداد صحة المخزون ضمن النطاق المحدد.",
-          )}
+      <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
+        <Detail
+          label={translate("Total Inventory Value", "إجمالي قيمة المخزون")}
+          value={formatMoney(overview.totalInventoryValue, currency)}
         />
-        <div className="grid grid-cols-1 gap-2.5">
-          <SummaryBox
-            label={translate("Total Inventory Value", "إجمالي قيمة المخزون")}
-            value={formatMoney(overview.totalInventoryValue, currency)}
-          />
-        </div>
-
-        <hr className="border-gray-300" />
-
-        <div className="grid grid-cols-4 gap-2.5">
-          <SummaryBox
-            label={translate("Total Registered Materials", "إجمالي عدد المواد المسجلة")}
-            value={String(overview.totalMaterials)}
-          />
-          <SummaryBox
-            label={translate("No Minimum Set", "عناصر بدون حد طلب")}
-            value={String(overview.noMinimumStockCount)}
-          />
-          <SummaryBox label={translate("Low Stock", "عناصر منخفضة المخزون")} value={String(overview.lowStockCount)} />
-          <SummaryBox label={translate("Out of Stock", "عناصر نفذت من المخزون")} value={String(overview.outOfStockCount)} />
-        </div>
+        <Detail
+          label={translate("Total Registered Materials", "إجمالي عدد المواد المسجلة")}
+          value={String(overview.totalMaterials)}
+        />
       </section>
+
+      <hr className="border-gray-300" />
 
       <section className="flex break-inside-avoid flex-col gap-2.5">
         <SectionHeading
@@ -150,6 +132,14 @@ export default function MaterialsReportPrintDocument({
           ])}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
+        {overview.noMinimumStockCount > 0 && (
+          <p className="rounded-lg bg-amber-50 px-2.5 py-2 text-[10px] text-amber-800">
+            {translate(
+              `${overview.noMinimumStockCount} material(s) have no minimum stock level set.`,
+              `هناك عدد ${overview.noMinimumStockCount} من المواد لم يتم تعيين حد أدنى طلب لها.`,
+            )}
+          </p>
+        )}
       </section>
 
       <section className="flex break-inside-avoid flex-col gap-2.5">
@@ -216,7 +206,7 @@ export default function MaterialsReportPrintDocument({
             translate("Unit", "الوحدة"),
             translate("Qty", "الكمية"),
             translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`),
-            translate(`Total Value (${translation.currency})`, `القيمة الإجمالية (${translation.currency})`),
+            translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`),
           ]}
           rows={topMaterialsByValue.map((material, index) => [
             String(index + 1),
@@ -250,7 +240,7 @@ export default function MaterialsReportPrintDocument({
             translate("Unit", "الوحدة"),
             translate("Qty", "الكمية"),
             translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`),
-            translate(`Total Value (${translation.currency})`, `القيمة الإجمالية (${translation.currency})`),
+            translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`),
           ]}
           rows={topMaterialsByQuantity.map((material, index) => [
             String(index + 1),
@@ -316,11 +306,11 @@ function SectionHeading({ title, subtitle }: { title: ReactNode; subtitle?: stri
   );
 }
 
-function SummaryBox({ label, value }: { label: string; value: string }) {
+function Detail({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-gray-300 bg-gray-50 px-3.5 py-3">
-      <p className="text-[10px] text-gray-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold">{value}</p>
+    <div className="flex flex-col gap-1">
+      <span className="text-[10px] text-gray-500">{label}</span>
+      <span className="text-xs font-medium">{value}</span>
     </div>
   );
 }
