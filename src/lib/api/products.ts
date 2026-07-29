@@ -27,6 +27,16 @@ const productsApi = {
     return await privateRequest<PaginatedData<ProductWithDimensions>>({ url: "products", params, signal });
   },
 
+  async listAllToPrint({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
+    const result = await privateRequest<PaginatedData<ProductWithDimensions>>({
+      url: "products",
+      params: { limit: Infinity, sort: "title" },
+      signal,
+    });
+
+    return result.data;
+  },
+
   async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
     return await privateRequest<ProductWithCreator>({ url: `products/${code}`, signal });
   },

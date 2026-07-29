@@ -15,11 +15,12 @@ import productsApi from "@/lib/api/products";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
-import { type Product, type ProductDimension, type ProductWithDimensions } from "@/types/product";
+import { type Product, type ProductWithDimensions } from "@/types/product";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
@@ -31,6 +32,8 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
+import ProductsListPrintDocument from "@/components/documents/products-list-print-document";
 import ProductModal from "@/components/global/data-modals/product-modal";
 import SelectProductSourceType from "@/components/global/selections/enum-based/select-product-source-type";
 import SelectProductMain from "@/components/global/selections/query-based/select-product-main";
@@ -42,6 +45,7 @@ const PRODUCTS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translate } = useI18n();
+  const printDate = formatDate(new Date(), locale);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -49,7 +53,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
-  const { helpers } = useProductCategories();
+  const { data: categoriesData, helpers } = useProductCategories();
 
   function getCategoryLabels(subCategoryId: string) {
     const sub = helpers.getProductCategorySubById(subCategoryId);
@@ -113,6 +117,14 @@ export default function Page() {
     placeholderData: keepPreviousData,
   });
 
+  // Only used for printing
+  const { data: allProducts, refetch: fetchAllProducts } = useQuery({
+    queryKey: queryKeys.products.list({ limit: "list-all-to-print" }),
+    queryFn: ({ signal }) => productsApi.listAllToPrint({ privateRequest, signal }),
+    staleTime: staleTimes.products,
+    enabled: false, // Disabled by default, will be enabled when the print button is clicked
+  });
+
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useEffect(() => {
@@ -152,7 +164,26 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <PermissionGuard permission={PERMISSIONS.PRINT_PRODUCTS_LIST}>
+              <div className="flex-center px-1">
+                <PrintDocument
+                  buttonType="icon"
+                  title={translate(`Products List - ${printDate}`, `قائمة المنتجات - ${printDate}`)}
+                  onBeforePrint={async () => {
+                    if (!allProducts) await fetchAllProducts();
+                  }}
+                >
+                  {allProducts && categoriesData && (
+                    <ProductsListPrintDocument
+                      products={allProducts}
+                      mainCategories={categoriesData.productCategoryMains}
+                      getSubCategory={helpers.getProductCategorySubById}
+                    />
+                  )}
+                </PrintDocument>
+              </div>
+            </PermissionGuard>
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT}>
               <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>

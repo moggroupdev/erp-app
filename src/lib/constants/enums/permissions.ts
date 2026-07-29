@@ -23,6 +23,7 @@ export const PERMISSION_VALUES = [
   "add_product",
   "update_product",
   "delete_product",
+  "print_products_list",
   "add_product_bom",
   "read_product_boms",
   "update_product_bom",
@@ -198,6 +199,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Delete Product",
       ar: "حذف المنتج",
+    },
+  },
+  print_products_list: {
+    value: "print_products_list",
+    label: {
+      en: "Print Products List",
+      ar: "طباعة قائمة المنتجات",
     },
   },
   add_product_bom: {
@@ -490,6 +498,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_product",
       "update_product",
       "delete_product",
+      "print_products_list",
       "add_product_bom",
       "read_product_boms",
       "update_product_bom",
