@@ -9,7 +9,7 @@ import type { BomItemWithMaterial } from "@/types/bom";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectMaterial from "@/components/global/selections/query-based/select-material";
+import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
 export default function BomItemModal({
   opened,
@@ -118,10 +118,7 @@ export default function BomItemModal({
     : true;
 
   const isReadyToSubmit =
-    quantityRequired !== "" &&
-    Number(quantityRequired) > 0 &&
-    isDataChanged &&
-    (isUpdate || !!materialCode);
+    quantityRequired !== "" && Number(quantityRequired) > 0 && isDataChanged && (isUpdate || !!materialCode);
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">

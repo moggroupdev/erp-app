@@ -9,7 +9,7 @@ import { type DepartmentWithManager } from "@/types/departments";
 import { Button, TextInput } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectUser from "@/components/global/selections/query-based/select-user";
+import SelectUser from "@/components/global/selections/remote-based/select-user";
 
 export default function DepartmentModal({
   opened,

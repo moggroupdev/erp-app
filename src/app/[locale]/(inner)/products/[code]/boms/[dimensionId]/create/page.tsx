@@ -19,7 +19,7 @@ import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import ErrorAlert from "@/components/ui/error-alert";
-import SelectMaterial from "@/components/global/selections/query-based/select-material";
+import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
 const PAGE_TITLE = { en: "Create BOM", ar: "إنشاء قائمة مواد" };
 

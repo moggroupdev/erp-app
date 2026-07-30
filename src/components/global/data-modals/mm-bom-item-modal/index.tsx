@@ -9,7 +9,7 @@ import type { MmBomItemWithMaterial } from "@/types/mm-bom";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectMaterial from "@/components/global/selections/query-based/select-material";
+import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
 export default function MmBomItemModal({
   opened,
