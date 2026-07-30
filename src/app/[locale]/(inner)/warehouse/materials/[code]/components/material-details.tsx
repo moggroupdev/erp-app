@@ -1,5 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
@@ -8,7 +9,7 @@ import { PackageSearch } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
 export default function MaterialDetails({ material }: { material: MaterialWithCreator }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const { helpers } = useMaterialCategories();
 
   const isDeleted = !!material.deletedAt;
@@ -47,7 +48,7 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
       value: getMaterialUnitLabel(material.unitOfMeasurement, locale),
     },
     { key: translate("Quantity", "الكمية"), value: material.quantity },
-    { key: translate("Unit Price", "سعر الوحدة"), value: material.unitPrice },
+    { key: translate("Unit Price", "سعر الوحدة"), value: formatMoney(material.unitPrice, translation.currency) },
     {
       key: translate("Minimum Stock", "الحد الأدنى للمخزون"),
       value: material.minimumStock ?? <EmptyValue />,

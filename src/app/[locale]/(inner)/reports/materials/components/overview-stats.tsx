@@ -7,7 +7,7 @@ import type { MaterialsInventoryOverview } from "@/types/reports";
 import { reportTheme } from "./report-theme";
 
 export default function OverviewStats({ overview }: { overview: MaterialsInventoryOverview }) {
-  const { locale, translate, translation } = useI18n();
+  const { translate, translation } = useI18n();
 
   const currency = translation.currency;
 
@@ -43,7 +43,7 @@ export default function OverviewStats({ overview }: { overview: MaterialsInvento
               {formatMoney(Math.abs(overview.valueChangeAmount), currency)}
             </span>
           }
-          hint={`${translate("Opening", "افتتاحية")}: ${overview.totalOpeningValue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { maximumFractionDigits: 2 })} ${currency} · ${valueChangePositive ? "+" : ""}${overview.valueChangePercentage.toFixed(2)}%`}
+          hint={`${translate("Opening", "افتتاحية")}: ${formatMoney(overview.totalOpeningValue, currency)} · ${valueChangePositive ? "+" : ""}${overview.valueChangePercentage.toFixed(2)}%`}
           icon={<TrendingUp size={20} />}
           valueClassName={valueChangeClass}
         />
