@@ -12,6 +12,7 @@ export type DepartmentWithManager = Department & { manager: { id: string; name: 
 export type CreateDepartmentDto = {
   nameEn: string;
   nameAr: string;
+  managerId: string | null;
 };
 
 export type UpdateDepartmentDto = Partial<CreateDepartmentDto>;

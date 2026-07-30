@@ -9,6 +9,7 @@ import { type DepartmentWithManager } from "@/types/departments";
 import { Button, TextInput } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
+import SelectUser from "@/components/global/selections/query-based/select-user";
 
 export default function DepartmentModal({
   opened,
@@ -29,10 +30,12 @@ export default function DepartmentModal({
 
   const [nameEn, setNameEn] = useState("");
   const [nameAr, setNameAr] = useState("");
+  const [managerId, setManagerId] = useState<string | null>(null);
 
   function reset() {
     setNameEn("");
     setNameAr("");
+    setManagerId(null);
   }
 
   useEffect(() => {
@@ -40,14 +43,16 @@ export default function DepartmentModal({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setNameEn(departmentToUpdate.nameEn);
       setNameAr(departmentToUpdate.nameAr);
+      setManagerId(departmentToUpdate.managerId);
     } else reset();
   }, [departmentToUpdate]);
 
   const mutation = useMutation({
     mutationFn: async () => {
+      const dto = { nameEn, nameAr, managerId };
       return departmentToUpdate
-        ? await departmentsApi.update({ privateRequest, id: departmentToUpdate.id, dto: { nameEn, nameAr } })
-        : await departmentsApi.create({ privateRequest, dto: { nameEn, nameAr } });
+        ? await departmentsApi.update({ privateRequest, id: departmentToUpdate.id, dto })
+        : await departmentsApi.create({ privateRequest, dto });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.departments.all });
@@ -88,7 +93,9 @@ export default function DepartmentModal({
   const isRequiredInputFilled = !!(nameEn && nameAr);
 
   const isDataChanged = departmentToUpdate
-    ? nameEn !== departmentToUpdate.nameEn || nameAr !== departmentToUpdate.nameAr
+    ? nameEn !== departmentToUpdate.nameEn ||
+      nameAr !== departmentToUpdate.nameAr ||
+      managerId !== departmentToUpdate.managerId
     : false;
 
   const isReadyToSubmit = isRequiredInputFilled && (departmentToUpdate ? isDataChanged : true);
@@ -112,6 +119,13 @@ export default function DepartmentModal({
           onChange={(e) => setNameAr(e.target.value)}
           radius="md"
           required
+        />
+
+        <SelectUser
+          value={managerId}
+          setValue={setManagerId}
+          label={translate("Manager", "المدير")}
+          placeholder={translate("Search user by name or code", "ابحث عن مستخدم بالاسم أو الكود")}
         />
 
         <div className="flex gap-2">
