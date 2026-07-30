@@ -29,7 +29,6 @@ import PrintDocument from "@/components/ui/print-document";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
-import MoneyViewer from "@/components/ui/money-viewer";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom-print-document";
@@ -242,13 +241,13 @@ export default function Page() {
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <CalculationCard
                     label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
-                    value={<MoneyViewer amount={totals.totalMaterialCost} currency={currency} />}
+                    value={formatMoney(totals.totalMaterialCost, currency)}
                     hint={translate("Sum of quantity × unit price for all items", "مجموع الكمية × سعر الوحدة لكل البنود")}
                     icon={<Wallet size={18} />}
                   />
                   <CalculationCard
                     label={translate("Estimated Product Price", "السعر التقديري للمنتج")}
-                    value={<MoneyViewer amount={totals.estimatedUnitPrice} currency={currency} />}
+                    value={formatMoney(totals.estimatedUnitPrice, currency)}
                     hint={translate(`Total material cost × pricing factor`, `إجمالي تكلفة المواد × معامل التسعير`)}
                     icon={<Calculator size={18} />}
                   />

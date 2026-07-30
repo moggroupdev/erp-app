@@ -8,7 +8,6 @@ import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import type { MaterialsInventoryByMaterialType } from "@/types/reports";
 import ReportCard from "./report-card";
 import { reportTheme } from "./report-theme";
-import MoneyViewer from "@/components/ui/money-viewer";
 import { formatMoney } from "@/lib/helpers/format-money";
 
 export default function MaterialTypeChart({ data }: { data: MaterialsInventoryByMaterialType[] }) {
@@ -100,9 +99,7 @@ export default function MaterialTypeChart({ data }: { data: MaterialsInventoryBy
                 />
                 {item.name}
               </span>
-              <span className="font-medium text-stone-800">
-                <MoneyViewer amount={item.value} currency={currency} />
-              </span>
+              <span className="font-medium text-stone-800">{formatMoney(item.value, currency)}</span>
             </li>
           ))}
         </ul>

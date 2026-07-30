@@ -5,7 +5,6 @@ import { Table } from "@mantine/core";
 import { Trophy } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import MoneyViewer from "@/components/ui/money-viewer";
 import type { MaterialsInventoryTopMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
 import { formatMoney } from "@/lib/helpers/format-money";

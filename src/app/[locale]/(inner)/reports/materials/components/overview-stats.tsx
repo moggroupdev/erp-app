@@ -2,7 +2,7 @@
 
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, Boxes, Package, TrendingUp, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
-import MoneyViewer from "@/components/ui/money-viewer";
+import { formatMoney } from "@/lib/helpers/format-money";
 import type { MaterialsInventoryOverview } from "@/types/reports";
 import { reportTheme } from "./report-theme";
 
@@ -20,7 +20,7 @@ export default function OverviewStats({ overview }: { overview: MaterialsInvento
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <KpiCard
           label={translate("Total Inventory Value", "إجمالي قيمة المخزون")}
-          value={<MoneyViewer amount={overview.totalInventoryValue} currency={currency} />}
+          value={formatMoney(overview.totalInventoryValue, currency)}
           hint={translate(
             "Current stock value based on quantity × unit price.",
             "قيمة المخزون الحالية بناءً على الكمية × سعر الوحدة.",
@@ -40,7 +40,7 @@ export default function OverviewStats({ overview }: { overview: MaterialsInvento
             <span className="inline-flex items-center gap-1">
               <ValueChangeIcon size={20} />
               {valueChangePositive ? "+" : "-"}
-              <MoneyViewer amount={Math.abs(overview.valueChangeAmount)} currency={currency} />
+              {formatMoney(Math.abs(overview.valueChangeAmount), currency)}
             </span>
           }
           hint={`${translate("Opening", "افتتاحية")}: ${overview.totalOpeningValue.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { maximumFractionDigits: 2 })} ${currency} · ${valueChangePositive ? "+" : ""}${overview.valueChangePercentage.toFixed(2)}%`}
