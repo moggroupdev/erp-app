@@ -15,11 +15,12 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import type { User } from "@/types/user";
+import { UserRound } from "lucide-react";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
 
 type SelectableUser = Pick<User, "id" | "name" | "code">;
 
-export type SelectUserProps = Omit<GenericDataSelectProps, "data" | "value" | "setValue" | "onChange"> & {
+export type SelectUserProps = Omit<GenericDataSelectProps, "data" | "value" | "setValue" | "onChange" | "rightIcon"> & {
   value: string | null;
   setValue: React.Dispatch<React.SetStateAction<string | null>>;
   onUserSelect?: (user: SelectableUser | null) => void;
@@ -145,6 +146,7 @@ export default function SelectUser({
       clearable={clearable}
       onSearchChange={handleSearchChange}
       disabled={props.disabled}
+      rightIcon={<UserRound size={15} className="pointer-events-none text-gray-400" />}
       // Server already filters by keyword (name, code, email, phone); skip client-side label matching.
       filter={({ options }) => options}
       nothingFoundMessage={

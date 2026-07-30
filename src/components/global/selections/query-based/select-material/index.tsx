@@ -18,11 +18,14 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import type { Material } from "@/types/material";
 import { ActionIcon, Tooltip } from "@mantine/core";
-import { Table2 } from "lucide-react";
+import { PackageSearch, Table2 } from "lucide-react";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
 import BrowseMaterialsModal from "./browse-materials-modal";
 
-export type SelectMaterialProps = Omit<GenericDataSelectProps, "data" | "value" | "setValue" | "onChange"> & {
+export type SelectMaterialProps = Omit<
+  GenericDataSelectProps,
+  "data" | "value" | "setValue" | "onChange" | "rightIcon"
+> & {
   value: string | null;
   setValue: React.Dispatch<React.SetStateAction<string | null>>;
   onMaterialSelect?: (material: Material | null) => void;
@@ -160,6 +163,7 @@ export default function SelectMaterial({
       clearable={clearable}
       onSearchChange={handleSearchChange}
       disabled={props.disabled}
+      rightIcon={<PackageSearch size={15} className="pointer-events-none text-gray-400" />}
       // Server already filters by keyword (title, code, legacyCode); skip client-side label matching.
       filter={({ options }) => options}
       nothingFoundMessage={
