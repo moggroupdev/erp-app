@@ -18,6 +18,14 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
+import {
+  getBomDisplayTotals,
+  getFlattenedMaterialRows,
+  getManufacturingCostRows,
+  type FlattenedBomRow,
+  type ManufacturingCostRow,
+  UNCATEGORIZED_ID,
+} from "@/lib/helpers/bom-display";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { Badge, Button, Divider, Table } from "@mantine/core";
@@ -34,7 +42,6 @@ import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom-print-document";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
-const UNCATEGORIZED_ID = "__uncategorized__";
 
 type CategoryBreakdown = {
   mainCategoryId: string;
@@ -42,7 +49,7 @@ type CategoryBreakdown = {
   itemCount: number;
   totalCost: number;
   sharePercent: number;
-  items: BomItemWithMaterial[];
+  items: FlattenedBomRow[];
 };
 
 export default function Page() {
@@ -78,20 +85,25 @@ export default function Page() {
     openModal();
   }
 
-  const items = bom?.standardBoms ?? [];
-  const hasBom = items.length > 0;
+  const bomItems = bom?.standardBoms ?? [];
+  const hasBom = bomItems.length > 0;
+
+  const materialRows = useMemo(() => getFlattenedMaterialRows(bomItems), [bomItems]);
+  const manufacturingRows = useMemo(() => getManufacturingCostRows(bomItems), [bomItems]);
 
   const totals = useMemo(() => {
-    const totalMaterialCost = items.reduce((sum, item) => sum + item.quantityRequired * item.material.unitPrice, 0);
-    const estimatedUnitPrice = totalMaterialCost * (bom?.product.pricingFactor ?? 0);
-    return { totalMaterialCost, estimatedUnitPrice, itemCount: items.length };
-  }, [items, bom?.product.pricingFactor]);
+    return getBomDisplayTotals({
+      materialRows,
+      manufacturingRows,
+      pricingFactor: bom?.product.pricingFactor ?? 0,
+    });
+  }, [materialRows, manufacturingRows, bom?.product.pricingFactor]);
 
   const categoryBreakdown = useMemo((): CategoryBreakdown[] => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
     const groups = new Map<string, CategoryBreakdown>();
 
-    for (const item of items) {
+    for (const item of materialRows) {
       const sub = materialCategoryHelpers.getMaterialCategorySubById(item.material.subCategoryId);
       const main = sub ? materialCategoryHelpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
       const mainCategoryId = main?.id ?? UNCATEGORIZED_ID;
@@ -118,14 +130,18 @@ export default function Page() {
     const totalCost = totals.totalMaterialCost;
     const rows = Array.from(groups.values()).map((group) => ({
       ...group,
+      items: [...group.items].sort(
+        (a, b) =>
+          a.material.title.localeCompare(b.material.title, locale) || a.material.code.localeCompare(b.material.code, locale),
+      ),
       sharePercent: totalCost > 0 ? (group.totalCost / totalCost) * 100 : 0,
     }));
 
     rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
     return rows;
-  }, [items, totals.totalMaterialCost, materialCategoryHelpers, translate, locale]);
+  }, [materialRows, totals.totalMaterialCost, materialCategoryHelpers, translate, locale]);
 
-  const excludeMaterialCodes = useMemo(() => items.map((item) => item.materialCode), [items]);
+  const excludeMaterialCodes = useMemo(() => bomItems.map((item) => item.materialCode), [bomItems]);
 
   const currency = translation.currency;
 
@@ -238,23 +254,6 @@ export default function Page() {
               <section className="flex flex-col gap-4">
                 <Divider variant="dashed" />
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <CalculationCard
-                    label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
-                    value={formatMoney(totals.totalMaterialCost, currency)}
-                    hint={translate("Sum of quantity × unit price for all items", "مجموع الكمية × سعر الوحدة لكل البنود")}
-                    icon={<Wallet size={18} />}
-                  />
-                  <CalculationCard
-                    label={translate("Estimated Product Price", "السعر التقديري للمنتج")}
-                    value={formatMoney(totals.estimatedUnitPrice, currency)}
-                    hint={translate(`Total material cost × pricing factor`, `إجمالي تكلفة المواد × معامل التسعير`)}
-                    icon={<Calculator size={18} />}
-                  />
-                </div>
-
-                <Divider variant="dashed" />
-
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
@@ -263,7 +262,7 @@ export default function Page() {
                     <div className="flex items-center gap-2">
                       <h4 className="text-lg font-semibold text-gray-900">{translate("BOM Items", "بنود قائمة المواد")}</h4>
                       <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                        {items.length}
+                        {materialRows.length}
                       </span>
                     </div>
                   </div>
@@ -281,7 +280,7 @@ export default function Page() {
                   </PermissionGuard>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-8">
                   {categoryBreakdown.map((group) => (
                     <div key={group.mainCategoryId} className="flex flex-col gap-3">
                       <h5 className="px-0.5 text-sm font-semibold text-gray-800">{group.title}</h5>
@@ -317,6 +316,7 @@ export default function Page() {
                           <Table.Tbody>
                             {group.items.map((item) => {
                               const lineCost = item.quantityRequired * item.material.unitPrice;
+
                               return (
                                 <Table.Tr key={item.id} className="text-gray-600">
                                   <Table.Td>
@@ -333,20 +333,35 @@ export default function Page() {
                                   <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
                                   <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
                                   <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
-                                  <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
+                                  <Table.Td className="max-w-48 text-gray-500">
+                                    <div className="flex flex-col gap-0.5">
+                                      {item.notes ? <span className="truncate">{item.notes}</span> : null}
+                                      {item.parentManufacturedMaterialTitle && (
+                                        <span className="text-xs text-gray-400">
+                                          {translate("Required for", "مطلوب لـ")}:{" "}
+                                          <span className="font-medium text-gray-800">
+                                            {item.parentManufacturedMaterialTitle}
+                                          </span>
+                                        </span>
+                                      )}
+                                      {!item.notes && !item.parentManufacturedMaterialTitle ? "-" : null}
+                                    </div>
+                                  </Table.Td>
                                   <Table.Td w={0}>
-                                    <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
-                                      <Button
-                                        onClick={() => handleOpenUpdateModal(item)}
-                                        variant="light"
-                                        color="gray"
-                                        size="xs"
-                                        radius="md"
-                                        p={6}
-                                      >
-                                        <Pencil size={12} />
-                                      </Button>
-                                    </PermissionGuard>
+                                    {!item.parentManufacturedMaterialTitle && (
+                                      <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
+                                        <Button
+                                          onClick={() => item.sourceBomItem && handleOpenUpdateModal(item.sourceBomItem)}
+                                          variant="light"
+                                          color="gray"
+                                          size="xs"
+                                          radius="md"
+                                          p={6}
+                                        >
+                                          <Pencil size={12} />
+                                        </Button>
+                                      </PermissionGuard>
+                                    )}
                                   </Table.Td>
                                 </Table.Tr>
                               );
@@ -373,6 +388,60 @@ export default function Page() {
                     </div>
                   ))}
                 </div>
+
+                {manufacturingRows.length > 0 && (
+                  <>
+                    <Divider variant="dashed" />
+
+                    <ManufacturingCostsSection
+                      rows={manufacturingRows}
+                      totalManufacturingCost={totals.totalManufacturingCost}
+                    />
+                  </>
+                )}
+
+                <Divider variant="dashed" />
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                  <CalculationCard
+                    label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
+                    value={formatMoney(totals.totalMaterialCost, currency)}
+                    hint={translate(
+                      "Sum of quantity × unit price for all material rows",
+                      "مجموع الكمية × سعر الوحدة لكل صفوف المواد",
+                    )}
+                    icon={<Wallet size={18} />}
+                  />
+                  <CalculationCard
+                    label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
+                    value={formatMoney(totals.totalManufacturingCost, currency)}
+                    hint={translate(
+                      "Manufactured material quantity × temporary unit manufacturing cost",
+                      "كمية المادة المصنعة × تكلفة التصنيع المؤقتة للوحدة",
+                    )}
+                    icon={<Wallet size={18} />}
+                  />
+                  <CalculationCard
+                    label={translate("Grand Total Cost", "إجمالي التكلفة الكلية")}
+                    value={formatMoney(totals.grandTotalCost, currency)}
+                    hint={translate(
+                      "Total material cost + total manufacturing cost",
+                      "إجمالي تكلفة المواد + إجمالي تكلفة التصنيع",
+                    )}
+                    icon={<Wallet size={18} />}
+                  />
+                  <CalculationCard
+                    label={translate("Estimated Product Price", "السعر التقديري للمنتج")}
+                    value={formatMoney(totals.estimatedUnitPrice, currency)}
+                    hint={translate(
+                      "Material cost + manufacturing cost, then multiplied by pricing factor",
+                      "تكلفة المواد + تكلفة التصنيع ثم تضرب في معامل التسعير",
+                    )}
+                    icon={<Calculator size={18} />}
+                  />
+                </div>
+
+                <Divider variant="dashed" />
 
                 <BomItemModal
                   opened={modalOpened}
@@ -409,5 +478,77 @@ function CalculationCard({
       <p className="text-xl font-semibold text-gray-900">{value}</p>
       {hint && <p className="text-xs text-gray-500">{hint}</p>}
     </div>
+  );
+}
+
+function ManufacturingCostsSection({
+  rows,
+  totalManufacturingCost,
+}: {
+  rows: ManufacturingCostRow[];
+  totalManufacturingCost: number;
+}) {
+  const { translate } = useI18n();
+
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <Wallet size={16} />
+        </div>
+        <div className="flex items-center gap-2">
+          <h4 className="text-lg font-semibold text-gray-900">{translate("Manufacturing Costs", "تكاليف التصنيع")}</h4>
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">{rows.length}</span>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <Table className="text-nowrap" highlightOnHover>
+          <Table.Thead className="bg-gray-50">
+            <Table.Tr className="h-10">
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Material Code", "كود المادة")}
+              </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Manufactured Material", "المادة المصنعة")}
+              </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Quantity", "الكمية")}
+              </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Unit Manufacturing Cost", "تكلفة التصنيع للوحدة")}
+              </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
+              </Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {rows.map((row) => (
+              <Table.Tr key={row.id} className="text-gray-600">
+                <Table.Td>
+                  <span className="font-mono text-xs text-gray-500">{row.materialCode}</span>
+                </Table.Td>
+                <Table.Td>
+                  <span className="font-medium text-gray-800">{row.materialTitle}</span>
+                </Table.Td>
+                <Table.Td className="font-medium text-gray-800">{row.quantityRequired}</Table.Td>
+                <Table.Td>{formatMoney(row.unitManufacturingCost)}</Table.Td>
+                <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalManufacturingCost)}</Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+          <Table.Tfoot className="bg-gray-50">
+            <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
+              <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
+              <Table.Td colSpan={3} className="text-gray-500">
+                {rows.length} {translate("Items", "بند")}
+              </Table.Td>
+              <Table.Td>{formatMoney(totalManufacturingCost)}</Table.Td>
+            </Table.Tr>
+          </Table.Tfoot>
+        </Table>
+      </div>
+    </section>
   );
 }

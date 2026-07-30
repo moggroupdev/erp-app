@@ -1,6 +1,7 @@
-import type { Bom, BomItemWithMaterial } from "@/types/bom";
+import type { Bom } from "@/types/bom";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { getManufacturingCostRows, type FlattenedBomRow } from "@/lib/helpers/bom-display";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -12,13 +13,20 @@ export type BomPrintCategoryGroup = {
   itemCount: number;
   totalCost: number;
   sharePercent: number;
-  items: BomItemWithMaterial[];
+  items: FlattenedBomRow[];
 };
 
 type BomPrintDocumentProps = {
   bom: Bom;
   categoryBreakdown: BomPrintCategoryGroup[];
-  totals: { totalMaterialCost: number; estimatedUnitPrice: number; itemCount: number };
+  totals: {
+    totalMaterialCost: number;
+    totalManufacturingCost: number;
+    grandTotalCost: number;
+    estimatedUnitPrice: number;
+    itemCount: number;
+    manufacturingItemCount: number;
+  };
   mainCategoryTitle: string | null;
 };
 
@@ -28,6 +36,7 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
   const dimensionLabel = `${bom.length} × ${bom.depth} × ${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
+  const manufacturingRows = getManufacturingCostRows(bom.standardBoms);
 
   return (
     <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
@@ -52,8 +61,8 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
           value={mainCategoryTitle || translate("Uncategorized", "غير مصنف")}
         />
         <PrintDetail
-          label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
-          value={formatMoney(totals.totalMaterialCost, translation.currency)}
+          label={translate("Grand Total Cost", "إجمالي التكلفة الكلية")}
+          value={formatMoney(totals.grandTotalCost, translation.currency)}
         />
       </section>
 
@@ -64,34 +73,48 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
           <div key={group.mainCategoryId} className="flex break-inside-avoid flex-col gap-2">
             <h3 className="text-sm font-semibold">{group.title}</h3>
 
-            <table className="w-full border-collapse text-[10px]">
+            <table className="w-full border-collapse text-[9px]">
               <thead>
                 <tr className="border-b border-gray-300 bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
-                  <th className="px-2.5 py-2 text-start">{translate("Material Code", "كود المادة")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Material Name", "اسم المادة")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Unit", "الوحدة")}</th>
-                  <th className="px-2.5 py-2 text-start">{translate("Quantity", "الكمية")}</th>
-                  <th className="px-2.5 py-2 text-start">
+                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Material Code", "كود المادة")}</th>
+                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Material Name", "اسم المادة")}</th>
+                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Unit", "الوحدة")}</th>
+                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Quantity", "الكمية")}</th>
+                  <th className="px-2.5 py-2 text-start whitespace-nowrap">
                     {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                   </th>
-                  <th className="px-2.5 py-2 text-start">
+                  <th className="px-2.5 py-2 text-start whitespace-nowrap">
                     {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
                   </th>
-                  <th className="px-2.5 py-2 text-start">{translate("Notes", "الملاحظات")}</th>
+                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Notes", "الملاحظات")}</th>
                 </tr>
               </thead>
               <tbody>
                 {group.items.map((item) => {
                   const lineCost = item.quantityRequired * item.material.unitPrice;
+
                   return (
                     <tr key={item.id} className="border-b border-gray-200">
                       <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{item.material.code}</td>
-                      <td className="px-2.5 py-2 font-medium">{item.material.title}</td>
+                      <td className="px-2.5 py-2">
+                        <span className="font-medium whitespace-nowrap text-gray-800">{item.material.title}</span>
+                      </td>
                       <td className="px-2.5 py-2">{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</td>
                       <td className="px-2.5 py-2">{item.quantityRequired}</td>
                       <td className="px-2.5 py-2">{formatMoney(item.material.unitPrice)}</td>
                       <td className="px-2.5 py-2 font-medium">{formatMoney(lineCost)}</td>
-                      <td className="px-2.5 py-2 text-gray-600">{item.notes || "-"}</td>
+                      <td className="px-2.5 py-2 text-gray-600">
+                        <div className="flex flex-col gap-0.5 leading-relaxed">
+                          {item.notes ? <span>{item.notes}</span> : null}
+                          {item.parentManufacturedMaterialTitle && (
+                            <span className="text-[9px] text-gray-500">
+                              {translate("Required for", "مطلوب لـ")}:{" "}
+                              <span className="font-medium text-gray-800">{item.parentManufacturedMaterialTitle}</span>
+                            </span>
+                          )}
+                          {!item.notes && !item.parentManufacturedMaterialTitle ? "-" : null}
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -111,17 +134,64 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
         ))}
       </section>
 
+      {manufacturingRows.length > 0 && (
+        <section className="mt-6 flex break-inside-avoid flex-col gap-2.5 border-y border-dashed border-gray-300 py-6">
+          <h2 className="text-base font-semibold">{translate("Outsourcing Items", "المواد المصنعة خارجيًا")}</h2>
+          <table className="w-full border-collapse break-inside-avoid text-[9px]">
+            <thead>
+              <tr className="border-b border-gray-300 bg-gray-50 text-start text-[9px] font-medium tracking-wide text-gray-500 uppercase">
+                <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Material Code", "كود المادة")}</th>
+                <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Material Name", "اسم المادة")}</th>
+                <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Quantity", "الكمية")}</th>
+                <th className="px-2.5 py-2 text-start whitespace-nowrap">
+                  {translate(
+                    `Unit Manufacturing Cost (${translation.currency})`,
+                    `تكلفة التصنيع للوحدة (${translation.currency})`,
+                  )}
+                </th>
+                <th className="px-2.5 py-2 text-start whitespace-nowrap">
+                  {translate(
+                    `Total Manufacturing Cost (${translation.currency})`,
+                    `إجمالي تكلفة التصنيع (${translation.currency})`,
+                  )}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {manufacturingRows.map((row) => (
+                <tr key={row.id} className="border-b border-gray-200">
+                  <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{row.materialCode}</td>
+                  <td className="px-2.5 py-2 font-medium whitespace-nowrap">{row.materialTitle}</td>
+                  <td className="px-2.5 py-2">{row.quantityRequired}</td>
+                  <td className="px-2.5 py-2">{formatMoney(row.unitManufacturingCost)}</td>
+                  <td className="px-2.5 py-2 font-medium">{formatMoney(row.totalManufacturingCost)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-gray-300 bg-gray-50 font-medium">
+                <td className="px-2.5 py-2">{translate("Total", "الإجمالي")}</td>
+                <td colSpan={3} className="px-2.5 py-2 text-gray-600">
+                  {totals.manufacturingItemCount} {translate("Items", "بند")}
+                </td>
+                <td className="px-2.5 py-2">{formatMoney(totals.totalManufacturingCost)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+      )}
+
       <section className="mt-8 flex break-inside-avoid flex-col gap-2.5">
-        <h2 className="text-base font-semibold">{translate("Summary", "الملخص")}</h2>
-        <table className="w-full border-collapse break-inside-avoid text-[10px]">
+        <h2 className="text-base font-semibold">{translate("Categories Summary", "ملخص الأقسام")}</h2>
+        <table className="w-full border-collapse break-inside-avoid text-[9px]">
           <thead>
             <tr className="border-b border-gray-300 bg-gray-50 text-start text-[9px] font-medium tracking-wide text-gray-500 uppercase">
-              <th className="px-2.5 py-2 text-start">{translate("Category", "الفئة")}</th>
-              <th className="px-2.5 py-2 text-start">{translate("Items Count", "عدد البنود")}</th>
-              <th className="px-2.5 py-2 text-start">
+              <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Category", "الفئة")}</th>
+              <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
+              <th className="px-2.5 py-2 text-start whitespace-nowrap">
                 {translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}
               </th>
-              <th className="px-2.5 py-2 text-start">{translate("Share", "الحصة")}</th>
+              <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Share", "الحصة")}</th>
             </tr>
           </thead>
           <tbody>
@@ -145,6 +215,21 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
             </tr>
           </tfoot>
         </table>
+      </section>
+
+      <section className="grid grid-cols-2 gap-x-6 gap-y-3 border-y border-dashed border-gray-300 py-6 text-xs sm:grid-cols-3">
+        <PrintDetail
+          label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
+          value={formatMoney(totals.totalMaterialCost, translation.currency)}
+        />
+        <PrintDetail
+          label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
+          value={formatMoney(totals.totalManufacturingCost, translation.currency)}
+        />
+        <PrintDetail
+          label={translate("Grand Total Cost", "إجمالي التكلفة الكلية")}
+          value={formatMoney(totals.grandTotalCost, translation.currency)}
+        />
       </section>
     </div>
   );
