@@ -14,8 +14,8 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { TextInput, Button, Textarea, NumberInput } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
-import SelectMaterialSub from "@/components/global/selections/query-based/select-material-sub";
+import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
+import SelectMaterialSub from "@/components/global/selections/reference-based/select-material-sub";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
 import SelectMaterialUnit from "@/components/global/selections/enum-based/select-material-unit";
 

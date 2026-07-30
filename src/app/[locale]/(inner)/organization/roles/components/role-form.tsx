@@ -21,7 +21,7 @@ import toAppRelativePath, { toAppHomeUrlInput } from "@/lib/helpers/to-app-relat
 import { Button, Checkbox, Divider, NumberInput, TextInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectDepartment from "@/components/global/selections/query-based/select-department";
+import SelectDepartment from "@/components/global/selections/reference-based/select-department";
 import { Check, Info, KeyRound, Shield, TriangleAlert, X } from "lucide-react";
 
 type RoleFormValues = {

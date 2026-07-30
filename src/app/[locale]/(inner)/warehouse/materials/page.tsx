@@ -37,8 +37,8 @@ import PrintDocument from "@/components/ui/print-document";
 import MaterialsListPrintDocument from "@/components/documents/materials-list-print-document";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
-import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
-import SelectMaterialSub from "@/components/global/selections/query-based/select-material-sub";
+import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
+import SelectMaterialSub from "@/components/global/selections/reference-based/select-material-sub";
 
 const PAGE_TITLE = { en: "Materials List", ar: "قائمة المواد" };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/lib/i18n/hooks";
-import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
+import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
 
 export default function CategoryPicker({
   value,

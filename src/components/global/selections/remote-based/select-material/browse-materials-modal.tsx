@@ -21,8 +21,8 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import PaginationHandler from "@/components/ui/pagination-handler";
-import SelectMaterialMain from "@/components/global/selections/query-based/select-material-main";
-import SelectMaterialSub from "@/components/global/selections/query-based/select-material-sub";
+import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
+import SelectMaterialSub from "@/components/global/selections/reference-based/select-material-sub";
 
 const MATERIALS_PER_PAGE = 10;
 

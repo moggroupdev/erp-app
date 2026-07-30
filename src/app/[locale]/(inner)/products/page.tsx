@@ -36,8 +36,8 @@ import PrintDocument from "@/components/ui/print-document";
 import ProductsListPrintDocument from "@/components/documents/products-list-print-document";
 import ProductModal from "@/components/global/data-modals/product-modal";
 import SelectProductSourceType from "@/components/global/selections/enum-based/select-product-source-type";
-import SelectProductMain from "@/components/global/selections/query-based/select-product-main";
-import SelectProductSub from "@/components/global/selections/query-based/select-product-sub";
+import SelectProductMain from "@/components/global/selections/reference-based/select-product-main";
+import SelectProductSub from "@/components/global/selections/reference-based/select-product-sub";
 
 const PAGE_TITLE = { en: "Products Catalog", ar: "كتالوج المنتجات" };
 

@@ -11,8 +11,8 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { TextInput, Button, Textarea, NumberInput } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectProductMain from "@/components/global/selections/query-based/select-product-main";
-import SelectProductSub from "@/components/global/selections/query-based/select-product-sub";
+import SelectProductMain from "@/components/global/selections/reference-based/select-product-main";
+import SelectProductSub from "@/components/global/selections/reference-based/select-product-sub";
 import SelectProductSourceType from "@/components/global/selections/enum-based/select-product-source-type";
 
 type ProductFormEntity = Product | ProductWithCreator;
