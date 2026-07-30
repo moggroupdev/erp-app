@@ -281,7 +281,6 @@ const url = getLocalizedHref(locale, "/privacy-policy");
 | Refetch control         | `src/components/ui/refetch-button.tsx`                 |
 | Modal shell             | `src/components/ui/modal.tsx`                          |
 | Data modals             | `src/components/global/data-modals/*-modal`            |
-| Page-local modals       | Feature page `components/` (e.g. department modal)     |
 | Enum-based selects      | `src/components/global/selections/enum-based/*`        |
 | Reference-based selects | `src/components/global/selections/reference-based/*`   |
 | Remote-based selects    | `src/components/global/selections/remote-based/*`      |

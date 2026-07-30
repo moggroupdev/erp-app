@@ -13,7 +13,7 @@ import PermissionGuard from "@/components/guards/permission";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import RefetchButton from "@/components/ui/refetch-button";
-import DepartmentModal from "./components/department-modal";
+import DepartmentModal from "@/components/global/data-modals/department-modal";
 import DepartmentCard from "./components/department-card";
 import DepartmentsLoadingSkeleton from "./components/departments-loading-skeleton";
 
