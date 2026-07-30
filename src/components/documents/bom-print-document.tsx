@@ -223,7 +223,7 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
           value={formatMoney(totals.totalMaterialCost, translation.currency)}
         />
         <PrintDetail
-          label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
+          label={translate("Total Outsourcing Cost", "إجمالي تكلفة التصنيع خارجيًا")}
           value={formatMoney(totals.totalManufacturingCost, translation.currency)}
         />
         <PrintDetail

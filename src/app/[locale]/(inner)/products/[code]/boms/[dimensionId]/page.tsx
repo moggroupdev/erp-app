@@ -413,11 +413,11 @@ export default function Page() {
                     icon={<Wallet size={18} />}
                   />
                   <CalculationCard
-                    label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
+                    label={translate("Total Outsourcing Cost", "إجمالي تكلفة التصنيع خارجيًا")}
                     value={formatMoney(totals.totalManufacturingCost, currency)}
                     hint={translate(
-                      "Manufactured material quantity × temporary unit manufacturing cost",
-                      "كمية المادة المصنعة × تكلفة التصنيع المؤقتة للوحدة",
+                      "Sum of quantity × unit price for all outsourcing rows",
+                      "مجموع الكمية × سعر الوحدة لكل صفوف التصنيع الخارجي",
                     )}
                     icon={<Wallet size={18} />}
                   />
@@ -425,8 +425,8 @@ export default function Page() {
                     label={translate("Grand Total Cost", "إجمالي التكلفة الكلية")}
                     value={formatMoney(totals.grandTotalCost, currency)}
                     hint={translate(
-                      "Total material cost + total manufacturing cost",
-                      "إجمالي تكلفة المواد + إجمالي تكلفة التصنيع",
+                      "Total material cost + total outsourcing cost",
+                      "إجمالي تكلفة المواد + إجمالي تكلفة التصنيع الخارجي",
                     )}
                     icon={<Wallet size={18} />}
                   />
@@ -488,7 +488,7 @@ function ManufacturingCostsSection({
   rows: ManufacturingCostRow[];
   totalManufacturingCost: number;
 }) {
-  const { translate } = useI18n();
+  const { translate, translation } = useI18n();
 
   return (
     <section className="flex flex-col gap-3">
@@ -497,7 +497,7 @@ function ManufacturingCostsSection({
           <Wallet size={16} />
         </div>
         <div className="flex items-center gap-2">
-          <h4 className="text-lg font-semibold text-gray-900">{translate("Manufacturing Costs", "تكاليف التصنيع")}</h4>
+          <h4 className="text-lg font-semibold text-gray-900">{translate("Outsourcing Costs", "تكاليف التصنيع خارجيًا")}</h4>
           <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">{rows.length}</span>
         </div>
       </div>
@@ -516,10 +516,16 @@ function ManufacturingCostsSection({
                 {translate("Quantity", "الكمية")}
               </Table.Th>
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Unit Manufacturing Cost", "تكلفة التصنيع للوحدة")}
+                {translate(
+                  `Unit Manufacturing Cost (${translation.currency})`,
+                  `تكلفة التصنيع للوحدة (${translation.currency})`,
+                )}
               </Table.Th>
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
+                {translate(
+                  `Total Manufacturing Cost (${translation.currency})`,
+                  `إجمالي تكلفة التصنيع (${translation.currency})`,
+                )}
               </Table.Th>
             </Table.Tr>
           </Table.Thead>
