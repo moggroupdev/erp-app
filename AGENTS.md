@@ -10,35 +10,36 @@ Path alias: `@/*` → `./src/*`.
 
 ```
 src/
-├── app/[locale]/             # All routes are locale-prefixed (/en/…, /ar/…)
-│   ├── layout.tsx             # Root providers + <html lang/dir>
-│   ├── (inner)/               # Authenticated ERP app (sidebar shell)
-│   ├── (outer)/               # Guest-only (e.g. login)
-│   ├── (public)/              # Public pages (no auth gate)
+├── app/[locale]/                # All routes are locale-prefixed (/en/…, /ar/…)
+│   ├── layout.tsx               # Root providers + <html lang/dir>
+│   ├── (inner)/                 # Authenticated ERP app (sidebar shell)
+│   ├── (outer)/                 # Guest-only (e.g. login)
+│   ├── (public)/                # Public pages (no auth gate)
 │   └── [...not-found]/
 ├── components/
-│   ├── global/                # Cross-feature UI (sidebar, logo, address-card, …)
-│   │   ├── data-modals/       # Shared create/edit entity modals
-│   │   └── selections/        # Shared LocalizedSelect wrappers
-│   │       ├── enum-based/    # Options from `lib/constants/enums`
-│   │       └── query-based/   # Options from `@/hooks/reference`
-│   ├── guards/                # Auth + permission guards
-│   ├── layouts/               # Inner shell / page chrome
-│   ├── mantine/               # Mantine setup helpers
-│   └── ui/                    # Reusable primitives (LayoutBox, sections, …)
+│   ├── global/                  # Cross-feature UI (sidebar, logo, address-card, …)
+│   │   ├── data-modals/         # Shared create/edit entity modals
+│   │   └── selections/          # Shared select wrappers
+│   │       ├── enum-based/      # Options from `lib/constants/enums`
+│   │       ├── reference-based/ # Options from `@/hooks/reference` (cached full lists)
+│   │       └── remote-based/    # Options from domain APIs (server keyword + pagination)
+│   ├── guards/                  # Auth + permission guards
+│   ├── layouts/                 # Inner shell / page chrome
+│   ├── mantine/                 # Mantine setup helpers
+│   └── ui/                      # Reusable primitives (LayoutBox, sections, …)
 ├── contexts/
-│   └── user/                  # Auth user state (context + provider + hook)
+│   └── user/                    # Auth user state (context + provider + hook)
 ├── providers/
-│   └── query.tsx              # React Query client + Devtools
-├── hooks/                     # Shared hooks (private request, permissions, …)
-│   └── reference/             # Cached reference data hooks
+│   └── query.tsx                # React Query client + Devtools
+├── hooks/                       # Shared hooks (private request, permissions, …)
+│   └── reference/               # Cached reference data hooks
 ├── lib/
-│   ├── api/                   # Domain API modules + query-keys/
-│   ├── constants/             # Enums (incl. derived/), stale times, global flags
-│   ├── helpers/               # api-request, get-error-message, metadata, …
-│   └── i18n/                  # Locales, hooks, utils, dictionaries
-├── middlewares/               # Localization (used from proxy.ts)
-└── types/                     # Shared DTOs / domain types (+ reports/ for aggregate shapes)
+│   ├── api/                     # Domain API modules + query-keys/
+│   ├── constants/               # Enums (incl. derived/), stale times, global flags
+│   ├── helpers/                 # api-request, get-error-message, metadata, …
+│   └── i18n/                    # Locales, hooks, utils, dictionaries
+├── middlewares/                 # Localization (used from proxy.ts)
+└── types/                       # Shared DTOs / domain types (+ reports/ for aggregate shapes)
 ```
 
 Providers in `src/app/[locale]/layout.tsx`:
@@ -154,7 +155,7 @@ const city = locationHelpers.getCityById(cityId);
 
 **New reference hook:** add it under `src/hooks/reference/` with the same return shape and lookup helpers under `helpers`.
 
-Query-based selects under `components/global/selections/query-based/` should use these hooks (not fetch ad hoc).
+Reference-based selects under `components/global/selections/reference-based/` should use these hooks (not fetch ad hoc). Remote-based selects (`selections/remote-based/`) load options via domain APIs with server-side keyword search and pagination — do not preload full entity lists into reference hooks.
 
 ---
 
@@ -228,7 +229,7 @@ Domain enums live under `src/lib/constants/enums/`. Most mirror DB-backed values
 2. Define **derived** enums (computed classifications, report-only statuses, anything with no DB enum) under `src/lib/constants/enums/derived/` — same file pattern, different folder.
 3. Import those constants in pages/components/API code.
 4. **Never** hardcode enum strings (permission names, source types, …) directly in components or pages.
-5. Enum-backed selects belong under `components/global/selections/enum-based/`.
+5. Enum-backed selects belong under `components/global/selections/enum-based/`. Reference-hook selects → `reference-based/`. Large entity typeahead selects (users, materials, …) → `remote-based/`.
 
 Permissions are part of this rule: always `PERMISSIONS.READ_VENDORS`, never `"read_vendors"` inline.
 
@@ -282,7 +283,8 @@ const url = getLocalizedHref(locale, "/privacy-policy");
 | Data modals             | `src/components/global/data-modals/*-modal`            |
 | Page-local modals       | Feature page `components/` (e.g. department modal)     |
 | Enum-based selects      | `src/components/global/selections/enum-based/*`        |
-| Query-based selects     | `src/components/global/selections/query-based/*`       |
+| Reference-based selects | `src/components/global/selections/reference-based/*`   |
+| Remote-based selects    | `src/components/global/selections/remote-based/*`      |
 
 Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSection` (retry) → else empty/no-results → else content.
 
@@ -292,6 +294,6 @@ Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSecti
 - Icons: prefer `lucide-react`.
 - Do **not** use heavy hover translate/lift (`translate-y`, etc.) or heavy hover shadow changes on cards and list items. Prefer quiet hover.
 
-**Selects:** enum options → `selections/enum-based/`; reference-hook options (locations, departments, roles, categories, …) → `selections/query-based/`. Do not leave new shared selects at `components/global/select-*`.
+**Selects:** enum options → `selections/enum-based/`; reference-hook options (locations, departments, roles, categories, …) → `selections/reference-based/`; large paginated entities with server keyword search (users, materials, …) → `selections/remote-based/`. Do not leave new shared selects at `components/global/select-*`.
 
 Match existing CRUD pages (vendors, customers, materials, departments) when adding new ones.
