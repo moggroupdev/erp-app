@@ -1,6 +1,7 @@
 import type { ProductSourceType } from "@/lib/constants/enums/product-source-types";
 import type { DimensionUnit } from "@/lib/constants/enums/dimension-units";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MaterialType } from "@/lib/constants/enums/material-types";
 
 export type BomItem = {
   id: string;
@@ -12,6 +13,21 @@ export type BomItem = {
   createdBy: string;
 };
 
+export type BomMmComponent = {
+  id: string;
+  materialCode: string;
+  quantityRequired: number;
+  notes: string | null;
+  material: {
+    code: string;
+    title: string;
+    materialType: MaterialType;
+    subCategoryId: string;
+    unitOfMeasurement: MaterialUnit;
+    unitPrice: number;
+  };
+};
+
 export type BomItemWithMaterial = {
   id: string;
   productDimensionId: string;
@@ -21,9 +37,11 @@ export type BomItemWithMaterial = {
   material: {
     code: string;
     title: string;
+    materialType: MaterialType;
     subCategoryId: string;
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
+    manufacturedMaterialBoms: BomMmComponent[];
   };
 };
 
