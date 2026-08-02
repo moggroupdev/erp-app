@@ -3,9 +3,17 @@ import { PrintSectionHeading, PrintTable } from "./components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
-import type { ProductWithDimensions } from "@/types/product";
+import type { ProductWithDimensions, ProductDimension } from "@/types/product";
 import type { ProductCategoryMain, ProductCategorySub } from "@/types/categories";
 import type { ReactNode } from "react";
+
+function countDimensions(list: ProductWithDimensions[]) {
+  return list.reduce((sum, product) => sum + product.dimensions.length, 0);
+}
+
+function sortDimensions(dimensions: ProductDimension[]) {
+  return [...dimensions].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+}
 
 export default function ProductsListPrintDocument({
   products,
@@ -19,6 +27,7 @@ export default function ProductsListPrintDocument({
   const { locale, translate, translation } = useI18n();
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
+  const totalDimensions = countDimensions(products);
 
   // Group products by main category
   const groups: { mainCategory: ProductCategoryMain; products: ProductWithDimensions[] }[] = [];
@@ -43,20 +52,50 @@ export default function ProductsListPrintDocument({
   const headers = [
     translate("Code", "الكود"),
     translate("Product Name", "اسم المنتج"),
-    translate("Standard Dimension", "الأبعاد النمطية") + ` (${translation.productDimensionUnit})`,
+    translate("Standard Dimensions", "الأبعاد النمطية") + ` (${translation.productDimensionUnit})`,
     translate("Source Type", "نوع المصدر"),
   ];
 
+  function renderDimensions(dimensions: ProductDimension[]): ReactNode {
+    if (dimensions.length === 0) return "-";
+
+    return (
+      <div className="flex flex-col gap-1">
+        {sortDimensions(dimensions).map((dimension) => (
+          <span key={dimension.id}>{formatDimensionLabel(dimension)}</span>
+        ))}
+      </div>
+    );
+  }
+
   function productRows(list: ProductWithDimensions[]): ReactNode[][] {
-    return list.map((p) => {
-      const defaultDimension = p.dimensions.find((dimension) => dimension.isDefault) ?? null;
-      return [
-        p.code,
-        p.title,
-        defaultDimension ? formatDimensionLabel(defaultDimension) : "-",
-        getProductSourceTypeLabel(p.sourceType, locale),
-      ];
-    });
+    return list.map((p) => [
+      p.code,
+      p.title,
+      renderDimensions(p.dimensions),
+      getProductSourceTypeLabel(p.sourceType, locale),
+    ]);
+  }
+
+  function categoryFooter(list: ProductWithDimensions[]): ReactNode[] {
+    const itemsCount = list.length;
+    const dimensionsCount = countDimensions(list);
+
+    return ["", `${itemsCount} ${translate("items", "منتج")}`, `${dimensionsCount} ${translate("dimensions", "مقاس")}`, ""];
+  }
+
+  function renderCategoryTable(list: ProductWithDimensions[]) {
+    return (
+      <PrintTable
+        headers={headers}
+        rows={productRows(list)}
+        footerRow={categoryFooter(list)}
+        monoColumnIndexes={[0]}
+        noWrapIndexes={[0, 3]}
+        tableClassName="break-before-avoid text-[9px] [&_td]:align-top"
+        emptyLabel={translate("No products", "لا توجد منتجات")}
+      />
+    );
   }
 
   return (
@@ -73,46 +112,35 @@ export default function ProductsListPrintDocument({
       </header>
 
       {groups.map((group) => (
-        <section key={group.mainCategory.id} className="mb-4 space-y-2.5">
+        <section key={group.mainCategory.id} className="mb-6 space-y-2.5">
           <div className="w-full break-after-avoid rounded-md bg-gray-100 px-3 py-2 text-center">
-            <h2 className="text-sm font-semibold text-gray-900">
-              {group.mainCategory.title}
-              <span className="ms-2 text-xs font-normal text-gray-600">({group.products.length})</span>
-            </h2>
+            <h2 className="text-sm font-semibold text-gray-900">{group.mainCategory.title}</h2>
           </div>
-          <PrintTable
-            headers={headers}
-            rows={productRows(group.products)}
-            monoColumnIndexes={[0]}
-            noWrapIndexes={[0, 2, 3]}
-            tableClassName="break-before-avoid text-[9px]"
-            emptyLabel={translate("No products", "لا توجد منتجات")}
-          />
+          {renderCategoryTable(group.products)}
         </section>
       ))}
 
       {uncategorized.length > 0 && (
         <section className="mb-4 space-y-2.5">
           <div className="break-after-avoid">
-            <PrintSectionHeading
-              title={
-                <>
-                  {translate("Uncategorized", "غير مصنف")}
-                  <span className="ms-2 text-xs font-normal text-gray-500">({uncategorized.length})</span>
-                </>
-              }
-            />
+            <PrintSectionHeading title={translate("Uncategorized", "غير مصنف")} />
           </div>
-          <PrintTable
-            headers={headers}
-            rows={productRows(uncategorized)}
-            monoColumnIndexes={[0]}
-            noWrapIndexes={[0, 2, 3]}
-            tableClassName="break-before-avoid text-[9px]"
-            emptyLabel={translate("No products", "لا توجد منتجات")}
-          />
+          {renderCategoryTable(uncategorized)}
         </section>
       )}
+
+      <footer className="mt-1 flex break-inside-avoid items-center justify-between gap-4 border-t border-gray-300 pt-3 text-[10px] text-gray-700">
+        <span className="font-semibold tracking-wide uppercase">{translate("Document Total", "إجمالي المستند")}</span>
+        <div className="flex items-center gap-4">
+          <span>
+            <span className="font-semibold text-gray-900">{products.length}</span> {translate("items", "منتج")}
+          </span>
+          <span className="text-gray-300">|</span>
+          <span>
+            <span className="font-semibold text-gray-900">{totalDimensions}</span> {translate("dimensions", "مقاس")}
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }

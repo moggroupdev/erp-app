@@ -51,10 +51,8 @@ export default function PrintTable({
             ))}
           </tr>
         ))}
-      </tbody>
-      {footerRow ? (
-        <tfoot>
-          <tr className="bg-gray-50 font-semibold text-gray-700">
+        {footerRow ? (
+          <tr className="break-inside-avoid border-b border-gray-200 bg-gray-50 font-semibold text-gray-700">
             {footerRow.map((cell, cellIndex) => (
               <td
                 key={`footer-${cellIndex}`}
@@ -64,8 +62,8 @@ export default function PrintTable({
               </td>
             ))}
           </tr>
-        </tfoot>
-      ) : null}
+        ) : null}
+      </tbody>
     </table>
   );
 }
