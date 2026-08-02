@@ -21,7 +21,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { type Product, type ProductWithDimensions } from "@/types/product";
-import { Button, Table, TextInput } from "@mantine/core";
+import { Button, Checkbox, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -71,6 +71,7 @@ export default function Page() {
   const [mainCategoryFilter, setMainCategoryFilter] = useState<string | null>(urlSearchParams.get("mainCategoryId") || null);
   const [subCategoryFilter, setSubCategoryFilter] = useState<string | null>(urlSearchParams.get("subCategoryId") || null);
   const [sourceTypeFilter, setSourceTypeFilter] = useState<string | null>(urlSearchParams.get("sourceType") || null);
+  const [showAllDimensions, setShowAllDimensions] = useState(false);
 
   const urlParams = {
     page: activePage.toString(),
@@ -238,6 +239,15 @@ export default function Page() {
           searchable
           radius="md"
         />
+
+        <div className="col-span-1 flex items-center md:col-span-3">
+          <Checkbox
+            checked={showAllDimensions}
+            onChange={(e) => setShowAllDimensions(e.currentTarget.checked)}
+            label={translate("Show all dimensions", "عرض جميع الأبعاد")}
+            radius="md"
+          />
+        </div>
       </div>
 
       {isFetching ? (
@@ -265,10 +275,10 @@ export default function Page() {
               <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Product Name", "اسم المنتج")}</Table.Th>
+                    <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>
-                      {translate("Standard Dimension", "الأبعاد النمطية")} ({translation.productDimensionUnit})
+                      {translate("Standard Dimensions", "الأبعاد النمطية")} ({translation.productDimensionUnit})
                     </Table.Th>
                     <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                     <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
@@ -279,27 +289,38 @@ export default function Page() {
                 <Table.Tbody>
                   {paginatedProducts.data.map((product) => {
                     const categories = getCategoryLabels(product.subCategoryId);
-                    const defaultDimension = product.dimensions.find((dimension) => dimension.isDefault) ?? null;
+                    const dimensions = showAllDimensions
+                      ? [...product.dimensions].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+                      : product.dimensions.filter((dimension) => dimension.isDefault);
                     return (
                       <Table.Tr key={product.code} className="text-gray-600">
-                        <Table.Td>
+                        <Table.Td className="align-top font-semibold text-gray-800">
+                          <Link href={getLocalizedHref(`/products/${product.code}`)} className="hover:underline">
+                            {product.title}
+                          </Link>
+                        </Table.Td>
+                        <Table.Td className="align-top">
                           <div className="flex items-center gap-1.5">
                             <span className="font-mono">{product.code}</span>
                             <CopyButton text={product.code} />
                           </div>
                         </Table.Td>
-                        <Table.Td className="font-semibold text-gray-800">
-                          <Link href={getLocalizedHref(`/products/${product.code}`)} className="hover:underline">
-                            {product.title}
-                          </Link>
+                        <Table.Td className="align-top text-sm">
+                          {dimensions.length > 0 ? (
+                            <div className="flex flex-col gap-1">
+                              {dimensions.map((dimension) => (
+                                <span key={dimension.id}>{formatDimensionLabel(dimension)}</span>
+                              ))}
+                            </div>
+                          ) : (
+                            ""
+                          )}
                         </Table.Td>
-                        <Table.Td className="text-sm">
-                          {defaultDimension ? formatDimensionLabel(defaultDimension) : ""}
-                        </Table.Td>
-                        <Table.Td>{categories.main}</Table.Td>
-                        <Table.Td>{categories.sub}</Table.Td>
-                        <Table.Td>{getProductSourceTypeLabel(product.sourceType, locale)}</Table.Td>
-                        <Table.Td w={0}>
+                        <Table.Td className="align-top">{categories.main}</Table.Td>
+                        <Table.Td className="align-top">{categories.sub}</Table.Td>
+                        <Table.Td className="align-top">{getProductSourceTypeLabel(product.sourceType, locale)}</Table.Td>
+
+                        <Table.Td className="align-top" w={0}>
                           <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
                             <button
                               onClick={() => handleOpenUpdateModal(product)}
