@@ -115,14 +115,6 @@ export default function Page() {
     placeholderData: keepPreviousData,
   });
 
-  // Only used for printing
-  const { data: allMaterials, refetch: fetchAllMaterials } = useQuery({
-    queryKey: queryKeys.materials.list({ limit: "list-all-to-print" }),
-    queryFn: ({ signal }) => materialsApi.listAllToPrint({ privateRequest, signal }),
-    staleTime: staleTimes.materials,
-    enabled: false, // Disabled by default, will be enabled when the print button is clicked
-  });
-
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useEffect(() => {
@@ -328,12 +320,7 @@ export default function Page() {
         }}
       />
 
-      <PrintMaterialsModal
-        opened={printModalOpened}
-        close={closePrintModal}
-        allMaterials={allMaterials}
-        fetchAllMaterials={fetchAllMaterials}
-      />
+      <PrintMaterialsModal opened={printModalOpened} close={closePrintModal} />
     </LayoutBox>
   );
 }

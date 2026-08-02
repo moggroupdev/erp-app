@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
+import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
+import materialsApi from "@/lib/api/materials";
+import { queryKeys } from "@/lib/api/query-keys";
+import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDate } from "@/lib/helpers/date-formaters";
-import type { Material } from "@/types/material";
 import { Button, SegmentedControl } from "@mantine/core";
 import Modal from "@/components/ui/modal";
 import PrintDocument from "@/components/ui/print-document";
@@ -13,18 +17,9 @@ import SelectMaterialMain from "@/components/global/selections/reference-based/s
 
 type PrintScope = "all" | "category";
 
-export default function PrintMaterialsModal({
-  opened,
-  close,
-  allMaterials,
-  fetchAllMaterials,
-}: {
-  opened: boolean;
-  close: () => void;
-  allMaterials: Material[] | undefined;
-  fetchAllMaterials: () => Promise<unknown>;
-}) {
+export default function PrintMaterialsModal({ opened, close }: { opened: boolean; close: () => void }) {
   const { locale, translate } = useI18n();
+  const privateRequest = usePrivateRequest();
   const { data: categoriesData, helpers } = useMaterialCategories();
   const printDate = formatDate(new Date(), locale);
 
@@ -36,10 +31,22 @@ export default function PrintMaterialsModal({
 
   const selectedMain = mainCategoryId ? helpers.getMaterialCategoryMainById(mainCategoryId) : null;
 
-  const materialsToPrint =
-    allMaterials && isCategoryScope && mainCategoryId
-      ? allMaterials.filter((m) => helpers.getMaterialCategorySubById(m.subCategoryId)?.mainCategoryId === mainCategoryId)
-      : allMaterials;
+  const printQueryParams = {
+    limit: "list-all-to-print",
+    ...(isCategoryScope && mainCategoryId ? { mainCategoryId } : {}),
+  };
+
+  const { data: materialsToPrint, refetch: fetchMaterialsToPrint } = useQuery({
+    queryKey: queryKeys.materials.list(printQueryParams),
+    queryFn: ({ signal }) =>
+      materialsApi.listAllToPrint({
+        privateRequest,
+        signal,
+        mainCategoryId: isCategoryScope && mainCategoryId ? mainCategoryId : undefined,
+      }),
+    staleTime: staleTimes.materials,
+    enabled: false,
+  });
 
   const mainCategoriesToPrint =
     categoriesData && isCategoryScope && selectedMain ? [selectedMain] : (categoriesData?.materialCategoryMains ?? []);
@@ -97,7 +104,7 @@ export default function PrintMaterialsModal({
           title={translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)}
           buttonLabel={translate("Print", "طباعة")}
           onBeforePrint={async () => {
-            if (!allMaterials) await fetchAllMaterials();
+            if (!materialsToPrint) await fetchMaterialsToPrint();
           }}
           renderTrigger={({ onClick, loading, label, icon }) => (
             <Button
