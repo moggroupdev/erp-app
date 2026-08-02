@@ -1,46 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
-import usePrivateRequest from "@/hooks/use-private-request";
-import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
-import mmBomsApi from "@/lib/api/mm-boms";
-import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { queryKeys } from "@/lib/api/query-keys";
-import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialWithCreator } from "@/types/material";
-import type { MmBomItemWithMaterial } from "@/types/mm-bom";
+import type { MmBom, MmBomItemWithMaterial } from "@/types/mm-bom";
 import { Badge, Button, Table } from "@mantine/core";
 import { Layers, Pencil, Plus } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
-import LoadingSection from "@/components/ui/sections/loading";
-import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import { EmptyValue } from "@/components/ui/entity-details";
 import MmBomItemModal from "@/components/global/data-modals/mm-bom-item-modal";
 
-export default function MaterialBomSection({ material }: { material: MaterialWithCreator }) {
+export default function MaterialBomSection({
+  material,
+  bom,
+}: {
+  material: MaterialWithCreator;
+  bom: MmBom | null;
+}) {
   const { locale, translate } = useI18n();
-  const privateRequest = usePrivateRequest();
-  const canReadBom = useHasPermission(PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS);
   const { helpers: materialCategoryHelpers } = useMaterialCategories();
-
-  const bomQuery = useQuery({
-    queryKey: queryKeys.mmBoms.detail(material.code),
-    queryFn: ({ signal }) => mmBomsApi.getByMaterial({ privateRequest, manufacturedMaterialCode: material.code, signal }),
-    staleTime: staleTimes.mmBoms,
-    enabled: canReadBom,
-  });
-
-  const bom = bomQuery.data || null;
-  const loading = bomQuery.isFetching;
-  const errorMessage = bomQuery.error ? getErrorMessage(locale, bomQuery.error) : "";
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<MmBomItemWithMaterial | null>(null);
@@ -68,175 +52,161 @@ export default function MaterialBomSection({ material }: { material: MaterialWit
   return (
     <PermissionGuard permission={PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS}>
       <section className="mt-4 flex flex-col gap-4">
-        {loading ? (
-          <LoadingSection message={translate("Loading BOM data", "جاري تحميل قائمة المواد")} />
-        ) : errorMessage ? (
-          <ErrorSection
-            errorTitle={translate("An error occurred while loading the BOM", "حدث خطأ أثناء تحميل قائمة المواد")}
-            errorMessage={errorMessage}
-            button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => bomQuery.refetch() }}
-          />
-        ) : (
-          <>
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
-                  <Layers size={16} />
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="flex flex-col gap-1">
-                    <h4 className="text-lg font-semibold text-gray-900">{translate("Bill of Materials", "قائمة المواد")}</h4>
-                    <p className="text-xs text-gray-500">
-                      {translate(
-                        "The required bill of materials required to produce this manufactured material.",
-                        "قائمة المواد المطلوبة لإنتاج هذه المادة المصنعة.",
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {hasBom && (
-                <PermissionGuard permission={PERMISSIONS.ADD_MANUFACTURED_MATERIAL_BOM}>
-                  <Button
-                    onClick={handleOpenAppendModal}
-                    variant="light"
-                    color="teal"
-                    radius="md"
-                    leftSection={<Plus size={15} />}
-                  >
-                    {translate("Add Item", "إضافة بند")}
-                  </Button>
-                </PermissionGuard>
-              )}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+              <Layers size={16} />
             </div>
-
-            {!hasBom ? (
-              <EmptySection
-                message={translate(
-                  "No BOM defined for this manufactured material yet.",
-                  "لا توجد قائمة مواد لهذه المادة المصنعة بعد.",
-                )}
-              >
-                <PermissionGuard permission={PERMISSIONS.ADD_MANUFACTURED_MATERIAL_BOM}>
-                  <Button
-                    onClick={handleOpenAppendModal}
-                    variant="light"
-                    color="teal"
-                    radius="md"
-                    leftSection={<Plus size={15} />}
-                  >
-                    {translate("Create BOM", "إنشاء قائمة مواد")}
-                  </Button>
-                </PermissionGuard>
-              </EmptySection>
-            ) : (
-              <div className="overflow-x-auto rounded-xl border border-gray-200">
-                <Table className="text-nowrap" highlightOnHover>
-                  <Table.Thead className="bg-gray-50">
-                    <Table.Tr className="h-10">
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Material Code", "كود المادة")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Material Name", "اسم المادة")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Main Category", "الفئة الرئيسية")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Subcategory", "الفئة الفرعية")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Unit", "الوحدة")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Quantity", "الكمية")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Total (EGP)", "الإجمالي (ج.م)")}
-                      </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Notes", "الملاحظات")}
-                      </Table.Th>
-                      <Table.Th />
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {items.map((item) => {
-                      const lineCost = item.quantityRequired * item.material.unitPrice;
-                      const subCategory = materialCategoryHelpers.getMaterialCategorySubById(
-                        item.material.subCategoryId,
-                      );
-                      const mainCategory = subCategory
-                        ? materialCategoryHelpers.getMaterialCategoryMainById(subCategory.mainCategoryId)
-                        : null;
-
-                      return (
-                        <Table.Tr key={item.id} className="text-gray-600">
-                          <Table.Td>
-                            <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
-                          </Table.Td>
-                          <Table.Td>
-                            <span className="font-medium text-gray-800">{item.material.title}</span>
-                          </Table.Td>
-                          <Table.Td>{mainCategory?.title || <EmptyValue />}</Table.Td>
-                          <Table.Td>{subCategory?.title || <EmptyValue />}</Table.Td>
-                          <Table.Td>
-                            <Badge size="sm" variant="light" color="gray" radius="md">
-                              {getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}
-                            </Badge>
-                          </Table.Td>
-                          <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
-                          <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
-                          <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
-                          <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
-                          <Table.Td w={0}>
-                            <PermissionGuard permission={PERMISSIONS.UPDATE_MANUFACTURED_MATERIAL_BOM}>
-                              <Button
-                                onClick={() => handleOpenUpdateModal(item)}
-                                variant="light"
-                                color="gray"
-                                size="xs"
-                                radius="md"
-                                p={6}
-                              >
-                                <Pencil size={12} />
-                              </Button>
-                            </PermissionGuard>
-                          </Table.Td>
-                        </Table.Tr>
-                      );
-                    })}
-                  </Table.Tbody>
-                  <Table.Tfoot className="bg-gray-50">
-                    <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
-                      <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
-                      <Table.Td colSpan={6} className="text-gray-500">
-                        {items.length} {translate("Items", "بند")}
-                      </Table.Td>
-                      <Table.Td>{formatMoney(totalMaterialCost)}</Table.Td>
-                      <Table.Td />
-                      <Table.Td />
-                    </Table.Tr>
-                  </Table.Tfoot>
-                </Table>
+            <div className="flex items-start gap-2">
+              <div className="flex flex-col gap-1">
+                <h4 className="text-lg font-semibold text-gray-900">{translate("Bill of Materials", "قائمة المواد")}</h4>
+                <p className="text-xs text-gray-500">
+                  {translate(
+                    "The required bill of materials required to produce this manufactured material.",
+                    "قائمة المواد المطلوبة لإنتاج هذه المادة المصنعة.",
+                  )}
+                </p>
               </div>
-            )}
+            </div>
+          </div>
 
-            <MmBomItemModal
-              opened={modalOpened}
-              close={closeModal}
-              manufacturedMaterialCode={material.code}
-              itemToUpdate={itemToUpdate}
-              setItemToUpdate={setItemToUpdate}
-              excludeMaterialCodes={excludeMaterialCodes}
-            />
-          </>
+          {hasBom && (
+            <PermissionGuard permission={PERMISSIONS.ADD_MANUFACTURED_MATERIAL_BOM}>
+              <Button
+                onClick={handleOpenAppendModal}
+                variant="light"
+                color="teal"
+                radius="md"
+                leftSection={<Plus size={15} />}
+              >
+                {translate("Add Item", "إضافة بند")}
+              </Button>
+            </PermissionGuard>
+          )}
+        </div>
+
+        {!hasBom ? (
+          <EmptySection
+            message={translate(
+              "No BOM defined for this manufactured material yet.",
+              "لا توجد قائمة مواد لهذه المادة المصنعة بعد.",
+            )}
+          >
+            <PermissionGuard permission={PERMISSIONS.ADD_MANUFACTURED_MATERIAL_BOM}>
+              <Button
+                onClick={handleOpenAppendModal}
+                variant="light"
+                color="teal"
+                radius="md"
+                leftSection={<Plus size={15} />}
+              >
+                {translate("Create BOM", "إنشاء قائمة مواد")}
+              </Button>
+            </PermissionGuard>
+          </EmptySection>
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <Table className="text-nowrap" highlightOnHover>
+              <Table.Thead className="bg-gray-50">
+                <Table.Tr className="h-10">
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Material Code", "كود المادة")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Material Name", "اسم المادة")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Main Category", "الفئة الرئيسية")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Subcategory", "الفئة الفرعية")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Unit", "الوحدة")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Quantity", "الكمية")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Total (EGP)", "الإجمالي (ج.م)")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Notes", "الملاحظات")}
+                  </Table.Th>
+                  <Table.Th />
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {items.map((item) => {
+                  const lineCost = item.quantityRequired * item.material.unitPrice;
+                  const subCategory = materialCategoryHelpers.getMaterialCategorySubById(item.material.subCategoryId);
+                  const mainCategory = subCategory
+                    ? materialCategoryHelpers.getMaterialCategoryMainById(subCategory.mainCategoryId)
+                    : null;
+
+                  return (
+                    <Table.Tr key={item.id} className="text-gray-600">
+                      <Table.Td>
+                        <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
+                      </Table.Td>
+                      <Table.Td>
+                        <span className="font-medium text-gray-800">{item.material.title}</span>
+                      </Table.Td>
+                      <Table.Td>{mainCategory?.title || <EmptyValue />}</Table.Td>
+                      <Table.Td>{subCategory?.title || <EmptyValue />}</Table.Td>
+                      <Table.Td>
+                        <Badge size="sm" variant="light" color="gray" radius="md">
+                          {getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}
+                        </Badge>
+                      </Table.Td>
+                      <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
+                      <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
+                      <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
+                      <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
+                      <Table.Td w={0}>
+                        <PermissionGuard permission={PERMISSIONS.UPDATE_MANUFACTURED_MATERIAL_BOM}>
+                          <Button
+                            onClick={() => handleOpenUpdateModal(item)}
+                            variant="light"
+                            color="gray"
+                            size="xs"
+                            radius="md"
+                            p={6}
+                          >
+                            <Pencil size={12} />
+                          </Button>
+                        </PermissionGuard>
+                      </Table.Td>
+                    </Table.Tr>
+                  );
+                })}
+              </Table.Tbody>
+              <Table.Tfoot className="bg-gray-50">
+                <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
+                  <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
+                  <Table.Td colSpan={6} className="text-gray-500">
+                    {items.length} {translate("Items", "بند")}
+                  </Table.Td>
+                  <Table.Td>{formatMoney(totalMaterialCost)}</Table.Td>
+                  <Table.Td />
+                  <Table.Td />
+                </Table.Tr>
+              </Table.Tfoot>
+            </Table>
+          </div>
         )}
+
+        <MmBomItemModal
+          opened={modalOpened}
+          close={closeModal}
+          manufacturedMaterialCode={material.code}
+          itemToUpdate={itemToUpdate}
+          setItemToUpdate={setItemToUpdate}
+          excludeMaterialCodes={excludeMaterialCodes}
+        />
       </section>
     </PermissionGuard>
   );

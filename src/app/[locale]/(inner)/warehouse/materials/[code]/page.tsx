@@ -6,7 +6,9 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import materialsApi from "@/lib/api/materials";
+import mmBomsApi from "@/lib/api/mm-boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
@@ -29,6 +31,7 @@ export default function Page() {
   const { locale, translate } = useI18n();
   const { code } = useParams<{ code: string }>();
   const privateRequest = usePrivateRequest();
+  const canReadBom = useHasPermission(PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS);
 
   const materialQuery = useQuery({
     queryKey: queryKeys.materials.detail(code),
@@ -37,10 +40,25 @@ export default function Page() {
   });
 
   const material = materialQuery.data || null;
-  const loading = materialQuery.isFetching;
-  const errorMessage = materialQuery.error ? getErrorMessage(locale, materialQuery.error) : "";
+  const shouldLoadBom = canReadBom && !!material && isManufacturedMaterial(material.materialType);
+
+  const bomQuery = useQuery({
+    queryKey: queryKeys.mmBoms.detail(code),
+    queryFn: ({ signal }) => mmBomsApi.getByMaterial({ privateRequest, manufacturedMaterialCode: code, signal }),
+    staleTime: staleTimes.mmBoms,
+    enabled: shouldLoadBom,
+  });
+
+  const loading = materialQuery.isFetching || (shouldLoadBom && bomQuery.isFetching);
+  const queryError = materialQuery.error || (shouldLoadBom ? bomQuery.error : null);
+  const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
 
   useDocumentTitle(`${material?.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Materials", "المواد")}`);
+
+  function handleRetry() {
+    materialQuery.refetch();
+    if (shouldLoadBom) bomQuery.refetch();
+  }
 
   // ========================= MODALS =========================
 
@@ -53,7 +71,7 @@ export default function Page() {
         backLink: true,
         sideElements: (
           <div className="flex gap-2">
-            <RefetchButton isFetching={loading} onRefetch={() => materialQuery.refetch()} />
+            <RefetchButton isFetching={loading} onRefetch={handleRetry} />
             {material && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
                 <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
@@ -71,7 +89,7 @@ export default function Page() {
         <ErrorSection
           errorTitle={translate("An error occurred while loading material data", "حدث خطأ أثناء تحميل ملف المادة")}
           errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => materialQuery.refetch() }}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleRetry }}
         />
       ) : (
         material && (
@@ -86,7 +104,9 @@ export default function Page() {
 
             <MaterialDetails material={material} />
 
-            {isManufacturedMaterial(material.materialType) && <MaterialBomSection material={material} />}
+            {isManufacturedMaterial(material.materialType) && (
+              <MaterialBomSection material={material} bom={bomQuery.data || null} />
+            )}
           </>
         )
       )}
