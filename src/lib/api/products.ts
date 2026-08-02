@@ -5,9 +5,11 @@ import type {
   ProductWithCreator,
   ProductWithDimensions,
   ProductDimension,
+  ProductProductionRoute,
   CreateProductDto,
   UpdateProductDto,
   CreateProductDimensionDto,
+  SetProductProductionRoutesDto,
 } from "@/types/product";
 
 const productsApi = {
@@ -84,6 +86,36 @@ const productsApi = {
       method: "PUT",
       url: `products/${code}/dimensions/${dimensionId}/default`,
     });
+  },
+
+  // ========================= Production Routes =========================
+
+  async setProductionRoutes({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: SetProductProductionRoutesDto;
+  }) {
+    return await privateRequest<ProductProductionRoute[]>({
+      method: "PUT",
+      url: `products/${code}/production-routes`,
+      data: dto,
+    });
+  },
+
+  async listProductionRoutes({
+    privateRequest,
+    code,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<ProductProductionRoute[]>({ url: `products/${code}/production-routes`, signal });
   },
 };
 

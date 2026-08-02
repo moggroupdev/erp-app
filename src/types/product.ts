@@ -1,4 +1,5 @@
 import type { ProductSourceType } from "@/lib/constants/enums/product-source-types";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 
 export type Product = {
   code: string;
@@ -29,6 +30,14 @@ export type ProductDimension = {
 
 export type ProductWithDimensions = Product & { dimensions: ProductDimension[] };
 
+export type ProductProductionRoute = {
+  id: string;
+  productCode: string;
+  productionSubDepartment: ProductionSubDepartment;
+  sequenceOrder: number;
+  completionPercentage: number;
+};
+
 // ==================== DTOs ====================
 
 export type CreateProductDto = {
@@ -48,4 +57,14 @@ export type CreateProductDimensionDto = {
   diameter: number | null;
   height: number;
   isDefault: boolean | null;
+};
+
+export type CreateProductProductionRouteDto = {
+  productionSubDepartment: ProductionSubDepartment;
+  sequenceOrder: number;
+  completionPercentage: number;
+};
+
+export type SetProductProductionRoutesDto = {
+  routes: CreateProductProductionRouteDto[];
 };
