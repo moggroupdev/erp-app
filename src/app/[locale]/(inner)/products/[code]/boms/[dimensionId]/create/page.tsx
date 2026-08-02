@@ -266,17 +266,17 @@ export default function Page() {
           <Table withColumnBorders>
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="h-12">
-                <Table.Th className="min-w-64 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-80 min-w-150 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Material", "المادة")}
                 </Table.Th>
-                <Table.Th className="min-w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-32 min-w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Quantity", "الكمية")}
                 </Table.Th>
                 <Table.Th className="min-w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Unit Price", "سعر الوحدة")}
+                  {translate("Unit Price", "سعر الوحدة")} ({currency})
                 </Table.Th>
                 <Table.Th className="min-w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Line Total", "إجمالي البند")}
+                  {translate("Line Total", "إجمالي البند")} ({currency})
                 </Table.Th>
                 <Table.Th className="min-w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Notes", "الملاحظات")}
@@ -286,8 +286,8 @@ export default function Page() {
             </Table.Thead>
             <Table.Tbody>
               {rows.map((row) => {
-                const qty = typeof row.quantityRequired === "number" ? row.quantityRequired : 0;
-                const lineTotal = qty * row.unitPrice;
+                const quantity = typeof row.quantityRequired === "number" ? row.quantityRequired : null;
+                const lineTotal = quantity !== null ? quantity * row.unitPrice : null;
                 const isDuplicate = !!row.materialCode && duplicateCodes.has(row.materialCode);
 
                 return (
@@ -319,18 +319,16 @@ export default function Page() {
                         hideControls
                         variant="unstyled"
                         radius={0}
-                        placeholder={translate("Enter quantity...", "أدخل الكمية...")}
+                        placeholder={translate("Enter quantity", "أدخل الكمية")}
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
                     <Table.Td>
-                      <span className="text-sm text-gray-600">
-                        {row.materialCode ? formatMoney(row.unitPrice, currency) : "-"}
-                      </span>
+                      <span className="text-sm text-gray-600">{row.materialCode ? formatMoney(row.unitPrice) : ""}</span>
                     </Table.Td>
                     <Table.Td>
                       <span className="text-sm font-medium text-gray-600">
-                        {row.materialCode ? formatMoney(lineTotal, currency) : "-"}
+                        {lineTotal !== null ? formatMoney(lineTotal) : ""}
                       </span>
                     </Table.Td>
                     <Table.Td className="transition-colors focus-within:bg-teal-50/60">
@@ -364,7 +362,7 @@ export default function Page() {
             </Table.Tbody>
             <Table.Tfoot className="bg-gray-50">
               <Table.Tr className="h-12">
-                <Table.Td colSpan={2}>
+                <Table.Td>
                   <Button
                     type="button"
                     variant="light"
@@ -377,13 +375,14 @@ export default function Page() {
                     {translate("Add Row", "إضافة صف")}
                   </Button>
                 </Table.Td>
+                <Table.Td />
                 <Table.Td>
                   <Badge size="sm" variant="light" color="dark" radius="md">
                     {translate("Total", "الإجمالي")}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal, currency)}</span>
+                  <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
                 </Table.Td>
                 <Table.Td />
                 <Table.Td />
