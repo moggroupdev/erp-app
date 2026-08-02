@@ -10,6 +10,7 @@ export const ar: Translation = {
   noDataAvailable: "لا يوجد بيانات متاحة",
   dashboard: "لوحة التحكم",
   currency: "ج.م",
+  productDimensionUnit: "سم",
   continue: "متابعة",
   back: "عودة",
   confirm: "تأكيد",

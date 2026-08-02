@@ -1,5 +1,4 @@
 import type { ProductSourceType } from "@/lib/constants/enums/product-source-types";
-import type { DimensionUnit } from "@/lib/constants/enums/dimension-units";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 
@@ -48,10 +47,10 @@ export type BomItemWithMaterial = {
 export type Bom = {
   id: string;
   productCode: string;
-  length: number;
-  depth: number;
+  length: number | null;
+  depth: number | null;
+  diameter: number | null;
   height: number;
-  dimensionUnit: DimensionUnit;
   isDefault: boolean;
   product: {
     code: string;

@@ -1,5 +1,4 @@
 import type { ProductSourceType } from "@/lib/constants/enums/product-source-types";
-import type { DimensionUnit } from "@/lib/constants/enums/dimension-units";
 
 export type Product = {
   code: string;
@@ -19,10 +18,10 @@ export type ProductWithCreator = Product & { createdBy: { id: string; name: stri
 export type ProductDimension = {
   id: string;
   productCode: string;
-  length: number;
-  depth: number;
+  length: number | null;
+  depth: number | null;
+  diameter: number | null;
   height: number;
-  dimensionUnit: DimensionUnit;
   isDefault: boolean;
   createdAt: Date;
   createdBy: string;
@@ -44,9 +43,9 @@ export type CreateProductDto = {
 export type UpdateProductDto = Partial<CreateProductDto>;
 
 export type CreateProductDimensionDto = {
-  length: number;
-  depth: number;
+  length: number | null;
+  depth: number | null;
+  diameter: number | null;
   height: number;
-  dimensionUnit: DimensionUnit;
   isDefault: boolean | null;
 };

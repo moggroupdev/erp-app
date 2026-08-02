@@ -8,6 +8,7 @@ export const en = {
   noDataAvailable: "No data available",
   dashboard: "Dashboard",
   currency: "EGP", // Needs to be a list
+  productDimensionUnit: "CM",
   continue: "Continue",
   back: "Back",
   confirm: "Confirm",
