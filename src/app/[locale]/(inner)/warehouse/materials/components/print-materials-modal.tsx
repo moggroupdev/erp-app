@@ -25,17 +25,15 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
 
   const [printScope, setPrintScope] = useState<PrintScope>("all");
   const [mainCategoryId, setMainCategoryId] = useState<string | null>(null);
-  const [includeQuantityAndUnitPrice, setIncludeQuantityAndUnitPrice] = useState(true);
+  const [includeQuantity, setIncludeQuantity] = useState(true);
+  const [includeUnitPrice, setIncludeUnitPrice] = useState(true);
 
   const isCategoryScope = printScope === "category";
   const canPrint = !isCategoryScope || !!mainCategoryId;
 
   const selectedMain = mainCategoryId ? helpers.getMaterialCategoryMainById(mainCategoryId) : null;
 
-  const printQueryParams = {
-    limit: "list-all-to-print",
-    ...(isCategoryScope && mainCategoryId ? { mainCategoryId } : {}),
-  };
+  const printQueryParams = { limit: "list-all-to-print", ...(isCategoryScope && mainCategoryId ? { mainCategoryId } : {}) };
 
   const { data: materialsToPrint, refetch: fetchMaterialsToPrint } = useQuery({
     queryKey: queryKeys.materials.list(printQueryParams),
@@ -59,7 +57,8 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
     setTimeout(() => {
       setPrintScope("all");
       setMainCategoryId(null);
-      setIncludeQuantityAndUnitPrice(true);
+      setIncludeQuantity(true);
+      setIncludeUnitPrice(true);
     }, 250);
   }
 
@@ -103,9 +102,17 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
         )}
 
         <Checkbox
-          checked={includeQuantityAndUnitPrice}
-          onChange={(e) => setIncludeQuantityAndUnitPrice(e.currentTarget.checked)}
-          label={translate("Include quantity and unit price", "تضمين الكمية وسعر الوحدة")}
+          checked={includeQuantity}
+          onChange={(e) => setIncludeQuantity(e.currentTarget.checked)}
+          label={translate("Include quantity", "تضمين الكمية")}
+          color="teal"
+          radius="md"
+        />
+
+        <Checkbox
+          checked={includeUnitPrice}
+          onChange={(e) => setIncludeUnitPrice(e.currentTarget.checked)}
+          label={translate("Include unit price", "تضمين سعر الوحدة")}
           color="teal"
           radius="md"
         />
@@ -143,7 +150,8 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
               mainCategories={mainCategoriesToPrint}
               getSubCategory={helpers.getMaterialCategorySubById}
               heading={printHeading}
-              includeQuantityAndUnitPrice={includeQuantityAndUnitPrice}
+              includeQuantity={includeQuantity}
+              includeUnitPrice={includeUnitPrice}
               showMainCategoryHeadings={!isCategoryScope}
             />
           )}

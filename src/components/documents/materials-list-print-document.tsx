@@ -11,14 +11,16 @@ export default function MaterialsListPrintDocument({
   mainCategories,
   getSubCategory,
   heading,
-  includeQuantityAndUnitPrice = true,
+  includeQuantity = true,
+  includeUnitPrice = true,
   showMainCategoryHeadings = true,
 }: {
   materials: Material[];
   mainCategories: MaterialCategoryMain[];
   getSubCategory: (id: string) => MaterialCategorySub | null;
   heading?: string;
-  includeQuantityAndUnitPrice?: boolean;
+  includeQuantity?: boolean;
+  includeUnitPrice?: boolean;
   showMainCategoryHeadings?: boolean;
 }) {
   const { locale, translate, translation } = useI18n();
@@ -53,9 +55,8 @@ export default function MaterialsListPrintDocument({
     translate("Material Name", "اسم المادة"),
     translate("Subcategory", "الفئة الفرعية"),
     translate("Unit", "الوحدة"),
-    ...(includeQuantityAndUnitPrice
-      ? [translate("Qty", "الكمية"), translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)]
-      : []),
+    ...(includeQuantity ? [translate("Qty", "الكمية")] : []),
+    ...(includeUnitPrice ? [translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)] : []),
   ];
 
   function sortMaterials(list: Material[]) {
@@ -77,11 +78,15 @@ export default function MaterialsListPrintDocument({
       m.title,
       getSubCategory(m.subCategoryId)?.title ?? "-",
       getMaterialUnitLabel(m.unitOfMeasurement, locale),
-      ...(includeQuantityAndUnitPrice ? [String(m.quantity), formatMoney(m.unitPrice)] : []),
+      ...(includeQuantity ? [String(m.quantity)] : []),
+      ...(includeUnitPrice ? [formatMoney(m.unitPrice)] : []),
     ]);
   }
 
-  const noWrapIndexes = includeQuantityAndUnitPrice ? [0, 1, 3, 4, 5, 6] : [0, 1, 3, 4];
+  const noWrapIndexes = [0, 1, 3, 4];
+  let optionalCol = 5;
+  if (includeQuantity) noWrapIndexes.push(optionalCol++);
+  if (includeUnitPrice) noWrapIndexes.push(optionalCol++);
 
   return (
     <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
