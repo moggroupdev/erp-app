@@ -130,7 +130,9 @@ export default function SelectMaterial({
     if (material) {
       setSelectedMaterial(material);
       onMaterialSelect?.(material);
-    } else onMaterialSelect?.(null);
+    }
+    // Do not call onMaterialSelect(null) when the material object is not in the current
+    // search results; the parent may resolve metadata from the selected code separately.
   }
 
   function handleBrowseSelect(material: Material) {

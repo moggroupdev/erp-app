@@ -7,11 +7,14 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
+import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
+import { isManufacturedMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { Material } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
@@ -20,6 +23,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import ErrorAlert from "@/components/ui/error-alert";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
+import MmComponentsSection from "./components/mm-components-section";
 
 const PAGE_TITLE = { en: "Create BOM", ar: "إنشاء قائمة مواد" };
 
@@ -27,6 +31,8 @@ type BomDraftRow = {
   key: string;
   materialCode: string | null;
   materialTitle: string;
+  materialType: MaterialType | null;
+  unitOfMeasurement: MaterialUnit | null;
   unitPrice: number;
   quantityRequired: number | "";
   notes: string;
@@ -41,6 +47,8 @@ function createEmptyRow(): BomDraftRow {
     key: createRowKey(),
     materialCode: null,
     materialTitle: "",
+    materialType: null,
+    unitOfMeasurement: null,
     unitPrice: 0,
     quantityRequired: "",
     notes: "",
@@ -104,6 +112,16 @@ export default function Page() {
     [rows],
   );
 
+  // Selected manufactured materials (quantity optional; used to show the info alert).
+  const mmRows = useMemo(
+    () =>
+      rows.filter(
+        (row): row is BomDraftRow & { materialCode: string; materialType: MaterialType } =>
+          !!row.materialCode && row.materialType !== null && isManufacturedMaterial(row.materialType),
+      ),
+    [rows],
+  );
+
   const grandTotal = useMemo(
     () =>
       rows.reduce((sum, row) => {
@@ -121,11 +139,37 @@ export default function Page() {
     updateRow(key, {
       materialCode: material?.code ?? null,
       materialTitle: material?.title ?? "",
+      materialType: material?.materialType ?? null,
+      unitOfMeasurement: material?.unitOfMeasurement ?? null,
       unitPrice: material?.unitPrice ?? 0,
     });
     setDuplicateCodes(new Set());
     setValidationError("");
   }
+
+  // If a material code is set without metadata (e.g. setValue-only path), resolve it from the API.
+  useEffect(() => {
+    const incomplete = rows.filter((row) => row.materialCode && !row.materialType);
+    if (incomplete.length === 0) return;
+
+    let cancelled = false;
+
+    Promise.all(
+      incomplete.map(async (row) => {
+        try {
+          const material = await materialsApi.get({ privateRequest, code: row.materialCode! });
+          if (!cancelled) handleMaterialSelect(row.key, material);
+        } catch {
+          // Leave the row as-is; user can re-select the material.
+        }
+      }),
+    );
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows.map((row) => `${row.key}:${row.materialCode}:${row.materialType}`).join("|")]);
 
   function addRow() {
     setRows((prev) => [...prev, createEmptyRow()]);
@@ -241,7 +285,7 @@ export default function Page() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {rows.map((row, index) => {
+              {rows.map((row) => {
                 const qty = typeof row.quantityRequired === "number" ? row.quantityRequired : 0;
                 const lineTotal = qty * row.unitPrice;
                 const isDuplicate = !!row.materialCode && duplicateCodes.has(row.materialCode);
@@ -349,6 +393,8 @@ export default function Page() {
         </div>
 
         {error && <ErrorAlert error={error} />}
+
+        <MmComponentsSection mmRows={mmRows} />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-gray-500">

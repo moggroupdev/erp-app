@@ -1,6 +1,8 @@
 import { TEMP_GLOBAL_MANUFACTURING_COST } from "@/lib/constants/global";
 import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
+import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { BomItemWithMaterial, BomMmComponent } from "@/types/bom";
+import type { MmBom } from "@/types/mm-bom";
 
 export const UNCATEGORIZED_ID = "__uncategorized__";
 
@@ -30,6 +32,13 @@ export type BomDisplayTotals = {
   estimatedUnitPrice: number;
   itemCount: number;
   manufacturingItemCount: number;
+};
+
+export type AggregatedComponentRequirement = {
+  materialCode: string;
+  materialTitle: string;
+  unitOfMeasurement: MaterialUnit;
+  quantityRequired: number;
 };
 
 export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): FlattenedBomRow[] {
@@ -96,4 +105,67 @@ export function getBomDisplayTotals(args: {
     itemCount: args.materialRows.length,
     manufacturingItemCount: args.manufacturingRows.length,
   };
+}
+
+export function aggregateMmComponentRequirements(
+  selections: { mmBom: MmBom | undefined; multiplier: number }[],
+): AggregatedComponentRequirement[] {
+  const byMaterialCode = new Map<string, AggregatedComponentRequirement>();
+
+  for (const { mmBom, multiplier } of selections) {
+    if (!mmBom || multiplier <= 0) continue;
+
+    for (const component of mmBom.manufacturedMaterialBoms) {
+      const quantityRequired = component.quantityRequired * multiplier;
+      const existing = byMaterialCode.get(component.materialCode);
+
+      if (existing) {
+        existing.quantityRequired += quantityRequired;
+        continue;
+      }
+
+      byMaterialCode.set(component.materialCode, {
+        materialCode: component.materialCode,
+        materialTitle: component.material.title,
+        unitOfMeasurement: component.material.unitOfMeasurement,
+        quantityRequired,
+      });
+    }
+  }
+
+  return Array.from(byMaterialCode.values());
+}
+
+export type MmComponentGroup = {
+  key: string;
+  materialCode: string;
+  materialTitle: string;
+  unitOfMeasurement: MaterialUnit | null;
+  quantityRequired: number | null;
+  components: AggregatedComponentRequirement[];
+};
+
+export function groupMmComponentRequirements(
+  selections: {
+    key: string;
+    materialCode: string;
+    materialTitle: string;
+    unitOfMeasurement: MaterialUnit | null;
+    quantityRequired: number | null;
+    mmBom: MmBom | undefined;
+  }[],
+): MmComponentGroup[] {
+  return selections.map((selection) => {
+    const multiplier =
+      typeof selection.quantityRequired === "number" && selection.quantityRequired > 0 ? selection.quantityRequired : 1;
+
+    return {
+      key: selection.key,
+      materialCode: selection.materialCode,
+      materialTitle: selection.materialTitle,
+      unitOfMeasurement: selection.unitOfMeasurement,
+      quantityRequired: selection.quantityRequired,
+      components: aggregateMmComponentRequirements([{ mmBom: selection.mmBom, multiplier }]),
+    };
+  });
 }
