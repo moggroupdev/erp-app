@@ -11,11 +11,13 @@ export default function MaterialsListPrintDocument({
   mainCategories,
   getSubCategory,
   heading,
+  includeQuantityAndUnitPrice = true,
 }: {
   materials: Material[];
   mainCategories: MaterialCategoryMain[];
   getSubCategory: (id: string) => MaterialCategorySub | null;
   heading?: string;
+  includeQuantityAndUnitPrice?: boolean;
 }) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
@@ -49,8 +51,9 @@ export default function MaterialsListPrintDocument({
     translate("Material Name", "اسم المادة"),
     translate("Subcategory", "الفئة الفرعية"),
     translate("Unit", "الوحدة"),
-    translate("Qty", "الكمية"),
-    translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`),
+    ...(includeQuantityAndUnitPrice
+      ? [translate("Qty", "الكمية"), translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)]
+      : []),
   ];
 
   function sortMaterials(list: Material[]) {
@@ -72,10 +75,11 @@ export default function MaterialsListPrintDocument({
       m.title,
       getSubCategory(m.subCategoryId)?.title ?? "-",
       getMaterialUnitLabel(m.unitOfMeasurement, locale),
-      String(m.quantity),
-      formatMoney(m.unitPrice),
+      ...(includeQuantityAndUnitPrice ? [String(m.quantity), formatMoney(m.unitPrice)] : []),
     ]);
   }
+
+  const noWrapIndexes = includeQuantityAndUnitPrice ? [0, 1, 3, 4, 5, 6] : [0, 1, 3, 4];
 
   return (
     <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
@@ -102,7 +106,7 @@ export default function MaterialsListPrintDocument({
             headers={headers}
             rows={materialRows(group.materials)}
             monoColumnIndexes={[0, 1]}
-            noWrapIndexes={[0, 1, 3, 4, 5, 6]}
+            noWrapIndexes={noWrapIndexes}
             tableClassName="break-before-avoid text-[8px] [&_thead_tr]:text-[8px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
           />
@@ -125,7 +129,7 @@ export default function MaterialsListPrintDocument({
             headers={headers}
             rows={materialRows(uncategorized)}
             monoColumnIndexes={[0, 1]}
-            noWrapIndexes={[0, 1, 3, 4, 5, 6]}
+            noWrapIndexes={noWrapIndexes}
             tableClassName="break-before-avoid text-[8px] [&_thead_tr]:text-[8px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
           />

@@ -9,7 +9,7 @@ import materialsApi from "@/lib/api/materials";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDate } from "@/lib/helpers/date-formaters";
-import { Button, SegmentedControl } from "@mantine/core";
+import { Button, Checkbox, SegmentedControl } from "@mantine/core";
 import Modal from "@/components/ui/modal";
 import PrintDocument from "@/components/ui/print-document";
 import MaterialsListPrintDocument from "@/components/documents/materials-list-print-document";
@@ -25,6 +25,7 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
 
   const [printScope, setPrintScope] = useState<PrintScope>("all");
   const [mainCategoryId, setMainCategoryId] = useState<string | null>(null);
+  const [includeQuantityAndUnitPrice, setIncludeQuantityAndUnitPrice] = useState(true);
 
   const isCategoryScope = printScope === "category";
   const canPrint = !isCategoryScope || !!mainCategoryId;
@@ -58,6 +59,7 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
     setTimeout(() => {
       setPrintScope("all");
       setMainCategoryId(null);
+      setIncludeQuantityAndUnitPrice(true);
     }, 250);
   }
 
@@ -100,6 +102,14 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
           />
         )}
 
+        <Checkbox
+          checked={includeQuantityAndUnitPrice}
+          onChange={(e) => setIncludeQuantityAndUnitPrice(e.currentTarget.checked)}
+          label={translate("Include quantity and unit price", "تضمين الكمية وسعر الوحدة")}
+          color="teal"
+          radius="md"
+        />
+
         <PrintDocument
           title={translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)}
           buttonLabel={translate("Print", "طباعة")}
@@ -126,6 +136,7 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
               mainCategories={mainCategoriesToPrint}
               getSubCategory={helpers.getMaterialCategorySubById}
               heading={printHeading}
+              includeQuantityAndUnitPrice={includeQuantityAndUnitPrice}
             />
           )}
         </PrintDocument>
