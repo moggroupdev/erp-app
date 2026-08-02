@@ -111,7 +111,14 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
         />
 
         <PrintDocument
-          title={translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)}
+          title={
+            isCategoryScope && selectedMain
+              ? translate(
+                  `Materials List - ${selectedMain.title} - ${printDate}`,
+                  `قائمة المواد - ${selectedMain.title} - ${printDate}`,
+                )
+              : translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)
+          }
           buttonLabel={translate("Print", "طباعة")}
           onBeforePrint={async () => {
             if (!materialsToPrint) await fetchMaterialsToPrint();
@@ -137,6 +144,7 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
               getSubCategory={helpers.getMaterialCategorySubById}
               heading={printHeading}
               includeQuantityAndUnitPrice={includeQuantityAndUnitPrice}
+              showMainCategoryHeadings={!isCategoryScope}
             />
           )}
         </PrintDocument>

@@ -12,12 +12,14 @@ export default function MaterialsListPrintDocument({
   getSubCategory,
   heading,
   includeQuantityAndUnitPrice = true,
+  showMainCategoryHeadings = true,
 }: {
   materials: Material[];
   mainCategories: MaterialCategoryMain[];
   getSubCategory: (id: string) => MaterialCategorySub | null;
   heading?: string;
   includeQuantityAndUnitPrice?: boolean;
+  showMainCategoryHeadings?: boolean;
 }) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
@@ -96,12 +98,11 @@ export default function MaterialsListPrintDocument({
 
       {groups.map((group) => (
         <section key={group.mainCategory.id} className="mb-4 space-y-2.5">
-          <div className="w-full break-after-avoid rounded-md bg-gray-100 px-3 py-2 text-center">
-            <h2 className="text-sm font-semibold text-gray-900">
-              {group.mainCategory.title}
-              <span className="ms-2 text-xs font-normal text-gray-600">({group.materials.length})</span>
-            </h2>
-          </div>
+          {showMainCategoryHeadings && (
+            <div className="w-full break-after-avoid rounded-md bg-gray-100 px-3 py-2 text-center">
+              <h2 className="text-sm font-semibold text-gray-900">{group.mainCategory.title}</h2>
+            </div>
+          )}
           <PrintTable
             headers={headers}
             rows={materialRows(group.materials)}
