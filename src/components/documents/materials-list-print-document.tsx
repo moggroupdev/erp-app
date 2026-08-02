@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading, PrintTable } from "./components";
+import { PrintSectionHeading, PrintTable } from "./components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
@@ -10,15 +10,18 @@ export default function MaterialsListPrintDocument({
   materials,
   mainCategories,
   getSubCategory,
+  heading,
 }: {
   materials: Material[];
   mainCategories: MaterialCategoryMain[];
   getSubCategory: (id: string) => MaterialCategorySub | null;
+  heading?: string;
 }) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
+  const documentHeading = heading ?? translate("All Materials", "جميع المواد");
 
   // Group materials by main category
   const groups: { mainCategory: MaterialCategoryMain; materials: Material[] }[] = [];
@@ -81,7 +84,7 @@ export default function MaterialsListPrintDocument({
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             {translate("Materials List", "قائمة المواد")}
           </p>
-          <h1 className="text-2xl font-semibold">{translate("All Materials", "جميع المواد")}</h1>
+          <h1 className="text-2xl font-semibold">{documentHeading}</h1>
           <p className="text-[10px] text-gray-500">{printedAt}</p>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />

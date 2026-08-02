@@ -15,7 +15,6 @@ import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { formatDate } from "@/lib/helpers/date-formaters";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
@@ -24,7 +23,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { type Material } from "@/types/material";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Pencil, Plus, Search, X } from "lucide-react";
+import { Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -33,12 +32,11 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
-import PrintDocument from "@/components/ui/print-document";
-import MaterialsListPrintDocument from "@/components/documents/materials-list-print-document";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
 import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
 import SelectMaterialSub from "@/components/global/selections/reference-based/select-material-sub";
+import PrintMaterialsModal from "./components/print-materials-modal";
 
 const PAGE_TITLE = { en: "Materials List", ar: "قائمة المواد" };
 
@@ -46,7 +44,6 @@ const MATERIALS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translation, translate } = useI18n();
-  const printDate = formatDate(new Date(), locale);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -54,7 +51,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
-  const { data: categoriesData, helpers } = useMaterialCategories();
+  const { helpers } = useMaterialCategories();
 
   function getCategoryLabels(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -154,6 +151,7 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [materialToUpdate, setMaterialToUpdate] = useState<Material | null>(null);
+  const [printModalOpened, { open: openPrintModal, close: closePrintModal }] = useDisclosure(false);
 
   function handleOpenUpdateModal(material: Material) {
     setMaterialToUpdate(material);
@@ -168,23 +166,14 @@ export default function Page() {
         sideElements: (
           <div className="flex items-center gap-2">
             <PermissionGuard permission={PERMISSIONS.PRINT_MATERIALS_LIST}>
-              <div className="flex-center px-1">
-                <PrintDocument
-                  buttonType="icon"
-                  title={translate(`Materials List - ${printDate}`, `قائمة المواد - ${printDate}`)}
-                  onBeforePrint={async () => {
-                    if (!allMaterials) await fetchAllMaterials();
-                  }}
-                >
-                  {allMaterials && categoriesData && (
-                    <MaterialsListPrintDocument
-                      materials={allMaterials}
-                      mainCategories={categoriesData.materialCategoryMains}
-                      getSubCategory={helpers.getMaterialCategorySubById}
-                    />
-                  )}
-                </PrintDocument>
-              </div>
+              <button
+                type="button"
+                title={translate("Print Materials List", "طباعة قائمة المواد")}
+                onClick={openPrintModal}
+                className="rounded-md px-1 text-xs text-gray-800 hover:text-gray-800/75"
+              >
+                <Printer size={15} />
+              </button>
             </PermissionGuard>
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL}>
@@ -337,6 +326,13 @@ export default function Page() {
         onSuccess={() => {
           if (!materialToUpdate && hasActiveFilters) resetAllFilters();
         }}
+      />
+
+      <PrintMaterialsModal
+        opened={printModalOpened}
+        close={closePrintModal}
+        allMaterials={allMaterials}
+        fetchAllMaterials={fetchAllMaterials}
       />
     </LayoutBox>
   );
