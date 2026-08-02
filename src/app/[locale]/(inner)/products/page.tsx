@@ -265,12 +265,14 @@ export default function Page() {
               <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{translate("Product Name", "اسم المنتج")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                    <Table.Th>{translate("Product Name", "اسم المنتج")}</Table.Th>
+                    <Table.Th>
+                      {translate("Standard Dimension", "الأبعاد النمطية")} ({translation.productDimensionUnit})
+                    </Table.Th>
                     <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                     <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
                     <Table.Th>{translate("Source Type", "نوع المصدر")}</Table.Th>
-                    <Table.Th>{translate("Standard Dimension", "الأبعاد النمطية")}</Table.Th>
                     <Table.Th />
                   </Table.Tr>
                 </Table.Thead>
@@ -280,25 +282,23 @@ export default function Page() {
                     const defaultDimension = product.dimensions.find((dimension) => dimension.isDefault) ?? null;
                     return (
                       <Table.Tr key={product.code} className="text-gray-600">
-                        <Table.Td className="font-semibold text-gray-800">
-                          <Link href={getLocalizedHref(`/products/${product.code}`)} className="hover:underline">
-                            {product.title}
-                          </Link>
-                        </Table.Td>
                         <Table.Td>
                           <div className="flex items-center gap-1.5">
                             <span className="font-mono">{product.code}</span>
                             <CopyButton text={product.code} />
                           </div>
                         </Table.Td>
+                        <Table.Td className="font-semibold text-gray-800">
+                          <Link href={getLocalizedHref(`/products/${product.code}`)} className="hover:underline">
+                            {product.title}
+                          </Link>
+                        </Table.Td>
+                        <Table.Td className="text-sm">
+                          {defaultDimension ? formatDimensionLabel(defaultDimension) : ""}
+                        </Table.Td>
                         <Table.Td>{categories.main}</Table.Td>
                         <Table.Td>{categories.sub}</Table.Td>
                         <Table.Td>{getProductSourceTypeLabel(product.sourceType, locale)}</Table.Td>
-                        <Table.Td className="text-sm">
-                          {defaultDimension
-                            ? formatDimensionLabel(defaultDimension, translation.productDimensionUnit)
-                            : ""}
-                        </Table.Td>
                         <Table.Td w={0}>
                           <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
                             <button

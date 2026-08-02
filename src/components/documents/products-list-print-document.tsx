@@ -43,8 +43,8 @@ export default function ProductsListPrintDocument({
   const headers = [
     translate("Code", "الكود"),
     translate("Product Name", "اسم المنتج"),
+    translate("Standard Dimension", "الأبعاد النمطية") + ` (${translation.productDimensionUnit})`,
     translate("Source Type", "نوع المصدر"),
-    translate("Standard Dimension", "الأبعاد النمطية"),
   ];
 
   function productRows(list: ProductWithDimensions[]): ReactNode[][] {
@@ -53,10 +53,8 @@ export default function ProductsListPrintDocument({
       return [
         p.code,
         p.title,
+        defaultDimension ? formatDimensionLabel(defaultDimension) : "-",
         getProductSourceTypeLabel(p.sourceType, locale),
-        defaultDimension
-          ? formatDimensionLabel(defaultDimension, translation.productDimensionUnit)
-          : "-",
       ];
     });
   }
