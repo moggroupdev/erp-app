@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export default function PrintTable({
   headers,
   rows,
@@ -8,12 +10,12 @@ export default function PrintTable({
   tableClassName,
 }: {
   headers: string[];
-  rows: string[][];
+  rows: ReactNode[][];
   emptyLabel: string;
   monoColumnIndexes?: number[];
   /** Column indexes that get `text-nowrap`. When omitted, all columns wrap normally. */
   noWrapIndexes?: number[];
-  footerRow?: string[];
+  footerRow?: ReactNode[];
   /** Override the default table font-size class (e.g. `"text-[9px]"`). */
   tableClassName?: string;
 }) {

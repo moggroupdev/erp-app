@@ -1,8 +1,8 @@
 import type { Bom } from "@/types/bom";
-import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getManufacturingCostRows, type FlattenedBomRow } from "@/lib/helpers/bom-display";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail } from "./components";
@@ -33,7 +33,7 @@ type BomPrintDocumentProps = {
 export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainCategoryTitle }: BomPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
 
-  const dimensionLabel = `${bom.length} × ${bom.depth} × ${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`;
+  const dimensionLabel = formatDimensionLabel(bom, translation.productDimensionUnit);
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
   const manufacturingRows = getManufacturingCostRows(bom.standardBoms);

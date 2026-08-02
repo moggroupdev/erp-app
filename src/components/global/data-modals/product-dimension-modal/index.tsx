@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
-import type { DimensionUnit } from "@/lib/constants/enums/dimension-units";
 import usePrivateRequest from "@/hooks/use-private-request";
 import productsApi from "@/lib/api/products";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { Button, Checkbox, NumberInput } from "@mantine/core";
+import { Button, Checkbox, NumberInput, SegmentedControl } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
-import SelectDimensionUnit from "@/components/global/selections/enum-based/select-dimension-unit";
+
+type DimensionMode = "rectangular" | "cylindrical";
 
 export default function ProductDimensionModal({
   opened,
@@ -28,17 +28,19 @@ export default function ProductDimensionModal({
   const privateRequest = usePrivateRequest();
   const [validationError, setValidationError] = useState("");
 
+  const [mode, setMode] = useState<DimensionMode>("rectangular");
   const [length, setLength] = useState<number | string>("");
   const [depth, setDepth] = useState<number | string>("");
+  const [diameter, setDiameter] = useState<number | string>("");
   const [height, setHeight] = useState<number | string>("");
-  const [dimensionUnit, setDimensionUnit] = useState<string | null>(null);
   const [isDefault, setIsDefault] = useState(false);
 
   function reset() {
+    setMode("rectangular");
     setLength("");
     setDepth("");
+    setDiameter("");
     setHeight("");
-    setDimensionUnit(null);
     setIsDefault(isFirstDimension);
   }
 
@@ -48,14 +50,15 @@ export default function ProductDimensionModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
+      const isRectangular = mode === "rectangular";
       return await productsApi.addDimension({
         privateRequest,
         code: productCode,
         dto: {
-          length: Number(length),
-          depth: Number(depth),
+          length: isRectangular ? Number(length) : null,
+          depth: isRectangular ? Number(depth) : null,
+          diameter: isRectangular ? null : Number(diameter),
           height: Number(height),
-          dimensionUnit: dimensionUnit as DimensionUnit,
           isDefault: isFirstDimension || isDefault,
         },
       });
@@ -74,17 +77,22 @@ export default function ProductDimensionModal({
     e.preventDefault();
     setValidationError("");
 
-    const normalizedLength = Number(length);
-    const normalizedDepth = Number(depth);
     const normalizedHeight = Number(height);
-
-    if (Number.isNaN(normalizedLength) || normalizedLength < 0)
-      return setValidationError(translate("Length must be a non-negative number.", "يجب أن يكون الطول رقماً غير سالب."));
-    if (Number.isNaN(normalizedDepth) || normalizedDepth < 0)
-      return setValidationError(translate("Depth must be a non-negative number.", "يجب أن يكون العمق رقماً غير سالب."));
     if (Number.isNaN(normalizedHeight) || normalizedHeight < 0)
       return setValidationError(translate("Height must be a non-negative number.", "يجب أن يكون الارتفاع رقماً غير سالب."));
-    if (!dimensionUnit) return setValidationError(translate("Please select a unit.", "يرجى اختيار الوحدة."));
+
+    if (mode === "rectangular") {
+      const normalizedLength = Number(length);
+      const normalizedDepth = Number(depth);
+      if (Number.isNaN(normalizedLength) || normalizedLength < 0)
+        return setValidationError(translate("Length must be a non-negative number.", "يجب أن يكون الطول رقماً غير سالب."));
+      if (Number.isNaN(normalizedDepth) || normalizedDepth < 0)
+        return setValidationError(translate("Depth must be a non-negative number.", "يجب أن يكون العمق رقماً غير سالب."));
+    } else {
+      const normalizedDiameter = Number(diameter);
+      if (Number.isNaN(normalizedDiameter) || normalizedDiameter < 0)
+        return setValidationError(translate("Diameter must be a non-negative number.", "يجب أن يكون القطر رقماً غير سالب."));
+    }
 
     mutation.mutate();
   }
@@ -99,41 +107,70 @@ export default function ProductDimensionModal({
   }
 
   const title = translate("Add New Dimension", "إضافة مقاس جديد");
+  const unit = translation.productDimensionUnit;
 
-  const isReadyToSubmit = length !== "" && depth !== "" && height !== "" && !!dimensionUnit;
+  const isReadyToSubmit =
+    height !== "" && (mode === "rectangular" ? length !== "" && depth !== "" : diameter !== "");
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
-          <NumberInput
-            value={length}
-            onChange={setLength}
-            label={translate("Length", "الطول")}
-            placeholder={translate("Enter length", "أدخل الطول")}
-            min={0}
-            allowNegative={false}
-            decimalScale={4}
-            required
-            radius="md"
-          />
+        <SegmentedControl
+          value={mode}
+          onChange={(value) => setMode(value as DimensionMode)}
+          data={[
+            { value: "rectangular", label: translate("Length & Depth", "الطول والعمق") },
+            { value: "cylindrical", label: translate("Diameter", "القطر") },
+          ]}
+          fullWidth
+          radius="md"
+        />
 
-          <NumberInput
-            value={depth}
-            onChange={setDepth}
-            label={translate("Depth", "العمق")}
-            placeholder={translate("Enter depth", "أدخل العمق")}
-            min={0}
-            allowNegative={false}
-            decimalScale={4}
-            required
-            radius="md"
-          />
+        <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
+          {mode === "rectangular" ? (
+            <>
+              <NumberInput
+                value={length}
+                onChange={setLength}
+                label={`${translate("Length", "الطول")} (${unit})`}
+                placeholder={translate("Enter length", "أدخل الطول")}
+                min={0}
+                allowNegative={false}
+                decimalScale={4}
+                required
+                radius="md"
+              />
+
+              <NumberInput
+                value={depth}
+                onChange={setDepth}
+                label={`${translate("Depth", "العمق")} (${unit})`}
+                placeholder={translate("Enter depth", "أدخل العمق")}
+                min={0}
+                allowNegative={false}
+                decimalScale={4}
+                required
+                radius="md"
+              />
+            </>
+          ) : (
+            <NumberInput
+              value={diameter}
+              onChange={setDiameter}
+              label={`${translate("Diameter", "القطر")} (${unit})`}
+              placeholder={translate("Enter diameter", "أدخل القطر")}
+              min={0}
+              allowNegative={false}
+              decimalScale={4}
+              required
+              radius="md"
+            />
+          )}
 
           <NumberInput
             value={height}
             onChange={setHeight}
-            label={translate("Height", "الارتفاع")}
+            label={`${translate("Height", "الارتفاع")} (${unit})`}
             placeholder={translate("Enter height", "أدخل الارتفاع")}
             min={0}
             allowNegative={false}
@@ -142,14 +179,6 @@ export default function ProductDimensionModal({
             radius="md"
           />
         </div>
-
-        <SelectDimensionUnit
-          value={dimensionUnit}
-          setValue={setDimensionUnit}
-          label={translate("Unit", "الوحدة")}
-          placeholder={translate("Select unit", "اختر الوحدة")}
-          required
-        />
 
         <Checkbox
           checked={isFirstDimension || isDefault}

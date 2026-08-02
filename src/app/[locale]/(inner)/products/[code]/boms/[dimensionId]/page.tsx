@@ -15,9 +15,9 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
-import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
+import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
+import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import {
   getBomDisplayTotals,
   getFlattenedMaterialRows,
@@ -160,7 +160,7 @@ export default function Page() {
         },
         {
           key: translate("Dimension", "المقاس"),
-          value: `${bom.length} × ${bom.depth} × ${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`,
+          value: formatDimensionLabel(bom, translation.productDimensionUnit),
         },
         {
           key: translate("Default Dimension", "المقاس الافتراضي"),
@@ -200,7 +200,7 @@ export default function Page() {
           <div className="flex items-center gap-2">
             {bom && hasBom && (
               <PrintDocument
-                title={`${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${bom.length}×${bom.depth}×${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`}
+                title={`${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
                 buttonLabel={translate("Print", "طباعة")}
                 buttonType="button"
                 paperWidth={210}

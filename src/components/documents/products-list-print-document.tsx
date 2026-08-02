@@ -1,10 +1,11 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintSectionHeading, PrintTable } from "./components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
+import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import type { ProductWithDimensions } from "@/types/product";
 import type { ProductCategoryMain, ProductCategorySub } from "@/types/categories";
+import type { ReactNode } from "react";
 
 export default function ProductsListPrintDocument({
   products,
@@ -15,7 +16,7 @@ export default function ProductsListPrintDocument({
   mainCategories: ProductCategoryMain[];
   getSubCategory: (id: string) => ProductCategorySub | null;
 }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
 
@@ -46,7 +47,7 @@ export default function ProductsListPrintDocument({
     translate("Standard Dimension", "الأبعاد النمطية"),
   ];
 
-  function productRows(list: ProductWithDimensions[]): string[][] {
+  function productRows(list: ProductWithDimensions[]): ReactNode[][] {
     return list.map((p) => {
       const defaultDimension = p.dimensions.find((dimension) => dimension.isDefault) ?? null;
       return [
@@ -54,7 +55,7 @@ export default function ProductsListPrintDocument({
         p.title,
         getProductSourceTypeLabel(p.sourceType, locale),
         defaultDimension
-          ? `${defaultDimension.length} × ${defaultDimension.depth} × ${defaultDimension.height} ${getDimensionUnitLabel(defaultDimension.dimensionUnit, locale)}`
+          ? formatDimensionLabel(defaultDimension, translation.productDimensionUnit)
           : "-",
       ];
     });

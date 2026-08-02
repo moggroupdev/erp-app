@@ -18,8 +18,8 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
+import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { type Product, type ProductWithDimensions } from "@/types/product";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
@@ -44,7 +44,7 @@ const PAGE_TITLE = { en: "Products Catalog", ar: "كتالوج المنتجات"
 const PRODUCTS_PER_PAGE = 25;
 
 export default function Page() {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const printDate = formatDate(new Date(), locale);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
@@ -296,7 +296,7 @@ export default function Page() {
                         <Table.Td>{getProductSourceTypeLabel(product.sourceType, locale)}</Table.Td>
                         <Table.Td className="text-sm">
                           {defaultDimension
-                            ? `${defaultDimension.length} × ${defaultDimension.depth} × ${defaultDimension.height} ${getDimensionUnitLabel(defaultDimension.dimensionUnit, locale)}`
+                            ? formatDimensionLabel(defaultDimension, translation.productDimensionUnit)
                             : ""}
                         </Table.Td>
                         <Table.Td w={0}>

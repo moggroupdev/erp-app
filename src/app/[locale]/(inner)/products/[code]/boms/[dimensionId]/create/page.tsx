@@ -12,7 +12,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
+import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { isManufacturedMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { Material } from "@/types/material";
@@ -256,7 +256,7 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         subTitle: bom
-          ? `${bom.product.title} · ${bom.length} × ${bom.depth} × ${bom.height} ${getDimensionUnitLabel(bom.dimensionUnit, locale)}`
+          ? `${bom.product.title} · ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
           : undefined,
         backLink: true,
       }}

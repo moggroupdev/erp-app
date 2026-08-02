@@ -14,7 +14,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { getDimensionUnitLabel } from "@/lib/constants/enums/dimension-units";
+import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { Badge, Button, FloatingPosition, Table, Tooltip } from "@mantine/core";
 import { Box, Pencil, Plus, Star } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
@@ -196,10 +196,10 @@ export default function Page() {
                           {translate("Depth", "العمق")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Height", "الارتفاع")}
+                          {translate("Diameter", "القطر")}
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                          {translate("Unit", "الوحدة")}
+                          {translate("Height", "الارتفاع")} ({translation.productDimensionUnit})
                         </Table.Th>
                         <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                           {translate("Default", "افتراضي")}
@@ -211,14 +211,10 @@ export default function Page() {
                       {dimensions.map((dimension) => (
                         <Table.Tr key={dimension.id} className={dimension.isDefault ? "bg-teal-50/60" : "text-gray-600"}>
                           <Table.Td className="text-gray-600">{product.title}</Table.Td>
-                          <Table.Td className="font-medium text-gray-800">{dimension.length}</Table.Td>
-                          <Table.Td className="font-medium text-gray-800">{dimension.depth}</Table.Td>
+                          <Table.Td className="font-medium text-gray-800">{dimension.length ?? "-"}</Table.Td>
+                          <Table.Td className="font-medium text-gray-800">{dimension.depth ?? "-"}</Table.Td>
+                          <Table.Td className="font-medium text-gray-800">{dimension.diameter ?? "-"}</Table.Td>
                           <Table.Td className="font-medium text-gray-800">{dimension.height}</Table.Td>
-                          <Table.Td>
-                            <Badge size="sm" variant="light" color="gray" radius="md">
-                              {getDimensionUnitLabel(dimension.dimensionUnit, locale)}
-                            </Badge>
-                          </Table.Td>
                           <Table.Td>
                             {dimension.isDefault ? (
                               <Badge
@@ -289,8 +285,7 @@ export default function Page() {
                         {translate("Selected dimension", "المقاس المحدد")}
                       </span>
                       <p className="mt-1 text-sm font-medium text-gray-800">
-                        {pendingDefaultDimension.length} × {pendingDefaultDimension.depth} × {pendingDefaultDimension.height}{" "}
-                        {getDimensionUnitLabel(pendingDefaultDimension.dimensionUnit, locale)}
+                        {formatDimensionLabel(pendingDefaultDimension, translation.productDimensionUnit)}
                       </p>
                     </div>
                   )}
