@@ -57,6 +57,10 @@ export default function ProductDimensionsSection({
 
   const pendingDefaultDimension = dimensions.find((dimension) => dimension.id === pendingDefaultDimensionId) ?? null;
 
+  // Schema: each row is (length + depth) XOR diameter. Show only columns that appear in the list.
+  const showLengthDepth = dimensions.some((d) => d.length != null && d.depth != null);
+  const showDiameter = dimensions.some((d) => d.diameter != null);
+
   function handleOpenDefaultModal(dimensionId: string) {
     setPendingDefaultDimensionId(dimensionId);
     openDefaultModal();
@@ -119,15 +123,21 @@ export default function ProductDimensionsSection({
             <Table.Thead className="bg-gray-50">
               <Table.Tr>
                 <Table.Th />
-                <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Length", "الطول")}
-                </Table.Th>
-                <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Depth", "العمق")}
-                </Table.Th>
-                <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Diameter", "القطر")}
-                </Table.Th>
+                {showLengthDepth && (
+                  <>
+                    <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Length", "الطول")}
+                    </Table.Th>
+                    <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Depth", "العمق")}
+                    </Table.Th>
+                  </>
+                )}
+                {showDiameter && (
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Diameter", "القطر")}
+                  </Table.Th>
+                )}
                 <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Height", "الارتفاع")} ({translation.productDimensionUnit})
                 </Table.Th>
@@ -141,9 +151,15 @@ export default function ProductDimensionsSection({
               {dimensions.map((dimension) => (
                 <Table.Tr key={dimension.id} className={dimension.isDefault ? "bg-blue-50/60" : "text-gray-600"}>
                   <Table.Td className="text-gray-600">{product.title}</Table.Td>
-                  <Table.Td className="font-medium text-gray-800">{dimension.length ?? "-"}</Table.Td>
-                  <Table.Td className="font-medium text-gray-800">{dimension.depth ?? "-"}</Table.Td>
-                  <Table.Td className="font-medium text-gray-800">{dimension.diameter ?? "-"}</Table.Td>
+                  {showLengthDepth && (
+                    <>
+                      <Table.Td className="font-medium text-gray-800">{dimension.length ?? "-"}</Table.Td>
+                      <Table.Td className="font-medium text-gray-800">{dimension.depth ?? "-"}</Table.Td>
+                    </>
+                  )}
+                  {showDiameter && (
+                    <Table.Td className="font-medium text-gray-800">{dimension.diameter ?? "-"}</Table.Td>
+                  )}
                   <Table.Td className="font-medium text-gray-800">{dimension.height}</Table.Td>
                   <Table.Td>
                     {dimension.isDefault ? (
