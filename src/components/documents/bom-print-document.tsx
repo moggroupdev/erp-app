@@ -39,7 +39,7 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
   const manufacturingRows = getManufacturingCostRows(bom.standardBoms);
 
   return (
-    <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
+    <div className="flex flex-col gap-5 text-xs text-gray-900">
       <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
         <div className="flex flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">

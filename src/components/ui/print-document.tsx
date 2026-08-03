@@ -12,7 +12,7 @@ export default function PrintDocument({
   paperWidth = 210,
   paperHeight = 297,
   paperMarginX = 10,
-  paperMarginTop = 15,
+  paperMarginTop = 18,
   paperMarginBottom = 20,
   showPageNumbers = true,
   icon = <Printer size={15} />,
