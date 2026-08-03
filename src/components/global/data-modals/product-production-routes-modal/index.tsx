@@ -80,12 +80,12 @@ function SortableStepCard({
     <div ref={setNodeRef} style={style} className="relative flex items-center gap-3">
       <div className="relative flex flex-col items-center">
         <div
-          className={`flex-center z-10 h-12 w-12 shrink-0 rounded-full text-sm font-bold shadow-sm ring-4 ring-white ${
+          className={`flex-center z-10 h-12 w-12 shrink-0 rounded-full text-sm font-bold ring-4 ring-white ${
             isDragging
-              ? "bg-blue-600 text-white"
+              ? "bg-blue-100 text-blue-700 ring-blue-50"
               : row.productionSubDepartment
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-500 ring-gray-50"
+                ? "bg-blue-50 text-blue-600"
+                : "bg-gray-100 text-gray-400 ring-gray-50"
           }`}
         >
           {index + 1}
@@ -349,26 +349,52 @@ export default function ProductProductionRoutesModal({
         </button>
 
         {/* Progress Bar */}
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-gray-50 via-white to-blue-50/40 p-4">
-          <div className="mb-2 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-sm text-gray-600">
-                {translate("Path completion: Percentages must reach 100%.", "اكتمال المسار: يجب أن تصل النسب إلى 100%.")}
-              </p>
-            </div>
+        <div
+          className={`overflow-hidden rounded-xl border px-4 py-3 transition-colors ${
+            isComplete
+              ? "border-green-200 bg-green-50/50"
+              : roundedTotal > 100
+                ? "border-rose-200 bg-rose-50/40"
+                : "border-gray-200 bg-linear-to-br from-gray-50 via-white to-blue-50/30"
+          }`}
+        >
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <p className="mt-0.5 text-[11px] leading-snug text-gray-500">
+              {translate("Path completion:", "اكتمال المسار:")}{" "}
+              {isComplete
+                ? translate("Ready to save. Total is exactly 100%.", "جاهز للحفظ. المجموع يساوي 100% تماماً.")
+                : roundedTotal > 100
+                  ? translate(
+                      `Over by ${(roundedTotal - 100).toFixed(2)}%. Reduce some shares.`,
+                      `زيادة بمقدار ${(roundedTotal - 100).toFixed(2)}%. خفّض بعض الحصص.`,
+                    )
+                  : translate(
+                      `${(100 - roundedTotal).toFixed(2)}% remaining to reach 100%.`,
+                      `يتبقى ${(100 - roundedTotal).toFixed(2)}% للوصول إلى 100%.`,
+                    )}
+            </p>
+
             <div
-              className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                isComplete ? "bg-blue-500 text-white" : "bg-white text-gray-600 ring-1 ring-gray-200"
+              className={`shrink-0 rounded-full px-2 py-0.5 text-xs! font-semibold tabular-nums ${
+                isComplete
+                  ? "bg-green-100 text-green-700"
+                  : roundedTotal > 100
+                    ? "bg-rose-100 text-rose-700"
+                    : "bg-amber-50 text-amber-700 ring-1 ring-amber-100"
               }`}
             >
-              {roundedTotal} %
+              {roundedTotal}%
             </div>
           </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-gray-200/80">
+          <div className="relative h-1.5 overflow-hidden rounded-full bg-white/80 ring-1 ring-gray-200/80">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
-                isComplete ? "bg-blue-500" : roundedTotal > 100 ? "bg-red-500" : "bg-yellow-500"
+                isComplete
+                  ? "bg-linear-to-r from-green-400 to-green-500"
+                  : roundedTotal > 100
+                    ? "bg-linear-to-r from-rose-400 to-rose-500"
+                    : "bg-linear-to-r from-amber-300 to-amber-400"
               }`}
               style={{ width: `${progressWidth}%` }}
             />

@@ -76,25 +76,25 @@ export default function ProductProductionRoutesSection({
                 return (
                   <div key={route.id} className="flex items-center">
                     <div className="relative flex w-44 flex-col items-center gap-3 sm:w-48">
-                      <div className="relative flex h-16 w-16 items-center justify-center">
-                        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 64 64" aria-hidden>
-                          <circle cx="32" cy="32" r="28" fill="none" stroke="#e2e8f0" strokeWidth="5" />
+                      <div className="relative flex h-20 w-20 items-center justify-center">
+                        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 80 80" aria-hidden>
+                          <circle cx="40" cy="40" r="35" fill="none" stroke="#e2e8f0" strokeWidth="5" />
                           <circle
-                            cx="32"
-                            cy="32"
-                            r="28"
+                            cx="40"
+                            cy="40"
+                            r="35"
                             fill="none"
                             stroke="#2b7fff"
                             strokeWidth="5"
                             strokeLinecap="round"
-                            strokeDasharray={`${(percentage / 100) * 175.9} 175.9`}
+                            strokeDasharray={`${(percentage / 100) * 219.9} 219.9`}
                           />
                         </svg>
-                        <div className="z-10 flex h-11 w-11 flex-col items-center justify-center rounded-full bg-blue-500 text-white shadow-sm">
-                          <span className="text-[9px] leading-none font-medium opacity-80">
+                        <div className="z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-blue-500 text-white shadow-sm">
+                          <span className="text-[10px] leading-none font-medium opacity-80">
                             {translate("Step", "خطوة")}
                           </span>
-                          <span className="mt-1.5 text-sm leading-none font-bold">{route.sequenceOrder}</span>
+                          <span className="mt-1.5 text-base leading-none font-bold">{route.sequenceOrder}</span>
                         </div>
                       </div>
 
@@ -110,7 +110,7 @@ export default function ProductProductionRoutesSection({
 
                     {!isLast && (
                       <div
-                        className="mx-1 mb-14 flex w-8 shrink-0 items-center justify-center sm:mx-2 sm:w-10"
+                        className="mx-1 mb-16 flex w-8 shrink-0 items-center justify-center sm:mx-2 sm:w-10"
                         aria-hidden
                       >
                         <ArrowRight size={18} className="text-blue-500 rtl:rotate-180" />
