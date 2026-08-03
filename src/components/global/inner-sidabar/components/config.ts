@@ -122,22 +122,10 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     items: [],
   },
   {
-    label: { en: "Production", ar: "الإنتاج" },
+    label: { en: "Production Plans", ar: "خطط الإنتاج" },
+    href: "/production/plans",
     icon: Factory,
-    items: [
-      {
-        label: { en: "Production Plans", ar: "خطط الإنتاج" },
-        href: "/production/plans",
-        icon: ClipboardList,
-        requiredPermission: PERMISSIONS.READ_PRODUCTION_PLANS,
-      },
-      {
-        label: { en: "Routing", ar: "المسارات" },
-        href: "/production/routing",
-        icon: Route,
-        requiredPermission: PERMISSIONS.READ_PRODUCTION_ROUTING,
-      },
-    ],
+    items: [],
   },
   {
     label: { en: "Warehouse", ar: "المخازن" },
