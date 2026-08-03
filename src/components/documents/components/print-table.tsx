@@ -34,8 +34,8 @@ export default function PrintTable({
     <table className={`w-full border-collapse ${tableClassName ?? "text-[10px]"}`}>
       <thead className="break-inside-avoid break-after-avoid">
         <tr className="border-b border-gray-300 bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
-          {headers.map((header) => (
-            <th key={header} className="px-2.5 py-2 text-start text-nowrap">
+          {headers.map((header, headerIndex) => (
+            <th key={headerIndex} className="px-2.5 py-2 text-start text-nowrap">
               {header}
             </th>
           ))}

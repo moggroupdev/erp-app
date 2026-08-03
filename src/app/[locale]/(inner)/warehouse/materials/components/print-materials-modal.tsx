@@ -27,6 +27,8 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
   const [mainCategoryId, setMainCategoryId] = useState<string | null>(null);
   const [includeQuantity, setIncludeQuantity] = useState(true);
   const [includeUnitPrice, setIncludeUnitPrice] = useState(true);
+  const [includeSubcategory, setIncludeSubcategory] = useState(true);
+  const [includeEmptyQuantityColumn, setIncludeEmptyQuantityColumn] = useState(false);
 
   const isCategoryScope = printScope === "category";
   const canPrint = !isCategoryScope || !!mainCategoryId;
@@ -59,6 +61,8 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
       setMainCategoryId(null);
       setIncludeQuantity(true);
       setIncludeUnitPrice(true);
+      setIncludeSubcategory(true);
+      setIncludeEmptyQuantityColumn(false);
     }, 250);
   }
 
@@ -102,6 +106,14 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
         )}
 
         <Checkbox
+          checked={includeSubcategory}
+          onChange={(e) => setIncludeSubcategory(e.currentTarget.checked)}
+          label={translate("Include subcategory", "تضمين الفئة الفرعية")}
+          color="teal"
+          radius="md"
+        />
+
+        <Checkbox
           checked={includeQuantity}
           onChange={(e) => setIncludeQuantity(e.currentTarget.checked)}
           label={translate("Include quantity", "تضمين الكمية")}
@@ -113,6 +125,17 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
           checked={includeUnitPrice}
           onChange={(e) => setIncludeUnitPrice(e.currentTarget.checked)}
           label={translate("Include unit price", "تضمين سعر الوحدة")}
+          color="teal"
+          radius="md"
+        />
+
+        <Checkbox
+          checked={includeEmptyQuantityColumn}
+          onChange={(e) => setIncludeEmptyQuantityColumn(e.currentTarget.checked)}
+          label={translate(
+            "Add empty quantity column (for inventory counting)",
+            "إضافة عمود كمية فارغ (يستخدم في أعمال الجرد)",
+          )}
           color="teal"
           radius="md"
         />
@@ -152,6 +175,8 @@ export default function PrintMaterialsModal({ opened, close }: { opened: boolean
               heading={printHeading}
               includeQuantity={includeQuantity}
               includeUnitPrice={includeUnitPrice}
+              includeSubcategory={includeSubcategory}
+              includeEmptyQuantityColumn={includeEmptyQuantityColumn}
               showMainCategoryHeadings={!isCategoryScope}
             />
           )}

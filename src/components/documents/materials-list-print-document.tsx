@@ -13,6 +13,8 @@ export default function MaterialsListPrintDocument({
   heading,
   includeQuantity = true,
   includeUnitPrice = true,
+  includeSubcategory = true,
+  includeEmptyQuantityColumn = false,
   showMainCategoryHeadings = true,
 }: {
   materials: Material[];
@@ -21,6 +23,8 @@ export default function MaterialsListPrintDocument({
   heading?: string;
   includeQuantity?: boolean;
   includeUnitPrice?: boolean;
+  includeSubcategory?: boolean;
+  includeEmptyQuantityColumn?: boolean;
   showMainCategoryHeadings?: boolean;
 }) {
   const { locale, translate, translation } = useI18n();
@@ -53,10 +57,11 @@ export default function MaterialsListPrintDocument({
     translate("Code", "الكود"),
     translate("Legacy Code", "الكود السابق"),
     translate("Material Name", "اسم المادة"),
-    translate("Subcategory", "الفئة الفرعية"),
+    ...(includeSubcategory ? [translate("Subcategory", "الفئة الفرعية")] : []),
     translate("Unit", "الوحدة"),
     ...(includeQuantity ? [translate("Qty", "الكمية")] : []),
     ...(includeUnitPrice ? [translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)] : []),
+    ...(includeEmptyQuantityColumn ? [translate("Quantity", "الكمية")] : []),
   ];
 
   function sortMaterials(list: Material[]) {
@@ -76,17 +81,21 @@ export default function MaterialsListPrintDocument({
       m.code,
       m.legacyCode || "-",
       m.title,
-      getSubCategory(m.subCategoryId)?.title ?? "-",
+      ...(includeSubcategory ? [getSubCategory(m.subCategoryId)?.title ?? "-"] : []),
       getMaterialUnitLabel(m.unitOfMeasurement, locale),
       ...(includeQuantity ? [String(m.quantity)] : []),
       ...(includeUnitPrice ? [formatMoney(m.unitPrice)] : []),
+      ...(includeEmptyQuantityColumn ? [""] : []),
     ]);
   }
 
-  const noWrapIndexes = [0, 1, 3, 4];
-  let optionalCol = 5;
-  if (includeQuantity) noWrapIndexes.push(optionalCol++);
-  if (includeUnitPrice) noWrapIndexes.push(optionalCol++);
+  const noWrapIndexes = [0, 1];
+  let nextCol = 3;
+  if (includeSubcategory) noWrapIndexes.push(nextCol++);
+  noWrapIndexes.push(nextCol++); // unit
+  if (includeQuantity) noWrapIndexes.push(nextCol++);
+  if (includeUnitPrice) noWrapIndexes.push(nextCol++);
+  if (includeEmptyQuantityColumn) noWrapIndexes.push(nextCol++);
 
   return (
     <div className="flex flex-col gap-5 p-3 text-xs text-gray-900">
