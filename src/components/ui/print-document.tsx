@@ -12,7 +12,9 @@ export default function PrintDocument({
   paperWidth = 210,
   paperHeight = 297,
   paperMarginX = 10,
-  paperMarginY = 15,
+  paperMarginTop = 15,
+  paperMarginBottom = 20,
+  showPageNumbers = true,
   icon = <Printer size={15} />,
   buttonType = "menu",
   onBeforePrint,
@@ -24,7 +26,10 @@ export default function PrintDocument({
   paperWidth?: number;
   paperHeight?: number;
   paperMarginX?: number;
-  paperMarginY?: number;
+  paperMarginTop?: number;
+  paperMarginBottom?: number;
+  /** When true, prints the page number centered at the bottom of each page (Chrome 131+, Safari 18.2+). */
+  showPageNumbers?: boolean;
   icon?: React.ReactNode;
   buttonType?: "menu" | "button" | "icon";
   /** Async callback invoked before printing. Print is delayed until it resolves. */
@@ -53,9 +58,21 @@ export default function PrintDocument({
 
     const style = document.createElement("style");
     style.setAttribute("data-print-document", printId);
+    const pageNumberRule = showPageNumbers
+      ? `
+          @bottom-center {
+            content: counter(page) " / " counter(pages);
+            direction: ltr;
+            font-size: 9pt;
+          }`
+      : "";
+
     style.textContent = `
       @media print {
-        @page { margin: ${paperMarginY}mm ${paperMarginX}mm; size: ${paperWidth}mm ${paperHeight}mm; }
+        @page {
+          margin: ${paperMarginTop}mm ${paperMarginX}mm ${paperMarginBottom}mm;
+          size: ${paperWidth}mm ${paperHeight}mm;${pageNumberRule}
+        }
         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         body > *:not(#${printId}) { display: none !important; }
         #${printId} {
@@ -79,7 +96,7 @@ export default function PrintDocument({
     window.print();
     // Some browsers may not fire afterprint reliably
     setTimeout(cleanup, 1000);
-  }, [title, printId, paperWidth, paperHeight, paperMarginX, paperMarginY]);
+  }, [title, printId, paperWidth, paperHeight, paperMarginX, paperMarginTop, paperMarginBottom, showPageNumbers]);
 
   const handlePrint = useCallback(async () => {
     if (onBeforePrint) {
