@@ -57,7 +57,7 @@ export default function SidebarBody({ collapsed }: { collapsed: boolean }) {
 
             const entryKey = getSidebarEntryKey(entry);
             const isActive =
-              (entry.href ? pathname === entry.href : false) ||
+              (entry.href ? isPathActive(pathname, entry.href) : false) ||
               entry.items.some((item) => isPathActive(pathname, item.href));
             const activeChild = entry.items.find((item) => isPathActive(pathname, item.href));
             const expanded = collapsed ? false : (expandedGroups[entryKey] ?? isActive);
