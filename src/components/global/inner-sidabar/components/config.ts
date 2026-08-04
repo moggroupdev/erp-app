@@ -138,7 +138,7 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_MATERIALS,
       },
       {
-        label: { en: "Inventory Transations", ar: "حركات المخزون" },
+        label: { en: "Inventory Transactions", ar: "حركات المخزون" },
         href: "/warehouse/transactions",
         icon: ReceiptText,
         requiredPermission: PERMISSIONS.READ_INVENTORY_TRANSACTIONS,

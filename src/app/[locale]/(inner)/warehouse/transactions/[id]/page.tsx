@@ -19,10 +19,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
-import TransactionDetails, {
-  getItemSourceLabel,
-  MaterialTitleLink,
-} from "./components/transaction-details";
+import TransactionDetails, { getItemSourceLabel, MaterialTitleLink } from "./components/transaction-details";
 
 const PAGE_TITLE = { en: "Transaction Details", ar: "تفاصيل الحركة" };
 
@@ -53,7 +50,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/warehouse/transations"),
+        backLink: getLocalizedHref("/warehouse/transactions"),
         sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
       }}
     >

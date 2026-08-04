@@ -179,7 +179,7 @@ export default function Page() {
                       <Table.Td className="font-semibold text-gray-800">
                         <div className="flex items-center gap-1.5">
                           <Link
-                            href={getLocalizedHref(`/warehouse/transations/${transaction.id}`)}
+                            href={getLocalizedHref(`/warehouse/transactions/${transaction.id}`)}
                             className="font-mono hover:underline"
                           >
                             {transaction.code}
