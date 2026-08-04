@@ -139,7 +139,7 @@ export const sidebarConfig: SidebarEntryConfig[] = [
       },
       {
         label: { en: "Inventory Transations", ar: "حركات المخزون" },
-        href: "/warehouse/transations",
+        href: "/warehouse/transactions",
         icon: ReceiptText,
         requiredPermission: PERMISSIONS.READ_INVENTORY_TRANSACTIONS,
       },
