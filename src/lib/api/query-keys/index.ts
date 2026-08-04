@@ -82,6 +82,13 @@ export const queryKeys = {
     details: () => [...queryKeys.boms.all, "detail"] as const,
     detail: (dimensionId: string) => [...queryKeys.boms.details(), dimensionId] as const,
   },
+  inventoryTransactions: {
+    all: ["inventory-transactions"] as const,
+    lists: () => [...queryKeys.inventoryTransactions.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.inventoryTransactions.lists(), filters] as const,
+    details: () => [...queryKeys.inventoryTransactions.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.inventoryTransactions.details(), id] as const,
+  },
   reports: {
     all: ["reports"] as const,
     materials: {
