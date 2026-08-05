@@ -292,6 +292,7 @@ Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSecti
 - Document title: `useDocumentTitle` with bilingual titles.
 - Icons: prefer `lucide-react`.
 - Do **not** use heavy hover translate/lift (`translate-y`, etc.) or heavy hover shadow changes on cards and list items. Prefer quiet hover.
+- **Repeated same-format tables:** When a page or printable document renders **more than one** table of the same format (same columns / same entity shape — e.g. category-grouped BOM rows), give columns **fixed widths** (`table-fixed` / `w-full` plus shared `%` or pixel widths on headers) so columns align across tables. Not required when the page has only one such table.
 
 **Selects:** enum options → `selections/enum-based/`; reference-hook options (locations, departments, roles, categories, …) → `selections/reference-based/`; large paginated entities with server keyword search (users, materials, …) → `selections/remote-based/`. Do not leave new shared selects at `components/global/select-*`.
 
