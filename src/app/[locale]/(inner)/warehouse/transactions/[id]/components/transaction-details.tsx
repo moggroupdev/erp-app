@@ -1,9 +1,9 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { getInventoryTransactionTypeLabel } from "@/lib/constants/enums/inventory-transaction-types";
 import { type InventoryTransactionDetailed } from "@/types/inventory-transaction";
 import { ReceiptText } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import InventoryTransactionTypeLabel from "@/components/ui/inventory-transaction-type-label";
 
 export default function TransactionDetails({ transaction }: { transaction: InventoryTransactionDetailed }) {
   const { locale, translate } = useI18n();
@@ -17,7 +17,7 @@ export default function TransactionDetails({ transaction }: { transaction: Inven
     },
     {
       key: translate("Transaction Type", "نوع الإذن"),
-      value: getInventoryTransactionTypeLabel(transaction.transactionType, locale),
+      value: <InventoryTransactionTypeLabel type={transaction.transactionType} />,
     },
     {
       key: translate("Notes", "الملاحظات"),

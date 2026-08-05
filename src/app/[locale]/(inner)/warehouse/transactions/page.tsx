@@ -14,7 +14,6 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import { getInventoryTransactionTypeLabel } from "@/lib/constants/enums/inventory-transaction-types";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type InventoryTransaction } from "@/types/inventory-transaction";
 import { Table, TextInput } from "@mantine/core";
@@ -27,6 +26,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import InventoryTransactionTypeLabel from "@/components/ui/inventory-transaction-type-label";
 import SelectInventoryTransactionType from "@/components/global/selections/enum-based/select-inventory-transaction-type";
 
 const PAGE_TITLE = { en: "Inventory Transactions", ar: "حركات المخزون" };
@@ -116,10 +116,7 @@ export default function Page() {
           <TextInput
             value={keyword}
             onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-            placeholder={translate(
-              "Search by code, legacy number, or notes...",
-              "ابحث بالكود أو الرقم القديم أو الملاحظات...",
-            )}
+            placeholder={translate("Search...", "ابحث...")}
             leftSection={<Search size={15} />}
             radius="md"
             rightSection={
@@ -167,8 +164,8 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                    <Table.Th>{translate("Legacy Number", "الرقم القديم")}</Table.Th>
-                    <Table.Th>{translate("Type", "النوع")}</Table.Th>
+                    <Table.Th>{translate("Transaction Number (Legacy)", "رقم الإذن (القديم)")}</Table.Th>
+                    <Table.Th>{translate("Transaction Type", "نوع الإذن")}</Table.Th>
                     <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                     <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
                   </Table.Tr>
@@ -194,7 +191,9 @@ export default function Page() {
                           <span className="text-gray-400">-</span>
                         )}
                       </Table.Td>
-                      <Table.Td>{getInventoryTransactionTypeLabel(transaction.transactionType, locale)}</Table.Td>
+                      <Table.Td>
+                        <InventoryTransactionTypeLabel type={transaction.transactionType} />
+                      </Table.Td>
                       <Table.Td className="max-w-xs truncate">
                         {transaction.notes || <span className="text-gray-400">-</span>}
                       </Table.Td>
