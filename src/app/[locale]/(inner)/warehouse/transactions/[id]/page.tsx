@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "@mantine/core";
@@ -19,9 +20,9 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
-import TransactionDetails, { getItemSourceLabel, MaterialTitleLink } from "./components/transaction-details";
+import TransactionDetails from "./components/transaction-details";
 
-const PAGE_TITLE = { en: "Transaction Details", ar: "تفاصيل الحركة" };
+const PAGE_TITLE = { en: "Transaction Details", ar: "تفاصيل الإذن" };
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -85,29 +86,49 @@ export default function Page() {
                         <Table.Th>
                           {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                         </Table.Th>
-                        <Table.Th>{translate("Source", "المصدر")}</Table.Th>
+                        <Table.Th>
+                          {translate(`Subtotal (${translation.currency})`, `المجموع الفرعي (${translation.currency})`)}
+                        </Table.Th>
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
-                      {transaction.items.map((item) => (
-                        <Table.Tr key={item.id} className="text-gray-600">
-                          <Table.Td className="font-semibold text-gray-800">
-                            <MaterialTitleLink code={item.material.code} title={item.material.title} />
-                          </Table.Td>
-                          <Table.Td>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono">{item.material.code}</span>
-                              <CopyButton text={item.material.code} />
-                            </div>
-                          </Table.Td>
-                          <Table.Td>{getMaterialTypeLabel(item.material.materialType, locale)}</Table.Td>
-                          <Table.Td>{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</Table.Td>
-                          <Table.Td>{item.quantity}</Table.Td>
-                          <Table.Td>{formatMoney(item.unitPrice)}</Table.Td>
-                          <Table.Td>{getItemSourceLabel(item, translate)}</Table.Td>
-                        </Table.Tr>
-                      ))}
+                      {transaction.items.map((item) => {
+                        const subtotal = Number(item.quantity) * Number(item.unitPrice);
+                        return (
+                          <Table.Tr key={item.id} className="text-gray-600">
+                            <Table.Td className="font-semibold text-gray-800">
+                              <Link
+                                href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                className="hover:underline"
+                              >
+                                {item.material.title}
+                              </Link>
+                            </Table.Td>
+                            <Table.Td>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono">{item.material.code}</span>
+                                <CopyButton text={item.material.code} />
+                              </div>
+                            </Table.Td>
+                            <Table.Td>{getMaterialTypeLabel(item.material.materialType, locale)}</Table.Td>
+                            <Table.Td>{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</Table.Td>
+                            <Table.Td>{item.quantity}</Table.Td>
+                            <Table.Td>{formatMoney(item.unitPrice)}</Table.Td>
+                            <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                          </Table.Tr>
+                        );
+                      })}
                     </Table.Tbody>
+                    <Table.Tfoot className="bg-gray-50">
+                      <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                        <Table.Th colSpan={6}>{translate("Total", "الإجمالي")}</Table.Th>
+                        <Table.Th>
+                          {formatMoney(
+                            transaction.items.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unitPrice), 0),
+                          )}
+                        </Table.Th>
+                      </Table.Tr>
+                    </Table.Tfoot>
                   </Table>
                 </div>
               )}
