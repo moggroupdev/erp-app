@@ -32,6 +32,7 @@ export type InventoryTransactionItem = {
     title: string;
     materialType: MaterialType;
     unitOfMeasurement: MaterialUnit;
+    subCategoryId: string;
     unitPrice: number;
   };
 };

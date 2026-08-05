@@ -7,11 +7,11 @@ import { Table } from "@mantine/core";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import inventoryTransactionsApi from "@/lib/api/inventory-transactions";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import LayoutBox from "@/components/ui/layout-box";
@@ -29,6 +29,13 @@ export default function Page() {
   const { id } = useParams<{ id: string }>();
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
+  const { helpers } = useMaterialCategories();
+
+  function getMainCategoryTitle(subCategoryId: string) {
+    const sub = helpers.getMaterialCategorySubById(subCategoryId);
+    const main = sub ? helpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
+    return main?.title || "-";
+  }
 
   const {
     data: transaction,
@@ -80,7 +87,7 @@ export default function Page() {
                       <Table.Tr>
                         <Table.Th>{translate("Material", "المادة")}</Table.Th>
                         <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                        <Table.Th>{translate("Type", "النوع")}</Table.Th>
+                        <Table.Th>{translate("Category", "الفئة")}</Table.Th>
                         <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
                         <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
                         <Table.Th>
@@ -110,7 +117,7 @@ export default function Page() {
                                 <CopyButton text={item.material.code} />
                               </div>
                             </Table.Td>
-                            <Table.Td>{getMaterialTypeLabel(item.material.materialType, locale)}</Table.Td>
+                            <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
                             <Table.Td>{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</Table.Td>
                             <Table.Td>{item.quantity}</Table.Td>
                             <Table.Td>{formatMoney(item.unitPrice)}</Table.Td>
