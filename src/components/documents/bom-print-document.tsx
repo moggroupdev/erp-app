@@ -73,20 +73,24 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
           <div key={group.mainCategoryId} className="flex break-inside-avoid flex-col gap-2">
             <h3 className="text-sm font-semibold">{group.title}</h3>
 
-            <table className="w-full border-collapse text-[9px]">
+            <table className="w-full table-fixed border-collapse text-[9px]">
               <thead>
                 <tr className="border-b border-gray-300 bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
-                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Material Code", "كود المادة")}</th>
-                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Material Name", "اسم المادة")}</th>
-                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Unit", "الوحدة")}</th>
-                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Quantity", "الكمية")}</th>
-                  <th className="px-2.5 py-2 text-start whitespace-nowrap">
+                  <th className="w-[12%] px-2.5 py-2 text-start whitespace-nowrap">
+                    {translate("Material Code", "كود المادة")}
+                  </th>
+                  <th className="w-[31%] px-2.5 py-2 text-start whitespace-nowrap">
+                    {translate("Material Name", "اسم المادة")}
+                  </th>
+                  <th className="w-[9%] px-2.5 py-2 text-start whitespace-nowrap">{translate("Unit", "الوحدة")}</th>
+                  <th className="w-[9%] px-2.5 py-2 text-start whitespace-nowrap">{translate("Quantity", "الكمية")}</th>
+                  <th className="w-[13%] px-2.5 py-2 text-start whitespace-nowrap">
                     {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                   </th>
-                  <th className="px-2.5 py-2 text-start whitespace-nowrap">
+                  <th className="w-[13%] px-2.5 py-2 text-start whitespace-nowrap">
                     {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
                   </th>
-                  <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Notes", "الملاحظات")}</th>
+                  <th className="w-[13%] px-2.5 py-2 text-start whitespace-nowrap">{translate("Notes", "الملاحظات")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -96,14 +100,12 @@ export default function BomPrintDocument({ bom, categoryBreakdown, totals, mainC
                   return (
                     <tr key={item.id} className="border-b border-gray-200">
                       <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{item.material.code}</td>
-                      <td className="px-2.5 py-2">
-                        <span className="font-medium whitespace-nowrap text-gray-800">{item.material.title}</span>
-                      </td>
+                      <td className="px-2.5 py-2 font-medium wrap-break-word text-gray-800">{item.material.title}</td>
                       <td className="px-2.5 py-2">{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</td>
                       <td className="px-2.5 py-2">{item.quantityRequired}</td>
                       <td className="px-2.5 py-2">{formatMoney(item.material.unitPrice)}</td>
                       <td className="px-2.5 py-2 font-medium">{formatMoney(lineCost)}</td>
-                      <td className="px-2.5 py-2 text-gray-600">
+                      <td className="px-2.5 py-2 wrap-break-word text-gray-600">
                         <div className="flex flex-col gap-0.5 leading-relaxed">
                           {item.notes ? <span>{item.notes}</span> : null}
                           {item.parentManufacturedMaterialTitle && (

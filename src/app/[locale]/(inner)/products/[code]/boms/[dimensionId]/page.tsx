@@ -286,31 +286,31 @@ export default function Page() {
                       <h5 className="px-0.5 text-sm font-semibold text-gray-800">{group.title}</h5>
 
                       <div className="overflow-x-auto rounded-xl border border-gray-200">
-                        <Table className="text-nowrap" highlightOnHover>
+                        <Table className="w-full table-fixed text-nowrap" highlightOnHover>
                           <Table.Thead className="bg-gray-50">
                             <Table.Tr className="h-10">
-                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Code", "كود المادة")}
                               </Table.Th>
-                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="26%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Name", "اسم المادة")}
                               </Table.Th>
-                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="9%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit", "الوحدة")}
                               </Table.Th>
-                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="9%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Quantity", "الكمية")}
                               </Table.Th>
-                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
                               </Table.Th>
-                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Total (EGP)", "الإجمالي (ج.م)")}
                               </Table.Th>
-                              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Notes", "الملاحظات")}
                               </Table.Th>
-                              <Table.Th />
+                              <Table.Th w="5%" />
                             </Table.Tr>
                           </Table.Thead>
                           <Table.Tbody>
@@ -323,21 +323,17 @@ export default function Page() {
                                     <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
                                   </Table.Td>
                                   <Table.Td>
-                                    <span className="font-medium text-gray-800">{item.material.title}</span>
+                                    <span className="block truncate font-medium text-gray-800">{item.material.title}</span>
                                   </Table.Td>
-                                  <Table.Td>
-                                    <Badge size="sm" variant="light" color="gray" radius="md">
-                                      {getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}
-                                    </Badge>
-                                  </Table.Td>
+                                  <Table.Td>{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</Table.Td>
                                   <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
                                   <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
                                   <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
-                                  <Table.Td className="max-w-48 text-gray-500">
-                                    <div className="flex flex-col gap-0.5">
+                                  <Table.Td className="text-gray-500">
+                                    <div className="flex flex-col gap-0.5 overflow-hidden">
                                       {item.notes ? <span className="truncate">{item.notes}</span> : null}
                                       {item.parentManufacturedMaterialTitle && (
-                                        <span className="text-xs text-gray-400">
+                                        <span className="truncate text-xs text-gray-400">
                                           {translate("Required for", "مطلوب لـ")}:{" "}
                                           <span className="font-medium text-gray-800">
                                             {item.parentManufacturedMaterialTitle}
@@ -347,7 +343,7 @@ export default function Page() {
                                       {!item.notes && !item.parentManufacturedMaterialTitle ? "-" : null}
                                     </div>
                                   </Table.Td>
-                                  <Table.Td w={0}>
+                                  <Table.Td>
                                     {!item.parentManufacturedMaterialTitle && (
                                       <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
                                         <Button
