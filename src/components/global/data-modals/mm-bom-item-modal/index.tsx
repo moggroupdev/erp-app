@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import mmBomsApi from "@/lib/api/mm-boms";
@@ -82,6 +83,11 @@ export default function MmBomItemModal({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.mmBoms.detail(manufacturedMaterialCode) });
+      toast.success(
+        isUpdate
+          ? translate("BOM item updated successfully.", "تم تحديث بند قائمة المواد بنجاح.")
+          : translate("BOM item added successfully.", "تمت إضافة بند قائمة المواد بنجاح."),
+      );
       handleClose();
     },
   });

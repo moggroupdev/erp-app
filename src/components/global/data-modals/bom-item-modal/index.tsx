@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
@@ -77,6 +78,11 @@ export default function BomItemModal({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionId) });
+      toast.success(
+        isUpdate
+          ? translate("BOM item updated successfully.", "تم تحديث بند قائمة المواد بنجاح.")
+          : translate("BOM item added successfully.", "تمت إضافة بند قائمة المواد بنجاح."),
+      );
       handleClose();
     },
   });

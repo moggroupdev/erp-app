@@ -7,6 +7,7 @@ import { MantineColorSchemeScript } from "@/components/mantine/color-scheme-scri
 import { getI18nFromParams } from "@/lib/i18n/utils";
 import { locales } from "@/lib/i18n/config";
 import { Alexandria } from "next/font/google";
+import { Toaster } from "sonner";
 import QueryProvider from "@/providers/query";
 import UserProvider from "@/contexts/user/provider";
 
@@ -35,7 +36,7 @@ export async function generateStaticParams() {
 }
 
 export default async function RootLayout({ params, children }: Readonly<LocaleLayoutProps>) {
-  const { locale, translation } = await getI18nFromParams(params);
+  const { locale, translate, translation } = await getI18nFromParams(params);
 
   return (
     <html
@@ -50,7 +51,14 @@ export default async function RootLayout({ params, children }: Readonly<LocaleLa
       <body style={{ height: "101vh" }}>
         <QueryProvider>
           <UserProvider>
-            <MantineProvider theme={theme}>{children}</MantineProvider>
+            <MantineProvider theme={theme}>
+              {children}
+              <Toaster
+                richColors
+                position={translate("bottom-right", "bottom-left") as "bottom-right" | "bottom-left"}
+                dir={translation.dir as "auto" | "ltr" | "rtl"}
+              />
+            </MantineProvider>
           </UserProvider>
         </QueryProvider>
       </body>
