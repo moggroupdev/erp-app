@@ -11,7 +11,7 @@ export default function TransactionDetails({ transaction }: { transaction: Inven
   const rows: DetailRow[] = [
     { key: translate("Code", "الكود"), value: transaction.code, mono: true, copyText: transaction.code },
     {
-      key: translate("Transaction Number (Legacy)", "رقم الإذن (القديم)"),
+      key: translate("Transaction Number", "رقم الإذن"),
       value: transaction.legacyNumber ? <span className="font-mono">{transaction.legacyNumber}</span> : <EmptyValue />,
       copyText: transaction.legacyNumber || undefined,
     },

@@ -180,7 +180,10 @@ export default function Page() {
                         </Table.Td>
                         <Table.Td>
                           {order.legacyInvoiceNumber ? (
-                            <span className="font-mono">{order.legacyInvoiceNumber}</span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono">{order.legacyInvoiceNumber}</span>
+                              <CopyButton text={order.legacyInvoiceNumber} />
+                            </div>
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}

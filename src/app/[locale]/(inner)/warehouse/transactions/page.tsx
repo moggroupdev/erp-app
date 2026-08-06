@@ -164,10 +164,10 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                    <Table.Th>{translate("Transaction Number (Legacy)", "رقم الإذن (القديم)")}</Table.Th>
+                    <Table.Th>{translate("Transaction Number", "رقم الإذن")}</Table.Th>
                     <Table.Th>{translate("Transaction Type", "نوع الإذن")}</Table.Th>
-                    <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                     <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
+                    <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -186,7 +186,10 @@ export default function Page() {
                       </Table.Td>
                       <Table.Td>
                         {transaction.legacyNumber ? (
-                          <span className="font-mono">{transaction.legacyNumber}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono">{transaction.legacyNumber}</span>
+                            <CopyButton text={transaction.legacyNumber} />
+                          </div>
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
@@ -194,10 +197,10 @@ export default function Page() {
                       <Table.Td>
                         <InventoryTransactionTypeLabel type={transaction.transactionType} />
                       </Table.Td>
+                      <Table.Td>{formatDateAndTime(transaction.createdAt, locale)}</Table.Td>
                       <Table.Td className="max-w-xs truncate">
                         {transaction.notes || <span className="text-gray-400">-</span>}
                       </Table.Td>
-                      <Table.Td>{formatDateAndTime(transaction.createdAt, locale)}</Table.Td>
                     </Table.Tr>
                   ))}
                 </Table.Tbody>

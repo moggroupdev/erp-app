@@ -182,7 +182,6 @@ export default function Page() {
                         <Table.Th>{translate("Code", "الكود")}</Table.Th>
                         <Table.Th>{translate("Received At", "تاريخ الاستلام")}</Table.Th>
                         <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
-                        <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -209,7 +208,6 @@ export default function Page() {
                           <Table.Td className="max-w-xs truncate">
                             {receipt.notes || <span className="text-gray-400">-</span>}
                           </Table.Td>
-                          <Table.Td>{formatDateAndTime(receipt.createdAt, locale)}</Table.Td>
                         </Table.Tr>
                       ))}
                     </Table.Tbody>
