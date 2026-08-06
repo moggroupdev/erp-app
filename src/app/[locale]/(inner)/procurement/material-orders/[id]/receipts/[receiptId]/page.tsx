@@ -74,7 +74,7 @@ export default function Page() {
             {receipt && receipt.items.length > 0 && (
               <Button
                 variant="light"
-                color="teal"
+                color="cyan"
                 radius="md"
                 leftSection={<ClipboardCheck size={15} />}
                 onClick={openInspectionModal}
