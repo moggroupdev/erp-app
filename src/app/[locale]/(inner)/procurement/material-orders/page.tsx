@@ -80,7 +80,7 @@ export default function Page() {
     refetch,
   } = useQuery({
     queryKey: queryKeys.materialPurchaseOrders.list(params),
-    queryFn: ({ signal }) => materialPurchaseOrdersApi.list({ privateRequest, params, signal }),
+    queryFn: ({ signal }) => materialPurchaseOrdersApi.listOrders({ privateRequest, params, signal }),
     staleTime: staleTimes.materialPurchaseOrders,
     placeholderData: keepPreviousData,
   });

@@ -44,7 +44,7 @@ export default function Page() {
     refetch,
   } = useQuery({
     queryKey: queryKeys.materialPurchaseOrders.detail(id),
-    queryFn: ({ signal }) => materialPurchaseOrdersApi.get({ privateRequest, id, signal }),
+    queryFn: ({ signal }) => materialPurchaseOrdersApi.getOrder({ privateRequest, id, signal }),
     staleTime: staleTimes.materialPurchaseOrders,
   });
 

@@ -95,6 +95,13 @@ export const queryKeys = {
     list: (filters: ListFilters) => [...queryKeys.materialPurchaseOrders.lists(), filters] as const,
     details: () => [...queryKeys.materialPurchaseOrders.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.materialPurchaseOrders.details(), id] as const,
+    receipts: {
+      all: () => [...queryKeys.materialPurchaseOrders.all, "receipts"] as const,
+      lists: () => [...queryKeys.materialPurchaseOrders.receipts.all(), "list"] as const,
+      list: (filters: ListFilters) => [...queryKeys.materialPurchaseOrders.receipts.lists(), filters] as const,
+      details: () => [...queryKeys.materialPurchaseOrders.receipts.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.materialPurchaseOrders.receipts.details(), id] as const,
+    },
   },
   reports: {
     all: ["reports"] as const,
