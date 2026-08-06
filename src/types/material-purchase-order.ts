@@ -71,6 +71,7 @@ export type MaterialPurchaseReceiptItem = {
     unitPrice: number;
     material: PurchaseMaterial;
   };
+  transaction: { id: string; code: string; legacyNumber: string | null } | null;
 };
 
 export type MaterialPurchaseReceiptDetailed = Omit<MaterialPurchaseReceipt, "createdBy" | "receivedBy"> & {
