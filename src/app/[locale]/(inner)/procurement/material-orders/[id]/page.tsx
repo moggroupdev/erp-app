@@ -13,6 +13,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -23,6 +24,8 @@ import CopyButton from "@/components/ui/copy-button";
 import OrderDetails from "./components/order-details";
 
 const PAGE_TITLE = { en: "Purchase Order Details", ar: "تفاصيل أمر الشراء" };
+
+const RECEIPTS_LIMIT = 100;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -39,16 +42,34 @@ export default function Page() {
 
   const {
     data: order,
-    isFetching,
-    error,
-    refetch,
+    isFetching: isOrderFetching,
+    error: orderError,
+    refetch: refetchOrder,
   } = useQuery({
     queryKey: queryKeys.materialPurchaseOrders.detail(id),
     queryFn: ({ signal }) => materialPurchaseOrdersApi.getOrder({ privateRequest, id, signal }),
     staleTime: staleTimes.materialPurchaseOrders,
   });
 
-  const errorMessage = error ? getErrorMessage(locale, error) : "";
+  const receiptsParams = { materialPurchaseOrderId: id, limit: RECEIPTS_LIMIT, sortBy: "-createdAt" };
+
+  const {
+    data: paginatedReceipts,
+    isFetching: isReceiptsFetching,
+    error: receiptsError,
+    refetch: refetchReceipts,
+  } = useQuery({
+    queryKey: queryKeys.materialPurchaseOrders.receipts.list(receiptsParams),
+    queryFn: ({ signal }) => materialPurchaseOrdersApi.listReceipts({ privateRequest, params: receiptsParams, signal }),
+    staleTime: staleTimes.materialPurchaseOrders,
+  });
+
+  const isFetching = isOrderFetching || isReceiptsFetching;
+
+  function refetch() {
+    refetchOrder();
+    refetchReceipts();
+  }
 
   useDocumentTitle(
     `${order?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر شراء الخامات")}`,
@@ -59,19 +80,19 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref("/procurement/material-orders"),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: <RefetchButton isFetching={isFetching} onRefetch={refetch} />,
       }}
     >
-      {isFetching ? (
+      {isOrderFetching ? (
         <LoadingSection message={translate("Loading purchase order data", "جاري تحميل بيانات أمر الشراء")} />
-      ) : errorMessage ? (
+      ) : orderError ? (
         <ErrorSection
           errorTitle={translate(
             "An error occurred while loading purchase order data",
             "حدث خطأ أثناء تحميل بيانات أمر الشراء",
           )}
-          errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
+          errorMessage={getErrorMessage(locale, orderError)}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetchOrder() }}
         />
       ) : (
         order && (
@@ -135,6 +156,63 @@ export default function Page() {
                         <Table.Th>{formatMoney(order.totalAmount)}</Table.Th>
                       </Table.Tr>
                     </Table.Tfoot>
+                  </Table>
+                </div>
+              )}
+            </section>
+
+            <section className="mt-8 flex flex-col gap-4">
+              <h4 className="text-lg font-semibold text-gray-900">{translate("Receipts", "إذونات الاستلام")}</h4>
+
+              {isReceiptsFetching ? (
+                <LoadingSection message={translate("Loading receipts...", "جاري تحميل إذونات الاستلام...")} />
+              ) : receiptsError ? (
+                <ErrorSection
+                  errorTitle={translate("Error loading receipts", "خطأ في تحميل إذونات الاستلام")}
+                  errorMessage={getErrorMessage(locale, receiptsError)}
+                  button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetchReceipts() }}
+                />
+              ) : !paginatedReceipts || paginatedReceipts.data.length === 0 ? (
+                <EmptySection message={translate("No receipts for this order", "لا توجد إذونات استلام لهذا الأمر")} />
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                        <Table.Th>{translate("Received At", "تاريخ الاستلام")}</Table.Th>
+                        <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
+                        <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {paginatedReceipts.data.map((receipt) => (
+                        <Table.Tr key={receipt.id} className="text-gray-600">
+                          <Table.Td className="font-semibold text-gray-800">
+                            <div className="flex items-center gap-1.5">
+                              <Link
+                                href={getLocalizedHref(`/procurement/material-orders/${id}/receipts/${receipt.id}`)}
+                                className="font-mono hover:underline"
+                              >
+                                {receipt.code}
+                              </Link>
+                              <CopyButton text={receipt.code} />
+                            </div>
+                          </Table.Td>
+                          <Table.Td>
+                            {receipt.receivedAt ? (
+                              formatDateAndTime(receipt.receivedAt, locale)
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </Table.Td>
+                          <Table.Td className="max-w-xs truncate">
+                            {receipt.notes || <span className="text-gray-400">-</span>}
+                          </Table.Td>
+                          <Table.Td>{formatDateAndTime(receipt.createdAt, locale)}</Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
                   </Table>
                 </div>
               )}

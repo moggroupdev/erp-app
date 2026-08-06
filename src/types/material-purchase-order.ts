@@ -38,7 +38,7 @@ export type MaterialPurchaseOrderItem = {
   material: PurchaseMaterial;
 };
 
-export type MaterialPurchaseOrderDetailed = MaterialPurchaseOrder & {
+export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "createdBy"> & {
   vendor: { id: string; name: string };
   createdBy: { id: string; name: string };
   items: MaterialPurchaseOrderItem[];
@@ -73,7 +73,7 @@ export type MaterialPurchaseReceiptItem = {
   };
 };
 
-export type MaterialPurchaseReceiptDetailed = MaterialPurchaseReceipt & {
+export type MaterialPurchaseReceiptDetailed = Omit<MaterialPurchaseReceipt, "createdBy" | "receivedBy"> & {
   materialPurchaseOrder: { id: string; code: string; legacyInvoiceNumber: string | null };
   createdBy: { id: string; name: string };
   receivedBy: { id: string; name: string } | null;
