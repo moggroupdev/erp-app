@@ -31,7 +31,6 @@ export type MaterialPurchaseOrderItem = {
     materialType: MaterialType;
     unitOfMeasurement: MaterialUnit;
     subCategoryId: string;
-    unitPrice: number;
   };
 };
 

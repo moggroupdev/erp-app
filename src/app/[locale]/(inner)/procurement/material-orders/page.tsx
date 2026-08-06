@@ -143,7 +143,10 @@ export default function Page() {
               button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
             />
           ) : (
-            <EmptySection useDefaultImg message={translate("No material purchase orders found", "لا توجد أوامر شراء خامات")} />
+            <EmptySection
+              useDefaultImg
+              message={translate("No material purchase orders found", "لا توجد أوامر شراء خامات")}
+            />
           )
         ) : (
           <>
@@ -152,11 +155,9 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                    <Table.Th>{translate("Invoice Number (Legacy)", "رقم الفاتورة (القديم)")}</Table.Th>
+                    <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                     <Table.Th>{translate("Vendor", "المورد")}</Table.Th>
-                    <Table.Th>
-                      {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
-                    </Table.Th>
+                    <Table.Th>{translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
                   </Table.Tr>

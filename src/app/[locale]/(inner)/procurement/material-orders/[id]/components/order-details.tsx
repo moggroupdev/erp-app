@@ -23,12 +23,8 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
   const rows: DetailRow[] = [
     { key: translate("Code", "الكود"), value: order.code, mono: true, copyText: order.code },
     {
-      key: translate("Invoice Number (Legacy)", "رقم الفاتورة (القديم)"),
-      value: order.legacyInvoiceNumber ? (
-        <span className="font-mono">{order.legacyInvoiceNumber}</span>
-      ) : (
-        <EmptyValue />
-      ),
+      key: translate("Invoice Number", "رقم الفاتورة"),
+      value: order.legacyInvoiceNumber ? <span className="font-mono">{order.legacyInvoiceNumber}</span> : <EmptyValue />,
       copyText: order.legacyInvoiceNumber || undefined,
     },
     {
