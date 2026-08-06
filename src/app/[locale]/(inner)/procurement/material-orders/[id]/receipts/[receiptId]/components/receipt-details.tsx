@@ -4,15 +4,22 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type MaterialPurchaseReceiptDetailed } from "@/types/material-purchase-order";
 import { ClipboardCheck } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import { getReceiptTransactionLabel, getReceiptTransactionState } from "./receipt-transaction-state";
 
 export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseReceiptDetailed }) {
   const { locale, translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
+  const transactionState = getReceiptTransactionState(receipt.items);
 
   const rows: DetailRow[] = [
-    { key: translate("Code", "الكود"), value: receipt.code, mono: true, copyText: receipt.code },
     {
-      key: translate("Purchase Order", "أمر الشراء"),
+      key: translate("Materials Receipt Code", "كود سند الاستلام"),
+      value: receipt.code,
+      mono: true,
+      copyText: receipt.code,
+    },
+    {
+      key: translate("Purchase Order Code", "كود أمر الشراء"),
       value: (
         <Link
           href={getLocalizedHref(`/procurement/material-orders/${receipt.materialPurchaseOrder.id}`)}
@@ -32,6 +39,37 @@ export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseR
       ),
       copyText: receipt.materialPurchaseOrder.legacyInvoiceNumber || undefined,
     },
+  ];
+
+  // ReceiptDetails shows the transaction only when all items share one, or when none exist yet.
+  if (transactionState.mode === "single") {
+    const transactionLabel = getReceiptTransactionLabel(transactionState.transaction);
+    rows.push({
+      key: translate("Transaction Number", "رقم إذن الإضافة"),
+      value: (
+        <Link
+          href={getLocalizedHref(`/warehouse/transactions/${transactionState.transaction.id}`)}
+          className="font-mono hover:underline"
+        >
+          {transactionLabel}
+        </Link>
+      ),
+      copyText: transactionLabel,
+    });
+  }
+
+  if (transactionState.mode === "none") {
+    rows.push({
+      key: translate("Transaction Number", "رقم الإذن"),
+      value: (
+        <span className="font-semibold text-red-600">
+          {translate("Inventory transaction was not created yet", "لم يُنشأ إذن المخزون بعد")}
+        </span>
+      ),
+    });
+  }
+
+  rows.push(
     {
       key: translate("Received At", "تاريخ الاستلام"),
       value: receipt.receivedAt ? formatDateAndTime(receipt.receivedAt, locale) : <EmptyValue />,
@@ -49,10 +87,10 @@ export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseR
       value: <CreatorLink creator={receipt.createdBy} />,
     },
     {
-      key: translate("Creation Date", "تاريخ إنشاء الإذن"),
+      key: translate("Creation Date", "تاريخ إنشاء سند الاستلام"),
       value: formatDateAndTime(receipt.createdAt, locale),
     },
-  ];
+  );
 
   return <EntityDetails title={receipt.code} icon={ClipboardCheck} rows={rows} />;
 }
