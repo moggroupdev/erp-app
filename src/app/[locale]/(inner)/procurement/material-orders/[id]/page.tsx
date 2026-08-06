@@ -23,7 +23,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import OrderDetails from "./components/order-details";
 
-const PAGE_TITLE = { en: "Purchase Order Details", ar: "تفاصيل أمر الشراء" };
+const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر شراء خامات" };
 
 const RECEIPTS_LIMIT = 100;
 
@@ -162,24 +162,24 @@ export default function Page() {
             </section>
 
             <section className="mt-8 flex flex-col gap-4">
-              <h4 className="text-lg font-semibold text-gray-900">{translate("Receipts", "إذونات الاستلام")}</h4>
+              <h4 className="text-lg font-semibold text-gray-900">{translate("Receipts", "سندات الاستلام")}</h4>
 
               {isReceiptsFetching ? (
-                <LoadingSection message={translate("Loading receipts...", "جاري تحميل إذونات الاستلام...")} />
+                <LoadingSection message={translate("Loading receipts...", "جاري تحميل سندات الاستلام...")} />
               ) : receiptsError ? (
                 <ErrorSection
-                  errorTitle={translate("Error loading receipts", "خطأ في تحميل إذونات الاستلام")}
+                  errorTitle={translate("Error loading receipts", "خطأ في تحميل سندات الاستلام")}
                   errorMessage={getErrorMessage(locale, receiptsError)}
                   button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetchReceipts() }}
                 />
               ) : !paginatedReceipts || paginatedReceipts.data.length === 0 ? (
-                <EmptySection message={translate("No receipts for this order", "لا توجد إذونات استلام لهذا الأمر")} />
+                <EmptySection message={translate("No receipts for this order", "لا توجد سندات استلام لهذا الأمر")} />
               ) : (
                 <div className="overflow-x-auto">
                   <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
                     <Table.Thead>
                       <Table.Tr>
-                        <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                        <Table.Th>{translate("Materials Receipt Code", "كود سند الاستلام")}</Table.Th>
                         <Table.Th>{translate("Received At", "تاريخ الاستلام")}</Table.Th>
                         <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                       </Table.Tr>

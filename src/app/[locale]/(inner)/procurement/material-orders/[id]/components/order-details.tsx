@@ -21,7 +21,7 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
   const status = getOrderStatusLabel(order, translate);
 
   const rows: DetailRow[] = [
-    { key: translate("Code", "الكود"), value: order.code, mono: true, copyText: order.code },
+    { key: translate("Purchase Order Code", "كود أمر الشراء"), value: order.code, mono: true, copyText: order.code },
     {
       key: translate("Invoice Number", "رقم الفاتورة"),
       value: order.legacyInvoiceNumber ? <span className="font-mono">{order.legacyInvoiceNumber}</span> : <EmptyValue />,
@@ -43,14 +43,22 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
       key: translate("Status", "الحالة"),
       value: <span className={status.className}>{status.label}</span>,
     },
-    {
-      key: translate("Completed At", "تاريخ الإكمال"),
-      value: order.completedAt ? formatDateAndTime(order.completedAt, locale) : <EmptyValue />,
-    },
-    {
-      key: translate("Cancelled At", "تاريخ الإلغاء"),
-      value: order.cancelledAt ? formatDateAndTime(order.cancelledAt, locale) : <EmptyValue />,
-    },
+    ...(order.completedAt
+      ? [
+          {
+            key: translate("Completed At", "تاريخ الإكمال"),
+            value: formatDateAndTime(order.completedAt, locale),
+          },
+        ]
+      : []),
+    ...(order.cancelledAt
+      ? [
+          {
+            key: translate("Cancelled At", "تاريخ الإلغاء"),
+            value: formatDateAndTime(order.cancelledAt, locale),
+          },
+        ]
+      : []),
     {
       key: translate("Notes", "الملاحظات"),
       value: order.notes ? <span className="font-normal whitespace-pre-wrap">{order.notes}</span> : <EmptyValue />,

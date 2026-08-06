@@ -19,21 +19,14 @@ export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseR
       copyText: receipt.code,
     },
     {
-      key: translate("Purchase Order Code", "كود أمر الشراء"),
-      value: (
+      key: translate("Invoice Number", "رقم الفاتورة"),
+      value: receipt.materialPurchaseOrder.legacyInvoiceNumber ? (
         <Link
           href={getLocalizedHref(`/procurement/material-orders/${receipt.materialPurchaseOrder.id}`)}
           className="font-mono hover:underline"
         >
-          {receipt.materialPurchaseOrder.code}
+          {receipt.materialPurchaseOrder.legacyInvoiceNumber}
         </Link>
-      ),
-      copyText: receipt.materialPurchaseOrder.code,
-    },
-    {
-      key: translate("Invoice Number", "رقم الفاتورة"),
-      value: receipt.materialPurchaseOrder.legacyInvoiceNumber ? (
-        <span className="font-mono">{receipt.materialPurchaseOrder.legacyInvoiceNumber}</span>
       ) : (
         <EmptyValue />
       ),
