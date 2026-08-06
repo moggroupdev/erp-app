@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { Button, Table } from "@mantine/core";
+import { ClipboardCheck } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -21,6 +23,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import ReceiptDetails from "./components/receipt-details";
+import InspectionReportModal from "./components/inspection-report-modal";
 
 const PAGE_TITLE = { en: "Receipt Details", ar: "تفاصيل إذن الاستلام" };
 
@@ -30,6 +33,8 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+
+  const [inspectionModalOpened, { open: openInspectionModal, close: closeInspectionModal }] = useDisclosure(false);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -59,7 +64,22 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref(`/procurement/material-orders/${orderId}`),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: (
+          <div className="flex items-center gap-2">
+            {receipt && receipt.items.length > 0 && (
+              <Button
+                variant="light"
+                color="teal"
+                radius="md"
+                leftSection={<ClipboardCheck size={15} />}
+                onClick={openInspectionModal}
+              >
+                {translate("Inspection Report", "محضر الفحص")}
+              </Button>
+            )}
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+          </div>
+        ),
       }}
     >
       {isFetching ? (
@@ -98,7 +118,6 @@ export default function Page() {
                         <Table.Th>
                           {translate(`Subtotal (${translation.currency})`, `المجموع الفرعي (${translation.currency})`)}
                         </Table.Th>
-                        <Table.Th>{translate("Inspection Notes", "ملاحظات الفحص")}</Table.Th>
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -128,9 +147,6 @@ export default function Page() {
                             <Table.Td>{item.quantityRejected}</Table.Td>
                             <Table.Td>{formatMoney(unitPrice)}</Table.Td>
                             <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                            <Table.Td className="max-w-xs truncate">
-                              {item.inspectionNotes || <span className="text-gray-400">-</span>}
-                            </Table.Td>
                           </Table.Tr>
                         );
                       })}
@@ -147,13 +163,18 @@ export default function Page() {
                             ),
                           )}
                         </Table.Th>
-                        <Table.Th />
                       </Table.Tr>
                     </Table.Tfoot>
                   </Table>
                 </div>
               )}
             </section>
+
+            <InspectionReportModal
+              opened={inspectionModalOpened}
+              onClose={closeInspectionModal}
+              items={receipt.items}
+            />
           </>
         )
       )}
