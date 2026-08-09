@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import customersApi from "@/lib/api/customers";
-import vendorsApi from "@/lib/api/vendors";
+import suppliersApi from "@/lib/api/suppliers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { EGYPT_COUNTRY_ID } from "@/lib/constants/global";
@@ -20,7 +20,7 @@ type AddressModalProps = {
   opened: boolean;
   close: () => void;
   isFirstAddress: boolean;
-} & ({ entityType: "customer"; entityId: string } | { entityType: "vendor"; entityId: string });
+} & ({ entityType: "customer"; entityId: string } | { entityType: "supplier"; entityId: string });
 
 export default function AddressModal({ opened, close, entityType, entityId, isFirstAddress }: AddressModalProps) {
   const { locale, translate, translation } = useI18n();
@@ -68,15 +68,15 @@ export default function AddressModal({ opened, close, entityType, entityId, isFi
         isDefault: isFirstAddress || isDefault,
       };
       if (entityType === "customer") return await customersApi.addAddress({ privateRequest, id: entityId, dto });
-      if (entityType === "vendor") return await vendorsApi.addAddress({ privateRequest, id: entityId, dto });
+      if (entityType === "supplier") return await suppliersApi.addAddress({ privateRequest, id: entityId, dto });
       return null;
     },
     onSuccess: async () => {
       const addressesKey =
         entityType === "customer"
           ? queryKeys.customers.addresses(entityId)
-          : entityType === "vendor"
-            ? queryKeys.vendors.addresses(entityId)
+          : entityType === "supplier"
+            ? queryKeys.suppliers.addresses(entityId)
             : null;
       if (addressesKey) await queryClient.invalidateQueries({ queryKey: addressesKey });
       handleClose();

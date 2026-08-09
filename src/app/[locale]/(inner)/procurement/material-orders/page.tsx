@@ -16,7 +16,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { type MaterialPurchaseOrderWithVendor } from "@/types/material-purchase-order";
+import { type MaterialPurchaseOrderWithSupplier } from "@/types/material-purchase-order";
 import { Table, TextInput } from "@mantine/core";
 import { Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -33,7 +33,7 @@ const PAGE_TITLE = { en: "Material Purchase Orders", ar: "أوامر شراء ا
 const ORDERS_PER_PAGE = 25;
 
 function getOrderStatusLabel(
-  order: Pick<MaterialPurchaseOrderWithVendor, "cancelledAt" | "completedAt">,
+  order: Pick<MaterialPurchaseOrderWithSupplier, "cancelledAt" | "completedAt">,
   translate: (en: string, ar: string) => string,
 ) {
   if (order.cancelledAt) return { label: translate("Cancelled", "ملغي"), className: "text-red-600 font-bold" };
@@ -156,7 +156,7 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
-                    <Table.Th>{translate("Vendor", "المورد")}</Table.Th>
+                    <Table.Th>{translate("Supplier", "المورد")}</Table.Th>
                     <Table.Th>{translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
@@ -190,10 +190,10 @@ export default function Page() {
                         </Table.Td>
                         <Table.Td>
                           <Link
-                            href={getLocalizedHref(`/procurement/vendors/${order.vendor.id}`)}
+                            href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)}
                             className="hover:underline"
                           >
-                            {order.vendor.name}
+                            {order.supplier.name}
                           </Link>
                         </Table.Td>
                         <Table.Td>{formatMoney(order.totalAmount)}</Table.Td>
@@ -208,7 +208,7 @@ export default function Page() {
               </Table>
             </div>
 
-            <PaginationHandler<MaterialPurchaseOrderWithVendor>
+            <PaginationHandler<MaterialPurchaseOrderWithSupplier>
               paginatedData={paginatedOrders}
               activePage={activePage}
               setActivePage={setActivePage}

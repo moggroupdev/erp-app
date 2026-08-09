@@ -7,7 +7,7 @@ import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
-import vendorsApi from "@/lib/api/vendors";
+import suppliersApi from "@/lib/api/suppliers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
@@ -20,12 +20,12 @@ import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
-import VendorModal from "@/components/global/data-modals/vendor-modal";
+import SupplierModal from "@/components/global/data-modals/supplier-modal";
 import AddressModal from "@/components/global/data-modals/address-modal";
 import AddressCard from "@/components/global/address-card";
-import VendorDetails from "./components/vendor-details";
+import SupplierDetails from "./components/supplier-details";
 
-const PAGE_TITLE = { en: "Vendor Data", ar: "ملف المورد" };
+const PAGE_TITLE = { en: "Supplier Data", ar: "ملف المورد" };
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -33,36 +33,36 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
 
-  const canUpdateVendor = useHasPermission(PERMISSIONS.UPDATE_VENDOR);
+  const canUpdateSupplier = useHasPermission(PERMISSIONS.UPDATE_SUPPLIER);
 
-  const vendorQuery = useQuery({
-    queryKey: queryKeys.vendors.detail(id),
-    queryFn: ({ signal }) => vendorsApi.get({ privateRequest, id, signal }),
-    staleTime: staleTimes.vendors,
+  const supplierQuery = useQuery({
+    queryKey: queryKeys.suppliers.detail(id),
+    queryFn: ({ signal }) => suppliersApi.get({ privateRequest, id, signal }),
+    staleTime: staleTimes.suppliers,
   });
 
   const addressesQuery = useQuery({
-    queryKey: queryKeys.vendors.addresses(id),
-    queryFn: ({ signal }) => vendorsApi.listAddresses({ privateRequest, id, signal }),
-    staleTime: staleTimes.vendors,
+    queryKey: queryKeys.suppliers.addresses(id),
+    queryFn: ({ signal }) => suppliersApi.listAddresses({ privateRequest, id, signal }),
+    staleTime: staleTimes.suppliers,
   });
 
-  const vendor = vendorQuery.data || null;
+  const supplier = supplierQuery.data || null;
   const addresses = addressesQuery.data || [];
 
-  const loading = vendorQuery.isFetching || addressesQuery.isFetching;
-  const queryError = vendorQuery.error || addressesQuery.error;
+  const loading = supplierQuery.isFetching || addressesQuery.isFetching;
+  const queryError = supplierQuery.error || addressesQuery.error;
   const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
 
-  useDocumentTitle(`${vendor?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Vendors", "الموردون")}`);
+  useDocumentTitle(`${supplier?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Suppliers", "الموردون")}`);
 
   const setDefaultAddressMutation = useMutation({
-    mutationFn: (addressId: string) => vendorsApi.setDefaultAddress({ privateRequest, id, addressId }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.vendors.addresses(id) }),
+    mutationFn: (addressId: string) => suppliersApi.setDefaultAddress({ privateRequest, id, addressId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.suppliers.addresses(id) }),
   });
 
   function handleRetry() {
-    vendorQuery.refetch();
+    supplierQuery.refetch();
     addressesQuery.refetch();
   }
 
@@ -79,8 +79,8 @@ export default function Page() {
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
-            {vendor && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
+            {supplier && (
+              <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
                 <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
                   {translate("Edit", "تعديل")}
                 </Button>
@@ -91,39 +91,39 @@ export default function Page() {
       }}
     >
       {loading ? (
-        <LoadingSection message={translate("Loading vendor data", "جاري تحميل ملف المورد")} />
+        <LoadingSection message={translate("Loading supplier data", "جاري تحميل ملف المورد")} />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate("An error occurred while loading vendor data", "حدث خطأ أثناء تحميل ملف المورد")}
+          errorTitle={translate("An error occurred while loading supplier data", "حدث خطأ أثناء تحميل ملف المورد")}
           errorMessage={errorMessage}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleRetry }}
         />
       ) : (
-        vendor && (
+        supplier && (
           <>
-            <VendorModal
+            <SupplierModal
               opened={updateModalOpened}
               close={closeUpdateModal}
-              vendorToUpdate={vendor}
-              setVendorToUpdate={() => {}}
+              supplierToUpdate={supplier}
+              setSupplierToUpdate={() => {}}
             />
 
-            <VendorDetails vendor={vendor} />
+            <SupplierDetails supplier={supplier} />
 
             {/* Addresses Section */}
             <section className="mt-4 flex flex-col gap-4">
               <AddressModal
                 opened={addressModalOpened}
                 close={closeAddressModal}
-                entityType="vendor"
-                entityId={vendor.id}
+                entityType="supplier"
+                entityId={supplier.id}
                 isFirstAddress={addresses.length === 0}
               />
 
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Addresses", "العناوين")}</h4>
 
-                <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
+                <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
                   <Button onClick={openAddressModal} variant="light" color="teal" radius="md">
                     {translate("Add New Address", "إضافة عنوان جديد")}
                   </Button>
@@ -139,7 +139,7 @@ export default function Page() {
                       key={address.id}
                       address={address}
                       onSetDefault={
-                        canUpdateVendor
+                        canUpdateSupplier
                           ? async (addressId) => {
                               await setDefaultAddressMutation.mutateAsync(addressId);
                             }

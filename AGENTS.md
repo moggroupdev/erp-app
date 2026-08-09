@@ -120,7 +120,7 @@ Hierarchy (see JSDoc on `query-keys/index.ts`):
 | After write                        | Prefer                                                                |
 | ---------------------------------- | --------------------------------------------------------------------- |
 | Create / update entity             | `invalidateQueries({ queryKey: queryKeys.<resource>.all })`           |
-| Nested collection only (addresses) | `invalidateQueries` on that nested key (e.g. `vendors.addresses(id)`) |
+| Nested collection only (addresses) | `invalidateQueries` on that nested key (e.g. `suppliers.addresses(id)`) |
 
 ---
 
@@ -231,7 +231,7 @@ Domain enums live under `src/lib/constants/enums/`. Most mirror DB-backed values
 4. **Never** hardcode enum strings (permission names, source types, …) directly in components or pages.
 5. Enum-backed selects belong under `components/global/selections/enum-based/`. Reference-hook selects → `reference-based/`. Large entity typeahead selects (users, materials, …) → `remote-based/`.
 
-Permissions are part of this rule: always `PERMISSIONS.READ_VENDORS`, never `"read_vendors"` inline.
+Permissions are part of this rule: always `PERMISSIONS.READ_SUPPLIERS`, never `"read_suppliers"` inline.
 
 ---
 
@@ -254,7 +254,7 @@ Locales: `en` `ar` (default `ar`). Config: `src/lib/i18n/config.ts`.
 // Client component
 const { locale, translate } = useI18n();
 const href = useLocaleHref();
-<a href={href("/procurement/vendors")}>{translate("Vendors", "الموردون")}</a>
+<a href={href("/procurement/suppliers")}>{translate("Suppliers", "الموردون")}</a>
 
 // Server page / components
 const { locale, translate, translation } = await getI18nFromParams(params);
@@ -296,4 +296,4 @@ Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSecti
 
 **Selects:** enum options → `selections/enum-based/`; reference-hook options (locations, departments, roles, categories, …) → `selections/reference-based/`; large paginated entities with server keyword search (users, materials, …) → `selections/remote-based/`. Do not leave new shared selects at `components/global/select-*`.
 
-Match existing CRUD pages (vendors, customers, materials, departments) when adding new ones.
+Match existing CRUD pages (suppliers, customers, materials, departments) when adding new ones.

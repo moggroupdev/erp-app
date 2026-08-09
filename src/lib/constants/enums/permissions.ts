@@ -13,9 +13,9 @@ export const PERMISSION_VALUES = [
   "add_department",
   "read_departments",
   "update_department",
-  "add_vendor",
-  "read_vendors",
-  "update_vendor",
+  "add_supplier",
+  "read_suppliers",
+  "update_supplier",
   "add_customer",
   "read_customers",
   "update_customer",
@@ -152,24 +152,24 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث القسم",
     },
   },
-  read_vendors: {
-    value: "read_vendors",
+  read_suppliers: {
+    value: "read_suppliers",
     label: {
-      en: "Read Vendors",
+      en: "Read Suppliers",
       ar: "عرض الموردين",
     },
   },
-  add_vendor: {
-    value: "add_vendor",
+  add_supplier: {
+    value: "add_supplier",
     label: {
-      en: "Add Vendor",
+      en: "Add Supplier",
       ar: "إضافة مورد",
     },
   },
-  update_vendor: {
-    value: "update_vendor",
+  update_supplier: {
+    value: "update_supplier",
     label: {
-      en: "Update Vendor",
+      en: "Update Supplier",
       ar: "تحديث المورد",
     },
   },
@@ -527,9 +527,9 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
     domain: "procurement",
     label: { en: "Procurement", ar: "المشتريات" },
     permissions: [
-      "add_vendor",
-      "read_vendors",
-      "update_vendor",
+      "add_supplier",
+      "read_suppliers",
+      "update_supplier",
       "read_material_purchase_orders",
       "read_product_purchase_orders",
     ],

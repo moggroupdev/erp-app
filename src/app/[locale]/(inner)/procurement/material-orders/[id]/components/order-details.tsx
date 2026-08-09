@@ -28,10 +28,10 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
       copyText: order.legacyInvoiceNumber || undefined,
     },
     {
-      key: translate("Vendor", "المورد"),
+      key: translate("Supplier", "المورد"),
       value: (
-        <Link href={getLocalizedHref(`/procurement/vendors/${order.vendor.id}`)} className="hover:underline">
-          {order.vendor.name}
+        <Link href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)} className="hover:underline">
+          {order.supplier.name}
         </Link>
       ),
     },

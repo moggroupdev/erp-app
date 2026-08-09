@@ -1,6 +1,6 @@
 import { Address } from "./address";
 
-export type Vendor = {
+export type Supplier = {
   id: string;
   code: string;
   name: string;
@@ -12,22 +12,22 @@ export type Vendor = {
   createdBy: string;
 };
 
-export type VendorWithCreator = Vendor & { createdBy: { id: string; name: string } };
+export type SupplierWithCreator = Supplier & { createdBy: { id: string; name: string } };
 
-export type VendorAddress = Address & { vendorId: string };
+export type SupplierAddress = Address & { supplierId: string };
 
 // ==================== DTOs ====================
 
-export type CreateVendorDto = {
+export type CreateSupplierDto = {
   name: string;
   phone: string | null;
   email: string | null;
   notes: string | null;
 };
 
-export type UpdateVendorDto = Partial<CreateVendorDto>;
+export type UpdateSupplierDto = Partial<CreateSupplierDto>;
 
-export type CreateVendorAddressDto = {
+export type CreateSupplierAddressDto = {
   countryId: string;
   cityId: string | null; // Required if the country is Egypt
   addressLine: string | null;

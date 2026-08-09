@@ -10,13 +10,13 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
-import vendorsApi from "@/lib/api/vendors";
+import suppliersApi from "@/lib/api/suppliers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { type Vendor } from "@/types/vendor";
+import { type Supplier } from "@/types/supplier";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
@@ -29,11 +29,11 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
-import VendorModal from "@/components/global/data-modals/vendor-modal";
+import SupplierModal from "@/components/global/data-modals/supplier-modal";
 
-const PAGE_TITLE = { en: "Vendors", ar: "الموردون" };
+const PAGE_TITLE = { en: "Suppliers", ar: "الموردون" };
 
-const VENDORS_PER_PAGE = 25;
+const SUPPLIERS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -58,7 +58,7 @@ export default function Page() {
     keyword: debouncedKeyword,
   };
 
-  const params = { limit: VENDORS_PER_PAGE, ...removeEmptyParams(urlParams) };
+  const params = { limit: SUPPLIERS_PER_PAGE, ...removeEmptyParams(urlParams) };
 
   const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword);
 
@@ -70,14 +70,14 @@ export default function Page() {
   const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword });
 
   const {
-    data: paginatedVendors,
+    data: paginatedSuppliers,
     isFetching,
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.vendors.list(params),
-    queryFn: ({ signal }) => vendorsApi.list({ privateRequest, params, signal }),
-    staleTime: staleTimes.vendors,
+    queryKey: queryKeys.suppliers.list(params),
+    queryFn: ({ signal }) => suppliersApi.list({ privateRequest, params, signal }),
+    staleTime: staleTimes.suppliers,
     placeholderData: keepPreviousData,
   });
 
@@ -102,10 +102,10 @@ export default function Page() {
   // ========================= MODALS =========================
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
-  const [vendorToUpdate, setVendorToUpdate] = useState<Vendor | null>(null);
+  const [supplierToUpdate, setSupplierToUpdate] = useState<Supplier | null>(null);
 
-  function handleOpenUpdateModal(vendor: Vendor) {
-    setVendorToUpdate(vendor);
+  function handleOpenUpdateModal(supplier: Supplier) {
+    setSupplierToUpdate(supplier);
     openModal();
   }
 
@@ -117,9 +117,9 @@ export default function Page() {
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_VENDOR}>
+            <PermissionGuard permission={PERMISSIONS.ADD_SUPPLIER}>
               <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
-                {translate("Add New Vendor", "إضافة مورد جديد")}
+                {translate("Add New Supplier", "إضافة مورد جديد")}
               </Button>
             </PermissionGuard>
           </div>
@@ -129,7 +129,7 @@ export default function Page() {
       <TextInput
         value={keyword}
         onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-        placeholder={translate("Search for a vendor...", "ابحث عن مورد...")}
+        placeholder={translate("Search for a supplier...", "ابحث عن مورد...")}
         leftSection={<Search size={15} />}
         radius="md"
         rightSection={
@@ -142,23 +142,23 @@ export default function Page() {
       />
 
       {isFetching ? (
-        <LoadingSection message={translate("Loading vendors...", "جاري تحميل الموردين...")} />
+        <LoadingSection message={translate("Loading suppliers...", "جاري تحميل الموردين...")} />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate("Error loading vendors", "خطأ في تحميل الموردين")}
+          errorTitle={translate("Error loading suppliers", "خطأ في تحميل الموردين")}
           errorMessage={errorMessage}
           button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
       ) : (
-        paginatedVendors &&
-        (paginatedVendors.data.length === 0 ? (
+        paginatedSuppliers &&
+        (paginatedSuppliers.data.length === 0 ? (
           debouncedKeyword ? (
             <NoResultsSection
               keyword={debouncedKeyword}
               button={{ text: translate("View All", "عرض الكل"), onClick: () => setImmediateKeyword("") }}
             />
           ) : (
-            <EmptySection useDefaultImg message={translate("No vendors found", "لا يوجد موردون")} />
+            <EmptySection useDefaultImg message={translate("No suppliers found", "لا يوجد موردون")} />
           )
         ) : (
           <>
@@ -175,26 +175,26 @@ export default function Page() {
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {paginatedVendors.data.map((vendor) => (
-                    <Table.Tr key={vendor.id} className="text-gray-600">
+                  {paginatedSuppliers.data.map((supplier) => (
+                    <Table.Tr key={supplier.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
-                        <Link href={getLocalizedHref(`/procurement/vendors/${vendor.id}`)} className="hover:underline">
-                          {vendor.name}
+                        <Link href={getLocalizedHref(`/procurement/suppliers/${supplier.id}`)} className="hover:underline">
+                          {supplier.name}
                         </Link>
                       </Table.Td>
                       <Table.Td>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono">{vendor.code}</span>
-                          <CopyButton text={vendor.code} />
+                          <span className="font-mono">{supplier.code}</span>
+                          <CopyButton text={supplier.code} />
                         </div>
                       </Table.Td>
-                      <Table.Td>{vendor.phone}</Table.Td>
-                      <Table.Td>{vendor.email}</Table.Td>
-                      <Table.Td>{formatDateAndTime(vendor.createdAt, locale)}</Table.Td>
+                      <Table.Td>{supplier.phone}</Table.Td>
+                      <Table.Td>{supplier.email}</Table.Td>
+                      <Table.Td>{formatDateAndTime(supplier.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>
-                        <PermissionGuard permission={PERMISSIONS.UPDATE_VENDOR}>
+                        <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
                           <button
-                            onClick={() => handleOpenUpdateModal(vendor)}
+                            onClick={() => handleOpenUpdateModal(supplier)}
                             className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
                           >
                             <Pencil size={14} />
@@ -207,8 +207,8 @@ export default function Page() {
               </Table>
             </div>
 
-            <PaginationHandler<Vendor>
-              paginatedData={paginatedVendors}
+            <PaginationHandler<Supplier>
+              paginatedData={paginatedSuppliers}
               activePage={activePage}
               setActivePage={setActivePage}
             />
@@ -216,14 +216,14 @@ export default function Page() {
         ))
       )}
 
-      <VendorModal
+      <SupplierModal
         opened={modalOpened}
         close={closeModal}
-        vendorToUpdate={vendorToUpdate}
-        setVendorToUpdate={setVendorToUpdate}
+        supplierToUpdate={supplierToUpdate}
+        setSupplierToUpdate={setSupplierToUpdate}
         isForList={true}
         onSuccess={() => {
-          if (!vendorToUpdate && hasActiveFilters) resetAllFilters();
+          if (!supplierToUpdate && hasActiveFilters) resetAllFilters();
         }}
       />
     </LayoutBox>

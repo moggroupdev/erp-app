@@ -2,7 +2,7 @@ import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type {
   MaterialPurchaseOrderDetailed,
-  MaterialPurchaseOrderWithVendor,
+  MaterialPurchaseOrderWithSupplier,
   MaterialPurchaseReceipt,
   MaterialPurchaseReceiptDetailed,
 } from "@/types/material-purchase-order";
@@ -17,7 +17,7 @@ const materialPurchaseOrdersApi = {
     params: Dictionary;
     signal: AbortSignal;
   }) {
-    return await privateRequest<PaginatedData<MaterialPurchaseOrderWithVendor>>({
+    return await privateRequest<PaginatedData<MaterialPurchaseOrderWithSupplier>>({
       url: "material-purchase-orders",
       params,
       signal,

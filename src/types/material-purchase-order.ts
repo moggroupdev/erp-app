@@ -15,7 +15,7 @@ export type MaterialPurchaseOrder = {
   id: string;
   code: string;
   legacyInvoiceNumber: string | null;
-  vendorId: string;
+  supplierId: string;
   totalAmount: number;
   completedAt: Date | null;
   cancelledAt: Date | null;
@@ -24,8 +24,8 @@ export type MaterialPurchaseOrder = {
   createdBy: string;
 };
 
-export type MaterialPurchaseOrderWithVendor = MaterialPurchaseOrder & {
-  vendor: { id: string; name: string };
+export type MaterialPurchaseOrderWithSupplier = MaterialPurchaseOrder & {
+  supplier: { id: string; name: string };
 };
 
 export type MaterialPurchaseOrderItem = {
@@ -39,7 +39,7 @@ export type MaterialPurchaseOrderItem = {
 };
 
 export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "createdBy"> & {
-  vendor: { id: string; name: string };
+  supplier: { id: string; name: string };
   createdBy: { id: string; name: string };
   items: MaterialPurchaseOrderItem[];
 };

@@ -15,8 +15,6 @@ import {
   Home,
   PackageSearch,
   ReceiptText,
-  Route,
-  Settings2,
   Shield,
   ShoppingCart,
   Truck,
@@ -150,10 +148,10 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     icon: ShoppingCart,
     items: [
       {
-        label: { en: "Vendors", ar: "الموردون" },
-        href: "/procurement/vendors",
+        label: { en: "Suppliers", ar: "الموردون" },
+        href: "/procurement/suppliers",
         icon: HandCoins,
-        requiredPermission: PERMISSIONS.READ_VENDORS,
+        requiredPermission: PERMISSIONS.READ_SUPPLIERS,
       },
       {
         label: { en: "Material Purchase Orders", ar: "أوامر شراء الخامات" },
