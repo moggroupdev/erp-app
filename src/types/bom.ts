@@ -24,6 +24,7 @@ export type BomMmComponent = {
     subCategoryId: string;
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
+    lastPurchasePrice: number | null;
   };
 };
 
@@ -40,6 +41,8 @@ export type BomItemWithMaterial = {
     subCategoryId: string;
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
+    lastPurchasePrice: number | null;
+    // For manufactured materials, we need to get the components of the material
     manufacturedMaterialBoms: BomMmComponent[];
   };
 };

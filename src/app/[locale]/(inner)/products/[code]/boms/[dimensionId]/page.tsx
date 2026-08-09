@@ -22,13 +22,21 @@ import {
   getBomDisplayTotals,
   getFlattenedMaterialRows,
   getManufacturingCostRows,
+  getMaterialCostPrice,
   type FlattenedBomRow,
   type ManufacturingCostRow,
   UNCATEGORIZED_ID,
 } from "@/lib/helpers/bom-display";
+import {
+  COSTING_METHODS,
+  COSTING_METHOD_LABELS_LIST,
+  getCostingMethodLabel,
+  isValidCostingMethod,
+  type CostingMethod,
+} from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { Badge, Button, Divider, Table } from "@mantine/core";
+import { Badge, Button, Divider, SegmentedControl, Table } from "@mantine/core";
 import { Calculator, Layers, Pencil, Plus, Printer, Wallet } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
@@ -74,6 +82,11 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
+  const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.AVERAGE_PRICE);
+
+  function handleCostingMethodChange(value: string) {
+    if (isValidCostingMethod(value)) setCostingMethod(value);
+  }
 
   function handleOpenAppendModal() {
     setItemToUpdate(null);
@@ -96,8 +109,9 @@ export default function Page() {
       materialRows,
       manufacturingRows,
       pricingFactor: bom?.product.pricingFactor ?? 0,
+      costingMethod,
     });
-  }, [materialRows, manufacturingRows, bom?.product.pricingFactor]);
+  }, [materialRows, manufacturingRows, bom?.product.pricingFactor, costingMethod]);
 
   const categoryBreakdown = useMemo((): CategoryBreakdown[] => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
@@ -108,7 +122,7 @@ export default function Page() {
       const main = sub ? materialCategoryHelpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
       const mainCategoryId = main?.id ?? UNCATEGORIZED_ID;
       const title = main?.title ?? uncategorizedTitle;
-      const lineCost = item.quantityRequired * item.material.unitPrice;
+      const lineCost = item.quantityRequired * getMaterialCostPrice(item.material, costingMethod);
 
       const existing = groups.get(mainCategoryId);
       if (existing) {
@@ -139,7 +153,7 @@ export default function Page() {
 
     rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
     return rows;
-  }, [materialRows, totals.totalMaterialCost, materialCategoryHelpers, translate, locale]);
+  }, [materialRows, totals.totalMaterialCost, materialCategoryHelpers, translate, locale, costingMethod]);
 
   const excludeMaterialCodes = useMemo(() => bomItems.map((item) => item.materialCode), [bomItems]);
 
@@ -212,6 +226,7 @@ export default function Page() {
                   totals={totals}
                   categoryBreakdown={categoryBreakdown}
                   mainCategoryTitle={productMainCategory?.title || null}
+                  costingMethod={costingMethod}
                 />
               </PrintDocument>
             )}
@@ -254,7 +269,7 @@ export default function Page() {
               <section className="flex flex-col gap-4">
                 <Divider variant="dashed" />
 
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
                       <Layers size={16} />
@@ -267,17 +282,34 @@ export default function Page() {
                     </div>
                   </div>
 
-                  <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
-                    <Button
-                      onClick={handleOpenAppendModal}
-                      variant="light"
-                      color="teal"
-                      radius="md"
-                      leftSection={<Plus size={15} />}
-                    >
-                      {translate("Add Item", "إضافة بند")}
-                    </Button>
-                  </PermissionGuard>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-gray-500">{translate("Costing", "أساس التكلفة")}</span>
+                      <SegmentedControl
+                        radius="md"
+                        color="teal"
+                        variant="light"
+                        value={costingMethod}
+                        onChange={handleCostingMethodChange}
+                        data={COSTING_METHOD_LABELS_LIST.map((method) => ({
+                          value: method.value,
+                          label: translate(method.label.en, method.label.ar),
+                        }))}
+                      />
+                    </div>
+
+                    <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
+                      <Button
+                        onClick={handleOpenAppendModal}
+                        variant="light"
+                        color="teal"
+                        radius="md"
+                        leftSection={<Plus size={15} />}
+                      >
+                        {translate("Add Item", "إضافة بند")}
+                      </Button>
+                    </PermissionGuard>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-8">
@@ -290,10 +322,10 @@ export default function Page() {
                           <Table.Thead className="bg-gray-50">
                             <Table.Tr className="h-10">
                               <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                {translate("Material Code", "كود المادة")}
+                                {translate("Material Code", "كود")}
                               </Table.Th>
                               <Table.Th w="26%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                {translate("Material Name", "اسم المادة")}
+                                {translate("Material Name", "الصنف")}
                               </Table.Th>
                               <Table.Th w="9%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit", "الوحدة")}
@@ -315,7 +347,8 @@ export default function Page() {
                           </Table.Thead>
                           <Table.Tbody>
                             {group.items.map((item) => {
-                              const lineCost = item.quantityRequired * item.material.unitPrice;
+                              const unitCost = getMaterialCostPrice(item.material, costingMethod);
+                              const lineCost = item.quantityRequired * unitCost;
                               const zeroValueClass = "text-orange-500";
 
                               return (
@@ -332,8 +365,8 @@ export default function Page() {
                                   >
                                     {item.quantityRequired}
                                   </Table.Td>
-                                  <Table.Td className={item.material.unitPrice === 0 ? zeroValueClass : undefined}>
-                                    {formatMoney(item.material.unitPrice)}
+                                  <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
+                                    {formatMoney(unitCost)}
                                   </Table.Td>
                                   <Table.Td className={`font-medium ${lineCost === 0 ? zeroValueClass : "text-gray-800"}`}>
                                     {formatMoney(lineCost)}
@@ -414,8 +447,8 @@ export default function Page() {
                     label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
                     value={formatMoney(totals.totalMaterialCost, currency)}
                     hint={translate(
-                      "Sum of quantity × unit price for all material rows",
-                      "مجموع الكمية × سعر الوحدة لكل صفوف المواد",
+                      `Sum of quantity × ${getCostingMethodLabel(costingMethod, "en")} for all material rows`,
+                      `مجموع الكمية × ${getCostingMethodLabel(costingMethod, "ar")} لكل صفوف المواد`,
                     )}
                     icon={<Wallet size={18} />}
                   />

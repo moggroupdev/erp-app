@@ -1,5 +1,6 @@
 import { TEMP_GLOBAL_MANUFACTURING_COST } from "@/lib/constants/global";
 import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
+import { COSTING_METHODS, type CostingMethod } from "@/lib/constants/enums/derived/costing-methods";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { BomItemWithMaterial, BomMmComponent } from "@/types/bom";
 import type { MmBom } from "@/types/mm-bom";
@@ -40,6 +41,15 @@ export type AggregatedComponentRequirement = {
   unitOfMeasurement: MaterialUnit;
   quantityRequired: number;
 };
+
+// Materials that were never purchased have no last purchase price, so they cost nothing under that method.
+export function getMaterialCostPrice(
+  material: { unitPrice: number; lastPurchasePrice: number | null },
+  costingMethod: CostingMethod,
+): number {
+  if (costingMethod === COSTING_METHODS.LAST_PURCHASE_PRICE) return material.lastPurchasePrice ?? 0;
+  return material.unitPrice;
+}
 
 export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): FlattenedBomRow[] {
   const rows: FlattenedBomRow[] = [];
@@ -92,8 +102,12 @@ export function getBomDisplayTotals(args: {
   materialRows: FlattenedBomRow[];
   manufacturingRows: ManufacturingCostRow[];
   pricingFactor: number;
+  costingMethod: CostingMethod;
 }): BomDisplayTotals {
-  const totalMaterialCost = args.materialRows.reduce((sum, row) => sum + row.quantityRequired * row.material.unitPrice, 0);
+  const totalMaterialCost = args.materialRows.reduce(
+    (sum, row) => sum + row.quantityRequired * getMaterialCostPrice(row.material, args.costingMethod),
+    0,
+  );
   const totalManufacturingCost = args.manufacturingRows.reduce((sum, row) => sum + row.totalManufacturingCost, 0);
   const grandTotalCost = totalMaterialCost + totalManufacturingCost;
 
