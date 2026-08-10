@@ -1,13 +1,24 @@
 import type { Locale, LocalizedEntity } from "@/lib/i18n/types";
 import { translate } from "@/lib/i18n/utils";
 
-export const MATERIAL_UNIT_VALUES = ["count", "kg", "gram", "meter", "cm", "liter", "sheet", "roll", "box"] as const;
+export const MATERIAL_UNIT_VALUES = [
+  "count",
+  "kg",
+  "gram",
+  "meter",
+  "cm",
+  "liter",
+  "sheet",
+  "roll",
+  "box",
+  "square_meter",
+  "cubic_meter",
+  "ton",
+] as const;
 
 export type MaterialUnit = (typeof MATERIAL_UNIT_VALUES)[number];
 
-export const MATERIAL_UNITS = Object.fromEntries(
-  MATERIAL_UNIT_VALUES.map((unit) => [unit.toUpperCase(), unit]),
-) as {
+export const MATERIAL_UNITS = Object.fromEntries(MATERIAL_UNIT_VALUES.map((unit) => [unit.toUpperCase(), unit])) as {
   [K in Uppercase<MaterialUnit>]: Lowercase<K>;
 };
 
@@ -21,6 +32,13 @@ export const MATERIAL_UNIT_LABELS: LocalizedEntity<MaterialUnit> = {
       ar: "عدد",
     },
   },
+  gram: {
+    value: "gram",
+    label: {
+      en: "Gram",
+      ar: "جرام",
+    },
+  },
   kg: {
     value: "kg",
     label: {
@@ -28,11 +46,18 @@ export const MATERIAL_UNIT_LABELS: LocalizedEntity<MaterialUnit> = {
       ar: "كيلوجرام",
     },
   },
-  gram: {
-    value: "gram",
+  ton: {
+    value: "ton",
     label: {
-      en: "Gram",
-      ar: "جرام",
+      en: "Ton",
+      ar: "طن",
+    },
+  },
+  cm: {
+    value: "cm",
+    label: {
+      en: "Centimeter",
+      ar: "سنتيمتر",
     },
   },
   meter: {
@@ -42,11 +67,18 @@ export const MATERIAL_UNIT_LABELS: LocalizedEntity<MaterialUnit> = {
       ar: "متر",
     },
   },
-  cm: {
-    value: "cm",
+  square_meter: {
+    value: "square_meter",
     label: {
-      en: "Centimeter",
-      ar: "سنتيمتر",
+      en: "Meter²",
+      ar: "متر²",
+    },
+  },
+  cubic_meter: {
+    value: "cubic_meter",
+    label: {
+      en: "Meter³",
+      ar: "متر³",
     },
   },
   liter: {
