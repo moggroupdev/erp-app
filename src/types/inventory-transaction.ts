@@ -1,6 +1,7 @@
 import type { InventoryTransactionType } from "@/lib/constants/enums/inventory-transaction-types";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 
 export type InventoryTransaction = {
   id: string;
@@ -22,11 +23,6 @@ export type InventoryTransactionItem = {
   materialCode: string;
   quantity: number;
   unitPrice: number;
-  productionPlanItemId: string | null;
-  maintenanceOrderSparePartId: string | null;
-  outsourcingOrderItemId: string | null;
-  outsourcingReceiptItemId: string | null;
-  materialPurchaseReceiptItemId: string | null;
   material: {
     code: string;
     title: string;
@@ -37,6 +33,32 @@ export type InventoryTransactionItem = {
   };
 };
 
-export type InventoryTransactionDetailed = InventoryTransactionWithCreator & {
-  items: InventoryTransactionItem[];
+export type InventoryTransactionSource = {
+  materialPurchaseReceipt: {
+    id: string;
+    code: string;
+    materialPurchaseOrder: { id: string; legacyInvoiceNumber: string | null };
+  } | null;
+  outsourcingReceipt: {
+    id: string;
+    code: string;
+    outsourcingOrder: { id: string; code: string };
+  } | null;
+  productionPlanItem: {
+    id: string;
+    productionStage: ProductionSubDepartment;
+    productUnit: {
+      id: string;
+      serialNumber: string;
+      contractItem: {
+        id: string;
+        contract: { id: string; code: string; customer: { id: string; name: string } };
+      };
+    };
+  } | null;
+  outsourcingOrder: { id: string; code: string } | null;
+  maintenanceOrder: { id: string; code: string } | null;
 };
+
+export type InventoryTransactionDetailed = InventoryTransactionWithCreator &
+  InventoryTransactionSource & { items: InventoryTransactionItem[] };
