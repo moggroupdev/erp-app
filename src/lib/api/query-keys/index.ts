@@ -71,6 +71,7 @@ export const queryKeys = {
     list: (filters: ListFilters) => [...queryKeys.materials.lists(), filters] as const,
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
+    units: (code: string) => [...queryKeys.materials.detail(code), "units"] as const,
   },
   mmBoms: {
     all: ["mm-boms"] as const,

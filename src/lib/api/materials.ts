@@ -1,6 +1,13 @@
 import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
-import type { Material, MaterialWithCreator, CreateMaterialDto, UpdateMaterialDto } from "@/types/material";
+import type {
+  Material,
+  MaterialWithCreator,
+  MaterialUnitConversion,
+  CreateMaterialDto,
+  UpdateMaterialDto,
+  CreateMaterialUnitConversionDto,
+} from "@/types/material";
 
 const materialsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateMaterialDto }) {
@@ -47,6 +54,28 @@ const materialsApi = {
 
   async update({ privateRequest, code, dto }: { privateRequest: PrivateRequest; code: string; dto: UpdateMaterialDto }) {
     return await privateRequest<Material>({ method: "PUT", url: `materials/${code}`, data: dto });
+  },
+
+  // ==================== UNITS ====================
+
+  async listUnits({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
+    return await privateRequest<MaterialUnitConversion[]>({ url: `materials/${code}/units`, signal });
+  },
+
+  async addUnit({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: CreateMaterialUnitConversionDto;
+  }) {
+    return await privateRequest<MaterialUnitConversion>({ method: "POST", url: `materials/${code}/units`, data: dto });
+  },
+
+  async removeUnit({ privateRequest, code, id }: { privateRequest: PrivateRequest; code: string; id: string }) {
+    return await privateRequest<MaterialUnitConversion>({ method: "DELETE", url: `materials/${code}/units/${id}` });
   },
 };
 

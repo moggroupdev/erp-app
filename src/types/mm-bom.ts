@@ -44,7 +44,8 @@ export type MmBom = {
 export type CreateMmBomItemDto = {
   materialCode: string;
   quantityRequired: number;
+  unit?: MaterialUnit;
   notes: string | null;
 };
 
-export type UpdateMmBomItemDto = Partial<Pick<CreateMmBomItemDto, "quantityRequired" | "notes">>;
+export type UpdateMmBomItemDto = Partial<Pick<CreateMmBomItemDto, "quantityRequired" | "unit" | "notes">>;

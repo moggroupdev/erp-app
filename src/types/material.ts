@@ -21,6 +21,15 @@ export type Material = {
 
 export type MaterialWithCreator = Material & { createdBy: { id: string; name: string } };
 
+export type MaterialUnitConversion = {
+  id: string;
+  materialCode: string;
+  unit: MaterialUnit;
+  conversionFactorToBase: number;
+  createdAt: Date;
+  createdBy: string | { id: string; name: string };
+};
+
 // ==================== DTOs ====================
 
 export type CreateMaterialDto = {
@@ -34,3 +43,8 @@ export type CreateMaterialDto = {
 };
 
 export type UpdateMaterialDto = Partial<CreateMaterialDto>;
+
+export type CreateMaterialUnitConversionDto = {
+  unit: MaterialUnit;
+  conversionFactorToBase: number;
+};
