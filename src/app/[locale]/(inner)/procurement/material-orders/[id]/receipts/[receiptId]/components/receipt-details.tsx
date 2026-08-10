@@ -4,12 +4,11 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type MaterialPurchaseReceiptDetailed } from "@/types/material-purchase-order";
 import { ClipboardCheck } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
-import { getReceiptTransactionLabel, getReceiptTransactionState } from "./receipt-transaction-state";
 
 export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseReceiptDetailed }) {
   const { locale, translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const transactionState = getReceiptTransactionState(receipt.items);
+  const { inventoryTransactions } = receipt;
 
   const rows: DetailRow[] = [
     {
@@ -34,30 +33,42 @@ export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseR
     },
   ];
 
-  // ReceiptDetails shows the transaction only when all items share one, or when none exist yet.
-  if (transactionState.mode === "single") {
-    const transactionLabel = getReceiptTransactionLabel(transactionState.transaction);
-    rows.push({
-      key: translate("Transaction Number", "رقم إذن الإضافة"),
-      value: (
-        <Link
-          href={getLocalizedHref(`/warehouse/transactions/${transactionState.transaction.id}`)}
-          className="font-mono hover:underline"
-        >
-          {transactionLabel}
-        </Link>
-      ),
-      copyText: transactionLabel,
-    });
-  }
-
-  if (transactionState.mode === "none") {
+  if (inventoryTransactions.length === 0) {
     rows.push({
       key: translate("Transaction Number", "رقم الإذن"),
       value: (
         <span className="font-semibold text-red-600">
           {translate("Inventory transaction was not created yet", "لم يُنشأ إذن المخزون بعد")}
         </span>
+      ),
+    });
+  } else if (inventoryTransactions.length === 1) {
+    const transaction = inventoryTransactions[0];
+    const transactionLabel = transaction.legacyNumber || transaction.id;
+    rows.push({
+      key: translate("Transaction Number", "رقم إذن الإضافة"),
+      value: (
+        <Link href={getLocalizedHref(`/warehouse/transactions/${transaction.id}`)} className="font-mono hover:underline">
+          {transactionLabel}
+        </Link>
+      ),
+      copyText: transactionLabel,
+    });
+  } else {
+    rows.push({
+      key: translate("Transaction Numbers", "أرقام أذون الإضافة"),
+      value: (
+        <div className="flex flex-col gap-1">
+          {inventoryTransactions.map((transaction) => (
+            <Link
+              key={transaction.id}
+              href={getLocalizedHref(`/warehouse/transactions/${transaction.id}`)}
+              className="font-mono hover:underline"
+            >
+              {transaction.legacyNumber || transaction.id}
+            </Link>
+          ))}
+        </div>
       ),
     });
   }

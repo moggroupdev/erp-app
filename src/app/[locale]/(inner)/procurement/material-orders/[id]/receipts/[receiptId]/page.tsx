@@ -24,7 +24,6 @@ import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import ReceiptDetails from "./components/receipt-details";
 import InspectionReportModal from "./components/inspection-report-modal";
-import { getReceiptTransactionLabel, getReceiptTransactionState } from "./components/receipt-transaction-state";
 
 const PAGE_TITLE = { en: "Materials Receipt Details", ar: "سند استلام خامات" };
 
@@ -59,10 +58,6 @@ export default function Page() {
   useDocumentTitle(
     `${receipt?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر شراء الخامات")}`,
   );
-
-  const transactionState = receipt ? getReceiptTransactionState(receipt.items) : { mode: "empty" as const };
-  // Mixed or partial links are shown per item in the table instead of in ReceiptDetails.
-  const showTransactionColumn = transactionState.mode === "multiple";
 
   return (
     <LayoutBox
@@ -123,7 +118,6 @@ export default function Page() {
                         <Table.Th>
                           {translate(`Subtotal (${translation.currency})`, `المجموع الفرعي (${translation.currency})`)}
                         </Table.Th>
-                        {showTransactionColumn && <Table.Th>{translate("Transaction Number", "رقم إذن الإضافة")}</Table.Th>}
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -153,32 +147,13 @@ export default function Page() {
                             <Table.Td>{item.quantityRejected}</Table.Td>
                             <Table.Td>{formatMoney(unitPrice)}</Table.Td>
                             <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                            {showTransactionColumn && (
-                              <Table.Td>
-                                {item.transaction ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <Link
-                                      href={getLocalizedHref(`/warehouse/transactions/${item.transaction.id}`)}
-                                      className="font-mono hover:underline"
-                                    >
-                                      {getReceiptTransactionLabel(item.transaction)}
-                                    </Link>
-                                    <CopyButton text={getReceiptTransactionLabel(item.transaction)} />
-                                  </div>
-                                ) : (
-                                  <span className="font-semibold text-red-600">
-                                    {translate("Not created yet", "لم يُنشأ بعد")}
-                                  </span>
-                                )}
-                              </Table.Td>
-                            )}
                           </Table.Tr>
                         );
                       })}
                     </Table.Tbody>
                     <Table.Tfoot className="bg-gray-50">
                       <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
-                        <Table.Th colSpan={showTransactionColumn ? 9 : 8}>{translate("Total", "الإجمالي")}</Table.Th>
+                        <Table.Th colSpan={8}>{translate("Total", "الإجمالي")}</Table.Th>
                         <Table.Th>
                           {formatMoney(
                             receipt.items.reduce(

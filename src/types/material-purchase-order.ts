@@ -1,3 +1,4 @@
+import type { InventoryTransactionType } from "@/lib/constants/enums/inventory-transaction-types";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 
@@ -71,11 +72,11 @@ export type MaterialPurchaseReceiptItem = {
     unitPrice: number;
     material: PurchaseMaterial;
   };
-  transaction: { id: string; code: string; legacyNumber: string | null } | null;
 };
 
 export type MaterialPurchaseReceiptDetailed = Omit<MaterialPurchaseReceipt, "createdBy" | "receivedBy"> & {
-  materialPurchaseOrder: { id: string; code: string; legacyInvoiceNumber: string | null };
+  materialPurchaseOrder: { id: string; legacyInvoiceNumber: string | null };
+  inventoryTransactions: { id: string; legacyNumber: string | null }[];
   createdBy: { id: string; name: string };
   receivedBy: { id: string; name: string } | null;
   items: MaterialPurchaseReceiptItem[];
