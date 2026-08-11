@@ -101,7 +101,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
                         `1 ${getMaterialUnitLabel(row.unit, locale)} = ${row.conversionFactorToBase} ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}`,
                       )}
                     </Table.Td>
-                    <Table.Td>{toDisplayQuantity(material.quantity, factor)}</Table.Td>
+                    <Table.Td>{toDisplayQuantity(material.quantity, factor).toFixed(2)}</Table.Td>
                     <Table.Td>{formatMoney(toDisplayUnitPrice(material.unitPrice, factor))}</Table.Td>
                   </Table.Tr>
                 );
