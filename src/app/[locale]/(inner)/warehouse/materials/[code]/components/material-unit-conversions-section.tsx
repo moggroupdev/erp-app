@@ -5,6 +5,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { formatMoney } from "@/lib/helpers/format-money";
+import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import { Badge, Button, Table } from "@mantine/core";
 import { Plus, Ruler } from "lucide-react";
@@ -13,7 +15,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import MaterialUnitConversionModal from "./material-unit-conversion-modal";
 
 export default function MaterialUnitConversionsSection({ material }: { material: MaterialWithCreatorAndUnitConversions }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
@@ -36,13 +38,11 @@ export default function MaterialUnitConversionsSection({ material }: { material:
             <Ruler size={16} />
           </div>
           <div className="flex flex-col gap-1">
-            <h4 className="text-lg font-semibold text-gray-900">
-              {translate("Alternate Units", "وحدات القياس البديلة")}
-            </h4>
+            <h4 className="text-lg font-semibold text-gray-900">{translate("Alternate Units", "وحدات القياس البديلة")}</h4>
             <p className="text-xs text-gray-500">
               {translate(
-                `Base unit: ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}. Define other units and how they convert to the base unit.`,
-                `الوحدة الأساسية: ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}. عرّف وحدات أخرى وكيفية تحويلها إلى الوحدة الأساسية.`,
+                `Define other units and how they convert to the base unit.`,
+                `عرّف وحدات أخرى وكيفية تحويلها إلى الوحدة الأساسية.`,
               )}
             </p>
           </div>
@@ -67,7 +67,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
         </EmptySection>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <Table className="text-nowrap" highlightOnHover>
+          <Table className="text-nowrap" highlightOnHover verticalSpacing="sm">
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="h-10">
                 <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -76,24 +76,36 @@ export default function MaterialUnitConversionsSection({ material }: { material:
                 <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Conversion to Base", "التحويل إلى الوحدة الأساسية")}
                 </Table.Th>
+                <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  {translate("Quantity", "الكمية")}
+                </Table.Th>
+                <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+                </Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {units.map((row) => (
-                <Table.Tr key={row.id} className="text-gray-600">
-                  <Table.Td>
-                    <Badge size="sm" variant="light" color="indigo" radius="md">
-                      {getMaterialUnitLabel(row.unit, locale)}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td className="font-medium text-gray-800">
-                    {translate(
-                      `1 ${getMaterialUnitLabel(row.unit, locale)} = ${row.conversionFactorToBase} ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}`,
-                      `1 ${getMaterialUnitLabel(row.unit, locale)} = ${row.conversionFactorToBase} ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}`,
-                    )}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
+              {units.map((row) => {
+                const factor = Number(row.conversionFactorToBase);
+
+                return (
+                  <Table.Tr key={row.id} className="text-gray-600">
+                    <Table.Td>
+                      <Badge size="sm" variant="light" color="indigo" radius="md">
+                        {getMaterialUnitLabel(row.unit, locale)}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td className="font-medium text-gray-800">
+                      {translate(
+                        `1 ${getMaterialUnitLabel(row.unit, locale)} = ${row.conversionFactorToBase} ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}`,
+                        `1 ${getMaterialUnitLabel(row.unit, locale)} = ${row.conversionFactorToBase} ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}`,
+                      )}
+                    </Table.Td>
+                    <Table.Td>{toDisplayQuantity(material.quantity, factor)}</Table.Td>
+                    <Table.Td>{formatMoney(toDisplayUnitPrice(material.unitPrice, factor))}</Table.Td>
+                  </Table.Tr>
+                );
+              })}
             </Table.Tbody>
           </Table>
         </div>
