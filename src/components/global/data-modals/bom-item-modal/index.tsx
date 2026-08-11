@@ -8,6 +8,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
+import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { BomItemWithMaterial } from "@/types/bom";
 import type { MaterialWithUnitConversions } from "@/types/material";
@@ -47,6 +48,8 @@ export default function BomItemModal({
   const isUpdate = !!itemToUpdate;
   const baseUnit = itemToUpdate?.material.unitOfMeasurement || selectedMaterial?.unitOfMeasurement || null;
   const unitConversions = itemToUpdate?.material.unitConversions ?? selectedMaterial?.unitConversions ?? [];
+  const materialType = itemToUpdate?.material.materialType || selectedMaterial?.materialType || null;
+  const showUnitSelect = !!materialType && isRawMaterial(materialType);
 
   const unitOptions = useMemo(() => {
     if (!baseUnit) return [];
@@ -79,7 +82,7 @@ export default function BomItemModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const payloadUnit = (unit as MaterialUnit) || undefined;
+      const payloadUnit = showUnitSelect ? (unit as MaterialUnit) || undefined : undefined;
 
       if (itemToUpdate) {
         return await bomsApi.updateItem({
@@ -125,7 +128,7 @@ export default function BomItemModal({
       return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
     }
 
-    if (!unit) {
+    if (showUnitSelect && !unit) {
       return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
     }
 
@@ -153,12 +156,16 @@ export default function BomItemModal({
 
   const isDataChanged = itemToUpdate
     ? Number(quantityRequired) !== itemToUpdate.quantityRequired ||
-      unit !== itemToUpdate.material.unitOfMeasurement ||
+      (showUnitSelect && unit !== itemToUpdate.material.unitOfMeasurement) ||
       (notes.trim() || null) !== itemToUpdate.notes
     : true;
 
   const isReadyToSubmit =
-    quantityRequired !== "" && Number(quantityRequired) > 0 && !!unit && isDataChanged && (isUpdate || !!materialCode);
+    quantityRequired !== "" &&
+    Number(quantityRequired) > 0 &&
+    (!showUnitSelect || !!unit) &&
+    isDataChanged &&
+    (isUpdate || !!materialCode);
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
@@ -186,7 +193,7 @@ export default function BomItemModal({
           />
         )}
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className={showUnitSelect ? "grid gap-3 sm:grid-cols-2" : undefined}>
           <NumberInput
             value={quantityRequired}
             onChange={setQuantityRequired}
@@ -199,16 +206,18 @@ export default function BomItemModal({
             radius="md"
           />
 
-          <DataSelect
-            value={unit}
-            setValue={setUnit}
-            data={unitOptions}
-            label={translate("Unit", "الوحدة")}
-            placeholder={translate("Select unit", "اختر الوحدة")}
-            required
-            disabled={!baseUnit}
-            searchable
-          />
+          {showUnitSelect && (
+            <DataSelect
+              value={unit}
+              setValue={setUnit}
+              data={unitOptions}
+              label={translate("Unit", "الوحدة")}
+              placeholder={translate("Select unit", "اختر الوحدة")}
+              required
+              disabled={!baseUnit}
+              searchable
+            />
+          )}
         </div>
 
         <Textarea
