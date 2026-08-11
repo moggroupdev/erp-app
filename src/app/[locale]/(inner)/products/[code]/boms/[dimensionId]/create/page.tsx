@@ -4,24 +4,27 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
-import { isManufacturedMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
-import type { MaterialUnit } from "@/lib/constants/enums/material-units";
-import type { Material } from "@/types/material";
+import { isManufacturedMaterial, isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import ErrorAlert from "@/components/ui/error-alert";
+import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import MmComponentsSection from "./components/mm-components-section";
 
@@ -33,6 +36,8 @@ type BomDraftRow = {
   materialTitle: string;
   materialType: MaterialType | null;
   unitOfMeasurement: MaterialUnit | null;
+  unitConversions: MaterialUnitConversionSummary[];
+  unit: MaterialUnit | null;
   unitPrice: number;
   quantityRequired: number | "";
   notes: string;
@@ -49,10 +54,29 @@ function createEmptyRow(): BomDraftRow {
     materialTitle: "",
     materialType: null,
     unitOfMeasurement: null,
+    unitConversions: [],
+    unit: null,
     unitPrice: 0,
     quantityRequired: "",
     notes: "",
   };
+}
+
+function showUnitSelect(row: BomDraftRow) {
+  return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+}
+
+function getRowUnitOptions(row: BomDraftRow, locale: Locale) {
+  if (!row.unitOfMeasurement) return [];
+  const altUnits = row.unitConversions.map((conversion) => conversion.unit);
+  const allUnits = [row.unitOfMeasurement, ...altUnits.filter((unit) => unit !== row.unitOfMeasurement)];
+  return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
+}
+
+function getRowFactor(row: BomDraftRow) {
+  if (!row.unit || !row.unitOfMeasurement || row.unit === row.unitOfMeasurement) return 1;
+  const conversion = row.unitConversions.find((item) => item.unit === row.unit);
+  return conversion ? Number(conversion.conversionFactorToBase) : 1;
 }
 
 export default function Page() {
@@ -93,6 +117,7 @@ export default function Page() {
           items: rows.map((row) => ({
             materialCode: row.materialCode!,
             quantityRequired: Number(row.quantityRequired),
+            unit: showUnitSelect(row) && row.unit ? row.unit : undefined,
             notes: row.notes.trim() || null,
           })),
         },
@@ -126,7 +151,7 @@ export default function Page() {
     () =>
       rows.reduce((sum, row) => {
         const qty = typeof row.quantityRequired === "number" ? row.quantityRequired : 0;
-        return sum + qty * row.unitPrice;
+        return sum + qty * toDisplayUnitPrice(row.unitPrice, getRowFactor(row));
       }, 0),
     [rows],
   );
@@ -135,12 +160,14 @@ export default function Page() {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
-  function handleMaterialSelect(key: string, material: Material | null) {
+  function handleMaterialSelect(key: string, material: MaterialWithUnitConversions | null) {
     updateRow(key, {
       materialCode: material?.code ?? null,
       materialTitle: material?.title ?? "",
       materialType: material?.materialType ?? null,
       unitOfMeasurement: material?.unitOfMeasurement ?? null,
+      unitConversions: material?.unitConversions ?? [],
+      unit: material?.unitOfMeasurement ?? null,
       unitPrice: material?.unitPrice ?? 0,
     });
     setDuplicateCodes(new Set());
@@ -266,19 +293,22 @@ export default function Page() {
           <Table withColumnBorders>
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="h-12">
-                <Table.Th className="w-80 min-w-150 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-64 min-w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Material", "المادة")}
                 </Table.Th>
-                <Table.Th className="w-32 min-w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-24 min-w-24 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Quantity", "الكمية")}
                 </Table.Th>
-                <Table.Th className="min-w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-32 min-w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  {translate("Unit", "الوحدة")}
+                </Table.Th>
+                <Table.Th className="min-w-24 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Unit Price", "سعر الوحدة")} ({currency})
                 </Table.Th>
-                <Table.Th className="min-w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="min-w-24 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Line Total", "إجمالي البند")} ({currency})
                 </Table.Th>
-                <Table.Th className="min-w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="min-w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Notes", "الملاحظات")}
                 </Table.Th>
                 <Table.Th className="w-12" />
@@ -287,7 +317,8 @@ export default function Page() {
             <Table.Tbody>
               {rows.map((row) => {
                 const quantity = typeof row.quantityRequired === "number" ? row.quantityRequired : null;
-                const lineTotal = quantity !== null ? quantity * row.unitPrice : null;
+                const displayUnitPrice = toDisplayUnitPrice(row.unitPrice, getRowFactor(row));
+                const lineTotal = quantity !== null ? quantity * displayUnitPrice : null;
                 const isDuplicate = !!row.materialCode && duplicateCodes.has(row.materialCode);
 
                 return (
@@ -323,8 +354,30 @@ export default function Page() {
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
+                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+                      {showUnitSelect(row) ? (
+                        <DataSelect
+                          value={row.unit}
+                          setValue={(next) => {
+                            const resolved = typeof next === "function" ? next(row.unit) : next;
+                            updateRow(row.key, { unit: (resolved as MaterialUnit | null) ?? row.unitOfMeasurement });
+                          }}
+                          data={getRowUnitOptions(row, locale)}
+                          variant="unstyled"
+                          radius={0}
+                          searchable
+                          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-600">
+                          {row.unitOfMeasurement ? getMaterialUnitLabel(row.unitOfMeasurement, locale) : ""}
+                        </span>
+                      )}
+                    </Table.Td>
                     <Table.Td>
-                      <span className="text-sm text-gray-600">{row.materialCode ? formatMoney(row.unitPrice) : ""}</span>
+                      <span className="text-sm text-gray-600">
+                        {row.materialCode ? formatMoney(displayUnitPrice) : ""}
+                      </span>
                     </Table.Td>
                     <Table.Td>
                       <span className="text-sm font-medium text-gray-600">
@@ -375,6 +428,7 @@ export default function Page() {
                     {translate("Add Row", "إضافة صف")}
                   </Button>
                 </Table.Td>
+                <Table.Td />
                 <Table.Td />
                 <Table.Td>
                   <Badge size="sm" variant="light" color="dark" radius="md">
