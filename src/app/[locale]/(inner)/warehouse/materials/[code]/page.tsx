@@ -24,6 +24,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
+import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
 
 const PAGE_TITLE = { en: "Material Details", ar: "تفاصيل المادة" };
 
@@ -103,6 +104,8 @@ export default function Page() {
             />
 
             <MaterialDetails material={material} />
+
+            <MaterialUnitConversionsSection material={material} />
 
             {isManufacturedMaterial(material.materialType) && (
               <MaterialBomSection material={material} bom={bomQuery.data || null} />
