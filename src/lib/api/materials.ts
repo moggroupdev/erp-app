@@ -74,10 +74,6 @@ const materialsApi = {
   }) {
     return await privateRequest<MaterialUnitConversion>({ method: "POST", url: `materials/${code}/units`, data: dto });
   },
-
-  async removeUnit({ privateRequest, code, id }: { privateRequest: PrivateRequest; code: string; id: string }) {
-    return await privateRequest<MaterialUnitConversion>({ method: "DELETE", url: `materials/${code}/units/${id}` });
-  },
 };
 
 export default materialsApi;
