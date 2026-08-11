@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -6,10 +8,13 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
+import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { BomItemWithMaterial } from "@/types/bom";
+import type { MaterialWithUnitConversions } from "@/types/material";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
+import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
 export default function BomItemModal({
@@ -34,13 +39,26 @@ export default function BomItemModal({
   const [validationError, setValidationError] = useState("");
 
   const [materialCode, setMaterialCode] = useState<string | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
+  const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
   const [notes, setNotes] = useState("");
 
   const isUpdate = !!itemToUpdate;
+  const baseUnit = itemToUpdate?.material.unitOfMeasurement || selectedMaterial?.unitOfMeasurement || null;
+  const unitConversions = itemToUpdate?.material.unitConversions ?? selectedMaterial?.unitConversions ?? [];
+
+  const unitOptions = useMemo(() => {
+    if (!baseUnit) return [];
+    const altUnits = unitConversions.map((row) => row.unit);
+    const allUnits = [baseUnit, ...altUnits.filter((u) => u !== baseUnit)];
+    return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
+  }, [baseUnit, unitConversions, locale]);
 
   function reset() {
     setMaterialCode(null);
+    setSelectedMaterial(null);
+    setUnit(null);
     setQuantityRequired("");
     setNotes("");
   }
@@ -50,17 +68,26 @@ export default function BomItemModal({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuantityRequired(itemToUpdate.quantityRequired);
       setNotes(itemToUpdate.notes || "");
+      setUnit(itemToUpdate.material.unitOfMeasurement);
     } else reset();
   }, [itemToUpdate]);
 
+  useEffect(() => {
+    if (!baseUnit) return;
+    setUnit((current) => current || baseUnit);
+  }, [baseUnit]);
+
   const mutation = useMutation({
     mutationFn: async () => {
+      const payloadUnit = (unit as MaterialUnit) || undefined;
+
       if (itemToUpdate) {
         return await bomsApi.updateItem({
           privateRequest,
           itemId: itemToUpdate.id,
           dto: {
             quantityRequired: Number(quantityRequired),
+            unit: payloadUnit,
             notes: notes.trim() || null,
           },
         });
@@ -72,6 +99,7 @@ export default function BomItemModal({
         dto: {
           materialCode: materialCode!,
           quantityRequired: Number(quantityRequired),
+          unit: payloadUnit,
           notes: notes.trim() || null,
         },
       });
@@ -97,6 +125,10 @@ export default function BomItemModal({
       return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
     }
 
+    if (!unit) {
+      return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
+    }
+
     const normalizedQuantity = Number(quantityRequired);
     if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
       return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
@@ -120,11 +152,13 @@ export default function BomItemModal({
     : translate("Add BOM Item", "إضافة بند لقائمة المواد");
 
   const isDataChanged = itemToUpdate
-    ? Number(quantityRequired) !== itemToUpdate.quantityRequired || (notes.trim() || null) !== itemToUpdate.notes
+    ? Number(quantityRequired) !== itemToUpdate.quantityRequired ||
+      unit !== itemToUpdate.material.unitOfMeasurement ||
+      (notes.trim() || null) !== itemToUpdate.notes
     : true;
 
   const isReadyToSubmit =
-    quantityRequired !== "" && Number(quantityRequired) > 0 && isDataChanged && (isUpdate || !!materialCode);
+    quantityRequired !== "" && Number(quantityRequired) > 0 && !!unit && isDataChanged && (isUpdate || !!materialCode);
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
@@ -140,6 +174,10 @@ export default function BomItemModal({
           <SelectMaterial
             value={materialCode}
             setValue={setMaterialCode}
+            onMaterialSelect={(material) => {
+              setSelectedMaterial(material);
+              setUnit(material?.unitOfMeasurement ?? null);
+            }}
             excludeCodes={excludeMaterialCodes}
             label={translate("Material", "المادة")}
             placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
@@ -148,17 +186,30 @@ export default function BomItemModal({
           />
         )}
 
-        <NumberInput
-          value={quantityRequired}
-          onChange={setQuantityRequired}
-          label={translate("Quantity Required", "الكمية المطلوبة")}
-          placeholder={translate("Enter quantity", "أدخل الكمية")}
-          min={0}
-          allowNegative={false}
-          decimalScale={4}
-          required
-          radius="md"
-        />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <NumberInput
+            value={quantityRequired}
+            onChange={setQuantityRequired}
+            label={translate("Quantity Required", "الكمية المطلوبة")}
+            placeholder={translate("Enter quantity", "أدخل الكمية")}
+            min={0}
+            allowNegative={false}
+            decimalScale={4}
+            required
+            radius="md"
+          />
+
+          <DataSelect
+            value={unit}
+            setValue={setUnit}
+            data={unitOptions}
+            label={translate("Unit", "الوحدة")}
+            placeholder={translate("Select unit", "اختر الوحدة")}
+            required
+            disabled={!baseUnit}
+            searchable
+          />
+        </div>
 
         <Textarea
           value={notes}
