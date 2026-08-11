@@ -290,28 +290,28 @@ export default function Page() {
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="overflow-x-auto rounded-xl">
-          <Table withColumnBorders>
+          <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">
-              <Table.Tr className="h-12">
-                <Table.Th className="w-64 min-w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
+              <Table.Tr className="h-9">
+                <Table.Th className="w-[34%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Material", "المادة")}
                 </Table.Th>
-                <Table.Th className="w-24 min-w-24 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Quantity", "الكمية")}
                 </Table.Th>
-                <Table.Th className="w-32 min-w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Unit", "الوحدة")}
                 </Table.Th>
-                <Table.Th className="min-w-24 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Unit Price", "سعر الوحدة")} ({currency})
                 </Table.Th>
-                <Table.Th className="min-w-24 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Line Total", "إجمالي البند")} ({currency})
                 </Table.Th>
-                <Table.Th className="min-w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[20%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Notes", "الملاحظات")}
                 </Table.Th>
-                <Table.Th className="w-12" />
+                <Table.Th className="w-[6%]" />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -366,7 +366,7 @@ export default function Page() {
                           variant="unstyled"
                           radius={0}
                           searchable
-                          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+                          styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
                         />
                       ) : (
                         <span className="text-sm text-gray-600">
@@ -414,7 +414,7 @@ export default function Page() {
               })}
             </Table.Tbody>
             <Table.Tfoot className="bg-gray-50">
-              <Table.Tr className="h-12">
+              <Table.Tr className="h-9">
                 <Table.Td>
                   <Button
                     type="button"
