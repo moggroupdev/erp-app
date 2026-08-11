@@ -62,7 +62,7 @@ export default function MaterialUnitConversionModal({
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.materials.units(materialCode) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.materials.all });
       toast.success(translate("Alternate unit added successfully.", "تمت إضافة وحدة القياس البديلة بنجاح."));
       handleClose();
     },

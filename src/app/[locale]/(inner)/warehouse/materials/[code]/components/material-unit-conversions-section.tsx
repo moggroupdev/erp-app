@@ -1,38 +1,23 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
-import usePrivateRequest from "@/hooks/use-private-request";
-import materialsApi from "@/lib/api/materials";
-import getErrorMessage from "@/lib/helpers/get-error-message";
-import { queryKeys } from "@/lib/api/query-keys";
-import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import type { MaterialWithCreator } from "@/types/material";
+import type { MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import { Badge, Button, Table } from "@mantine/core";
 import { Plus, Ruler } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
-import LoadingSection from "@/components/ui/sections/loading";
-import ErrorSection from "@/components/ui/sections/error";
 import MaterialUnitConversionModal from "./material-unit-conversion-modal";
 
-export default function MaterialUnitConversionsSection({ material }: { material: MaterialWithCreator }) {
+export default function MaterialUnitConversionsSection({ material }: { material: MaterialWithCreatorAndUnitConversions }) {
   const { locale, translate } = useI18n();
-  const privateRequest = usePrivateRequest();
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
-  const unitsQuery = useQuery({
-    queryKey: queryKeys.materials.units(material.code),
-    queryFn: ({ signal }) => materialsApi.listUnits({ privateRequest, code: material.code, signal }),
-    staleTime: staleTimes.materials,
-  });
-
-  const units = unitsQuery.data ?? [];
+  const units = material.unitConversions;
   const existingUnitValues = useMemo(() => units.map((row) => row.unit), [units]);
 
   return (
@@ -72,15 +57,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
         )}
       </div>
 
-      {unitsQuery.isFetching ? (
-        <LoadingSection message={translate("Loading alternate units", "جاري تحميل وحدات القياس البديلة")} />
-      ) : unitsQuery.error ? (
-        <ErrorSection
-          errorTitle={translate("Failed to load alternate units", "فشل تحميل وحدات القياس البديلة")}
-          errorMessage={getErrorMessage(locale, unitsQuery.error)}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => unitsQuery.refetch() }}
-        />
-      ) : units.length === 0 ? (
+      {units.length === 0 ? (
         <EmptySection message={translate("No alternate units defined yet.", "لا توجد وحدات قياس بديلة بعد.")}>
           <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
             <Button onClick={openModal} variant="light" color="indigo" radius="md" leftSection={<Plus size={15} />}>

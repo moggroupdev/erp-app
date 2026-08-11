@@ -59,10 +59,6 @@ const materialsApi = {
 
   // ==================== UNITS ====================
 
-  async listUnits({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
-    return await privateRequest<MaterialUnitConversion[]>({ url: `materials/${code}/units`, signal });
-  },
-
   async addUnit({
     privateRequest,
     code,
