@@ -14,7 +14,9 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
+import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -102,7 +104,13 @@ export default function Page() {
                       {transaction.items.map((item) => {
                         const subtotal = Number(item.quantity) * Number(item.unitPrice);
                         return (
-                          <Table.Tr key={item.id} className="text-gray-600">
+                          <UnitToggle
+                            key={item.id}
+                            baseUnit={item.material.unitOfMeasurement}
+                            unitConversions={item.material.unitConversions}
+                          >
+                            {({ unit, factor, toggleButton }) => (
+                          <Table.Tr className="text-gray-600">
                             <Table.Td className="font-semibold text-gray-800">
                               <Link
                                 href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
@@ -118,11 +126,18 @@ export default function Page() {
                               </div>
                             </Table.Td>
                             <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
-                            <Table.Td>{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</Table.Td>
-                            <Table.Td>{item.quantity}</Table.Td>
-                            <Table.Td>{formatMoney(item.unitPrice)}</Table.Td>
+                            <Table.Td>
+                              <div className="flex items-center gap-1">
+                                {getMaterialUnitLabel(unit, locale)}
+                                {toggleButton}
+                              </div>
+                            </Table.Td>
+                            <Table.Td>{toDisplayQuantity(item.quantity, factor)}</Table.Td>
+                            <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
                             <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
                           </Table.Tr>
+                            )}
+                          </UnitToggle>
                         );
                       })}
                     </Table.Tbody>

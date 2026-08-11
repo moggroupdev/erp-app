@@ -5,6 +5,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialWithCreator } from "@/types/material";
@@ -13,6 +14,7 @@ import { Badge, Button, Table } from "@mantine/core";
 import { Layers, Pencil, Plus } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
+import UnitToggle from "@/components/ui/unit-toggle";
 import { EmptyValue } from "@/components/ui/entity-details";
 import MmBomItemModal from "@/components/global/data-modals/mm-bom-item-modal";
 
@@ -148,7 +150,13 @@ export default function MaterialBomSection({
                     : null;
 
                   return (
-                    <Table.Tr key={item.id} className="text-gray-600">
+                    <UnitToggle
+                      key={item.id}
+                      baseUnit={item.material.unitOfMeasurement}
+                      unitConversions={item.material.unitConversions}
+                    >
+                      {({ unit, factor, toggleButton }) => (
+                    <Table.Tr className="text-gray-600">
                       <Table.Td>
                         <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
                       </Table.Td>
@@ -158,12 +166,17 @@ export default function MaterialBomSection({
                       <Table.Td>{mainCategory?.title || <EmptyValue />}</Table.Td>
                       <Table.Td>{subCategory?.title || <EmptyValue />}</Table.Td>
                       <Table.Td>
-                        <Badge size="sm" variant="light" color="gray" radius="md">
-                          {getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}
-                        </Badge>
+                        <div className="flex items-center gap-1">
+                          <Badge size="sm" variant="light" color="gray" radius="md">
+                            {getMaterialUnitLabel(unit, locale)}
+                          </Badge>
+                          {toggleButton}
+                        </div>
                       </Table.Td>
-                      <Table.Td className="font-medium text-gray-800">{item.quantityRequired}</Table.Td>
-                      <Table.Td>{formatMoney(item.material.unitPrice)}</Table.Td>
+                      <Table.Td className="font-medium text-gray-800">
+                        {toDisplayQuantity(item.quantityRequired, factor)}
+                      </Table.Td>
+                      <Table.Td>{formatMoney(toDisplayUnitPrice(item.material.unitPrice, factor))}</Table.Td>
                       <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
                       <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
                       <Table.Td w={0}>
@@ -181,6 +194,8 @@ export default function MaterialBomSection({
                         </PermissionGuard>
                       </Table.Td>
                     </Table.Tr>
+                      )}
+                    </UnitToggle>
                   );
                 })}
               </Table.Tbody>

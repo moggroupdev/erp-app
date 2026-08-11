@@ -20,7 +20,8 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { type Material } from "@/types/material";
+import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { type Material, type MaterialWithUnitConversions } from "@/types/material";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Printer, Search, X } from "lucide-react";
@@ -32,6 +33,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import UnitToggle from "@/components/ui/unit-toggle";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
 import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
@@ -265,42 +267,58 @@ export default function Page() {
                   {paginatedMaterials.data.map((material) => {
                     const categories = getCategoryLabels(material.subCategoryId);
                     return (
-                      <Table.Tr key={material.code} className="text-gray-600">
-                        <Table.Td className="font-semibold text-gray-800">
-                          <Link href={getLocalizedHref(`/warehouse/materials/${material.code}`)} className="hover:underline">
-                            {material.title}
-                          </Link>
-                        </Table.Td>
-                        <Table.Td>
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-mono">{material.code}</span>
-                            <CopyButton text={material.code} />
-                          </div>
-                        </Table.Td>
-                        <Table.Td>{getMaterialTypeLabel(material.materialType, locale)}</Table.Td>
-                        <Table.Td>{categories.main}</Table.Td>
-                        <Table.Td>{categories.sub}</Table.Td>
-                        <Table.Td>{getMaterialUnitLabel(material.unitOfMeasurement, locale)}</Table.Td>
-                        <Table.Td>{material.quantity}</Table.Td>
-                        <Table.Td>{formatMoney(material.unitPrice)}</Table.Td>
-                        <Table.Td w={0}>
-                          <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
-                            <button
-                              onClick={() => handleOpenUpdateModal(material)}
-                              className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
-                            >
-                              <Pencil size={14} />
-                            </button>
-                          </PermissionGuard>
-                        </Table.Td>
-                      </Table.Tr>
+                      <UnitToggle
+                        key={material.code}
+                        baseUnit={material.unitOfMeasurement}
+                        unitConversions={material.unitConversions}
+                      >
+                        {({ unit, factor, toggleButton }) => (
+                          <Table.Tr className="text-gray-600">
+                            <Table.Td className="font-semibold text-gray-800">
+                              <Link
+                                href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
+                                className="hover:underline"
+                              >
+                                {material.title}
+                              </Link>
+                            </Table.Td>
+                            <Table.Td>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono">{material.code}</span>
+                                <CopyButton text={material.code} />
+                              </div>
+                            </Table.Td>
+                            <Table.Td>{getMaterialTypeLabel(material.materialType, locale)}</Table.Td>
+                            <Table.Td>{categories.main}</Table.Td>
+                            <Table.Td>{categories.sub}</Table.Td>
+                            <Table.Td>
+                              <div className="flex items-center gap-1">
+                                {getMaterialUnitLabel(unit, locale)}
+                                {toggleButton}
+                              </div>
+                            </Table.Td>
+                            <Table.Td>{toDisplayQuantity(material.quantity, factor)}</Table.Td>
+                            <Table.Td>{formatMoney(toDisplayUnitPrice(material.unitPrice, factor))}</Table.Td>
+                            <Table.Td w={0}>
+                              <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
+                                <button
+                                  onClick={() => handleOpenUpdateModal(material)}
+                                  className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                              </PermissionGuard>
+                            </Table.Td>
+                          </Table.Tr>
+                        )}
+                      </UnitToggle>
                     );
                   })}
                 </Table.Tbody>
               </Table>
             </div>
 
-            <PaginationHandler<Material>
+            <PaginationHandler<MaterialWithUnitConversions>
               paginatedData={paginatedMaterials}
               activePage={activePage}
               setActivePage={setActivePage}

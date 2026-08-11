@@ -35,11 +35,13 @@ import {
   type CostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { Badge, Button, Divider, SegmentedControl, Table } from "@mantine/core";
 import { Calculator, Layers, Pencil, Plus, Printer, Wallet } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
+import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -352,21 +354,32 @@ export default function Page() {
                               const zeroValueClass = "text-orange-500";
 
                               return (
-                                <Table.Tr key={item.id} className="text-gray-600">
+                                <UnitToggle
+                                  key={item.id}
+                                  baseUnit={item.material.unitOfMeasurement}
+                                  unitConversions={item.material.unitConversions}
+                                >
+                                  {({ unit, factor, toggleButton }) => (
+                                <Table.Tr className="text-gray-600">
                                   <Table.Td>
                                     <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
                                   </Table.Td>
                                   <Table.Td>
                                     <span className="block truncate font-medium text-gray-800">{item.material.title}</span>
                                   </Table.Td>
-                                  <Table.Td>{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</Table.Td>
+                                  <Table.Td>
+                                    <div className="flex items-center gap-1">
+                                      {getMaterialUnitLabel(unit, locale)}
+                                      {toggleButton}
+                                    </div>
+                                  </Table.Td>
                                   <Table.Td
                                     className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
                                   >
-                                    {item.quantityRequired}
+                                    {toDisplayQuantity(item.quantityRequired, factor)}
                                   </Table.Td>
                                   <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
-                                    {formatMoney(unitCost)}
+                                    {formatMoney(toDisplayUnitPrice(unitCost, factor))}
                                   </Table.Td>
                                   <Table.Td className={`font-medium ${lineCost === 0 ? zeroValueClass : "text-gray-800"}`}>
                                     {formatMoney(lineCost)}
@@ -402,6 +415,8 @@ export default function Page() {
                                     )}
                                   </Table.Td>
                                 </Table.Tr>
+                                  )}
+                                </UnitToggle>
                               );
                             })}
                           </Table.Tbody>

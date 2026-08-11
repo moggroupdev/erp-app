@@ -26,6 +26,7 @@ export type BomMmComponent = {
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
     lastPurchasePrice: number | null;
+    unitConversions: MaterialUnitConversionSummary[];
   };
 };
 
