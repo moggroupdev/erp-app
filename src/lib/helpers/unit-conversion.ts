@@ -1,4 +1,30 @@
+import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+
 const CONVERSION_FACTOR_DISPLAY_SCALE = 6;
+
+const MASS_TO_GRAM: Partial<Record<MaterialUnit, number>> = {
+  gram: 1,
+  kg: 1000,
+  ton: 1_000_000,
+};
+
+const LENGTH_TO_CM: Partial<Record<MaterialUnit, number>> = {
+  cm: 1,
+  meter: 100,
+};
+
+const KNOWN_UNIT_GROUPS: Partial<Record<MaterialUnit, number>>[] = [MASS_TO_GRAM, LENGTH_TO_CM];
+
+/** Exact "1 unit = X base" factor when both units share a known group; otherwise null. */
+export function getKnownConversionFactorToBase(unit: MaterialUnit, baseUnit: MaterialUnit): number | null {
+  for (const group of KNOWN_UNIT_GROUPS) {
+    if (group[unit] !== undefined && group[baseUnit] !== undefined) {
+      return group[unit]! / group[baseUnit]!;
+    }
+  }
+
+  return null;
+}
 
 function formatFactorForDisplay(factor: number): string {
   return factor.toFixed(CONVERSION_FACTOR_DISPLAY_SCALE).replace(/\.?0+$/, "");

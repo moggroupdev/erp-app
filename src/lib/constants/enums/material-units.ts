@@ -5,15 +5,15 @@ export const MATERIAL_UNIT_VALUES = [
   "count",
   "kg",
   "gram",
-  "meter",
+  "ton",
   "cm",
+  "meter",
+  "square_meter",
+  "cubic_meter",
   "liter",
   "sheet",
   "roll",
   "box",
-  "square_meter",
-  "cubic_meter",
-  "ton",
 ] as const;
 
 export type MaterialUnit = (typeof MATERIAL_UNIT_VALUES)[number];

@@ -7,10 +7,15 @@ import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { toStoredConversionFactorToBase } from "@/lib/helpers/unit-conversion";
+import {
+  formatConversionLabel,
+  getKnownConversionFactorToBase,
+  toStoredConversionFactorToBase,
+} from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { getMaterialUnitLabel, MATERIAL_UNIT_LABELS_LIST, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { Button, NumberInput, SegmentedControl } from "@mantine/core";
+import { Alert, Button, NumberInput, SegmentedControl } from "@mantine/core";
+import { Info } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
@@ -105,6 +110,20 @@ export default function MaterialUnitConversionModal({
   const selectedUnitLabel = unit ? getMaterialUnitLabel(unit as MaterialUnit, locale) : null;
   const leftUnitLabel = factorFromBase ? baseUnitLabel : (selectedUnitLabel ?? translate("unit", "وحدة"));
   const rightUnitLabel = factorFromBase ? (selectedUnitLabel ?? translate("unit", "وحدة")) : baseUnitLabel;
+  const knownFactor = unit ? getKnownConversionFactorToBase(unit as MaterialUnit, baseUnit) : null;
+
+  function applyKnownFactor() {
+    if (knownFactor == null) return;
+
+    if (knownFactor > 0 && knownFactor < 1) {
+      setFactorFromBase(true);
+      setEnteredFactor(1 / knownFactor);
+      return;
+    }
+
+    setFactorFromBase(false);
+    setEnteredFactor(knownFactor);
+  }
 
   return (
     <Modal opened={opened} onClose={handleClose} title={translate("Add Alternate Unit", "إضافة وحدة قياس بديلة")} size="md">
@@ -141,6 +160,22 @@ export default function MaterialUnitConversionModal({
             fullWidth
             radius="md"
           />
+        )}
+
+        {knownFactor != null && selectedUnitLabel && (
+          <Alert color="indigo" variant="light" radius="md" icon={<Info size={16} />}>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm">
+                {translate(
+                  `Known conversion: ${formatConversionLabel(knownFactor, selectedUnitLabel, baseUnitLabel)}`,
+                  `تحويل معروف: ${formatConversionLabel(knownFactor, selectedUnitLabel, baseUnitLabel)}`,
+                )}
+              </p>
+              <Button type="button" size="xs" color="indigo" variant="light" radius="md" onClick={applyKnownFactor}>
+                {translate("Use this factor", "استخدام هذا المعامل")}
+              </Button>
+            </div>
+          </Alert>
         )}
 
         <NumberInput
