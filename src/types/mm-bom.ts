@@ -1,5 +1,6 @@
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 
 export type MmBomItem = {
   id: string;
@@ -24,6 +25,7 @@ export type MmBomItemWithMaterial = {
     materialType: MaterialType;
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
+    unitConversions: MaterialUnitConversionSummary[];
   };
 };
 

@@ -16,19 +16,16 @@ import materialsApi from "@/lib/api/materials";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import type { Material } from "@/types/material";
+import type { MaterialWithUnitConversions } from "@/types/material";
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { PackageSearch, Table2 } from "lucide-react";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
 import BrowseMaterialsModal from "./browse-materials-modal";
 
-export type SelectMaterialProps = Omit<
-  GenericDataSelectProps,
-  "data" | "value" | "setValue" | "onChange" | "rightIcon"
-> & {
+export type SelectMaterialProps = Omit<GenericDataSelectProps, "data" | "value" | "setValue" | "onChange" | "rightIcon"> & {
   value: string | null;
   setValue: React.Dispatch<React.SetStateAction<string | null>>;
-  onMaterialSelect?: (material: Material | null) => void;
+  onMaterialSelect?: (material: MaterialWithUnitConversions | null) => void;
   /** Material codes to hide from the options list (e.g. already on the BOM). */
   excludeCodes?: string[];
   /** Show a button that opens a detail-browse modal for picking a material. */
@@ -51,7 +48,7 @@ export default function SelectMaterial({
 
   const { debouncedValue: debouncedSearch, setPendingValue: setSearch } = useDebouncedState("");
 
-  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
   const [browseOpened, { open: openBrowse, close: closeBrowse }] = useDisclosure(false);
 
   const trimmedSearch = debouncedSearch.trim();
@@ -103,7 +100,7 @@ export default function SelectMaterial({
   const excludeSet = useMemo(() => new Set(excludeCodes.filter((code) => code !== value)), [excludeCodes, value]);
 
   const data = useMemo(() => {
-    const byCode = new Map<string, Material>();
+    const byCode = new Map<string, MaterialWithUnitConversions>();
 
     for (const material of materials) if (!excludeSet.has(material.code)) byCode.set(material.code, material);
 
@@ -135,7 +132,7 @@ export default function SelectMaterial({
     // search results; the parent may resolve metadata from the selected code separately.
   }
 
-  function handleBrowseSelect(material: Material) {
+  function handleBrowseSelect(material: MaterialWithUnitConversions) {
     setSelectedMaterial(material);
     setValue(material.code);
     onMaterialSelect?.(material);

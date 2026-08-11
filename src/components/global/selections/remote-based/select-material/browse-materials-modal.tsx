@@ -12,7 +12,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import type { Material } from "@/types/material";
+import type { MaterialWithUnitConversions } from "@/types/material";
 import { Table, TextInput } from "@mantine/core";
 import { Search, X } from "lucide-react";
 import Modal from "@/components/ui/modal";
@@ -34,7 +34,7 @@ export default function BrowseMaterialsModal({
 }: {
   opened: boolean;
   close: () => void;
-  onSelect: (material: Material) => void;
+  onSelect: (material: MaterialWithUnitConversions) => void;
   excludeCodes?: string[];
 }) {
   const { locale, translate } = useI18n();
@@ -129,7 +129,7 @@ export default function BrowseMaterialsModal({
     return materials.filter((material) => !excludeSet.has(material.code));
   }, [paginatedMaterials?.data, excludeSet]);
 
-  function handleSelect(material: Material) {
+  function handleSelect(material: MaterialWithUnitConversions) {
     onSelect(material);
     close();
   }
@@ -233,7 +233,7 @@ export default function BrowseMaterialsModal({
                 </Table>
               </div>
 
-              <PaginationHandler<Material>
+              <PaginationHandler<MaterialWithUnitConversions>
                 paginatedData={paginatedMaterials}
                 activePage={activePage}
                 setActivePage={setActivePage}

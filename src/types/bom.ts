@@ -1,6 +1,7 @@
 import type { ProductSourceType } from "@/lib/constants/enums/product-source-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 
 export type BomItem = {
   id: string;
@@ -42,6 +43,7 @@ export type BomItemWithMaterial = {
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
     lastPurchasePrice: number | null;
+    unitConversions: MaterialUnitConversionSummary[];
     // For manufactured materials, we need to get the components of the material
     manufacturedMaterialBoms: BomMmComponent[];
   };

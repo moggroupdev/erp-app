@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
-import type { Material, MaterialWithCreator } from "@/types/material";
+import type { Material, MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
@@ -19,7 +19,7 @@ import SelectMaterialSub from "@/components/global/selections/reference-based/se
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
 import SelectMaterialUnit from "@/components/global/selections/enum-based/select-material-unit";
 
-type MaterialFormEntity = Material | MaterialWithCreator;
+type MaterialFormEntity = Material | MaterialWithCreatorAndUnitConversions;
 
 export default function MaterialModal({
   opened,

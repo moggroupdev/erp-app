@@ -2,8 +2,9 @@ import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type {
   Material,
-  MaterialWithCreator,
   MaterialUnitConversion,
+  MaterialWithUnitConversions,
+  MaterialWithCreatorAndUnitConversions,
   CreateMaterialDto,
   UpdateMaterialDto,
   CreateMaterialUnitConversionDto,
@@ -23,7 +24,7 @@ const materialsApi = {
     params: Dictionary;
     signal: AbortSignal;
   }) {
-    return await privateRequest<PaginatedData<Material>>({ url: "materials", params, signal });
+    return await privateRequest<PaginatedData<MaterialWithUnitConversions>>({ url: "materials", params, signal });
   },
 
   async listAllToPrint({
@@ -35,7 +36,7 @@ const materialsApi = {
     signal?: AbortSignal;
     mainCategoryId?: string;
   }) {
-    const result = await privateRequest<PaginatedData<Material>>({
+    const result = await privateRequest<PaginatedData<MaterialWithUnitConversions>>({
       url: "materials",
       params: {
         limit: Infinity,
@@ -49,7 +50,7 @@ const materialsApi = {
   },
 
   async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
-    return await privateRequest<MaterialWithCreator>({ url: `materials/${code}`, signal });
+    return await privateRequest<MaterialWithCreatorAndUnitConversions>({ url: `materials/${code}`, signal });
   },
 
   async update({ privateRequest, code, dto }: { privateRequest: PrivateRequest; code: string; dto: UpdateMaterialDto }) {
