@@ -1,6 +1,6 @@
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 
-const CONVERSION_FACTOR_DISPLAY_SCALE = 6;
+const CONVERSION_FACTOR_DISPLAY_SCALE = 3;
 
 const MASS_TO_GRAM: Partial<Record<MaterialUnit, number>> = {
   gram: 1,
