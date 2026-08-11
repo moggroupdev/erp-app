@@ -15,11 +15,29 @@ const LENGTH_TO_CM: Partial<Record<MaterialUnit, number>> = {
 
 const KNOWN_UNIT_GROUPS: Partial<Record<MaterialUnit, number>>[] = [MASS_TO_GRAM, LENGTH_TO_CM];
 
-/** Exact "1 unit = X base" factor when both units share a known group; otherwise null. */
-export function getKnownConversionFactorToBase(unit: MaterialUnit, baseUnit: MaterialUnit): number | null {
+function getGroupRatio(unitA: MaterialUnit, unitB: MaterialUnit): number | null {
   for (const group of KNOWN_UNIT_GROUPS) {
-    if (group[unit] !== undefined && group[baseUnit] !== undefined) {
-      return group[unit]! / group[baseUnit]!;
+    if (group[unitA] !== undefined && group[unitB] !== undefined) {
+      return group[unitA]! / group[unitB]!;
+    }
+  }
+
+  return null;
+}
+
+/** Exact "1 unit = X base" factor when both units share a known group, or via an existing alternate; otherwise null. */
+export function getKnownConversionFactorToBase(
+  unit: MaterialUnit,
+  baseUnit: MaterialUnit,
+  existingConversions: { unit: MaterialUnit; conversionFactorToBase: number }[] = [],
+): number | null {
+  const directFactor = getGroupRatio(unit, baseUnit);
+  if (directFactor != null) return directFactor;
+
+  for (const existing of existingConversions) {
+    const ratioToExisting = getGroupRatio(unit, existing.unit);
+    if (ratioToExisting != null) {
+      return ratioToExisting * Number(existing.conversionFactorToBase);
     }
   }
 

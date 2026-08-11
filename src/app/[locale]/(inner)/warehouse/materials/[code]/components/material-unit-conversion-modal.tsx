@@ -14,6 +14,7 @@ import {
 } from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { getMaterialUnitLabel, MATERIAL_UNIT_LABELS_LIST, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 import { Alert, Button, NumberInput, SegmentedControl } from "@mantine/core";
 import { Info } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -25,13 +26,13 @@ export default function MaterialUnitConversionModal({
   close,
   materialCode,
   baseUnit,
-  existingUnits,
+  existingConversions,
 }: {
   opened: boolean;
   close: () => void;
   materialCode: string;
   baseUnit: MaterialUnit;
-  existingUnits: MaterialUnit[];
+  existingConversions: MaterialUnitConversionSummary[];
 }) {
   const { locale, translate, translation } = useI18n();
   const queryClient = useQueryClient();
@@ -42,6 +43,7 @@ export default function MaterialUnitConversionModal({
   const [enteredFactor, setEnteredFactor] = useState<number | string>("");
   const [factorFromBase, setFactorFromBase] = useState(false);
 
+  const existingUnits = existingConversions.map((conversion) => conversion.unit);
   const unitOptions = MATERIAL_UNIT_LABELS_LIST.filter(
     (item) => item.value !== baseUnit && !existingUnits.includes(item.value),
   ).map((item) => ({ value: item.value, label: translate(item.label.en, item.label.ar) }));
@@ -110,7 +112,7 @@ export default function MaterialUnitConversionModal({
   const selectedUnitLabel = unit ? getMaterialUnitLabel(unit as MaterialUnit, locale) : null;
   const leftUnitLabel = factorFromBase ? baseUnitLabel : (selectedUnitLabel ?? translate("unit", "وحدة"));
   const rightUnitLabel = factorFromBase ? (selectedUnitLabel ?? translate("unit", "وحدة")) : baseUnitLabel;
-  const knownFactor = unit ? getKnownConversionFactorToBase(unit as MaterialUnit, baseUnit) : null;
+  const knownFactor = unit ? getKnownConversionFactorToBase(unit as MaterialUnit, baseUnit, existingConversions) : null;
 
   function applyKnownFactor() {
     if (knownFactor == null) return;
@@ -164,7 +166,7 @@ export default function MaterialUnitConversionModal({
 
         {knownFactor != null && selectedUnitLabel && (
           <Alert color="indigo" variant="light" radius="md" icon={<Info size={16} />}>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-2">
               <p className="text-sm">
                 {translate(
                   `Known conversion: ${formatConversionLabel(knownFactor, selectedUnitLabel, baseUnitLabel)}`,

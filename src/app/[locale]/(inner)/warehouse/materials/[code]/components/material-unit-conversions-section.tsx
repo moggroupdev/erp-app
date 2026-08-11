@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
@@ -20,7 +19,6 @@ export default function MaterialUnitConversionsSection({ material }: { material:
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
   const units = material.unitConversions;
-  const existingUnitValues = useMemo(() => units.map((row) => row.unit), [units]);
 
   return (
     <section className="mt-4 flex flex-col gap-4">
@@ -29,7 +27,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
         close={closeModal}
         materialCode={material.code}
         baseUnit={material.unitOfMeasurement}
-        existingUnits={existingUnitValues}
+        existingConversions={units}
       />
 
       <div className="flex items-center justify-between gap-3">
