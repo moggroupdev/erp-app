@@ -2,6 +2,7 @@ import type { InventoryTransactionType } from "@/lib/constants/enums/inventory-t
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 
 export type InventoryTransaction = {
   id: string;
@@ -30,6 +31,7 @@ export type InventoryTransactionItem = {
     unitOfMeasurement: MaterialUnit;
     subCategoryId: string;
     unitPrice: number;
+    unitConversions: MaterialUnitConversionSummary[];
   };
 };
 

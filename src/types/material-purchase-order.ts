@@ -1,6 +1,6 @@
-import type { InventoryTransactionType } from "@/lib/constants/enums/inventory-transaction-types";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 
 type PurchaseMaterial = {
   code: string;
@@ -8,6 +8,10 @@ type PurchaseMaterial = {
   materialType: MaterialType;
   unitOfMeasurement: MaterialUnit;
   subCategoryId: string;
+};
+
+type PurchaseMaterialWithUnitConversion = PurchaseMaterial & {
+  unitConversions: MaterialUnitConversionSummary[];
 };
 
 // =============== Material Purchase Orders ===============
@@ -36,7 +40,7 @@ export type MaterialPurchaseOrderItem = {
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
-  material: PurchaseMaterial;
+  material: PurchaseMaterialWithUnitConversion;
 };
 
 export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "createdBy"> & {
@@ -70,7 +74,7 @@ export type MaterialPurchaseReceiptItem = {
     materialCode: string;
     quantityOrdered: number;
     unitPrice: number;
-    material: PurchaseMaterial;
+    material: PurchaseMaterialWithUnitConversion;
   };
 };
 
