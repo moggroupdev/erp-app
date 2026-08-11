@@ -7,9 +7,10 @@ import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
+import { toStoredConversionFactorToBase } from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { getMaterialUnitLabel, MATERIAL_UNIT_LABELS_LIST, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { Button, NumberInput } from "@mantine/core";
+import { Button, NumberInput, SegmentedControl } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
@@ -33,7 +34,8 @@ export default function MaterialUnitConversionModal({
 
   const [validationError, setValidationError] = useState("");
   const [unit, setUnit] = useState<string | null>(null);
-  const [conversionFactorToBase, setConversionFactorToBase] = useState<number | string>("");
+  const [enteredFactor, setEnteredFactor] = useState<number | string>("");
+  const [factorFromBase, setFactorFromBase] = useState(false);
 
   const unitOptions = MATERIAL_UNIT_LABELS_LIST.filter(
     (item) => item.value !== baseUnit && !existingUnits.includes(item.value),
@@ -41,7 +43,8 @@ export default function MaterialUnitConversionModal({
 
   function reset() {
     setUnit(null);
-    setConversionFactorToBase("");
+    setEnteredFactor("");
+    setFactorFromBase(false);
   }
 
   useEffect(() => {
@@ -57,7 +60,7 @@ export default function MaterialUnitConversionModal({
         code: materialCode,
         dto: {
           unit: unit as MaterialUnit,
-          conversionFactorToBase: Number(conversionFactorToBase),
+          conversionFactorToBase: toStoredConversionFactorToBase(Number(enteredFactor), factorFromBase),
         },
       });
     },
@@ -78,8 +81,8 @@ export default function MaterialUnitConversionModal({
       return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
     }
 
-    const factor = Number(conversionFactorToBase);
-    if (Number.isNaN(factor) || factor <= 0) {
+    const entered = Number(enteredFactor);
+    if (Number.isNaN(entered) || entered <= 0) {
       return setValidationError(
         translate("Conversion factor must be a positive number.", "يجب أن يكون معامل التحويل رقماً موجباً."),
       );
@@ -97,9 +100,11 @@ export default function MaterialUnitConversionModal({
     }, 250);
   }
 
-  const isReadyToSubmit = !!unit && conversionFactorToBase !== "" && Number(conversionFactorToBase) > 0;
+  const isReadyToSubmit = !!unit && enteredFactor !== "" && Number(enteredFactor) > 0;
   const baseUnitLabel = getMaterialUnitLabel(baseUnit, locale);
   const selectedUnitLabel = unit ? getMaterialUnitLabel(unit as MaterialUnit, locale) : null;
+  const leftUnitLabel = factorFromBase ? baseUnitLabel : (selectedUnitLabel ?? translate("unit", "وحدة"));
+  const rightUnitLabel = factorFromBase ? (selectedUnitLabel ?? translate("unit", "وحدة")) : baseUnitLabel;
 
   return (
     <Modal opened={opened} onClose={handleClose} title={translate("Add Alternate Unit", "إضافة وحدة قياس بديلة")} size="md">
@@ -115,32 +120,38 @@ export default function MaterialUnitConversionModal({
           clearable
         />
 
+        {unit && (
+          <SegmentedControl
+            value={factorFromBase ? "fromBase" : "toBase"}
+            onChange={(value) => setFactorFromBase(value === "fromBase")}
+            data={[
+              {
+                value: "toBase",
+                label: selectedUnitLabel
+                  ? `1 ${selectedUnitLabel} = ? ${baseUnitLabel}`
+                  : translate(`1 unit = ? ${baseUnitLabel}`, `1 وحدة = ؟ ${baseUnitLabel}`),
+              },
+              {
+                value: "fromBase",
+                label: selectedUnitLabel
+                  ? `1 ${baseUnitLabel} = ? ${selectedUnitLabel}`
+                  : translate(`1 ${baseUnitLabel} = ? unit`, `1 ${baseUnitLabel} = ؟ وحدة`),
+              },
+            ]}
+            fullWidth
+            radius="md"
+          />
+        )}
+
         <NumberInput
-          value={conversionFactorToBase}
-          onChange={setConversionFactorToBase}
-          label={
-            selectedUnitLabel
-              ? translate(
-                  `Conversion factor (1 ${selectedUnitLabel} = ? ${baseUnitLabel})`,
-                  `معامل التحويل (1 ${selectedUnitLabel} = ؟ ${baseUnitLabel})`,
-                )
-              : translate(
-                  `Conversion factor (1 unit = ? ${baseUnitLabel})`,
-                  `معامل التحويل (1 وحدة = ؟ ${baseUnitLabel})`,
-                )
-          }
+          value={enteredFactor}
+          onChange={setEnteredFactor}
+          label={translate(`Conversion factor`, `معامل التحويل`)}
           placeholder={translate("Enter conversion factor", "أدخل معامل التحويل")}
-          description={
-            selectedUnitLabel
-              ? translate(
-                  `How many ${baseUnitLabel} equal 1 ${selectedUnitLabel}.`,
-                  `كم ${baseUnitLabel} تعادل 1 ${selectedUnitLabel}.`,
-                )
-              : translate(
-                  `How many ${baseUnitLabel} equal one of the selected unit.`,
-                  `كم ${baseUnitLabel} تعادل وحدة واحدة من الوحدة المختارة.`,
-                )
-          }
+          description={translate(
+            `How many ${rightUnitLabel} equal 1 ${leftUnitLabel}.`,
+            `كم ${rightUnitLabel} تعادل 1 ${leftUnitLabel}.`,
+          )}
           min={0}
           allowNegative={false}
           decimalScale={5}

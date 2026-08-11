@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatConversionLabel, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import { Badge, Button, Table } from "@mantine/core";
 import { Plus, Ruler } from "lucide-react";
@@ -87,19 +87,18 @@ export default function MaterialUnitConversionsSection({ material }: { material:
             <Table.Tbody>
               {units.map((row) => {
                 const factor = Number(row.conversionFactorToBase);
+                const altLabel = getMaterialUnitLabel(row.unit, locale);
+                const baseLabel = getMaterialUnitLabel(material.unitOfMeasurement, locale);
 
                 return (
                   <Table.Tr key={row.id} className="text-gray-600">
                     <Table.Td>
                       <Badge size="sm" variant="light" color="indigo" radius="md">
-                        {getMaterialUnitLabel(row.unit, locale)}
+                        {altLabel}
                       </Badge>
                     </Table.Td>
                     <Table.Td className="font-medium text-gray-800">
-                      {translate(
-                        `1 ${getMaterialUnitLabel(row.unit, locale)} = ${row.conversionFactorToBase} ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}`,
-                        `1 ${getMaterialUnitLabel(row.unit, locale)} = ${row.conversionFactorToBase} ${getMaterialUnitLabel(material.unitOfMeasurement, locale)}`,
-                      )}
+                      {formatConversionLabel(factor, altLabel, baseLabel)}
                     </Table.Td>
                     <Table.Td>{toDisplayQuantity(material.quantity, factor).toFixed(2)}</Table.Td>
                     <Table.Td>{formatMoney(toDisplayUnitPrice(material.unitPrice, factor))}</Table.Td>
