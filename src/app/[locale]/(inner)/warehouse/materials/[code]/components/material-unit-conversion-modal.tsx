@@ -99,6 +99,7 @@ export default function MaterialUnitConversionModal({
 
   const isReadyToSubmit = !!unit && conversionFactorToBase !== "" && Number(conversionFactorToBase) > 0;
   const baseUnitLabel = getMaterialUnitLabel(baseUnit, locale);
+  const selectedUnitLabel = unit ? getMaterialUnitLabel(unit as MaterialUnit, locale) : null;
 
   return (
     <Modal opened={opened} onClose={handleClose} title={translate("Add Alternate Unit", "إضافة وحدة قياس بديلة")} size="md">
@@ -117,12 +118,29 @@ export default function MaterialUnitConversionModal({
         <NumberInput
           value={conversionFactorToBase}
           onChange={setConversionFactorToBase}
-          label={translate(`Conversion factor (1 unit = ? ${baseUnitLabel})`, `معامل التحويل (1 وحدة = ؟ ${baseUnitLabel})`)}
+          label={
+            selectedUnitLabel
+              ? translate(
+                  `Conversion factor (1 ${selectedUnitLabel} = ? ${baseUnitLabel})`,
+                  `معامل التحويل (1 ${selectedUnitLabel} = ؟ ${baseUnitLabel})`,
+                )
+              : translate(
+                  `Conversion factor (1 unit = ? ${baseUnitLabel})`,
+                  `معامل التحويل (1 وحدة = ؟ ${baseUnitLabel})`,
+                )
+          }
           placeholder={translate("Enter conversion factor", "أدخل معامل التحويل")}
-          description={translate(
-            `How many ${baseUnitLabel} equal one of the selected unit.`,
-            `كم ${baseUnitLabel} تعادل وحدة واحدة من الوحدة المختارة.`,
-          )}
+          description={
+            selectedUnitLabel
+              ? translate(
+                  `How many ${baseUnitLabel} equal 1 ${selectedUnitLabel}.`,
+                  `كم ${baseUnitLabel} تعادل 1 ${selectedUnitLabel}.`,
+                )
+              : translate(
+                  `How many ${baseUnitLabel} equal one of the selected unit.`,
+                  `كم ${baseUnitLabel} تعادل وحدة واحدة من الوحدة المختارة.`,
+                )
+          }
           min={0}
           allowNegative={false}
           decimalScale={6}
