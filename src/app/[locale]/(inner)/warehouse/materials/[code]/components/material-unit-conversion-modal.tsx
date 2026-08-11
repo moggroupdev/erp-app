@@ -143,7 +143,7 @@ export default function MaterialUnitConversionModal({
           }
           min={0}
           allowNegative={false}
-          decimalScale={6}
+          decimalScale={5}
           required
           radius="md"
         />

@@ -244,17 +244,15 @@ export default function MaterialModal({
           />
         )}
 
-        {!materialToUpdate && (
-          <SelectMaterialUnit
-            value={unitOfMeasurement}
-            setValue={setUnitOfMeasurement}
-            label={translate("Unit of Measurement", "وحدة القياس")}
-            placeholder={translate("Select unit of measurement", "اختر وحدة القياس")}
-            searchable
-            required
-            disabled={isUnitLockedToCount}
-          />
-        )}
+        <SelectMaterialUnit
+          value={unitOfMeasurement}
+          setValue={setUnitOfMeasurement}
+          label={translate("Unit of Measurement", "وحدة القياس")}
+          placeholder={translate("Select unit of measurement", "اختر وحدة القياس")}
+          searchable
+          required
+          disabled={isUnitLockedToCount}
+        />
 
         <NumberInput
           value={minimumStock}
@@ -263,7 +261,7 @@ export default function MaterialModal({
           placeholder={translate("Enter minimum stock", "أدخل الحد الأدنى للمخزون")}
           min={0}
           allowNegative={false}
-          decimalScale={3}
+          decimalScale={5}
           radius="md"
         />
 

@@ -206,7 +206,7 @@ export default function MmBomItemModal({
             placeholder={translate("Enter quantity", "أدخل الكمية")}
             min={0}
             allowNegative={false}
-            decimalScale={4}
+            decimalScale={5}
             required
             radius="md"
           />
