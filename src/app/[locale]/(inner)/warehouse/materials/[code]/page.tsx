@@ -13,7 +13,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
+import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
 import { Button } from "@mantine/core";
 import { Pencil } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
@@ -105,7 +105,7 @@ export default function Page() {
 
             <MaterialDetails material={material} />
 
-            <MaterialUnitConversionsSection material={material} />
+            {isRawMaterial(material.materialType) && <MaterialUnitConversionsSection material={material} />}
 
             {isManufacturedMaterial(material.materialType) && (
               <MaterialBomSection material={material} bom={bomQuery.data || null} />
