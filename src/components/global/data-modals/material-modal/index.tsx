@@ -263,7 +263,7 @@ export default function MaterialModal({
           placeholder={translate("Enter minimum stock", "أدخل الحد الأدنى للمخزون")}
           min={0}
           allowNegative={false}
-          decimalScale={5}
+          decimalScale={6}
           radius="md"
         />
 

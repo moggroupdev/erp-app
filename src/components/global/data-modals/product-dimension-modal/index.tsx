@@ -136,7 +136,7 @@ export default function ProductDimensionModal({
                 placeholder={translate("Enter length", "أدخل الطول")}
                 min={0}
                 allowNegative={false}
-                decimalScale={5}
+                decimalScale={6}
                 required
                 radius="md"
               />
@@ -148,7 +148,7 @@ export default function ProductDimensionModal({
                 placeholder={translate("Enter depth", "أدخل العمق")}
                 min={0}
                 allowNegative={false}
-                decimalScale={5}
+                decimalScale={6}
                 required
                 radius="md"
               />
@@ -161,7 +161,7 @@ export default function ProductDimensionModal({
               placeholder={translate("Enter diameter", "أدخل القطر")}
               min={0}
               allowNegative={false}
-              decimalScale={5}
+              decimalScale={6}
               required
               radius="md"
             />
@@ -174,7 +174,7 @@ export default function ProductDimensionModal({
             placeholder={translate("Enter height", "أدخل الارتفاع")}
             min={0}
             allowNegative={false}
-            decimalScale={5}
+            decimalScale={6}
             required
             radius="md"
           />

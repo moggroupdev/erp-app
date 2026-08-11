@@ -238,7 +238,7 @@ export default function ProductModal({
           placeholder={translate("Enter pricing factor", "أدخل معامل التسعير")}
           min={0}
           allowNegative={false}
-          decimalScale={5}
+          decimalScale={6}
           required
           radius="md"
         />

@@ -346,7 +346,7 @@ export default function Page() {
                         onChange={(value) => updateRow(row.key, { quantityRequired: value === "" ? "" : Number(value) })}
                         min={0}
                         allowNegative={false}
-                        decimalScale={5}
+                        decimalScale={6}
                         hideControls
                         variant="unstyled"
                         radius={0}
