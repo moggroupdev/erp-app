@@ -1,12 +1,12 @@
-const CONVERSION_FACTOR_SCALE = 5;
+const CONVERSION_FACTOR_DISPLAY_SCALE = 6;
 
-export function roundConversionFactor(factor: number): number {
-  return Number(factor.toFixed(CONVERSION_FACTOR_SCALE));
+function formatFactorForDisplay(factor: number): string {
+  return factor.toFixed(CONVERSION_FACTOR_DISPLAY_SCALE).replace(/\.?0+$/, "");
 }
 
 /** Convert a user-entered factor into stored "1 alternate = X base" form. */
 export function toStoredConversionFactorToBase(entered: number, fromBase: boolean): number {
-  return roundConversionFactor(fromBase ? 1 / entered : entered);
+  return fromBase ? 1 / entered : entered;
 }
 
 /** Readable conversion: reverse when factor < 1 so the displayed number is >= 1. */
@@ -18,10 +18,10 @@ export function formatConversionLabel(
   const factor = Number(conversionFactorToBase);
 
   if (factor > 0 && factor < 1) {
-    return `1 ${baseUnitLabel} = ${roundConversionFactor(1 / factor)} ${alternateUnitLabel}`;
+    return `1 ${baseUnitLabel} = ${formatFactorForDisplay(1 / factor)} ${alternateUnitLabel}`;
   }
 
-  return `1 ${alternateUnitLabel} = ${roundConversionFactor(factor)} ${baseUnitLabel}`;
+  return `1 ${alternateUnitLabel} = ${formatFactorForDisplay(factor)} ${baseUnitLabel}`;
 }
 
 export function toDisplayQuantity(baseQuantity: number, factor: number): number {
