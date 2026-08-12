@@ -8,6 +8,7 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialsInventoryTopMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 
 type TopMaterialsTableProps = {
   data: MaterialsInventoryTopMaterial[];
@@ -64,7 +65,7 @@ export default function TopMaterialsTable({ data, rankBy = "value" }: TopMateria
               {data.map((material, index) => (
                 <Table.Tr key={material.code} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
-                  <Table.Td className="max-w-[240px] truncate font-medium text-gray-800">
+                  <Table.Td className="max-w-60 truncate font-medium text-gray-800">
                     <Link
                       href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
                       className="text-gray-800 hover:underline"
@@ -75,7 +76,7 @@ export default function TopMaterialsTable({ data, rankBy = "value" }: TopMateria
                   </Table.Td>
                   <Table.Td className="font-mono text-xs text-gray-500">{material.code}</Table.Td>
                   <Table.Td>{getMaterialUnitLabel(material.unitOfMeasurement, locale)}</Table.Td>
-                  <Table.Td>{material.quantity}</Table.Td>
+                  <Table.Td>{formatQuantity(material.quantity)}</Table.Td>
                   <Table.Td>{formatMoney(material.unitPrice)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(material.value)}</Table.Td>
                 </Table.Tr>

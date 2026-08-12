@@ -2,6 +2,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "./components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getStockStatusLabel } from "@/lib/constants/enums/derived/stock-statuses";
@@ -213,7 +214,7 @@ export default function MaterialsReportPrintDocument({
             material.title,
             material.code,
             getMaterialUnitLabel(material.unitOfMeasurement, locale),
-            String(material.quantity),
+            formatQuantity(material.quantity),
             formatMoney(material.unitPrice),
             formatMoney(material.value),
           ])}
@@ -247,7 +248,7 @@ export default function MaterialsReportPrintDocument({
             material.title,
             material.code,
             getMaterialUnitLabel(material.unitOfMeasurement, locale),
-            String(material.quantity),
+            formatQuantity(material.quantity),
             formatMoney(material.unitPrice),
             formatMoney(material.value),
           ])}
@@ -284,9 +285,9 @@ export default function MaterialsReportPrintDocument({
             rows={lowStockMaterials.map((material) => [
               material.title,
               material.code,
-              String(material.quantity),
-              String(material.minimumStock),
-              String(material.deficit),
+              formatQuantity(material.quantity),
+              formatQuantity(material.minimumStock),
+              formatQuantity(material.deficit),
             ])}
             monoColumnIndexes={[1]}
             emptyLabel={translate("No data available", "لا توجد بيانات")}

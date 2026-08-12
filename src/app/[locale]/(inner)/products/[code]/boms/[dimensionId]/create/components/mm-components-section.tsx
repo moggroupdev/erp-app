@@ -8,6 +8,7 @@ import mmBomsApi from "@/lib/api/mm-boms";
 import { groupMmComponentRequirements } from "@/lib/helpers/bom-display";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { Badge, Table } from "@mantine/core";
 import { Info } from "lucide-react";
@@ -106,7 +107,7 @@ export default function MmComponentsSection({
                   {group.quantityRequired !== null ? (
                     <div className="flex items-center gap-1.5">
                       {unitLabel ? <span className="text-xs text-gray-500">{unitLabel}</span> : null}
-                      <span className="text-xs font-medium text-gray-700">{group.quantityRequired}</span>
+                      <span className="text-xs font-medium text-gray-700">{formatQuantity(group.quantityRequired)}</span>
                     </div>
                   ) : (
                     <span className="text-gray-400">{translate("Not set", "غير محددة")}</span>
@@ -141,7 +142,7 @@ export default function MmComponentsSection({
                         </Table.Td>
                         <Table.Td>
                           <span className="text-xs font-medium text-gray-700">
-                            {getMaterialUnitLabel(component.unitOfMeasurement, locale)} {component.quantityRequired}
+                            {getMaterialUnitLabel(component.unitOfMeasurement, locale)} {formatQuantity(component.quantityRequired)}
                           </span>
                         </Table.Td>
                       </Table.Tr>

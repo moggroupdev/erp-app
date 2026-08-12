@@ -5,6 +5,7 @@ import { getManufacturingCostRows, getMaterialCostPrice, type FlattenedBomRow } 
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail } from "./components";
 
@@ -111,7 +112,7 @@ export default function BomPrintDocument({
                       <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{item.material.code}</td>
                       <td className="px-2.5 py-2 font-medium wrap-break-word text-gray-800">{item.material.title}</td>
                       <td className="px-2.5 py-2">{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</td>
-                      <td className="px-2.5 py-2">{item.quantityRequired}</td>
+                      <td className="px-2.5 py-2">{formatQuantity(item.quantityRequired)}</td>
                       <td className="px-2.5 py-2">{formatMoney(unitCost)}</td>
                       <td className="px-2.5 py-2 font-medium">{formatMoney(lineCost)}</td>
                       <td className="px-2.5 py-2 wrap-break-word text-gray-600">
@@ -173,7 +174,7 @@ export default function BomPrintDocument({
                 <tr key={row.id} className="border-b border-gray-200">
                   <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{row.materialCode}</td>
                   <td className="px-2.5 py-2 font-medium whitespace-nowrap">{row.materialTitle}</td>
-                  <td className="px-2.5 py-2">{row.quantityRequired}</td>
+                  <td className="px-2.5 py-2">{formatQuantity(row.quantityRequired)}</td>
                   <td className="px-2.5 py-2">{formatMoney(row.unitManufacturingCost)}</td>
                   <td className="px-2.5 py-2 font-medium">{formatMoney(row.totalManufacturingCost)}</td>
                 </tr>

@@ -5,7 +5,8 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatConversionLabel, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { formatConversionLabel, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import { Badge, Button, Table } from "@mantine/core";
 import { Plus, Ruler } from "lucide-react";
@@ -98,7 +99,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
                     <Table.Td className="font-medium text-gray-800">
                       {formatConversionLabel(factor, altLabel, baseLabel)}
                     </Table.Td>
-                    <Table.Td>{toDisplayQuantity(material.quantity, factor).toFixed(2)}</Table.Td>
+                    <Table.Td>{formatDisplayQuantity(material.quantity, factor)}</Table.Td>
                     <Table.Td>{formatMoney(toDisplayUnitPrice(material.unitPrice, factor))}</Table.Td>
                   </Table.Tr>
                 );

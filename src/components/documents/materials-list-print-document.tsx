@@ -2,6 +2,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PrintSectionHeading, PrintTable } from "./components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { Material } from "@/types/material";
 import type { MaterialCategoryMain, MaterialCategorySub } from "@/types/categories";
@@ -83,7 +84,7 @@ export default function MaterialsListPrintDocument({
       m.title,
       ...(includeSubcategory ? [getSubCategory(m.subCategoryId)?.title ?? "-"] : []),
       getMaterialUnitLabel(m.unitOfMeasurement, locale),
-      ...(includeQuantity ? [String(m.quantity)] : []),
+      ...(includeQuantity ? [formatQuantity(m.quantity)] : []),
       ...(includeUnitPrice ? [formatMoney(m.unitPrice)] : []),
       ...(includeEmptyQuantityColumn ? [""] : []),
     ]);

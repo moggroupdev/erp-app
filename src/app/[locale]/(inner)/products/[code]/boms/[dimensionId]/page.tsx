@@ -35,7 +35,8 @@ import {
   type CostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatDisplayQuantity, formatQuantity } from "@/lib/helpers/format-quantity";
+import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { Badge, Button, Divider, SegmentedControl, Table } from "@mantine/core";
 import { Calculator, Layers, Pencil, Plus, Printer, Wallet } from "lucide-react";
@@ -376,7 +377,7 @@ export default function Page() {
                                   <Table.Td
                                     className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
                                   >
-                                    {toDisplayQuantity(item.quantityRequired, factor)}
+                                    {formatDisplayQuantity(item.quantityRequired, factor)}
                                   </Table.Td>
                                   <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
                                     {formatMoney(toDisplayUnitPrice(unitCost, factor))}
@@ -593,7 +594,7 @@ function ManufacturingCostsSection({
                 <Table.Td>
                   <span className="font-medium text-gray-800">{row.materialTitle}</span>
                 </Table.Td>
-                <Table.Td className="font-medium text-gray-800">{row.quantityRequired}</Table.Td>
+                <Table.Td className="font-medium text-gray-800">{formatQuantity(row.quantityRequired)}</Table.Td>
                 <Table.Td>{formatMoney(row.unitManufacturingCost)}</Table.Td>
                 <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalManufacturingCost)}</Table.Td>
               </Table.Tr>

@@ -5,6 +5,7 @@ import { Alert, Table } from "@mantine/core";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { MaterialsInventoryLowStockMaterial } from "@/types/reports";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import ReportCard from "./report-card";
 
 export default function LowStockMaterialsTable({ data }: { data: MaterialsInventoryLowStockMaterial[] }) {
@@ -49,7 +50,7 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
             <Table.Tbody>
               {data.map((material) => (
                 <Table.Tr key={material.code} className="text-stone-600">
-                  <Table.Td className="max-w-[240px] truncate font-medium text-stone-800">
+                  <Table.Td className="max-w-60 truncate font-medium text-stone-800">
                     <Link
                       href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
                       className="text-gray-800 hover:underline"
@@ -59,9 +60,9 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
                     </Link>
                   </Table.Td>
                   <Table.Td className="font-mono text-xs text-stone-500">{material.code}</Table.Td>
-                  <Table.Td>{material.quantity}</Table.Td>
-                  <Table.Td>{material.minimumStock}</Table.Td>
-                  <Table.Td className="font-semibold text-amber-700">{material.deficit}</Table.Td>
+                  <Table.Td>{formatQuantity(material.quantity)}</Table.Td>
+                  <Table.Td>{formatQuantity(material.minimumStock)}</Table.Td>
+                  <Table.Td className="font-semibold text-amber-700">{formatQuantity(material.deficit)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

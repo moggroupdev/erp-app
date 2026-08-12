@@ -5,7 +5,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialWithCreator } from "@/types/material";
@@ -174,7 +175,7 @@ export default function MaterialBomSection({
                         </div>
                       </Table.Td>
                       <Table.Td className="font-medium text-gray-800">
-                        {toDisplayQuantity(item.quantityRequired, factor)}
+                        {formatDisplayQuantity(item.quantityRequired, factor)}
                       </Table.Td>
                       <Table.Td>{formatMoney(toDisplayUnitPrice(item.material.unitPrice, factor))}</Table.Td>
                       <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
