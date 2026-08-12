@@ -244,7 +244,6 @@ export default function MaterialModal({
           />
         )}
 
-        {/* {!materialToUpdate && ( */}
         <SelectMaterialUnit
           value={unitOfMeasurement}
           setValue={setUnitOfMeasurement}
@@ -254,7 +253,6 @@ export default function MaterialModal({
           required
           disabled={isUnitLockedToCount}
         />
-        {/* )} */}
 
         <NumberInput
           value={minimumStock}
