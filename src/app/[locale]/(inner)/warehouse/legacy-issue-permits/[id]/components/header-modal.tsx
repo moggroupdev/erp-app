@@ -252,7 +252,7 @@ export default function HeaderModal({
               <SelectLegacyIssuePermitWorkOrderType
                 value={maintenanceWorkOrderType}
                 setValue={setMaintenanceWorkOrderType}
-                label={translate("Work Order Type", "نوع أمر الشغل")}
+                label={translate("Maintenance Type", "نوع الصيانة")}
                 placeholder={translate("Select type...", "اختر النوع...")}
                 excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
                 required
