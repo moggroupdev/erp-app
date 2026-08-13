@@ -114,9 +114,10 @@ export default function Page() {
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <PermissionGuard permission={PERMISSIONS.ADD_LEGACY_ISSUE_PERMIT}>
               <Button
+                radius="md"
+                variant="light"
                 component={Link}
                 href={getLocalizedHref("/warehouse/legacy-issue-permits/create")}
-                radius="md"
                 leftSection={<Plus size={15} />}
               >
                 {translate("Create", "إنشاء")}

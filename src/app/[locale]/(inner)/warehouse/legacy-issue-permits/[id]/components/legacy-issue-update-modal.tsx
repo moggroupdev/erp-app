@@ -20,12 +20,10 @@ import Modal from "@/components/ui/modal";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
-
-function toDateTimeLocalValue(date: Date | string) {
-  const d = new Date(date);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+import DateTimePickerInput, {
+  dateTimePickerValueToIso,
+  toDateTimePickerValue,
+} from "@/components/ui/datetime-picker-input";
 
 export default function HeaderModal({
   opened,
@@ -43,8 +41,8 @@ export default function HeaderModal({
 
   const [issuePermitNumber, setIssuePermitNumber] = useState("");
   const [issueOrderNumber, setIssueOrderNumber] = useState("");
-  const [issueOrderDate, setIssueOrderDate] = useState("");
-  const [date, setDate] = useState("");
+  const [issueOrderDate, setIssueOrderDate] = useState<string | null>(null);
+  const [date, setDate] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
@@ -58,8 +56,8 @@ export default function HeaderModal({
     if (!opened) return;
     setIssuePermitNumber(transaction.issuePermitNumber);
     setIssueOrderNumber(transaction.issueOrderNumber);
-    setIssueOrderDate(toDateTimeLocalValue(transaction.issueOrderDate));
-    setDate(toDateTimeLocalValue(transaction.date));
+    setIssueOrderDate(toDateTimePickerValue(transaction.issueOrderDate));
+    setDate(toDateTimePickerValue(transaction.date));
     setCreatorId(transaction.creator.id);
     setProductionSubDepartment(transaction.productionSubDepartment);
     setContractNumber(transaction.contractNumber || "");
@@ -87,8 +85,8 @@ export default function HeaderModal({
         dto: {
           issuePermitNumber: issuePermitNumber.trim(),
           issueOrderNumber: issueOrderNumber.trim(),
-          issueOrderDate: new Date(issueOrderDate).toISOString(),
-          date: new Date(date).toISOString(),
+          issueOrderDate: dateTimePickerValueToIso(issueOrderDate)!,
+          date: dateTimePickerValueToIso(date)!,
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           contractNumber: contractNumber.trim() || null,
@@ -118,10 +116,10 @@ export default function HeaderModal({
     if (!issueOrderNumber.trim()) {
       return setValidationError(translate("Issue order number is required.", "رقم طلب الصرف مطلوب."));
     }
-    if (!issueOrderDate || Number.isNaN(new Date(issueOrderDate).getTime())) {
+    if (!dateTimePickerValueToIso(issueOrderDate)) {
       return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ طلب الصرف صالحاً."));
     }
-    if (!date || Number.isNaN(new Date(date).getTime())) {
+    if (!dateTimePickerValueToIso(date)) {
       return setValidationError(translate("Date must be valid.", "يجب أن يكون التاريخ صالحاً."));
     }
     if (!creatorId) {
@@ -145,8 +143,8 @@ export default function HeaderModal({
   const isDataChanged =
     issuePermitNumber.trim() !== transaction.issuePermitNumber ||
     issueOrderNumber.trim() !== transaction.issueOrderNumber ||
-    toDateTimeLocalValue(transaction.issueOrderDate) !== issueOrderDate ||
-    toDateTimeLocalValue(transaction.date) !== date ||
+    dateTimePickerValueToIso(toDateTimePickerValue(transaction.issueOrderDate)) !== dateTimePickerValueToIso(issueOrderDate) ||
+    dateTimePickerValueToIso(toDateTimePickerValue(transaction.date)) !== dateTimePickerValueToIso(date) ||
     creatorId !== transaction.creator.id ||
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
     (contractNumber.trim() || null) !== transaction.contractNumber ||
@@ -158,8 +156,8 @@ export default function HeaderModal({
   const isReadyToSubmit =
     !!issuePermitNumber.trim() &&
     !!issueOrderNumber.trim() &&
-    !!issueOrderDate &&
-    !!date &&
+    !!dateTimePickerValueToIso(issueOrderDate) &&
+    !!dateTimePickerValueToIso(date) &&
     !!creatorId &&
     (!isMaintenance || !!maintenanceWorkOrderType) &&
     isDataChanged;
@@ -181,14 +179,12 @@ export default function HeaderModal({
             required
             radius="md"
           />
-          <TextInput
-            type="datetime-local"
+          <DateTimePickerInput
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={setDate}
             label={translate("Issue Permit Date", "تاريخ إذن الصرف")}
             placeholder={translate("Select issue permit date", "اختر تاريخ إذن الصرف")}
             required
-            radius="md"
           />
           <TextInput
             value={issueOrderNumber}
@@ -198,14 +194,12 @@ export default function HeaderModal({
             required
             radius="md"
           />
-          <TextInput
-            type="datetime-local"
+          <DateTimePickerInput
             value={issueOrderDate}
-            onChange={(e) => setIssueOrderDate(e.target.value)}
+            onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}
             placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
             required
-            radius="md"
           />
           <SelectUser
             value={creatorId}

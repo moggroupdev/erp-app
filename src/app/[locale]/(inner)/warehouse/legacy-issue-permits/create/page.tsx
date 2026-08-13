@@ -28,6 +28,10 @@ import SelectMaterial from "@/components/global/selections/remote-based/select-m
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
+import DateTimePickerInput, {
+  dateTimePickerValueToIso,
+  toDateTimePickerValue,
+} from "@/components/ui/datetime-picker-input";
 
 const PAGE_TITLE = { en: "Create Legacy Issue Permit", ar: "إنشاء إذن صرف مرحلي" };
 
@@ -72,11 +76,6 @@ function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
   return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
 }
 
-function toDateTimeLocalValue(date = new Date()) {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
 export default function Page() {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
@@ -86,8 +85,8 @@ export default function Page() {
 
   const [issuePermitNumber, setIssuePermitNumber] = useState("");
   const [issueOrderNumber, setIssueOrderNumber] = useState("");
-  const [issueOrderDate, setIssueOrderDate] = useState(toDateTimeLocalValue());
-  const [date, setDate] = useState(toDateTimeLocalValue());
+  const [issueOrderDate, setIssueOrderDate] = useState<string | null>(toDateTimePickerValue(new Date()));
+  const [date, setDate] = useState<string | null>(toDateTimePickerValue(new Date()));
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
@@ -110,8 +109,8 @@ export default function Page() {
         dto: {
           issuePermitNumber: issuePermitNumber.trim(),
           issueOrderNumber: issueOrderNumber.trim(),
-          issueOrderDate: new Date(issueOrderDate).toISOString(),
-          date: new Date(date).toISOString(),
+          issueOrderDate: dateTimePickerValueToIso(issueOrderDate)!,
+          date: dateTimePickerValueToIso(date)!,
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           contractNumber: contractNumber.trim() || null,
@@ -202,19 +201,11 @@ export default function Page() {
       return setValidationError(translate("Issue order number is required.", "رقم طلب الصرف مطلوب."));
     }
 
-    if (!issueOrderDate) {
-      return setValidationError(translate("Issue order date is required.", "تاريخ طلب الصرف مطلوب."));
-    }
-
-    if (Number.isNaN(new Date(issueOrderDate).getTime())) {
+    if (!dateTimePickerValueToIso(issueOrderDate)) {
       return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ طلب الصرف صالحاً."));
     }
 
-    if (!date) {
-      return setValidationError(translate("Date is required.", "التاريخ مطلوب."));
-    }
-
-    if (Number.isNaN(new Date(date).getTime())) {
+    if (!dateTimePickerValueToIso(date)) {
       return setValidationError(translate("Date must be valid.", "يجب أن يكون التاريخ صالحاً."));
     }
 
@@ -270,14 +261,12 @@ export default function Page() {
             required
             radius="md"
           />
-          <TextInput
-            type="datetime-local"
+          <DateTimePickerInput
             value={date}
-            onChange={(e) => setDate(e.target.value)}
+            onChange={setDate}
             label={translate("Issue Permit Date", "تاريخ إذن الصرف")}
             placeholder={translate("Select issue permit date", "اختر تاريخ إذن الصرف")}
             required
-            radius="md"
           />
           <TextInput
             value={issueOrderNumber}
@@ -287,14 +276,12 @@ export default function Page() {
             required
             radius="md"
           />
-          <TextInput
-            type="datetime-local"
+          <DateTimePickerInput
             value={issueOrderDate}
-            onChange={(e) => setIssueOrderDate(e.target.value)}
+            onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}
             placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
             required
-            radius="md"
           />
           <SelectUser
             value={creatorId}

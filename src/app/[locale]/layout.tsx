@@ -1,9 +1,11 @@
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 import "@/app/globals.css";
 
 import type { LocaleLayoutProps } from "@/lib/i18n/types";
 import { createTheme, MantineProvider, mantineHtmlProps } from "@mantine/core";
 import { MantineColorSchemeScript } from "@/components/mantine/color-scheme-script";
+import MantineDatesProvider from "@/components/mantine/dates-provider";
 import { getI18nFromParams } from "@/lib/i18n/utils";
 import { locales } from "@/lib/i18n/config";
 import { Alexandria } from "next/font/google";
@@ -52,7 +54,7 @@ export default async function RootLayout({ params, children }: Readonly<LocaleLa
         <QueryProvider>
           <UserProvider>
             <MantineProvider theme={theme}>
-              {children}
+              <MantineDatesProvider locale={locale}>{children}</MantineDatesProvider>
               <Toaster
                 richColors
                 position={translate("bottom-right", "bottom-left") as "bottom-right" | "bottom-left"}
