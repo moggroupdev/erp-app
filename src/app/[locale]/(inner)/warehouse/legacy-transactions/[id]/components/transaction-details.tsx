@@ -28,6 +28,10 @@ export default function TransactionDetails({
       copyText: transaction.issueOrderNumber,
     },
     {
+      key: translate("Issue Order Date", "تاريخ أمر الصرف"),
+      value: formatDateAndTime(transaction.issueOrderDate, locale),
+    },
+    {
       key: translate("Date", "التاريخ"),
       value: formatDateAndTime(transaction.date, locale),
     },

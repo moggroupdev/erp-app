@@ -83,6 +83,7 @@ export default function Page() {
 
   const [issuePermitNumber, setIssuePermitNumber] = useState("");
   const [issueOrderNumber, setIssueOrderNumber] = useState("");
+  const [issueOrderDate, setIssueOrderDate] = useState(toDateTimeLocalValue());
   const [date, setDate] = useState(toDateTimeLocalValue());
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
@@ -105,6 +106,7 @@ export default function Page() {
         dto: {
           issuePermitNumber: issuePermitNumber.trim(),
           issueOrderNumber: issueOrderNumber.trim(),
+          issueOrderDate: new Date(issueOrderDate).toISOString(),
           date: new Date(date).toISOString(),
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
@@ -194,6 +196,14 @@ export default function Page() {
       return setValidationError(translate("Issue order number is required.", "رقم أمر الصرف مطلوب."));
     }
 
+    if (!issueOrderDate) {
+      return setValidationError(translate("Issue order date is required.", "تاريخ أمر الصرف مطلوب."));
+    }
+
+    if (Number.isNaN(new Date(issueOrderDate).getTime())) {
+      return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ أمر الصرف صالحاً."));
+    }
+
     if (!date) {
       return setValidationError(translate("Date is required.", "التاريخ مطلوب."));
     }
@@ -259,6 +269,14 @@ export default function Page() {
             onChange={(e) => setIssueOrderNumber(e.target.value)}
             label={translate("Issue Order Number", "رقم أمر الصرف")}
             placeholder={translate("Enter issue order number", "أدخل رقم أمر الصرف")}
+            required
+            radius="md"
+          />
+          <TextInput
+            type="datetime-local"
+            value={issueOrderDate}
+            onChange={(e) => setIssueOrderDate(e.target.value)}
+            label={translate("Issue Order Date", "تاريخ أمر الصرف")}
             required
             radius="md"
           />

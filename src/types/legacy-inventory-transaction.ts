@@ -7,6 +7,7 @@ export type LegacyInventoryTransaction = {
   id: string;
   issuePermitNumber: string;
   issueOrderNumber: string;
+  issueOrderDate: Date;
   date: Date;
   creatorId: string;
   productionSubDepartment: ProductionSubDepartment | null;
@@ -56,6 +57,7 @@ export type CreateLegacyInventoryTransactionItemDto = {
 export type CreateLegacyInventoryTransactionDto = {
   issuePermitNumber: string;
   issueOrderNumber: string;
+  issueOrderDate: string;
   date: string;
   creatorId: string;
   productionSubDepartment: ProductionSubDepartment | null;

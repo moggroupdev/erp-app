@@ -40,6 +40,7 @@ export default function HeaderModal({
 
   const [issuePermitNumber, setIssuePermitNumber] = useState("");
   const [issueOrderNumber, setIssueOrderNumber] = useState("");
+  const [issueOrderDate, setIssueOrderDate] = useState("");
   const [date, setDate] = useState("");
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
@@ -53,6 +54,7 @@ export default function HeaderModal({
     if (!opened) return;
     setIssuePermitNumber(transaction.issuePermitNumber);
     setIssueOrderNumber(transaction.issueOrderNumber);
+    setIssueOrderDate(toDateTimeLocalValue(transaction.issueOrderDate));
     setDate(toDateTimeLocalValue(transaction.date));
     setCreatorId(transaction.creator.id);
     setProductionSubDepartment(transaction.productionSubDepartment);
@@ -72,6 +74,7 @@ export default function HeaderModal({
         dto: {
           issuePermitNumber: issuePermitNumber.trim(),
           issueOrderNumber: issueOrderNumber.trim(),
+          issueOrderDate: new Date(issueOrderDate).toISOString(),
           date: new Date(date).toISOString(),
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
@@ -104,6 +107,9 @@ export default function HeaderModal({
     if (!issueOrderNumber.trim()) {
       return setValidationError(translate("Issue order number is required.", "رقم أمر الصرف مطلوب."));
     }
+    if (!issueOrderDate || Number.isNaN(new Date(issueOrderDate).getTime())) {
+      return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ أمر الصرف صالحاً."));
+    }
     if (!date || Number.isNaN(new Date(date).getTime())) {
       return setValidationError(translate("Date must be valid.", "يجب أن يكون التاريخ صالحاً."));
     }
@@ -128,6 +134,7 @@ export default function HeaderModal({
   const isDataChanged =
     issuePermitNumber.trim() !== transaction.issuePermitNumber ||
     issueOrderNumber.trim() !== transaction.issueOrderNumber ||
+    toDateTimeLocalValue(transaction.issueOrderDate) !== issueOrderDate ||
     toDateTimeLocalValue(transaction.date) !== date ||
     creatorId !== transaction.creator.id ||
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
@@ -140,6 +147,7 @@ export default function HeaderModal({
   const isReadyToSubmit =
     !!issuePermitNumber.trim() &&
     !!issueOrderNumber.trim() &&
+    !!issueOrderDate &&
     !!date &&
     !!creatorId &&
     !!workOrderNumberType &&
@@ -165,6 +173,14 @@ export default function HeaderModal({
             value={issueOrderNumber}
             onChange={(e) => setIssueOrderNumber(e.target.value)}
             label={translate("Issue Order Number", "رقم أمر الصرف")}
+            required
+            radius="md"
+          />
+          <TextInput
+            type="datetime-local"
+            value={issueOrderDate}
+            onChange={(e) => setIssueOrderDate(e.target.value)}
+            label={translate("Issue Order Date", "تاريخ أمر الصرف")}
             required
             radius="md"
           />

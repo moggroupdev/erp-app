@@ -186,6 +186,7 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Issue Permit Number", "رقم إذن الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Number", "رقم أمر الصرف")}</Table.Th>
+                    <Table.Th>{translate("Issue Order Date", "تاريخ أمر الصرف")}</Table.Th>
                     <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
                     <Table.Th>{translate("Work Order Type", "نوع أمر العمل")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
@@ -209,6 +210,7 @@ export default function Page() {
                       <Table.Td>
                         <span className="font-mono">{transaction.issueOrderNumber}</span>
                       </Table.Td>
+                      <Table.Td>{formatDateAndTime(transaction.issueOrderDate, locale)}</Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.date, locale)}</Table.Td>
                       <Table.Td>{getLegacyWorkOrderTypeLabel(transaction.workOrderNumberType, locale)}</Table.Td>
                       <Table.Td>
