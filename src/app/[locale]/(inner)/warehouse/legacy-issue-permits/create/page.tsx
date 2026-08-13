@@ -28,10 +28,8 @@ import SelectMaterial from "@/components/global/selections/remote-based/select-m
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
-import DateTimePickerInput, {
-  dateTimePickerValueToIso,
-  toDateTimePickerValue,
-} from "@/components/ui/datetime-picker-input";
+import DateTimePickerInput from "@/components/ui/datetime-picker-input";
+import { dateTimePickerValueToIso, toDateTimePickerValue } from "@/lib/helpers/datetime-picker";
 
 const PAGE_TITLE = { en: "Create Legacy Issue Permit", ar: "إنشاء إذن صرف مرحلي" };
 

@@ -20,10 +20,8 @@ import Modal from "@/components/ui/modal";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
-import DateTimePickerInput, {
-  dateTimePickerValueToIso,
-  toDateTimePickerValue,
-} from "@/components/ui/datetime-picker-input";
+import DateTimePickerInput from "@/components/ui/datetime-picker-input";
+import { dateTimePickerValueToIso, toDateTimePickerValue } from "@/lib/helpers/datetime-picker";
 
 export default function HeaderModal({
   opened,
