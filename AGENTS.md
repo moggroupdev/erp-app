@@ -6,6 +6,20 @@ Path alias: `@/*` → `./src/*`.
 
 ---
 
+## File encoding (Windows)
+
+All source files must be **UTF-8** (no BOM). Never leave UTF-16 / UTF-16 LE files in the repo — they break Next.js with `Unexpected character '\0'`.
+
+After creating or rewriting any new `.ts` / `.tsx` / `.js` / `.json` / `.md` / `.css` file on Windows:
+
+1. Check the first ~40 bytes for nulls (`\0`) or a UTF-16 LE BOM (`FF FE`).
+2. If UTF-16, re-save immediately as UTF-8 without BOM (e.g. PowerShell `[IO.File]::WriteAllText($path, $text, (New-Object Text.UTF8Encoding $false))` after reading with Unicode).
+3. Do not consider the file done until that check passes.
+
+Prefer editing existing UTF-8 files in place over delete+recreate when possible.
+
+---
+
 ## Project structure
 
 ```

@@ -1,0 +1,242 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n/hooks";
+import usePrivateRequest from "@/hooks/use-private-request";
+import legacyInventoryTransactionsApi from "@/lib/api/legacy-inventory-transactions";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query-keys";
+import { type LegacyWorkOrderType } from "@/lib/constants/enums/legacy-work-order-types";
+import { type ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
+import type { LegacyInventoryTransactionDetailed } from "@/types/legacy-inventory-transaction";
+import { Button, Checkbox, TextInput, Textarea } from "@mantine/core";
+import ErrorAlert from "@/components/ui/error-alert";
+import Modal from "@/components/ui/modal";
+import SelectUser from "@/components/global/selections/remote-based/select-user";
+import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
+import SelectLegacyWorkOrderType from "@/components/global/selections/enum-based/select-legacy-work-order-type";
+
+function toDateTimeLocalValue(date: Date | string) {
+  const d = new Date(date);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+export default function HeaderModal({
+  opened,
+  close,
+  transaction,
+}: {
+  opened: boolean;
+  close: () => void;
+  transaction: LegacyInventoryTransactionDetailed;
+}) {
+  const { locale, translate, translation } = useI18n();
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
+  const [validationError, setValidationError] = useState("");
+
+  const [issuePermitNumber, setIssuePermitNumber] = useState("");
+  const [issueOrderNumber, setIssueOrderNumber] = useState("");
+  const [date, setDate] = useState("");
+  const [creatorId, setCreatorId] = useState<string | null>(null);
+  const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
+  const [contractNumber, setContractNumber] = useState("");
+  const [workOrderNumber, setWorkOrderNumber] = useState("");
+  const [workOrderNumberType, setWorkOrderNumberType] = useState<string | null>(null);
+  const [isCancelled, setIsCancelled] = useState(false);
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (!opened) return;
+    setIssuePermitNumber(transaction.issuePermitNumber);
+    setIssueOrderNumber(transaction.issueOrderNumber);
+    setDate(toDateTimeLocalValue(transaction.date));
+    setCreatorId(transaction.creator.id);
+    setProductionSubDepartment(transaction.productionSubDepartment);
+    setContractNumber(transaction.contractNumber || "");
+    setWorkOrderNumber(transaction.workOrderNumber || "");
+    setWorkOrderNumberType(transaction.workOrderNumberType);
+    setIsCancelled(transaction.isCancelled);
+    setNotes(transaction.notes || "");
+    setValidationError("");
+  }, [opened, transaction]);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      return await legacyInventoryTransactionsApi.updateHeader({
+        privateRequest,
+        id: transaction.id,
+        dto: {
+          issuePermitNumber: issuePermitNumber.trim(),
+          issueOrderNumber: issueOrderNumber.trim(),
+          date: new Date(date).toISOString(),
+          creatorId: creatorId!,
+          productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
+          contractNumber: contractNumber.trim() || null,
+          workOrderNumber: workOrderNumber.trim() || null,
+          workOrderNumberType: workOrderNumberType as LegacyWorkOrderType,
+          isCancelled,
+          notes: notes.trim() || null,
+        },
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyInventoryTransactions.all });
+      toast.success(
+        translate("Legacy inventory transaction updated successfully.", "تم تحديث حركة المخزون القديمة بنجاح."),
+      );
+      handleClose();
+    },
+  });
+
+  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setValidationError("");
+
+    if (!issuePermitNumber.trim()) {
+      return setValidationError(translate("Issue permit number is required.", "رقم إذن الصرف مطلوب."));
+    }
+    if (!issueOrderNumber.trim()) {
+      return setValidationError(translate("Issue order number is required.", "رقم أمر الصرف مطلوب."));
+    }
+    if (!date || Number.isNaN(new Date(date).getTime())) {
+      return setValidationError(translate("Date must be valid.", "يجب أن يكون التاريخ صالحاً."));
+    }
+    if (!creatorId) {
+      return setValidationError(translate("Please select a creator.", "يرجى اختيار المنشئ."));
+    }
+    if (!workOrderNumberType) {
+      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر العمل."));
+    }
+
+    mutation.mutate();
+  }
+
+  function handleClose() {
+    close();
+    setTimeout(() => {
+      setValidationError("");
+      mutation.reset();
+    }, 250);
+  }
+
+  const isDataChanged =
+    issuePermitNumber.trim() !== transaction.issuePermitNumber ||
+    issueOrderNumber.trim() !== transaction.issueOrderNumber ||
+    toDateTimeLocalValue(transaction.date) !== date ||
+    creatorId !== transaction.creator.id ||
+    (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
+    (contractNumber.trim() || null) !== transaction.contractNumber ||
+    (workOrderNumber.trim() || null) !== transaction.workOrderNumber ||
+    workOrderNumberType !== transaction.workOrderNumberType ||
+    isCancelled !== transaction.isCancelled ||
+    (notes.trim() || null) !== transaction.notes;
+
+  const isReadyToSubmit =
+    !!issuePermitNumber.trim() &&
+    !!issueOrderNumber.trim() &&
+    !!date &&
+    !!creatorId &&
+    !!workOrderNumberType &&
+    isDataChanged;
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={handleClose}
+      title={translate("Edit Transaction Header", "تعديل رأس الحركة")}
+      size="lg"
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <TextInput
+            value={issuePermitNumber}
+            onChange={(e) => setIssuePermitNumber(e.target.value)}
+            label={translate("Issue Permit Number", "رقم إذن الصرف")}
+            required
+            radius="md"
+          />
+          <TextInput
+            value={issueOrderNumber}
+            onChange={(e) => setIssueOrderNumber(e.target.value)}
+            label={translate("Issue Order Number", "رقم أمر الصرف")}
+            required
+            radius="md"
+          />
+          <TextInput
+            type="datetime-local"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            label={translate("Date", "التاريخ")}
+            required
+            radius="md"
+          />
+          <SelectUser
+            value={creatorId}
+            setValue={setCreatorId}
+            label={translate("Creator", "المنشئ")}
+            required
+            radius="md"
+          />
+          <SelectProductionSubDepartment
+            value={productionSubDepartment}
+            setValue={setProductionSubDepartment}
+            label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
+            clearable
+            radius="md"
+          />
+          <SelectLegacyWorkOrderType
+            value={workOrderNumberType}
+            setValue={setWorkOrderNumberType}
+            label={translate("Work Order Type", "نوع أمر العمل")}
+            required
+            radius="md"
+          />
+          <TextInput
+            value={contractNumber}
+            onChange={(e) => setContractNumber(e.target.value)}
+            label={translate("Contract Number", "رقم العقد")}
+            radius="md"
+          />
+          <TextInput
+            value={workOrderNumber}
+            onChange={(e) => setWorkOrderNumber(e.target.value)}
+            label={translate("Work Order Number", "رقم أمر العمل")}
+            radius="md"
+          />
+        </div>
+
+        <Textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          label={translate("Notes", "الملاحظات")}
+          radius="md"
+          autosize
+          minRows={2}
+        />
+
+        <Checkbox
+          checked={isCancelled}
+          onChange={(e) => setIsCancelled(e.currentTarget.checked)}
+          label={translate("Cancelled", "ملغي")}
+        />
+
+        <div className="flex gap-2">
+          <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
+            {translation.cancel}
+          </Button>
+          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
+            {translate("Save Changes", "حفظ التغييرات")}
+          </Button>
+        </div>
+
+        {error && <ErrorAlert error={error} />}
+      </form>
+    </Modal>
+  );
+}
