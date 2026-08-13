@@ -30,7 +30,7 @@ import TransactionDetails from "./components/transaction-details";
 import HeaderModal from "./components/header-modal";
 import ItemModal from "./components/item-modal";
 
-const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل حركة المخزون القديمة" };
+const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل أذن صرف مرحلي" };
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -63,7 +63,7 @@ export default function Page() {
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useDocumentTitle(
-    `${transaction?.issuePermitNumber || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Inventory Transactions", "حركات المخزون القديمة")}`,
+    `${transaction?.issuePermitNumber || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Inventory Transactions", "أذونات الصرف المرحلية")}`,
   );
 
   function handleEditItem(item: LegacyInventoryTransactionItemDetailed) {

@@ -370,21 +370,21 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     value: "add_legacy_inventory_transaction",
     label: {
       en: "Add Legacy Inventory Transaction",
-      ar: "إضافة حركة مخزون قديمة",
+      ar: "إنشاء إذن صرف مرحلي",
     },
   },
   read_legacy_inventory_transactions: {
     value: "read_legacy_inventory_transactions",
     label: {
       en: "Read Legacy Inventory Transactions",
-      ar: "عرض حركات المخزون القديمة",
+      ar: "عرض أذونات الصرف المرحلية",
     },
   },
   update_legacy_inventory_transaction: {
     value: "update_legacy_inventory_transaction",
     label: {
       en: "Update Legacy Inventory Transaction",
-      ar: "تحديث حركة مخزون قديمة",
+      ar: "تحديث أذن صرف مرحلي",
     },
   },
   read_material_purchase_orders: {

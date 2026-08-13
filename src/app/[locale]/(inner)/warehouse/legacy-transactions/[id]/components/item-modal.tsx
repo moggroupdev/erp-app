@@ -113,7 +113,7 @@ export default function ItemModal({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyInventoryTransactions.detail(transactionId) });
-      toast.success(translate("Legacy inventory item updated successfully.", "تم تحديث بند حركة المخزون القديمة بنجاح."));
+      toast.success(translate("Legacy inventory item updated successfully.", "تم تحديث بند أذن الصرف المرحلي بنجاح."));
       handleClose();
     },
   });
@@ -166,7 +166,7 @@ export default function ItemModal({
     isDataChanged;
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={translate("Edit Item", "تعديل البند")} size="lg">
+    <Modal opened={opened} onClose={handleClose} title={translate("Edit Item", "تعديل بند أذن الصرف")} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         {itemToUpdate && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
@@ -220,9 +220,7 @@ export default function ItemModal({
           ) : (
             <TextInput
               value={
-                unitOfMeasurementSelected
-                  ? getMaterialUnitLabel(unitOfMeasurementSelected as MaterialUnit, locale)
-                  : ""
+                unitOfMeasurementSelected ? getMaterialUnitLabel(unitOfMeasurementSelected as MaterialUnit, locale) : ""
               }
               label={translate("Unit", "الوحدة")}
               readOnly

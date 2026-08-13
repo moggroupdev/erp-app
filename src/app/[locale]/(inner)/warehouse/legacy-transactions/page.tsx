@@ -31,7 +31,7 @@ import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import SelectLegacyWorkOrderType from "@/components/global/selections/enum-based/select-legacy-work-order-type";
 
-const PAGE_TITLE = { en: "Legacy Inventory Transactions", ar: "حركات المخزون القديمة" };
+const PAGE_TITLE = { en: "Legacy Inventory Transactions", ar: "أذونات الصرف المرحلية" };
 
 const TRANSACTIONS_PER_PAGE = 25;
 
@@ -120,7 +120,7 @@ export default function Page() {
                 radius="md"
                 leftSection={<Plus size={15} />}
               >
-                {translate("Add", "إضافة")}
+                {translate("Create", "إنشاء")}
               </Button>
             </PermissionGuard>
           </div>
@@ -156,11 +156,11 @@ export default function Page() {
 
       {isFetching ? (
         <LoadingSection
-          message={translate("Loading legacy inventory transactions...", "جاري تحميل حركات المخزون القديمة...")}
+          message={translate("Loading legacy inventory transactions...", "جاري تحميل أذونات الصرف المرحلية...")}
         />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate("Error loading legacy inventory transactions", "خطأ في تحميل حركات المخزون القديمة")}
+          errorTitle={translate("Error loading legacy inventory transactions", "خطأ في تحميل أذونات الصرف المرحلية")}
           errorMessage={errorMessage}
           button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
@@ -175,7 +175,7 @@ export default function Page() {
           ) : (
             <EmptySection
               useDefaultImg
-              message={translate("No legacy inventory transactions found", "لا توجد حركات مخزون قديمة")}
+              message={translate("No legacy inventory transactions found", "لا توجد أذونات صرف مرحلية")}
             />
           )
         ) : (

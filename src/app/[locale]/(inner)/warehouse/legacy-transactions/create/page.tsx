@@ -26,7 +26,7 @@ import SelectUser from "@/components/global/selections/remote-based/select-user"
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyWorkOrderType from "@/components/global/selections/enum-based/select-legacy-work-order-type";
 
-const PAGE_TITLE = { en: "Create Legacy Inventory Transaction", ar: "إنشاء حركة مخزون قديمة" };
+const PAGE_TITLE = { en: "Create Legacy Inventory Transaction", ar: "إنشاء إذن صرف مرحلي" };
 
 type ItemDraftRow = {
   key: string;
@@ -96,7 +96,7 @@ export default function Page() {
   const [validationError, setValidationError] = useState("");
 
   useDocumentTitle(
-    `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Inventory Transactions", "حركات المخزون القديمة")}`,
+    `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Inventory Transactions", "أذونات الصرف المرحلية")}`,
   );
 
   const mutation = useMutation({
@@ -407,8 +407,7 @@ export default function Page() {
                           setValue={(next) => {
                             const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
                             updateRow(row.key, {
-                              unitOfMeasurementSelected:
-                                (resolved as MaterialUnit | null) ?? row.unitOfMeasurement,
+                              unitOfMeasurementSelected: (resolved as MaterialUnit | null) ?? row.unitOfMeasurement,
                             });
                           }}
                           data={getRowUnitOptions(row, locale)}
@@ -419,9 +418,7 @@ export default function Page() {
                         />
                       ) : (
                         <span className="text-sm text-gray-600">
-                          {row.unitOfMeasurementSelected
-                            ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale)
-                            : ""}
+                          {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
                         </span>
                       )}
                     </Table.Td>

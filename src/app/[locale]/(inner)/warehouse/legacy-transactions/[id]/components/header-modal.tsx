@@ -88,9 +88,7 @@ export default function HeaderModal({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyInventoryTransactions.all });
-      toast.success(
-        translate("Legacy inventory transaction updated successfully.", "تم تحديث حركة المخزون القديمة بنجاح."),
-      );
+      toast.success(translate("Legacy inventory transaction updated successfully.", "تم تحديث أذن الصرف المرحلي بنجاح."));
       handleClose();
     },
   });
@@ -157,7 +155,7 @@ export default function HeaderModal({
     <Modal
       opened={opened}
       onClose={handleClose}
-      title={translate("Edit Transaction Header", "تعديل رأس الحركة")}
+      title={translate("Edit Transaction Header", "تعديل رأس أذن الصرف")}
       size="lg"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
