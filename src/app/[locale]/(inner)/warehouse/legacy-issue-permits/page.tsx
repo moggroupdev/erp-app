@@ -28,7 +28,6 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
-import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
 
 const PAGE_TITLE = { en: "Legacy Issue Permits", ar: "أذونات الصرف المرحلية" };
 
@@ -51,14 +50,10 @@ export default function Page() {
     setPendingValue: setPendingKeyword,
     setImmediateValue: setImmediateKeyword,
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
-  const [workOrderTypeFilter, setWorkOrderTypeFilter] = useState<string | null>(
-    urlSearchParams.get("workOrderNumberType") || null,
-  );
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
-    workOrderNumberType: workOrderTypeFilter,
   };
 
   const params = { limit: TRANSACTIONS_PER_PAGE, ...removeEmptyParams(urlParams) };
@@ -66,12 +61,10 @@ export default function Page() {
   const resetAllFilters = () => {
     setActivePage(1);
     setImmediateKeyword("");
-    setWorkOrderTypeFilter(null);
   };
 
   const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
     debouncedKeyword,
-    workOrderTypeFilter,
   });
 
   const {
@@ -91,7 +84,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword, workOrderTypeFilter };
+    const newFilters = { debouncedKeyword };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -102,7 +95,7 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword, workOrderTypeFilter]);
+  }, [activePage, debouncedKeyword]);
 
   return (
     <LayoutBox
@@ -127,32 +120,20 @@ export default function Page() {
         ),
       }}
     >
-      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">
-        <div className="col-span-1 md:col-span-3">
-          <TextInput
-            value={keyword}
-            onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-            placeholder={translate("Search...", "ابحث...")}
-            leftSection={<Search size={15} />}
-            radius="md"
-            rightSection={
-              keyword ? (
-                <button type="button" onClick={() => setImmediateKeyword("")}>
-                  <X size={15} />
-                </button>
-              ) : undefined
-            }
-          />
-        </div>
-
-        <SelectLegacyIssuePermitWorkOrderType
-          value={workOrderTypeFilter}
-          setValue={setWorkOrderTypeFilter}
-          placeholder={translate("Select work order type...", "اختر نوع أمر الشغل...")}
-          clearable
-          radius="md"
-        />
-      </div>
+      <TextInput
+        value={keyword}
+        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+        placeholder={translate("Search...", "ابحث...")}
+        leftSection={<Search size={15} />}
+        radius="md"
+        rightSection={
+          keyword ? (
+            <button type="button" onClick={() => setImmediateKeyword("")}>
+              <X size={15} />
+            </button>
+          ) : undefined
+        }
+      />
 
       {isFetching ? (
         <LoadingSection message={translate("Loading legacy issue permits...", "جاري تحميل أذونات الصرف المرحلية...")} />
@@ -165,7 +146,7 @@ export default function Page() {
       ) : (
         paginatedTransactions &&
         (paginatedTransactions.data.length === 0 ? (
-          debouncedKeyword || workOrderTypeFilter ? (
+          debouncedKeyword ? (
             <NoResultsSection
               keyword={debouncedKeyword || translate("selected filters", "الفلاتر المحددة")}
               button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
