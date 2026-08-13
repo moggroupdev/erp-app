@@ -1,6 +1,9 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { getLegacyIssuePermitWorkOrderTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import {
+  getLegacyIssuePermitWorkOrderTypeLabel,
+  LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
+} from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { type LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
 import { Badge } from "@mantine/core";
@@ -18,6 +21,10 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
       copyText: transaction.issuePermitNumber,
     },
     {
+      key: translate("Issue Permit Date", "تاريخ إذن الصرف"),
+      value: formatDateAndTime(transaction.date, locale),
+    },
+    {
       key: translate("Issue Order Number", "رقم طلب الصرف"),
       value: transaction.issueOrderNumber,
       mono: true,
@@ -28,15 +35,11 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
       value: formatDateAndTime(transaction.issueOrderDate, locale),
     },
     {
-      key: translate("Date", "التاريخ"),
-      value: formatDateAndTime(transaction.date, locale),
-    },
-    {
       key: translate("Creator", "المحرر"),
       value: <CreatorLink creator={transaction.creator} />,
     },
     {
-      key: translate("Production Sub-Department", "قسم الانتاج"),
+      key: translate("Production Department", "قسم الانتاج"),
       value: transaction.productionSubDepartment ? (
         getProductionSubDepartmentLabel(transaction.productionSubDepartment, locale)
       ) : (
@@ -53,22 +56,26 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
       value: transaction.workOrderNumber ? <span className="font-mono">{transaction.workOrderNumber}</span> : <EmptyValue />,
       copyText: transaction.workOrderNumber || undefined,
     },
-    {
-      key: translate("Work Order Type", "نوع أمر الشغل"),
-      value: getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
-    },
-    {
-      key: translate("Status", "الحالة"),
-      value: transaction.isCancelled ? (
-        <Badge size="sm" variant="light" color="red" radius="md">
-          {translate("Cancelled", "ملغي")}
-        </Badge>
-      ) : (
-        <Badge size="sm" variant="light" color="teal" radius="md">
-          {translate("Active", "نشط")}
-        </Badge>
-      ),
-    },
+    ...(transaction.workOrderNumberType !== LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
+      ? [
+          {
+            key: translate("Work Order Type", "نوع أمر الشغل"),
+            value: getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
+          },
+        ]
+      : []),
+    ...(transaction.isCancelled
+      ? [
+          {
+            key: translate("Status", "الحالة"),
+            value: (
+              <Badge size="sm" variant="light" color="red" radius="md">
+                {translate("Cancelled", "ملغي")}
+              </Badge>
+            ),
+          },
+        ]
+      : []),
     {
       key: translate("Notes", "الملاحظات"),
       value: transaction.notes ? (
@@ -76,14 +83,6 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
       ) : (
         <EmptyValue />
       ),
-    },
-    {
-      key: translate("Created By", "أنشئ بواسطة"),
-      value: <CreatorLink creator={transaction.createdBy} />,
-    },
-    {
-      key: translate("Created At", "تاريخ الإنشاء"),
-      value: formatDateAndTime(transaction.createdAt, locale),
     },
   ];
 
