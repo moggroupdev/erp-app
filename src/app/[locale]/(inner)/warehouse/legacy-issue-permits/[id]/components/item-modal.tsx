@@ -5,13 +5,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
-import legacyInventoryTransactionsApi from "@/lib/api/legacy-inventory-transactions";
+import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import type { LegacyInventoryTransactionItemDetailed } from "@/types/legacy-inventory-transaction";
+import type { LegacyIssuePermitItemDetailed } from "@/types/legacy-issue-permit";
 import type { MaterialWithUnitConversions } from "@/types/material";
 import { Badge, Button, NumberInput, TextInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -30,8 +30,8 @@ export default function ItemModal({
   opened: boolean;
   close: () => void;
   transactionId: string;
-  itemToUpdate: LegacyInventoryTransactionItemDetailed | null;
-  setItemToUpdate: React.Dispatch<React.SetStateAction<LegacyInventoryTransactionItemDetailed | null>>;
+  itemToUpdate: LegacyIssuePermitItemDetailed | null;
+  setItemToUpdate: React.Dispatch<React.SetStateAction<LegacyIssuePermitItemDetailed | null>>;
   excludeMaterialCodes?: string[];
 }) {
   const { locale, translate, translation } = useI18n();
@@ -99,7 +99,7 @@ export default function ItemModal({
     mutationFn: async () => {
       if (!itemToUpdate) return;
 
-      return await legacyInventoryTransactionsApi.updateItem({
+      return await legacyIssuePermitsApi.updateItem({
         privateRequest,
         id: transactionId,
         itemId: itemToUpdate.id,
@@ -112,8 +112,8 @@ export default function ItemModal({
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyInventoryTransactions.detail(transactionId) });
-      toast.success(translate("Legacy inventory item updated successfully.", "تم تحديث بند أذن الصرف المرحلي بنجاح."));
+      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.detail(transactionId) });
+      toast.success(translate("Legacy issue permit item updated successfully.", "تم تحديث بند أذن الصرف المرحلي بنجاح."));
       handleClose();
     },
   });

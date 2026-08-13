@@ -5,18 +5,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
-import legacyInventoryTransactionsApi from "@/lib/api/legacy-inventory-transactions";
+import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { type LegacyWorkOrderType } from "@/lib/constants/enums/legacy-work-order-types";
+import { type LegacyIssuePermitWorkOrderType } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { type ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
-import type { LegacyInventoryTransactionDetailed } from "@/types/legacy-inventory-transaction";
+import type { LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
 import { Button, Checkbox, TextInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
-import SelectLegacyWorkOrderType from "@/components/global/selections/enum-based/select-legacy-work-order-type";
+import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
 
 function toDateTimeLocalValue(date: Date | string) {
   const d = new Date(date);
@@ -31,7 +31,7 @@ export default function HeaderModal({
 }: {
   opened: boolean;
   close: () => void;
-  transaction: LegacyInventoryTransactionDetailed;
+  transaction: LegacyIssuePermitDetailed;
 }) {
   const { locale, translate, translation } = useI18n();
   const queryClient = useQueryClient();
@@ -68,7 +68,7 @@ export default function HeaderModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      return await legacyInventoryTransactionsApi.updateHeader({
+      return await legacyIssuePermitsApi.updateHeader({
         privateRequest,
         id: transaction.id,
         dto: {
@@ -80,15 +80,15 @@ export default function HeaderModal({
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           contractNumber: contractNumber.trim() || null,
           workOrderNumber: workOrderNumber.trim() || null,
-          workOrderNumberType: workOrderNumberType as LegacyWorkOrderType,
+          workOrderNumberType: workOrderNumberType as LegacyIssuePermitWorkOrderType,
           isCancelled,
           notes: notes.trim() || null,
         },
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyInventoryTransactions.all });
-      toast.success(translate("Legacy inventory transaction updated successfully.", "تم تحديث أذن الصرف المرحلي بنجاح."));
+      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.all });
+      toast.success(translate("Legacy issue permit updated successfully.", "تم تحديث أذن الصرف المرحلي بنجاح."));
       handleClose();
     },
   });
@@ -204,7 +204,7 @@ export default function HeaderModal({
             clearable
             radius="md"
           />
-          <SelectLegacyWorkOrderType
+          <SelectLegacyIssuePermitWorkOrderType
             value={workOrderNumberType}
             setValue={setWorkOrderNumberType}
             label={translate("Work Order Type", "نوع أمر العمل")}

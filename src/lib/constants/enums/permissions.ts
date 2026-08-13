@@ -46,9 +46,9 @@ export const PERMISSION_VALUES = [
   "read_production_plans",
   "read_production_routing",
   "read_inventory_transactions",
-  "add_legacy_inventory_transaction",
-  "read_legacy_inventory_transactions",
-  "update_legacy_inventory_transaction",
+  "add_legacy_issue_permit",
+  "read_legacy_issue_permits",
+  "update_legacy_issue_permit",
   "read_material_purchase_orders",
   "read_product_purchase_orders",
   "read_trips",
@@ -366,24 +366,24 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض حركات المخزون",
     },
   },
-  add_legacy_inventory_transaction: {
-    value: "add_legacy_inventory_transaction",
+  add_legacy_issue_permit: {
+    value: "add_legacy_issue_permit",
     label: {
-      en: "Add Legacy Inventory Transaction",
+      en: "Add Legacy Issue Permit",
       ar: "إنشاء إذن صرف مرحلي",
     },
   },
-  read_legacy_inventory_transactions: {
-    value: "read_legacy_inventory_transactions",
+  read_legacy_issue_permits: {
+    value: "read_legacy_issue_permits",
     label: {
-      en: "Read Legacy Inventory Transactions",
+      en: "Read Legacy Issue Permits",
       ar: "عرض أذونات الصرف المرحلية",
     },
   },
-  update_legacy_inventory_transaction: {
-    value: "update_legacy_inventory_transaction",
+  update_legacy_issue_permit: {
+    value: "update_legacy_issue_permit",
     label: {
-      en: "Update Legacy Inventory Transaction",
+      en: "Update Legacy Issue Permit",
       ar: "تحديث أذن صرف مرحلي",
     },
   },
@@ -545,9 +545,9 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_manufactured_material_boms",
       "update_manufactured_material_bom",
       "read_inventory_transactions",
-      "add_legacy_inventory_transaction",
-      "read_legacy_inventory_transactions",
-      "update_legacy_inventory_transaction",
+      "add_legacy_issue_permit",
+      "read_legacy_issue_permits",
+      "update_legacy_issue_permit",
     ],
   },
   {

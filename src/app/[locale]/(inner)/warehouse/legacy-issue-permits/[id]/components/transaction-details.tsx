@@ -1,8 +1,8 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { getLegacyWorkOrderTypeLabel } from "@/lib/constants/enums/legacy-work-order-types";
+import { getLegacyIssuePermitWorkOrderTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
-import { type LegacyInventoryTransactionDetailed } from "@/types/legacy-inventory-transaction";
+import { type LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
 import { Badge } from "@mantine/core";
 import { History } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
@@ -10,7 +10,7 @@ import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/compon
 export default function TransactionDetails({
   transaction,
 }: {
-  transaction: LegacyInventoryTransactionDetailed;
+  transaction: LegacyIssuePermitDetailed;
 }) {
   const { locale, translate } = useI18n();
 
@@ -67,7 +67,7 @@ export default function TransactionDetails({
     },
     {
       key: translate("Work Order Type", "نوع أمر العمل"),
-      value: getLegacyWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
+      value: getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
     },
     {
       key: translate("Status", "الحالة"),

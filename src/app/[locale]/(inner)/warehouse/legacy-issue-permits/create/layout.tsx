@@ -3,7 +3,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <PermissionGuard permission={PERMISSIONS.READ_LEGACY_INVENTORY_TRANSACTIONS} isForPage>
+    <PermissionGuard permission={PERMISSIONS.ADD_LEGACY_ISSUE_PERMIT} isForPage>
       {children}
     </PermissionGuard>
   );

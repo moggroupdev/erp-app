@@ -89,12 +89,12 @@ export const queryKeys = {
     details: () => [...queryKeys.inventoryTransactions.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.inventoryTransactions.details(), id] as const,
   },
-  legacyInventoryTransactions: {
-    all: ["legacy-inventory-transactions"] as const,
-    lists: () => [...queryKeys.legacyInventoryTransactions.all, "list"] as const,
-    list: (filters: ListFilters) => [...queryKeys.legacyInventoryTransactions.lists(), filters] as const,
-    details: () => [...queryKeys.legacyInventoryTransactions.all, "detail"] as const,
-    detail: (id: string) => [...queryKeys.legacyInventoryTransactions.details(), id] as const,
+  legacyIssuePermits: {
+    all: ["legacy-issue-permits"] as const,
+    lists: () => [...queryKeys.legacyIssuePermits.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.legacyIssuePermits.lists(), filters] as const,
+    details: () => [...queryKeys.legacyIssuePermits.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.legacyIssuePermits.details(), id] as const,
   },
   materialPurchaseOrders: {
     all: ["material-purchase-orders"] as const,

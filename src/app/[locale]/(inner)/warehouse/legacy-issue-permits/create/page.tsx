@@ -7,11 +7,11 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
-import legacyInventoryTransactionsApi from "@/lib/api/legacy-inventory-transactions";
+import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { LEGACY_WORK_ORDER_TYPES, type LegacyWorkOrderType } from "@/lib/constants/enums/legacy-work-order-types";
+import { LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES, type LegacyIssuePermitWorkOrderType } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
@@ -24,9 +24,9 @@ import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
-import SelectLegacyWorkOrderType from "@/components/global/selections/enum-based/select-legacy-work-order-type";
+import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
 
-const PAGE_TITLE = { en: "Create Legacy Inventory Transaction", ar: "إنشاء إذن صرف مرحلي" };
+const PAGE_TITLE = { en: "Create Legacy Issue Permit", ar: "إنشاء إذن صرف مرحلي" };
 
 type ItemDraftRow = {
   key: string;
@@ -89,19 +89,19 @@ export default function Page() {
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
   const [workOrderNumber, setWorkOrderNumber] = useState("");
-  const [workOrderNumberType, setWorkOrderNumberType] = useState<string | null>(LEGACY_WORK_ORDER_TYPES.BASE_CONTRACT);
+  const [workOrderNumberType, setWorkOrderNumberType] = useState<string | null>(LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT);
   const [isCancelled, setIsCancelled] = useState(false);
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
 
   useDocumentTitle(
-    `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Inventory Transactions", "أذونات الصرف المرحلية")}`,
+    `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Issue Permits", "أذونات الصرف المرحلية")}`,
   );
 
   const mutation = useMutation({
     mutationFn: async () => {
-      return await legacyInventoryTransactionsApi.create({
+      return await legacyIssuePermitsApi.create({
         privateRequest,
         dto: {
           issuePermitNumber: issuePermitNumber.trim(),
@@ -112,7 +112,7 @@ export default function Page() {
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           contractNumber: contractNumber.trim() || null,
           workOrderNumber: workOrderNumber.trim() || null,
-          workOrderNumberType: (workOrderNumberType as LegacyWorkOrderType) || LEGACY_WORK_ORDER_TYPES.BASE_CONTRACT,
+          workOrderNumberType: (workOrderNumberType as LegacyIssuePermitWorkOrderType) || LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
           isCancelled,
           notes: notes.trim() || null,
           items: rows.map((row) => ({
@@ -125,8 +125,8 @@ export default function Page() {
       });
     },
     onSuccess: async (created) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyInventoryTransactions.all });
-      router.push(getLocalizedHref(`/warehouse/legacy-transactions/${created.id}`));
+      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.all });
+      router.push(getLocalizedHref(`/warehouse/legacy-issue-permits/${created.id}`));
     },
   });
 
@@ -251,7 +251,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/warehouse/legacy-transactions"),
+        backLink: getLocalizedHref("/warehouse/legacy-issue-permits"),
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -304,7 +304,7 @@ export default function Page() {
             clearable
             radius="md"
           />
-          <SelectLegacyWorkOrderType
+          <SelectLegacyIssuePermitWorkOrderType
             value={workOrderNumberType}
             setValue={setWorkOrderNumberType}
             label={translate("Work Order Type", "نوع أمر العمل")}
@@ -490,7 +490,7 @@ export default function Page() {
               variant="light"
               color="dark"
               radius="md"
-              onClick={() => router.push(getLocalizedHref("/warehouse/legacy-transactions"))}
+              onClick={() => router.push(getLocalizedHref("/warehouse/legacy-issue-permits"))}
             >
               {translation.cancel}
             </Button>

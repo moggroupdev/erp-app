@@ -11,14 +11,14 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
-import legacyInventoryTransactionsApi from "@/lib/api/legacy-inventory-transactions";
+import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import type { LegacyInventoryTransactionItemDetailed } from "@/types/legacy-inventory-transaction";
+import type { LegacyIssuePermitItemDetailed } from "@/types/legacy-issue-permit";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -41,7 +41,7 @@ export default function Page() {
 
   const [headerModalOpened, { open: openHeaderModal, close: closeHeaderModal }] = useDisclosure(false);
   const [itemModalOpened, { open: openItemModal, close: closeItemModal }] = useDisclosure(false);
-  const [itemToUpdate, setItemToUpdate] = useState<LegacyInventoryTransactionItemDetailed | null>(null);
+  const [itemToUpdate, setItemToUpdate] = useState<LegacyIssuePermitItemDetailed | null>(null);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -55,18 +55,18 @@ export default function Page() {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.legacyInventoryTransactions.detail(id),
-    queryFn: ({ signal }) => legacyInventoryTransactionsApi.get({ privateRequest, id, signal }),
-    staleTime: staleTimes.legacyInventoryTransactions,
+    queryKey: queryKeys.legacyIssuePermits.detail(id),
+    queryFn: ({ signal }) => legacyIssuePermitsApi.get({ privateRequest, id, signal }),
+    staleTime: staleTimes.legacyIssuePermits,
   });
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useDocumentTitle(
-    `${transaction?.issuePermitNumber || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Inventory Transactions", "أذونات الصرف المرحلية")}`,
+    `${transaction?.issuePermitNumber || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Issue Permits", "أذونات الصرف المرحلية")}`,
   );
 
-  function handleEditItem(item: LegacyInventoryTransactionItemDetailed) {
+  function handleEditItem(item: LegacyIssuePermitItemDetailed) {
     setItemToUpdate(item);
     openItemModal();
   }
@@ -75,12 +75,12 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/warehouse/legacy-transactions"),
+        backLink: getLocalizedHref("/warehouse/legacy-issue-permits"),
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             {transaction && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_INVENTORY_TRANSACTION}>
+              <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
                 <Button onClick={openHeaderModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
                   {translate("Edit Header", "تعديل الرأس")}
                 </Button>
@@ -155,7 +155,7 @@ export default function Page() {
                             {item.notes || <span className="text-gray-400">-</span>}
                           </Table.Td>
                           <Table.Td>
-                            <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_INVENTORY_TRANSACTION}>
+                            <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
                               <Button
                                 variant="subtle"
                                 color="gray"

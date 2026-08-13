@@ -9,15 +9,15 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
-import legacyInventoryTransactionsApi from "@/lib/api/legacy-inventory-transactions";
+import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { getLegacyWorkOrderTypeLabel } from "@/lib/constants/enums/legacy-work-order-types";
-import { type LegacyInventoryTransaction } from "@/types/legacy-inventory-transaction";
+import { getLegacyIssuePermitWorkOrderTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import { type LegacyIssuePermit } from "@/types/legacy-issue-permit";
 import { Badge, Button, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
@@ -29,9 +29,9 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
-import SelectLegacyWorkOrderType from "@/components/global/selections/enum-based/select-legacy-work-order-type";
+import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
 
-const PAGE_TITLE = { en: "Legacy Inventory Transactions", ar: "أذونات الصرف المرحلية" };
+const PAGE_TITLE = { en: "Legacy Issue Permits", ar: "أذونات الصرف المرحلية" };
 
 const TRANSACTIONS_PER_PAGE = 25;
 
@@ -81,9 +81,9 @@ export default function Page() {
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.legacyInventoryTransactions.list(params),
-    queryFn: ({ signal }) => legacyInventoryTransactionsApi.list({ privateRequest, params, signal }),
-    staleTime: staleTimes.legacyInventoryTransactions,
+    queryKey: queryKeys.legacyIssuePermits.list(params),
+    queryFn: ({ signal }) => legacyIssuePermitsApi.list({ privateRequest, params, signal }),
+    staleTime: staleTimes.legacyIssuePermits,
     placeholderData: keepPreviousData,
   });
 
@@ -113,10 +113,10 @@ export default function Page() {
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_LEGACY_INVENTORY_TRANSACTION}>
+            <PermissionGuard permission={PERMISSIONS.ADD_LEGACY_ISSUE_PERMIT}>
               <Button
                 component={Link}
-                href={getLocalizedHref("/warehouse/legacy-transactions/create")}
+                href={getLocalizedHref("/warehouse/legacy-issue-permits/create")}
                 radius="md"
                 leftSection={<Plus size={15} />}
               >
@@ -145,7 +145,7 @@ export default function Page() {
           />
         </div>
 
-        <SelectLegacyWorkOrderType
+        <SelectLegacyIssuePermitWorkOrderType
           value={workOrderTypeFilter}
           setValue={setWorkOrderTypeFilter}
           placeholder={translate("Select work order type...", "اختر نوع أمر العمل...")}
@@ -156,11 +156,11 @@ export default function Page() {
 
       {isFetching ? (
         <LoadingSection
-          message={translate("Loading legacy inventory transactions...", "جاري تحميل أذونات الصرف المرحلية...")}
+          message={translate("Loading legacy issue permits...", "جاري تحميل أذونات الصرف المرحلية...")}
         />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate("Error loading legacy inventory transactions", "خطأ في تحميل أذونات الصرف المرحلية")}
+          errorTitle={translate("Error loading legacy issue permits", "خطأ في تحميل أذونات الصرف المرحلية")}
           errorMessage={errorMessage}
           button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
@@ -175,7 +175,7 @@ export default function Page() {
           ) : (
             <EmptySection
               useDefaultImg
-              message={translate("No legacy inventory transactions found", "لا توجد أذونات صرف مرحلية")}
+              message={translate("No legacy issue permits found", "لا توجد أذونات صرف مرحلية")}
             />
           )
         ) : (
@@ -199,7 +199,7 @@ export default function Page() {
                       <Table.Td className="font-semibold text-gray-800">
                         <div className="flex items-center gap-1.5">
                           <Link
-                            href={getLocalizedHref(`/warehouse/legacy-transactions/${transaction.id}`)}
+                            href={getLocalizedHref(`/warehouse/legacy-issue-permits/${transaction.id}`)}
                             className="font-mono hover:underline"
                           >
                             {transaction.issuePermitNumber}
@@ -212,7 +212,7 @@ export default function Page() {
                       </Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.issueOrderDate, locale)}</Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.date, locale)}</Table.Td>
-                      <Table.Td>{getLegacyWorkOrderTypeLabel(transaction.workOrderNumberType, locale)}</Table.Td>
+                      <Table.Td>{getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale)}</Table.Td>
                       <Table.Td>
                         {transaction.isCancelled ? (
                           <Badge size="sm" variant="light" color="red" radius="md">
@@ -233,7 +233,7 @@ export default function Page() {
               </Table>
             </div>
 
-            <PaginationHandler<LegacyInventoryTransaction>
+            <PaginationHandler<LegacyIssuePermit>
               paginatedData={paginatedTransactions}
               activePage={activePage}
               setActivePage={setActivePage}

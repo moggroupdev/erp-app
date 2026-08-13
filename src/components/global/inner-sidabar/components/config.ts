@@ -143,10 +143,10 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_INVENTORY_TRANSACTIONS,
       },
       {
-        label: { en: "Legacy Inventory Transactions", ar: "أذونات الصرف المرحلية" },
-        href: "/warehouse/legacy-transactions",
+        label: { en: "Legacy Issue Permits", ar: "أذونات الصرف المرحلية" },
+        href: "/warehouse/legacy-issue-permits",
         icon: History,
-        requiredPermission: PERMISSIONS.READ_LEGACY_INVENTORY_TRANSACTIONS,
+        requiredPermission: PERMISSIONS.READ_LEGACY_ISSUE_PERMITS,
       },
     ],
   },

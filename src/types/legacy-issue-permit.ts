@@ -1,9 +1,9 @@
-import type { LegacyWorkOrderType } from "@/lib/constants/enums/legacy-work-order-types";
+import type { LegacyIssuePermitWorkOrderType } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 
-export type LegacyInventoryTransaction = {
+export type LegacyIssuePermit = {
   id: string;
   issuePermitNumber: string;
   issueOrderNumber: string;
@@ -13,23 +13,23 @@ export type LegacyInventoryTransaction = {
   productionSubDepartment: ProductionSubDepartment | null;
   contractNumber: string | null;
   workOrderNumber: string | null;
-  workOrderNumberType: LegacyWorkOrderType;
+  workOrderNumberType: LegacyIssuePermitWorkOrderType;
   isCancelled: boolean;
   notes: string | null;
   createdAt: Date;
   createdBy: string;
 };
 
-export type LegacyInventoryTransactionItem = {
+export type LegacyIssuePermitItem = {
   id: string;
-  legacyTransactionId: string;
+  issuePermitId: string;
   materialCode: string;
   unitOfMeasurementSelected: MaterialUnit;
   quantity: number;
   notes: string | null;
 };
 
-export type LegacyInventoryTransactionItemDetailed = LegacyInventoryTransactionItem & {
+export type LegacyIssuePermitItemDetailed = LegacyIssuePermitItem & {
   material: {
     code: string;
     title: string;
@@ -39,22 +39,22 @@ export type LegacyInventoryTransactionItemDetailed = LegacyInventoryTransactionI
   };
 };
 
-export type LegacyInventoryTransactionDetailed = Omit<LegacyInventoryTransaction, "creatorId" | "createdBy"> & {
+export type LegacyIssuePermitDetailed = Omit<LegacyIssuePermit, "creatorId" | "createdBy"> & {
   creator: { id: string; name: string };
   createdBy: { id: string; name: string };
-  items: LegacyInventoryTransactionItemDetailed[];
+  items: LegacyIssuePermitItemDetailed[];
 };
 
 // ==================== DTOs ====================
 
-export type CreateLegacyInventoryTransactionItemDto = {
+export type CreateLegacyIssuePermitItemDto = {
   materialCode: string;
   unitOfMeasurementSelected: MaterialUnit;
   quantity: number;
   notes: string | null;
 };
 
-export type CreateLegacyInventoryTransactionDto = {
+export type CreateLegacyIssuePermitDto = {
   issuePermitNumber: string;
   issueOrderNumber: string;
   issueOrderDate: string;
@@ -63,12 +63,12 @@ export type CreateLegacyInventoryTransactionDto = {
   productionSubDepartment: ProductionSubDepartment | null;
   contractNumber: string | null;
   workOrderNumber: string | null;
-  workOrderNumberType?: LegacyWorkOrderType;
+  workOrderNumberType?: LegacyIssuePermitWorkOrderType;
   isCancelled?: boolean;
   notes: string | null;
-  items: CreateLegacyInventoryTransactionItemDto[];
+  items: CreateLegacyIssuePermitItemDto[];
 };
 
-export type UpdateLegacyInventoryTransactionDto = Partial<Omit<CreateLegacyInventoryTransactionDto, "items">>;
+export type UpdateLegacyIssuePermitDto = Partial<Omit<CreateLegacyIssuePermitDto, "items">>;
 
-export type UpdateLegacyInventoryTransactionItemDto = Partial<CreateLegacyInventoryTransactionItemDto>;
+export type UpdateLegacyIssuePermitItemDto = Partial<CreateLegacyIssuePermitItemDto>;
