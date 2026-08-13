@@ -103,19 +103,19 @@ export default function HeaderModal({
       return setValidationError(translate("Issue permit number is required.", "رقم إذن الصرف مطلوب."));
     }
     if (!issueOrderNumber.trim()) {
-      return setValidationError(translate("Issue order number is required.", "رقم أمر الصرف مطلوب."));
+      return setValidationError(translate("Issue order number is required.", "رقم طلب الصرف مطلوب."));
     }
     if (!issueOrderDate || Number.isNaN(new Date(issueOrderDate).getTime())) {
-      return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ أمر الصرف صالحاً."));
+      return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ طلب الصرف صالحاً."));
     }
     if (!date || Number.isNaN(new Date(date).getTime())) {
       return setValidationError(translate("Date must be valid.", "يجب أن يكون التاريخ صالحاً."));
     }
     if (!creatorId) {
-      return setValidationError(translate("Please select a creator.", "يرجى اختيار المنشئ."));
+      return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
     if (!workOrderNumberType) {
-      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر العمل."));
+      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر الشغل."));
     }
 
     mutation.mutate();
@@ -164,13 +164,15 @@ export default function HeaderModal({
             value={issuePermitNumber}
             onChange={(e) => setIssuePermitNumber(e.target.value)}
             label={translate("Issue Permit Number", "رقم إذن الصرف")}
+            placeholder={translate("Enter issue permit number", "أدخل رقم إذن الصرف")}
             required
             radius="md"
           />
           <TextInput
             value={issueOrderNumber}
             onChange={(e) => setIssueOrderNumber(e.target.value)}
-            label={translate("Issue Order Number", "رقم أمر الصرف")}
+            label={translate("Issue Order Number", "رقم طلب الصرف")}
+            placeholder={translate("Enter issue order number", "أدخل رقم طلب الصرف")}
             required
             radius="md"
           />
@@ -178,7 +180,8 @@ export default function HeaderModal({
             type="datetime-local"
             value={issueOrderDate}
             onChange={(e) => setIssueOrderDate(e.target.value)}
-            label={translate("Issue Order Date", "تاريخ أمر الصرف")}
+            label={translate("Issue Order Date", "تاريخ طلب الصرف")}
+            placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
             required
             radius="md"
           />
@@ -187,40 +190,46 @@ export default function HeaderModal({
             value={date}
             onChange={(e) => setDate(e.target.value)}
             label={translate("Date", "التاريخ")}
+            placeholder={translate("Select date", "اختر التاريخ")}
             required
             radius="md"
           />
           <SelectUser
             value={creatorId}
             setValue={setCreatorId}
-            label={translate("Creator", "المنشئ")}
+            label={translate("Creator", "المحرر")}
+            placeholder={translate("Search users...", "ابحث عن مستخدم...")}
             required
             radius="md"
           />
           <SelectProductionSubDepartment
             value={productionSubDepartment}
             setValue={setProductionSubDepartment}
-            label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
+            label={translate("Production Sub-Department", "قسم الانتاج")}
+            placeholder={translate("Select department...", "اختر القسم...")}
             clearable
             radius="md"
           />
           <SelectLegacyIssuePermitWorkOrderType
             value={workOrderNumberType}
             setValue={setWorkOrderNumberType}
-            label={translate("Work Order Type", "نوع أمر العمل")}
+            label={translate("Work Order Type", "نوع أمر الشغل")}
+            placeholder={translate("Select type...", "اختر النوع...")}
             required
             radius="md"
           />
           <TextInput
             value={contractNumber}
             onChange={(e) => setContractNumber(e.target.value)}
-            label={translate("Contract Number", "رقم العقد")}
+            label={translate("Contract Number", "رقم مراجعة العقد")}
+            placeholder={translate("Enter contract number", "أدخل رقم مراجعة العقد")}
             radius="md"
           />
           <TextInput
             value={workOrderNumber}
             onChange={(e) => setWorkOrderNumber(e.target.value)}
-            label={translate("Work Order Number", "رقم أمر العمل")}
+            label={translate("Work Order Number", "رقم أمر الشغل")}
+            placeholder={translate("Enter work order number", "أدخل رقم أمر الشغل")}
             radius="md"
           />
         </div>
@@ -229,6 +238,7 @@ export default function HeaderModal({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           label={translate("Notes", "الملاحظات")}
+          placeholder={translate("Enter notes", "أدخل الملاحظات")}
           radius="md"
           autosize
           minRows={2}
@@ -237,7 +247,7 @@ export default function HeaderModal({
         <Checkbox
           checked={isCancelled}
           onChange={(e) => setIsCancelled(e.currentTarget.checked)}
-          label={translate("Cancelled", "ملغي")}
+          label={translate("Cancelled", "تعيين كإذن ملغي")}
         />
 
         <div className="flex gap-2">

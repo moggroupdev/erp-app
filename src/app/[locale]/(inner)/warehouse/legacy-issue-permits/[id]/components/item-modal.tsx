@@ -223,6 +223,7 @@ export default function ItemModal({
                 unitOfMeasurementSelected ? getMaterialUnitLabel(unitOfMeasurementSelected as MaterialUnit, locale) : ""
               }
               label={translate("Unit", "الوحدة")}
+              placeholder={translate("Base unit", "الوحدة الأساسية")}
               readOnly
               radius="md"
             />

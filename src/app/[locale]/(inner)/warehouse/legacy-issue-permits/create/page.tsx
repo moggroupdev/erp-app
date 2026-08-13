@@ -11,7 +11,10 @@ import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES, type LegacyIssuePermitWorkOrderType } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import {
+  LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
+  type LegacyIssuePermitWorkOrderType,
+} from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
@@ -89,7 +92,9 @@ export default function Page() {
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
   const [workOrderNumber, setWorkOrderNumber] = useState("");
-  const [workOrderNumberType, setWorkOrderNumberType] = useState<string | null>(LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT);
+  const [workOrderNumberType, setWorkOrderNumberType] = useState<string | null>(
+    LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
+  );
   const [isCancelled, setIsCancelled] = useState(false);
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
@@ -112,7 +117,8 @@ export default function Page() {
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           contractNumber: contractNumber.trim() || null,
           workOrderNumber: workOrderNumber.trim() || null,
-          workOrderNumberType: (workOrderNumberType as LegacyIssuePermitWorkOrderType) || LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
+          workOrderNumberType:
+            (workOrderNumberType as LegacyIssuePermitWorkOrderType) || LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
           isCancelled,
           notes: notes.trim() || null,
           items: rows.map((row) => ({
@@ -193,15 +199,15 @@ export default function Page() {
     }
 
     if (!issueOrderNumber.trim()) {
-      return setValidationError(translate("Issue order number is required.", "رقم أمر الصرف مطلوب."));
+      return setValidationError(translate("Issue order number is required.", "رقم طلب الصرف مطلوب."));
     }
 
     if (!issueOrderDate) {
-      return setValidationError(translate("Issue order date is required.", "تاريخ أمر الصرف مطلوب."));
+      return setValidationError(translate("Issue order date is required.", "تاريخ طلب الصرف مطلوب."));
     }
 
     if (Number.isNaN(new Date(issueOrderDate).getTime())) {
-      return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ أمر الصرف صالحاً."));
+      return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ طلب الصرف صالحاً."));
     }
 
     if (!date) {
@@ -213,11 +219,11 @@ export default function Page() {
     }
 
     if (!creatorId) {
-      return setValidationError(translate("Please select a creator.", "يرجى اختيار المنشئ."));
+      return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
 
     if (!workOrderNumberType) {
-      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر العمل."));
+      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر الشغل."));
     }
 
     for (let index = 0; index < rows.length; index++) {
@@ -267,8 +273,8 @@ export default function Page() {
           <TextInput
             value={issueOrderNumber}
             onChange={(e) => setIssueOrderNumber(e.target.value)}
-            label={translate("Issue Order Number", "رقم أمر الصرف")}
-            placeholder={translate("Enter issue order number", "أدخل رقم أمر الصرف")}
+            label={translate("Issue Order Number", "رقم طلب الصرف")}
+            placeholder={translate("Enter issue order number", "أدخل رقم طلب الصرف")}
             required
             radius="md"
           />
@@ -276,7 +282,8 @@ export default function Page() {
             type="datetime-local"
             value={issueOrderDate}
             onChange={(e) => setIssueOrderDate(e.target.value)}
-            label={translate("Issue Order Date", "تاريخ أمر الصرف")}
+            label={translate("Issue Order Date", "تاريخ طلب الصرف")}
+            placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
             required
             radius="md"
           />
@@ -285,13 +292,14 @@ export default function Page() {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             label={translate("Date", "التاريخ")}
+            placeholder={translate("Select date", "اختر التاريخ")}
             required
             radius="md"
           />
           <SelectUser
             value={creatorId}
             setValue={setCreatorId}
-            label={translate("Creator", "المنشئ")}
+            label={translate("Creator", "المحرر")}
             placeholder={translate("Search users...", "ابحث عن مستخدم...")}
             required
             radius="md"
@@ -299,7 +307,7 @@ export default function Page() {
           <SelectProductionSubDepartment
             value={productionSubDepartment}
             setValue={setProductionSubDepartment}
-            label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
+            label={translate("Production Sub-Department", "قسم الانتاج")}
             placeholder={translate("Select department...", "اختر القسم...")}
             clearable
             radius="md"
@@ -307,7 +315,7 @@ export default function Page() {
           <SelectLegacyIssuePermitWorkOrderType
             value={workOrderNumberType}
             setValue={setWorkOrderNumberType}
-            label={translate("Work Order Type", "نوع أمر العمل")}
+            label={translate("Work Order Type", "نوع أمر الشغل")}
             placeholder={translate("Select type...", "اختر النوع...")}
             required
             radius="md"
@@ -315,14 +323,14 @@ export default function Page() {
           <TextInput
             value={contractNumber}
             onChange={(e) => setContractNumber(e.target.value)}
-            label={translate("Contract Number", "رقم العقد")}
+            label={translate("Contract Number", "رقم مراجعة العقد")}
             placeholder={translate("Optional", "اختياري")}
             radius="md"
           />
           <TextInput
             value={workOrderNumber}
             onChange={(e) => setWorkOrderNumber(e.target.value)}
-            label={translate("Work Order Number", "رقم أمر العمل")}
+            label={translate("Work Order Number", "رقم أمر الشغل")}
             placeholder={translate("Optional", "اختياري")}
             radius="md"
           />
@@ -340,7 +348,7 @@ export default function Page() {
           <Checkbox
             checked={isCancelled}
             onChange={(e) => setIsCancelled(e.currentTarget.checked)}
-            label={translate("Cancelled", "ملغي")}
+            label={translate("Cancelled", "تعيين كإذن ملغي")}
           />
         </section>
 
@@ -414,6 +422,7 @@ export default function Page() {
                           variant="unstyled"
                           radius={0}
                           searchable
+                          placeholder={translate("Select unit", "اختر الوحدة")}
                           styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
                         />
                       ) : (

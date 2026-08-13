@@ -7,11 +7,7 @@ import { Badge } from "@mantine/core";
 import { History } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
-export default function TransactionDetails({
-  transaction,
-}: {
-  transaction: LegacyIssuePermitDetailed;
-}) {
+export default function TransactionDetails({ transaction }: { transaction: LegacyIssuePermitDetailed }) {
   const { locale, translate } = useI18n();
 
   const rows: DetailRow[] = [
@@ -22,13 +18,13 @@ export default function TransactionDetails({
       copyText: transaction.issuePermitNumber,
     },
     {
-      key: translate("Issue Order Number", "رقم أمر الصرف"),
+      key: translate("Issue Order Number", "رقم طلب الصرف"),
       value: transaction.issueOrderNumber,
       mono: true,
       copyText: transaction.issueOrderNumber,
     },
     {
-      key: translate("Issue Order Date", "تاريخ أمر الصرف"),
+      key: translate("Issue Order Date", "تاريخ طلب الصرف"),
       value: formatDateAndTime(transaction.issueOrderDate, locale),
     },
     {
@@ -36,11 +32,11 @@ export default function TransactionDetails({
       value: formatDateAndTime(transaction.date, locale),
     },
     {
-      key: translate("Creator", "المنشئ"),
+      key: translate("Creator", "المحرر"),
       value: <CreatorLink creator={transaction.creator} />,
     },
     {
-      key: translate("Production Sub-Department", "القسم الفرعي للإنتاج"),
+      key: translate("Production Sub-Department", "قسم الانتاج"),
       value: transaction.productionSubDepartment ? (
         getProductionSubDepartmentLabel(transaction.productionSubDepartment, locale)
       ) : (
@@ -48,25 +44,17 @@ export default function TransactionDetails({
       ),
     },
     {
-      key: translate("Contract Number", "رقم العقد"),
-      value: transaction.contractNumber ? (
-        <span className="font-mono">{transaction.contractNumber}</span>
-      ) : (
-        <EmptyValue />
-      ),
+      key: translate("Contract Number", "رقم مراجعة العقد"),
+      value: transaction.contractNumber ? <span className="font-mono">{transaction.contractNumber}</span> : <EmptyValue />,
       copyText: transaction.contractNumber || undefined,
     },
     {
-      key: translate("Work Order Number", "رقم أمر العمل"),
-      value: transaction.workOrderNumber ? (
-        <span className="font-mono">{transaction.workOrderNumber}</span>
-      ) : (
-        <EmptyValue />
-      ),
+      key: translate("Work Order Number", "رقم أمر الشغل"),
+      value: transaction.workOrderNumber ? <span className="font-mono">{transaction.workOrderNumber}</span> : <EmptyValue />,
       copyText: transaction.workOrderNumber || undefined,
     },
     {
-      key: translate("Work Order Type", "نوع أمر العمل"),
+      key: translate("Work Order Type", "نوع أمر الشغل"),
       value: getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
     },
     {
@@ -99,11 +87,5 @@ export default function TransactionDetails({
     },
   ];
 
-  return (
-    <EntityDetails
-      title={transaction.issuePermitNumber}
-      icon={History}
-      rows={rows}
-    />
-  );
+  return <EntityDetails title={transaction.issuePermitNumber} icon={History} rows={rows} />;
 }

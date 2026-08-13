@@ -148,16 +148,14 @@ export default function Page() {
         <SelectLegacyIssuePermitWorkOrderType
           value={workOrderTypeFilter}
           setValue={setWorkOrderTypeFilter}
-          placeholder={translate("Select work order type...", "اختر نوع أمر العمل...")}
+          placeholder={translate("Select work order type...", "اختر نوع أمر الشغل...")}
           clearable
           radius="md"
         />
       </div>
 
       {isFetching ? (
-        <LoadingSection
-          message={translate("Loading legacy issue permits...", "جاري تحميل أذونات الصرف المرحلية...")}
-        />
+        <LoadingSection message={translate("Loading legacy issue permits...", "جاري تحميل أذونات الصرف المرحلية...")} />
       ) : errorMessage ? (
         <ErrorSection
           errorTitle={translate("Error loading legacy issue permits", "خطأ في تحميل أذونات الصرف المرحلية")}
@@ -173,10 +171,7 @@ export default function Page() {
               button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
             />
           ) : (
-            <EmptySection
-              useDefaultImg
-              message={translate("No legacy issue permits found", "لا توجد أذونات صرف مرحلية")}
-            />
+            <EmptySection useDefaultImg message={translate("No legacy issue permits found", "لا توجد أذونات صرف مرحلية")} />
           )
         ) : (
           <>
@@ -185,10 +180,10 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Issue Permit Number", "رقم إذن الصرف")}</Table.Th>
-                    <Table.Th>{translate("Issue Order Number", "رقم أمر الصرف")}</Table.Th>
-                    <Table.Th>{translate("Issue Order Date", "تاريخ أمر الصرف")}</Table.Th>
+                    <Table.Th>{translate("Issue Order Number", "رقم طلب الصرف")}</Table.Th>
+                    <Table.Th>{translate("Issue Order Date", "تاريخ طلب الصرف")}</Table.Th>
                     <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
-                    <Table.Th>{translate("Work Order Type", "نوع أمر العمل")}</Table.Th>
+                    <Table.Th>{translate("Work Order Type", "نوع أمر الشغل")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                   </Table.Tr>
