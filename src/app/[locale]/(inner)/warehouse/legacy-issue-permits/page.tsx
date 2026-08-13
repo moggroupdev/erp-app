@@ -16,7 +16,6 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { getLegacyIssuePermitWorkOrderTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { type LegacyIssuePermit } from "@/types/legacy-issue-permit";
 import { Badge, Button, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
@@ -180,10 +179,9 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Issue Permit Number", "رقم إذن الصرف")}</Table.Th>
+                    <Table.Th>{translate("Issue Permit Date", "تاريخ إذن الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Number", "رقم طلب الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Date", "تاريخ طلب الصرف")}</Table.Th>
-                    <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
-                    <Table.Th>{translate("Work Order Type", "نوع أمر الشغل")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                   </Table.Tr>
@@ -202,12 +200,11 @@ export default function Page() {
                           <CopyButton text={transaction.issuePermitNumber} />
                         </div>
                       </Table.Td>
+                      <Table.Td>{formatDateAndTime(transaction.date, locale)}</Table.Td>
                       <Table.Td>
                         <span className="font-mono">{transaction.issueOrderNumber}</span>
                       </Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.issueOrderDate, locale)}</Table.Td>
-                      <Table.Td>{formatDateAndTime(transaction.date, locale)}</Table.Td>
-                      <Table.Td>{getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale)}</Table.Td>
                       <Table.Td>
                         {transaction.isCancelled ? (
                           <Badge size="sm" variant="light" color="red" radius="md">

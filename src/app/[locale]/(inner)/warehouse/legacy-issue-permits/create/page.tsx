@@ -271,6 +271,15 @@ export default function Page() {
             radius="md"
           />
           <TextInput
+            type="datetime-local"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            label={translate("Issue Permit Date", "تاريخ إذن الصرف")}
+            placeholder={translate("Select issue permit date", "اختر تاريخ إذن الصرف")}
+            required
+            radius="md"
+          />
+          <TextInput
             value={issueOrderNumber}
             onChange={(e) => setIssueOrderNumber(e.target.value)}
             label={translate("Issue Order Number", "رقم طلب الصرف")}
@@ -284,15 +293,6 @@ export default function Page() {
             onChange={(e) => setIssueOrderDate(e.target.value)}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}
             placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
-            required
-            radius="md"
-          />
-          <TextInput
-            type="datetime-local"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            label={translate("Date", "التاريخ")}
-            placeholder={translate("Select date", "اختر التاريخ")}
             required
             radius="md"
           />
@@ -312,26 +312,6 @@ export default function Page() {
             clearable
             radius="md"
           />
-          <Checkbox
-            checked={isMaintenance}
-            onChange={(e) => {
-              const checked = e.currentTarget.checked;
-              setIsMaintenance(checked);
-              if (!checked) setMaintenanceWorkOrderType(null);
-            }}
-            label={translate("Maintenance", "صيانة")}
-          />
-          {isMaintenance && (
-            <SelectLegacyIssuePermitWorkOrderType
-              value={maintenanceWorkOrderType}
-              setValue={setMaintenanceWorkOrderType}
-              label={translate("Work Order Type", "نوع أمر الشغل")}
-              placeholder={translate("Select type...", "اختر النوع...")}
-              excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
-              required
-              radius="md"
-            />
-          )}
           <TextInput
             value={contractNumber}
             onChange={(e) => setContractNumber(e.target.value)}
@@ -346,6 +326,30 @@ export default function Page() {
             placeholder={translate("Optional", "اختياري")}
             radius="md"
           />
+
+          <div className="flex flex-col gap-2">
+            <Checkbox
+              checked={isMaintenance}
+              onChange={(e) => {
+                const checked = e.currentTarget.checked;
+                setIsMaintenance(checked);
+                if (!checked) setMaintenanceWorkOrderType(null);
+              }}
+              label={translate("Maintenance", "صيانة")}
+            />
+            {isMaintenance && (
+              <SelectLegacyIssuePermitWorkOrderType
+                value={maintenanceWorkOrderType}
+                setValue={setMaintenanceWorkOrderType}
+                label={translate("Work Order Type", "نوع أمر الشغل")}
+                placeholder={translate("Select type...", "اختر النوع...")}
+                excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+                required
+                radius="md"
+              />
+            )}
+          </div>
+
           <div className="md:col-span-2">
             <Textarea
               value={notes}
@@ -361,6 +365,7 @@ export default function Page() {
             checked={isCancelled}
             onChange={(e) => setIsCancelled(e.currentTarget.checked)}
             label={translate("Cancelled", "تعيين كإذن ملغي")}
+            color="red"
           />
         </section>
 
@@ -498,27 +503,19 @@ export default function Page() {
 
         {error && <ErrorAlert error={error} />}
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-gray-500">
-            {translate(
-              "Enter the legacy issue header and line items. These records are used for seeding only.",
-              "أدخل رأس إذن الصرف القديم وبنوده. تُستخدم هذه السجلات لأغراض التهيئة فقط.",
-            )}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="light"
-              color="dark"
-              radius="md"
-              onClick={() => router.push(getLocalizedHref("/warehouse/legacy-issue-permits"))}
-            >
-              {translation.cancel}
-            </Button>
-            <Button type="submit" loading={mutation.isPending} radius="md" color="teal">
-              {translate("Create", "إنشاء")}
-            </Button>
-          </div>
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="light"
+            color="dark"
+            radius="md"
+            onClick={() => router.push(getLocalizedHref("/warehouse/legacy-issue-permits"))}
+          >
+            {translation.cancel}
+          </Button>
+          <Button type="submit" loading={mutation.isPending} radius="md" color="teal">
+            {translate("Create", "إنشاء")}
+          </Button>
         </div>
       </form>
     </LayoutBox>

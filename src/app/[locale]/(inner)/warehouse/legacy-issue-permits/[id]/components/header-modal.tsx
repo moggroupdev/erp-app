@@ -169,7 +169,7 @@ export default function HeaderModal({
       opened={opened}
       onClose={handleClose}
       title={translate("Edit Transaction Header", "تعديل رأس أذن الصرف")}
-      size="lg"
+      size="xl"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -178,6 +178,15 @@ export default function HeaderModal({
             onChange={(e) => setIssuePermitNumber(e.target.value)}
             label={translate("Issue Permit Number", "رقم إذن الصرف")}
             placeholder={translate("Enter issue permit number", "أدخل رقم إذن الصرف")}
+            required
+            radius="md"
+          />
+          <TextInput
+            type="datetime-local"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            label={translate("Issue Permit Date", "تاريخ إذن الصرف")}
+            placeholder={translate("Select issue permit date", "اختر تاريخ إذن الصرف")}
             required
             radius="md"
           />
@@ -198,15 +207,6 @@ export default function HeaderModal({
             required
             radius="md"
           />
-          <TextInput
-            type="datetime-local"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            label={translate("Date", "التاريخ")}
-            placeholder={translate("Select date", "اختر التاريخ")}
-            required
-            radius="md"
-          />
           <SelectUser
             value={creatorId}
             setValue={setCreatorId}
@@ -223,26 +223,6 @@ export default function HeaderModal({
             clearable
             radius="md"
           />
-          <Checkbox
-            checked={isMaintenance}
-            onChange={(e) => {
-              const checked = e.currentTarget.checked;
-              setIsMaintenance(checked);
-              if (!checked) setMaintenanceWorkOrderType(null);
-            }}
-            label={translate("Maintenance", "صيانة")}
-          />
-          {isMaintenance && (
-            <SelectLegacyIssuePermitWorkOrderType
-              value={maintenanceWorkOrderType}
-              setValue={setMaintenanceWorkOrderType}
-              label={translate("Work Order Type", "نوع أمر الشغل")}
-              placeholder={translate("Select type...", "اختر النوع...")}
-              excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
-              required
-              radius="md"
-            />
-          )}
           <TextInput
             value={contractNumber}
             onChange={(e) => setContractNumber(e.target.value)}
@@ -257,6 +237,29 @@ export default function HeaderModal({
             placeholder={translate("Enter work order number", "أدخل رقم أمر الشغل")}
             radius="md"
           />
+
+          <div className="flex flex-col gap-2">
+            <Checkbox
+              checked={isMaintenance}
+              onChange={(e) => {
+                const checked = e.currentTarget.checked;
+                setIsMaintenance(checked);
+                if (!checked) setMaintenanceWorkOrderType(null);
+              }}
+              label={translate("Maintenance", "صيانة")}
+            />
+            {isMaintenance && (
+              <SelectLegacyIssuePermitWorkOrderType
+                value={maintenanceWorkOrderType}
+                setValue={setMaintenanceWorkOrderType}
+                label={translate("Work Order Type", "نوع أمر الشغل")}
+                placeholder={translate("Select type...", "اختر النوع...")}
+                excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+                required
+                radius="md"
+              />
+            )}
+          </div>
         </div>
 
         <Textarea
@@ -273,6 +276,7 @@ export default function HeaderModal({
           checked={isCancelled}
           onChange={(e) => setIsCancelled(e.currentTarget.checked)}
           label={translate("Cancelled", "تعيين كإذن ملغي")}
+          color="red"
         />
 
         <div className="flex gap-2">
