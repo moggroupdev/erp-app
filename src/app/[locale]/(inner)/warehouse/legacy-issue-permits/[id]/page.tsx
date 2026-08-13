@@ -27,7 +27,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import TransactionDetails from "./components/transaction-details";
-import HeaderModal from "./components/header-modal";
+import HeaderModal from "./components/legacy-issue-update-modal";
 import ItemModal from "./components/item-modal";
 
 const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل أذن صرف مرحلي" };
@@ -82,7 +82,7 @@ export default function Page() {
             {transaction && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
                 <Button onClick={openHeaderModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-                  {translate("Edit Header", "تعديل الرأس")}
+                  {translate("Edit Issue Permit", "تعديل إذن الصرف")}
                 </Button>
               </PermissionGuard>
             )}

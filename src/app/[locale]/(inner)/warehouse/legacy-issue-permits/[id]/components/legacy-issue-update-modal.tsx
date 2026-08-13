@@ -168,7 +168,7 @@ export default function HeaderModal({
     <Modal
       opened={opened}
       onClose={handleClose}
-      title={translate("Edit Transaction Header", "تعديل رأس أذن الصرف")}
+      title={translate("Edit Issue Permit", "تعديل إذن الصرف")}
       size="xl"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
