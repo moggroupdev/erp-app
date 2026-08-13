@@ -92,9 +92,8 @@ export default function Page() {
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
   const [workOrderNumber, setWorkOrderNumber] = useState("");
-  const [workOrderNumberType, setWorkOrderNumberType] = useState<string | null>(
-    LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
-  );
+  const [isMaintenance, setIsMaintenance] = useState(false);
+  const [maintenanceWorkOrderType, setMaintenanceWorkOrderType] = useState<string | null>(null);
   const [isCancelled, setIsCancelled] = useState(false);
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
@@ -117,8 +116,9 @@ export default function Page() {
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           contractNumber: contractNumber.trim() || null,
           workOrderNumber: workOrderNumber.trim() || null,
-          workOrderNumberType:
-            (workOrderNumberType as LegacyIssuePermitWorkOrderType) || LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
+          workOrderNumberType: isMaintenance
+            ? (maintenanceWorkOrderType as LegacyIssuePermitWorkOrderType)
+            : LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
           isCancelled,
           notes: notes.trim() || null,
           items: rows.map((row) => ({
@@ -222,7 +222,7 @@ export default function Page() {
       return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
 
-    if (!workOrderNumberType) {
+    if (isMaintenance && !maintenanceWorkOrderType) {
       return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر الشغل."));
     }
 
@@ -312,14 +312,26 @@ export default function Page() {
             clearable
             radius="md"
           />
-          <SelectLegacyIssuePermitWorkOrderType
-            value={workOrderNumberType}
-            setValue={setWorkOrderNumberType}
-            label={translate("Work Order Type", "نوع أمر الشغل")}
-            placeholder={translate("Select type...", "اختر النوع...")}
-            required
-            radius="md"
+          <Checkbox
+            checked={isMaintenance}
+            onChange={(e) => {
+              const checked = e.currentTarget.checked;
+              setIsMaintenance(checked);
+              if (!checked) setMaintenanceWorkOrderType(null);
+            }}
+            label={translate("Maintenance", "صيانة")}
           />
+          {isMaintenance && (
+            <SelectLegacyIssuePermitWorkOrderType
+              value={maintenanceWorkOrderType}
+              setValue={setMaintenanceWorkOrderType}
+              label={translate("Work Order Type", "نوع أمر الشغل")}
+              placeholder={translate("Select type...", "اختر النوع...")}
+              excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+              required
+              radius="md"
+            />
+          )}
           <TextInput
             value={contractNumber}
             onChange={(e) => setContractNumber(e.target.value)}

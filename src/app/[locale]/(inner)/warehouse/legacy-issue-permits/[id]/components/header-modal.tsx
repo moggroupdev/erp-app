@@ -8,7 +8,10 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { type LegacyIssuePermitWorkOrderType } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import {
+  LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
+  type LegacyIssuePermitWorkOrderType,
+} from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { type ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
 import { Button, Checkbox, TextInput, Textarea } from "@mantine/core";
@@ -46,7 +49,8 @@ export default function HeaderModal({
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
   const [workOrderNumber, setWorkOrderNumber] = useState("");
-  const [workOrderNumberType, setWorkOrderNumberType] = useState<string | null>(null);
+  const [isMaintenance, setIsMaintenance] = useState(false);
+  const [maintenanceWorkOrderType, setMaintenanceWorkOrderType] = useState<string | null>(null);
   const [isCancelled, setIsCancelled] = useState(false);
   const [notes, setNotes] = useState("");
 
@@ -60,11 +64,20 @@ export default function HeaderModal({
     setProductionSubDepartment(transaction.productionSubDepartment);
     setContractNumber(transaction.contractNumber || "");
     setWorkOrderNumber(transaction.workOrderNumber || "");
-    setWorkOrderNumberType(transaction.workOrderNumberType);
+    setIsMaintenance(transaction.workOrderNumberType !== LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT);
+    setMaintenanceWorkOrderType(
+      transaction.workOrderNumberType !== LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
+        ? transaction.workOrderNumberType
+        : null,
+    );
     setIsCancelled(transaction.isCancelled);
     setNotes(transaction.notes || "");
     setValidationError("");
   }, [opened, transaction]);
+
+  const resolvedWorkOrderNumberType = isMaintenance
+    ? (maintenanceWorkOrderType as LegacyIssuePermitWorkOrderType)
+    : LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT;
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -80,7 +93,7 @@ export default function HeaderModal({
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           contractNumber: contractNumber.trim() || null,
           workOrderNumber: workOrderNumber.trim() || null,
-          workOrderNumberType: workOrderNumberType as LegacyIssuePermitWorkOrderType,
+          workOrderNumberType: resolvedWorkOrderNumberType,
           isCancelled,
           notes: notes.trim() || null,
         },
@@ -114,7 +127,7 @@ export default function HeaderModal({
     if (!creatorId) {
       return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
-    if (!workOrderNumberType) {
+    if (isMaintenance && !maintenanceWorkOrderType) {
       return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر الشغل."));
     }
 
@@ -138,7 +151,7 @@ export default function HeaderModal({
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
     (contractNumber.trim() || null) !== transaction.contractNumber ||
     (workOrderNumber.trim() || null) !== transaction.workOrderNumber ||
-    workOrderNumberType !== transaction.workOrderNumberType ||
+    resolvedWorkOrderNumberType !== transaction.workOrderNumberType ||
     isCancelled !== transaction.isCancelled ||
     (notes.trim() || null) !== transaction.notes;
 
@@ -148,7 +161,7 @@ export default function HeaderModal({
     !!issueOrderDate &&
     !!date &&
     !!creatorId &&
-    !!workOrderNumberType &&
+    (!isMaintenance || !!maintenanceWorkOrderType) &&
     isDataChanged;
 
   return (
@@ -210,14 +223,26 @@ export default function HeaderModal({
             clearable
             radius="md"
           />
-          <SelectLegacyIssuePermitWorkOrderType
-            value={workOrderNumberType}
-            setValue={setWorkOrderNumberType}
-            label={translate("Work Order Type", "نوع أمر الشغل")}
-            placeholder={translate("Select type...", "اختر النوع...")}
-            required
-            radius="md"
+          <Checkbox
+            checked={isMaintenance}
+            onChange={(e) => {
+              const checked = e.currentTarget.checked;
+              setIsMaintenance(checked);
+              if (!checked) setMaintenanceWorkOrderType(null);
+            }}
+            label={translate("Maintenance", "صيانة")}
           />
+          {isMaintenance && (
+            <SelectLegacyIssuePermitWorkOrderType
+              value={maintenanceWorkOrderType}
+              setValue={setMaintenanceWorkOrderType}
+              label={translate("Work Order Type", "نوع أمر الشغل")}
+              placeholder={translate("Select type...", "اختر النوع...")}
+              excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+              required
+              radius="md"
+            />
+          )}
           <TextInput
             value={contractNumber}
             onChange={(e) => setContractNumber(e.target.value)}
