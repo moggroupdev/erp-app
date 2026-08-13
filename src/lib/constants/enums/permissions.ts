@@ -46,6 +46,9 @@ export const PERMISSION_VALUES = [
   "read_production_plans",
   "read_production_routing",
   "read_inventory_transactions",
+  "add_legacy_inventory_transaction",
+  "read_legacy_inventory_transactions",
+  "update_legacy_inventory_transaction",
   "read_material_purchase_orders",
   "read_product_purchase_orders",
   "read_trips",
@@ -363,6 +366,27 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض حركات المخزون",
     },
   },
+  add_legacy_inventory_transaction: {
+    value: "add_legacy_inventory_transaction",
+    label: {
+      en: "Add Legacy Inventory Transaction",
+      ar: "إضافة حركة مخزون قديمة",
+    },
+  },
+  read_legacy_inventory_transactions: {
+    value: "read_legacy_inventory_transactions",
+    label: {
+      en: "Read Legacy Inventory Transactions",
+      ar: "عرض حركات المخزون القديمة",
+    },
+  },
+  update_legacy_inventory_transaction: {
+    value: "update_legacy_inventory_transaction",
+    label: {
+      en: "Update Legacy Inventory Transaction",
+      ar: "تحديث حركة مخزون قديمة",
+    },
+  },
   read_material_purchase_orders: {
     value: "read_material_purchase_orders",
     label: {
@@ -521,6 +545,9 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_manufactured_material_boms",
       "update_manufactured_material_bom",
       "read_inventory_transactions",
+      "add_legacy_inventory_transaction",
+      "read_legacy_inventory_transactions",
+      "update_legacy_inventory_transaction",
     ],
   },
   {
