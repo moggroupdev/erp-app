@@ -134,18 +134,18 @@ function SortableItemRow({
       </Table.Td>
       <Table.Td>{item.quantity == null ? <EmptyValue /> : formatQuantity(item.quantity)}</Table.Td>
       <Table.Td className="max-w-xs truncate">{item.notes || <EmptyValue />}</Table.Td>
-      <Table.Td>
+      <Table.Td className="w-10">
         <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
           <Button
-            variant="subtle"
-            color="gray"
+            variant="light"
+            color="dark"
             size="xs"
             radius="md"
             p={6}
             onClick={() => onEdit(item)}
             title={translate("Edit item", "تعديل البند")}
           >
-            <Pencil size={14} />
+            <Pencil size={12} />
           </Button>
         </PermissionGuard>
       </Table.Td>
@@ -213,16 +213,6 @@ export default function LegacyIssueItemsTable({
 
   return (
     <div className="flex flex-col gap-3">
-      {errorMessage && <ErrorAlert error={errorMessage} />}
-
-      {canUpdate && isDirty && (
-        <div className="flex justify-end">
-          <Button radius="md" loading={reorderMutation.isPending} onClick={() => reorderMutation.mutate()}>
-            {translate("Save order", "حفظ الترتيب")}
-          </Button>
-        </div>
-      )}
-
       <div className="overflow-x-auto">
         <DndContext
           sensors={sensors}
@@ -234,14 +224,14 @@ export default function LegacyIssueItemsTable({
             <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th className="w-10" />
+                  <Table.Th className="w-10 text-center!">#</Table.Th>
                   <Table.Th>{translate("Material", "المادة")}</Table.Th>
                   <Table.Th>{translate("Code", "الكود")}</Table.Th>
                   <Table.Th>{translate("Category", "الفئة")}</Table.Th>
                   <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
                   <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
                   <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
-                  <Table.Th />
+                  <Table.Th className="w-10" />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -260,6 +250,28 @@ export default function LegacyIssueItemsTable({
           </SortableContext>
         </DndContext>
       </div>
+
+      {errorMessage && <ErrorAlert error={errorMessage} />}
+
+      {canUpdate && isDirty && (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="light"
+            color="dark"
+            radius="md"
+            disabled={reorderMutation.isPending}
+            onClick={() => {
+              setOrderedItems(items);
+              reorderMutation.reset();
+            }}
+          >
+            {translate("Discard", "تجاهل")}
+          </Button>
+          <Button radius="md" loading={reorderMutation.isPending} onClick={() => reorderMutation.mutate()}>
+            {translate("Save order", "حفظ الترتيب")}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

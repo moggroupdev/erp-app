@@ -131,9 +131,7 @@ function SortableItemRow({
           type="button"
           disabled={!canReorder}
           className={`group relative flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors ${
-            canReorder
-              ? "cursor-grab hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing"
-              : "cursor-default"
+            canReorder ? "cursor-grab hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing" : "cursor-default"
           }`}
           title={canReorder ? translate("Reorder row", "إعادة ترتيب الصف") : undefined}
           {...(canReorder ? attributes : {})}
@@ -555,17 +553,17 @@ export default function Page() {
                 <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
                   <Table.Thead className="bg-gray-50">
                     <Table.Tr className="h-9">
-                      <Table.Th className="w-[2.5%]" />
-                      <Table.Th className="w-[39%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
+                      <Table.Th className="w-[47.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Material", "المادة")}
                       </Table.Th>
-                      <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Quantity", "الكمية")}
                       </Table.Th>
-                      <Table.Th className="w-[16%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Unit", "الوحدة")}
                       </Table.Th>
-                      <Table.Th className="w-[26%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="w-[27.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Notes", "الملاحظات")}
                       </Table.Th>
                       <Table.Th className="w-[2.5%]" />
