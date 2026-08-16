@@ -202,6 +202,7 @@ export default function SelectMaterial({
       searchValue={hasSelection ? getSelectedLabel() || "" : searchKeyword}
       onSearchChange={handleSearchChange}
       disabled={props.disabled}
+      classNames={hasSelection ? { input: "!cursor-default" } : props.classNames}
       rightIcon={<PackageSearch size={15} className="pointer-events-none text-gray-400" />}
       // Server already filters by keyword (title, code, legacyCode); skip client-side label matching.
       filter={({ options }) => options}
