@@ -149,10 +149,33 @@ export default function LegacyIssueItemModal({
     e.preventDefault();
     setValidationError("");
 
+    const materialName = selectedMaterial?.title || itemToUpdate?.material?.title || materialCode;
+
+    if (materialCode) {
+      if (!unitOfMeasurementSelected) {
+        return setValidationError(
+          translate(`Please select the unit for material ${materialName}.`, `يرجى اختيار الوحدة للمادة ${materialName}.`),
+        );
+      }
+
+      if (quantity === "") {
+        return setValidationError(
+          translate(`Please enter the quantity for material ${materialName}.`, `يرجى إدخال الكمية للمادة ${materialName}.`),
+        );
+      }
+    }
+
     if (quantity !== "") {
       const normalizedQuantity = Number(quantity);
       if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
-        return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
+        return setValidationError(
+          materialName
+            ? translate(
+                `Quantity for material ${materialName} must be a positive number.`,
+                `يجب أن تكون كمية المادة ${materialName} رقماً موجباً.`,
+              )
+            : translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."),
+        );
       }
     }
 
@@ -217,6 +240,7 @@ export default function LegacyIssueItemModal({
             onChange={setQuantity}
             label={translate("Quantity", "الكمية")}
             placeholder={translate("Enter quantity", "أدخل الكمية")}
+            required={!!materialCode}
             min={0}
             allowNegative={false}
             decimalScale={6}
@@ -230,6 +254,7 @@ export default function LegacyIssueItemModal({
               data={unitOptions}
               label={translate("Unit", "الوحدة")}
               placeholder={translate("Select unit", "اختر الوحدة")}
+              required={!!materialCode}
               disabled={!baseUnit}
               searchable
             />
@@ -240,6 +265,7 @@ export default function LegacyIssueItemModal({
               }
               label={translate("Unit", "الوحدة")}
               placeholder={translate("Base unit", "الوحدة الأساسية")}
+              required={!!materialCode}
               readOnly
               radius="md"
             />

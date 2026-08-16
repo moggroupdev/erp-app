@@ -403,13 +403,43 @@ export default function Page() {
 
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index];
+      const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
+      const materialName = row.materialTitle || row.materialCode;
+
+      if (row.materialCode) {
+        if (!row.unitOfMeasurementSelected) {
+          return setValidationError(
+            translate(
+              `${rowLabel}: please select the unit for material ${materialName}.`,
+              `${rowLabel}: يرجى اختيار الوحدة للمادة ${materialName}.`,
+            ),
+          );
+        }
+
+        if (row.quantity === "") {
+          return setValidationError(
+            translate(
+              `${rowLabel}: please enter the quantity for material ${materialName}.`,
+              `${rowLabel}: يرجى إدخال الكمية للمادة ${materialName}.`,
+            ),
+          );
+        }
+      }
+
       if (row.quantity === "") continue;
 
       const qty = Number(row.quantity);
       if (Number.isNaN(qty) || qty <= 0) {
-        const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
         return setValidationError(
-          translate(`${rowLabel}: quantity must be greater than zero.`, `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`),
+          materialName
+            ? translate(
+                `${rowLabel}: quantity for material ${materialName} must be greater than zero.`,
+                `${rowLabel}: يجب أن تكون كمية المادة ${materialName} أكبر من صفر.`,
+              )
+            : translate(
+                `${rowLabel}: quantity must be greater than zero.`,
+                `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`,
+              ),
         );
       }
     }
