@@ -84,6 +84,10 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
         <EmptyValue />
       ),
     },
+    {
+      key: translate("Entry Date", "تاريخ الإدخال"),
+      value: formatDateAndTime(transaction.createdAt, locale),
+    },
   ];
 
   return <EntityDetails title={transaction.issuePermitNumber} icon={History} rows={rows} />;

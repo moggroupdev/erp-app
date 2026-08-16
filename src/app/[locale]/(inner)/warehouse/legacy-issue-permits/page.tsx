@@ -164,7 +164,7 @@ export default function Page() {
                     <Table.Th>{translate("Issue Permit Date", "تاريخ إذن الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Number", "رقم طلب الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Date", "تاريخ طلب الصرف")}</Table.Th>
-                    <Table.Th>{translate("Status", "الحالة")}</Table.Th>
+                    <Table.Th>{translate("Entry Date", "تاريخ الإدخال")}</Table.Th>
                     <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -180,6 +180,12 @@ export default function Page() {
                             {transaction.issuePermitNumber}
                           </Link>
                           <CopyButton text={transaction.issuePermitNumber} />
+
+                          {transaction.isCancelled && (
+                            <Badge size="sm" variant="light" color="red" radius="md">
+                              {translate("Cancelled", "ملغي")}
+                            </Badge>
+                          )}
                         </div>
                       </Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.date, locale)}</Table.Td>
@@ -187,17 +193,7 @@ export default function Page() {
                         <span className="font-mono">{transaction.issueOrderNumber}</span>
                       </Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.issueOrderDate, locale)}</Table.Td>
-                      <Table.Td>
-                        {transaction.isCancelled ? (
-                          <Badge size="sm" variant="light" color="red" radius="md">
-                            {translate("Cancelled", "ملغي")}
-                          </Badge>
-                        ) : (
-                          <Badge size="sm" variant="light" color="teal" radius="md">
-                            {translate("Active", "نشط")}
-                          </Badge>
-                        )}
-                      </Table.Td>
+                      <Table.Td>{formatDateAndTime(transaction.createdAt, locale)}</Table.Td>
                       <Table.Td className="max-w-xs truncate">
                         {transaction.notes || <span className="text-gray-400">-</span>}
                       </Table.Td>
