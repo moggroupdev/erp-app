@@ -19,7 +19,7 @@ import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
-export default function ItemModal({
+export default function LegacyIssueItemModal({
   opened,
   close,
   transactionId,
@@ -45,8 +45,8 @@ export default function ItemModal({
   const [quantity, setQuantity] = useState<number | string>("");
   const [notes, setNotes] = useState("");
 
-  const baseUnit = selectedMaterial?.unitOfMeasurement || itemToUpdate?.material.unitOfMeasurement || null;
-  const materialType = selectedMaterial?.materialType || itemToUpdate?.material.materialType || null;
+  const baseUnit = selectedMaterial?.unitOfMeasurement || itemToUpdate?.material?.unitOfMeasurement || null;
+  const materialType = selectedMaterial?.materialType || itemToUpdate?.material?.materialType || null;
   const unitConversions = selectedMaterial?.unitConversions ?? [];
   const showUnitSelect = !!materialType && isRawMaterial(materialType) && unitConversions.length > 0;
 
@@ -66,13 +66,24 @@ export default function ItemModal({
   }
 
   useEffect(() => {
-    if (!opened || !itemToUpdate) return;
+    if (!opened) return;
+
+    if (!itemToUpdate) {
+      reset();
+      setValidationError("");
+      return;
+    }
 
     setMaterialCode(itemToUpdate.materialCode);
     setUnitOfMeasurementSelected(itemToUpdate.unitOfMeasurementSelected);
-    setQuantity(itemToUpdate.quantity);
+    setQuantity(itemToUpdate.quantity ?? "");
     setNotes(itemToUpdate.notes || "");
     setValidationError("");
+
+    if (!itemToUpdate.materialCode) {
+      setSelectedMaterial(null);
+      return;
+    }
 
     let cancelled = false;
     materialsApi
@@ -95,25 +106,39 @@ export default function ItemModal({
     setUnitOfMeasurementSelected((current) => current || baseUnit);
   }, [baseUnit]);
 
+  const isEditing = !!itemToUpdate;
+
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!itemToUpdate) return;
+      const dto = {
+        materialCode: materialCode || null,
+        unitOfMeasurementSelected: (unitOfMeasurementSelected as MaterialUnit) || null,
+        quantity: quantity === "" ? null : Number(quantity),
+        notes: notes.trim() || null,
+      };
 
-      return await legacyIssuePermitsApi.updateItem({
+      if (itemToUpdate) {
+        return await legacyIssuePermitsApi.updateItem({
+          privateRequest,
+          id: transactionId,
+          itemId: itemToUpdate.id,
+          dto,
+        });
+      }
+
+      return await legacyIssuePermitsApi.addItem({
         privateRequest,
         id: transactionId,
-        itemId: itemToUpdate.id,
-        dto: {
-          materialCode: materialCode!,
-          unitOfMeasurementSelected: unitOfMeasurementSelected as MaterialUnit,
-          quantity: Number(quantity),
-          notes: notes.trim() || null,
-        },
+        dto,
       });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.detail(transactionId) });
-      toast.success(translate("Legacy issue permit item updated successfully.", "تم تحديث بند أذن الصرف المرحلي بنجاح."));
+      toast.success(
+        isEditing
+          ? translate("Legacy issue permit item updated successfully.", "تم تحديث بند إذن الصرف المرحلي بنجاح.")
+          : translate("Legacy issue permit item added successfully.", "تم إضافة بند إذن الصرف المرحلي بنجاح."),
+      );
       handleClose();
     },
   });
@@ -124,17 +149,34 @@ export default function ItemModal({
     e.preventDefault();
     setValidationError("");
 
-    if (!materialCode) {
-      return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
+    const materialName = selectedMaterial?.title || itemToUpdate?.material?.title || materialCode;
+
+    if (materialCode) {
+      if (!unitOfMeasurementSelected) {
+        return setValidationError(
+          translate(`Please select the unit for material ${materialName}.`, `يرجى اختيار الوحدة للمادة ${materialName}.`),
+        );
+      }
+
+      if (quantity === "") {
+        return setValidationError(
+          translate(`Please enter the quantity for material ${materialName}.`, `يرجى إدخال الكمية للمادة ${materialName}.`),
+        );
+      }
     }
 
-    if (!unitOfMeasurementSelected) {
-      return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
-    }
-
-    const normalizedQuantity = Number(quantity);
-    if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
-      return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
+    if (quantity !== "") {
+      const normalizedQuantity = Number(quantity);
+      if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
+        return setValidationError(
+          materialName
+            ? translate(
+                `Quantity for material ${materialName} must be a positive number.`,
+                `يجب أن تكون كمية المادة ${materialName} رقماً موجباً.`,
+              )
+            : translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."),
+        );
+      }
     }
 
     mutation.mutate();
@@ -153,22 +195,22 @@ export default function ItemModal({
   const isDataChanged = itemToUpdate
     ? materialCode !== itemToUpdate.materialCode ||
       unitOfMeasurementSelected !== itemToUpdate.unitOfMeasurementSelected ||
-      Number(quantity) !== Number(itemToUpdate.quantity) ||
+      (quantity === "" ? null : Number(quantity)) !==
+        (itemToUpdate.quantity == null ? null : Number(itemToUpdate.quantity)) ||
       (notes.trim() || null) !== itemToUpdate.notes
     : true;
 
-  const isReadyToSubmit =
-    !!itemToUpdate &&
-    !!materialCode &&
-    !!unitOfMeasurementSelected &&
-    quantity !== "" &&
-    Number(quantity) > 0 &&
-    isDataChanged;
+  const isReadyToSubmit = isDataChanged;
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={translate("Edit Item", "تعديل بند أذن الصرف")} size="lg">
+    <Modal
+      opened={opened}
+      onClose={handleClose}
+      title={isEditing ? translate("Edit Item", "تعديل البند") : translate("Add Item", "إضافة بند")}
+      size="lg"
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {itemToUpdate && (
+        {isEditing && itemToUpdate?.material && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
             <p className="truncate text-sm font-medium text-gray-800">
               {selectedMaterial?.title || itemToUpdate.material.title}
@@ -189,7 +231,6 @@ export default function ItemModal({
           excludeCodes={excludeMaterialCodes.filter((code) => code !== materialCode)}
           label={translate("Material", "المادة")}
           placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
-          required
           withBrowseModal
         />
 
@@ -199,10 +240,10 @@ export default function ItemModal({
             onChange={setQuantity}
             label={translate("Quantity", "الكمية")}
             placeholder={translate("Enter quantity", "أدخل الكمية")}
+            required={!!materialCode}
             min={0}
             allowNegative={false}
             decimalScale={6}
-            required
             radius="md"
           />
 
@@ -213,7 +254,7 @@ export default function ItemModal({
               data={unitOptions}
               label={translate("Unit", "الوحدة")}
               placeholder={translate("Select unit", "اختر الوحدة")}
-              required
+              required={!!materialCode}
               disabled={!baseUnit}
               searchable
             />
@@ -224,6 +265,7 @@ export default function ItemModal({
               }
               label={translate("Unit", "الوحدة")}
               placeholder={translate("Base unit", "الوحدة الأساسية")}
+              required={!!materialCode}
               readOnly
               radius="md"
             />
@@ -244,7 +286,7 @@ export default function ItemModal({
             {translation.cancel}
           </Button>
           <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
-            {translate("Save Changes", "حفظ التغييرات")}
+            {isEditing ? translate("Save Changes", "حفظ التغييرات") : translate("Add Item", "إضافة بند")}
           </Button>
         </div>
 

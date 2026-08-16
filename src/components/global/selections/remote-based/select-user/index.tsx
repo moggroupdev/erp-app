@@ -149,6 +149,18 @@ export default function SelectUser({
       rightIcon={<UserRound size={15} className="pointer-events-none text-gray-400" />}
       // Server already filters by keyword (name, code, email, phone); skip client-side label matching.
       filter={({ options }) => options}
+      renderOption={({ option }) => {
+        const user = users.find((item) => item.id === option.value) || (selectedUser?.id === option.value ? selectedUser : null);
+        const name = user?.name ?? option.label;
+        const code = user?.code ?? "";
+
+        return (
+          <div className="flex w-full min-w-0 items-center justify-between gap-3">
+            <span className="min-w-0 truncate">{name}</span>
+            {code ? <span className="shrink-0 text-xs text-gray-400">{code}</span> : null}
+          </div>
+        );
+      }}
       nothingFoundMessage={
         !trimmedSearch
           ? translate("Type to search users", "اكتب للبحث عن المستخدمين")

@@ -31,11 +31,13 @@ export default function BrowseMaterialsModal({
   close,
   onSelect,
   excludeCodes = [],
+  initialKeyword = "",
 }: {
   opened: boolean;
   close: () => void;
   onSelect: (material: MaterialWithUnitConversions) => void;
   excludeCodes?: string[];
+  initialKeyword?: string;
 }) {
   const { locale, translate } = useI18n();
   const privateRequest = usePrivateRequest();
@@ -54,7 +56,7 @@ export default function BrowseMaterialsModal({
   useEffect(() => {
     if (!opened) return;
     setActivePage(1);
-    setImmediateKeyword("");
+    setImmediateKeyword(initialKeyword.trim());
     setMainCategoryFilter(null);
     setSubCategoryFilter(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps

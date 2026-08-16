@@ -3,6 +3,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type Modifier,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -20,7 +38,7 @@ import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/m
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
 import { Button, Checkbox, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
-import { Plus, Trash2 } from "lucide-react";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
@@ -28,8 +46,8 @@ import SelectMaterial from "@/components/global/selections/remote-based/select-m
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
-import DateTimePickerInput from "@/components/ui/datetime-picker-input";
-import { dateTimePickerValueToIso, toDateTimePickerValue } from "@/lib/helpers/datetime-picker";
+import DatePickerInput from "@/components/ui/date-picker-input";
+import { dateTimePickerValueToIso } from "@/lib/helpers/datetime-picker";
 
 const PAGE_TITLE = { en: "Create Legacy Issue Permit", ar: "إنشاء إذن صرف مرحلي" };
 
@@ -44,6 +62,10 @@ type ItemDraftRow = {
   quantity: number | "";
   notes: string;
 };
+
+function restrictToVerticalAxis({ transform }: Parameters<Modifier>[0]) {
+  return { ...transform, x: 0 };
+}
 
 function createRowKey() {
   return `legacy-item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -74,6 +96,145 @@ function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
   return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
 }
 
+function SortableItemRow({
+  row,
+  index,
+  locale,
+  usedMaterialCodes,
+  canRemove,
+  canReorder,
+  onMaterialSelect,
+  onUpdate,
+  onRemove,
+}: {
+  row: ItemDraftRow;
+  index: number;
+  locale: Locale;
+  usedMaterialCodes: string[];
+  canRemove: boolean;
+  canReorder: boolean;
+  onMaterialSelect: (key: string, material: MaterialWithUnitConversions | null) => void;
+  onUpdate: (key: string, patch: Partial<ItemDraftRow>) => void;
+  onRemove: (key: string) => void;
+}) {
+  const { translate } = useI18n();
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: row.key,
+    disabled: !canReorder,
+  });
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : undefined };
+
+  return (
+    <Table.Tr ref={setNodeRef} style={style}>
+      <Table.Td className="w-[2.5%]">
+        <button
+          type="button"
+          disabled={!canReorder}
+          className={`group relative flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors ${
+            canReorder ? "cursor-grab hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing" : "cursor-default"
+          }`}
+          title={canReorder ? translate("Reorder row", "إعادة ترتيب الصف") : undefined}
+          {...(canReorder ? attributes : {})}
+          {...(canReorder ? listeners : {})}
+        >
+          <span
+            className={`text-xs font-medium text-gray-500 ${
+              canReorder ? (isDragging ? "opacity-0" : "group-hover:opacity-0") : ""
+            }`}
+          >
+            {index + 1}
+          </span>
+          {canReorder && (
+            <GripVertical
+              size={16}
+              className={`absolute ${isDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+            />
+          )}
+        </button>
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <SelectMaterial
+          value={row.materialCode}
+          setValue={(next) => {
+            const resolved = typeof next === "function" ? next(row.materialCode) : next;
+            if (!resolved) onMaterialSelect(row.key, null);
+            else onUpdate(row.key, { materialCode: resolved });
+          }}
+          onMaterialSelect={(material) => onMaterialSelect(row.key, material)}
+          excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
+          placeholder={translate("Enter material...", "أدخل المادة...")}
+          variant="unstyled"
+          radius={0}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          withBrowseModal
+        />
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <NumberInput
+          value={row.quantity}
+          onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
+          min={0}
+          allowNegative={false}
+          decimalScale={6}
+          hideControls
+          variant="unstyled"
+          radius={0}
+          placeholder={translate("Enter quantity", "أدخل الكمية")}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+        />
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        {showUnitSelect(row) ? (
+          <DataSelect
+            value={row.unitOfMeasurementSelected}
+            setValue={(next) => {
+              const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
+              onUpdate(row.key, {
+                unitOfMeasurementSelected: (resolved as MaterialUnit | null) ?? row.unitOfMeasurement,
+              });
+            }}
+            data={getRowUnitOptions(row, locale)}
+            variant="unstyled"
+            radius={0}
+            searchable
+            placeholder={translate("Select unit", "اختر الوحدة")}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+          />
+        ) : (
+          <span className="text-sm text-gray-600">
+            {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
+          </span>
+        )}
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <TextInput
+          value={row.notes}
+          onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
+          placeholder={translate("Optional", "اختياري")}
+          variant="unstyled"
+          radius={0}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+        />
+      </Table.Td>
+      <Table.Td className="w-[2.5%]">
+        <Button
+          type="button"
+          variant="subtle"
+          color="red"
+          size="xs"
+          radius="md"
+          p={6}
+          disabled={!canRemove}
+          onClick={() => onRemove(row.key)}
+          title={translate("Remove row", "حذف الصف")}
+        >
+          <Trash2 size={14} />
+        </Button>
+      </Table.Td>
+    </Table.Tr>
+  );
+}
+
 export default function Page() {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
@@ -83,8 +244,8 @@ export default function Page() {
 
   const [issuePermitNumber, setIssuePermitNumber] = useState("");
   const [issueOrderNumber, setIssueOrderNumber] = useState("");
-  const [issueOrderDate, setIssueOrderDate] = useState<string | null>(toDateTimePickerValue(new Date()));
-  const [date, setDate] = useState<string | null>(toDateTimePickerValue(new Date()));
+  const [issueOrderDate, setIssueOrderDate] = useState<string | null>(null);
+  const [date, setDate] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
@@ -111,17 +272,17 @@ export default function Page() {
           date: dateTimePickerValueToIso(date)!,
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
-          contractNumber: contractNumber.trim() || null,
-          workOrderNumber: workOrderNumber.trim() || null,
+          contractNumber: isMaintenance ? null : contractNumber.trim() || null,
+          workOrderNumber: isMaintenance ? workOrderNumber.trim() || null : null,
           workOrderNumberType: isMaintenance
             ? (maintenanceWorkOrderType as LegacyIssuePermitWorkOrderType)
             : LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
           isCancelled,
           notes: notes.trim() || null,
           items: rows.map((row) => ({
-            materialCode: row.materialCode!,
-            unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
-            quantity: Number(row.quantity),
+            materialCode: row.materialCode,
+            unitOfMeasurementSelected: row.unitOfMeasurementSelected,
+            quantity: row.quantity === "" ? null : Number(row.quantity),
             notes: row.notes.trim() || null,
           })),
         },
@@ -138,6 +299,12 @@ export default function Page() {
   const usedMaterialCodes = useMemo(
     () => rows.map((row) => row.materialCode).filter((code): code is string => !!code),
     [rows],
+  );
+  const rowIds = useMemo(() => rows.map((row) => row.key), [rows]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
   function updateRow(key: string, patch: Partial<ItemDraftRow>) {
@@ -187,6 +354,18 @@ export default function Page() {
     setRows((prev) => (prev.length <= 1 ? prev : prev.filter((row) => row.key !== key)));
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setRows((prev) => {
+      const oldIndex = prev.findIndex((row) => row.key === active.id);
+      const newIndex = prev.findIndex((row) => row.key === over.id);
+      if (oldIndex < 0 || newIndex < 0) return prev;
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidationError("");
@@ -211,30 +390,56 @@ export default function Page() {
       return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
 
-    if (isMaintenance && !maintenanceWorkOrderType) {
-      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر الشغل."));
+    if (isMaintenance) {
+      if (!workOrderNumber.trim()) {
+        return setValidationError(translate("Work order number is required.", "رقم أمر الشغل مطلوب."));
+      }
+      if (!maintenanceWorkOrderType) {
+        return setValidationError(translate("Please select a maintenance type.", "يرجى اختيار نوع الصيانة."));
+      }
+    } else if (!contractNumber.trim()) {
+      return setValidationError(translate("Contract number is required.", "رقم مراجعة العقد مطلوب."));
     }
 
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index];
       const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
+      const materialName = row.materialTitle || row.materialCode;
 
-      if (!row.materialCode) {
-        return setValidationError(translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
+      if (row.materialCode) {
+        if (!row.unitOfMeasurementSelected) {
+          return setValidationError(
+            translate(
+              `${rowLabel}: please select the unit for material ${materialName}.`,
+              `${rowLabel}: يرجى اختيار الوحدة للمادة ${materialName}.`,
+            ),
+          );
+        }
+
+        if (row.quantity === "") {
+          return setValidationError(
+            translate(
+              `${rowLabel}: please enter the quantity for material ${materialName}.`,
+              `${rowLabel}: يرجى إدخال الكمية للمادة ${materialName}.`,
+            ),
+          );
+        }
       }
 
-      if (!row.unitOfMeasurementSelected) {
-        return setValidationError(translate(`${rowLabel}: please select a unit.`, `${rowLabel}: يرجى اختيار وحدة قياس.`));
-      }
-
-      if (row.quantity === "") {
-        return setValidationError(translate(`${rowLabel}: quantity is required.`, `${rowLabel}: الكمية مطلوبة.`));
-      }
+      if (row.quantity === "") continue;
 
       const qty = Number(row.quantity);
       if (Number.isNaN(qty) || qty <= 0) {
         return setValidationError(
-          translate(`${rowLabel}: quantity must be greater than zero.`, `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`),
+          materialName
+            ? translate(
+                `${rowLabel}: quantity for material ${materialName} must be greater than zero.`,
+                `${rowLabel}: يجب أن تكون كمية المادة ${materialName} أكبر من صفر.`,
+              )
+            : translate(
+                `${rowLabel}: quantity must be greater than zero.`,
+                `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`,
+              ),
         );
       }
     }
@@ -259,7 +464,7 @@ export default function Page() {
             required
             radius="md"
           />
-          <DateTimePickerInput
+          <DatePickerInput
             value={date}
             onChange={setDate}
             label={translate("Issue Permit Date", "تاريخ إذن الصرف")}
@@ -274,7 +479,7 @@ export default function Page() {
             required
             radius="md"
           />
-          <DateTimePickerInput
+          <DatePickerInput
             value={issueOrderDate}
             onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}
@@ -297,45 +502,55 @@ export default function Page() {
             clearable
             radius="md"
           />
-          <TextInput
-            value={contractNumber}
-            onChange={(e) => setContractNumber(e.target.value)}
-            label={translate("Contract Number", "رقم مراجعة العقد")}
-            placeholder={translate("Optional", "اختياري")}
-            radius="md"
-          />
-          <TextInput
-            value={workOrderNumber}
-            onChange={(e) => setWorkOrderNumber(e.target.value)}
-            label={translate("Work Order Number", "رقم أمر الشغل")}
-            placeholder={translate("Optional", "اختياري")}
-            radius="md"
-          />
-
-          <div className="flex flex-col gap-2">
+          <div className="col-span-2 flex flex-col gap-2">
             <Checkbox
               checked={isMaintenance}
               onChange={(e) => {
                 const checked = e.currentTarget.checked;
                 setIsMaintenance(checked);
-                if (!checked) setMaintenanceWorkOrderType(null);
+                if (checked) {
+                  setContractNumber("");
+                } else {
+                  setWorkOrderNumber("");
+                  setMaintenanceWorkOrderType(null);
+                }
               }}
               label={translate("Maintenance", "صيانة")}
             />
-            {isMaintenance && (
-              <SelectLegacyIssuePermitWorkOrderType
-                value={maintenanceWorkOrderType}
-                setValue={setMaintenanceWorkOrderType}
-                label={translate("Maintenance Type", "نوع الصيانة")}
-                placeholder={translate("Select type...", "اختر النوع...")}
-                excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+          </div>
+          <div className="col-span-2 grid grid-cols-2 gap-2">
+            {!isMaintenance ? (
+              <TextInput
+                value={contractNumber}
+                onChange={(e) => setContractNumber(e.target.value)}
+                label={translate("Contract Number", "رقم مراجعة العقد")}
+                placeholder={translate("Enter contract number", "أدخل رقم مراجعة العقد")}
                 required
                 radius="md"
               />
+            ) : (
+              <>
+                <TextInput
+                  value={workOrderNumber}
+                  onChange={(e) => setWorkOrderNumber(e.target.value)}
+                  label={translate("Work Order Number", "رقم أمر الشغل")}
+                  placeholder={translate("Enter work order number", "أدخل رقم أمر الشغل")}
+                  required
+                  radius="md"
+                />
+                <SelectLegacyIssuePermitWorkOrderType
+                  value={maintenanceWorkOrderType}
+                  setValue={setMaintenanceWorkOrderType}
+                  label={translate("Maintenance Type", "نوع الصيانة")}
+                  placeholder={translate("Select type...", "اختر النوع...")}
+                  excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+                  required
+                  radius="md"
+                />
+              </>
             )}
           </div>
-
-          <div className="md:col-span-2">
+          <div className="col-span-2">
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -349,7 +564,7 @@ export default function Page() {
           <Checkbox
             checked={isCancelled}
             onChange={(e) => setIsCancelled(e.currentTarget.checked)}
-            label={translate("Cancelled", "تعيين كإذن ملغي")}
+            label={translate("Set as cancelled", "تعيين كإذن ملغي")}
             color="red"
           />
         </section>
@@ -358,131 +573,73 @@ export default function Page() {
           <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
 
           <div className="overflow-x-auto rounded-xl">
-            <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
-              <Table.Thead className="bg-gray-50">
-                <Table.Tr className="h-9">
-                  <Table.Th className="w-[38%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Material", "المادة")}
-                  </Table.Th>
-                  <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Quantity", "الكمية")}
-                  </Table.Th>
-                  <Table.Th className="w-[16%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Unit", "الوحدة")}
-                  </Table.Th>
-                  <Table.Th className="w-[26%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Notes", "الملاحظات")}
-                  </Table.Th>
-                  <Table.Th className="w-[6%]" />
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {rows.map((row) => (
-                  <Table.Tr key={row.key}>
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-                      <SelectMaterial
-                        value={row.materialCode}
-                        setValue={(next) => {
-                          const resolved = typeof next === "function" ? next(row.materialCode) : next;
-                          if (!resolved) handleMaterialSelect(row.key, null);
-                          else updateRow(row.key, { materialCode: resolved });
-                        }}
-                        onMaterialSelect={(material) => handleMaterialSelect(row.key, material)}
-                        excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
-                        placeholder={translate("Enter material...", "أدخل المادة...")}
-                        variant="unstyled"
-                        radius={0}
-                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-                        withBrowseModal
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
+                <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+                  <Table.Thead className="bg-gray-50">
+                    <Table.Tr className="h-9">
+                      <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
+                      <Table.Th className="w-[47.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Material", "المادة")}
+                      </Table.Th>
+                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Quantity", "الكمية")}
+                      </Table.Th>
+                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Unit", "الوحدة")}
+                      </Table.Th>
+                      <Table.Th className="w-[27.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Notes", "الملاحظات")}
+                      </Table.Th>
+                      <Table.Th className="w-[2.5%]" />
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {rows.map((row, index) => (
+                      <SortableItemRow
+                        key={row.key}
+                        row={row}
+                        index={index}
+                        locale={locale}
+                        usedMaterialCodes={usedMaterialCodes}
+                        canRemove={rows.length > 1}
+                        canReorder={rows.length > 1}
+                        onMaterialSelect={handleMaterialSelect}
+                        onUpdate={updateRow}
+                        onRemove={removeRow}
                       />
-                    </Table.Td>
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-                      <NumberInput
-                        value={row.quantity}
-                        onChange={(value) => updateRow(row.key, { quantity: value === "" ? "" : Number(value) })}
-                        min={0}
-                        allowNegative={false}
-                        decimalScale={6}
-                        hideControls
-                        variant="unstyled"
-                        radius={0}
-                        placeholder={translate("Enter quantity", "أدخل الكمية")}
-                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-                      />
-                    </Table.Td>
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-                      {showUnitSelect(row) ? (
-                        <DataSelect
-                          value={row.unitOfMeasurementSelected}
-                          setValue={(next) => {
-                            const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
-                            updateRow(row.key, {
-                              unitOfMeasurementSelected: (resolved as MaterialUnit | null) ?? row.unitOfMeasurement,
-                            });
-                          }}
-                          data={getRowUnitOptions(row, locale)}
-                          variant="unstyled"
-                          radius={0}
-                          searchable
-                          placeholder={translate("Select unit", "اختر الوحدة")}
-                          styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
-                        />
-                      ) : (
-                        <span className="text-sm text-gray-600">
-                          {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
-                        </span>
-                      )}
-                    </Table.Td>
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-                      <TextInput
-                        value={row.notes}
-                        onChange={(e) => updateRow(row.key, { notes: e.target.value })}
-                        placeholder={translate("Optional", "اختياري")}
-                        variant="unstyled"
-                        radius={0}
-                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-                      />
-                    </Table.Td>
-                    <Table.Td>
-                      <Button
-                        type="button"
-                        variant="subtle"
-                        color="gray"
-                        size="xs"
-                        radius="md"
-                        p={6}
-                        disabled={rows.length <= 1}
-                        onClick={() => removeRow(row.key)}
-                        title={translate("Remove row", "حذف الصف")}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
-              </Table.Tbody>
-              <Table.Tfoot className="bg-gray-50">
-                <Table.Tr className="h-9">
-                  <Table.Td>
-                    <Button
-                      type="button"
-                      variant="light"
-                      color="teal"
-                      radius="md"
-                      size="xs"
-                      leftSection={<Plus size={14} />}
-                      onClick={addRow}
-                    >
-                      {translate("Add Row", "إضافة صف")}
-                    </Button>
-                  </Table.Td>
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                </Table.Tr>
-              </Table.Tfoot>
-            </Table>
+                    ))}
+                  </Table.Tbody>
+                  <Table.Tfoot className="bg-gray-50">
+                    <Table.Tr className="h-9">
+                      <Table.Td />
+                      <Table.Td>
+                        <Button
+                          type="button"
+                          variant="light"
+                          color="teal"
+                          radius="md"
+                          size="xs"
+                          leftSection={<Plus size={14} />}
+                          onClick={addRow}
+                        >
+                          {translate("Add Row", "إضافة صف")}
+                        </Button>
+                      </Table.Td>
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                    </Table.Tr>
+                  </Table.Tfoot>
+                </Table>
+              </SortableContext>
+            </DndContext>
           </div>
         </section>
 

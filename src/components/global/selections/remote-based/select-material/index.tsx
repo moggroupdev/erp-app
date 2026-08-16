@@ -6,7 +6,7 @@
  * opens a detail-browse modal (search + category filters + results table).
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -46,10 +46,14 @@ export default function SelectMaterial({
 
   const privateRequest = usePrivateRequest();
 
-  const { debouncedValue: debouncedSearch, setPendingValue: setSearch } = useDebouncedState("");
+  const { value: searchKeyword, debouncedValue: debouncedSearch, setPendingValue: setSearch } = useDebouncedState("");
 
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
   const [browseOpened, { open: openBrowse, close: closeBrowse }] = useDisclosure(false);
+  const [browseKeyword, setBrowseKeyword] = useState("");
+  const browseKeywordRef = useRef("");
+  const preserveSelectSearchRef = useRef(false);
+  const selectWrapRef = useRef<HTMLDivElement>(null);
 
   const trimmedSearch = debouncedSearch.trim();
   const listParams = removeEmptyParams({ page: "1", limit: "20", keyword: trimmedSearch });
@@ -114,6 +118,7 @@ export default function SelectMaterial({
 
   function handleChange(next: string | null) {
     setValue(next);
+    setSearch("");
 
     if (!next) {
       setSelectedMaterial(null);
@@ -132,25 +137,57 @@ export default function SelectMaterial({
     // search results; the parent may resolve metadata from the selected code separately.
   }
 
-  function handleBrowseSelect(material: MaterialWithUnitConversions) {
-    setSelectedMaterial(material);
-    setValue(material.code);
-    onMaterialSelect?.(material);
+  function getSelectedLabel() {
+    if (selectedMaterial && selectedMaterial.code === value) {
+      return `${selectedMaterial.title} - ${selectedMaterial.code}`;
+    }
+
+    return data.find((option) => option.value === value)?.label;
+  }
+
+  function captureBrowseKeyword() {
+    const selectedLabel = getSelectedLabel();
+    const inputValue = selectWrapRef.current?.querySelector("input")?.value.trim() ?? "";
+    const typed = searchKeyword.trim();
+    const fromInput = inputValue && inputValue !== selectedLabel ? inputValue : "";
+    const fromState = typed && typed !== selectedLabel ? typed : "";
+
+    browseKeywordRef.current = fromInput || fromState;
+  }
+
+  function handleOpenBrowse() {
+    preserveSelectSearchRef.current = true;
+    setBrowseKeyword(browseKeywordRef.current);
+    openBrowse();
+  }
+
+  function handleCloseBrowse() {
+    preserveSelectSearchRef.current = false;
     closeBrowse();
   }
 
-  // Mantine syncs the search input to the selected option label after change.
-  // Ignore that so we do not fire another materials list request.
+  function handleBrowseSelect(material: MaterialWithUnitConversions) {
+    setSelectedMaterial(material);
+    setValue(material.code);
+    setSearch("");
+    onMaterialSelect?.(material);
+    handleCloseBrowse();
+  }
+
+  // Mantine syncs the search input to the selected option label after change,
+  // and clears it on blur (e.g. when the browse modal takes focus).
   function handleSearchChange(search: string) {
-    const selectedLabel =
-      selectedMaterial && selectedMaterial.code === value
-        ? `${selectedMaterial.title} - ${selectedMaterial.code}`
-        : data.find((option) => option.value === value)?.label;
+    if (value) return;
+
+    const selectedLabel = getSelectedLabel();
 
     if (selectedLabel && search === selectedLabel) return;
+    if (!search && preserveSelectSearchRef.current) return;
 
     setSearch(search);
   }
+
+  const hasSelection = Boolean(value);
 
   const select = (
     <DataSelect
@@ -158,13 +195,31 @@ export default function SelectMaterial({
       value={value}
       setValue={handleChange as React.Dispatch<React.SetStateAction<string | null>>}
       data={data}
-      searchable={searchable}
+      searchable={searchable && !hasSelection}
       clearable={clearable}
+      readOnly={hasSelection || props.readOnly}
+      dropdownOpened={hasSelection ? false : undefined}
+      searchValue={hasSelection ? getSelectedLabel() || "" : searchKeyword}
       onSearchChange={handleSearchChange}
       disabled={props.disabled}
+      classNames={hasSelection ? { input: "!cursor-default" } : props.classNames}
       rightIcon={<PackageSearch size={15} className="pointer-events-none text-gray-400" />}
       // Server already filters by keyword (title, code, legacyCode); skip client-side label matching.
       filter={({ options }) => options}
+      renderOption={({ option }) => {
+        const material =
+          materials.find((item) => item.code === option.value) ||
+          (selectedMaterial?.code === option.value ? selectedMaterial : null);
+        const title = material?.title ?? option.label;
+        const code = material?.code ?? option.value;
+
+        return (
+          <div className="flex w-full min-w-0 items-center justify-between gap-3">
+            <span className="min-w-0 truncate">{title}</span>
+            <span className="shrink-0 text-xs text-gray-400">{code}</span>
+          </div>
+        );
+      }}
       nothingFoundMessage={
         !trimmedSearch
           ? translate("Type to search materials", "اكتب للبحث عن المواد")
@@ -180,9 +235,23 @@ export default function SelectMaterial({
   return (
     <>
       <div className="flex items-end gap-2">
-        <div className="flex-1">{select}</div>
+        <div ref={selectWrapRef} className="flex-1">
+          {select}
+        </div>
         <Tooltip label={translate("Browse materials", "تصفح المواد")} withArrow>
-          <ActionIcon variant="light" color="teal" radius="md" size={36} onClick={openBrowse} disabled={props.disabled}>
+          <ActionIcon
+            variant="light"
+            color="teal"
+            radius="md"
+            size={36}
+            onMouseDown={(event) => {
+              event.preventDefault();
+              preserveSelectSearchRef.current = true;
+              captureBrowseKeyword();
+            }}
+            onClick={handleOpenBrowse}
+            disabled={props.disabled}
+          >
             <Table2 size={15} />
           </ActionIcon>
         </Tooltip>
@@ -190,9 +259,10 @@ export default function SelectMaterial({
 
       <BrowseMaterialsModal
         opened={browseOpened}
-        close={closeBrowse}
+        close={handleCloseBrowse}
         onSelect={handleBrowseSelect}
         excludeCodes={excludeCodes}
+        initialKeyword={browseKeyword}
       />
     </>
   );

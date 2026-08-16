@@ -23,9 +23,10 @@ export type LegacyIssuePermit = {
 export type LegacyIssuePermitItem = {
   id: string;
   issuePermitId: string;
-  materialCode: string;
-  unitOfMeasurementSelected: MaterialUnit;
-  quantity: number;
+  sequenceOrder: number;
+  materialCode: string | null;
+  unitOfMeasurementSelected: MaterialUnit | null;
+  quantity: number | null;
   notes: string | null;
 };
 
@@ -36,7 +37,7 @@ export type LegacyIssuePermitItemDetailed = LegacyIssuePermitItem & {
     materialType: MaterialType;
     unitOfMeasurement: MaterialUnit;
     subCategoryId: string;
-  };
+  } | null;
 };
 
 export type LegacyIssuePermitDetailed = Omit<LegacyIssuePermit, "creatorId" | "createdBy"> & {
@@ -48,9 +49,9 @@ export type LegacyIssuePermitDetailed = Omit<LegacyIssuePermit, "creatorId" | "c
 // ==================== DTOs ====================
 
 export type CreateLegacyIssuePermitItemDto = {
-  materialCode: string;
-  unitOfMeasurementSelected: MaterialUnit;
-  quantity: number;
+  materialCode: string | null;
+  unitOfMeasurementSelected: MaterialUnit | null;
+  quantity: number | null;
   notes: string | null;
 };
 
@@ -72,3 +73,7 @@ export type CreateLegacyIssuePermitDto = {
 export type UpdateLegacyIssuePermitDto = Partial<Omit<CreateLegacyIssuePermitDto, "items">>;
 
 export type UpdateLegacyIssuePermitItemDto = Partial<CreateLegacyIssuePermitItemDto>;
+
+export type ReorderLegacyIssuePermitItemsDto = {
+  itemIds: string[];
+};
