@@ -384,7 +384,7 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     value: "update_legacy_issue_permit",
     label: {
       en: "Update Legacy Issue Permit",
-      ar: "تحديث أذن صرف مرحلي",
+      ar: "تحديث إذن صرف مرحلي",
     },
   },
   read_material_purchase_orders: {

@@ -136,8 +136,8 @@ export default function LegacyIssueItemModal({
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.detail(transactionId) });
       toast.success(
         isEditing
-          ? translate("Legacy issue permit item updated successfully.", "تم تحديث بند أذن الصرف المرحلي بنجاح.")
-          : translate("Legacy issue permit item added successfully.", "تم إضافة بند أذن الصرف المرحلي بنجاح."),
+          ? translate("Legacy issue permit item updated successfully.", "تم تحديث بند إذن الصرف المرحلي بنجاح.")
+          : translate("Legacy issue permit item added successfully.", "تم إضافة بند إذن الصرف المرحلي بنجاح."),
       );
       handleClose();
     },
@@ -172,7 +172,8 @@ export default function LegacyIssueItemModal({
   const isDataChanged = itemToUpdate
     ? materialCode !== itemToUpdate.materialCode ||
       unitOfMeasurementSelected !== itemToUpdate.unitOfMeasurementSelected ||
-      (quantity === "" ? null : Number(quantity)) !== (itemToUpdate.quantity == null ? null : Number(itemToUpdate.quantity)) ||
+      (quantity === "" ? null : Number(quantity)) !==
+        (itemToUpdate.quantity == null ? null : Number(itemToUpdate.quantity)) ||
       (notes.trim() || null) !== itemToUpdate.notes
     : true;
 

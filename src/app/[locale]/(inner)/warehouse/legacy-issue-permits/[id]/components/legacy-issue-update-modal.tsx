@@ -97,7 +97,7 @@ export default function LegacyIssuePermitUpdateModal({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.all });
-      toast.success(translate("Legacy issue permit updated successfully.", "تم تحديث أذن الصرف المرحلي بنجاح."));
+      toast.success(translate("Legacy issue permit updated successfully.", "تم تحديث إذن الصرف المرحلي بنجاح."));
       handleClose();
     },
   });
@@ -148,8 +148,7 @@ export default function LegacyIssuePermitUpdateModal({
   const isDataChanged =
     issuePermitNumber.trim() !== transaction.issuePermitNumber ||
     issueOrderNumber.trim() !== transaction.issueOrderNumber ||
-    dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate)) !==
-      dateTimePickerValueToIso(issueOrderDate) ||
+    dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate)) !== dateTimePickerValueToIso(issueOrderDate) ||
     dateTimePickerValueToIso(toDatePickerValue(transaction.date)) !== dateTimePickerValueToIso(date) ||
     creatorId !== transaction.creator.id ||
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
