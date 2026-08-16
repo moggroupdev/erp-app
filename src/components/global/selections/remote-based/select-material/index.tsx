@@ -197,6 +197,20 @@ export default function SelectMaterial({
       rightIcon={<PackageSearch size={15} className="pointer-events-none text-gray-400" />}
       // Server already filters by keyword (title, code, legacyCode); skip client-side label matching.
       filter={({ options }) => options}
+      renderOption={({ option }) => {
+        const material =
+          materials.find((item) => item.code === option.value) ||
+          (selectedMaterial?.code === option.value ? selectedMaterial : null);
+        const title = material?.title ?? option.label;
+        const code = material?.code ?? option.value;
+
+        return (
+          <div className="flex w-full min-w-0 items-center justify-between gap-3">
+            <span className="min-w-0 truncate">{title}</span>
+            <span className="shrink-0 text-xs text-gray-400">{code}</span>
+          </div>
+        );
+      }}
       nothingFoundMessage={
         !trimmedSearch
           ? translate("Type to search materials", "اكتب للبحث عن المواد")
