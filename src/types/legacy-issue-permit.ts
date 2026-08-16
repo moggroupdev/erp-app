@@ -73,3 +73,7 @@ export type CreateLegacyIssuePermitDto = {
 export type UpdateLegacyIssuePermitDto = Partial<Omit<CreateLegacyIssuePermitDto, "items">>;
 
 export type UpdateLegacyIssuePermitItemDto = Partial<CreateLegacyIssuePermitItemDto>;
+
+export type ReorderLegacyIssuePermitItemsDto = {
+  itemIds: string[];
+};

@@ -6,6 +6,7 @@ import type {
   LegacyIssuePermit,
   LegacyIssuePermitDetailed,
   LegacyIssuePermitItem,
+  ReorderLegacyIssuePermitItemsDto,
   UpdateLegacyIssuePermitDto,
   UpdateLegacyIssuePermitItemDto,
 } from "@/types/legacy-issue-permit";
@@ -70,6 +71,22 @@ const legacyIssuePermitsApi = {
     return await privateRequest<LegacyIssuePermitItem>({
       method: "POST",
       url: `legacy-issue-permits/${id}/items`,
+      data: dto,
+    });
+  },
+
+  async reorderItems({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: ReorderLegacyIssuePermitItemsDto;
+  }) {
+    return await privateRequest<LegacyIssuePermitItem[]>({
+      method: "PATCH",
+      url: `legacy-issue-permits/${id}/items-order`,
       data: dto,
     });
   },
