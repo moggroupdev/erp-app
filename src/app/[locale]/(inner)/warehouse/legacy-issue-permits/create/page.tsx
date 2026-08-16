@@ -20,10 +20,9 @@ import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/m
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
 import { Button, Checkbox, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
-import { Plus, Trash2, TriangleAlert } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
-import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
@@ -96,7 +95,6 @@ export default function Page() {
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
-  const [confirmEmptyItemsOpened, setConfirmEmptyItemsOpened] = useState(false);
 
   useDocumentTitle(
     `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Issue Permits", "أذونات الصرف المرحلية")}`,
@@ -120,14 +118,12 @@ export default function Page() {
             : LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
           isCancelled,
           notes: notes.trim() || null,
-          items: rows
-            .filter((row) => !!row.materialCode)
-            .map((row) => ({
-              materialCode: row.materialCode!,
-              unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
-              quantity: Number(row.quantity),
-              notes: row.notes.trim() || null,
-            })),
+          items: rows.map((row) => ({
+            materialCode: row.materialCode,
+            unitOfMeasurementSelected: row.unitOfMeasurementSelected,
+            quantity: row.quantity === "" ? null : Number(row.quantity),
+            notes: row.notes.trim() || null,
+          })),
         },
       });
     },
@@ -226,37 +222,13 @@ export default function Page() {
       return setValidationError(translate("Contract number is required.", "رقم مراجعة العقد مطلوب."));
     }
 
-    const filledRows = rows.filter(
-      (row) => !!row.materialCode || row.quantity !== "" || !!row.notes.trim() || !!row.unitOfMeasurementSelected,
-    );
-
-    if (filledRows.length === 0) {
-      setConfirmEmptyItemsOpened(true);
-      return;
-    }
-
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index];
-      const hasAnyValue =
-        !!row.materialCode || row.quantity !== "" || !!row.notes.trim() || !!row.unitOfMeasurementSelected;
-      if (!hasAnyValue) continue;
-
-      const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
-
-      if (!row.materialCode) {
-        return setValidationError(translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
-      }
-
-      if (!row.unitOfMeasurementSelected) {
-        return setValidationError(translate(`${rowLabel}: please select a unit.`, `${rowLabel}: يرجى اختيار وحدة قياس.`));
-      }
-
-      if (row.quantity === "") {
-        return setValidationError(translate(`${rowLabel}: quantity is required.`, `${rowLabel}: الكمية مطلوبة.`));
-      }
+      if (row.quantity === "") continue;
 
       const qty = Number(row.quantity);
       if (Number.isNaN(qty) || qty <= 0) {
+        const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
         return setValidationError(
           translate(`${rowLabel}: quantity must be greater than zero.`, `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`),
         );
@@ -520,7 +492,7 @@ export default function Page() {
           </div>
         </section>
 
-        {error && !confirmEmptyItemsOpened && <ErrorAlert error={error} />}
+        {error && <ErrorAlert error={error} />}
 
         <div className="flex justify-end gap-2">
           <Button
@@ -532,53 +504,11 @@ export default function Page() {
           >
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={mutation.isPending && !confirmEmptyItemsOpened} radius="md" color="teal">
+          <Button type="submit" loading={mutation.isPending} radius="md" color="teal">
             {translate("Create", "إنشاء")}
           </Button>
         </div>
       </form>
-
-      <Modal
-        opened={confirmEmptyItemsOpened}
-        onClose={() => setConfirmEmptyItemsOpened(false)}
-        title={translate("Create without items?", "إنشاء بدون بنود؟")}
-      >
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50 p-3 text-amber-900">
-            <TriangleAlert size={18} className="mt-0.5 shrink-0" />
-            <p className="text-sm">
-              {translate(
-                "This issue permit has no items. Do you want to create it anyway?",
-                "هذا الإذن لا يحتوي على بنود. هل تريد إنشاءه على أي حال؟",
-              )}
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="light"
-              color="dark"
-              radius="md"
-              onClick={() => setConfirmEmptyItemsOpened(false)}
-              disabled={mutation.isPending}
-              fullWidth
-            >
-              {translation.cancel}
-            </Button>
-            <Button
-              radius="md"
-              color="teal"
-              loading={mutation.isPending}
-              onClick={() => mutation.mutate()}
-              fullWidth
-            >
-              {translate("Confirm & Create", "تأكيد وإنشاء")}
-            </Button>
-          </div>
-
-          {error && <ErrorAlert error={error} />}
-        </div>
-      </Modal>
     </LayoutBox>
   );
 }

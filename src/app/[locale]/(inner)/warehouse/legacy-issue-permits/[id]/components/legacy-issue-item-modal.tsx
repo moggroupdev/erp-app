@@ -45,8 +45,8 @@ export default function LegacyIssueItemModal({
   const [quantity, setQuantity] = useState<number | string>("");
   const [notes, setNotes] = useState("");
 
-  const baseUnit = selectedMaterial?.unitOfMeasurement || itemToUpdate?.material.unitOfMeasurement || null;
-  const materialType = selectedMaterial?.materialType || itemToUpdate?.material.materialType || null;
+  const baseUnit = selectedMaterial?.unitOfMeasurement || itemToUpdate?.material?.unitOfMeasurement || null;
+  const materialType = selectedMaterial?.materialType || itemToUpdate?.material?.materialType || null;
   const unitConversions = selectedMaterial?.unitConversions ?? [];
   const showUnitSelect = !!materialType && isRawMaterial(materialType) && unitConversions.length > 0;
 
@@ -76,9 +76,14 @@ export default function LegacyIssueItemModal({
 
     setMaterialCode(itemToUpdate.materialCode);
     setUnitOfMeasurementSelected(itemToUpdate.unitOfMeasurementSelected);
-    setQuantity(itemToUpdate.quantity);
+    setQuantity(itemToUpdate.quantity ?? "");
     setNotes(itemToUpdate.notes || "");
     setValidationError("");
+
+    if (!itemToUpdate.materialCode) {
+      setSelectedMaterial(null);
+      return;
+    }
 
     let cancelled = false;
     materialsApi
@@ -106,9 +111,9 @@ export default function LegacyIssueItemModal({
   const mutation = useMutation({
     mutationFn: async () => {
       const dto = {
-        materialCode: materialCode!,
-        unitOfMeasurementSelected: unitOfMeasurementSelected as MaterialUnit,
-        quantity: Number(quantity),
+        materialCode: materialCode || null,
+        unitOfMeasurementSelected: (unitOfMeasurementSelected as MaterialUnit) || null,
+        quantity: quantity === "" ? null : Number(quantity),
         notes: notes.trim() || null,
       };
 
@@ -144,17 +149,11 @@ export default function LegacyIssueItemModal({
     e.preventDefault();
     setValidationError("");
 
-    if (!materialCode) {
-      return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
-    }
-
-    if (!unitOfMeasurementSelected) {
-      return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
-    }
-
-    const normalizedQuantity = Number(quantity);
-    if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
-      return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
+    if (quantity !== "") {
+      const normalizedQuantity = Number(quantity);
+      if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
+        return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
+      }
     }
 
     mutation.mutate();
@@ -173,16 +172,11 @@ export default function LegacyIssueItemModal({
   const isDataChanged = itemToUpdate
     ? materialCode !== itemToUpdate.materialCode ||
       unitOfMeasurementSelected !== itemToUpdate.unitOfMeasurementSelected ||
-      Number(quantity) !== Number(itemToUpdate.quantity) ||
+      (quantity === "" ? null : Number(quantity)) !== (itemToUpdate.quantity == null ? null : Number(itemToUpdate.quantity)) ||
       (notes.trim() || null) !== itemToUpdate.notes
     : true;
 
-  const isReadyToSubmit =
-    !!materialCode &&
-    !!unitOfMeasurementSelected &&
-    quantity !== "" &&
-    Number(quantity) > 0 &&
-    isDataChanged;
+  const isReadyToSubmit = isDataChanged;
 
   return (
     <Modal
@@ -192,7 +186,7 @@ export default function LegacyIssueItemModal({
       size="lg"
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {isEditing && itemToUpdate && (
+        {isEditing && itemToUpdate?.material && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
             <p className="truncate text-sm font-medium text-gray-800">
               {selectedMaterial?.title || itemToUpdate.material.title}
@@ -213,7 +207,6 @@ export default function LegacyIssueItemModal({
           excludeCodes={excludeMaterialCodes.filter((code) => code !== materialCode)}
           label={translate("Material", "المادة")}
           placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
-          required
           withBrowseModal
         />
 
@@ -226,7 +219,6 @@ export default function LegacyIssueItemModal({
             min={0}
             allowNegative={false}
             decimalScale={6}
-            required
             radius="md"
           />
 
@@ -237,7 +229,6 @@ export default function LegacyIssueItemModal({
               data={unitOptions}
               label={translate("Unit", "الوحدة")}
               placeholder={translate("Select unit", "اختر الوحدة")}
-              required
               disabled={!baseUnit}
               searchable
             />

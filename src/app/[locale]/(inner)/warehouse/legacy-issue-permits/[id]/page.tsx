@@ -25,6 +25,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
+import { EmptyValue } from "@/components/ui/entity-details";
 import CopyButton from "@/components/ui/copy-button";
 import TransactionDetails from "./components/transaction-details";
 import LegacyIssuePermitUpdateModal from "./components/legacy-issue-update-modal";
@@ -43,10 +44,11 @@ export default function Page() {
   const [itemModalOpened, { open: openItemModal, close: closeItemModal }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<LegacyIssuePermitItemDetailed | null>(null);
 
-  function getMainCategoryTitle(subCategoryId: string) {
+  function getMainCategoryTitle(subCategoryId: string | undefined) {
+    if (!subCategoryId) return null;
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
     const main = sub ? helpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
-    return main?.title || "-";
+    return main?.title || null;
   }
 
   const {
@@ -139,33 +141,47 @@ export default function Page() {
                       {transaction.items.map((item) => (
                         <Table.Tr key={item.id} className="text-gray-600">
                           <Table.Td className="font-semibold text-gray-800">
-                            <Link
-                              href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                              className="hover:underline"
-                            >
-                              {item.material.title}
-                            </Link>
+                            {item.material ? (
+                              <Link
+                                href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                className="hover:underline"
+                              >
+                                {item.material.title}
+                              </Link>
+                            ) : (
+                              <EmptyValue />
+                            )}
                           </Table.Td>
                           <Table.Td>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono">{item.material.code}</span>
-                              <CopyButton text={item.material.code} />
-                            </div>
+                            {item.materialCode ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono">{item.materialCode}</span>
+                                <CopyButton text={item.materialCode} />
+                              </div>
+                            ) : (
+                              <EmptyValue />
+                            )}
                           </Table.Td>
-                          <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
+                          <Table.Td>{getMainCategoryTitle(item.material?.subCategoryId) || <EmptyValue />}</Table.Td>
                           <Table.Td>
-                            <div className="flex items-center gap-1.5">
-                              {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
-                              {item.unitOfMeasurementSelected !== item.material.unitOfMeasurement && (
-                                <Badge size="xs" variant="light" color="gray" radius="md">
-                                  {translate("Selected", "مختارة")}
-                                </Badge>
-                              )}
-                            </div>
+                            {item.unitOfMeasurementSelected ? (
+                              <div className="flex items-center gap-1.5">
+                                {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
+                                {item.material && item.unitOfMeasurementSelected !== item.material.unitOfMeasurement && (
+                                  <Badge size="xs" variant="light" color="gray" radius="md">
+                                    {translate("Selected", "مختارة")}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : (
+                              <EmptyValue />
+                            )}
                           </Table.Td>
-                          <Table.Td>{formatQuantity(item.quantity)}</Table.Td>
+                          <Table.Td>
+                            {item.quantity == null ? <EmptyValue /> : formatQuantity(item.quantity)}
+                          </Table.Td>
                           <Table.Td className="max-w-xs truncate">
-                            {item.notes || <span className="text-gray-400">-</span>}
+                            {item.notes || <EmptyValue />}
                           </Table.Td>
                           <Table.Td>
                             <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
@@ -197,7 +213,9 @@ export default function Page() {
               transactionId={transaction.id}
               itemToUpdate={itemToUpdate}
               setItemToUpdate={setItemToUpdate}
-              excludeMaterialCodes={transaction.items.map((item) => item.materialCode)}
+              excludeMaterialCodes={transaction.items
+                .map((item) => item.materialCode)
+                .filter((code): code is string => !!code)}
             />
           </>
         )
