@@ -27,8 +27,8 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import TransactionDetails from "./components/transaction-details";
-import HeaderModal from "./components/legacy-issue-update-modal";
-import ItemModal from "./components/item-modal";
+import LegacyIssuePermitUpdateModal from "./components/legacy-issue-update-modal";
+import LegacyIssueItemModal from "./components/legacy-issue-item-modal";
 
 const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل إذن صرف مرحلي" };
 
@@ -177,8 +177,8 @@ export default function Page() {
               )}
             </section>
 
-            <HeaderModal opened={headerModalOpened} close={closeHeaderModal} transaction={transaction} />
-            <ItemModal
+            <LegacyIssuePermitUpdateModal opened={headerModalOpened} close={closeHeaderModal} transaction={transaction} />
+            <LegacyIssueItemModal
               opened={itemModalOpened}
               close={closeItemModal}
               transactionId={transaction.id}

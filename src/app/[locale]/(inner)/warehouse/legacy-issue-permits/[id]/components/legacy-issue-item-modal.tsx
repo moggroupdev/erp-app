@@ -19,7 +19,7 @@ import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
-export default function ItemModal({
+export default function LegacyIssueItemModal({
   opened,
   close,
   transactionId,

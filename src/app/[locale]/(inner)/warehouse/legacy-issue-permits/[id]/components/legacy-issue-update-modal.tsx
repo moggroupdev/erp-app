@@ -23,7 +23,7 @@ import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import { dateTimePickerValueToIso, toDateTimePickerValue } from "@/lib/helpers/datetime-picker";
 
-export default function HeaderModal({
+export default function LegacyIssuePermitUpdateModal({
   opened,
   close,
   transaction,
@@ -141,7 +141,8 @@ export default function HeaderModal({
   const isDataChanged =
     issuePermitNumber.trim() !== transaction.issuePermitNumber ||
     issueOrderNumber.trim() !== transaction.issueOrderNumber ||
-    dateTimePickerValueToIso(toDateTimePickerValue(transaction.issueOrderDate)) !== dateTimePickerValueToIso(issueOrderDate) ||
+    dateTimePickerValueToIso(toDateTimePickerValue(transaction.issueOrderDate)) !==
+      dateTimePickerValueToIso(issueOrderDate) ||
     dateTimePickerValueToIso(toDateTimePickerValue(transaction.date)) !== dateTimePickerValueToIso(date) ||
     creatorId !== transaction.creator.id ||
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
@@ -161,12 +162,7 @@ export default function HeaderModal({
     isDataChanged;
 
   return (
-    <Modal
-      opened={opened}
-      onClose={handleClose}
-      title={translate("Edit Issue Permit", "تعديل إذن الصرف")}
-      size="xl"
-    >
+    <Modal opened={opened} onClose={handleClose} title={translate("Edit Issue Permit", "تعديل إذن الصرف")} size="xl">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <TextInput
