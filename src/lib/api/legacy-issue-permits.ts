@@ -2,6 +2,7 @@ import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type {
   CreateLegacyIssuePermitDto,
+  CreateLegacyIssuePermitItemDto,
   LegacyIssuePermit,
   LegacyIssuePermitDetailed,
   LegacyIssuePermitItem,
@@ -53,6 +54,22 @@ const legacyIssuePermitsApi = {
     return await privateRequest<LegacyIssuePermit>({
       method: "PATCH",
       url: `legacy-issue-permits/${id}`,
+      data: dto,
+    });
+  },
+
+  async addItem({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: CreateLegacyIssuePermitItemDto;
+  }) {
+    return await privateRequest<LegacyIssuePermitItem>({
+      method: "POST",
+      url: `legacy-issue-permits/${id}/items`,
       data: dto,
     });
   },

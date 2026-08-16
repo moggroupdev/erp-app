@@ -66,7 +66,13 @@ export default function LegacyIssueItemModal({
   }
 
   useEffect(() => {
-    if (!opened || !itemToUpdate) return;
+    if (!opened) return;
+
+    if (!itemToUpdate) {
+      reset();
+      setValidationError("");
+      return;
+    }
 
     setMaterialCode(itemToUpdate.materialCode);
     setUnitOfMeasurementSelected(itemToUpdate.unitOfMeasurementSelected);
@@ -95,25 +101,39 @@ export default function LegacyIssueItemModal({
     setUnitOfMeasurementSelected((current) => current || baseUnit);
   }, [baseUnit]);
 
+  const isEditing = !!itemToUpdate;
+
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!itemToUpdate) return;
+      const dto = {
+        materialCode: materialCode!,
+        unitOfMeasurementSelected: unitOfMeasurementSelected as MaterialUnit,
+        quantity: Number(quantity),
+        notes: notes.trim() || null,
+      };
 
-      return await legacyIssuePermitsApi.updateItem({
+      if (itemToUpdate) {
+        return await legacyIssuePermitsApi.updateItem({
+          privateRequest,
+          id: transactionId,
+          itemId: itemToUpdate.id,
+          dto,
+        });
+      }
+
+      return await legacyIssuePermitsApi.addItem({
         privateRequest,
         id: transactionId,
-        itemId: itemToUpdate.id,
-        dto: {
-          materialCode: materialCode!,
-          unitOfMeasurementSelected: unitOfMeasurementSelected as MaterialUnit,
-          quantity: Number(quantity),
-          notes: notes.trim() || null,
-        },
+        dto,
       });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.detail(transactionId) });
-      toast.success(translate("Legacy issue permit item updated successfully.", "تم تحديث بند أذن الصرف المرحلي بنجاح."));
+      toast.success(
+        isEditing
+          ? translate("Legacy issue permit item updated successfully.", "تم تحديث بند أذن الصرف المرحلي بنجاح.")
+          : translate("Legacy issue permit item added successfully.", "تم إضافة بند أذن الصرف المرحلي بنجاح."),
+      );
       handleClose();
     },
   });
@@ -158,7 +178,6 @@ export default function LegacyIssueItemModal({
     : true;
 
   const isReadyToSubmit =
-    !!itemToUpdate &&
     !!materialCode &&
     !!unitOfMeasurementSelected &&
     quantity !== "" &&
@@ -166,9 +185,14 @@ export default function LegacyIssueItemModal({
     isDataChanged;
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={translate("Edit Item", "تعديل البند ")} size="lg">
+    <Modal
+      opened={opened}
+      onClose={handleClose}
+      title={isEditing ? translate("Edit Item", "تعديل البند") : translate("Add Item", "إضافة بند")}
+      size="lg"
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {itemToUpdate && (
+        {isEditing && itemToUpdate && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
             <p className="truncate text-sm font-medium text-gray-800">
               {selectedMaterial?.title || itemToUpdate.material.title}
@@ -244,7 +268,7 @@ export default function LegacyIssueItemModal({
             {translation.cancel}
           </Button>
           <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
-            {translate("Save Changes", "حفظ التغييرات")}
+            {isEditing ? translate("Save Changes", "حفظ التغييرات") : translate("Add Item", "إضافة بند")}
           </Button>
         </div>
 

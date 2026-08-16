@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Badge, Button, Table } from "@mantine/core";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -66,6 +66,11 @@ export default function Page() {
     `${transaction?.issuePermitNumber || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Issue Permits", "أذونات الصرف المرحلية")}`,
   );
 
+  function handleAddItem() {
+    setItemToUpdate(null);
+    openItemModal();
+  }
+
   function handleEditItem(item: LegacyIssuePermitItemDetailed) {
     setItemToUpdate(item);
     openItemModal();
@@ -104,7 +109,15 @@ export default function Page() {
             <TransactionDetails transaction={transaction} />
 
             <section className="mt-4 flex flex-col gap-4">
-              <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+              <div className="flex items-center justify-between gap-3">
+                <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+
+                <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
+                  <Button onClick={handleAddItem} variant="light" radius="md" leftSection={<Plus size={15} />}>
+                    {translate("Add Item", "إضافة بند")}
+                  </Button>
+                </PermissionGuard>
+              </div>
 
               {transaction.items.length === 0 ? (
                 <EmptySection message={translate("No items in this transaction", "لا توجد بنود في هذه الحركة")} />
