@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "scripts": {
     "build": "next build",
-    "start": "next start -p 1725",
-    "dev": "next dev -p 1725",
+    "start": "node scripts/run.mjs start",
+    "dev": "node scripts/run.mjs dev",
     "lint": "eslint"
   },
   "dependencies": {
