@@ -118,6 +118,7 @@ export default function SelectMaterial({
 
   function handleChange(next: string | null) {
     setValue(next);
+    setSearch("");
 
     if (!next) {
       setSelectedMaterial(null);
@@ -168,6 +169,7 @@ export default function SelectMaterial({
   function handleBrowseSelect(material: MaterialWithUnitConversions) {
     setSelectedMaterial(material);
     setValue(material.code);
+    setSearch("");
     onMaterialSelect?.(material);
     handleCloseBrowse();
   }
@@ -175,6 +177,8 @@ export default function SelectMaterial({
   // Mantine syncs the search input to the selected option label after change,
   // and clears it on blur (e.g. when the browse modal takes focus).
   function handleSearchChange(search: string) {
+    if (value) return;
+
     const selectedLabel = getSelectedLabel();
 
     if (selectedLabel && search === selectedLabel) return;
@@ -183,15 +187,19 @@ export default function SelectMaterial({
     setSearch(search);
   }
 
+  const hasSelection = Boolean(value);
+
   const select = (
     <DataSelect
       {...props}
       value={value}
       setValue={handleChange as React.Dispatch<React.SetStateAction<string | null>>}
       data={data}
-      searchable={searchable}
+      searchable={searchable && !hasSelection}
       clearable={clearable}
-      searchValue={searchKeyword || getSelectedLabel() || ""}
+      readOnly={hasSelection || props.readOnly}
+      dropdownOpened={hasSelection ? false : undefined}
+      searchValue={hasSelection ? getSelectedLabel() || "" : searchKeyword}
       onSearchChange={handleSearchChange}
       disabled={props.disabled}
       rightIcon={<PackageSearch size={15} className="pointer-events-none text-gray-400" />}
