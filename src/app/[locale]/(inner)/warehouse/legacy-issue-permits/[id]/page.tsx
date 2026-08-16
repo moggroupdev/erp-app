@@ -30,7 +30,7 @@ import TransactionDetails from "./components/transaction-details";
 import HeaderModal from "./components/legacy-issue-update-modal";
 import ItemModal from "./components/item-modal";
 
-const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل أذن صرف مرحلي" };
+const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل إذن صرف مرحلي" };
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -82,7 +82,7 @@ export default function Page() {
             {transaction && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
                 <Button onClick={openHeaderModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-                  {translate("Edit Issue Permit", "تعديل إذن الصرف")}
+                  {translate("Edit", "تعديل")}
                 </Button>
               </PermissionGuard>
             )}

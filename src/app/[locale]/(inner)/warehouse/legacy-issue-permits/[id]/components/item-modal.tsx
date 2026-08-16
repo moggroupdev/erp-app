@@ -166,7 +166,7 @@ export default function ItemModal({
     isDataChanged;
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={translate("Edit Item", "تعديل بند أذن الصرف")} size="lg">
+    <Modal opened={opened} onClose={handleClose} title={translate("Edit Item", "تعديل البند ")} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         {itemToUpdate && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
