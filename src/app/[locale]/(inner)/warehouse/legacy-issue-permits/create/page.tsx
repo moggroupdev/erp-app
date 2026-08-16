@@ -28,7 +28,7 @@ import SelectMaterial from "@/components/global/selections/remote-based/select-m
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
-import DateTimePickerInput from "@/components/ui/datetime-picker-input";
+import DatePickerInput from "@/components/ui/date-picker-input";
 import { dateTimePickerValueToIso } from "@/lib/helpers/datetime-picker";
 
 const PAGE_TITLE = { en: "Create Legacy Issue Permit", ar: "إنشاء إذن صرف مرحلي" };
@@ -266,7 +266,7 @@ export default function Page() {
             required
             radius="md"
           />
-          <DateTimePickerInput
+          <DatePickerInput
             value={date}
             onChange={setDate}
             label={translate("Issue Permit Date", "تاريخ إذن الصرف")}
@@ -281,7 +281,7 @@ export default function Page() {
             required
             radius="md"
           />
-          <DateTimePickerInput
+          <DatePickerInput
             value={issueOrderDate}
             onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}

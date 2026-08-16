@@ -14,7 +14,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type LegacyIssuePermit } from "@/types/legacy-issue-permit";
 import { Badge, Button, Table, TextInput } from "@mantine/core";
@@ -188,11 +188,11 @@ export default function Page() {
                           )}
                         </div>
                       </Table.Td>
-                      <Table.Td>{formatDateAndTime(transaction.date, locale)}</Table.Td>
+                      <Table.Td>{formatDate(transaction.date, locale)}</Table.Td>
                       <Table.Td>
                         <span className="font-mono">{transaction.issueOrderNumber}</span>
                       </Table.Td>
-                      <Table.Td>{formatDateAndTime(transaction.issueOrderDate, locale)}</Table.Td>
+                      <Table.Td>{formatDate(transaction.issueOrderDate, locale)}</Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.createdAt, locale)}</Table.Td>
                       <Table.Td className="max-w-xs truncate">
                         {transaction.notes || <span className="text-gray-400">-</span>}

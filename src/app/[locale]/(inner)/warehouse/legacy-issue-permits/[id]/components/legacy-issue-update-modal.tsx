@@ -20,8 +20,8 @@ import Modal from "@/components/ui/modal";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
-import DateTimePickerInput from "@/components/ui/datetime-picker-input";
-import { dateTimePickerValueToIso, toDateTimePickerValue } from "@/lib/helpers/datetime-picker";
+import DatePickerInput from "@/components/ui/date-picker-input";
+import { dateTimePickerValueToIso, toDatePickerValue } from "@/lib/helpers/datetime-picker";
 
 export default function LegacyIssuePermitUpdateModal({
   opened,
@@ -54,8 +54,8 @@ export default function LegacyIssuePermitUpdateModal({
     if (!opened) return;
     setIssuePermitNumber(transaction.issuePermitNumber);
     setIssueOrderNumber(transaction.issueOrderNumber);
-    setIssueOrderDate(toDateTimePickerValue(transaction.issueOrderDate));
-    setDate(toDateTimePickerValue(transaction.date));
+    setIssueOrderDate(toDatePickerValue(transaction.issueOrderDate));
+    setDate(toDatePickerValue(transaction.date));
     setCreatorId(transaction.creator.id);
     setProductionSubDepartment(transaction.productionSubDepartment);
     setContractNumber(transaction.contractNumber || "");
@@ -148,9 +148,9 @@ export default function LegacyIssuePermitUpdateModal({
   const isDataChanged =
     issuePermitNumber.trim() !== transaction.issuePermitNumber ||
     issueOrderNumber.trim() !== transaction.issueOrderNumber ||
-    dateTimePickerValueToIso(toDateTimePickerValue(transaction.issueOrderDate)) !==
+    dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate)) !==
       dateTimePickerValueToIso(issueOrderDate) ||
-    dateTimePickerValueToIso(toDateTimePickerValue(transaction.date)) !== dateTimePickerValueToIso(date) ||
+    dateTimePickerValueToIso(toDatePickerValue(transaction.date)) !== dateTimePickerValueToIso(date) ||
     creatorId !== transaction.creator.id ||
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
     (contractNumber.trim() || null) !== transaction.contractNumber ||
@@ -180,7 +180,7 @@ export default function LegacyIssuePermitUpdateModal({
             required
             radius="md"
           />
-          <DateTimePickerInput
+          <DatePickerInput
             value={date}
             onChange={setDate}
             label={translate("Issue Permit Date", "تاريخ إذن الصرف")}
@@ -195,7 +195,7 @@ export default function LegacyIssuePermitUpdateModal({
             required
             radius="md"
           />
-          <DateTimePickerInput
+          <DatePickerInput
             value={issueOrderDate}
             onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}

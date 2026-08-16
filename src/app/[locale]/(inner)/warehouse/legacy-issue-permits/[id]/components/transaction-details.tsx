@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import {
   getLegacyIssuePermitWorkOrderTypeLabel,
   LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
@@ -22,7 +22,7 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
     },
     {
       key: translate("Issue Permit Date", "تاريخ إذن الصرف"),
-      value: formatDateAndTime(transaction.date, locale),
+      value: formatDate(transaction.date, locale),
     },
     {
       key: translate("Issue Order Number", "رقم طلب الصرف"),
@@ -32,7 +32,7 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
     },
     {
       key: translate("Issue Order Date", "تاريخ طلب الصرف"),
-      value: formatDateAndTime(transaction.issueOrderDate, locale),
+      value: formatDate(transaction.issueOrderDate, locale),
     },
     {
       key: translate("Creator", "المحرر"),
@@ -46,24 +46,33 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
         <EmptyValue />
       ),
     },
-    {
-      key: translate("Contract Number", "رقم مراجعة العقد"),
-      value: transaction.contractNumber ? <span className="font-mono">{transaction.contractNumber}</span> : <EmptyValue />,
-      copyText: transaction.contractNumber || undefined,
-    },
-    {
-      key: translate("Work Order Number", "رقم أمر الشغل"),
-      value: transaction.workOrderNumber ? <span className="font-mono">{transaction.workOrderNumber}</span> : <EmptyValue />,
-      copyText: transaction.workOrderNumber || undefined,
-    },
-    ...(transaction.workOrderNumberType !== LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
+    ...(transaction.workOrderNumberType === LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
       ? [
           {
-            key: translate("Work Order Type", "نوع أمر الشغل"),
-            value: getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
+            key: translate("Contract Number", "رقم مراجعة العقد"),
+            value: transaction.contractNumber ? (
+              <span className="font-mono">{transaction.contractNumber}</span>
+            ) : (
+              <EmptyValue />
+            ),
+            copyText: transaction.contractNumber || undefined,
           },
         ]
-      : []),
+      : [
+          {
+            key: translate("Work Order Number", "رقم أمر الشغل"),
+            value: transaction.workOrderNumber ? (
+              <span className="font-mono">{transaction.workOrderNumber}</span>
+            ) : (
+              <EmptyValue />
+            ),
+            copyText: transaction.workOrderNumber || undefined,
+          },
+          {
+            key: translate("Maintenance Type", "نوع الصيانة"),
+            value: getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
+          },
+        ]),
     ...(transaction.isCancelled
       ? [
           {

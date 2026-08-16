@@ -5,6 +5,11 @@ export function toDateTimePickerValue(date: Date | string) {
   return parsed.isValid() ? parsed.format("YYYY-MM-DD HH:mm:ss") : null;
 }
 
+export function toDatePickerValue(date: Date | string) {
+  const parsed = dayjs(date);
+  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : null;
+}
+
 export function dateTimePickerValueToIso(value: string | null) {
   if (!value) return null;
   const parsed = dayjs(value);
