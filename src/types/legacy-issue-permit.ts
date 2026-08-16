@@ -23,6 +23,7 @@ export type LegacyIssuePermit = {
 export type LegacyIssuePermitItem = {
   id: string;
   issuePermitId: string;
+  sequenceOrder: number;
   materialCode: string | null;
   unitOfMeasurementSelected: MaterialUnit | null;
   quantity: number | null;
