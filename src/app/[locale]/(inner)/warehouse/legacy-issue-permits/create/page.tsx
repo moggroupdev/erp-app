@@ -29,7 +29,7 @@ import SelectUser from "@/components/global/selections/remote-based/select-user"
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
-import { dateTimePickerValueToIso, toDateTimePickerValue } from "@/lib/helpers/datetime-picker";
+import { dateTimePickerValueToIso } from "@/lib/helpers/datetime-picker";
 
 const PAGE_TITLE = { en: "Create Legacy Issue Permit", ar: "إنشاء إذن صرف مرحلي" };
 
@@ -83,8 +83,8 @@ export default function Page() {
 
   const [issuePermitNumber, setIssuePermitNumber] = useState("");
   const [issueOrderNumber, setIssueOrderNumber] = useState("");
-  const [issueOrderDate, setIssueOrderDate] = useState<string | null>(toDateTimePickerValue(new Date()));
-  const [date, setDate] = useState<string | null>(toDateTimePickerValue(new Date()));
+  const [issueOrderDate, setIssueOrderDate] = useState<string | null>(null);
+  const [date, setDate] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
@@ -111,8 +111,8 @@ export default function Page() {
           date: dateTimePickerValueToIso(date)!,
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
-          contractNumber: contractNumber.trim() || null,
-          workOrderNumber: workOrderNumber.trim() || null,
+          contractNumber: isMaintenance ? null : contractNumber.trim() || null,
+          workOrderNumber: isMaintenance ? workOrderNumber.trim() || null : null,
           workOrderNumberType: isMaintenance
             ? (maintenanceWorkOrderType as LegacyIssuePermitWorkOrderType)
             : LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT,
@@ -211,8 +211,15 @@ export default function Page() {
       return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
 
-    if (isMaintenance && !maintenanceWorkOrderType) {
-      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر الشغل."));
+    if (isMaintenance) {
+      if (!workOrderNumber.trim()) {
+        return setValidationError(translate("Work order number is required.", "رقم أمر الشغل مطلوب."));
+      }
+      if (!maintenanceWorkOrderType) {
+        return setValidationError(translate("Please select a maintenance type.", "يرجى اختيار نوع الصيانة."));
+      }
+    } else if (!contractNumber.trim()) {
+      return setValidationError(translate("Contract number is required.", "رقم مراجعة العقد مطلوب."));
     }
 
     for (let index = 0; index < rows.length; index++) {
@@ -297,45 +304,55 @@ export default function Page() {
             clearable
             radius="md"
           />
-          <TextInput
-            value={contractNumber}
-            onChange={(e) => setContractNumber(e.target.value)}
-            label={translate("Contract Number", "رقم مراجعة العقد")}
-            placeholder={translate("Optional", "اختياري")}
-            radius="md"
-          />
-          <TextInput
-            value={workOrderNumber}
-            onChange={(e) => setWorkOrderNumber(e.target.value)}
-            label={translate("Work Order Number", "رقم أمر الشغل")}
-            placeholder={translate("Optional", "اختياري")}
-            radius="md"
-          />
-
-          <div className="flex flex-col gap-2">
+          <div className="col-span-2 flex flex-col gap-2">
             <Checkbox
               checked={isMaintenance}
               onChange={(e) => {
                 const checked = e.currentTarget.checked;
                 setIsMaintenance(checked);
-                if (!checked) setMaintenanceWorkOrderType(null);
+                if (checked) {
+                  setContractNumber("");
+                } else {
+                  setWorkOrderNumber("");
+                  setMaintenanceWorkOrderType(null);
+                }
               }}
               label={translate("Maintenance", "صيانة")}
             />
-            {isMaintenance && (
-              <SelectLegacyIssuePermitWorkOrderType
-                value={maintenanceWorkOrderType}
-                setValue={setMaintenanceWorkOrderType}
-                label={translate("Maintenance Type", "نوع الصيانة")}
-                placeholder={translate("Select type...", "اختر النوع...")}
-                excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+          </div>
+          <div className="col-span-2 grid grid-cols-2 gap-2">
+            {!isMaintenance ? (
+              <TextInput
+                value={contractNumber}
+                onChange={(e) => setContractNumber(e.target.value)}
+                label={translate("Contract Number", "رقم مراجعة العقد")}
+                placeholder={translate("Enter contract number", "أدخل رقم مراجعة العقد")}
                 required
                 radius="md"
               />
+            ) : (
+              <>
+                <TextInput
+                  value={workOrderNumber}
+                  onChange={(e) => setWorkOrderNumber(e.target.value)}
+                  label={translate("Work Order Number", "رقم أمر الشغل")}
+                  placeholder={translate("Enter work order number", "أدخل رقم أمر الشغل")}
+                  required
+                  radius="md"
+                />
+                <SelectLegacyIssuePermitWorkOrderType
+                  value={maintenanceWorkOrderType}
+                  setValue={setMaintenanceWorkOrderType}
+                  label={translate("Maintenance Type", "نوع الصيانة")}
+                  placeholder={translate("Select type...", "اختر النوع...")}
+                  excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+                  required
+                  radius="md"
+                />
+              </>
             )}
           </div>
-
-          <div className="md:col-span-2">
+          <div className="col-span-2">
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -349,7 +366,7 @@ export default function Page() {
           <Checkbox
             checked={isCancelled}
             onChange={(e) => setIsCancelled(e.currentTarget.checked)}
-            label={translate("Cancelled", "تعيين كإذن ملغي")}
+            label={translate("Set as cancelled", "تعيين كإذن ملغي")}
             color="red"
           />
         </section>

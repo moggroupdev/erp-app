@@ -87,8 +87,8 @@ export default function LegacyIssuePermitUpdateModal({
           date: dateTimePickerValueToIso(date)!,
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
-          contractNumber: contractNumber.trim() || null,
-          workOrderNumber: workOrderNumber.trim() || null,
+          contractNumber: isMaintenance ? null : contractNumber.trim() || null,
+          workOrderNumber: isMaintenance ? workOrderNumber.trim() || null : null,
           workOrderNumberType: resolvedWorkOrderNumberType,
           isCancelled,
           notes: notes.trim() || null,
@@ -123,8 +123,15 @@ export default function LegacyIssuePermitUpdateModal({
     if (!creatorId) {
       return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
-    if (isMaintenance && !maintenanceWorkOrderType) {
-      return setValidationError(translate("Please select a work order type.", "يرجى اختيار نوع أمر الشغل."));
+    if (isMaintenance) {
+      if (!workOrderNumber.trim()) {
+        return setValidationError(translate("Work order number is required.", "رقم أمر الشغل مطلوب."));
+      }
+      if (!maintenanceWorkOrderType) {
+        return setValidationError(translate("Please select a maintenance type.", "يرجى اختيار نوع الصيانة."));
+      }
+    } else if (!contractNumber.trim()) {
+      return setValidationError(translate("Contract number is required.", "رقم مراجعة العقد مطلوب."));
     }
 
     mutation.mutate();
@@ -158,13 +165,13 @@ export default function LegacyIssuePermitUpdateModal({
     !!dateTimePickerValueToIso(issueOrderDate) &&
     !!dateTimePickerValueToIso(date) &&
     !!creatorId &&
-    (!isMaintenance || !!maintenanceWorkOrderType) &&
+    (isMaintenance ? !!workOrderNumber.trim() && !!maintenanceWorkOrderType : !!contractNumber.trim()) &&
     isDataChanged;
 
   return (
     <Modal opened={opened} onClose={handleClose} title={translate("Edit Issue Permit", "تعديل إذن الصرف")} size="xl">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <TextInput
             value={issuePermitNumber}
             onChange={(e) => setIssuePermitNumber(e.target.value)}
@@ -211,61 +218,72 @@ export default function LegacyIssuePermitUpdateModal({
             clearable
             radius="md"
           />
-          <TextInput
-            value={contractNumber}
-            onChange={(e) => setContractNumber(e.target.value)}
-            label={translate("Contract Number", "رقم مراجعة العقد")}
-            placeholder={translate("Enter contract number", "أدخل رقم مراجعة العقد")}
-            radius="md"
-          />
-          <TextInput
-            value={workOrderNumber}
-            onChange={(e) => setWorkOrderNumber(e.target.value)}
-            label={translate("Work Order Number", "رقم أمر الشغل")}
-            placeholder={translate("Enter work order number", "أدخل رقم أمر الشغل")}
-            radius="md"
-          />
-
-          <div className="flex flex-col gap-2">
+          <div className="col-span-2 flex flex-col gap-2">
             <Checkbox
               checked={isMaintenance}
               onChange={(e) => {
                 const checked = e.currentTarget.checked;
                 setIsMaintenance(checked);
-                if (!checked) setMaintenanceWorkOrderType(null);
+                if (checked) {
+                  setContractNumber("");
+                } else {
+                  setWorkOrderNumber("");
+                  setMaintenanceWorkOrderType(null);
+                }
               }}
               label={translate("Maintenance", "صيانة")}
             />
-            {isMaintenance && (
-              <SelectLegacyIssuePermitWorkOrderType
-                value={maintenanceWorkOrderType}
-                setValue={setMaintenanceWorkOrderType}
-                label={translate("Maintenance Type", "نوع الصيانة")}
-                placeholder={translate("Select type...", "اختر النوع...")}
-                excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+          </div>
+          <div className="col-span-2 grid grid-cols-2 gap-2">
+            {!isMaintenance ? (
+              <TextInput
+                value={contractNumber}
+                onChange={(e) => setContractNumber(e.target.value)}
+                label={translate("Contract Number", "رقم مراجعة العقد")}
+                placeholder={translate("Enter contract number", "أدخل رقم مراجعة العقد")}
                 required
                 radius="md"
               />
+            ) : (
+              <>
+                <TextInput
+                  value={workOrderNumber}
+                  onChange={(e) => setWorkOrderNumber(e.target.value)}
+                  label={translate("Work Order Number", "رقم أمر الشغل")}
+                  placeholder={translate("Enter work order number", "أدخل رقم أمر الشغل")}
+                  required
+                  radius="md"
+                />
+                <SelectLegacyIssuePermitWorkOrderType
+                  value={maintenanceWorkOrderType}
+                  setValue={setMaintenanceWorkOrderType}
+                  label={translate("Maintenance Type", "نوع الصيانة")}
+                  placeholder={translate("Select type...", "اختر النوع...")}
+                  excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
+                  required
+                  radius="md"
+                />
+              </>
             )}
           </div>
+          <div className="col-span-2">
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              label={translate("Notes", "الملاحظات")}
+              placeholder={translate("Enter notes", "أدخل الملاحظات")}
+              radius="md"
+              autosize
+              minRows={2}
+            />
+          </div>
+          <Checkbox
+            checked={isCancelled}
+            onChange={(e) => setIsCancelled(e.currentTarget.checked)}
+            label={translate("Set as cancelled", "تعيين كإذن ملغي")}
+            color="red"
+          />
         </div>
-
-        <Textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          label={translate("Notes", "الملاحظات")}
-          placeholder={translate("Enter notes", "أدخل الملاحظات")}
-          radius="md"
-          autosize
-          minRows={2}
-        />
-
-        <Checkbox
-          checked={isCancelled}
-          onChange={(e) => setIsCancelled(e.currentTarget.checked)}
-          label={translate("Cancelled", "تعيين كإذن ملغي")}
-          color="red"
-        />
 
         <div className="flex gap-2">
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
