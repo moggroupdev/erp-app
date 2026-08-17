@@ -12,7 +12,7 @@ export default function HomeContent() {
   const getLocalizedHref = useLocaleHref();
   const { isInitializing, user } = useUser();
 
-  const ctaHref = getLocalizedHref(user ? DEFAULT_HOME_HREF : "/login");
+  const ctaHref = getLocalizedHref(user ? user.role?.homeUrl || DEFAULT_HOME_HREF : "/login");
   const ctaLabel = user ? translation.dashboard : translate("Sign in to your account", "تسجيل الدخول إلى حسابك");
 
   return (
