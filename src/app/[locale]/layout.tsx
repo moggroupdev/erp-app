@@ -66,6 +66,7 @@ export default async function RootLayout({ params, children }: Readonly<LocaleLa
       {...mantineHtmlProps}
     >
       <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
         <MantineColorSchemeScript />
       </head>
       <body style={{ height: "101vh" }}>
