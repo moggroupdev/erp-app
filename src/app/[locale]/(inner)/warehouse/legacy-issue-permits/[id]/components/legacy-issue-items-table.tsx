@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
   type Modifier,
 } from "@dnd-kit/core";
 import {
@@ -49,29 +51,28 @@ function canUpdatePermit(user: ReturnType<typeof useUser>["user"]) {
   return user.role?.permissions.includes(PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT) ?? false;
 }
 
-function SortableItemRow({
+function ItemRowCells({
   item,
   index,
   canReorder,
+  isDragging,
   getMainCategoryTitle,
   onEdit,
+  dragHandleProps,
 }: {
   item: LegacyIssuePermitItemDetailed;
   index: number;
   canReorder: boolean;
+  isDragging?: boolean;
   getMainCategoryTitle: (subCategoryId: string | undefined) => string | null;
-  onEdit: (item: LegacyIssuePermitItemDetailed) => void;
+  onEdit?: (item: LegacyIssuePermitItemDetailed) => void;
+  dragHandleProps?: Record<string, unknown>;
 }) {
   const { locale, translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: item.id,
-    disabled: !canReorder,
-  });
-  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : undefined };
 
   return (
-    <Table.Tr ref={setNodeRef} style={style} className="text-gray-600">
+    <>
       <Table.Td className="w-10">
         <button
           type="button"
@@ -80,8 +81,7 @@ function SortableItemRow({
             canReorder ? "cursor-grab hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing" : "cursor-default"
           }`}
           title={canReorder ? translate("Reorder row", "إعادة ترتيب الصف") : undefined}
-          {...(canReorder ? attributes : {})}
-          {...(canReorder ? listeners : {})}
+          {...(dragHandleProps ?? {})}
         >
           <span
             className={`text-xs font-medium text-gray-500 ${
@@ -135,21 +135,92 @@ function SortableItemRow({
       <Table.Td>{item.quantity == null ? <EmptyValue /> : formatQuantity(item.quantity)}</Table.Td>
       <Table.Td className="max-w-xs truncate">{item.notes || <EmptyValue />}</Table.Td>
       <Table.Td className="w-10">
-        <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
-          <Button
-            variant="light"
-            color="dark"
-            size="xs"
-            radius="md"
-            p={6}
-            onClick={() => onEdit(item)}
-            title={translate("Edit item", "تعديل البند")}
-          >
-            <Pencil size={12} />
-          </Button>
-        </PermissionGuard>
+        {onEdit && (
+          <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
+            <Button
+              variant="light"
+              color="dark"
+              size="xs"
+              radius="md"
+              p={6}
+              onClick={() => onEdit(item)}
+              title={translate("Edit item", "تعديل البند")}
+            >
+              <Pencil size={12} />
+            </Button>
+          </PermissionGuard>
+        )}
       </Table.Td>
+    </>
+  );
+}
+
+function SortableItemRow({
+  item,
+  index,
+  canReorder,
+  getMainCategoryTitle,
+  onEdit,
+}: {
+  item: LegacyIssuePermitItemDetailed;
+  index: number;
+  canReorder: boolean;
+  getMainCategoryTitle: (subCategoryId: string | undefined) => string | null;
+  onEdit: (item: LegacyIssuePermitItemDetailed) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+    disabled: !canReorder,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.35 : undefined,
+  };
+
+  return (
+    <Table.Tr ref={setNodeRef} style={style} className={`text-gray-600 ${isDragging ? "bg-gray-100" : ""}`}>
+      <ItemRowCells
+        item={item}
+        index={index}
+        canReorder={canReorder}
+        isDragging={isDragging}
+        getMainCategoryTitle={getMainCategoryTitle}
+        onEdit={onEdit}
+        dragHandleProps={canReorder ? { ...attributes, ...listeners } : undefined}
+      />
     </Table.Tr>
+  );
+}
+
+function DragOverlayRow({
+  item,
+  index,
+  getMainCategoryTitle,
+  tableWidth,
+  columnWidths,
+}: {
+  item: LegacyIssuePermitItemDetailed;
+  index: number;
+  getMainCategoryTitle: (subCategoryId: string | undefined) => string | null;
+  tableWidth: number;
+  columnWidths: number[];
+}) {
+  return (
+    <Table className="bg-white text-nowrap" verticalSpacing="xs" style={{ width: tableWidth, tableLayout: "fixed" }}>
+      {columnWidths.length > 0 && (
+        <colgroup>
+          {columnWidths.map((width, i) => (
+            <col key={i} style={{ width }} />
+          ))}
+        </colgroup>
+      )}
+      <Table.Tbody>
+        <Table.Tr className="bg-blue-50 text-gray-600 [&_td]:border-x-0 [&_td]:border-y-3 [&_td]:border-blue-500">
+          <ItemRowCells item={item} index={index} canReorder isDragging getMainCategoryTitle={getMainCategoryTitle} />
+        </Table.Tr>
+      </Table.Tbody>
+    </Table>
   );
 }
 
@@ -169,12 +240,22 @@ export default function LegacyIssueItemsTable({
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
   const [orderedItems, setOrderedItems] = useState(items);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [overlayMetrics, setOverlayMetrics] = useState<{ tableWidth: number; columnWidths: number[] } | null>(null);
 
   const canUpdate = canUpdatePermit(user);
   const canReorder = canUpdate && orderedItems.length > 1;
   const isDirty = orderedItems.length === items.length && orderedItems.some((item, index) => item.id !== items[index]?.id);
 
   const rowIds = useMemo(() => orderedItems.map((item) => item.id), [orderedItems]);
+  const activeItem = useMemo(
+    () => (activeId ? orderedItems.find((item) => item.id === activeId) : undefined),
+    [activeId, orderedItems],
+  );
+  const activeIndex = useMemo(
+    () => (activeId ? orderedItems.findIndex((item) => item.id === activeId) : -1),
+    [activeId, orderedItems],
+  );
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -184,8 +265,27 @@ export default function LegacyIssueItemsTable({
     setOrderedItems(items);
   }, [items]);
 
+  function clearDragState() {
+    setActiveId(null);
+    setOverlayMetrics(null);
+  }
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(String(event.active.id));
+
+    const rowEl = (event.activatorEvent.target as HTMLElement | null)?.closest("tr");
+    if (!rowEl) return;
+
+    const cells = Array.from(rowEl.children) as HTMLElement[];
+    setOverlayMetrics({
+      tableWidth: rowEl.getBoundingClientRect().width,
+      columnWidths: cells.map((cell) => cell.getBoundingClientRect().width),
+    });
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    clearDragState();
     if (!over || active.id === over.id) return;
 
     setOrderedItems((prev) => {
@@ -194,6 +294,10 @@ export default function LegacyIssueItemsTable({
       if (oldIndex < 0 || newIndex < 0) return prev;
       return arrayMove(prev, oldIndex, newIndex);
     });
+  }
+
+  function handleDragCancel() {
+    clearDragState();
   }
 
   const reorderMutation = useMutation({
@@ -218,7 +322,9 @@ export default function LegacyIssueItemsTable({
           sensors={sensors}
           collisionDetection={closestCenter}
           modifiers={[restrictToVerticalAxis]}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
           <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
             <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
@@ -248,13 +354,25 @@ export default function LegacyIssueItemsTable({
               </Table.Tbody>
             </Table>
           </SortableContext>
+
+          <DragOverlay dropAnimation={null} modifiers={[restrictToVerticalAxis]}>
+            {activeItem && activeIndex >= 0 && overlayMetrics ? (
+              <DragOverlayRow
+                item={activeItem}
+                index={activeIndex}
+                getMainCategoryTitle={getMainCategoryTitle}
+                tableWidth={overlayMetrics.tableWidth}
+                columnWidths={overlayMetrics.columnWidths}
+              />
+            ) : null}
+          </DragOverlay>
         </DndContext>
       </div>
 
       {errorMessage && <ErrorAlert error={errorMessage} />}
 
       {canUpdate && isDirty && (
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
           <Button
             variant="light"
             color="dark"

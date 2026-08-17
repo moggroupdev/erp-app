@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Tooltip } from "@mantine/core";
+import { getLogoSize } from "@/lib/constants/ratios";
 import { useI18n } from "@/lib/i18n/hooks";
 import { type DepartmentWithManager } from "@/types/departments";
 import { Pencil, UserRound } from "lucide-react";
@@ -21,9 +22,9 @@ export default function DepartmentCard({
             <Image
               src="/images/logo.png"
               alt={translate("Department logo", "شعار القسم")}
-              width={48}
-              height={48}
+              {...getLogoSize(48)}
               className="object-contain"
+              style={{ height: "auto" }}
             />
           </div>
 

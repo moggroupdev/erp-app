@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { getLogoSize } from "@/lib/constants/ratios";
 
 export default function Logo({
   onClick,
@@ -22,7 +23,13 @@ export default function Logo({
         if (redirectToHome) router.push("/");
       }}
     >
-      <Image src={"/images/logo.png"} alt={title} width={38} height={38} className="rounded" />
+      <Image
+        src={"/images/logo.png"}
+        alt={title}
+        {...getLogoSize(38)}
+        className="rounded"
+        style={{ height: "auto" }}
+      />
       {title && <span className={`text-lg font-bold text-nowrap`}>{title}</span>}
     </button>
   );
