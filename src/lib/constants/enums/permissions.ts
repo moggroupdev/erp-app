@@ -4,6 +4,7 @@ import { translate } from "@/lib/i18n/utils";
 export const PERMISSION_VALUES = [
   "add_user",
   "read_users",
+  "read_assignable_users",
   "update_user",
   "delete_user",
   "add_role",
@@ -83,6 +84,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Read Users",
       ar: "عرض المستخدمين",
+    },
+  },
+  read_assignable_users: {
+    value: "read_assignable_users",
+    label: {
+      en: "Read Assignable Users",
+      ar: "عرض المستخدمين القابلين للتعيين",
     },
   },
   update_user: {
@@ -488,6 +496,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
     permissions: [
       "add_user",
       "read_users",
+      "read_assignable_users",
       "update_user",
       "delete_user",
       "add_role",

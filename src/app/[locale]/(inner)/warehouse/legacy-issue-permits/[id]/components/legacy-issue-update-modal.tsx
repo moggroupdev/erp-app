@@ -204,6 +204,8 @@ export default function LegacyIssuePermitUpdateModal({
           <SelectUser
             value={creatorId}
             setValue={setCreatorId}
+            assignable
+            initialUser={transaction.creator}
             label={translate("Creator", "المحرر")}
             placeholder={translate("Search users...", "ابحث عن مستخدم...")}
             required
