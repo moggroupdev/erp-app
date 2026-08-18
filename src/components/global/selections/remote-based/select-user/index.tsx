@@ -27,11 +27,11 @@ export type SelectUserProps = Omit<GenericDataSelectProps, "data" | "value" | "s
   /** User ids to hide from the options list. */
   excludeIds?: string[];
   /**
-   * Search non-admin users via `GET /users/assignable` (`read_assignable_users`).
+   * Search non-admin users via `GET /users/lookup` (`lookup_users`).
    * Defaults to the full users list (`read_users`).
    */
-  assignable?: boolean;
-  /** Seed the selected option label without fetching `GET /users/:id` (used with `assignable`). */
+  lookup?: boolean;
+  /** Seed the selected option label without fetching `GET /users/:id` (used with `lookup`). */
   initialUser?: SelectableUser | null;
 };
 
@@ -40,7 +40,7 @@ export default function SelectUser({
   setValue,
   onUserSelect,
   excludeIds = [],
-  assignable = false,
+  lookup = false,
   initialUser = null,
   searchable = true,
   clearable = true,
@@ -60,10 +60,10 @@ export default function SelectUser({
   const listParams = removeEmptyParams({ page: "1", limit: "20", keyword: trimmedSearch });
 
   const usersQuery = useQuery({
-    queryKey: assignable ? queryKeys.users.assignableList(listParams) : queryKeys.users.list(listParams),
+    queryKey: lookup ? queryKeys.users.lookup(listParams) : queryKeys.users.list(listParams),
     queryFn: ({ signal }) =>
-      assignable
-        ? usersApi.listAssignable({ privateRequest, params: listParams, signal })
+      lookup
+        ? usersApi.lookup({ privateRequest, params: listParams, signal })
         : usersApi.list({ privateRequest, params: listParams, signal }),
     staleTime: staleTimes.users,
     placeholderData: keepPreviousData,
@@ -93,8 +93,8 @@ export default function SelectUser({
       return;
     }
 
-    // `GET /users/:id` requires `read_users`; skip it when searching assignable users.
-    if (assignable) return;
+    // `GET /users/:id` requires `read_users`; skip it when looking up users.
+    if (lookup) return;
 
     let cancelled = false;
 
@@ -111,7 +111,7 @@ export default function SelectUser({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, users, initialUser, assignable]);
+  }, [value, users, initialUser, lookup]);
 
   const excludeSet = useMemo(() => new Set(excludeIds.filter((id) => id !== value)), [excludeIds, value]);
 

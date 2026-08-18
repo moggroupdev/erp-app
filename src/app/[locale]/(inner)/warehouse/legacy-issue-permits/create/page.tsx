@@ -489,7 +489,7 @@ export default function Page() {
           <SelectUser
             value={creatorId}
             setValue={setCreatorId}
-            assignable
+            lookup
             label={translate("Creator", "المحرر")}
             placeholder={translate("Search users...", "ابحث عن مستخدم...")}
             required
