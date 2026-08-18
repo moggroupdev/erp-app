@@ -19,6 +19,18 @@ const usersApi = {
     return await privateRequest<PaginatedData<User>>({ url: "users", params, signal });
   },
 
+  async lookup({
+    privateRequest,
+    params,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    params: Dictionary;
+    signal: AbortSignal;
+  }) {
+    return await privateRequest<PaginatedData<User>>({ url: "users/lookup", params, signal });
+  },
+
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<UserWithCreator>({ url: `users/${id}`, signal });
   },

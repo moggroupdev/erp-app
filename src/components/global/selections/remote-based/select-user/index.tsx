@@ -18,7 +18,7 @@ import type { User } from "@/types/user";
 import { UserRound } from "lucide-react";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
 
-type SelectableUser = Pick<User, "id" | "name" | "code">;
+type SelectableUser = Pick<User, "id" | "name"> & Partial<Pick<User, "code">>;
 
 export type SelectUserProps = Omit<GenericDataSelectProps, "data" | "value" | "setValue" | "onChange" | "rightIcon"> & {
   value: string | null;
@@ -26,6 +26,13 @@ export type SelectUserProps = Omit<GenericDataSelectProps, "data" | "value" | "s
   onUserSelect?: (user: SelectableUser | null) => void;
   /** User ids to hide from the options list. */
   excludeIds?: string[];
+  /**
+   * Search non-admin users via `GET /users/lookup` (`lookup_users`).
+   * Defaults to the full users list (`read_users`).
+   */
+  lookup?: boolean;
+  /** Seed the selected option label without fetching `GET /users/:id` (used with `lookup`). */
+  initialUser?: SelectableUser | null;
 };
 
 export default function SelectUser({
@@ -33,6 +40,8 @@ export default function SelectUser({
   setValue,
   onUserSelect,
   excludeIds = [],
+  lookup = false,
+  initialUser = null,
   searchable = true,
   clearable = true,
   ...props
@@ -43,14 +52,19 @@ export default function SelectUser({
 
   const { debouncedValue: debouncedSearch, setPendingValue: setSearch } = useDebouncedState("");
 
-  const [selectedUser, setSelectedUser] = useState<SelectableUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<SelectableUser | null>(
+    initialUser && initialUser.id === value ? initialUser : null,
+  );
 
   const trimmedSearch = debouncedSearch.trim();
   const listParams = removeEmptyParams({ page: "1", limit: "20", keyword: trimmedSearch });
 
   const usersQuery = useQuery({
-    queryKey: queryKeys.users.list(listParams),
-    queryFn: ({ signal }) => usersApi.list({ privateRequest, params: listParams, signal }),
+    queryKey: lookup ? queryKeys.users.lookup(listParams) : queryKeys.users.list(listParams),
+    queryFn: ({ signal }) =>
+      lookup
+        ? usersApi.lookup({ privateRequest, params: listParams, signal })
+        : usersApi.list({ privateRequest, params: listParams, signal }),
     staleTime: staleTimes.users,
     placeholderData: keepPreviousData,
     enabled: trimmedSearch.length > 0,
@@ -74,6 +88,14 @@ export default function SelectUser({
 
     if (selectedUser?.id === value) return;
 
+    if (initialUser?.id === value) {
+      setSelectedUser(initialUser);
+      return;
+    }
+
+    // `GET /users/:id` requires `read_users`; skip it when looking up users.
+    if (lookup) return;
+
     let cancelled = false;
 
     usersApi
@@ -89,7 +111,7 @@ export default function SelectUser({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, users]);
+  }, [value, users, initialUser, lookup]);
 
   const excludeSet = useMemo(() => new Set(excludeIds.filter((id) => id !== value)), [excludeIds, value]);
 
@@ -102,7 +124,7 @@ export default function SelectUser({
 
     return Array.from(byId.values()).map((user) => ({
       value: user.id,
-      label: `${user.name} - ${user.code}`,
+      label: user.code ? `${user.name} - ${user.code}` : user.name,
     }));
   }, [users, selectedUser, excludeSet]);
 
@@ -128,7 +150,9 @@ export default function SelectUser({
   function handleSearchChange(search: string) {
     const selectedLabel =
       selectedUser && selectedUser.id === value
-        ? `${selectedUser.name} - ${selectedUser.code}`
+        ? selectedUser.code
+          ? `${selectedUser.name} - ${selectedUser.code}`
+          : selectedUser.name
         : data.find((option) => option.value === value)?.label;
 
     if (selectedLabel && search === selectedLabel) return;

@@ -37,6 +37,7 @@ export const queryKeys = {
     all: ["users"] as const,
     lists: () => [...queryKeys.users.all, "list"] as const,
     list: (filters: ListFilters) => [...queryKeys.users.lists(), filters] as const,
+    lookup: (filters: ListFilters) => [...queryKeys.users.lists(), "lookup", filters] as const,
     details: () => [...queryKeys.users.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.users.details(), id] as const,
   },
