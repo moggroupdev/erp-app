@@ -5,7 +5,6 @@ import { Table } from "@mantine/core";
 import { FolderTree } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { PurchasingMaterialsByMainCategory } from "@/types/reports";
 import ReportCard from "./report-card";
 
@@ -13,8 +12,6 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
   const { translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
-  const totalMaterialCount = data.reduce((sum, row) => sum + row.materialCount, 0);
-  const totalQuantity = data.reduce((sum, row) => sum + row.totalQuantity, 0);
   const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
   const percentageFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 2,
@@ -26,7 +23,7 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
       title={translate("Spending by Main Category", "الإنفاق حسب الفئة الرئيسية")}
       description={translate(
         "Purchase spend grouped by main material category, sorted from highest to lowest.",
-        "إنفاق الشراء مجمّع حسب الفئة الرئيسية للمواد، مرتب من الأعلى إلى الأدنى.",
+        "إنفاق المشتريات مجمّع حسب الفئة الرئيسية للمواد، مرتب من الأعلى إلى الأدنى.",
       )}
       icon={FolderTree}
       accent="teal"
@@ -40,8 +37,6 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
               <Table.Tr>
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Materials", "المواد")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Total Spend (${translation.currency})`, `إجمالي الإنفاق (${translation.currency})`)}
                 </Table.Th>
@@ -61,8 +56,6 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
                       {row.mainCategoryTitle}
                     </Link>
                   </Table.Td>
-                  <Table.Td>{row.materialCount}</Table.Td>
-                  <Table.Td>{formatQuantity(row.totalQuantity)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
                   <Table.Td>
                     {percentageFormatter.format(totalSpend === 0 ? 0 : (row.totalSpend / totalSpend) * 100)}%
@@ -74,8 +67,6 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
               <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
                 <Table.Th />
                 <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
-                <Table.Th>{totalMaterialCount}</Table.Th>
-                <Table.Th>{formatQuantity(totalQuantity)}</Table.Th>
                 <Table.Th>{formatMoney(totalSpend)}</Table.Th>
                 <Table.Th>{percentageFormatter.format(data.length === 0 ? 0 : 100)}%</Table.Th>
               </Table.Tr>

@@ -73,8 +73,7 @@ export default function Page() {
 
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: queryKeys.reports.purchasingMaterials.spendingSummary(filters),
-    queryFn: ({ signal }) =>
-      reportsApi.purchasingMaterials.getSpendingSummary({ privateRequest, ...filters, signal }),
+    queryFn: ({ signal }) => reportsApi.purchasingMaterials.getSpendingSummary({ privateRequest, ...filters, signal }),
     staleTime: staleTimes.reports.purchasingMaterialsSpendingSummary,
   });
 
@@ -129,8 +128,8 @@ export default function Page() {
               <SpendingTrendChart data={data.byPeriod} groupBy={groupBy} />
               <TopOrdersTable data={data.topOrders} />
               <TopSuppliersTable data={data.bySupplier} />
-              <SpendingByMainCategoryTable data={data.byMainCategory} />
               <TopMaterialsTable data={data.byMaterial} />
+              <SpendingByMainCategoryTable data={data.byMainCategory} />
             </div>
           )
         )}
