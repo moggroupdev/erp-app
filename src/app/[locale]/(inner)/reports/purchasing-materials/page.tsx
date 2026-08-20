@@ -1,0 +1,63 @@
+"use client";
+
+import { useI18n } from "@/lib/i18n/hooks";
+import useDocumentTitle from "@/hooks/use-document-title";
+import ReportPageHeader from "@/components/ui/report-page-header";
+import { ShoppingCart } from "lucide-react";
+import ReportLinkCard from "../components/report-link-card";
+
+const PAGE_TITLE = {
+  en: "Purchasing Materials Reports",
+  ar: "تقارير شراء المواد",
+};
+
+const PAGE_SUBTITLE = {
+  en: "Spending analytics for material purchases, covering cost trends, supplier rankings, and price history.",
+  ar: "تحليلات الإنفاق على شراء المواد، تشمل اتجاهات التكلفة وترتيب الموردين وتاريخ الأسعار.",
+};
+
+export default function Page() {
+  const { translate } = useI18n();
+
+  useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
+
+  return (
+    <div className="space-y-6">
+      <ReportPageHeader
+        breadcrumbs={[
+          { label: { en: "Dashboard", ar: "الرئيسية" }, href: "/dashboard" },
+          { label: { en: "Reports", ar: "التقارير" }, href: "/reports" },
+          { label: PAGE_TITLE },
+        ]}
+        icon={ShoppingCart}
+        title={translate(PAGE_TITLE.en, PAGE_TITLE.ar)}
+        subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
+      />
+
+      <main>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <ReportLinkCard
+            report={{
+              label: { en: "Spending Summary", ar: "ملخص الإنفاق" },
+              description: {
+                en: "Total spend overview by period, supplier, and material with order status breakdown.",
+                ar: "نظرة شاملة على الإنفاق حسب الفترة والمورد والمادة مع تفصيل حالات الطلبات.",
+              },
+              href: "/reports/purchasing-materials/spending-summary",
+            }}
+          />
+          <ReportLinkCard
+            report={{
+              label: { en: "Price History", ar: "تاريخ الأسعار" },
+              description: {
+                en: "Track unit price changes for a specific material over time across purchase orders.",
+                ar: "تتبع تغيرات سعر الوحدة لمادة محددة عبر أوامر الشراء بمرور الوقت.",
+              },
+              href: "/reports/purchasing-materials/price-history",
+            }}
+          />
+        </div>
+      </main>
+    </div>
+  );
+}

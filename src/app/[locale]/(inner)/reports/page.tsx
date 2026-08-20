@@ -39,6 +39,16 @@ export default function Page() {
               href: "/reports/materials",
             }}
           />
+          <ReportLinkCard
+            report={{
+              label: { en: "Purchasing Materials Reports", ar: "تقارير شراء المواد" },
+              description: {
+                en: "Spending analytics for material purchases, covering cost trends, supplier rankings, and price history.",
+                ar: "تحليلات الإنفاق على شراء المواد، تشمل اتجاهات التكلفة وترتيب الموردين وتاريخ الأسعار.",
+              },
+              href: "/reports/purchasing-materials",
+            }}
+          />
         </div>
       </main>
     </div>
