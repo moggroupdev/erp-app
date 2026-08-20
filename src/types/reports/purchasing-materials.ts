@@ -42,6 +42,7 @@ export type PurchasingMaterialsByMaterial = {
 export type PurchasingMaterialsTopOrder = {
   orderId: string;
   orderCode: string;
+  supplierId: string;
   supplierName: string;
   totalAmount: number;
   createdAt: string;
@@ -59,8 +60,10 @@ export type PurchasingMaterialsSpendingSummary = {
 // ================ Price History ================
 
 export type PurchasingMaterialsPriceHistoryEntry = {
+  orderId: string;
   orderCode: string;
   orderDate: string;
+  supplierId: string;
   supplierName: string;
   unitPrice: number;
   quantityOrdered: number;
