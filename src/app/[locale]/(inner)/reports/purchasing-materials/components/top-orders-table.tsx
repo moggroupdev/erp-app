@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Table } from "@mantine/core";
 import { FileText, CheckCircle, Clock } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
@@ -11,17 +12,6 @@ import ReportCard from "./report-card";
 export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopOrder[] }) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const currency = translation.currency;
-
-  if (data.length === 0) {
-    return (
-      <ReportCard title={translate("Top Purchase Orders", "أكبر أوامر الشراء")} icon={FileText} accent="amber">
-        <p className="py-10 text-center text-sm text-stone-500">
-          {translate("No data available", "لا توجد بيانات")}
-        </p>
-      </ReportCard>
-    );
-  }
 
   return (
     <ReportCard
@@ -33,82 +23,84 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
       icon={FileText}
       accent="amber"
     >
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-stone-100 text-xs text-stone-500">
-              <th className="px-3 py-2 text-start font-medium">#</th>
-              <th className="px-3 py-2 text-start font-medium">{translate("Code", "الكود")}</th>
-              <th className="px-3 py-2 text-start font-medium">{translate("Invoice Number", "رقم الفاتورة")}</th>
-              <th className="px-3 py-2 text-start font-medium">{translate("Supplier", "المورد")}</th>
-              <th className="px-3 py-2 text-start font-medium">{translate("Date", "التاريخ")}</th>
-              <th className="px-3 py-2 text-center font-medium">{translate("Status", "الحالة")}</th>
-              <th className="px-3 py-2 text-end font-medium">
-                {translate("Amount", "المبلغ")} ({currency})
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, index) => (
-              <tr key={row.orderId} className="border-b border-stone-50">
-                <td className="px-3 py-2.5 text-stone-400">{index + 1}</td>
-                <td className="px-3 py-2.5">
-                  <div className="flex items-center gap-1.5">
-                    <Link
-                      href={getLocalizedHref(`/procurement/material-orders/${row.orderId}`)}
-                      className="font-mono font-medium text-stone-800 hover:underline"
-                    >
-                      {row.orderCode}
-                    </Link>
-                    <CopyButton text={row.orderCode} />
-                  </div>
-                </td>
-                <td className="px-3 py-2.5">
-                  {row.legacyInvoiceNumber ? (
+      {data.length === 0 ? (
+        <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl">
+          <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
+            <Table.Thead className="bg-gray-50">
+              <Table.Tr>
+                <Table.Th className="text-gray-600">#</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Date", "التاريخ")}</Table.Th>
+                <Table.Th className="text-center text-gray-600">{translate("Status", "الحالة")}</Table.Th>
+                <Table.Th className="text-gray-600">
+                  {translate(`Amount (${translation.currency})`, `المبلغ (${translation.currency})`)}
+                </Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {data.map((row, index) => (
+                <Table.Tr key={row.orderId} className="text-gray-600">
+                  <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
+                  <Table.Td>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-stone-600">{row.legacyInvoiceNumber}</span>
-                      <CopyButton text={row.legacyInvoiceNumber} />
+                      <Link
+                        href={getLocalizedHref(`/procurement/material-orders/${row.orderId}`)}
+                        className="font-mono font-medium text-gray-800 hover:underline"
+                      >
+                        {row.orderCode}
+                      </Link>
+                      <CopyButton text={row.orderCode} />
                     </div>
-                  ) : (
-                    <span className="text-stone-400">-</span>
-                  )}
-                </td>
-                <td className="px-3 py-2.5">
-                  <Link
-                    href={getLocalizedHref(`/procurement/suppliers/${row.supplierId}`)}
-                    className="text-stone-600 hover:underline"
-                  >
-                    {row.supplierName}
-                  </Link>
-                </td>
-                <td className="px-3 py-2.5 text-stone-600">
-                  {new Date(row.createdAt).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </td>
-                <td className="px-3 py-2.5 text-center">
-                  {row.completedAt ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-                      <CheckCircle size={12} />
-                      {translate("Completed", "مكتمل")}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
-                      <Clock size={12} />
-                      {translate("Open", "مفتوح")}
-                    </span>
-                  )}
-                </td>
-                <td className="px-3 py-2.5 text-end font-medium text-stone-800">
-                  {formatMoney(row.totalAmount)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  </Table.Td>
+                  <Table.Td>
+                    {row.legacyInvoiceNumber ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-gray-600">{row.legacyInvoiceNumber}</span>
+                        <CopyButton text={row.legacyInvoiceNumber} />
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </Table.Td>
+                  <Table.Td>
+                    <Link
+                      href={getLocalizedHref(`/procurement/suppliers/${row.supplierId}`)}
+                      className="text-gray-800 hover:underline"
+                    >
+                      {row.supplierName}
+                    </Link>
+                  </Table.Td>
+                  <Table.Td>
+                    {new Date(row.createdAt).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </Table.Td>
+                  <Table.Td className="text-center">
+                    {row.completedAt ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                        <CheckCircle size={12} />
+                        {translate("Completed", "مكتمل")}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                        <Clock size={12} />
+                        {translate("Open", "مفتوح")}
+                      </span>
+                    )}
+                  </Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalAmount)}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </div>
+      )}
     </ReportCard>
   );
 }
