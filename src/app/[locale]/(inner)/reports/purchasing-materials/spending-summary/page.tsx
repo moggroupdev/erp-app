@@ -82,11 +82,14 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
   const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
-  const dateRangeParts = [from, to].filter(Boolean).map((value) => formatDate(value!, locale));
+  const printDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
   const printDateSuffix =
-    dateRangeParts.length > 0
-      ? dateRangeParts.join(" – ")
-      : new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
+    from && to
+      ? translate(
+          `from ${formatDate(from, locale)} to ${formatDate(to, locale)}`,
+          `من ${formatDate(from, locale)} إلى ${formatDate(to, locale)}`,
+        )
+      : printDate;
   const printTitle = `${translate("Report", "تقرير")} - ${reportTitle} - ${printDateSuffix}`;
 
   return (

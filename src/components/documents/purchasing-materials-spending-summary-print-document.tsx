@@ -93,24 +93,26 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             {translate("Purchasing Materials Report", "تقرير شراء المواد")}
           </p>
           <h1 className="text-2xl font-semibold">{title}</h1>
-          <p className="text-[10px] text-gray-500">{printedAt}</p>
+          <p className="text-[10px] text-gray-500">
+            <span className="font-medium text-gray-600">{translate("Printing date", "تاريخ الطباعة")}:</span> {printedAt}
+          </p>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
-        <PrintDetail
-          label={translate("Start Date", "تاريخ البداية")}
-          value={startDate ? formatDate(startDate, locale) : "-"}
-        />
-        <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={endDate ? formatDate(endDate, locale) : "-"} />
-        <PrintDetail label={translate("Group by", "تجميع حسب")} value={getGroupByLabel(groupBy, translate)} />
         <PrintDetail label={translate("Total Spend", "إجمالي الإنفاق")} value={formatMoney(overview.totalSpend, currency)} />
         <PrintDetail label={translate("Total Orders", "إجمالي الطلبات")} value={String(overview.totalOrders)} />
         <PrintDetail
           label={translate("Average Order Value", "متوسط قيمة الطلب")}
           value={formatMoney(overview.avgOrderValue, currency)}
         />
+        <PrintDetail
+          label={translate("Start Date", "تاريخ البداية")}
+          value={startDate ? formatDate(startDate, locale) : "-"}
+        />
+        <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={endDate ? formatDate(endDate, locale) : "-"} />
+        <PrintDetail label={translate("Group by", "تجميع حسب")} value={getGroupByLabel(groupBy, translate)} />
       </section>
 
       <hr className="border-gray-300" />
@@ -118,7 +120,10 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
       <section className="flex break-inside-avoid flex-col gap-2.5">
         <PrintSectionHeading
           title={translate("Spending by Period", "الإنفاق حسب الفترة")}
-          subtitle={translate("Total spend, order count, and average order value per period.", "إجمالي الإنفاق وعدد الطلبات ومتوسط قيمة الطلب لكل فترة.")}
+          subtitle={translate(
+            "Total spend, order count, and average order value per period.",
+            "إجمالي الإنفاق وعدد الطلبات ومتوسط قيمة الطلب لكل فترة.",
+          )}
         />
         <PrintTable
           headers={[
@@ -145,7 +150,10 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
               <span className="ms-2 text-xs font-normal text-gray-500">({topOrders.length})</span>
             </>
           }
-          subtitle={translate("Largest purchase orders ranked by total amount.", "أكبر أوامر الشراء مرتبة حسب إجمالي المبلغ.")}
+          subtitle={translate(
+            "Largest purchase orders ranked by total amount.",
+            "أكبر أوامر الشراء مرتبة حسب إجمالي المبلغ.",
+          )}
         />
         <PrintTable
           headers={[
@@ -179,7 +187,10 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
               <span className="ms-2 text-xs font-normal text-gray-500">({bySupplier.length})</span>
             </>
           }
-          subtitle={translate("Suppliers ranked by total purchase order value.", "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.")}
+          subtitle={translate(
+            "Suppliers ranked by total purchase order value.",
+            "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
+          )}
         />
         <PrintTable
           headers={[
