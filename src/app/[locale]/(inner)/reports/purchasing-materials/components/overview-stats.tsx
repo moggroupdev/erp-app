@@ -11,72 +11,26 @@ export default function OverviewStats({ overview }: { overview: PurchasingMateri
   const currency = translation.currency;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <KpiCard
-          label={translate("Total Spend", "إجمالي الإنفاق")}
-          value={formatMoney(overview.totalSpend, currency)}
-          hint={translate(
-            "Sum of all non-cancelled purchase order amounts.",
-            "مجموع مبالغ جميع أوامر الشراء غير الملغاة.",
-          )}
-          icon={<ShoppingCart size={20} />}
-          valueClassName={reportTheme.kpi.value}
-        />
-        <KpiCard
-          label={translate("Total Orders", "إجمالي الطلبات")}
-          value={overview.totalOrders}
-          hint={translate("Non-cancelled purchase orders in this period.", "أوامر الشراء غير الملغاة في هذه الفترة.")}
-          icon={<ClipboardList size={20} />}
-        />
-        <KpiCard
-          label={translate("Average Order Value", "متوسط قيمة الطلب")}
-          value={formatMoney(overview.avgOrderValue, currency)}
-          hint={translate("Total spend divided by order count.", "إجمالي الإنفاق مقسوماً على عدد الطلبات.")}
-          icon={<TrendingUp size={20} />}
-        />
-      </div>
-
-      <div className="rounded-3xl bg-white p-5 sm:p-6">
-        <div className="mb-4 flex items-center gap-3">
-          <ClipboardList size={18} className="text-stone-600" />
-          <div className="flex flex-col gap-1">
-            <h3 className="text-sm font-semibold text-stone-800">
-              {translate("Order Status Breakdown", "تفصيل حالات الطلبات")}
-            </h3>
-            <p className="text-xs text-stone-500">
-              {translate(
-                "Distribution of purchase orders by completion status.",
-                "توزيع أوامر الشراء حسب حالة الإنجاز.",
-              )}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <StatusPill
-            label={translate("Completed", "مكتملة")}
-            count={overview.completedCount}
-            amount={formatMoney(overview.completedAmount, currency)}
-            icon={<CheckCircle size={14} />}
-            tone="success"
-          />
-          <StatusPill
-            label={translate("Open", "مفتوحة")}
-            count={overview.openCount}
-            amount={formatMoney(overview.openAmount, currency)}
-            icon={<Clock size={14} />}
-            tone="warning"
-          />
-          <StatusPill
-            label={translate("Cancelled", "ملغاة")}
-            count={overview.cancelledCount}
-            amount={formatMoney(overview.cancelledAmount, currency)}
-            icon={<XCircle size={14} />}
-            tone="neutral"
-          />
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <KpiCard
+        label={translate("Total Spend", "إجمالي الإنفاق")}
+        value={formatMoney(overview.totalSpend, currency)}
+        hint={translate("Sum of all non-cancelled purchase order amounts.", "مجموع مبالغ جميع أوامر الشراء غير الملغاة.")}
+        icon={<ShoppingCart size={20} />}
+        valueClassName={reportTheme.kpi.value}
+      />
+      <KpiCard
+        label={translate("Total Orders", "إجمالي الطلبات")}
+        value={overview.totalOrders}
+        hint={translate("Non-cancelled purchase orders in this period.", "أوامر الشراء غير الملغاة في هذه الفترة.")}
+        icon={<ClipboardList size={20} />}
+      />
+      <KpiCard
+        label={translate("Average Order Value", "متوسط قيمة الطلب")}
+        value={formatMoney(overview.avgOrderValue, currency)}
+        hint={translate("Total spend divided by order count.", "إجمالي الإنفاق مقسوماً على عدد الطلبات.")}
+        icon={<TrendingUp size={20} />}
+      />
     </div>
   );
 }
