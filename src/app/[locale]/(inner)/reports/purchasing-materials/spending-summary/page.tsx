@@ -82,13 +82,12 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
   const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
-  const shortDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
-  const printTitle = `${translate("Report", "تقرير")} - ${reportTitle} - ${shortDate}`;
-
-  const scopeParts: string[] = [];
-  if (from) scopeParts.push(formatDate(from, locale));
-  if (to) scopeParts.push(formatDate(to, locale));
-  const scopeLabel = scopeParts.length > 0 ? scopeParts.join(" – ") : null;
+  const dateRangeParts = [from, to].filter(Boolean).map((value) => formatDate(value!, locale));
+  const printDateSuffix =
+    dateRangeParts.length > 0
+      ? dateRangeParts.join(" – ")
+      : new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
+  const printTitle = `${translate("Report", "تقرير")} - ${reportTitle} - ${printDateSuffix}`;
 
   return (
     <div className="space-y-6">
@@ -114,7 +113,8 @@ export default function Page() {
               >
                 <PurchasingMaterialsSpendingSummaryPrintDocument
                   title={reportTitle}
-                  scopeLabel={scopeLabel}
+                  startDate={from}
+                  endDate={to}
                   groupBy={groupBy}
                   overview={data.overview}
                   byPeriod={data.byPeriod}

@@ -46,9 +46,16 @@ function formatPeriodLabel(period: string, locale: string, groupBy: GroupBy): st
   return date.toLocaleDateString(localeTag, { year: "numeric", month: "short", timeZone: "UTC" });
 }
 
+function getGroupByLabel(groupBy: GroupBy, translate: (en: string, ar: string) => string) {
+  if (groupBy === "quarter") return translate("Quarter", "ربع سنة");
+  if (groupBy === "year") return translate("Year", "سنة");
+  return translate("Month", "شهر");
+}
+
 export default function PurchasingMaterialsSpendingSummaryPrintDocument({
   title,
-  scopeLabel,
+  startDate,
+  endDate,
   groupBy = "month",
   overview,
   byPeriod,
@@ -58,7 +65,8 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
   topOrders,
 }: {
   title: string;
-  scopeLabel?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
   groupBy?: GroupBy;
   overview: PurchasingMaterialsOverview;
   byPeriod: PurchasingMaterialsByPeriod[];
@@ -84,16 +92,19 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             {translate("Purchasing Materials Report", "تقرير شراء المواد")}
           </p>
-          <h1 className="text-2xl font-semibold">
-            {title}
-            {scopeLabel && <span> - {scopeLabel}</span>}
-          </h1>
+          <h1 className="text-2xl font-semibold">{title}</h1>
           <p className="text-[10px] text-gray-500">{printedAt}</p>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
+        <PrintDetail
+          label={translate("Start Date", "تاريخ البداية")}
+          value={startDate ? formatDate(startDate, locale) : "-"}
+        />
+        <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={endDate ? formatDate(endDate, locale) : "-"} />
+        <PrintDetail label={translate("Group by", "تجميع حسب")} value={getGroupByLabel(groupBy, translate)} />
         <PrintDetail label={translate("Total Spend", "إجمالي الإنفاق")} value={formatMoney(overview.totalSpend, currency)} />
         <PrintDetail label={translate("Total Orders", "إجمالي الطلبات")} value={String(overview.totalOrders)} />
         <PrintDetail
