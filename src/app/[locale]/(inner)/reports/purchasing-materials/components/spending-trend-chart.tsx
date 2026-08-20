@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { TrendingUp } from "lucide-react";
 import { localeDirections } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -53,16 +53,23 @@ export default function SpendingTrendChart({ data }: { data: PurchasingMaterials
     >
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip
-              formatter={(value: number) => [formatMoney(value, currency), translate("Spend", "الإنفاق")]}
+              formatter={(value) => [formatMoney(Number(value ?? 0), currency), translate("Spend", "الإنفاق")]}
               contentStyle={{ borderRadius: 10, border: "1px solid #e7e5e4", direction: dir }}
             />
-            <Bar dataKey="totalSpend" fill={reportTheme.chart.period} radius={[4, 4, 0, 0]} />
-          </BarChart>
+            <Line
+              type="monotone"
+              dataKey="totalSpend"
+              stroke={reportTheme.chart.period}
+              strokeWidth={2}
+              dot={{ r: 4, fill: reportTheme.chart.period }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </ReportCard>
