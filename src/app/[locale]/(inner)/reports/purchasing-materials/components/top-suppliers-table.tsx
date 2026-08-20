@@ -41,8 +41,12 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
               <th className="px-3 py-2 text-start font-medium">#</th>
               <th className="px-3 py-2 text-start font-medium">{translate("Supplier", "المورد")}</th>
               <th className="px-3 py-2 text-end font-medium">{translate("Orders", "الطلبات")}</th>
-              <th className="px-3 py-2 text-end font-medium">{translate("Total Spend", "إجمالي الإنفاق")}</th>
-              <th className="px-3 py-2 text-end font-medium">{translate("Avg Order", "متوسط الطلب")}</th>
+              <th className="px-3 py-2 text-end font-medium">
+                {translate("Total Spend", "إجمالي الإنفاق")} ({currency})
+              </th>
+              <th className="px-3 py-2 text-end font-medium">
+                {translate("Avg Order", "متوسط الطلب")} ({currency})
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -54,8 +58,8 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
                   <div className="text-xs text-stone-400">{row.supplierCode}</div>
                 </td>
                 <td className="px-3 py-2.5 text-end text-stone-700">{row.orderCount}</td>
-                <td className="px-3 py-2.5 text-end font-medium text-stone-800">{formatMoney(row.totalSpend, currency)}</td>
-                <td className="px-3 py-2.5 text-end text-stone-600">{formatMoney(row.avgOrderValue, currency)}</td>
+                <td className="px-3 py-2.5 text-end font-medium text-stone-800">{formatMoney(row.totalSpend)}</td>
+                <td className="px-3 py-2.5 text-end text-stone-600">{formatMoney(row.avgOrderValue)}</td>
               </tr>
             ))}
           </tbody>

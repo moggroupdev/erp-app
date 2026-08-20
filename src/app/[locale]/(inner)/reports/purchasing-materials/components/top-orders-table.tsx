@@ -39,7 +39,9 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
               <th className="px-3 py-2 text-start font-medium">{translate("Supplier", "المورد")}</th>
               <th className="px-3 py-2 text-start font-medium">{translate("Date", "التاريخ")}</th>
               <th className="px-3 py-2 text-center font-medium">{translate("Status", "الحالة")}</th>
-              <th className="px-3 py-2 text-end font-medium">{translate("Amount", "المبلغ")}</th>
+              <th className="px-3 py-2 text-end font-medium">
+                {translate("Amount", "المبلغ")} ({currency})
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -69,7 +71,7 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
                   )}
                 </td>
                 <td className="px-3 py-2.5 text-end font-medium text-stone-800">
-                  {formatMoney(row.totalAmount, currency)}
+                  {formatMoney(row.totalAmount)}
                 </td>
               </tr>
             ))}

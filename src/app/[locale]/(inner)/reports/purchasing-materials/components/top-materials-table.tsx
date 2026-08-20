@@ -41,8 +41,12 @@ export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsB
               <th className="px-3 py-2 text-start font-medium">#</th>
               <th className="px-3 py-2 text-start font-medium">{translate("Material", "المادة")}</th>
               <th className="px-3 py-2 text-end font-medium">{translate("Qty Ordered", "الكمية المطلوبة")}</th>
-              <th className="px-3 py-2 text-end font-medium">{translate("Total Spend", "إجمالي الإنفاق")}</th>
-              <th className="px-3 py-2 text-end font-medium">{translate("Avg Unit Price", "متوسط سعر الوحدة")}</th>
+              <th className="px-3 py-2 text-end font-medium">
+                {translate("Total Spend", "إجمالي الإنفاق")} ({currency})
+              </th>
+              <th className="px-3 py-2 text-end font-medium">
+                {translate("Avg Unit Price", "متوسط سعر الوحدة")} ({currency})
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -56,8 +60,8 @@ export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsB
                 <td className="px-3 py-2.5 text-end text-stone-700">
                   {row.totalQuantity.toLocaleString()}
                 </td>
-                <td className="px-3 py-2.5 text-end font-medium text-stone-800">{formatMoney(row.totalSpend, currency)}</td>
-                <td className="px-3 py-2.5 text-end text-stone-600">{formatMoney(row.avgUnitPrice, currency)}</td>
+                <td className="px-3 py-2.5 text-end font-medium text-stone-800">{formatMoney(row.totalSpend)}</td>
+                <td className="px-3 py-2.5 text-end text-stone-600">{formatMoney(row.avgUnitPrice)}</td>
               </tr>
             ))}
           </tbody>

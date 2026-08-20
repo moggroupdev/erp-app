@@ -30,7 +30,9 @@ export default function PriceEntriesTable({ data }: { data: PurchasingMaterialsP
               <th className="px-3 py-2 text-start font-medium">{translate("Date", "التاريخ")}</th>
               <th className="px-3 py-2 text-start font-medium">{translate("Supplier", "المورد")}</th>
               <th className="px-3 py-2 text-end font-medium">{translate("Qty", "الكمية")}</th>
-              <th className="px-3 py-2 text-end font-medium">{translate("Unit Price", "سعر الوحدة")}</th>
+              <th className="px-3 py-2 text-end font-medium">
+                {translate("Unit Price", "سعر الوحدة")} ({currency})
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -46,7 +48,7 @@ export default function PriceEntriesTable({ data }: { data: PurchasingMaterialsP
                 </td>
                 <td className="px-3 py-2.5 text-stone-600">{row.supplierName}</td>
                 <td className="px-3 py-2.5 text-end text-stone-700">{row.quantityOrdered.toLocaleString()}</td>
-                <td className="px-3 py-2.5 text-end font-medium text-stone-800">{formatMoney(row.unitPrice, currency)}</td>
+                <td className="px-3 py-2.5 text-end font-medium text-stone-800">{formatMoney(row.unitPrice)}</td>
               </tr>
             ))}
           </tbody>
