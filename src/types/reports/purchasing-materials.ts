@@ -39,6 +39,14 @@ export type PurchasingMaterialsByMaterial = {
   avgUnitPrice: number;
 };
 
+export type PurchasingMaterialsByMainCategory = {
+  mainCategoryId: string;
+  mainCategoryTitle: string;
+  materialCount: number;
+  totalQuantity: number;
+  totalSpend: number;
+};
+
 export type PurchasingMaterialsTopOrder = {
   orderId: string;
   orderCode: string;
@@ -55,6 +63,7 @@ export type PurchasingMaterialsSpendingSummary = {
   byPeriod: PurchasingMaterialsByPeriod[];
   bySupplier: PurchasingMaterialsBySupplier[];
   byMaterial: PurchasingMaterialsByMaterial[];
+  byMainCategory: PurchasingMaterialsByMainCategory[];
   topOrders: PurchasingMaterialsTopOrder[];
 };
 
