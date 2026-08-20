@@ -9,14 +9,35 @@ import { formatCompactNumber } from "@/lib/helpers/format-compact-number";
 import type { PurchasingMaterialsByPeriod } from "@/types/reports";
 import ReportCard from "./report-card";
 import { reportTheme } from "./report-theme";
+import type { GroupBy } from "./date-range-filter";
 
-function formatPeriodLabel(period: string, locale: string): string {
+const ARABIC_QUARTER_LABELS: Record<1 | 2 | 3 | 4, string> = {
+  1: "الربع الأول",
+  2: "الربع الثاني",
+  3: "الربع الثالث",
+  4: "الربع الرابع",
+};
+
+function formatPeriodLabel(period: string, locale: string, groupBy: GroupBy): string {
   const date = new Date(period);
   if (isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { year: "numeric", month: "short" });
+
+  const localeTag = locale === "ar" ? "ar-EG" : "en-US";
+  const year = date.getUTCFullYear();
+
+  if (groupBy === "year") {
+    return String(year);
+  }
+
+  if (groupBy === "quarter") {
+    const quarter = (Math.floor(date.getUTCMonth() / 3) + 1) as 1 | 2 | 3 | 4;
+    return locale === "ar" ? `${ARABIC_QUARTER_LABELS[quarter]} لعام ${year}` : `Q${quarter} ${year}`;
+  }
+
+  return date.toLocaleDateString(localeTag, { year: "numeric", month: "short", timeZone: "UTC" });
 }
 
-export default function SpendingTrendChart({ data }: { data: PurchasingMaterialsByPeriod[] }) {
+export default function SpendingTrendChart({ data, groupBy }: { data: PurchasingMaterialsByPeriod[]; groupBy: GroupBy }) {
   const { locale, translate, translation } = useI18n();
   const dir = localeDirections[locale];
   const isRtl = dir === "rtl";
@@ -38,7 +59,7 @@ export default function SpendingTrendChart({ data }: { data: PurchasingMaterials
   }
 
   const chartData = data.map((d) => ({
-    name: formatPeriodLabel(d.period, locale),
+    name: formatPeriodLabel(d.period, locale, groupBy),
     totalSpend: d.totalSpend,
     orderCount: d.orderCount,
   }));
