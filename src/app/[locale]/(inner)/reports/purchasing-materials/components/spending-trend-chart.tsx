@@ -18,6 +18,7 @@ function formatPeriodLabel(period: string, locale: string): string {
 export default function SpendingTrendChart({ data }: { data: PurchasingMaterialsByPeriod[] }) {
   const { locale, translate, translation } = useI18n();
   const dir = localeDirections[locale];
+  const isRtl = dir === "rtl";
   const currency = translation.currency;
 
   if (data.length === 0) {
@@ -51,12 +52,12 @@ export default function SpendingTrendChart({ data }: { data: PurchasingMaterials
       icon={TrendingUp}
       accent="teal"
     >
-      <div className="h-64">
+      <div className="h-64" dir={dir}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
+          <LineChart data={chartData} style={{ direction: "ltr" }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} reversed={isRtl} />
+            <YAxis tick={{ fontSize: 11 }} orientation={isRtl ? "right" : "left"} />
             <Tooltip
               formatter={(value) => [formatMoney(Number(value ?? 0), currency), translate("Spend", "الإنفاق")]}
               contentStyle={{ borderRadius: 10, border: "1px solid #e7e5e4", direction: dir }}
