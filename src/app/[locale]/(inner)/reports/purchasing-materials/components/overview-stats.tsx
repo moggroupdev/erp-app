@@ -15,14 +15,14 @@ export default function OverviewStats({ overview }: { overview: PurchasingMateri
       <KpiCard
         label={translate("Total Spend", "إجمالي الإنفاق")}
         value={formatMoney(overview.totalSpend, currency)}
-        hint={translate("Sum of all non-cancelled purchase order amounts.", "مجموع مبالغ جميع أوامر الشراء غير الملغاة.")}
+        hint={translate("Sum of all purchase order amounts.", "مجموع مبالغ جميع أوامر الشراء.")}
         icon={<ShoppingCart size={20} />}
         valueClassName={reportTheme.kpi.value}
       />
       <KpiCard
         label={translate("Total Orders", "إجمالي الطلبات")}
         value={overview.totalOrders}
-        hint={translate("Non-cancelled purchase orders in this period.", "أوامر الشراء غير الملغاة في هذه الفترة.")}
+        hint={translate("Purchase orders in this period.", "أوامر الشراء في هذه الفترة.")}
         icon={<ClipboardList size={20} />}
       />
       <KpiCard

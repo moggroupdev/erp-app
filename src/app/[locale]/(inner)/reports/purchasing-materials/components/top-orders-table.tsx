@@ -15,10 +15,10 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
 
   return (
     <ReportCard
-      title={translate("Top Purchase Orders", "أكبر أوامر الشراء")}
+      title={translate("Top Purchase Orders", "أعلى أوامر الشراء قيمة")}
       description={translate(
-        "Largest non-cancelled purchase orders ranked by total amount.",
-        "أكبر أوامر الشراء غير الملغاة مرتبة حسب إجمالي المبلغ.",
+        "Largest purchase orders ranked by total amount.",
+        "أكبر أوامر الشراء مرتبة حسب إجمالي المبلغ.",
       )}
       icon={FileText}
       accent="amber"
@@ -81,7 +81,7 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
                       day: "numeric",
                     })}
                   </Table.Td>
-                  <Table.Td className="text-center">
+                  <Table.Td>
                     {row.completedAt ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
                         <CheckCircle size={12} />

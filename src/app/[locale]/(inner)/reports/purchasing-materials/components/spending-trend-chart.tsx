@@ -76,8 +76,8 @@ export default function SpendingTrendChart({ data, groupBy }: { data: Purchasing
     <ReportCard
       title={translate("Spending Trend", "اتجاه الإنفاق")}
       description={translate(
-        "Total spend per period across non-cancelled purchase orders.",
-        "إجمالي الإنفاق لكل فترة عبر أوامر الشراء غير الملغاة.",
+        "Total spend per period across purchase orders.",
+        "إجمالي الإنفاق لكل فترة عبر أوامر الشراء.",
       )}
       icon={TrendingUp}
       accent="teal"
