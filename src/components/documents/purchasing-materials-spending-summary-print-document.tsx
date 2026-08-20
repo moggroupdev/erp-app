@@ -46,12 +46,6 @@ function formatPeriodLabel(period: string, locale: string, groupBy: GroupBy): st
   return date.toLocaleDateString(localeTag, { year: "numeric", month: "short", timeZone: "UTC" });
 }
 
-function getGroupByLabel(groupBy: GroupBy, translate: (en: string, ar: string) => string) {
-  if (groupBy === "quarter") return translate("Quarter", "ربع سنة");
-  if (groupBy === "year") return translate("Year", "سنة");
-  return translate("Month", "شهر");
-}
-
 export default function PurchasingMaterialsSpendingSummaryPrintDocument({
   title,
   startDate,
@@ -86,7 +80,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
   const totalCategorySpend = byMainCategory.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
-    <div className="flex flex-col gap-5 text-xs text-gray-900">
+    <div className="flex flex-col gap-8 text-xs text-gray-900">
       <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
         <div className="flex min-w-0 flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
@@ -112,7 +106,6 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           value={startDate ? formatDate(startDate, locale) : "-"}
         />
         <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={endDate ? formatDate(endDate, locale) : "-"} />
-        <PrintDetail label={translate("Group by", "تجميع حسب")} value={getGroupByLabel(groupBy, translate)} />
       </section>
 
       <hr className="border-gray-300" />
@@ -144,12 +137,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex break-inside-avoid flex-col gap-2.5">
         <PrintSectionHeading
-          title={
-            <>
-              {translate("Top Purchase Orders", "أعلى أوامر الشراء قيمة")}
-              <span className="ms-2 text-xs font-normal text-gray-500">({topOrders.length})</span>
-            </>
-          }
+          title={translate("Top Purchase Orders", "أعلى أوامر الشراء قيمة")}
           subtitle={translate(
             "Largest purchase orders ranked by total amount.",
             "أكبر أوامر الشراء مرتبة حسب إجمالي المبلغ.",
@@ -181,12 +169,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex break-inside-avoid flex-col gap-2.5">
         <PrintSectionHeading
-          title={
-            <>
-              {translate("Top Suppliers by Spend", "أعلى الموردين إنفاقاً")}
-              <span className="ms-2 text-xs font-normal text-gray-500">({bySupplier.length})</span>
-            </>
-          }
+          title={translate("Top Suppliers by Spend", "أعلى الموردين إنفاقاً")}
           subtitle={translate(
             "Suppliers ranked by total purchase order value.",
             "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
@@ -216,12 +199,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex break-inside-avoid flex-col gap-2.5">
         <PrintSectionHeading
-          title={
-            <>
-              {translate("Top Materials by Spend", "أعلى المواد إنفاقاً")}
-              <span className="ms-2 text-xs font-normal text-gray-500">({byMaterial.length})</span>
-            </>
-          }
+          title={translate("Top Materials by Spend", "أعلى المواد إنفاقاً")}
           subtitle={translate(
             "Materials ranked by total purchase cost (quantity x unit price).",
             "المواد مرتبة حسب إجمالي تكلفة الشراء (الكمية x سعر الوحدة).",
@@ -253,12 +231,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex break-inside-avoid flex-col gap-2.5">
         <PrintSectionHeading
-          title={
-            <>
-              {translate("Spending by Main Category", "الإنفاق حسب الفئة الرئيسية")}
-              <span className="ms-2 text-xs font-normal text-gray-500">({byMainCategory.length})</span>
-            </>
-          }
+          title={translate("Spending by Main Category", "الإنفاق حسب الفئة الرئيسية")}
           subtitle={translate(
             "Purchase spend grouped by main material category, sorted from highest to lowest.",
             "إنفاق المشتريات مجمّع حسب الفئة الرئيسية للمواد، مرتب من الأعلى إلى الأدنى.",
