@@ -39,6 +39,7 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
             <tr className="border-b border-stone-100 text-xs text-stone-500">
               <th className="px-3 py-2 text-start font-medium">#</th>
               <th className="px-3 py-2 text-start font-medium">{translate("Code", "الكود")}</th>
+              <th className="px-3 py-2 text-start font-medium">{translate("Invoice Number", "رقم الفاتورة")}</th>
               <th className="px-3 py-2 text-start font-medium">{translate("Supplier", "المورد")}</th>
               <th className="px-3 py-2 text-start font-medium">{translate("Date", "التاريخ")}</th>
               <th className="px-3 py-2 text-center font-medium">{translate("Status", "الحالة")}</th>
@@ -61,6 +62,16 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
                     </Link>
                     <CopyButton text={row.orderCode} />
                   </div>
+                </td>
+                <td className="px-3 py-2.5">
+                  {row.legacyInvoiceNumber ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-stone-600">{row.legacyInvoiceNumber}</span>
+                      <CopyButton text={row.legacyInvoiceNumber} />
+                    </div>
+                  ) : (
+                    <span className="text-stone-400">-</span>
+                  )}
                 </td>
                 <td className="px-3 py-2.5">
                   <Link

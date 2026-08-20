@@ -42,6 +42,7 @@ export type PurchasingMaterialsByMaterial = {
 export type PurchasingMaterialsTopOrder = {
   orderId: string;
   orderCode: string;
+  legacyInvoiceNumber: string | null;
   supplierId: string;
   supplierName: string;
   totalAmount: number;
