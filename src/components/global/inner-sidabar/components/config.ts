@@ -59,13 +59,13 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     icon: ChartNoAxesCombined,
     items: [
       {
-        label: { en: "Materials", ar: "المواد" },
+        label: { en: "Inventory", ar: "المخزون" },
         href: "/reports/materials",
         icon: Boxes,
         requiredPermission: PERMISSIONS.READ_MATERIAL_REPORTS,
       },
       {
-        label: { en: "Purchasing Materials", ar: "شراء المواد" },
+        label: { en: "Purchases", ar: "المشتريات" },
         href: "/reports/purchasing-materials",
         icon: ShoppingCart,
         requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASING_REPORTS,

@@ -63,7 +63,7 @@ export default function MaterialsReportPrintDocument({
       <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
         <div className="flex min-w-0 flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
-            {translate("Materials Report", "تقرير المواد")}
+            {translate("Inventory Report", "تقرير المخزون")}
           </p>
           <h1 className="text-2xl font-semibold">
             {title}

@@ -24,11 +24,11 @@ import TopMaterialsTable from "../components/top-materials-table";
 import TopOrdersTable from "../components/top-orders-table";
 import SpendingByMainCategoryTable from "../components/spending-by-main-category-table";
 
-const PAGE_TITLE = { en: "Purchasing Spending Summary", ar: "ملخص إنفاق المشتريات" };
+const PAGE_TITLE = { en: "Purchases Spending Summary", ar: "ملخص إنفاق المشتريات" };
 
 const PAGE_SUBTITLE = {
-  en: "Overview of material purchasing spend by period, supplier, material, and main category with order status breakdown.",
-  ar: "نظرة شاملة على إنفاق شراء المواد حسب الفترة والمورد والمادة والفئة الرئيسية مع تفصيل حالات الطلبات.",
+  en: "Overview of purchases spend by period, supplier, material, and main category with order status breakdown.",
+  ar: "نظرة شاملة على إنفاق المشتريات حسب الفترة والمورد والمادة والفئة الرئيسية مع تفصيل حالات الطلبات.",
 };
 
 function parseGroupBy(value: string | null): GroupBy {
@@ -98,7 +98,7 @@ export default function Page() {
         breadcrumbs={[
           { label: { en: "Dashboard", ar: "الرئيسية" }, href: "/dashboard" },
           { label: { en: "Reports", ar: "التقارير" }, href: "/reports" },
-          { label: { en: "Purchasing Materials", ar: "شراء المواد" }, href: "/reports/purchasing-materials" },
+          { label: { en: "Purchases", ar: "المشتريات" }, href: "/reports/purchasing-materials" },
           { label: PAGE_TITLE },
         ]}
         icon={BarChart3}

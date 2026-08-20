@@ -84,7 +84,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
       <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
         <div className="flex min-w-0 flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
-            {translate("Purchasing Materials Report", "تقرير شراء المواد")}
+            {translate("Purchases Report", "تقرير المشتريات")}
           </p>
           <h1 className="text-2xl font-semibold">{title}</h1>
           <p className="text-[10px] text-gray-500">

@@ -7,13 +7,13 @@ import { ShoppingCart } from "lucide-react";
 import ReportLinkCard from "../components/report-link-card";
 
 const PAGE_TITLE = {
-  en: "Purchasing Materials Reports",
-  ar: "تقارير شراء المواد",
+  en: "Purchases Reports",
+  ar: "تقارير المشتريات",
 };
 
 const PAGE_SUBTITLE = {
-  en: "Spending analytics for material purchases, covering cost trends, supplier rankings, and price history.",
-  ar: "تحليلات الإنفاق على شراء المواد، تشمل اتجاهات التكلفة وترتيب الموردين وتاريخ الأسعار.",
+  en: "Spending analytics for purchases, covering cost trends, supplier rankings, and price history.",
+  ar: "تحليلات الإنفاق على المشتريات، تشمل اتجاهات التكلفة وترتيب الموردين وتاريخ الأسعار.",
 };
 
 export default function Page() {

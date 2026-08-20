@@ -448,15 +448,15 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
   read_material_reports: {
     value: "read_material_reports",
     label: {
-      en: "Read Material Reports",
-      ar: "عرض تقارير المواد",
+      en: "Read Inventory Reports",
+      ar: "عرض تقارير المخزون",
     },
   },
   read_material_purchasing_reports: {
     value: "read_material_purchasing_reports",
     label: {
-      en: "Read Material Purchasing Reports",
-      ar: "عرض تقارير شراء المواد",
+      en: "Read Purchases Reports",
+      ar: "عرض تقارير المشتريات",
     },
   },
 };

@@ -24,7 +24,7 @@ import MaterialsReportPrintDocument from "@/components/documents/materials-repor
 import CategoryPicker from "./components/category-picker";
 import CategoryStatsEmpty from "./components/category-stats-empty";
 
-const PAGE_TITLE = { en: "Materials Category Stats", ar: "إحصائيات فئة المواد" };
+const PAGE_TITLE = { en: "Inventory Category Stats", ar: "إحصائيات فئة المخزون" };
 
 const PAGE_SUBTITLE = {
   en: "Analysis scoped to one product family, with subcategory comparison, stock health, and high-value or understocked items within the selected main category.",
@@ -74,7 +74,7 @@ export default function Page() {
         breadcrumbs={[
           { label: { en: "Dashboard", ar: "الرئيسية" }, href: "/dashboard" },
           { label: { en: "Reports", ar: "التقارير" }, href: "/reports" },
-          { label: { en: "Materials Reports", ar: "تقارير المواد" }, href: "/reports/materials" },
+          { label: { en: "Inventory Reports", ar: "تقارير المخزون" }, href: "/reports/materials" },
           { label: PAGE_TITLE },
         ]}
         icon={FolderKanban}

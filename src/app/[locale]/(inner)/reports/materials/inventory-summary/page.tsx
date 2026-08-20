@@ -21,10 +21,10 @@ import TopMaterialsTable from "../components/top-materials-table";
 import LowStockMaterialsTable from "../components/low-stock-materials-table";
 import MaterialsReportPrintDocument from "@/components/documents/materials-report-print-document";
 
-const PAGE_TITLE = { en: "Materials Inventory Summary", ar: "ملخص مخزون المواد" };
+const PAGE_TITLE = { en: "Inventory Summary", ar: "ملخص المخزون" };
 
 const PAGE_SUBTITLE = {
-  en: "Executive view of the full materials inventory, including capital in stock, distribution across types and categories, and items requiring reorder.",
+  en: "Executive view of the full inventory, including capital in stock, distribution across types and categories, and items requiring reorder.",
   ar: "نظرة تنفيذية على مخزون المواد بالكامل، تشمل رأس المال المخزّن والتوزيع بين الأنواع والفئات والمواد التي تحتاج إعادة طلب.",
 };
 
@@ -51,7 +51,7 @@ export default function Page() {
         breadcrumbs={[
           { label: { en: "Dashboard", ar: "الرئيسية" }, href: "/dashboard" },
           { label: { en: "Reports", ar: "التقارير" }, href: "/reports" },
-          { label: { en: "Materials Reports", ar: "تقارير المواد" }, href: "/reports/materials" },
+          { label: { en: "Inventory Reports", ar: "تقارير المخزون" }, href: "/reports/materials" },
           { label: PAGE_TITLE },
         ]}
         icon={BarChart3}

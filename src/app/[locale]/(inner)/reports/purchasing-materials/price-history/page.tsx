@@ -85,7 +85,7 @@ export default function Page() {
         breadcrumbs={[
           { label: { en: "Dashboard", ar: "الرئيسية" }, href: "/dashboard" },
           { label: { en: "Reports", ar: "التقارير" }, href: "/reports" },
-          { label: { en: "Purchasing Materials", ar: "شراء المواد" }, href: "/reports/purchasing-materials" },
+          { label: { en: "Purchases", ar: "المشتريات" }, href: "/reports/purchasing-materials" },
           { label: PAGE_TITLE },
         ]}
         icon={History}
