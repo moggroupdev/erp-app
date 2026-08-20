@@ -119,6 +119,13 @@ export const queryKeys = {
       categoryStats: (mainCategoryId: string) =>
         [...queryKeys.reports.materials.all, "category-stats", mainCategoryId] as const,
     },
+    purchasingMaterials: {
+      all: ["reports", "purchasing-materials"] as const,
+      spendingSummary: (filters?: { from?: string; to?: string; groupBy?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "spending-summary", filters] as const,
+      priceHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "price-history", materialCode, filters] as const,
+    },
   },
   profile: {
     all: ["profile"] as const,

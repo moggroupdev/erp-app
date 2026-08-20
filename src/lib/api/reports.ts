@@ -1,5 +1,10 @@
 import type { PrivateRequest } from "@/types/api";
-import type { MaterialsCategoryStats, MaterialsInventorySummary } from "@/types/reports";
+import type {
+  MaterialsCategoryStats,
+  MaterialsInventorySummary,
+  PurchasingMaterialsSpendingSummary,
+  PurchasingMaterialsPriceHistory,
+} from "@/types/reports";
 
 const reportsApi = {
   materials: {
@@ -28,6 +33,48 @@ const reportsApi = {
       return await privateRequest<MaterialsCategoryStats>({
         url: "reports/materials/category-stats",
         params: { mainCategoryId },
+        signal,
+      });
+    },
+  },
+
+  purchasingMaterials: {
+    async getSpendingSummary({
+      privateRequest,
+      from,
+      to,
+      groupBy,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      from?: string;
+      to?: string;
+      groupBy?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsSpendingSummary>({
+        url: "reports/purchasing-materials/spending-summary",
+        params: { from, to, groupBy },
+        signal,
+      });
+    },
+
+    async getPriceHistory({
+      privateRequest,
+      materialCode,
+      from,
+      to,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      materialCode: string;
+      from?: string;
+      to?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsPriceHistory>({
+        url: "reports/purchasing-materials/price-history",
+        params: { materialCode, from, to },
         signal,
       });
     },

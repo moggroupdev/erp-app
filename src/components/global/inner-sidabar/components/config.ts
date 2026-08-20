@@ -64,6 +64,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         icon: Boxes,
         requiredPermission: PERMISSIONS.READ_MATERIAL_REPORTS,
       },
+      {
+        label: { en: "Purchasing Materials", ar: "شراء المواد" },
+        href: "/reports/purchasing-materials",
+        icon: ShoppingCart,
+        requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASING_REPORTS,
+      },
     ],
   },
   {
