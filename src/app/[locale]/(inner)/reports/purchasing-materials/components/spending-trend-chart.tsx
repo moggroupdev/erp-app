@@ -5,6 +5,7 @@ import { TrendingUp } from "lucide-react";
 import { localeDirections } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { formatCompactNumber } from "@/lib/helpers/format-compact-number";
 import type { PurchasingMaterialsByPeriod } from "@/types/reports";
 import ReportCard from "./report-card";
 import { reportTheme } from "./report-theme";
@@ -57,7 +58,12 @@ export default function SpendingTrendChart({ data }: { data: PurchasingMaterials
           <LineChart data={chartData} style={{ direction: "ltr" }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} reversed={isRtl} />
-            <YAxis tick={{ fontSize: 11 }} orientation={isRtl ? "right" : "left"} />
+            <YAxis
+              tick={{ fontSize: 11 }}
+              orientation={isRtl ? "right" : "left"}
+              tickFormatter={formatCompactNumber}
+              width={48}
+            />
             <Tooltip
               formatter={(value) => [formatMoney(Number(value ?? 0), currency), translate("Spend", "الإنفاق")]}
               contentStyle={{ borderRadius: 10, border: "1px solid #e7e5e4", direction: dir }}
