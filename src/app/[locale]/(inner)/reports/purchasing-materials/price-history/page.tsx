@@ -13,6 +13,7 @@ import { History, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import ReportPageHeader from "@/components/ui/report-page-header";
 import ReportSkeleton from "../components/report-skeleton";
+import DateRangeFilter from "../components/date-range-filter";
 import MaterialPicker from "./components/material-picker";
 import PriceHistoryEmpty from "./components/price-history-empty";
 import PriceChart from "./components/price-chart";
@@ -35,21 +36,41 @@ export default function Page() {
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
   const materialCode = searchParams.get("materialCode");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
 
-  function setMaterialCode(next: string | null) {
+  function updateQuery(patch: { materialCode?: string | null; from?: string | null; to?: string | null }) {
     const params = new URLSearchParams(searchParams.toString());
-    if (next) params.set("materialCode", next);
-    else params.delete("materialCode");
+
+    if ("materialCode" in patch) {
+      if (patch.materialCode) params.set("materialCode", patch.materialCode);
+      else params.delete("materialCode");
+    }
+    if ("from" in patch) {
+      if (patch.from) params.set("from", patch.from);
+      else params.delete("from");
+    }
+    if ("to" in patch) {
+      if (patch.to) params.set("to", patch.to);
+      else params.delete("to");
+    }
+
     const query = params.toString();
     router.replace(query ? `?${query}` : "?", { scroll: false });
   }
 
+  const dateFilters = {
+    from: from || undefined,
+    to: to || undefined,
+  };
+
   const { data, isFetching, error, refetch } = useQuery({
-    queryKey: queryKeys.reports.purchasingMaterials.priceHistory(materialCode ?? ""),
+    queryKey: queryKeys.reports.purchasingMaterials.priceHistory(materialCode ?? "", dateFilters),
     queryFn: ({ signal }) =>
       reportsApi.purchasingMaterials.getPriceHistory({
         privateRequest,
         materialCode: materialCode!,
+        ...dateFilters,
         signal,
       }),
     staleTime: staleTimes.reports.purchasingMaterialsPriceHistory,
@@ -83,7 +104,14 @@ export default function Page() {
         }
       />
 
-      <MaterialPicker value={materialCode} onChange={setMaterialCode} />
+      <MaterialPicker value={materialCode} onChange={(next) => updateQuery({ materialCode: next })} />
+
+      <DateRangeFilter
+        from={from}
+        to={to}
+        onFromChange={(value) => updateQuery({ from: value })}
+        onToChange={(value) => updateQuery({ to: value })}
+      />
 
       <main>
         {!materialCode ? (

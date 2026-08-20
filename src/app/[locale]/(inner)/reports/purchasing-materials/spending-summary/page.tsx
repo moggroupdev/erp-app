@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -12,7 +12,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { BarChart3, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import DateRangeFilter from "../components/date-range-filter";
+import DateRangeFilter, { type GroupBy } from "../components/date-range-filter";
 import OverviewStats from "../components/overview-stats";
 import ReportSkeleton from "../components/report-skeleton";
 import SpendingTrendChart from "../components/spending-trend-chart";
@@ -27,17 +27,42 @@ const PAGE_SUBTITLE = {
   ar: "نظرة شاملة على إنفاق شراء المواد حسب الفترة والمورد والمادة مع تفصيل حالات الطلبات.",
 };
 
-type GroupBy = "month" | "quarter" | "year";
+function parseGroupBy(value: string | null): GroupBy {
+  if (value === "quarter" || value === "year") return value;
+  return "month";
+}
 
 export default function Page() {
   const { locale, translate } = useI18n();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
 
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [groupBy, setGroupBy] = useState<GroupBy>("month");
-
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
+
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+  const groupBy = parseGroupBy(searchParams.get("groupBy"));
+
+  function updateQuery(patch: { from?: string | null; to?: string | null; groupBy?: GroupBy }) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if ("from" in patch) {
+      if (patch.from) params.set("from", patch.from);
+      else params.delete("from");
+    }
+    if ("to" in patch) {
+      if (patch.to) params.set("to", patch.to);
+      else params.delete("to");
+    }
+    if ("groupBy" in patch && patch.groupBy) {
+      if (patch.groupBy === "month") params.delete("groupBy");
+      else params.set("groupBy", patch.groupBy);
+    }
+
+    const query = params.toString();
+    router.replace(query ? `?${query}` : "?", { scroll: false });
+  }
 
   const filters = {
     from: from || undefined,
@@ -81,9 +106,9 @@ export default function Page() {
         from={from}
         to={to}
         groupBy={groupBy}
-        onFromChange={setFrom}
-        onToChange={setTo}
-        onGroupByChange={setGroupBy}
+        onFromChange={(value) => updateQuery({ from: value })}
+        onToChange={(value) => updateQuery({ to: value })}
+        onGroupByChange={(value) => updateQuery({ groupBy: value })}
       />
 
       <main>
