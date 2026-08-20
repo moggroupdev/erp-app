@@ -5,13 +5,14 @@ import { Table } from "@mantine/core";
 import { Boxes } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { PurchasingMaterialsByMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
 
 export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsByMaterial[] }) {
-  const { translate, translation } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
   return (
@@ -34,6 +35,7 @@ export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsB
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Material", "المادة")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Total Spend (${translation.currency})`, `إجمالي الإنفاق (${translation.currency})`)}
@@ -62,6 +64,7 @@ export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsB
                       <CopyButton text={row.materialCode} />
                     </div>
                   </Table.Td>
+                  <Table.Td>{getMaterialUnitLabel(row.unitOfMeasurement, locale)}</Table.Td>
                   <Table.Td>{formatQuantity(row.totalQuantity)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
                   <Table.Td>{formatMoney(row.avgUnitPrice)}</Table.Td>
