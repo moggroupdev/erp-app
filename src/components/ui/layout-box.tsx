@@ -14,6 +14,7 @@ export default function LayoutBox({
     title: string;
     subTitle?: string;
     backLink?: string | boolean;
+    confirmNavigate?: () => boolean;
     sideElements?: React.ReactNode;
     border?: boolean;
   };
@@ -33,6 +34,7 @@ export default function LayoutBox({
               {header.backLink && (
                 <Button
                   onClick={() => {
+                    if (header.confirmNavigate && !header.confirmNavigate()) return;
                     if (typeof header.backLink === "string") router.push(header.backLink);
                     else if (header.backLink === true) router.back();
                   }}

@@ -24,6 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
+import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import usePrivateRequest from "@/hooks/use-private-request";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import materialsApi from "@/lib/api/materials";
@@ -87,6 +88,10 @@ function createEmptyRow(): ItemDraftRow {
 
 function showUnitSelect(row: ItemDraftRow) {
   return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+}
+
+function isEmptyRow(row: ItemDraftRow) {
+  return row.materialCode === null && row.quantity === "" && row.notes.trim() === "";
 }
 
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
@@ -256,6 +261,7 @@ export default function Page() {
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   useDocumentTitle(
     `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Issue Permits", "أذونات الصرف المرحلية")}`,
@@ -289,12 +295,48 @@ export default function Page() {
       });
     },
     onSuccess: async (created) => {
+      setSubmitted(true);
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.all });
       router.push(getLocalizedHref(`/warehouse/legacy-issue-permits/${created.id}`));
     },
   });
 
   const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
+
+  const isDirty = useMemo(
+    () =>
+      issuePermitNumber.trim() !== "" ||
+      issueOrderNumber.trim() !== "" ||
+      issueOrderDate !== null ||
+      date !== null ||
+      creatorId !== null ||
+      productionSubDepartment !== null ||
+      contractNumber.trim() !== "" ||
+      workOrderNumber.trim() !== "" ||
+      isMaintenance ||
+      maintenanceWorkOrderType !== null ||
+      isCancelled ||
+      notes.trim() !== "" ||
+      rows.length > 1 ||
+      rows.some((row) => !isEmptyRow(row)),
+    [
+      issuePermitNumber,
+      issueOrderNumber,
+      issueOrderDate,
+      date,
+      creatorId,
+      productionSubDepartment,
+      contractNumber,
+      workOrderNumber,
+      isMaintenance,
+      maintenanceWorkOrderType,
+      isCancelled,
+      notes,
+      rows,
+    ],
+  );
+
+  const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
   const usedMaterialCodes = useMemo(
     () => rows.map((row) => row.materialCode).filter((code): code is string => !!code),
@@ -452,6 +494,7 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref("/warehouse/legacy-issue-permits"),
+        confirmNavigate: confirmNavigation,
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -652,7 +695,9 @@ export default function Page() {
             variant="light"
             color="dark"
             radius="md"
-            onClick={() => router.push(getLocalizedHref("/warehouse/legacy-issue-permits"))}
+            onClick={() => {
+              if (confirmNavigation()) router.push(getLocalizedHref("/warehouse/legacy-issue-permits"));
+            }}
           >
             {translation.cancel}
           </Button>
