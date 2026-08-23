@@ -51,7 +51,7 @@ export default function PriceChart({ data }: { data: PurchasingMaterialsPriceHis
             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip
-              formatter={(value: number) => [formatMoney(value, currency), translate("Unit Price", "سعر الوحدة")]}
+              formatter={(value) => [formatMoney(Number(value ?? 0), currency), translate("Unit Price", "سعر الوحدة")]}
               contentStyle={{ borderRadius: 10, border: "1px solid #e7e5e4", direction: dir }}
             />
             <Line
