@@ -94,7 +94,7 @@ export default function LatestInvoicesTable({ data }: { data: PurchasingMaterial
                       </span>
                     )}
                   </Table.Td>
-                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalAmount)}</Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.legacyInvoiceTotalPurchases)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

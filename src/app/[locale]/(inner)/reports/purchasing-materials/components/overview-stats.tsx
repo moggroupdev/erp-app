@@ -15,7 +15,7 @@ export default function OverviewStats({ overview }: { overview: PurchasingMateri
       <KpiCard
         label={translate("Total Spend", "إجمالي الإنفاق")}
         value={formatMoney(overview.totalSpend, currency)}
-        hint={translate("Sum of all purchase order amounts.", "مجموع مبالغ جميع أوامر الشراء.")}
+        hint={translate("Sum of invoice total purchases.", "مجموع إجمالي مشتريات الفواتير.")}
         icon={<ShoppingCart size={20} />}
         valueClassName={reportTheme.kpi.value}
       />

@@ -160,7 +160,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             row.supplierName,
             formatDate(row.createdAt, locale),
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
-            formatMoney(row.totalAmount),
+            formatMoney(row.legacyInvoiceTotalPurchases),
           ])}
           monoColumnIndexes={[1, 2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
@@ -201,8 +201,8 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
         <PrintSectionHeading
           title={translate("Top Materials by Spend", "أعلى المواد إنفاقاً")}
           subtitle={translate(
-            "Materials ranked by total purchase cost (quantity x unit price).",
-            "المواد مرتبة حسب إجمالي تكلفة الشراء (الكمية x سعر الوحدة).",
+            "Materials ranked by allocated invoice total purchases.",
+            "المواد مرتبة حسب إجمالي مشتريات الفواتير الموزعة.",
           )}
         />
         <PrintTable

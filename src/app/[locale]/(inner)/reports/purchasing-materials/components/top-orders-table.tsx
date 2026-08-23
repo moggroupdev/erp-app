@@ -94,7 +94,7 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
                       </span>
                     )}
                   </Table.Td>
-                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalAmount)}</Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.legacyInvoiceTotalPurchases)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

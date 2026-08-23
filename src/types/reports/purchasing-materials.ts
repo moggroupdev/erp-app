@@ -53,7 +53,7 @@ export type PurchasingMaterialsTopOrder = {
   legacyInvoiceNumber: string | null;
   supplierId: string;
   supplierName: string;
-  totalAmount: number;
+  legacyInvoiceTotalPurchases: number;
   createdAt: string;
   completedAt: string | null;
 };

@@ -19,8 +19,8 @@ export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsB
     <ReportCard
       title={translate("Top Materials by Spend", "أعلى المواد إنفاقاً")}
       description={translate(
-        "Materials ranked by total purchase cost (quantity x unit price).",
-        "المواد مرتبة حسب إجمالي تكلفة الشراء (الكمية x سعر الوحدة).",
+        "Materials ranked by allocated invoice total purchases.",
+        "المواد مرتبة حسب إجمالي مشتريات الفواتير الموزعة.",
       )}
       icon={Boxes}
       accent="sky"
