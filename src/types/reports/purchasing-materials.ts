@@ -95,3 +95,30 @@ export type PurchasingMaterialsPriceHistory = {
   entries: PurchasingMaterialsPriceHistoryEntry[];
   summary: PurchasingMaterialsPriceHistorySummary;
 };
+
+// ================ Category Stats ================
+
+export type PurchasingMaterialsSupplierInvoiceCount = {
+  supplierId: string;
+  supplierCode: string;
+  supplierName: string;
+  invoiceCount: number;
+  totalSpend: number;
+};
+
+export type PurchasingMaterialsCategoryStatsOverview = Pick<
+  PurchasingMaterialsOverview,
+  "totalSpend" | "totalOrders" | "avgOrderValue"
+>;
+
+export type PurchasingMaterialsCategoryStats = {
+  category: {
+    id: string;
+    title: string;
+  };
+  overview: PurchasingMaterialsCategoryStatsOverview;
+  bySupplier: PurchasingMaterialsBySupplier[];
+  topSuppliersByInvoiceCount: PurchasingMaterialsSupplierInvoiceCount[];
+  latestInvoices: PurchasingMaterialsTopOrder[];
+  topMaterials: PurchasingMaterialsByMaterial[];
+};

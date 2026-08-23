@@ -3,10 +3,10 @@
 import { ClipboardList, ShoppingCart, TrendingUp, CheckCircle, Clock, XCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
-import type { PurchasingMaterialsOverview } from "@/types/reports";
+import type { PurchasingMaterialsCategoryStatsOverview } from "@/types/reports";
 import { reportTheme } from "./report-theme";
 
-export default function OverviewStats({ overview }: { overview: PurchasingMaterialsOverview }) {
+export default function OverviewStats({ overview }: { overview: PurchasingMaterialsCategoryStatsOverview }) {
   const { translate, translation } = useI18n();
   const currency = translation.currency;
 

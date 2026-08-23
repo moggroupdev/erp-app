@@ -125,6 +125,8 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "spending-summary", filters] as const,
       priceHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "price-history", materialCode, filters] as const,
+      categoryStats: (mainCategoryId: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "category-stats", mainCategoryId, filters] as const,
     },
   },
   profile: {

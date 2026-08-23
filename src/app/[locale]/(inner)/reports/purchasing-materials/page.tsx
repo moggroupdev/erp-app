@@ -56,6 +56,16 @@ export default function Page() {
               href: "/reports/purchasing-materials/price-history",
             }}
           />
+          <ReportLinkCard
+            report={{
+              label: { en: "Purchasing by Category", ar: "المشتريات حسب الفئة" },
+              description: {
+                en: "Purchase stats for one main category: suppliers, invoices, and top materials.",
+                ar: "إحصائيات المشتريات لفئة رئيسية واحدة: الموردون والفواتير وأعلى المواد.",
+              },
+              href: "/reports/purchasing-materials/category-stats",
+            }}
+          />
         </div>
       </main>
     </div>
