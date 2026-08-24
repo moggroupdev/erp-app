@@ -126,3 +126,29 @@ export type PurchasingMaterialsCategoryStats = {
   orders: PurchasingMaterialsCategoryOrder[];
   materials: PurchasingMaterialsByMaterial[];
 };
+
+// ================ Supplier Stats ================
+
+export type PurchasingMaterialsSupplierOrder = {
+  orderId: string;
+  orderCode: string;
+  legacyInvoiceNumber: string | null;
+  legacyInvoiceIssuedAt: string | null;
+  legacyInvoiceTotalPurchases: number;
+  createdAt: string;
+  completedAt: string | null;
+  inventoryTransactionLegacyNumbers: string[];
+};
+
+export type PurchasingMaterialsSupplierStats = {
+  supplier: {
+    id: string;
+    code: string;
+    name: string;
+  };
+  overview: PurchasingMaterialsCategoryStatsOverview;
+  byPeriod: PurchasingMaterialsByPeriod[];
+  categories: PurchasingMaterialsByMainCategory[];
+  orders: PurchasingMaterialsSupplierOrder[];
+  materials: PurchasingMaterialsByMaterial[];
+};

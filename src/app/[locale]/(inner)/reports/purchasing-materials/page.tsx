@@ -66,6 +66,16 @@ export default function Page() {
               href: "/reports/purchasing-materials/category-stats",
             }}
           />
+          <ReportLinkCard
+            report={{
+              label: { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" },
+              description: {
+                en: "Purchase stats for one supplier: spending trend, categories, orders, and materials.",
+                ar: "إحصائيات المشتريات لمورد واحد: اتجاه الإنفاق والفئات وأوامر الشراء والمواد.",
+              },
+              href: "/reports/purchasing-materials/supplier-stats",
+            }}
+          />
         </div>
       </main>
     </div>

@@ -5,6 +5,7 @@ import type {
   PurchasingMaterialsCategoryStats,
   PurchasingMaterialsSpendingSummary,
   PurchasingMaterialsPriceHistory,
+  PurchasingMaterialsSupplierStats,
 } from "@/types/reports";
 
 const reportsApi = {
@@ -96,6 +97,28 @@ const reportsApi = {
       return await privateRequest<PurchasingMaterialsCategoryStats>({
         url: "reports/purchasing-materials/category-stats",
         params: { mainCategoryId, from, to },
+        signal,
+      });
+    },
+
+    async getSupplierStats({
+      privateRequest,
+      supplierId,
+      from,
+      to,
+      groupBy,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      supplierId: string;
+      from?: string;
+      to?: string;
+      groupBy?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsSupplierStats>({
+        url: "reports/purchasing-materials/supplier-stats",
+        params: { supplierId, from, to, groupBy },
         signal,
       });
     },
