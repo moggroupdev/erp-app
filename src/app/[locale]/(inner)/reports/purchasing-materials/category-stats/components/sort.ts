@@ -1,8 +1,19 @@
 import type {
   PurchasingMaterialsByMaterial,
+  PurchasingMaterialsBySubCategory,
   PurchasingMaterialsBySupplier,
   PurchasingMaterialsCategoryOrder,
 } from "@/types/reports";
+
+export type CategorySubCategoriesSort =
+  | "spend-desc"
+  | "spend-asc"
+  | "qty-desc"
+  | "qty-asc"
+  | "materials-desc"
+  | "materials-asc"
+  | "name-asc"
+  | "name-desc";
 
 export type CategorySuppliersSort =
   | "spend-desc"
@@ -39,6 +50,17 @@ export type CategoryMaterialsSort =
   | "code-desc";
 
 type Translate = (en: string, ar: string) => string;
+
+const SUB_CATEGORIES_SORT_LABELS: Record<CategorySubCategoriesSort, { en: string; ar: string }> = {
+  "spend-desc": { en: "Value (high to low)", ar: "القيمة (من الأعلى للأقل)" },
+  "spend-asc": { en: "Value (low to high)", ar: "القيمة (من الأقل للأعلى)" },
+  "qty-desc": { en: "Quantity (high to low)", ar: "الكمية (من الأعلى للأقل)" },
+  "qty-asc": { en: "Quantity (low to high)", ar: "الكمية (من الأقل للأعلى)" },
+  "materials-desc": { en: "Materials (high to low)", ar: "المواد (من الأعلى للأقل)" },
+  "materials-asc": { en: "Materials (low to high)", ar: "المواد (من الأقل للأعلى)" },
+  "name-asc": { en: "Name (A–Z)", ar: "الاسم (أ–ي)" },
+  "name-desc": { en: "Name (Z–A)", ar: "الاسم (ي–أ)" },
+};
 
 const SUPPLIERS_SORT_LABELS: Record<CategorySuppliersSort, { en: string; ar: string }> = {
   "spend-desc": { en: "Value (high to low)", ar: "القيمة (من الأعلى للأقل)" },
@@ -77,6 +99,11 @@ const MATERIALS_SORT_LABELS: Record<CategoryMaterialsSort, { en: string; ar: str
   "code-desc": { en: "Code (Z–A)", ar: "الكود (ي–أ)" },
 };
 
+export function getCategorySubCategoriesSortLabel(sort: CategorySubCategoriesSort, translate: Translate) {
+  const label = SUB_CATEGORIES_SORT_LABELS[sort];
+  return translate(label.en, label.ar);
+}
+
 export function getCategorySuppliersSortLabel(sort: CategorySuppliersSort, translate: Translate) {
   const label = SUPPLIERS_SORT_LABELS[sort];
   return translate(label.en, label.ar);
@@ -94,6 +121,33 @@ export function getCategoryMaterialsSortLabel(sort: CategoryMaterialsSort, trans
 
 function invoiceDateValue(row: PurchasingMaterialsCategoryOrder) {
   return row.legacyInvoiceIssuedAt ?? row.createdAt;
+}
+
+export function sortCategorySubCategories(data: PurchasingMaterialsBySubCategory[], sort: CategorySubCategoriesSort) {
+  const rows = [...data];
+  rows.sort((a, b) => {
+    switch (sort) {
+      case "spend-desc":
+        return b.totalSpend - a.totalSpend;
+      case "spend-asc":
+        return a.totalSpend - b.totalSpend;
+      case "qty-desc":
+        return b.totalQuantity - a.totalQuantity;
+      case "qty-asc":
+        return a.totalQuantity - b.totalQuantity;
+      case "materials-desc":
+        return b.materialCount - a.materialCount;
+      case "materials-asc":
+        return a.materialCount - b.materialCount;
+      case "name-asc":
+        return a.subCategoryTitle.localeCompare(b.subCategoryTitle);
+      case "name-desc":
+        return b.subCategoryTitle.localeCompare(a.subCategoryTitle);
+      default:
+        return 0;
+    }
+  });
+  return rows;
 }
 
 export function sortCategorySuppliers(data: PurchasingMaterialsBySupplier[], sort: CategorySuppliersSort) {

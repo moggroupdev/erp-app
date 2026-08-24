@@ -9,6 +9,7 @@ import type {
   PurchasingMaterialsByMaterial,
   PurchasingMaterialsByPeriod,
   PurchasingMaterialsCategoryStatsOverview,
+  PurchasingMaterialsSupplierBySubCategory,
   PurchasingMaterialsSupplierOrder,
 } from "@/types/reports";
 
@@ -54,9 +55,11 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
   overview,
   byPeriod,
   categories,
+  subCategories,
   orders,
   materials,
   categoriesSortLabel,
+  subCategoriesSortLabel,
   ordersSortLabel,
   materialsSortLabel,
 }: {
@@ -68,9 +71,11 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
   overview: PurchasingMaterialsCategoryStatsOverview;
   byPeriod: PurchasingMaterialsByPeriod[];
   categories: PurchasingMaterialsByMainCategory[];
+  subCategories: PurchasingMaterialsSupplierBySubCategory[];
   orders: PurchasingMaterialsSupplierOrder[];
   materials: PurchasingMaterialsByMaterial[];
   categoriesSortLabel: string;
+  subCategoriesSortLabel: string;
   ordersSortLabel: string;
   materialsSortLabel: string;
 }) {
@@ -90,6 +95,10 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
   const totalCategoryMaterials = categories.reduce((sum, row) => sum + row.materialCount, 0);
   const totalCategoryQuantity = categories.reduce((sum, row) => sum + row.totalQuantity, 0);
   const totalCategorySpend = categories.reduce((sum, row) => sum + row.totalSpend, 0);
+
+  const totalSubCategoryMaterials = subCategories.reduce((sum, row) => sum + row.materialCount, 0);
+  const totalSubCategoryQuantity = subCategories.reduce((sum, row) => sum + row.totalQuantity, 0);
+  const totalSubCategorySpend = subCategories.reduce((sum, row) => sum + row.totalSpend, 0);
 
   const totalOrderAmount = orders.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
   const totalMaterialQuantity = materials.reduce((sum, row) => sum + row.totalQuantity, 0);
@@ -187,6 +196,43 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             formatQuantity(totalCategoryQuantity),
             formatMoney(totalCategorySpend),
             `${percentageFormatter.format(categories.length === 0 ? 0 : 100)}%`,
+          ]}
+          emptyLabel={translate("No data available", "لا توجد بيانات")}
+        />
+      </section>
+
+      <section className="flex flex-col gap-2.5">
+        <PrintSectionHeading
+          title={translate("Value by Subcategory", "القيمة حسب الفئة الفرعية")}
+          subtitle={translate(`Sorted by: ${subCategoriesSortLabel}`, `مرتّب حسب: ${subCategoriesSortLabel}`)}
+        />
+        <PrintTable
+          headers={[
+            "#",
+            translate("Main Category", "الفئة الرئيسية"),
+            translate("Subcategory", "الفئة الفرعية"),
+            translate("Materials", "المواد"),
+            translate("Qty Ordered", "الكمية المطلوبة"),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Percentage", "النسبة"),
+          ]}
+          rows={subCategories.map((row, index) => [
+            String(index + 1),
+            row.mainCategoryTitle,
+            row.subCategoryTitle,
+            String(row.materialCount),
+            formatQuantity(row.totalQuantity),
+            formatMoney(row.totalSpend),
+            `${percentageFormatter.format(totalSubCategorySpend === 0 ? 0 : (row.totalSpend / totalSubCategorySpend) * 100)}%`,
+          ])}
+          footerRow={[
+            "",
+            translate("Total", "الإجمالي"),
+            "",
+            String(totalSubCategoryMaterials),
+            formatQuantity(totalSubCategoryQuantity),
+            formatMoney(totalSubCategorySpend),
+            `${percentageFormatter.format(subCategories.length === 0 ? 0 : 100)}%`,
           ]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />

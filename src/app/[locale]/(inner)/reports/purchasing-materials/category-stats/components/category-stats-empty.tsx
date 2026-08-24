@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp, FileClock, Files, ShoppingCart, Truck } from "lucide-react";
+import { ArrowUp, FileClock, Files, Layers, ShoppingCart, Truck } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 
 export default function CategoryStatsEmpty() {
@@ -11,6 +11,11 @@ export default function CategoryStatsEmpty() {
       icon: ShoppingCart,
       label: translate("Overview totals", "إجماليات عامة"),
       detail: translate("Value, invoice count, and average order value", "القيمة وعدد الفواتير ومتوسط قيمة الطلب"),
+    },
+    {
+      icon: Layers,
+      label: translate("Subcategories", "الفئات الفرعية"),
+      detail: translate("Value broken down by subcategory", "القيمة مفصّلة حسب الفئة الفرعية"),
     },
     {
       icon: Truck,

@@ -22,26 +22,30 @@ import SpendingTrendChart from "../components/spending-trend-chart";
 import SupplierStatsEmpty from "./components/supplier-stats-empty";
 import SupplierPicker from "./components/supplier-picker";
 import SupplierCategoriesTable from "./components/categories-table";
+import SupplierSubCategoriesTable from "./components/subcategories-table";
 import SupplierOrdersTable from "./components/orders-table";
 import SupplierMaterialsTable from "./components/materials-table";
 import {
   getSupplierCategoriesSortLabel,
   getSupplierMaterialsSortLabel,
   getSupplierOrdersSortLabel,
+  getSupplierSubCategoriesSortLabel,
   sortSupplierCategories,
   sortSupplierMaterials,
   sortSupplierOrders,
+  sortSupplierSubCategories,
   type SupplierCategoriesSort,
   type SupplierMaterialsSort,
   type SupplierOrdersSort,
+  type SupplierSubCategoriesSort,
 } from "./components/sort";
 import PurchasingMaterialsSupplierStatsPrintDocument from "@/components/documents/purchasing-materials-supplier-stats-print-document";
 
 const PAGE_TITLE = { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" };
 
 const PAGE_SUBTITLE = {
-  en: "Purchase stats scoped to one supplier: value trend, categories, purchase orders, and materials.",
-  ar: "إحصائيات المشتريات ضمن مورد واحد: اتجاه القيمة والفئات وأوامر الشراء والمواد.",
+  en: "Purchase stats scoped to one supplier: value trend, categories, subcategories, purchase orders, and materials.",
+  ar: "إحصائيات المشتريات ضمن مورد واحد: اتجاه القيمة والفئات والفئات الفرعية وأوامر الشراء والمواد.",
 };
 
 function parseGroupBy(value: string | null): GroupBy {
@@ -63,6 +67,7 @@ export default function Page() {
   const groupBy = parseGroupBy(searchParams.get("groupBy"));
 
   const [categoriesSort, setCategoriesSort] = useState<SupplierCategoriesSort>("spend-desc");
+  const [subCategoriesSort, setSubCategoriesSort] = useState<SupplierSubCategoriesSort>("spend-desc");
   const [ordersSort, setOrdersSort] = useState<SupplierOrdersSort>("invoice-date-desc");
   const [materialsSort, setMaterialsSort] = useState<SupplierMaterialsSort>("spend-desc");
 
@@ -112,6 +117,10 @@ export default function Page() {
   const sortedCategories = useMemo(
     () => (data ? sortSupplierCategories(data.categories, categoriesSort) : []),
     [data, categoriesSort],
+  );
+  const sortedSubCategories = useMemo(
+    () => (data ? sortSupplierSubCategories(data.subCategories, subCategoriesSort) : []),
+    [data, subCategoriesSort],
   );
   const sortedOrders = useMemo(() => (data ? sortSupplierOrders(data.orders, ordersSort) : []), [data, ordersSort]);
   const sortedMaterials = useMemo(
@@ -165,9 +174,11 @@ export default function Page() {
                     overview={data.overview}
                     byPeriod={data.byPeriod}
                     categories={sortedCategories}
+                    subCategories={sortedSubCategories}
                     orders={sortedOrders}
                     materials={sortedMaterials}
                     categoriesSortLabel={getSupplierCategoriesSortLabel(categoriesSort, translate)}
+                    subCategoriesSortLabel={getSupplierSubCategoriesSortLabel(subCategoriesSort, translate)}
                     ordersSortLabel={getSupplierOrdersSortLabel(ordersSort, translate)}
                     materialsSortLabel={getSupplierMaterialsSortLabel(materialsSort, translate)}
                   />
@@ -216,6 +227,11 @@ export default function Page() {
               <OverviewStats overview={data.overview} />
               <SpendingTrendChart data={data.byPeriod} groupBy={groupBy} />
               <SupplierCategoriesTable data={sortedCategories} sort={categoriesSort} onSortChange={setCategoriesSort} />
+              <SupplierSubCategoriesTable
+                data={sortedSubCategories}
+                sort={subCategoriesSort}
+                onSortChange={setSubCategoriesSort}
+              />
               <SupplierOrdersTable data={sortedOrders} sort={ordersSort} onSortChange={setOrdersSort} />
               <SupplierMaterialsTable data={sortedMaterials} sort={materialsSort} onSortChange={setMaterialsSort} />
             </div>

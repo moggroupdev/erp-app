@@ -6,6 +6,7 @@ import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type {
   PurchasingMaterialsByMaterial,
+  PurchasingMaterialsBySubCategory,
   PurchasingMaterialsBySupplier,
   PurchasingMaterialsCategoryOrder,
   PurchasingMaterialsCategoryStatsOverview,
@@ -17,9 +18,11 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   startDate,
   endDate,
   overview,
+  subCategories,
   suppliers,
   orders,
   materials,
+  subCategoriesSortLabel,
   suppliersSortLabel,
   ordersSortLabel,
   materialsSortLabel,
@@ -29,9 +32,11 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   startDate?: string | null;
   endDate?: string | null;
   overview: PurchasingMaterialsCategoryStatsOverview;
+  subCategories: PurchasingMaterialsBySubCategory[];
   suppliers: PurchasingMaterialsBySupplier[];
   orders: PurchasingMaterialsCategoryOrder[];
   materials: PurchasingMaterialsByMaterial[];
+  subCategoriesSortLabel: string;
   suppliersSortLabel: string;
   ordersSortLabel: string;
   materialsSortLabel: string;
@@ -40,7 +45,14 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   const currency = translation.currency;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
+  const totalSubCategoryMaterials = subCategories.reduce((sum, row) => sum + row.materialCount, 0);
+  const totalSubCategoryQuantity = subCategories.reduce((sum, row) => sum + row.totalQuantity, 0);
+  const totalSubCategorySpend = subCategories.reduce((sum, row) => sum + row.totalSpend, 0);
   const totalSupplierOrders = suppliers.reduce((sum, row) => sum + row.orderCount, 0);
   const totalSupplierSpend = suppliers.reduce((sum, row) => sum + row.totalSpend, 0);
   const avgSupplierOrderValue = totalSupplierOrders === 0 ? 0 : totalSupplierSpend / totalSupplierOrders;
@@ -79,6 +91,40 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
       </section>
 
       <hr className="border-gray-300" />
+
+      <section className="flex flex-col gap-2.5">
+        <PrintSectionHeading
+          title={translate("Value by Subcategory", "القيمة حسب الفئة الفرعية")}
+          subtitle={translate(`Sorted by: ${subCategoriesSortLabel}`, `مرتّب حسب: ${subCategoriesSortLabel}`)}
+        />
+        <PrintTable
+          headers={[
+            "#",
+            translate("Subcategory", "الفئة الفرعية"),
+            translate("Materials", "المواد"),
+            translate("Qty Ordered", "الكمية المطلوبة"),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Percentage", "النسبة"),
+          ]}
+          rows={subCategories.map((row, index) => [
+            String(index + 1),
+            row.subCategoryTitle,
+            String(row.materialCount),
+            formatQuantity(row.totalQuantity),
+            formatMoney(row.totalSpend),
+            `${percentageFormatter.format(totalSubCategorySpend === 0 ? 0 : (row.totalSpend / totalSubCategorySpend) * 100)}%`,
+          ])}
+          footerRow={[
+            "",
+            translate("Total", "الإجمالي"),
+            String(totalSubCategoryMaterials),
+            formatQuantity(totalSubCategoryQuantity),
+            formatMoney(totalSubCategorySpend),
+            `${percentageFormatter.format(subCategories.length === 0 ? 0 : 100)}%`,
+          ]}
+          emptyLabel={translate("No data available", "لا توجد بيانات")}
+        />
+      </section>
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
@@ -147,6 +193,13 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
           monoColumnIndexes={[1, 2, 4]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
+        <p className="text-[10px] leading-relaxed text-amber-800">
+          <span className="font-semibold">{translate("Important", "هام")}: </span>
+          {translate(
+            "The total of these invoices may differ from the report total because these invoices may include other line items that do not belong to the selected category.",
+            "إجمالي هذه الفواتير قد يختلف عن إجمالي التقرير لأن هذه الفواتير قد تتضمن بنوداً أخرى لا تنتمي للفئة المختارة.",
+          )}
+        </p>
       </section>
 
       <section className="flex flex-col gap-2.5">

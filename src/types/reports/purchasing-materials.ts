@@ -47,6 +47,19 @@ export type PurchasingMaterialsByMainCategory = {
   totalSpend: number;
 };
 
+export type PurchasingMaterialsBySubCategory = {
+  subCategoryId: string;
+  subCategoryTitle: string;
+  materialCount: number;
+  totalQuantity: number;
+  totalSpend: number;
+};
+
+export type PurchasingMaterialsSupplierBySubCategory = PurchasingMaterialsBySubCategory & {
+  mainCategoryId: string;
+  mainCategoryTitle: string;
+};
+
 export type PurchasingMaterialsTopOrder = {
   orderId: string;
   orderCode: string;
@@ -122,6 +135,7 @@ export type PurchasingMaterialsCategoryStats = {
     title: string;
   };
   overview: PurchasingMaterialsCategoryStatsOverview;
+  subCategories: PurchasingMaterialsBySubCategory[];
   suppliers: PurchasingMaterialsBySupplier[];
   orders: PurchasingMaterialsCategoryOrder[];
   materials: PurchasingMaterialsByMaterial[];
@@ -149,6 +163,7 @@ export type PurchasingMaterialsSupplierStats = {
   overview: PurchasingMaterialsCategoryStatsOverview;
   byPeriod: PurchasingMaterialsByPeriod[];
   categories: PurchasingMaterialsByMainCategory[];
+  subCategories: PurchasingMaterialsSupplierBySubCategory[];
   orders: PurchasingMaterialsSupplierOrder[];
   materials: PurchasingMaterialsByMaterial[];
 };

@@ -20,18 +20,22 @@ import OverviewStats from "../components/overview-stats";
 import ReportSkeleton from "../components/report-skeleton";
 import CategoryStatsEmpty from "./components/category-stats-empty";
 import CategoryPicker from "./components/category-picker";
+import CategorySubCategoriesTable from "./components/subcategories-table";
 import CategorySuppliersTable from "./components/suppliers-table";
 import CategoryOrdersTable from "./components/orders-table";
 import CategoryMaterialsTable from "./components/materials-table";
 import {
   getCategoryMaterialsSortLabel,
   getCategoryOrdersSortLabel,
+  getCategorySubCategoriesSortLabel,
   getCategorySuppliersSortLabel,
   sortCategoryMaterials,
   sortCategoryOrders,
+  sortCategorySubCategories,
   sortCategorySuppliers,
   type CategoryMaterialsSort,
   type CategoryOrdersSort,
+  type CategorySubCategoriesSort,
   type CategorySuppliersSort,
 } from "./components/sort";
 import PurchasingMaterialsCategoryStatsPrintDocument from "@/components/documents/purchasing-materials-category-stats-print-document";
@@ -39,8 +43,8 @@ import PurchasingMaterialsCategoryStatsPrintDocument from "@/components/document
 const PAGE_TITLE = { en: "Purchasing by Category", ar: "المشتريات حسب الفئة" };
 
 const PAGE_SUBTITLE = {
-  en: "Purchase stats scoped to one main material category: suppliers, purchase orders, and materials.",
-  ar: "إحصائيات المشتريات ضمن فئة مواد رئيسية واحدة: الموردون وأوامر الشراء والمواد.",
+  en: "Purchase stats scoped to one main material category: subcategories, suppliers, purchase orders, and materials.",
+  ar: "إحصائيات المشتريات ضمن فئة مواد رئيسية واحدة: الفئات الفرعية والموردون وأوامر الشراء والمواد.",
 };
 
 export default function Page() {
@@ -55,6 +59,7 @@ export default function Page() {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
 
+  const [subCategoriesSort, setSubCategoriesSort] = useState<CategorySubCategoriesSort>("spend-desc");
   const [suppliersSort, setSuppliersSort] = useState<CategorySuppliersSort>("spend-desc");
   const [ordersSort, setOrdersSort] = useState<CategoryOrdersSort>("invoice-date-desc");
   const [materialsSort, setMaterialsSort] = useState<CategoryMaterialsSort>("spend-desc");
@@ -97,6 +102,10 @@ export default function Page() {
     enabled: Boolean(mainCategoryId),
   });
 
+  const sortedSubCategories = useMemo(
+    () => (data ? sortCategorySubCategories(data.subCategories, subCategoriesSort) : []),
+    [data, subCategoriesSort],
+  );
   const sortedSuppliers = useMemo(
     () => (data ? sortCategorySuppliers(data.suppliers, suppliersSort) : []),
     [data, suppliersSort],
@@ -153,9 +162,11 @@ export default function Page() {
                     startDate={from}
                     endDate={to}
                     overview={data.overview}
+                    subCategories={sortedSubCategories}
                     suppliers={sortedSuppliers}
                     orders={sortedOrders}
                     materials={sortedMaterials}
+                    subCategoriesSortLabel={getCategorySubCategoriesSortLabel(subCategoriesSort, translate)}
                     suppliersSortLabel={getCategorySuppliersSortLabel(suppliersSort, translate)}
                     ordersSortLabel={getCategoryOrdersSortLabel(ordersSort, translate)}
                     materialsSortLabel={getCategoryMaterialsSortLabel(materialsSort, translate)}
@@ -201,6 +212,11 @@ export default function Page() {
           data && (
             <div className="flex flex-col gap-6">
               <OverviewStats overview={data.overview} />
+              <CategorySubCategoriesTable
+                data={sortedSubCategories}
+                sort={subCategoriesSort}
+                onSortChange={setSubCategoriesSort}
+              />
               <CategorySuppliersTable
                 data={sortedSuppliers}
                 sort={suppliersSort}
