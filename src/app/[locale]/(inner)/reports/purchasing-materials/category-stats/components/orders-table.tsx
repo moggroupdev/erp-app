@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Select, Table } from "@mantine/core";
 import { FileText, CheckCircle, Clock } from "lucide-react";
@@ -9,58 +8,19 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsCategoryOrder } from "@/types/reports";
 import ReportCard from "../../components/report-card";
+import type { CategoryOrdersSort } from "./sort";
 
-type SortOption =
-  | "invoice-date-desc"
-  | "invoice-date-asc"
-  | "amount-desc"
-  | "amount-asc"
-  | "invoice-number-asc"
-  | "invoice-number-desc"
-  | "supplier-asc"
-  | "supplier-desc"
-  | "code-asc"
-  | "code-desc";
-
-function invoiceDateValue(row: PurchasingMaterialsCategoryOrder) {
-  return row.legacyInvoiceIssuedAt ?? row.createdAt;
-}
-
-export default function CategoryOrdersTable({ data }: { data: PurchasingMaterialsCategoryOrder[] }) {
+export default function CategoryOrdersTable({
+  data,
+  sort,
+  onSortChange,
+}: {
+  data: PurchasingMaterialsCategoryOrder[];
+  sort: CategoryOrdersSort;
+  onSortChange: (sort: CategoryOrdersSort) => void;
+}) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const [sort, setSort] = useState<SortOption>("invoice-date-desc");
-
-  const sorted = useMemo(() => {
-    const rows = [...data];
-    rows.sort((a, b) => {
-      switch (sort) {
-        case "invoice-date-desc":
-          return new Date(invoiceDateValue(b)).getTime() - new Date(invoiceDateValue(a)).getTime();
-        case "invoice-date-asc":
-          return new Date(invoiceDateValue(a)).getTime() - new Date(invoiceDateValue(b)).getTime();
-        case "amount-desc":
-          return b.legacyInvoiceTotalPurchases - a.legacyInvoiceTotalPurchases;
-        case "amount-asc":
-          return a.legacyInvoiceTotalPurchases - b.legacyInvoiceTotalPurchases;
-        case "invoice-number-asc":
-          return (a.legacyInvoiceNumber ?? "").localeCompare(b.legacyInvoiceNumber ?? "");
-        case "invoice-number-desc":
-          return (b.legacyInvoiceNumber ?? "").localeCompare(a.legacyInvoiceNumber ?? "");
-        case "supplier-asc":
-          return a.supplierName.localeCompare(b.supplierName);
-        case "supplier-desc":
-          return b.supplierName.localeCompare(a.supplierName);
-        case "code-asc":
-          return a.orderCode.localeCompare(b.orderCode);
-        case "code-desc":
-          return b.orderCode.localeCompare(a.orderCode);
-        default:
-          return 0;
-      }
-    });
-    return rows;
-  }, [data, sort]);
 
   function formatDisplayDate(value: string | null) {
     if (!value) return "-";
@@ -84,7 +44,7 @@ export default function CategoryOrdersTable({ data }: { data: PurchasingMaterial
         <Select
           value={sort}
           onChange={(value) => {
-            if (value) setSort(value as SortOption);
+            if (value) onSortChange(value as CategoryOrdersSort);
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
@@ -117,12 +77,12 @@ export default function CategoryOrdersTable({ data }: { data: PurchasingMaterial
         />
       }
     >
-      {sorted.length === 0 ? (
+      {data.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
       ) : (
-        <div className="max-h-128 overflow-auto rounded-xl">
+        <div className="overflow-x-auto rounded-xl">
           <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
-            <Table.Thead className="sticky top-0 bg-gray-50">
+            <Table.Thead className="bg-gray-50">
               <Table.Tr>
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
@@ -139,7 +99,7 @@ export default function CategoryOrdersTable({ data }: { data: PurchasingMaterial
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {sorted.map((row, index) => (
+              {data.map((row, index) => (
                 <Table.Tr key={row.orderId} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td>

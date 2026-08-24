@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Select, Table } from "@mantine/core";
 import { Truck } from "lucide-react";
@@ -9,48 +8,19 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsBySupplier } from "@/types/reports";
 import ReportCard from "../../components/report-card";
+import type { CategorySuppliersSort } from "./sort";
 
-type SortOption =
-  | "spend-desc"
-  | "spend-asc"
-  | "orders-desc"
-  | "orders-asc"
-  | "avg-desc"
-  | "avg-asc"
-  | "name-asc"
-  | "name-desc";
-
-export default function CategorySuppliersTable({ data }: { data: PurchasingMaterialsBySupplier[] }) {
+export default function CategorySuppliersTable({
+  data,
+  sort,
+  onSortChange,
+}: {
+  data: PurchasingMaterialsBySupplier[];
+  sort: CategorySuppliersSort;
+  onSortChange: (sort: CategorySuppliersSort) => void;
+}) {
   const { translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const [sort, setSort] = useState<SortOption>("spend-desc");
-
-  const sorted = useMemo(() => {
-    const rows = [...data];
-    rows.sort((a, b) => {
-      switch (sort) {
-        case "spend-desc":
-          return b.totalSpend - a.totalSpend;
-        case "spend-asc":
-          return a.totalSpend - b.totalSpend;
-        case "orders-desc":
-          return b.orderCount - a.orderCount;
-        case "orders-asc":
-          return a.orderCount - b.orderCount;
-        case "avg-desc":
-          return b.avgOrderValue - a.avgOrderValue;
-        case "avg-asc":
-          return a.avgOrderValue - b.avgOrderValue;
-        case "name-asc":
-          return a.supplierName.localeCompare(b.supplierName);
-        case "name-desc":
-          return b.supplierName.localeCompare(a.supplierName);
-        default:
-          return 0;
-      }
-    });
-    return rows;
-  }, [data, sort]);
 
   return (
     <ReportCard
@@ -65,7 +35,7 @@ export default function CategorySuppliersTable({ data }: { data: PurchasingMater
         <Select
           value={sort}
           onChange={(value) => {
-            if (value) setSort(value as SortOption);
+            if (value) onSortChange(value as CategorySuppliersSort);
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
@@ -84,12 +54,12 @@ export default function CategorySuppliersTable({ data }: { data: PurchasingMater
         />
       }
     >
-      {sorted.length === 0 ? (
+      {data.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
       ) : (
-        <div className="max-h-128 overflow-auto rounded-xl">
+        <div className="overflow-x-auto rounded-xl">
           <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
-            <Table.Thead className="sticky top-0 bg-gray-50">
+            <Table.Thead className="bg-gray-50">
               <Table.Tr>
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
@@ -104,7 +74,7 @@ export default function CategorySuppliersTable({ data }: { data: PurchasingMater
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {sorted.map((row, index) => (
+              {data.map((row, index) => (
                 <Table.Tr key={row.supplierId} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td className="max-w-60 truncate font-medium text-gray-800">

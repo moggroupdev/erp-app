@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -22,6 +23,14 @@ import CategoryPicker from "./components/category-picker";
 import CategorySuppliersTable from "./components/suppliers-table";
 import CategoryOrdersTable from "./components/orders-table";
 import CategoryMaterialsTable from "./components/materials-table";
+import {
+  sortCategoryMaterials,
+  sortCategoryOrders,
+  sortCategorySuppliers,
+  type CategoryMaterialsSort,
+  type CategoryOrdersSort,
+  type CategorySuppliersSort,
+} from "./components/sort";
 import PurchasingMaterialsCategoryStatsPrintDocument from "@/components/documents/purchasing-materials-category-stats-print-document";
 
 const PAGE_TITLE = { en: "Purchasing by Category", ar: "المشتريات حسب الفئة" };
@@ -42,6 +51,10 @@ export default function Page() {
   const mainCategoryId = searchParams.get("mainCategoryId");
   const from = searchParams.get("from");
   const to = searchParams.get("to");
+
+  const [suppliersSort, setSuppliersSort] = useState<CategorySuppliersSort>("spend-desc");
+  const [ordersSort, setOrdersSort] = useState<CategoryOrdersSort>("invoice-date-desc");
+  const [materialsSort, setMaterialsSort] = useState<CategoryMaterialsSort>("spend-desc");
 
   function updateQuery(patch: { mainCategoryId?: string | null; from?: string | null; to?: string | null }) {
     const params = new URLSearchParams(searchParams.toString());
@@ -80,6 +93,19 @@ export default function Page() {
     staleTime: staleTimes.reports.purchasingMaterialsCategoryStats,
     enabled: Boolean(mainCategoryId),
   });
+
+  const sortedSuppliers = useMemo(
+    () => (data ? sortCategorySuppliers(data.suppliers, suppliersSort) : []),
+    [data, suppliersSort],
+  );
+  const sortedOrders = useMemo(
+    () => (data ? sortCategoryOrders(data.orders, ordersSort) : []),
+    [data, ordersSort],
+  );
+  const sortedMaterials = useMemo(
+    () => (data ? sortCategoryMaterials(data.materials, materialsSort) : []),
+    [data, materialsSort],
+  );
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
   const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
@@ -124,9 +150,9 @@ export default function Page() {
                     startDate={from}
                     endDate={to}
                     overview={data.overview}
-                    suppliers={data.suppliers}
-                    orders={data.orders}
-                    materials={data.materials}
+                    suppliers={sortedSuppliers}
+                    orders={sortedOrders}
+                    materials={sortedMaterials}
                   />
                 </PrintDocument>
               )}
@@ -169,9 +195,17 @@ export default function Page() {
           data && (
             <div className="flex flex-col gap-6">
               <OverviewStats overview={data.overview} />
-              <CategorySuppliersTable data={data.suppliers} />
-              <CategoryOrdersTable data={data.orders} />
-              <CategoryMaterialsTable data={data.materials} />
+              <CategorySuppliersTable
+                data={sortedSuppliers}
+                sort={suppliersSort}
+                onSortChange={setSuppliersSort}
+              />
+              <CategoryOrdersTable data={sortedOrders} sort={ordersSort} onSortChange={setOrdersSort} />
+              <CategoryMaterialsTable
+                data={sortedMaterials}
+                sort={materialsSort}
+                onSortChange={setMaterialsSort}
+              />
             </div>
           )
         )}

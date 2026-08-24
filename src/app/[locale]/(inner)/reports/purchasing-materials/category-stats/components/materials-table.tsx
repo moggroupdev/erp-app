@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Select, Table } from "@mantine/core";
 import { Boxes } from "lucide-react";
@@ -11,54 +10,19 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { PurchasingMaterialsByMaterial } from "@/types/reports";
 import ReportCard from "../../components/report-card";
+import type { CategoryMaterialsSort } from "./sort";
 
-type SortOption =
-  | "spend-desc"
-  | "spend-asc"
-  | "qty-desc"
-  | "qty-asc"
-  | "avg-desc"
-  | "avg-asc"
-  | "name-asc"
-  | "name-desc"
-  | "code-asc"
-  | "code-desc";
-
-export default function CategoryMaterialsTable({ data }: { data: PurchasingMaterialsByMaterial[] }) {
+export default function CategoryMaterialsTable({
+  data,
+  sort,
+  onSortChange,
+}: {
+  data: PurchasingMaterialsByMaterial[];
+  sort: CategoryMaterialsSort;
+  onSortChange: (sort: CategoryMaterialsSort) => void;
+}) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const [sort, setSort] = useState<SortOption>("spend-desc");
-
-  const sorted = useMemo(() => {
-    const rows = [...data];
-    rows.sort((a, b) => {
-      switch (sort) {
-        case "spend-desc":
-          return b.totalSpend - a.totalSpend;
-        case "spend-asc":
-          return a.totalSpend - b.totalSpend;
-        case "qty-desc":
-          return b.totalQuantity - a.totalQuantity;
-        case "qty-asc":
-          return a.totalQuantity - b.totalQuantity;
-        case "avg-desc":
-          return b.avgUnitPrice - a.avgUnitPrice;
-        case "avg-asc":
-          return a.avgUnitPrice - b.avgUnitPrice;
-        case "name-asc":
-          return a.materialTitle.localeCompare(b.materialTitle);
-        case "name-desc":
-          return b.materialTitle.localeCompare(a.materialTitle);
-        case "code-asc":
-          return a.materialCode.localeCompare(b.materialCode);
-        case "code-desc":
-          return b.materialCode.localeCompare(a.materialCode);
-        default:
-          return 0;
-      }
-    });
-    return rows;
-  }, [data, sort]);
 
   return (
     <ReportCard
@@ -73,7 +37,7 @@ export default function CategoryMaterialsTable({ data }: { data: PurchasingMater
         <Select
           value={sort}
           onChange={(value) => {
-            if (value) setSort(value as SortOption);
+            if (value) onSortChange(value as CategoryMaterialsSort);
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
@@ -100,12 +64,12 @@ export default function CategoryMaterialsTable({ data }: { data: PurchasingMater
         />
       }
     >
-      {sorted.length === 0 ? (
+      {data.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
       ) : (
-        <div className="max-h-128 overflow-auto rounded-xl">
+        <div className="overflow-x-auto rounded-xl">
           <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
-            <Table.Thead className="sticky top-0 bg-gray-50">
+            <Table.Thead className="bg-gray-50">
               <Table.Tr>
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Material", "المادة")}</Table.Th>
@@ -121,7 +85,7 @@ export default function CategoryMaterialsTable({ data }: { data: PurchasingMater
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {sorted.map((row, index) => (
+              {data.map((row, index) => (
                 <Table.Tr key={row.materialCode} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td className="max-w-60 truncate font-medium text-gray-800">
