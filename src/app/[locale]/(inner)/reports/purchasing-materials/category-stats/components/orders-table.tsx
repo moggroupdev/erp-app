@@ -89,7 +89,7 @@ export default function CategoryOrdersTable({
                 <Table.Th className="text-gray-600">{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Invoice Date", "تاريخ الفاتورة")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate("Inventory Transaction Legacy Numbers", "أرقام حركات المخزون القديمة")}
+                  {translate("Addition Permit Numbers", "أرقام إذن الإضافة")}
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-center text-gray-600">{translate("Status", "الحالة")}</Table.Th>

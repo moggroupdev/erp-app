@@ -24,6 +24,9 @@ import CategorySuppliersTable from "./components/suppliers-table";
 import CategoryOrdersTable from "./components/orders-table";
 import CategoryMaterialsTable from "./components/materials-table";
 import {
+  getCategoryMaterialsSortLabel,
+  getCategoryOrdersSortLabel,
+  getCategorySuppliersSortLabel,
   sortCategoryMaterials,
   sortCategoryOrders,
   sortCategorySuppliers,
@@ -153,6 +156,9 @@ export default function Page() {
                     suppliers={sortedSuppliers}
                     orders={sortedOrders}
                     materials={sortedMaterials}
+                    suppliersSortLabel={getCategorySuppliersSortLabel(suppliersSort, translate)}
+                    ordersSortLabel={getCategoryOrdersSortLabel(ordersSort, translate)}
+                    materialsSortLabel={getCategoryMaterialsSortLabel(materialsSort, translate)}
                   />
                 </PrintDocument>
               )}

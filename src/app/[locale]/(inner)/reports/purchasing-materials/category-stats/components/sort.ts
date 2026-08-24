@@ -38,6 +38,60 @@ export type CategoryMaterialsSort =
   | "code-asc"
   | "code-desc";
 
+type Translate = (en: string, ar: string) => string;
+
+const SUPPLIERS_SORT_LABELS: Record<CategorySuppliersSort, { en: string; ar: string }> = {
+  "spend-desc": { en: "Spend (high to low)", ar: "الإنفاق (من الأعلى للأقل)" },
+  "spend-asc": { en: "Spend (low to high)", ar: "الإنفاق (من الأقل للأعلى)" },
+  "orders-desc": { en: "Orders (high to low)", ar: "الطلبات (من الأعلى للأقل)" },
+  "orders-asc": { en: "Orders (low to high)", ar: "الطلبات (من الأقل للأعلى)" },
+  "avg-desc": { en: "Avg order (high to low)", ar: "متوسط الطلب (من الأعلى للأقل)" },
+  "avg-asc": { en: "Avg order (low to high)", ar: "متوسط الطلب (من الأقل للأعلى)" },
+  "name-asc": { en: "Name (A–Z)", ar: "الاسم (أ–ي)" },
+  "name-desc": { en: "Name (Z–A)", ar: "الاسم (ي–أ)" },
+};
+
+const ORDERS_SORT_LABELS: Record<CategoryOrdersSort, { en: string; ar: string }> = {
+  "invoice-date-desc": { en: "Invoice date (newest)", ar: "تاريخ الفاتورة (الأحدث)" },
+  "invoice-date-asc": { en: "Invoice date (oldest)", ar: "تاريخ الفاتورة (الأقدم)" },
+  "amount-desc": { en: "Amount (high to low)", ar: "المبلغ (من الأعلى للأقل)" },
+  "amount-asc": { en: "Amount (low to high)", ar: "المبلغ (من الأقل للأعلى)" },
+  "invoice-number-asc": { en: "Invoice number (A–Z)", ar: "رقم الفاتورة (أ–ي)" },
+  "invoice-number-desc": { en: "Invoice number (Z–A)", ar: "رقم الفاتورة (ي–أ)" },
+  "supplier-asc": { en: "Supplier (A–Z)", ar: "المورد (أ–ي)" },
+  "supplier-desc": { en: "Supplier (Z–A)", ar: "المورد (ي–أ)" },
+  "code-asc": { en: "Code (A–Z)", ar: "الكود (أ–ي)" },
+  "code-desc": { en: "Code (Z–A)", ar: "الكود (ي–أ)" },
+};
+
+const MATERIALS_SORT_LABELS: Record<CategoryMaterialsSort, { en: string; ar: string }> = {
+  "spend-desc": { en: "Spend (high to low)", ar: "الإنفاق (من الأعلى للأقل)" },
+  "spend-asc": { en: "Spend (low to high)", ar: "الإنفاق (من الأقل للأعلى)" },
+  "qty-desc": { en: "Quantity (high to low)", ar: "الكمية (من الأعلى للأقل)" },
+  "qty-asc": { en: "Quantity (low to high)", ar: "الكمية (من الأقل للأعلى)" },
+  "avg-desc": { en: "Avg unit price (high to low)", ar: "متوسط سعر الوحدة (من الأعلى للأقل)" },
+  "avg-asc": { en: "Avg unit price (low to high)", ar: "متوسط سعر الوحدة (من الأقل للأعلى)" },
+  "name-asc": { en: "Name (A–Z)", ar: "الاسم (أ–ي)" },
+  "name-desc": { en: "Name (Z–A)", ar: "الاسم (ي–أ)" },
+  "code-asc": { en: "Code (A–Z)", ar: "الكود (أ–ي)" },
+  "code-desc": { en: "Code (Z–A)", ar: "الكود (ي–أ)" },
+};
+
+export function getCategorySuppliersSortLabel(sort: CategorySuppliersSort, translate: Translate) {
+  const label = SUPPLIERS_SORT_LABELS[sort];
+  return translate(label.en, label.ar);
+}
+
+export function getCategoryOrdersSortLabel(sort: CategoryOrdersSort, translate: Translate) {
+  const label = ORDERS_SORT_LABELS[sort];
+  return translate(label.en, label.ar);
+}
+
+export function getCategoryMaterialsSortLabel(sort: CategoryMaterialsSort, translate: Translate) {
+  const label = MATERIALS_SORT_LABELS[sort];
+  return translate(label.en, label.ar);
+}
+
 function invoiceDateValue(row: PurchasingMaterialsCategoryOrder) {
   return row.legacyInvoiceIssuedAt ?? row.createdAt;
 }

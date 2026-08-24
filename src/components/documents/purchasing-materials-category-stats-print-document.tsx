@@ -20,6 +20,9 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   suppliers,
   orders,
   materials,
+  suppliersSortLabel,
+  ordersSortLabel,
+  materialsSortLabel,
 }: {
   title: string;
   categoryTitle: string;
@@ -29,6 +32,9 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   suppliers: PurchasingMaterialsBySupplier[];
   orders: PurchasingMaterialsCategoryOrder[];
   materials: PurchasingMaterialsByMaterial[];
+  suppliersSortLabel: string;
+  ordersSortLabel: string;
+  materialsSortLabel: string;
 }) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
@@ -67,13 +73,10 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
 
       <hr className="border-gray-300" />
 
-      <section className="flex break-inside-avoid flex-col gap-2.5">
+      <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
           title={translate("Suppliers", "الموردون")}
-          subtitle={translate(
-            "All suppliers with purchase orders that include materials from this category.",
-            "جميع الموردين الذين لديهم أوامر شراء تتضمن مواداً من هذه الفئة.",
-          )}
+          subtitle={translate(`Sorted by: ${suppliersSortLabel}`, `مرتّب حسب: ${suppliersSortLabel}`)}
         />
         <PrintTable
           headers={[
@@ -97,13 +100,10 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
         />
       </section>
 
-      <section className="flex break-inside-avoid flex-col gap-2.5">
+      <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
           title={translate("Purchase Orders", "أوامر الشراء")}
-          subtitle={translate(
-            "All purchase orders that include materials from this category.",
-            "جميع أوامر الشراء التي تتضمن مواداً من هذه الفئة.",
-          )}
+          subtitle={translate(`Sorted by: ${ordersSortLabel}`, `مرتّب حسب: ${ordersSortLabel}`)}
         />
         <PrintTable
           headers={[
@@ -111,7 +111,7 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             translate("Code", "الكود"),
             translate("Invoice Number", "رقم الفاتورة"),
             translate("Invoice Date", "تاريخ الفاتورة"),
-            translate("Inventory Transaction Legacy Numbers", "أرقام حركات المخزون القديمة"),
+            translate("Addition Permit Numbers", "أرقام إذن الإضافة"),
             translate("Supplier", "المورد"),
             translate("Status", "الحالة"),
             translate(`Amount (${currency})`, `المبلغ (${currency})`),
@@ -133,13 +133,10 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
         />
       </section>
 
-      <section className="flex break-inside-avoid flex-col gap-2.5">
+      <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
           title={translate("Purchased Materials", "المواد المشتراة")}
-          subtitle={translate(
-            "All materials purchased within this category.",
-            "جميع المواد المشتراة ضمن هذه الفئة.",
-          )}
+          subtitle={translate(`Sorted by: ${materialsSortLabel}`, `مرتّب حسب: ${materialsSortLabel}`)}
         />
         <PrintTable
           headers={[
