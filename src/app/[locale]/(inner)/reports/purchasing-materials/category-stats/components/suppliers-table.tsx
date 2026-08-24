@@ -43,10 +43,10 @@ export default function CategorySuppliersTable({
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
-            { value: "spend-desc", label: translate("Spend (high to low)", "القيمة (من الأعلى للأقل)") },
-            { value: "spend-asc", label: translate("Spend (low to high)", "القيمة (من الأقل للأعلى)") },
-            { value: "orders-desc", label: translate("Orders (high to low)", "الفواتير (من الأعلى للأقل)") },
-            { value: "orders-asc", label: translate("Orders (low to high)", "الفواتير (من الأقل للأعلى)") },
+            { value: "spend-desc", label: translate("Value (high to low)", "القيمة (من الأعلى للأقل)") },
+            { value: "spend-asc", label: translate("Value (low to high)", "القيمة (من الأقل للأعلى)") },
+            { value: "orders-desc", label: translate("Invoices (high to low)", "الفواتير (من الأعلى للأقل)") },
+            { value: "orders-asc", label: translate("Invoices (low to high)", "الفواتير (من الأقل للأعلى)") },
             { value: "avg-desc", label: translate("Avg order (high to low)", "متوسط الطلب (من الأعلى للأقل)") },
             { value: "avg-asc", label: translate("Avg order (low to high)", "متوسط الطلب (من الأقل للأعلى)") },
             { value: "name-asc", label: translate("Name (A–Z)", "الاسم (أ–ي)") },
@@ -68,9 +68,9 @@ export default function CategorySuppliersTable({
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Orders", "الفواتير")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Invoices", "الفواتير")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
+                  {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Avg Order (${translation.currency})`, `متوسط الطلب (${translation.currency})`)}

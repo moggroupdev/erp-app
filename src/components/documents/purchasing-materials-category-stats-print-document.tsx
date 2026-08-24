@@ -65,8 +65,8 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
         <PrintDetail label={translate("Main Category", "الفئة الرئيسية")} value={categoryTitle} />
-        <PrintDetail label={translate("Total Spend", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
-        <PrintDetail label={translate("Total Orders", "إجمالي الفواتير")} value={String(overview.totalOrders)} />
+        <PrintDetail label={translate("Total Value", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
+        <PrintDetail label={translate("Total Invoices", "إجمالي الفواتير")} value={String(overview.totalOrders)} />
         <PrintDetail
           label={translate("Average Order Value", "متوسط قيمة الطلب")}
           value={formatMoney(overview.avgOrderValue, currency)}
@@ -90,8 +90,8 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             "#",
             translate("Supplier", "المورد"),
             translate("Code", "الكود"),
-            translate("Orders", "الفواتير"),
-            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Invoices", "الفواتير"),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
           ]}
           rows={suppliers.map((row, index) => [
@@ -161,7 +161,7 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             translate("Code", "الكود"),
             translate("Unit", "الوحدة"),
             translate("Qty Ordered", "الكمية المطلوبة"),
-            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
           ]}
           rows={materials.map((row, index) => [

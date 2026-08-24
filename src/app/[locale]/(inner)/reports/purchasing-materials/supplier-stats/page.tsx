@@ -40,7 +40,7 @@ import PurchasingMaterialsSupplierStatsPrintDocument from "@/components/document
 const PAGE_TITLE = { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" };
 
 const PAGE_SUBTITLE = {
-  en: "Purchase stats scoped to one supplier: spending trend, categories, purchase orders, and materials.",
+  en: "Purchase stats scoped to one supplier: value trend, categories, purchase orders, and materials.",
   ar: "إحصائيات المشتريات ضمن مورد واحد: اتجاه القيمة والفئات وأوامر الشراء والمواد.",
 };
 

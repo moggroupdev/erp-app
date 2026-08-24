@@ -112,8 +112,8 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
         <PrintDetail label={translate("Supplier", "المورد")} value={supplierName} />
-        <PrintDetail label={translate("Total Spend", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
-        <PrintDetail label={translate("Total Orders", "إجمالي الفواتير")} value={String(overview.totalOrders)} />
+        <PrintDetail label={translate("Total Value", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
+        <PrintDetail label={translate("Total Invoices", "إجمالي الفواتير")} value={String(overview.totalOrders)} />
         <PrintDetail
           label={translate("Average Order Value", "متوسط قيمة الطلب")}
           value={formatMoney(overview.avgOrderValue, currency)}
@@ -129,17 +129,17 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Spending by Period", "القيمة حسب الفترة")}
+          title={translate("Value by Period", "القيمة حسب الفترة")}
           subtitle={translate(
-            "Total spend, order count, and average order value per period.",
+            "Total value, invoice count, and average order value per period.",
             "إجمالي القيمة وعدد الفواتير ومتوسط قيمة الطلب لكل فترة.",
           )}
         />
         <PrintTable
           headers={[
             translate("Period", "الفترة"),
-            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Orders", "الفواتير"),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Invoices", "الفواتير"),
             translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
           ]}
           rows={byPeriod.map((row) => [
@@ -160,7 +160,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Spending by Main Category", "القيمة حسب الفئة الرئيسية")}
+          title={translate("Value by Main Category", "القيمة حسب الفئة الرئيسية")}
           subtitle={translate(`Sorted by: ${categoriesSortLabel}`, `مرتّب حسب: ${categoriesSortLabel}`)}
         />
         <PrintTable
@@ -169,7 +169,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             translate("Main Category", "الفئة الرئيسية"),
             translate("Materials", "المواد"),
             translate("Qty Ordered", "الكمية المطلوبة"),
-            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate("Percentage", "النسبة"),
           ]}
           rows={categories.map((row, index) => [
@@ -234,7 +234,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             translate("Code", "الكود"),
             translate("Unit", "الوحدة"),
             translate("Qty Ordered", "الكمية المطلوبة"),
-            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
           ]}
           rows={materials.map((row, index) => [

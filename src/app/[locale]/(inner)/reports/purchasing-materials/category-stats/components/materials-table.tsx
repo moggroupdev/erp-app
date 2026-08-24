@@ -44,8 +44,8 @@ export default function CategoryMaterialsTable({
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
-            { value: "spend-desc", label: translate("Spend (high to low)", "القيمة (من الأعلى للأقل)") },
-            { value: "spend-asc", label: translate("Spend (low to high)", "القيمة (من الأقل للأعلى)") },
+            { value: "spend-desc", label: translate("Value (high to low)", "القيمة (من الأعلى للأقل)") },
+            { value: "spend-asc", label: translate("Value (low to high)", "القيمة (من الأقل للأعلى)") },
             { value: "qty-desc", label: translate("Quantity (high to low)", "الكمية (من الأعلى للأقل)") },
             { value: "qty-asc", label: translate("Quantity (low to high)", "الكمية (من الأقل للأعلى)") },
             {
@@ -80,7 +80,7 @@ export default function CategoryMaterialsTable({
                 <Table.Th className="text-gray-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
+                  {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Avg Unit Price (${translation.currency})`, `متوسط سعر الوحدة (${translation.currency})`)}

@@ -41,10 +41,10 @@ export type CategoryMaterialsSort =
 type Translate = (en: string, ar: string) => string;
 
 const SUPPLIERS_SORT_LABELS: Record<CategorySuppliersSort, { en: string; ar: string }> = {
-  "spend-desc": { en: "Spend (high to low)", ar: "القيمة (من الأعلى للأقل)" },
-  "spend-asc": { en: "Spend (low to high)", ar: "القيمة (من الأقل للأعلى)" },
-  "orders-desc": { en: "Orders (high to low)", ar: "الفواتير (من الأعلى للأقل)" },
-  "orders-asc": { en: "Orders (low to high)", ar: "الفواتير (من الأقل للأعلى)" },
+  "spend-desc": { en: "Value (high to low)", ar: "القيمة (من الأعلى للأقل)" },
+  "spend-asc": { en: "Value (low to high)", ar: "القيمة (من الأقل للأعلى)" },
+  "orders-desc": { en: "Invoices (high to low)", ar: "الفواتير (من الأعلى للأقل)" },
+  "orders-asc": { en: "Invoices (low to high)", ar: "الفواتير (من الأقل للأعلى)" },
   "avg-desc": { en: "Avg order (high to low)", ar: "متوسط الطلب (من الأعلى للأقل)" },
   "avg-asc": { en: "Avg order (low to high)", ar: "متوسط الطلب (من الأقل للأعلى)" },
   "name-asc": { en: "Name (A–Z)", ar: "الاسم (أ–ي)" },
@@ -65,8 +65,8 @@ const ORDERS_SORT_LABELS: Record<CategoryOrdersSort, { en: string; ar: string }>
 };
 
 const MATERIALS_SORT_LABELS: Record<CategoryMaterialsSort, { en: string; ar: string }> = {
-  "spend-desc": { en: "Spend (high to low)", ar: "القيمة (من الأعلى للأقل)" },
-  "spend-asc": { en: "Spend (low to high)", ar: "القيمة (من الأقل للأعلى)" },
+  "spend-desc": { en: "Value (high to low)", ar: "القيمة (من الأعلى للأقل)" },
+  "spend-asc": { en: "Value (low to high)", ar: "القيمة (من الأقل للأعلى)" },
   "qty-desc": { en: "Quantity (high to low)", ar: "الكمية (من الأعلى للأقل)" },
   "qty-asc": { en: "Quantity (low to high)", ar: "الكمية (من الأقل للأعلى)" },
   "avg-desc": { en: "Avg unit price (high to low)", ar: "متوسط سعر الوحدة (من الأعلى للأقل)" },

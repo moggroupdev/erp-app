@@ -39,8 +39,8 @@ export type SupplierMaterialsSort =
 type Translate = (en: string, ar: string) => string;
 
 const CATEGORIES_SORT_LABELS: Record<SupplierCategoriesSort, { en: string; ar: string }> = {
-  "spend-desc": { en: "Spend (high to low)", ar: "القيمة (من الأعلى للأقل)" },
-  "spend-asc": { en: "Spend (low to high)", ar: "القيمة (من الأقل للأعلى)" },
+  "spend-desc": { en: "Value (high to low)", ar: "القيمة (من الأعلى للأقل)" },
+  "spend-asc": { en: "Value (low to high)", ar: "القيمة (من الأقل للأعلى)" },
   "qty-desc": { en: "Quantity (high to low)", ar: "الكمية (من الأعلى للأقل)" },
   "qty-asc": { en: "Quantity (low to high)", ar: "الكمية (من الأقل للأعلى)" },
   "materials-desc": { en: "Materials (high to low)", ar: "المواد (من الأعلى للأقل)" },
@@ -61,8 +61,8 @@ const ORDERS_SORT_LABELS: Record<SupplierOrdersSort, { en: string; ar: string }>
 };
 
 const MATERIALS_SORT_LABELS: Record<SupplierMaterialsSort, { en: string; ar: string }> = {
-  "spend-desc": { en: "Spend (high to low)", ar: "القيمة (من الأعلى للأقل)" },
-  "spend-asc": { en: "Spend (low to high)", ar: "القيمة (من الأقل للأعلى)" },
+  "spend-desc": { en: "Value (high to low)", ar: "القيمة (من الأعلى للأقل)" },
+  "spend-asc": { en: "Value (low to high)", ar: "القيمة (من الأقل للأعلى)" },
   "qty-desc": { en: "Quantity (high to low)", ar: "الكمية (من الأعلى للأقل)" },
   "qty-asc": { en: "Quantity (low to high)", ar: "الكمية (من الأقل للأعلى)" },
   "avg-desc": { en: "Avg unit price (high to low)", ar: "متوسط سعر الوحدة (من الأعلى للأقل)" },

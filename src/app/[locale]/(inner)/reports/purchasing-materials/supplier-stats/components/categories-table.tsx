@@ -32,7 +32,7 @@ export default function SupplierCategoriesTable({
 
   return (
     <ReportCard
-      title={translate("Spending by Main Category", "القيمة حسب الفئة الرئيسية")}
+      title={translate("Value by Main Category", "القيمة حسب الفئة الرئيسية")}
       description={translate(
         "Purchase spend from this supplier grouped by main material category.",
         "قيمة المشتريات من هذا المورد مجمّع حسب الفئة الرئيسية للمواد.",
@@ -47,8 +47,8 @@ export default function SupplierCategoriesTable({
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
-            { value: "spend-desc", label: translate("Spend (high to low)", "القيمة (من الأعلى للأقل)") },
-            { value: "spend-asc", label: translate("Spend (low to high)", "القيمة (من الأقل للأعلى)") },
+            { value: "spend-desc", label: translate("Value (high to low)", "القيمة (من الأعلى للأقل)") },
+            { value: "spend-asc", label: translate("Value (low to high)", "القيمة (من الأقل للأعلى)") },
             { value: "qty-desc", label: translate("Quantity (high to low)", "الكمية (من الأعلى للأقل)") },
             { value: "qty-asc", label: translate("Quantity (low to high)", "الكمية (من الأقل للأعلى)") },
             {
@@ -80,7 +80,7 @@ export default function SupplierCategoriesTable({
                 <Table.Th className="text-gray-600">{translate("Materials", "المواد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
+                  {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
               </Table.Tr>
