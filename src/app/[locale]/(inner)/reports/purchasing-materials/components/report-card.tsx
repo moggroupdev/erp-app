@@ -15,6 +15,7 @@ export default function ReportCard({
   children,
   className = "",
   accent = "slate",
+  headerAction,
 }: {
   title: string;
   description?: string;
@@ -22,6 +23,7 @@ export default function ReportCard({
   children: React.ReactNode;
   className?: string;
   accent?: keyof typeof iconStyles;
+  headerAction?: React.ReactNode;
 }) {
   return (
     <article className={`overflow-hidden rounded-3xl bg-white ${className}`}>
@@ -36,6 +38,7 @@ export default function ReportCard({
             <h3 className="text-sm font-semibold text-stone-800">{title}</h3>
             {description && <p className="mt-1 text-xs leading-relaxed text-stone-500">{description}</p>}
           </div>
+          {headerAction && <div className="shrink-0">{headerAction}</div>}
         </div>
       </header>
 

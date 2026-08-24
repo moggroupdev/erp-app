@@ -98,18 +98,23 @@ export type PurchasingMaterialsPriceHistory = {
 
 // ================ Category Stats ================
 
-export type PurchasingMaterialsSupplierInvoiceCount = {
-  supplierId: string;
-  supplierCode: string;
-  supplierName: string;
-  invoiceCount: number;
-  totalSpend: number;
-};
-
 export type PurchasingMaterialsCategoryStatsOverview = Pick<
   PurchasingMaterialsOverview,
   "totalSpend" | "totalOrders" | "avgOrderValue"
 >;
+
+export type PurchasingMaterialsCategoryOrder = {
+  orderId: string;
+  orderCode: string;
+  legacyInvoiceNumber: string | null;
+  legacyInvoiceIssuedAt: string | null;
+  supplierId: string;
+  supplierName: string;
+  legacyInvoiceTotalPurchases: number;
+  createdAt: string;
+  completedAt: string | null;
+  inventoryTransactionLegacyNumbers: string[];
+};
 
 export type PurchasingMaterialsCategoryStats = {
   category: {
@@ -117,8 +122,7 @@ export type PurchasingMaterialsCategoryStats = {
     title: string;
   };
   overview: PurchasingMaterialsCategoryStatsOverview;
-  bySupplier: PurchasingMaterialsBySupplier[];
-  topSuppliersByInvoiceCount: PurchasingMaterialsSupplierInvoiceCount[];
-  latestInvoices: PurchasingMaterialsTopOrder[];
-  topMaterials: PurchasingMaterialsByMaterial[];
+  suppliers: PurchasingMaterialsBySupplier[];
+  orders: PurchasingMaterialsCategoryOrder[];
+  materials: PurchasingMaterialsByMaterial[];
 };

@@ -17,19 +17,18 @@ import { formatDate } from "@/lib/helpers/date-formaters";
 import DateRangeFilter from "../components/date-range-filter";
 import OverviewStats from "../components/overview-stats";
 import ReportSkeleton from "../components/report-skeleton";
-import TopSuppliersTable from "../components/top-suppliers-table";
-import TopSuppliersByInvoiceCountTable from "../components/top-suppliers-by-invoice-count-table";
-import LatestInvoicesTable from "../components/latest-invoices-table";
-import TopMaterialsTable from "../components/top-materials-table";
 import CategoryStatsEmpty from "./components/category-stats-empty";
 import CategoryPicker from "./components/category-picker";
+import CategorySuppliersTable from "./components/suppliers-table";
+import CategoryOrdersTable from "./components/orders-table";
+import CategoryMaterialsTable from "./components/materials-table";
 import PurchasingMaterialsCategoryStatsPrintDocument from "@/components/documents/purchasing-materials-category-stats-print-document";
 
 const PAGE_TITLE = { en: "Purchasing by Category", ar: "المشتريات حسب الفئة" };
 
 const PAGE_SUBTITLE = {
-  en: "Purchase stats scoped to one main material category: suppliers, invoices, and top materials.",
-  ar: "إحصائيات المشتريات ضمن فئة مواد رئيسية واحدة: الموردون والفواتير وأعلى المواد.",
+  en: "Purchase stats scoped to one main material category: suppliers, purchase orders, and materials.",
+  ar: "إحصائيات المشتريات ضمن فئة مواد رئيسية واحدة: الموردون وأوامر الشراء والمواد.",
 };
 
 export default function Page() {
@@ -125,10 +124,9 @@ export default function Page() {
                     startDate={from}
                     endDate={to}
                     overview={data.overview}
-                    bySupplier={data.bySupplier}
-                    topSuppliersByInvoiceCount={data.topSuppliersByInvoiceCount}
-                    latestInvoices={data.latestInvoices}
-                    topMaterials={data.topMaterials}
+                    suppliers={data.suppliers}
+                    orders={data.orders}
+                    materials={data.materials}
                   />
                 </PrintDocument>
               )}
@@ -171,10 +169,9 @@ export default function Page() {
           data && (
             <div className="flex flex-col gap-6">
               <OverviewStats overview={data.overview} />
-              <TopSuppliersTable data={data.bySupplier} />
-              <TopSuppliersByInvoiceCountTable data={data.topSuppliersByInvoiceCount} />
-              <LatestInvoicesTable data={data.latestInvoices} />
-              <TopMaterialsTable data={data.topMaterials} />
+              <CategorySuppliersTable data={data.suppliers} />
+              <CategoryOrdersTable data={data.orders} />
+              <CategoryMaterialsTable data={data.materials} />
             </div>
           )
         )}
