@@ -82,7 +82,18 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+
+  const totalPeriodSpend = byPeriod.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalPeriodOrders = byPeriod.reduce((sum, row) => sum + row.orderCount, 0);
+  const avgPeriodOrderValue = totalPeriodOrders === 0 ? 0 : totalPeriodSpend / totalPeriodOrders;
+
+  const totalCategoryMaterials = categories.reduce((sum, row) => sum + row.materialCount, 0);
+  const totalCategoryQuantity = categories.reduce((sum, row) => sum + row.totalQuantity, 0);
   const totalCategorySpend = categories.reduce((sum, row) => sum + row.totalSpend, 0);
+
+  const totalOrderAmount = orders.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
+  const totalMaterialQuantity = materials.reduce((sum, row) => sum + row.totalQuantity, 0);
+  const totalMaterialSpend = materials.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
     <div className="flex flex-col gap-8 text-xs text-gray-900">
@@ -101,8 +112,8 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
         <PrintDetail label={translate("Supplier", "المورد")} value={supplierName} />
-        <PrintDetail label={translate("Total Spend", "إجمالي الإنفاق")} value={formatMoney(overview.totalSpend, currency)} />
-        <PrintDetail label={translate("Total Orders", "إجمالي الطلبات")} value={String(overview.totalOrders)} />
+        <PrintDetail label={translate("Total Spend", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
+        <PrintDetail label={translate("Total Orders", "إجمالي الفواتير")} value={String(overview.totalOrders)} />
         <PrintDetail
           label={translate("Average Order Value", "متوسط قيمة الطلب")}
           value={formatMoney(overview.avgOrderValue, currency)}
@@ -118,17 +129,17 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Spending by Period", "الإنفاق حسب الفترة")}
+          title={translate("Spending by Period", "القيمة حسب الفترة")}
           subtitle={translate(
             "Total spend, order count, and average order value per period.",
-            "إجمالي الإنفاق وعدد الطلبات ومتوسط قيمة الطلب لكل فترة.",
+            "إجمالي القيمة وعدد الفواتير ومتوسط قيمة الطلب لكل فترة.",
           )}
         />
         <PrintTable
           headers={[
             translate("Period", "الفترة"),
-            translate(`Total Spend (${currency})`, `إجمالي الإنفاق (${currency})`),
-            translate("Orders", "الطلبات"),
+            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Orders", "الفواتير"),
             translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
           ]}
           rows={byPeriod.map((row) => [
@@ -137,13 +148,19 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             String(row.orderCount),
             formatMoney(row.avgOrderValue),
           ])}
+          footerRow={[
+            translate("Total", "الإجمالي"),
+            formatMoney(totalPeriodSpend),
+            String(totalPeriodOrders),
+            formatMoney(avgPeriodOrderValue),
+          ]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Spending by Main Category", "الإنفاق حسب الفئة الرئيسية")}
+          title={translate("Spending by Main Category", "القيمة حسب الفئة الرئيسية")}
           subtitle={translate(`Sorted by: ${categoriesSortLabel}`, `مرتّب حسب: ${categoriesSortLabel}`)}
         />
         <PrintTable
@@ -152,7 +169,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             translate("Main Category", "الفئة الرئيسية"),
             translate("Materials", "المواد"),
             translate("Qty Ordered", "الكمية المطلوبة"),
-            translate(`Total Spend (${currency})`, `إجمالي الإنفاق (${currency})`),
+            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
             translate("Percentage", "النسبة"),
           ]}
           rows={categories.map((row, index) => [
@@ -166,8 +183,8 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
           footerRow={[
             "",
             translate("Total", "الإجمالي"),
-            "",
-            "",
+            String(totalCategoryMaterials),
+            formatQuantity(totalCategoryQuantity),
             formatMoney(totalCategorySpend),
             `${percentageFormatter.format(categories.length === 0 ? 0 : 100)}%`,
           ]}
@@ -199,6 +216,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
             formatMoney(row.legacyInvoiceTotalPurchases),
           ])}
+          footerRow={["", translate("Total", "الإجمالي"), "", "", "", "", formatMoney(totalOrderAmount)]}
           monoColumnIndexes={[1, 2, 4]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
@@ -216,7 +234,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             translate("Code", "الكود"),
             translate("Unit", "الوحدة"),
             translate("Qty Ordered", "الكمية المطلوبة"),
-            translate(`Total Spend (${currency})`, `إجمالي الإنفاق (${currency})`),
+            translate(`Total Spend (${currency})`, `إجمالي القيمة (${currency})`),
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
           ]}
           rows={materials.map((row, index) => [
@@ -228,6 +246,15 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
             formatMoney(row.totalSpend),
             formatMoney(row.avgUnitPrice),
           ])}
+          footerRow={[
+            "",
+            translate("Total", "الإجمالي"),
+            "",
+            "",
+            formatQuantity(totalMaterialQuantity),
+            formatMoney(totalMaterialSpend),
+            "",
+          ]}
           monoColumnIndexes={[2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />

@@ -22,6 +22,8 @@ export default function SupplierCategoriesTable({
   const { translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
+  const totalMaterials = data.reduce((sum, row) => sum + row.materialCount, 0);
+  const totalQuantity = data.reduce((sum, row) => sum + row.totalQuantity, 0);
   const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
   const percentageFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 2,
@@ -30,10 +32,10 @@ export default function SupplierCategoriesTable({
 
   return (
     <ReportCard
-      title={translate("Spending by Main Category", "الإنفاق حسب الفئة الرئيسية")}
+      title={translate("Spending by Main Category", "القيمة حسب الفئة الرئيسية")}
       description={translate(
         "Purchase spend from this supplier grouped by main material category.",
-        "إنفاق المشتريات من هذا المورد مجمّع حسب الفئة الرئيسية للمواد.",
+        "قيمة المشتريات من هذا المورد مجمّع حسب الفئة الرئيسية للمواد.",
       )}
       icon={FolderTree}
       accent="teal"
@@ -45,8 +47,8 @@ export default function SupplierCategoriesTable({
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
-            { value: "spend-desc", label: translate("Spend (high to low)", "الإنفاق (من الأعلى للأقل)") },
-            { value: "spend-asc", label: translate("Spend (low to high)", "الإنفاق (من الأقل للأعلى)") },
+            { value: "spend-desc", label: translate("Spend (high to low)", "القيمة (من الأعلى للأقل)") },
+            { value: "spend-asc", label: translate("Spend (low to high)", "القيمة (من الأقل للأعلى)") },
             { value: "qty-desc", label: translate("Quantity (high to low)", "الكمية (من الأعلى للأقل)") },
             { value: "qty-asc", label: translate("Quantity (low to high)", "الكمية (من الأقل للأعلى)") },
             {
@@ -78,7 +80,7 @@ export default function SupplierCategoriesTable({
                 <Table.Th className="text-gray-600">{translate("Materials", "المواد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي الإنفاق (${translation.currency})`)}
+                  {translate(`Total Spend (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
               </Table.Tr>
@@ -111,8 +113,8 @@ export default function SupplierCategoriesTable({
               <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
                 <Table.Th />
                 <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
-                <Table.Th />
-                <Table.Th />
+                <Table.Th>{totalMaterials}</Table.Th>
+                <Table.Th>{formatQuantity(totalQuantity)}</Table.Th>
                 <Table.Th>{formatMoney(totalSpend)}</Table.Th>
                 <Table.Th>{percentageFormatter.format(data.length === 0 ? 0 : 100)}%</Table.Th>
               </Table.Tr>

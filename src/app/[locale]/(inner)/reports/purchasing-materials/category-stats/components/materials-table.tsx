@@ -24,6 +24,9 @@ export default function CategoryMaterialsTable({
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
+  const totalQuantity = data.reduce((sum, row) => sum + row.totalQuantity, 0);
+  const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
+
   return (
     <ReportCard
       title={translate("Purchased Materials", "المواد المشتراة")}
@@ -41,8 +44,8 @@ export default function CategoryMaterialsTable({
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
-            { value: "spend-desc", label: translate("Spend (high to low)", "الإنفاق (من الأعلى للأقل)") },
-            { value: "spend-asc", label: translate("Spend (low to high)", "الإنفاق (من الأقل للأعلى)") },
+            { value: "spend-desc", label: translate("Spend (high to low)", "القيمة (من الأعلى للأقل)") },
+            { value: "spend-asc", label: translate("Spend (low to high)", "القيمة (من الأقل للأعلى)") },
             { value: "qty-desc", label: translate("Quantity (high to low)", "الكمية (من الأعلى للأقل)") },
             { value: "qty-asc", label: translate("Quantity (low to high)", "الكمية (من الأقل للأعلى)") },
             {
@@ -77,7 +80,7 @@ export default function CategoryMaterialsTable({
                 <Table.Th className="text-gray-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي الإنفاق (${translation.currency})`)}
+                  {translate(`Total Spend (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Avg Unit Price (${translation.currency})`, `متوسط سعر الوحدة (${translation.currency})`)}
@@ -110,6 +113,17 @@ export default function CategoryMaterialsTable({
                 </Table.Tr>
               ))}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th />
+                <Table.Th>{formatQuantity(totalQuantity)}</Table.Th>
+                <Table.Th>{formatMoney(totalSpend)}</Table.Th>
+                <Table.Th />
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}

@@ -22,6 +22,10 @@ export default function CategorySuppliersTable({
   const { translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
+  const totalOrders = data.reduce((sum, row) => sum + row.orderCount, 0);
+  const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
+  const avgOrderValue = totalOrders === 0 ? 0 : totalSpend / totalOrders;
+
   return (
     <ReportCard
       title={translate("Suppliers", "الموردون")}
@@ -39,10 +43,10 @@ export default function CategorySuppliersTable({
           }}
           label={translate("Sort by", "ترتيب حسب")}
           data={[
-            { value: "spend-desc", label: translate("Spend (high to low)", "الإنفاق (من الأعلى للأقل)") },
-            { value: "spend-asc", label: translate("Spend (low to high)", "الإنفاق (من الأقل للأعلى)") },
-            { value: "orders-desc", label: translate("Orders (high to low)", "الطلبات (من الأعلى للأقل)") },
-            { value: "orders-asc", label: translate("Orders (low to high)", "الطلبات (من الأقل للأعلى)") },
+            { value: "spend-desc", label: translate("Spend (high to low)", "القيمة (من الأعلى للأقل)") },
+            { value: "spend-asc", label: translate("Spend (low to high)", "القيمة (من الأقل للأعلى)") },
+            { value: "orders-desc", label: translate("Orders (high to low)", "الفواتير (من الأعلى للأقل)") },
+            { value: "orders-asc", label: translate("Orders (low to high)", "الفواتير (من الأقل للأعلى)") },
             { value: "avg-desc", label: translate("Avg order (high to low)", "متوسط الطلب (من الأعلى للأقل)") },
             { value: "avg-asc", label: translate("Avg order (low to high)", "متوسط الطلب (من الأقل للأعلى)") },
             { value: "name-asc", label: translate("Name (A–Z)", "الاسم (أ–ي)") },
@@ -64,9 +68,9 @@ export default function CategorySuppliersTable({
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Orders", "الطلبات")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Orders", "الفواتير")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي الإنفاق (${translation.currency})`)}
+                  {translate(`Total Spend (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Avg Order (${translation.currency})`, `متوسط الطلب (${translation.currency})`)}
@@ -97,6 +101,16 @@ export default function CategorySuppliersTable({
                 </Table.Tr>
               ))}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th>{totalOrders}</Table.Th>
+                <Table.Th>{formatMoney(totalSpend)}</Table.Th>
+                <Table.Th>{formatMoney(avgOrderValue)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}

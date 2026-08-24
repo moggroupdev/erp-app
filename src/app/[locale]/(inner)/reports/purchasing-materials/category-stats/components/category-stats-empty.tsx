@@ -10,12 +10,12 @@ export default function CategoryStatsEmpty() {
     {
       icon: ShoppingCart,
       label: translate("Overview totals", "إجماليات عامة"),
-      detail: translate("Spend, order count, and average order value", "الإنفاق وعدد الطلبات ومتوسط قيمة الطلب"),
+      detail: translate("Spend, order count, and average order value", "القيمة وعدد الفواتير ومتوسط قيمة الطلب"),
     },
     {
       icon: Truck,
       label: translate("Suppliers", "الموردون"),
-      detail: translate("Ranked by spend and by invoice count", "مرتّبون حسب الإنفاق وعدد الفواتير"),
+      detail: translate("Ranked by spend and by invoice count", "مرتّبون حسب القيمة وعدد الفواتير"),
     },
     {
       icon: FileClock,
@@ -25,7 +25,7 @@ export default function CategoryStatsEmpty() {
     {
       icon: Files,
       label: translate("Top materials", "أعلى المواد"),
-      detail: translate("Materials with the highest purchase spend", "المواد ذات أعلى إنفاق شراء"),
+      detail: translate("Materials with the highest purchase spend", "المواد ذات أعلى قيمة شراء"),
     },
   ];
 

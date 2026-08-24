@@ -31,6 +31,8 @@ export default function SupplierOrdersTable({
     });
   }
 
+  const totalAmount = data.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
+
   return (
     <ReportCard
       title={translate("Purchase Orders", "أوامر الشراء")}
@@ -154,6 +156,17 @@ export default function SupplierOrdersTable({
                 </Table.Tr>
               ))}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th>{formatMoney(totalAmount)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}

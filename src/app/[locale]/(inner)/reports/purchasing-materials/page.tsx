@@ -71,7 +71,7 @@ export default function Page() {
               label: { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" },
               description: {
                 en: "Purchase stats for one supplier: spending trend, categories, orders, and materials.",
-                ar: "إحصائيات المشتريات لمورد واحد: اتجاه الإنفاق والفئات وأوامر الشراء والمواد.",
+                ar: "إحصائيات المشتريات لمورد واحد: اتجاه القيمة والفئات وأوامر الشراء والمواد.",
               },
               href: "/reports/purchasing-materials/supplier-stats",
             }}

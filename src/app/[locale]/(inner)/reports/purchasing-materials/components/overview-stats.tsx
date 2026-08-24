@@ -13,14 +13,14 @@ export default function OverviewStats({ overview }: { overview: PurchasingMateri
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <KpiCard
-        label={translate("Total Spend", "إجمالي الإنفاق")}
+        label={translate("Total Spend", "إجمالي القيمة")}
         value={formatMoney(overview.totalSpend, currency)}
         hint={translate("Sum of invoice total purchases.", "مجموع إجمالي مشتريات الفواتير.")}
         icon={<ShoppingCart size={20} />}
         valueClassName={reportTheme.kpi.value}
       />
       <KpiCard
-        label={translate("Total Orders", "إجمالي الطلبات")}
+        label={translate("Total Orders", "إجمالي الفواتير")}
         value={overview.totalOrders}
         hint={translate("Purchase orders in this period.", "أوامر الشراء في هذه الفترة.")}
         icon={<ClipboardList size={20} />}
@@ -28,7 +28,7 @@ export default function OverviewStats({ overview }: { overview: PurchasingMateri
       <KpiCard
         label={translate("Average Order Value", "متوسط قيمة الطلب")}
         value={formatMoney(overview.avgOrderValue, currency)}
-        hint={translate("Total spend divided by order count.", "إجمالي الإنفاق مقسوماً على عدد الطلبات.")}
+        hint={translate("Total spend divided by order count.", "إجمالي القيمة مقسوماً على عدد الفواتير.")}
         icon={<TrendingUp size={20} />}
       />
     </div>

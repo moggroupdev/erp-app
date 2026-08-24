@@ -54,8 +54,8 @@ export default function SpendingTrendChart({ data, groupBy }: { data: Purchasing
   if (data.length === 0) {
     return (
       <ReportCard
-        title={translate("Spending Trend", "اتجاه الإنفاق")}
-        description={translate("Total spend per period.", "إجمالي الإنفاق لكل فترة.")}
+        title={translate("Spending Trend", "اتجاه القيمة")}
+        description={translate("Total spend per period.", "إجمالي القيمة لكل فترة.")}
         icon={TrendingUp}
         accent="teal"
       >
@@ -74,10 +74,10 @@ export default function SpendingTrendChart({ data, groupBy }: { data: Purchasing
 
   return (
     <ReportCard
-      title={translate("Spending Trend", "اتجاه الإنفاق")}
+      title={translate("Spending Trend", "اتجاه القيمة")}
       description={translate(
         "Total spend per period across purchase orders.",
-        "إجمالي الإنفاق لكل فترة عبر أوامر الشراء.",
+        "إجمالي القيمة لكل فترة عبر أوامر الشراء.",
       )}
       icon={TrendingUp}
       accent="teal"
@@ -94,7 +94,7 @@ export default function SpendingTrendChart({ data, groupBy }: { data: Purchasing
               width={48}
             />
             <Tooltip
-              formatter={(value) => [formatMoney(Number(value ?? 0), currency), translate("Spend", "الإنفاق")]}
+              formatter={(value) => [formatMoney(Number(value ?? 0), currency), translate("Spend", "القيمة")]}
               contentStyle={{ borderRadius: 10, border: "1px solid #e7e5e4", direction: dir }}
             />
             <Line

@@ -10,17 +10,17 @@ export default function SupplierStatsEmpty() {
     {
       icon: ShoppingCart,
       label: translate("Overview totals", "إجماليات عامة"),
-      detail: translate("Spend, order count, and average order value", "الإنفاق وعدد الطلبات ومتوسط قيمة الطلب"),
+      detail: translate("Spend, order count, and average order value", "القيمة وعدد الفواتير ومتوسط قيمة الطلب"),
     },
     {
       icon: TrendingUp,
-      label: translate("Spending trend", "اتجاه الإنفاق"),
-      detail: translate("Total spend per period for this supplier", "إجمالي الإنفاق لكل فترة لهذا المورد"),
+      label: translate("Spending trend", "اتجاه القيمة"),
+      detail: translate("Total spend per period for this supplier", "إجمالي القيمة لكل فترة لهذا المورد"),
     },
     {
       icon: FolderTree,
       label: translate("Main categories", "الفئات الرئيسية"),
-      detail: translate("Purchase spend grouped by material category", "إنفاق المشتريات مجمّع حسب فئة المواد"),
+      detail: translate("Purchase spend grouped by material category", "قيمة المشتريات مجمّع حسب فئة المواد"),
     },
     {
       icon: FileText,
