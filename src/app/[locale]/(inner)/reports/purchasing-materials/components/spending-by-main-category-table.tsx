@@ -20,10 +20,10 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
 
   return (
     <ReportCard
-      title={translate("Spending by Main Category", "الإنفاق حسب الفئة الرئيسية")}
+      title={translate("Value by Category", "القيمة حسب الفئة")}
       description={translate(
-        "Purchase spend grouped by main material category, sorted from highest to lowest.",
-        "إنفاق المشتريات مجمّع حسب الفئة الرئيسية للمواد، مرتب من الأعلى إلى الأدنى.",
+        "Purchase value grouped by main material category, sorted from highest to lowest.",
+        "قيمة المشتريات مجمّعة حسب الفئة الرئيسية للمواد، مرتبة من الأعلى إلى الأدنى.",
       )}
       icon={FolderTree}
       accent="teal"
@@ -38,7 +38,7 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي الإنفاق (${translation.currency})`)}
+                  {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
               </Table.Tr>

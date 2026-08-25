@@ -178,7 +178,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
         />
       </section>
 
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-4">
         <PrintSectionHeading
           title={translate("Value by Category", "القيمة حسب الفئة")}
           subtitle={translate(`Sorted by: ${categoriesSortLabel}`, `مرتّب حسب: ${categoriesSortLabel}`)}

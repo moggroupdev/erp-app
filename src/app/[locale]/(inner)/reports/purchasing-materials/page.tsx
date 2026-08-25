@@ -38,10 +38,10 @@ export default function Page() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ReportLinkCard
             report={{
-              label: { en: "Spending Summary", ar: "ملخص الإنفاق" },
+              label: { en: "Purchases Summary", ar: "ملخص المشتريات" },
               description: {
-                en: "Total spend overview by period, supplier, and material with order status breakdown.",
-                ar: "نظرة شاملة على الإنفاق حسب الفترة والمورد والمادة مع تفصيل حالات الطلبات.",
+                en: "Overview by period, supplier, and material with order status breakdown.",
+                ar: "نظرة شاملة حسب الفترة والمورد والمادة مع تفصيل حالات الطلبات.",
               },
               href: "/reports/purchasing-materials/spending-summary",
             }}

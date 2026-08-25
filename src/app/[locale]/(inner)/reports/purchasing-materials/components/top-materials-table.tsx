@@ -32,7 +32,7 @@ export default function TopMaterialsTable({
 
   return (
     <ReportCard
-      title={translate("Top Materials by Spend", "أعلى المواد إنفاقاً")}
+      title={translate("Top Materials by Value", "أعلى المواد قيمة")}
       description={translate(
         "Materials ranked by allocated invoice total purchases.",
         "المواد مرتبة حسب إجمالي مشتريات الفواتير الموزعة.",
@@ -73,7 +73,7 @@ export default function TopMaterialsTable({
                 <Table.Th className="text-gray-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Total Spend (${translation.currency})`, `إجمالي الإنفاق (${translation.currency})`)}
+                  {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Avg Unit Price (${translation.currency})`, `متوسط سعر الوحدة (${translation.currency})`)}

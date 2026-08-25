@@ -26,11 +26,11 @@ import TopMaterialsTable from "../components/top-materials-table";
 import TopOrdersTable from "../components/top-orders-table";
 import SpendingByMainCategoryTable from "../components/spending-by-main-category-table";
 
-const PAGE_TITLE = { en: "Purchases Spending Summary", ar: "ملخص إنفاق المشتريات" };
+const PAGE_TITLE = { en: "Purchases Summary", ar: "ملخص المشتريات" };
 
 const PAGE_SUBTITLE = {
-  en: "Overview of purchases spend by period, supplier, material, and main category with order status breakdown.",
-  ar: "نظرة شاملة على إنفاق المشتريات حسب الفترة والمورد والمادة والفئة الرئيسية مع تفصيل حالات الطلبات.",
+  en: "Overview of purchases by period, supplier, material, and category with order status breakdown.",
+  ar: "نظرة شاملة على المشتريات حسب الفترة والمورد والمادة والفئة مع تفصيل حالات الطلبات.",
 };
 
 function parseGroupBy(value: string | null): GroupBy {
@@ -167,14 +167,14 @@ export default function Page() {
             <div className="flex flex-col gap-6">
               <OverviewStats overview={data.overview} />
               <SpendingTrendChart data={data.byPeriod} groupBy={groupBy} />
-              <TopOrdersTable data={data.topOrders} />
               <TopSuppliersTable data={data.bySupplier} />
+              <TopOrdersTable data={data.topOrders} />
+              <SpendingByMainCategoryTable data={data.byMainCategory} />
               <TopMaterialsTable
                 data={data.byMaterial}
                 displayUnit={materialsDisplayUnit}
                 onDisplayUnitChange={setMaterialsDisplayUnit}
               />
-              <SpendingByMainCategoryTable data={data.byMainCategory} />
             </div>
           )
         )}
