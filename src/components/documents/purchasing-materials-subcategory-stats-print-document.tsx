@@ -81,7 +81,7 @@ export default function PurchasingMaterialsSubCategoryStatsPrintDocument({
         <PrintDetail label={translate("Main Category", "الفئة الرئيسية")} value={mainCategoryTitle} />
         <div title="Just a spacer" />
         <PrintDetail label={translate("Total Value", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
-        <PrintDetail label={translate("Total Invoices", "إجمالي عدد الفواتير")} value={String(overview.totalOrders)} />
+        <PrintDetail label={translate("Total Invoices Count", "إجمالي عدد الفواتير")} value={String(overview.totalOrders)} />
         <PrintDetail
           label={translate("Average Order Value", "متوسط قيمة الطلب")}
           value={formatMoney(overview.avgOrderValue, currency)}
@@ -105,9 +105,9 @@ export default function PurchasingMaterialsSubCategoryStatsPrintDocument({
             "#",
             translate("Supplier", "المورد"),
             translate("Code", "الكود"),
-            translate("Invoices", "عدد الفواتير"),
+            translate("Invoices Count", "عدد الفواتير"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
+            translate(`Avg Invoice (${currency})`, `متوسط الفاتورة (${currency})`),
           ]}
           rows={suppliers.map((row, index) => [
             String(index + 1),
