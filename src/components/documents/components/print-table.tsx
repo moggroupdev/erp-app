@@ -72,10 +72,7 @@ export default function PrintTable({
         {footerRow ? (
           <tr className="break-inside-avoid border-b border-gray-200 bg-gray-50 font-semibold text-gray-700">
             {footerRow.map((cell, cellIndex) => (
-              <td
-                key={`footer-${cellIndex}`}
-                className={`px-2.5 py-2 ${monoColumnIndexes.includes(cellIndex) ? "font-mono" : ""}`}
-              >
+              <td key={`footer-${cellIndex}`} className="px-2.5 py-2">
                 {cell}
               </td>
             ))}
