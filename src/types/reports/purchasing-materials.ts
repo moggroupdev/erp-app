@@ -143,6 +143,21 @@ export type PurchasingMaterialsCategoryStats = {
   materials: PurchasingMaterialsByMaterial[];
 };
 
+// ================ Subcategory Stats ================
+
+export type PurchasingMaterialsSubCategoryStats = {
+  subCategory: {
+    id: string;
+    title: string;
+    mainCategoryId: string;
+    mainCategoryTitle: string;
+  };
+  overview: PurchasingMaterialsCategoryStatsOverview;
+  suppliers: PurchasingMaterialsBySupplier[];
+  orders: PurchasingMaterialsCategoryOrder[];
+  materials: PurchasingMaterialsByMaterial[];
+};
+
 // ================ Supplier Stats ================
 
 export type PurchasingMaterialsSupplierOrder = {

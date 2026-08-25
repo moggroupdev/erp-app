@@ -5,6 +5,7 @@ import type {
   PurchasingMaterialsCategoryStats,
   PurchasingMaterialsSpendingSummary,
   PurchasingMaterialsPriceHistory,
+  PurchasingMaterialsSubCategoryStats,
   PurchasingMaterialsSupplierStats,
 } from "@/types/reports";
 
@@ -97,6 +98,26 @@ const reportsApi = {
       return await privateRequest<PurchasingMaterialsCategoryStats>({
         url: "reports/purchasing-materials/category-stats",
         params: { mainCategoryId, from, to },
+        signal,
+      });
+    },
+
+    async getSubCategoryStats({
+      privateRequest,
+      subCategoryId,
+      from,
+      to,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      subCategoryId: string;
+      from?: string;
+      to?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsSubCategoryStats>({
+        url: "reports/purchasing-materials/subcategory-stats",
+        params: { subCategoryId, from, to },
         signal,
       });
     },

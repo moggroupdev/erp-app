@@ -68,6 +68,16 @@ export default function Page() {
           />
           <ReportLinkCard
             report={{
+              label: { en: "Purchasing by Subcategory", ar: "المشتريات حسب الفئة الفرعية" },
+              description: {
+                en: "Purchase stats for one subcategory: suppliers, invoices, and materials.",
+                ar: "إحصائيات المشتريات لفئة فرعية واحدة: الموردون والفواتير والمواد.",
+              },
+              href: "/reports/purchasing-materials/subcategory-stats",
+            }}
+          />
+          <ReportLinkCard
+            report={{
               label: { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" },
               description: {
                 en: "Purchase stats for one supplier: value trend, categories, orders, and materials.",

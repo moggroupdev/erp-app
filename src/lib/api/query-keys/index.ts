@@ -127,6 +127,8 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "price-history", materialCode, filters] as const,
       categoryStats: (mainCategoryId: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "category-stats", mainCategoryId, filters] as const,
+      subCategoryStats: (subCategoryId: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "subcategory-stats", subCategoryId, filters] as const,
       supplierStats: (supplierId: string, filters?: { from?: string; to?: string; groupBy?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "supplier-stats", supplierId, filters] as const,
     },
