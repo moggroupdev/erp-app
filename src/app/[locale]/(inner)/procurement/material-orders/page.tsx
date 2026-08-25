@@ -157,7 +157,12 @@ export default function Page() {
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                     <Table.Th>{translate("Supplier", "المورد")}</Table.Th>
-                    <Table.Th>{translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}</Table.Th>
+                    <Table.Th>
+                      {translate(`Invoice Total (${translation.currency})`, `إجمالي الفاتورة (${translation.currency})`)}
+                    </Table.Th>
+                    <Table.Th>
+                      {translate(`Calclated Total (${translation.currency})`, `الإجمالي المحسوب (${translation.currency})`)}
+                    </Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
                   </Table.Tr>
@@ -196,7 +201,23 @@ export default function Page() {
                             {order.supplier.name}
                           </Link>
                         </Table.Td>
-                        <Table.Td>{formatMoney(order.totalAmount)}</Table.Td>
+                        <Table.Td>
+                          {order.legacyInvoiceTotalPurchases != null ? (
+                            formatMoney(order.legacyInvoiceTotalPurchases)
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </Table.Td>
+                        <Table.Td
+                          className={
+                            order.legacyInvoiceTotalPurchases != null &&
+                            Math.trunc(order.totalAmount) !== Math.trunc(order.legacyInvoiceTotalPurchases)
+                              ? "text-orange-600 font-semibold"
+                              : undefined
+                          }
+                        >
+                          {formatMoney(order.totalAmount)}
+                        </Table.Td>
                         <Table.Td>
                           <span className={status.className}>{status.label}</span>
                         </Table.Td>
