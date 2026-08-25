@@ -103,10 +103,7 @@ export default function Page() {
     () => (data ? sortSubCategorySuppliers(data.suppliers, suppliersSort) : []),
     [data, suppliersSort],
   );
-  const sortedOrders = useMemo(
-    () => (data ? sortSubCategoryOrders(data.orders, ordersSort) : []),
-    [data, ordersSort],
-  );
+  const sortedOrders = useMemo(() => (data ? sortSubCategoryOrders(data.orders, ordersSort) : []), [data, ordersSort]);
   const sortedMaterials = useMemo(
     () => (data ? sortSubCategoryMaterials(data.materials, materialsSort) : []),
     [data, materialsSort],
@@ -205,11 +202,7 @@ export default function Page() {
           data && (
             <div className="flex flex-col gap-6">
               <OverviewStats overview={data.overview} />
-              <SubCategorySuppliersTable
-                data={sortedSuppliers}
-                sort={suppliersSort}
-                onSortChange={setSuppliersSort}
-              />
+              <SubCategorySuppliersTable data={sortedSuppliers} sort={suppliersSort} onSortChange={setSuppliersSort} />
               <SubCategoryOrdersTable data={sortedOrders} sort={ordersSort} onSortChange={setOrdersSort} />
               <SubCategoryMaterialsTable
                 data={sortedMaterials}

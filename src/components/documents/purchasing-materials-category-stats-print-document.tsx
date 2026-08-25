@@ -88,7 +88,7 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
         <PrintDetail label={translate("Main Category", "الفئة الرئيسية")} value={categoryTitle} />
         <PrintDetail label={translate("Total Value", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
-        <PrintDetail label={translate("Total Invoices", "إجمالي عدد الفواتير")} value={String(overview.totalOrders)} />
+        <PrintDetail label={translate("Total Invoices Count", "إجمالي عدد الفواتير")} value={String(overview.totalOrders)} />
         <PrintDetail
           label={translate("Average Order Value", "متوسط قيمة الطلب")}
           value={formatMoney(overview.avgOrderValue, currency)}
@@ -111,7 +111,7 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
           headers={[
             "#",
             translate("Subcategory", "الفئة الفرعية"),
-            translate("Materials", "المواد"),
+            translate("Materials Count", "عدد الأصناف"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate("Percentage", "النسبة"),
           ]}
@@ -144,9 +144,9 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             "#",
             translate("Supplier", "المورد"),
             translate("Code", "الكود"),
-            translate("Invoices", "عدد الفواتير"),
+            translate("Invoices Count", "عدد الفواتير"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
+            translate(`Avg Invoice (${currency})`, `متوسط الفاتورة (${currency})`),
           ]}
           rows={suppliers.map((row, index) => [
             String(index + 1),

@@ -68,12 +68,12 @@ export default function CategorySuppliersTable({
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Invoices", "الفواتير")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Invoices Count", "عدد الفواتير")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Avg Order (${translation.currency})`, `متوسط الطلب (${translation.currency})`)}
+                  {translate(`Avg Invoice (${translation.currency})`, `متوسط الفاتورة (${translation.currency})`)}
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>

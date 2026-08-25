@@ -20,7 +20,7 @@ export default function OverviewStats({ overview }: { overview: PurchasingMateri
         valueClassName={reportTheme.kpi.value}
       />
       <KpiCard
-        label={translate("Total Invoices", "إجمالي الفواتير")}
+        label={translate("Total Invoices Count", "إجمالي عدد الفواتير")}
         value={overview.totalOrders}
         hint={translate("Purchase orders in this period.", "أوامر الشراء في هذه الفترة.")}
         icon={<ClipboardList size={20} />}

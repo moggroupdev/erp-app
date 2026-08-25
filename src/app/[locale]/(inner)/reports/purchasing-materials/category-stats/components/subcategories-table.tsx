@@ -78,18 +78,14 @@ export default function CategorySubCategoriesTable({
             <Table.Thead className="bg-gray-50">
               <Table.Tr>
                 <Table.Th className={`${COL.index} text-gray-600`}>#</Table.Th>
-                <Table.Th className={`${COL.name} text-gray-600`}>
-                  {translate("Subcategory", "الفئة الفرعية")}
-                </Table.Th>
+                <Table.Th className={`${COL.name} text-gray-600`}>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
                 <Table.Th className={`${COL.materials} text-gray-600`}>
-                  {translate("Materials", "المواد")}
+                  {translate("Materials Count", "عدد الأصناف")}
                 </Table.Th>
                 <Table.Th className={`${COL.value} text-gray-600`}>
                   {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
-                <Table.Th className={`${COL.percent} text-gray-600`}>
-                  {translate("Percentage", "النسبة")}
-                </Table.Th>
+                <Table.Th className={`${COL.percent} text-gray-600`}>{translate("Percentage", "النسبة")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -100,9 +96,7 @@ export default function CategorySubCategoriesTable({
                     {row.subCategoryTitle}
                   </Table.Td>
                   <Table.Td className={COL.materials}>{row.materialCount}</Table.Td>
-                  <Table.Td className={`${COL.value} font-semibold text-gray-800`}>
-                    {formatMoney(row.totalSpend)}
-                  </Table.Td>
+                  <Table.Td className={`${COL.value} font-semibold text-gray-800`}>{formatMoney(row.totalSpend)}</Table.Td>
                   <Table.Td className={COL.percent}>
                     {percentageFormatter.format(totalSpend === 0 ? 0 : (row.totalSpend / totalSpend) * 100)}%
                   </Table.Td>
