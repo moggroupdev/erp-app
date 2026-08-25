@@ -63,7 +63,12 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
     const { unit, factor } = resolveDisplayUnit(materialsDisplayUnit, row.unitOfMeasurement, row.unitConversions);
     return { row, unit, factor, displayQuantity: toDisplayQuantity(row.totalQuantity, factor) };
   });
-  const totalMaterialQuantity = materialDisplayRows.reduce((sum, item) => sum + item.displayQuantity, 0);
+  const allMaterialUnitsMatch =
+    materialDisplayRows.length > 0 &&
+    materialDisplayRows.every((item) => item.unit === materialDisplayRows[0].unit);
+  const totalMaterialQuantity = allMaterialUnitsMatch
+    ? materialDisplayRows.reduce((sum, item) => sum + item.displayQuantity, 0)
+    : null;
   const totalMaterialSpend = materials.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
@@ -235,7 +240,7 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             translate("Total", "الإجمالي"),
             "",
             "",
-            formatQuantity(totalMaterialQuantity),
+            totalMaterialQuantity == null ? "" : formatQuantity(totalMaterialQuantity),
             formatMoney(totalMaterialSpend),
             "",
           ]}

@@ -45,7 +45,11 @@ export default function CategoryMaterialsTable({
     };
   });
 
-  const totalQuantity = displayRows.reduce((sum, item) => sum + item.displayQuantity, 0);
+  const allUnitsMatch =
+    displayRows.length > 0 && displayRows.every((item) => item.unit === displayRows[0].unit);
+  const totalQuantity = allUnitsMatch
+    ? displayRows.reduce((sum, item) => sum + item.displayQuantity, 0)
+    : null;
   const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
@@ -160,7 +164,7 @@ export default function CategoryMaterialsTable({
                 <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
                 <Table.Th />
                 <Table.Th />
-                <Table.Th>{formatDisplayQuantity(totalQuantity, 1)}</Table.Th>
+                <Table.Th>{totalQuantity == null ? "" : formatDisplayQuantity(totalQuantity, 1)}</Table.Th>
                 <Table.Th>{formatMoney(totalSpend)}</Table.Th>
                 <Table.Th />
               </Table.Tr>
