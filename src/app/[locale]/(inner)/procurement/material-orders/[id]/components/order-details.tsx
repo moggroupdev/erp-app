@@ -21,7 +21,7 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
   const status = getOrderStatusLabel(order, translate);
 
   const rows: DetailRow[] = [
-    { key: translate("Purchase Order Code", "كود أمر الشراء"), value: order.code, mono: true, copyText: order.code },
+    { key: translate("Purchase Order Code", "كود أمر التوريد"), value: order.code, mono: true, copyText: order.code },
     {
       key: translate("Invoice Number", "رقم الفاتورة"),
       value: order.legacyInvoiceNumber ? <span className="font-mono">{order.legacyInvoiceNumber}</span> : <EmptyValue />,

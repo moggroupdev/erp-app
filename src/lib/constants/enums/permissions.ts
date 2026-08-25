@@ -408,14 +408,14 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     value: "read_material_purchase_orders",
     label: {
       en: "Read Material Purchase Orders",
-      ar: "عرض أوامر شراء المواد",
+      ar: "عرض أوامر توريد المواد",
     },
   },
   read_product_purchase_orders: {
     value: "read_product_purchase_orders",
     label: {
       en: "Read Product Purchase Orders",
-      ar: "عرض أوامر شراء المنتجات",
+      ar: "عرض أوامر توريد المنتجات",
     },
   },
   read_trips: {

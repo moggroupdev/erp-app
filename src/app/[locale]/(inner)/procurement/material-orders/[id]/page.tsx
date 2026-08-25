@@ -26,7 +26,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import OrderDetails from "./components/order-details";
 
-const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر شراء خامات" };
+const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خامات" };
 
 const RECEIPTS_LIMIT = 100;
 
@@ -75,7 +75,7 @@ export default function Page() {
   }
 
   useDocumentTitle(
-    `${order?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر شراء الخامات")}`,
+    `${order?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
   );
 
   return (
@@ -87,12 +87,12 @@ export default function Page() {
       }}
     >
       {isOrderFetching ? (
-        <LoadingSection message={translate("Loading purchase order data", "جاري تحميل بيانات أمر الشراء")} />
+        <LoadingSection message={translate("Loading purchase order data", "جاري تحميل بيانات أمر التوريد")} />
       ) : orderError ? (
         <ErrorSection
           errorTitle={translate(
             "An error occurred while loading purchase order data",
-            "حدث خطأ أثناء تحميل بيانات أمر الشراء",
+            "حدث خطأ أثناء تحميل بيانات أمر التوريد",
           )}
           errorMessage={getErrorMessage(locale, orderError)}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetchOrder() }}

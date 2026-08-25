@@ -59,7 +59,7 @@ export default function Page() {
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useDocumentTitle(
-    `${receipt?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر شراء الخامات")}`,
+    `${receipt?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
   );
 
   return (

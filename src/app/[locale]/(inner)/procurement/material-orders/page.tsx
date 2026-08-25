@@ -28,7 +28,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 
-const PAGE_TITLE = { en: "Material Purchase Orders", ar: "أوامر شراء الخامات" };
+const PAGE_TITLE = { en: "Material Purchase Orders", ar: "أوامر توريد الخامات" };
 
 const ORDERS_PER_PAGE = 25;
 
@@ -127,10 +127,10 @@ export default function Page() {
       />
 
       {isFetching ? (
-        <LoadingSection message={translate("Loading material purchase orders...", "جاري تحميل أوامر شراء الخامات...")} />
+        <LoadingSection message={translate("Loading material purchase orders...", "جاري تحميل أوامر توريد الخامات...")} />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate("Error loading material purchase orders", "خطأ في تحميل أوامر شراء الخامات")}
+          errorTitle={translate("Error loading material purchase orders", "خطأ في تحميل أوامر توريد الخامات")}
           errorMessage={errorMessage}
           button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
@@ -145,7 +145,7 @@ export default function Page() {
           ) : (
             <EmptySection
               useDefaultImg
-              message={translate("No material purchase orders found", "لا توجد أوامر شراء خامات")}
+              message={translate("No material purchase orders found", "لا توجد أوامر توريد خامات")}
             />
           )
         ) : (
