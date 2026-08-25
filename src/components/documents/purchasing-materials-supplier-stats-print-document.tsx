@@ -12,6 +12,10 @@ import type {
   PurchasingMaterialsSupplierBySubCategory,
   PurchasingMaterialsSupplierOrder,
 } from "@/types/reports";
+import {
+  buildSupplierCategoryGroups,
+  type SupplierCategoriesSort,
+} from "@/app/[locale]/(inner)/reports/purchasing-materials/supplier-stats/components/sort";
 
 type GroupBy = "month" | "quarter" | "year";
 
@@ -58,8 +62,8 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
   subCategories,
   orders,
   materials,
+  categoriesSort = "spend-desc",
   categoriesSortLabel,
-  subCategoriesSortLabel,
   ordersSortLabel,
   materialsSortLabel,
 }: {
@@ -74,8 +78,8 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
   subCategories: PurchasingMaterialsSupplierBySubCategory[];
   orders: PurchasingMaterialsSupplierOrder[];
   materials: PurchasingMaterialsByMaterial[];
+  categoriesSort?: SupplierCategoriesSort;
   categoriesSortLabel: string;
-  subCategoriesSortLabel: string;
   ordersSortLabel: string;
   materialsSortLabel: string;
 }) {
@@ -92,13 +96,9 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
   const totalPeriodOrders = byPeriod.reduce((sum, row) => sum + row.orderCount, 0);
   const avgPeriodOrderValue = totalPeriodOrders === 0 ? 0 : totalPeriodSpend / totalPeriodOrders;
 
-  const totalCategoryMaterials = categories.reduce((sum, row) => sum + row.materialCount, 0);
-  const totalCategoryQuantity = categories.reduce((sum, row) => sum + row.totalQuantity, 0);
   const totalCategorySpend = categories.reduce((sum, row) => sum + row.totalSpend, 0);
 
-  const totalSubCategoryMaterials = subCategories.reduce((sum, row) => sum + row.materialCount, 0);
-  const totalSubCategoryQuantity = subCategories.reduce((sum, row) => sum + row.totalQuantity, 0);
-  const totalSubCategorySpend = subCategories.reduce((sum, row) => sum + row.totalSpend, 0);
+  const categoryGroups = buildSupplierCategoryGroups(categories, subCategories, categoriesSort);
 
   const totalOrderAmount = orders.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
   const totalMaterialQuantity = materials.reduce((sum, row) => sum + row.totalQuantity, 0);
@@ -169,73 +169,47 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Value by Main Category", "القيمة حسب الفئة الرئيسية")}
+          title={translate("Value by Category", "القيمة حسب الفئة")}
           subtitle={translate(`Sorted by: ${categoriesSortLabel}`, `مرتّب حسب: ${categoriesSortLabel}`)}
         />
-        <PrintTable
-          headers={[
-            "#",
-            translate("Main Category", "الفئة الرئيسية"),
-            translate("Materials", "المواد"),
-            translate("Qty Ordered", "الكمية المطلوبة"),
-            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Percentage", "النسبة"),
-          ]}
-          rows={categories.map((row, index) => [
-            String(index + 1),
-            row.mainCategoryTitle,
-            String(row.materialCount),
-            formatQuantity(row.totalQuantity),
-            formatMoney(row.totalSpend),
-            `${percentageFormatter.format(totalCategorySpend === 0 ? 0 : (row.totalSpend / totalCategorySpend) * 100)}%`,
-          ])}
-          footerRow={[
-            "",
-            translate("Total", "الإجمالي"),
-            String(totalCategoryMaterials),
-            formatQuantity(totalCategoryQuantity),
-            formatMoney(totalCategorySpend),
-            `${percentageFormatter.format(categories.length === 0 ? 0 : 100)}%`,
-          ]}
-          emptyLabel={translate("No data available", "لا توجد بيانات")}
-        />
-      </section>
 
-      <section className="flex flex-col gap-2.5">
-        <PrintSectionHeading
-          title={translate("Value by Subcategory", "القيمة حسب الفئة الفرعية")}
-          subtitle={translate(`Sorted by: ${subCategoriesSortLabel}`, `مرتّب حسب: ${subCategoriesSortLabel}`)}
-        />
-        <PrintTable
-          headers={[
-            "#",
-            translate("Main Category", "الفئة الرئيسية"),
-            translate("Subcategory", "الفئة الفرعية"),
-            translate("Materials", "المواد"),
-            translate("Qty Ordered", "الكمية المطلوبة"),
-            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Percentage", "النسبة"),
-          ]}
-          rows={subCategories.map((row, index) => [
-            String(index + 1),
-            row.mainCategoryTitle,
-            row.subCategoryTitle,
-            String(row.materialCount),
-            formatQuantity(row.totalQuantity),
-            formatMoney(row.totalSpend),
-            `${percentageFormatter.format(totalSubCategorySpend === 0 ? 0 : (row.totalSpend / totalSubCategorySpend) * 100)}%`,
-          ])}
-          footerRow={[
-            "",
-            translate("Total", "الإجمالي"),
-            "",
-            String(totalSubCategoryMaterials),
-            formatQuantity(totalSubCategoryQuantity),
-            formatMoney(totalSubCategorySpend),
-            `${percentageFormatter.format(subCategories.length === 0 ? 0 : 100)}%`,
-          ]}
-          emptyLabel={translate("No data available", "لا توجد بيانات")}
-        />
+        {categoryGroups.length === 0 ? (
+          <p className="text-xs text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
+        ) : (
+          categoryGroups.map(({ main, subs }) => (
+            <div key={main.mainCategoryId} className="flex flex-col gap-1.5">
+              <p className="text-[10px] font-semibold text-gray-700">{main.mainCategoryTitle}</p>
+              <PrintTable
+                headers={[
+                  "#",
+                  translate("Subcategory", "الفئة الفرعية"),
+                  translate("Materials", "المواد"),
+                  translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+                  translate("% of category", "% من الفئة"),
+                  translate("% of supplier", "% من المورد"),
+                ]}
+                columnWidths={["6%", "34%", "12%", "18%", "15%", "15%"]}
+                rows={subs.map((sub, index) => [
+                  String(index + 1),
+                  sub.subCategoryTitle,
+                  String(sub.materialCount),
+                  formatMoney(sub.totalSpend),
+                  `${percentageFormatter.format(main.totalSpend === 0 ? 0 : (sub.totalSpend / main.totalSpend) * 100)}%`,
+                  `${percentageFormatter.format(totalCategorySpend === 0 ? 0 : (sub.totalSpend / totalCategorySpend) * 100)}%`,
+                ])}
+                footerRow={[
+                  "",
+                  `${translate("Total", "الإجمالي")} (${main.mainCategoryTitle})`,
+                  String(main.materialCount),
+                  formatMoney(main.totalSpend),
+                  `${percentageFormatter.format(100)}%`,
+                  `${percentageFormatter.format(totalCategorySpend === 0 ? 0 : (main.totalSpend / totalCategorySpend) * 100)}%`,
+                ]}
+                emptyLabel={translate("No subcategories", "لا توجد فئات فرعية")}
+              />
+            </div>
+          ))
+        )}
       </section>
 
       <section className="flex flex-col gap-2.5">

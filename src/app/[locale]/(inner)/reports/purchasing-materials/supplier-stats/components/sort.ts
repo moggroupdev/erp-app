@@ -152,7 +152,7 @@ export function sortSupplierCategories(data: PurchasingMaterialsByMainCategory[]
 
 export function sortSupplierSubCategories(
   data: PurchasingMaterialsSupplierBySubCategory[],
-  sort: SupplierSubCategoriesSort,
+  sort: SupplierCategoriesSort | SupplierSubCategoriesSort,
 ) {
   const rows = [...data];
   rows.sort((a, b) => {
@@ -182,6 +182,26 @@ export function sortSupplierSubCategories(
     }
   });
   return rows;
+}
+
+export function buildSupplierCategoryGroups(
+  categories: PurchasingMaterialsByMainCategory[],
+  subCategories: PurchasingMaterialsSupplierBySubCategory[],
+  sort: SupplierCategoriesSort,
+) {
+  const sortedMains = sortSupplierCategories(categories, sort);
+  const byMainId = new Map<string, PurchasingMaterialsSupplierBySubCategory[]>();
+
+  for (const sub of subCategories) {
+    const list = byMainId.get(sub.mainCategoryId) ?? [];
+    list.push(sub);
+    byMainId.set(sub.mainCategoryId, list);
+  }
+
+  return sortedMains.map((main) => ({
+    main,
+    subs: sortSupplierSubCategories(byMainId.get(main.mainCategoryId) ?? [], sort),
+  }));
 }
 
 export function sortSupplierOrders(data: PurchasingMaterialsSupplierOrder[], sort: SupplierOrdersSort) {

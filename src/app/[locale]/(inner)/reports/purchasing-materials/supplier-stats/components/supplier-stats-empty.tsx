@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUp, Boxes, FileText, FolderTree, Layers, ShoppingCart, TrendingUp } from "lucide-react";
+import { ArrowUp, Boxes, FileText, FolderTree, ShoppingCart, TrendingUp } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 
 export default function SupplierStatsEmpty() {
@@ -19,13 +19,8 @@ export default function SupplierStatsEmpty() {
     },
     {
       icon: FolderTree,
-      label: translate("Main categories", "الفئات الرئيسية"),
-      detail: translate("Purchase value grouped by material category", "قيمة المشتريات مجمّع حسب فئة المواد"),
-    },
-    {
-      icon: Layers,
-      label: translate("Subcategories", "الفئات الفرعية"),
-      detail: translate("Purchase value broken down by subcategory", "قيمة المشتريات مفصّلة حسب الفئة الفرعية"),
+      label: translate("Categories", "الفئات"),
+      detail: translate("Purchase value by main category with subcategory breakdown", "قيمة المشتريات حسب الفئة الرئيسية مع تفصيل الفئات الفرعية"),
     },
     {
       icon: FileText,

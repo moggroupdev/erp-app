@@ -51,7 +51,6 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   });
 
   const totalSubCategoryMaterials = subCategories.reduce((sum, row) => sum + row.materialCount, 0);
-  const totalSubCategoryQuantity = subCategories.reduce((sum, row) => sum + row.totalQuantity, 0);
   const totalSubCategorySpend = subCategories.reduce((sum, row) => sum + row.totalSpend, 0);
   const totalSupplierOrders = suppliers.reduce((sum, row) => sum + row.orderCount, 0);
   const totalSupplierSpend = suppliers.reduce((sum, row) => sum + row.totalSpend, 0);
@@ -102,15 +101,14 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             "#",
             translate("Subcategory", "الفئة الفرعية"),
             translate("Materials", "المواد"),
-            translate("Qty Ordered", "الكمية المطلوبة"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate("Percentage", "النسبة"),
           ]}
+          columnWidths={["8%", "42%", "15%", "20%", "15%"]}
           rows={subCategories.map((row, index) => [
             String(index + 1),
             row.subCategoryTitle,
             String(row.materialCount),
-            formatQuantity(row.totalQuantity),
             formatMoney(row.totalSpend),
             `${percentageFormatter.format(totalSubCategorySpend === 0 ? 0 : (row.totalSpend / totalSubCategorySpend) * 100)}%`,
           ])}
@@ -118,7 +116,6 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             "",
             translate("Total", "الإجمالي"),
             String(totalSubCategoryMaterials),
-            formatQuantity(totalSubCategoryQuantity),
             formatMoney(totalSubCategorySpend),
             `${percentageFormatter.format(subCategories.length === 0 ? 0 : 100)}%`,
           ]}

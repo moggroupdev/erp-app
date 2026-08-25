@@ -1,41 +1,62 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Select, Table } from "@mantine/core";
 import { FolderTree } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatQuantity } from "@/lib/helpers/format-quantity";
-import type { PurchasingMaterialsByMainCategory } from "@/types/reports";
+import type {
+  PurchasingMaterialsByMainCategory,
+  PurchasingMaterialsSupplierBySubCategory,
+} from "@/types/reports";
 import ReportCard from "../../components/report-card";
-import type { SupplierCategoriesSort } from "./sort";
+import { buildSupplierCategoryGroups, type SupplierCategoriesSort } from "./sort";
+
+const COL = {
+  index: "w-[6%]",
+  name: "w-[34%]",
+  materials: "w-[12%]",
+  value: "w-[18%]",
+  percentCategory: "w-[15%]",
+  percentSupplier: "w-[15%]",
+} as const;
 
 export default function SupplierCategoriesTable({
-  data,
+  categories,
+  subCategories,
   sort,
   onSortChange,
 }: {
-  data: PurchasingMaterialsByMainCategory[];
+  categories: PurchasingMaterialsByMainCategory[];
+  subCategories: PurchasingMaterialsSupplierBySubCategory[];
   sort: SupplierCategoriesSort;
   onSortChange: (sort: SupplierCategoriesSort) => void;
 }) {
   const { translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
-  const totalMaterials = data.reduce((sum, row) => sum + row.materialCount, 0);
-  const totalQuantity = data.reduce((sum, row) => sum + row.totalQuantity, 0);
-  const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
+  const groups = useMemo(
+    () => buildSupplierCategoryGroups(categories, subCategories, sort),
+    [categories, subCategories, sort],
+  );
+
+  const totalSpend = categories.reduce((sum, row) => sum + row.totalSpend, 0);
   const percentageFormatter = new Intl.NumberFormat(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
+  function formatPercent(value: number, ofTotal: number) {
+    return `${percentageFormatter.format(ofTotal === 0 ? 0 : (value / ofTotal) * 100)}%`;
+  }
+
   return (
     <ReportCard
-      title={translate("Value by Main Category", "القيمة حسب الفئة الرئيسية")}
+      title={translate("Value by Category", "القيمة حسب الفئة")}
       description={translate(
-        "Purchase spend from this supplier grouped by main material category.",
-        "قيمة المشتريات من هذا المورد مجمّع حسب الفئة الرئيسية للمواد.",
+        "One table per main category. Rows are its subcategories; the total row is the category itself.",
+        "جدول لكل فئة رئيسية. الصفوف هي فئاتها الفرعية، وصف الإجمالي يمثل الفئة نفسها.",
       )}
       icon={FolderTree}
       accent="teal"
@@ -49,8 +70,6 @@ export default function SupplierCategoriesTable({
           data={[
             { value: "spend-desc", label: translate("Value (high to low)", "القيمة (من الأعلى للأقل)") },
             { value: "spend-asc", label: translate("Value (low to high)", "القيمة (من الأقل للأعلى)") },
-            { value: "qty-desc", label: translate("Quantity (high to low)", "الكمية (من الأعلى للأقل)") },
-            { value: "qty-asc", label: translate("Quantity (low to high)", "الكمية (من الأقل للأعلى)") },
             {
               value: "materials-desc",
               label: translate("Materials (high to low)", "المواد (من الأعلى للأقل)"),
@@ -68,58 +87,98 @@ export default function SupplierCategoriesTable({
         />
       }
     >
-      {data.length === 0 ? (
+      {groups.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl">
-          <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
-            <Table.Thead className="bg-gray-50">
-              <Table.Tr>
-                <Table.Th className="text-gray-600">#</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Materials", "المواد")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Qty Ordered", "الكمية المطلوبة")}</Table.Th>
-                <Table.Th className="text-gray-600">
-                  {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
-                </Table.Th>
-                <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {data.map((row, index) => (
-                <Table.Tr key={row.mainCategoryId} className="text-gray-600">
-                  <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
-                  <Table.Td className="max-w-[300px] truncate font-medium text-gray-800">
-                    <Link
-                      href={getLocalizedHref(
-                        `/reports/purchasing-materials/category-stats?mainCategoryId=${row.mainCategoryId}`,
-                      )}
-                      className="text-gray-800 hover:underline"
-                      title={row.mainCategoryTitle}
-                    >
-                      {row.mainCategoryTitle}
-                    </Link>
-                  </Table.Td>
-                  <Table.Td>{row.materialCount}</Table.Td>
-                  <Table.Td>{formatQuantity(row.totalQuantity)}</Table.Td>
-                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
-                  <Table.Td>
-                    {percentageFormatter.format(totalSpend === 0 ? 0 : (row.totalSpend / totalSpend) * 100)}%
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-            <Table.Tfoot className="bg-gray-50">
-              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
-                <Table.Th />
-                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
-                <Table.Th>{totalMaterials}</Table.Th>
-                <Table.Th>{formatQuantity(totalQuantity)}</Table.Th>
-                <Table.Th>{formatMoney(totalSpend)}</Table.Th>
-                <Table.Th>{percentageFormatter.format(data.length === 0 ? 0 : 100)}%</Table.Th>
-              </Table.Tr>
-            </Table.Tfoot>
-          </Table>
+        <div className="flex flex-col gap-6">
+          {groups.map(({ main, subs }) => (
+            <section key={main.mainCategoryId} className="flex flex-col gap-2">
+              <h4 className="text-sm font-semibold text-stone-800">
+                <Link
+                  href={getLocalizedHref(
+                    `/reports/purchasing-materials/category-stats?mainCategoryId=${main.mainCategoryId}`,
+                  )}
+                  className="text-stone-800 hover:underline"
+                  title={main.mainCategoryTitle}
+                >
+                  {main.mainCategoryTitle}
+                </Link>
+              </h4>
+
+              <div className="overflow-x-auto rounded-xl border border-stone-100">
+                <Table className="w-full table-fixed text-nowrap" verticalSpacing="sm" highlightOnHover>
+                  <Table.Thead className="bg-gray-50">
+                    <Table.Tr>
+                      <Table.Th className={`${COL.index} text-gray-600`}>#</Table.Th>
+                      <Table.Th className={`${COL.name} text-gray-600`}>
+                        {translate("Subcategory", "الفئة الفرعية")}
+                      </Table.Th>
+                      <Table.Th className={`${COL.materials} text-gray-600`}>
+                        {translate("Materials", "المواد")}
+                      </Table.Th>
+                      <Table.Th className={`${COL.value} text-gray-600`}>
+                        {translate(
+                          `Total Value (${translation.currency})`,
+                          `إجمالي القيمة (${translation.currency})`,
+                        )}
+                      </Table.Th>
+                      <Table.Th className={`${COL.percentCategory} text-gray-600`}>
+                        {translate("% of category", "% من الفئة")}
+                      </Table.Th>
+                      <Table.Th className={`${COL.percentSupplier} text-gray-600`}>
+                        {translate("% of supplier", "% من المورد")}
+                      </Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {subs.length === 0 ? (
+                      <Table.Tr>
+                        <Table.Td colSpan={6} className="py-6 text-center text-sm text-gray-500">
+                          {translate("No subcategories", "لا توجد فئات فرعية")}
+                        </Table.Td>
+                      </Table.Tr>
+                    ) : (
+                      subs.map((sub, index) => (
+                        <Table.Tr key={sub.subCategoryId} className="text-gray-700">
+                          <Table.Td className={`${COL.index} font-medium text-gray-400`}>{index + 1}</Table.Td>
+                          <Table.Td className={`${COL.name} truncate font-medium`} title={sub.subCategoryTitle}>
+                            {sub.subCategoryTitle}
+                          </Table.Td>
+                          <Table.Td className={`${COL.materials} font-medium`}>{sub.materialCount}</Table.Td>
+                          <Table.Td className={`${COL.value} font-semibold text-gray-900`}>
+                            {formatMoney(sub.totalSpend)}
+                          </Table.Td>
+                          <Table.Td className={`${COL.percentCategory} font-medium`}>
+                            {formatPercent(sub.totalSpend, main.totalSpend)}
+                          </Table.Td>
+                          <Table.Td className={`${COL.percentSupplier} font-medium`}>
+                            {formatPercent(sub.totalSpend, totalSpend)}
+                          </Table.Td>
+                        </Table.Tr>
+                      ))
+                    )}
+                  </Table.Tbody>
+                  <Table.Tfoot className="bg-gray-50">
+                    <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                      <Table.Th className={COL.index} />
+                      <Table.Th className={COL.name}>
+                        {translate("Total", "الإجمالي")}
+                        <span className="ms-1 font-normal text-stone-500">({main.mainCategoryTitle})</span>
+                      </Table.Th>
+                      <Table.Th className={COL.materials}>{main.materialCount}</Table.Th>
+                      <Table.Th className={COL.value}>{formatMoney(main.totalSpend)}</Table.Th>
+                      <Table.Th className={`${COL.percentCategory} font-medium`}>
+                        {percentageFormatter.format(100)}%
+                      </Table.Th>
+                      <Table.Th className={`${COL.percentSupplier} font-medium`}>
+                        {formatPercent(main.totalSpend, totalSpend)}
+                      </Table.Th>
+                    </Table.Tr>
+                  </Table.Tfoot>
+                </Table>
+              </div>
+            </section>
+          ))}
         </div>
       )}
     </ReportCard>
