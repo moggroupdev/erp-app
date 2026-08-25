@@ -17,6 +17,7 @@ export const PERMISSION_VALUES = [
   "add_supplier",
   "read_suppliers",
   "update_supplier",
+  "print_suppliers_list",
   "add_customer",
   "read_customers",
   "update_customer",
@@ -183,6 +184,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Supplier",
       ar: "تحديث المورد",
+    },
+  },
+  print_suppliers_list: {
+    value: "print_suppliers_list",
+    label: {
+      en: "Print Suppliers List",
+      ar: "طباعة قائمة الموردين",
     },
   },
   read_products: {
@@ -574,6 +582,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_supplier",
       "read_suppliers",
       "update_supplier",
+      "print_suppliers_list",
       "read_material_purchase_orders",
       "read_product_purchase_orders",
     ],

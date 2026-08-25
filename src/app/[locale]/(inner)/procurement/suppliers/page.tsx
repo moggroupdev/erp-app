@@ -17,7 +17,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Supplier } from "@/types/supplier";
-import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Button, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
@@ -29,6 +29,8 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
+import SuppliersListPrintDocument from "@/components/documents/suppliers-list-print-document";
 import SupplierModal from "@/components/global/data-modals/supplier-modal";
 
 const PAGE_TITLE = { en: "Suppliers", ar: "الموردون" };
@@ -37,6 +39,7 @@ const SUPPLIERS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translate } = useI18n();
+  const printDate = formatDate(new Date(), locale);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -81,6 +84,14 @@ export default function Page() {
     placeholderData: keepPreviousData,
   });
 
+  // Only used for printing
+  const { data: allSuppliers, refetch: fetchAllSuppliers } = useQuery({
+    queryKey: queryKeys.suppliers.list({ limit: "list-all-to-print" }),
+    queryFn: ({ signal }) => suppliersApi.listAllToPrint({ privateRequest, signal }),
+    staleTime: staleTimes.suppliers,
+    enabled: false, // Disabled by default, will be enabled when the print button is clicked
+  });
+
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useEffect(() => {
@@ -115,7 +126,20 @@ export default function Page() {
         backLink: getLocalizedHref("/procurement"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <PermissionGuard permission={PERMISSIONS.PRINT_SUPPLIERS_LIST}>
+              <div className="flex-center px-1">
+                <PrintDocument
+                  buttonType="icon"
+                  title={translate(`Suppliers List - ${printDate}`, `قائمة الموردين - ${printDate}`)}
+                  onBeforePrint={async () => {
+                    if (!allSuppliers) await fetchAllSuppliers();
+                  }}
+                >
+                  {allSuppliers && <SuppliersListPrintDocument suppliers={allSuppliers} />}
+                </PrintDocument>
+              </div>
+            </PermissionGuard>
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <PermissionGuard permission={PERMISSIONS.ADD_SUPPLIER}>
               <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>

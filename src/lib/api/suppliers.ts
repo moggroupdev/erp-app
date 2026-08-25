@@ -26,6 +26,16 @@ const suppliersApi = {
     return await privateRequest<PaginatedData<Supplier>>({ url: "suppliers", params, signal });
   },
 
+  async listAllToPrint({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
+    const result = await privateRequest<PaginatedData<Supplier>>({
+      url: "suppliers",
+      params: { limit: Infinity, sort: "name" },
+      signal,
+    });
+
+    return result.data;
+  },
+
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<SupplierWithCreator>({ url: `suppliers/${id}`, signal });
   },
