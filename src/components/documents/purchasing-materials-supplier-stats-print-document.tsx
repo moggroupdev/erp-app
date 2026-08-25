@@ -109,8 +109,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
     return { row, unit, factor, displayQuantity: toDisplayQuantity(row.totalQuantity, factor) };
   });
   const allMaterialUnitsMatch =
-    materialDisplayRows.length > 0 &&
-    materialDisplayRows.every((item) => item.unit === materialDisplayRows[0].unit);
+    materialDisplayRows.length > 0 && materialDisplayRows.every((item) => item.unit === materialDisplayRows[0].unit);
   const totalMaterialQuantity = allMaterialUnitsMatch
     ? materialDisplayRows.reduce((sum, item) => sum + item.displayQuantity, 0)
     : null;
@@ -134,9 +133,9 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
         <PrintDetail label={translate("Supplier", "المورد")} value={supplierName} />
         <PrintDetail label={translate("Total Value", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
-        <PrintDetail label={translate("Total Invoices", "إجمالي الفواتير")} value={String(overview.totalOrders)} />
+        <PrintDetail label={translate("Total Invoices Count", "إجمالي عدد الفواتير")} value={String(overview.totalOrders)} />
         <PrintDetail
-          label={translate("Average Order Value", "متوسط قيمة الطلب")}
+          label={translate("Average Invoice Value", "متوسط قيمة الفاتورة")}
           value={formatMoney(overview.avgOrderValue, currency)}
         />
         <PrintDetail
@@ -152,16 +151,16 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
         <PrintSectionHeading
           title={translate("Value by Period", "القيمة حسب الفترة")}
           subtitle={translate(
-            "Total value, invoice count, and average order value per period.",
-            "إجمالي القيمة وعدد الفواتير ومتوسط قيمة الطلب لكل فترة.",
+            "Total value, invoice count, and average invoice value per period.",
+            "إجمالي القيمة وعدد الفواتير ومتوسط قيمة الفاتورة لكل فترة.",
           )}
         />
         <PrintTable
           headers={[
             translate("Period", "الفترة"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Invoices", "الفواتير"),
-            translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
+            translate("Invoices Count", "عدد الفواتير"),
+            translate(`Avg Invoice (${currency})`, `متوسط الفاتورة (${currency})`),
           ]}
           rows={byPeriod.map((row) => [
             formatPeriodLabel(row.period, locale, groupBy),
@@ -195,10 +194,10 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
                 headers={[
                   "#",
                   translate("Subcategory", "الفئة الفرعية"),
-                  translate("Materials", "المواد"),
+                  translate("Materials Count", "عدد الأصناف"),
                   translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-                  translate("% of category", "% من الفئة"),
-                  translate("% of supplier", "% من المورد"),
+                  translate("% of category", "النسبة من الفئة"),
+                  translate("% of supplier", "النسبة من المورد"),
                 ]}
                 columnWidths={["6%", "34%", "12%", "18%", "15%", "15%"]}
                 rows={subs.map((sub, index) => [

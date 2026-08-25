@@ -6,10 +6,7 @@ import { Select, Table } from "@mantine/core";
 import { FolderTree } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
-import type {
-  PurchasingMaterialsByMainCategory,
-  PurchasingMaterialsSupplierBySubCategory,
-} from "@/types/reports";
+import type { PurchasingMaterialsByMainCategory, PurchasingMaterialsSupplierBySubCategory } from "@/types/reports";
 import ReportCard from "../../components/report-card";
 import { buildSupplierCategoryGroups, type SupplierCategoriesSort } from "./sort";
 
@@ -114,19 +111,16 @@ export default function SupplierCategoriesTable({
                         {translate("Subcategory", "الفئة الفرعية")}
                       </Table.Th>
                       <Table.Th className={`${COL.materials} text-gray-600`}>
-                        {translate("Materials", "المواد")}
+                        {translate("Materials Count", "عدد الأصناف")}
                       </Table.Th>
                       <Table.Th className={`${COL.value} text-gray-600`}>
-                        {translate(
-                          `Total Value (${translation.currency})`,
-                          `إجمالي القيمة (${translation.currency})`,
-                        )}
+                        {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                       </Table.Th>
                       <Table.Th className={`${COL.percentCategory} text-gray-600`}>
-                        {translate("% of category", "% من الفئة")}
+                        {translate("% of category", "النسبة من الفئة")}
                       </Table.Th>
                       <Table.Th className={`${COL.percentSupplier} text-gray-600`}>
-                        {translate("% of supplier", "% من المورد")}
+                        {translate("% of supplier", "النسبة من المورد")}
                       </Table.Th>
                     </Table.Tr>
                   </Table.Thead>
