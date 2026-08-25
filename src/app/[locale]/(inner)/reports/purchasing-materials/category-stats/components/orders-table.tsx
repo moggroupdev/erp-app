@@ -91,9 +91,7 @@ export default function CategoryOrdersTable({
                   <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
                   <Table.Th className="text-gray-600">{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                   <Table.Th className="text-gray-600">{translate("Invoice Date", "تاريخ الفاتورة")}</Table.Th>
-                  <Table.Th className="text-gray-600">
-                    {translate("Addition Permit Numbers", "أرقام إذن الإضافة")}
-                  </Table.Th>
+                  <Table.Th className="text-gray-600">{translate("Addition Permit Numbers", "أرقام إذن الإضافة")}</Table.Th>
                   <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                   <Table.Th className="text-center text-gray-600">{translate("Status", "الحالة")}</Table.Th>
                   <Table.Th className="text-gray-600">
@@ -184,7 +182,7 @@ export default function CategoryOrdersTable({
           </div>
 
           <Alert
-            color="amber"
+            color="orange"
             variant="light"
             radius="lg"
             icon={<AlertTriangle size={18} />}
