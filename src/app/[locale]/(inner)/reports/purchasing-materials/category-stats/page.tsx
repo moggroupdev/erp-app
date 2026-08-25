@@ -45,7 +45,7 @@ const PAGE_TITLE = { en: "Purchasing by Category", ar: "المشتريات حس�
 
 const PAGE_SUBTITLE = {
   en: "Purchase stats scoped to one main material category: subcategories, suppliers, purchase orders, and materials.",
-  ar: "إحصائيات المشتريات ضمن فئة مواد رئيسية واحدة: الفئات الفرعية والموردون وأوامر الشراء والمواد.",
+  ar: "إحصائيات المشتريات ضمن فئة مواد رئيسية واحدة: الفئات الفرعية والموردون وأوامر التوريد والمواد.",
 };
 
 export default function Page() {

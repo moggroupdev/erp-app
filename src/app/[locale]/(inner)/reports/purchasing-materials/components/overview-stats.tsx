@@ -22,7 +22,7 @@ export default function OverviewStats({ overview }: { overview: PurchasingMateri
       <KpiCard
         label={translate("Total Invoices Count", "إجمالي عدد الفواتير")}
         value={overview.totalOrders}
-        hint={translate("Purchase orders in this period.", "أوامر الشراء في هذه الفترة.")}
+        hint={translate("Purchase orders in this period.", "أوامر التوريد في هذه الفترة.")}
         icon={<ClipboardList size={20} />}
       />
       <KpiCard

@@ -25,7 +25,7 @@ export default function CategoryStatsEmpty() {
     {
       icon: FileClock,
       label: translate("Latest invoices", "أحدث الفواتير"),
-      detail: translate("Recent purchase orders in this category", "أحدث أوامر الشراء ضمن هذه الفئة"),
+      detail: translate("Recent purchase orders in this category", "أحدث أوامر التوريد ضمن هذه الفئة"),
     },
     {
       icon: Files,

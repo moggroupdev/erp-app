@@ -15,10 +15,10 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
 
   return (
     <ReportCard
-      title={translate("Top Purchase Orders", "أعلى أوامر الشراء قيمة")}
+      title={translate("Top Purchase Orders", "أعلى أوامر التوريد قيمة")}
       description={translate(
         "Largest purchase orders ranked by total amount.",
-        "أكبر أوامر الشراء مرتبة حسب إجمالي المبلغ.",
+        "أكبر أوامر التوريد مرتبة حسب إجمالي المبلغ.",
       )}
       icon={FileText}
       accent="amber"

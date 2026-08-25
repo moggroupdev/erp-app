@@ -41,7 +41,7 @@ const PAGE_TITLE = { en: "Purchasing by Supplier", ar: "المشتريات حس�
 
 const PAGE_SUBTITLE = {
   en: "Purchase stats scoped to one supplier: value trend, categories, purchase orders, and materials.",
-  ar: "إحصائيات المشتريات ضمن مورد واحد: اتجاه القيمة والفئات وأوامر الشراء والمواد.",
+  ar: "إحصائيات المشتريات ضمن مورد واحد: اتجاه القيمة والفئات وأوامر التوريد والمواد.",
 };
 
 function parseGroupBy(value: string | null): GroupBy {

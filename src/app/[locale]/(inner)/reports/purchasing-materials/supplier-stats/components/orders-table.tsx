@@ -35,10 +35,10 @@ export default function SupplierOrdersTable({
 
   return (
     <ReportCard
-      title={translate("Purchase Orders", "أوامر الشراء")}
+      title={translate("Purchase Orders", "أوامر التوريد")}
       description={translate(
         "All purchase orders from this supplier.",
-        "جميع أوامر الشراء من هذا المورد.",
+        "جميع أوامر التوريد من هذا المورد.",
       )}
       icon={FileText}
       accent="amber"

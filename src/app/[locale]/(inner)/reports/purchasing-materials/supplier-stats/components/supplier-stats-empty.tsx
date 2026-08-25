@@ -24,8 +24,8 @@ export default function SupplierStatsEmpty() {
     },
     {
       icon: FileText,
-      label: translate("Purchase orders", "أوامر الشراء"),
-      detail: translate("All purchase orders from this supplier", "جميع أوامر الشراء من هذا المورد"),
+      label: translate("Purchase orders", "أوامر التوريد"),
+      detail: translate("All purchase orders from this supplier", "جميع أوامر التوريد من هذا المورد"),
     },
     {
       icon: Boxes,

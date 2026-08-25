@@ -39,7 +39,7 @@ export default function PriceChart({ data }: { data: PurchasingMaterialsPriceHis
       title={translate("Price Trend", "اتجاه السعر")}
       description={translate(
         "Unit price per purchase order over time.",
-        "سعر الوحدة لكل أمر شراء بمرور الوقت.",
+        "سعر الوحدة لكل أمر توريد بمرور الوقت.",
       )}
       icon={TrendingUp}
       accent="teal"

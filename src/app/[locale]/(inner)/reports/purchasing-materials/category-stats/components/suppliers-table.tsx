@@ -31,7 +31,7 @@ export default function CategorySuppliersTable({
       title={translate("Suppliers", "الموردون")}
       description={translate(
         "All suppliers with purchase orders that include materials from this category.",
-        "جميع الموردين الذين لديهم أوامر شراء تتضمن مواداً من هذه الفئة.",
+        "جميع الموردين الذين لديهم أوامر توريد تتضمن مواداً من هذه الفئة.",
       )}
       icon={Truck}
       accent="amber"

@@ -18,7 +18,7 @@ export default function LatestInvoicesTable({ data }: { data: PurchasingMaterial
       title={translate("Latest Invoices", "أحدث الفواتير")}
       description={translate(
         "Most recent purchase orders that include materials from this category.",
-        "أحدث أوامر الشراء التي تتضمن مواداً من هذه الفئة.",
+        "أحدث أوامر التوريد التي تتضمن مواداً من هذه الفئة.",
       )}
       icon={FileClock}
       accent="amber"

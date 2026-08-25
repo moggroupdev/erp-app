@@ -77,7 +77,7 @@ export default function SpendingTrendChart({ data, groupBy }: { data: Purchasing
       title={translate("Value Trend", "اتجاه القيمة")}
       description={translate(
         "Total value per period across purchase orders.",
-        "إجمالي القيمة لكل فترة عبر أوامر الشراء.",
+        "إجمالي القيمة لكل فترة عبر أوامر التوريد.",
       )}
       icon={TrendingUp}
       accent="teal"

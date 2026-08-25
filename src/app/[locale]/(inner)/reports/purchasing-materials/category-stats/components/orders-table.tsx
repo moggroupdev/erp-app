@@ -35,10 +35,10 @@ export default function CategoryOrdersTable({
 
   return (
     <ReportCard
-      title={translate("Purchase Orders", "أوامر الشراء")}
+      title={translate("Purchase Orders", "أوامر التوريد")}
       description={translate(
         "All purchase orders that include materials from this category.",
-        "جميع أوامر الشراء التي تتضمن مواداً من هذه الفئة.",
+        "جميع أوامر التوريد التي تتضمن مواداً من هذه الفئة.",
       )}
       icon={FileText}
       accent="amber"

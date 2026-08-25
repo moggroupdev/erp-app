@@ -10,7 +10,7 @@ export default function PriceHistoryEmpty() {
     {
       icon: TrendingUp,
       label: translate("Price trend", "اتجاه السعر"),
-      detail: translate("Unit price over time across purchase orders", "سعر الوحدة عبر الوقت عبر أوامر الشراء"),
+      detail: translate("Unit price over time across purchase orders", "سعر الوحدة عبر الوقت عبر أوامر التوريد"),
     },
     {
       icon: Table2,
@@ -39,7 +39,7 @@ export default function PriceHistoryEmpty() {
           <p className="mt-2 text-xs leading-relaxed text-stone-500">
             {translate(
               "Pick a material in the field above. The report will load its price history across all purchase orders.",
-              "اختر مادة من الحقل أعلاه. سيُحمَّل تاريخ أسعارها عبر جميع أوامر الشراء.",
+              "اختر مادة من الحقل أعلاه. سيُحمَّل تاريخ أسعارها عبر جميع أوامر التوريد.",
             )}
           </p>
 

@@ -51,7 +51,7 @@ export default function Page() {
               label: { en: "Price History", ar: "تاريخ الأسعار" },
               description: {
                 en: "Track unit price changes for a specific material over time across purchase orders.",
-                ar: "تتبع تغيرات سعر الوحدة لمادة محددة عبر أوامر الشراء بمرور الوقت.",
+                ar: "تتبع تغيرات سعر الوحدة لمادة محددة عبر أوامر التوريد بمرور الوقت.",
               },
               href: "/reports/purchasing-materials/price-history",
             }}
@@ -81,7 +81,7 @@ export default function Page() {
               label: { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" },
               description: {
                 en: "Purchase stats for one supplier: value trend, categories, orders, and materials.",
-                ar: "إحصائيات المشتريات لمورد واحد: اتجاه القيمة والفئات وأوامر الشراء والمواد.",
+                ar: "إحصائيات المشتريات لمورد واحد: اتجاه القيمة والفئات وأوامر التوريد والمواد.",
               },
               href: "/reports/purchasing-materials/supplier-stats",
             }}

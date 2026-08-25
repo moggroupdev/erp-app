@@ -21,7 +21,7 @@ export default function PriceEntriesTable({ data }: { data: PurchasingMaterialsP
       title={translate("Purchase History", "سجل المشتريات")}
       description={translate(
         "Individual purchase order lines for this material.",
-        "بنود أوامر الشراء الفردية لهذه المادة.",
+        "بنود أوامر التوريد الفردية لهذه المادة.",
       )}
       icon={Table2}
       accent="slate"

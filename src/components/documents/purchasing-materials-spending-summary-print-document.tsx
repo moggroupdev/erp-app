@@ -146,7 +146,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           title={translate("Top Suppliers by Value", "أعلى الموردين قيمة")}
           subtitle={translate(
             "Suppliers ranked by total purchase order value.",
-            "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
+            "الموردون مرتبون حسب إجمالي قيمة أوامر التوريد.",
           )}
         />
         <PrintTable
@@ -173,10 +173,10 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Top Purchase Orders", "أعلى أوامر الشراء قيمة")}
+          title={translate("Top Purchase Orders", "أعلى أوامر التوريد قيمة")}
           subtitle={translate(
             "Largest purchase orders ranked by total amount.",
-            "أكبر أوامر الشراء مرتبة حسب إجمالي المبلغ.",
+            "أكبر أوامر التوريد مرتبة حسب إجمالي المبلغ.",
           )}
         />
         <PrintTable

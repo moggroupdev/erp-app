@@ -35,10 +35,10 @@ export default function SubCategoryOrdersTable({
 
   return (
     <ReportCard
-      title={translate("Purchase Orders", "أوامر الشراء")}
+      title={translate("Purchase Orders", "أوامر التوريد")}
       description={translate(
         "All purchase orders that include materials from this subcategory.",
-        "جميع أوامر الشراء التي تتضمن مواداً من هذه الفئة الفرعية.",
+        "جميع أوامر التوريد التي تتضمن مواداً من هذه الفئة الفرعية.",
       )}
       icon={FileText}
       accent="amber"

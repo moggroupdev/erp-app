@@ -24,7 +24,7 @@ const PAGE_TITLE = { en: "Material Price History", ar: "تاريخ أسعار ا
 
 const PAGE_SUBTITLE = {
   en: "Track unit price changes for a specific material over time across purchase orders.",
-  ar: "تتبع تغيرات سعر الوحدة لمادة محددة عبر أوامر الشراء بمرور الوقت.",
+  ar: "تتبع تغيرات سعر الوحدة لمادة محددة عبر أوامر التوريد بمرور الوقت.",
 };
 
 export default function Page() {
