@@ -75,3 +75,29 @@ export function toDisplayQuantity(baseQuantity: number, factor: number): number 
 export function toDisplayUnitPrice(baseUnitPrice: number, factor: number): number {
   return Number(baseUnitPrice) * factor;
 }
+
+/**
+ * Resolve which unit/factor to show for a material given a preferred table-level unit.
+ * Falls back to the material's base unit when the preferred unit cannot be converted.
+ */
+export function resolveDisplayUnit(
+  preferredUnit: MaterialUnit | null | undefined,
+  baseUnit: MaterialUnit,
+  unitConversions: { unit: MaterialUnit; conversionFactorToBase: number }[] = [],
+): { unit: MaterialUnit; factor: number } {
+  if (!preferredUnit || preferredUnit === baseUnit) {
+    return { unit: baseUnit, factor: 1 };
+  }
+
+  const stored = unitConversions.find((row) => row.unit === preferredUnit);
+  if (stored) {
+    return { unit: preferredUnit, factor: Number(stored.conversionFactorToBase) };
+  }
+
+  const knownFactor = getKnownConversionFactorToBase(preferredUnit, baseUnit, unitConversions);
+  if (knownFactor != null) {
+    return { unit: preferredUnit, factor: knownFactor };
+  }
+
+  return { unit: baseUnit, factor: 1 };
+}

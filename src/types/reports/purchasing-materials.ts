@@ -1,4 +1,5 @@
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 
 // ================ Spending Summary ================
 
@@ -34,6 +35,7 @@ export type PurchasingMaterialsByMaterial = {
   materialCode: string;
   materialTitle: string;
   unitOfMeasurement: MaterialUnit;
+  unitConversions?: MaterialUnitConversionSummary[];
   totalSpend: number;
   totalQuantity: number;
   avgUnitPrice: number;

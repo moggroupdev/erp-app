@@ -2,8 +2,9 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "./components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { formatDisplayQuantity, formatQuantity } from "@/lib/helpers/format-quantity";
+import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { resolveDisplayUnit, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type {
   PurchasingMaterialsByMaterial,
   PurchasingMaterialsBySubCategory,
@@ -22,6 +23,7 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   suppliers,
   orders,
   materials,
+  materialsDisplayUnit,
   subCategoriesSortLabel,
   suppliersSortLabel,
   ordersSortLabel,
@@ -36,6 +38,7 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   suppliers: PurchasingMaterialsBySupplier[];
   orders: PurchasingMaterialsCategoryOrder[];
   materials: PurchasingMaterialsByMaterial[];
+  materialsDisplayUnit?: MaterialUnit | null;
   subCategoriesSortLabel: string;
   suppliersSortLabel: string;
   ordersSortLabel: string;
@@ -56,7 +59,11 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
   const totalSupplierSpend = suppliers.reduce((sum, row) => sum + row.totalSpend, 0);
   const avgSupplierOrderValue = totalSupplierOrders === 0 ? 0 : totalSupplierSpend / totalSupplierOrders;
   const totalOrderAmount = orders.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
-  const totalMaterialQuantity = materials.reduce((sum, row) => sum + row.totalQuantity, 0);
+  const materialDisplayRows = materials.map((row) => {
+    const { unit, factor } = resolveDisplayUnit(materialsDisplayUnit, row.unitOfMeasurement, row.unitConversions);
+    return { row, unit, factor, displayQuantity: toDisplayQuantity(row.totalQuantity, factor) };
+  });
+  const totalMaterialQuantity = materialDisplayRows.reduce((sum, item) => sum + item.displayQuantity, 0);
   const totalMaterialSpend = materials.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
@@ -214,14 +221,14 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
           ]}
-          rows={materials.map((row, index) => [
+          rows={materialDisplayRows.map(({ row, unit, factor }, index) => [
             String(index + 1),
             row.materialTitle,
             row.materialCode,
-            getMaterialUnitLabel(row.unitOfMeasurement, locale),
-            formatQuantity(row.totalQuantity),
+            getMaterialUnitLabel(unit, locale),
+            formatDisplayQuantity(row.totalQuantity, factor),
             formatMoney(row.totalSpend),
-            formatMoney(row.avgUnitPrice),
+            formatMoney(toDisplayUnitPrice(row.avgUnitPrice, factor)),
           ])}
           footerRow={[
             "",

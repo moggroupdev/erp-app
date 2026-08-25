@@ -14,6 +14,7 @@ import { FolderKanban, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
+import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import DateRangeFilter from "../components/date-range-filter";
 import OverviewStats from "../components/overview-stats";
@@ -63,6 +64,7 @@ export default function Page() {
   const [suppliersSort, setSuppliersSort] = useState<CategorySuppliersSort>("spend-desc");
   const [ordersSort, setOrdersSort] = useState<CategoryOrdersSort>("invoice-date-desc");
   const [materialsSort, setMaterialsSort] = useState<CategoryMaterialsSort>("spend-desc");
+  const [materialsDisplayUnit, setMaterialsDisplayUnit] = useState<MaterialUnit | null>(null);
 
   function updateQuery(patch: { mainCategoryId?: string | null; from?: string | null; to?: string | null }) {
     const params = new URLSearchParams(searchParams.toString());
@@ -166,6 +168,7 @@ export default function Page() {
                     suppliers={sortedSuppliers}
                     orders={sortedOrders}
                     materials={sortedMaterials}
+                    materialsDisplayUnit={materialsDisplayUnit}
                     subCategoriesSortLabel={getCategorySubCategoriesSortLabel(subCategoriesSort, translate)}
                     suppliersSortLabel={getCategorySuppliersSortLabel(suppliersSort, translate)}
                     ordersSortLabel={getCategoryOrdersSortLabel(ordersSort, translate)}
@@ -227,6 +230,8 @@ export default function Page() {
                 data={sortedMaterials}
                 sort={materialsSort}
                 onSortChange={setMaterialsSort}
+                displayUnit={materialsDisplayUnit}
+                onDisplayUnitChange={setMaterialsDisplayUnit}
               />
             </div>
           )

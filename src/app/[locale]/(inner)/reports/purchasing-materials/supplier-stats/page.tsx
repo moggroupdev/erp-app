@@ -14,6 +14,7 @@ import { Printer, RefreshCw, Truck } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
+import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import DateRangeFilter, { type GroupBy } from "../components/date-range-filter";
 import OverviewStats from "../components/overview-stats";
@@ -64,6 +65,7 @@ export default function Page() {
   const [categoriesSort, setCategoriesSort] = useState<SupplierCategoriesSort>("spend-desc");
   const [ordersSort, setOrdersSort] = useState<SupplierOrdersSort>("invoice-date-desc");
   const [materialsSort, setMaterialsSort] = useState<SupplierMaterialsSort>("spend-desc");
+  const [materialsDisplayUnit, setMaterialsDisplayUnit] = useState<MaterialUnit | null>(null);
 
   function updateQuery(patch: { supplierId?: string | null; from?: string | null; to?: string | null; groupBy?: GroupBy }) {
     const params = new URLSearchParams(searchParams.toString());
@@ -163,6 +165,7 @@ export default function Page() {
                     subCategories={data.subCategories}
                     orders={sortedOrders}
                     materials={sortedMaterials}
+                    materialsDisplayUnit={materialsDisplayUnit}
                     categoriesSort={categoriesSort}
                     categoriesSortLabel={getSupplierCategoriesSortLabel(categoriesSort, translate)}
                     ordersSortLabel={getSupplierOrdersSortLabel(ordersSort, translate)}
@@ -219,7 +222,13 @@ export default function Page() {
                 onSortChange={setCategoriesSort}
               />
               <SupplierOrdersTable data={sortedOrders} sort={ordersSort} onSortChange={setOrdersSort} />
-              <SupplierMaterialsTable data={sortedMaterials} sort={materialsSort} onSortChange={setMaterialsSort} />
+              <SupplierMaterialsTable
+                data={sortedMaterials}
+                sort={materialsSort}
+                onSortChange={setMaterialsSort}
+                displayUnit={materialsDisplayUnit}
+                onDisplayUnitChange={setMaterialsDisplayUnit}
+              />
             </div>
           )
         )}

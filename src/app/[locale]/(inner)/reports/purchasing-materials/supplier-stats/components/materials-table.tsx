@@ -5,26 +5,47 @@ import { Select, Table } from "@mantine/core";
 import { Boxes } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import {
+  getMaterialUnitLabel,
+  MATERIAL_UNIT_LABELS_LIST,
+  type MaterialUnit,
+} from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { resolveDisplayUnit, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { PurchasingMaterialsByMaterial } from "@/types/reports";
 import ReportCard from "../../components/report-card";
 import type { SupplierMaterialsSort } from "./sort";
+
+const BASE_UNIT_VALUE = "__base__";
 
 export default function SupplierMaterialsTable({
   data,
   sort,
   onSortChange,
+  displayUnit,
+  onDisplayUnitChange,
 }: {
   data: PurchasingMaterialsByMaterial[];
   sort: SupplierMaterialsSort;
   onSortChange: (sort: SupplierMaterialsSort) => void;
+  displayUnit: MaterialUnit | null;
+  onDisplayUnitChange: (unit: MaterialUnit | null) => void;
 }) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
-  const totalQuantity = data.reduce((sum, row) => sum + row.totalQuantity, 0);
+  const displayRows = data.map((row) => {
+    const { unit, factor } = resolveDisplayUnit(displayUnit, row.unitOfMeasurement, row.unitConversions);
+    return {
+      row,
+      unit,
+      factor,
+      displayQuantity: toDisplayQuantity(row.totalQuantity, factor),
+    };
+  });
+
+  const totalQuantity = displayRows.reduce((sum, item) => sum + item.displayQuantity, 0);
   const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
@@ -37,34 +58,54 @@ export default function SupplierMaterialsTable({
       icon={Boxes}
       accent="sky"
       headerAction={
-        <Select
-          value={sort}
-          onChange={(value) => {
-            if (value) onSortChange(value as SupplierMaterialsSort);
-          }}
-          label={translate("Sort by", "ترتيب حسب")}
-          data={[
-            { value: "spend-desc", label: translate("Value (high to low)", "القيمة (من الأعلى للأقل)") },
-            { value: "spend-asc", label: translate("Value (low to high)", "القيمة (من الأقل للأعلى)") },
-            { value: "qty-desc", label: translate("Quantity (high to low)", "الكمية (من الأعلى للأقل)") },
-            { value: "qty-asc", label: translate("Quantity (low to high)", "الكمية (من الأقل للأعلى)") },
-            {
-              value: "avg-desc",
-              label: translate("Avg unit price (high to low)", "متوسط سعر الوحدة (من الأعلى للأقل)"),
-            },
-            {
-              value: "avg-asc",
-              label: translate("Avg unit price (low to high)", "متوسط سعر الوحدة (من الأقل للأعلى)"),
-            },
-            { value: "name-asc", label: translate("Name (A-Z)", "الاسم (أ-ي)") },
-            { value: "name-desc", label: translate("Name (Z-A)", "الاسم (ي-أ)") },
-            { value: "code-asc", label: translate("Code (A-Z)", "الكود (أ-ي)") },
-            { value: "code-desc", label: translate("Code (Z-A)", "الكود (ي-أ)") },
-          ]}
-          allowDeselect={false}
-          radius="md"
-          w={240}
-        />
+        <div className="flex flex-wrap items-end justify-end gap-2">
+          <Select
+            value={displayUnit ?? BASE_UNIT_VALUE}
+            onChange={(value) => {
+              if (!value || value === BASE_UNIT_VALUE) onDisplayUnitChange(null);
+              else onDisplayUnitChange(value as MaterialUnit);
+            }}
+            label={translate("Display unit", "وحدة العرض")}
+            data={[
+              { value: BASE_UNIT_VALUE, label: translate("Base unit", "الوحدة الأساسية") },
+              ...MATERIAL_UNIT_LABELS_LIST.map((item) => ({
+                value: item.value,
+                label: locale === "ar" ? item.label.ar : item.label.en,
+              })),
+            ]}
+            allowDeselect={false}
+            radius="md"
+            w={180}
+          />
+          <Select
+            value={sort}
+            onChange={(value) => {
+              if (value) onSortChange(value as SupplierMaterialsSort);
+            }}
+            label={translate("Sort by", "ترتيب حسب")}
+            data={[
+              { value: "spend-desc", label: translate("Value (high to low)", "القيمة (من الأعلى للأقل)") },
+              { value: "spend-asc", label: translate("Value (low to high)", "القيمة (من الأقل للأعلى)") },
+              { value: "qty-desc", label: translate("Quantity (high to low)", "الكمية (من الأعلى للأقل)") },
+              { value: "qty-asc", label: translate("Quantity (low to high)", "الكمية (من الأقل للأعلى)") },
+              {
+                value: "avg-desc",
+                label: translate("Avg unit price (high to low)", "متوسط سعر الوحدة (من الأعلى للأقل)"),
+              },
+              {
+                value: "avg-asc",
+                label: translate("Avg unit price (low to high)", "متوسط سعر الوحدة (من الأقل للأعلى)"),
+              },
+              { value: "name-asc", label: translate("Name (A-Z)", "الاسم (أ-ي)") },
+              { value: "name-desc", label: translate("Name (Z-A)", "الاسم (ي-أ)") },
+              { value: "code-asc", label: translate("Code (A-Z)", "الكود (أ-ي)") },
+              { value: "code-desc", label: translate("Code (Z-A)", "الكود (ي-أ)") },
+            ]}
+            allowDeselect={false}
+            radius="md"
+            w={240}
+          />
+        </div>
       }
     >
       {data.length === 0 ? (
@@ -88,7 +129,7 @@ export default function SupplierMaterialsTable({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {data.map((row, index) => (
+              {displayRows.map(({ row, unit, factor }, index) => (
                 <Table.Tr key={row.materialCode} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td className="max-w-60 truncate font-medium text-gray-800">
@@ -106,10 +147,10 @@ export default function SupplierMaterialsTable({
                       <CopyButton text={row.materialCode} />
                     </div>
                   </Table.Td>
-                  <Table.Td>{getMaterialUnitLabel(row.unitOfMeasurement, locale)}</Table.Td>
-                  <Table.Td>{formatQuantity(row.totalQuantity)}</Table.Td>
+                  <Table.Td>{getMaterialUnitLabel(unit, locale)}</Table.Td>
+                  <Table.Td>{formatDisplayQuantity(row.totalQuantity, factor)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
-                  <Table.Td>{formatMoney(row.avgUnitPrice)}</Table.Td>
+                  <Table.Td>{formatMoney(toDisplayUnitPrice(row.avgUnitPrice, factor))}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -119,7 +160,7 @@ export default function SupplierMaterialsTable({
                 <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
                 <Table.Th />
                 <Table.Th />
-                <Table.Th>{formatQuantity(totalQuantity)}</Table.Th>
+                <Table.Th>{formatDisplayQuantity(totalQuantity, 1)}</Table.Th>
                 <Table.Th>{formatMoney(totalSpend)}</Table.Th>
                 <Table.Th />
               </Table.Tr>
