@@ -1,17 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { Table } from "@mantine/core";
+import { Select, Table } from "@mantine/core";
 import { Boxes } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import {
+  getMaterialUnitLabel,
+  MATERIAL_UNIT_LABELS_LIST,
+  type MaterialUnit,
+} from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { PurchasingMaterialsByMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
 
-export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsByMaterial[] }) {
+const BASE_UNIT_VALUE = "__base__";
+
+export default function TopMaterialsTable({
+  data,
+  displayUnit,
+  onDisplayUnitChange,
+}: {
+  data: PurchasingMaterialsByMaterial[];
+  displayUnit: MaterialUnit | null;
+  onDisplayUnitChange: (unit: MaterialUnit | null) => void;
+}) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
@@ -24,6 +39,26 @@ export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsB
       )}
       icon={Boxes}
       accent="sky"
+      headerAction={
+        <Select
+          value={displayUnit ?? BASE_UNIT_VALUE}
+          onChange={(value) => {
+            if (!value || value === BASE_UNIT_VALUE) onDisplayUnitChange(null);
+            else onDisplayUnitChange(value as MaterialUnit);
+          }}
+          label={translate("Display unit", "وحدة العرض")}
+          data={[
+            { value: BASE_UNIT_VALUE, label: translate("Base unit", "الوحدة الأساسية") },
+            ...MATERIAL_UNIT_LABELS_LIST.map((item) => ({
+              value: item.value,
+              label: locale === "ar" ? item.label.ar : item.label.en,
+            })),
+          ]}
+          allowDeselect={false}
+          radius="md"
+          w={180}
+        />
+      }
     >
       {data.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
@@ -46,30 +81,37 @@ export default function TopMaterialsTable({ data }: { data: PurchasingMaterialsB
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {data.map((row, index) => (
-                <Table.Tr key={row.materialCode} className="text-gray-600">
-                  <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
-                  <Table.Td className="max-w-60 truncate font-medium text-gray-800">
-                    <Link
-                      href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
-                      className="text-gray-800 hover:underline"
-                      title={row.materialTitle}
-                    >
-                      {row.materialTitle}
-                    </Link>
-                  </Table.Td>
-                  <Table.Td>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-xs text-gray-500">{row.materialCode}</span>
-                      <CopyButton text={row.materialCode} />
-                    </div>
-                  </Table.Td>
-                  <Table.Td>{getMaterialUnitLabel(row.unitOfMeasurement, locale)}</Table.Td>
-                  <Table.Td>{formatQuantity(row.totalQuantity)}</Table.Td>
-                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
-                  <Table.Td>{formatMoney(row.avgUnitPrice)}</Table.Td>
-                </Table.Tr>
-              ))}
+              {data.map((row, index) => {
+                const { unit, factor } = resolveDisplayUnit(
+                  displayUnit,
+                  row.unitOfMeasurement,
+                  row.unitConversions,
+                );
+                return (
+                  <Table.Tr key={row.materialCode} className="text-gray-600">
+                    <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
+                    <Table.Td className="max-w-60 truncate font-medium text-gray-800">
+                      <Link
+                        href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+                        className="text-gray-800 hover:underline"
+                        title={row.materialTitle}
+                      >
+                        {row.materialTitle}
+                      </Link>
+                    </Table.Td>
+                    <Table.Td>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-xs text-gray-500">{row.materialCode}</span>
+                        <CopyButton text={row.materialCode} />
+                      </div>
+                    </Table.Td>
+                    <Table.Td>{getMaterialUnitLabel(unit, locale)}</Table.Td>
+                    <Table.Td>{formatDisplayQuantity(row.totalQuantity, factor)}</Table.Td>
+                    <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
+                    <Table.Td>{formatMoney(toDisplayUnitPrice(row.avgUnitPrice, factor))}</Table.Td>
+                  </Table.Tr>
+                );
+              })}
             </Table.Tbody>
           </Table>
         </div>

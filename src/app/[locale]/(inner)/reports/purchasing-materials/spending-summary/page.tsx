@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -14,6 +15,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
 import PurchasingMaterialsSpendingSummaryPrintDocument from "@/components/documents/purchasing-materials-spending-summary-print-document";
+import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import DateRangeFilter, { type GroupBy } from "../components/date-range-filter";
 import OverviewStats from "../components/overview-stats";
@@ -47,6 +49,7 @@ export default function Page() {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const groupBy = parseGroupBy(searchParams.get("groupBy"));
+  const [materialsDisplayUnit, setMaterialsDisplayUnit] = useState<MaterialUnit | null>(null);
 
   function updateQuery(patch: { from?: string | null; to?: string | null; groupBy?: GroupBy }) {
     const params = new URLSearchParams(searchParams.toString());
@@ -125,6 +128,7 @@ export default function Page() {
                   byMaterial={data.byMaterial}
                   byMainCategory={data.byMainCategory}
                   topOrders={data.topOrders}
+                  materialsDisplayUnit={materialsDisplayUnit}
                 />
               </PrintDocument>
             )}
@@ -165,7 +169,11 @@ export default function Page() {
               <SpendingTrendChart data={data.byPeriod} groupBy={groupBy} />
               <TopOrdersTable data={data.topOrders} />
               <TopSuppliersTable data={data.bySupplier} />
-              <TopMaterialsTable data={data.byMaterial} />
+              <TopMaterialsTable
+                data={data.byMaterial}
+                displayUnit={materialsDisplayUnit}
+                onDisplayUnitChange={setMaterialsDisplayUnit}
+              />
               <SpendingByMainCategoryTable data={data.byMainCategory} />
             </div>
           )
