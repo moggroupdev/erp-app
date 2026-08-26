@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Calculator, FileDiff, Receipt } from "lucide-react";
+import { AlertTriangle, Calculator, FileDiff, FileWarning, Receipt } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsTotalAmountMismatchOverview } from "@/types/reports";
@@ -11,7 +11,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
   const currency = translation.currency;
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
       <KpiCard
         label={translate("Invoices with Discrepancies", "عدد الفواتير ذات الفروقات")}
         value={overview.mismatchCount}
@@ -23,16 +23,26 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
         valueClassName={overview.mismatchCount > 0 ? "text-orange-700" : reportTheme.kpi.neutral}
       />
       <KpiCard
+        label={translate("Completed Without Invoice Total", "مكتملة بدون إجمالي فاتورة")}
+        value={overview.missingInvoiceTotalCount}
+        hint={translate(
+          "Completed orders with no invoice total purchases value.",
+          "أوامر مكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
+        )}
+        icon={<FileWarning size={20} />}
+        valueClassName={overview.missingInvoiceTotalCount > 0 ? "text-rose-700" : reportTheme.kpi.neutral}
+      />
+      <KpiCard
         label={translate(`Calculated Total (${currency})`, `الإجمالي المحسوب (${currency})`)}
         value={formatMoney(overview.totalCalculatedAmount, currency)}
-        hint={translate("Sum of order line totals.", "مجموع إجماليات بنود الأوامر.")}
+        hint={translate("Sum of mismatched order line totals.", "مجموع إجماليات بنود الأوامر ذات الفروقات.")}
         icon={<Calculator size={20} />}
         valueClassName={reportTheme.kpi.value}
       />
       <KpiCard
         label={translate(`Invoice Total Purchases (${currency})`, `إجمالي مشتريات الفاتورة (${currency})`)}
         value={formatMoney(overview.totalLegacyInvoicePurchases, currency)}
-        hint={translate("Sum of legacy invoice totals.", "مجموع إجماليات الفواتير القديمة.")}
+        hint={translate("Sum of legacy invoice totals for mismatches.", "مجموع إجماليات الفواتير للأوامر ذات الفروقات.")}
         icon={<Receipt size={20} />}
       />
       <KpiCard

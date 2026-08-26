@@ -192,6 +192,8 @@ export type PurchasingMaterialsTotalAmountMismatchOverview = {
   totalCalculatedAmount: number;
   totalLegacyInvoicePurchases: number;
   totalDifference: number;
+  missingInvoiceTotalCount: number;
+  missingInvoiceTotalCalculatedAmount: number;
 };
 
 export type PurchasingMaterialsTotalAmountMismatchOrder = {
@@ -207,7 +209,19 @@ export type PurchasingMaterialsTotalAmountMismatchOrder = {
   completedAt: string | null;
 };
 
+export type PurchasingMaterialsCompletedWithoutInvoiceTotalOrder = {
+  orderId: string;
+  orderCode: string;
+  legacyInvoiceNumber: string | null;
+  supplierId: string;
+  supplierName: string;
+  calculatedTotalAmount: number;
+  createdAt: string;
+  completedAt: string;
+};
+
 export type PurchasingMaterialsTotalAmountMismatches = {
   overview: PurchasingMaterialsTotalAmountMismatchOverview;
   orders: PurchasingMaterialsTotalAmountMismatchOrder[];
+  completedWithoutInvoiceTotal: PurchasingMaterialsCompletedWithoutInvoiceTotalOrder[];
 };

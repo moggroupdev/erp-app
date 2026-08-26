@@ -19,6 +19,7 @@ import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
 import MismatchesOverview from "./components/mismatches-overview";
 import MismatchesTable from "./components/mismatches-table";
+import CompletedWithoutInvoiceTotalTable from "./components/completed-without-invoice-total-table";
 
 const PAGE_TITLE = {
   en: "Invoice Total Variance",
@@ -108,6 +109,7 @@ export default function Page() {
                   endDate={to}
                   overview={data.overview}
                   orders={data.orders}
+                  completedWithoutInvoiceTotal={data.completedWithoutInvoiceTotal}
                 />
               </PrintDocument>
             )}
@@ -141,6 +143,7 @@ export default function Page() {
         <div className="space-y-6">
           <MismatchesOverview overview={data.overview} />
           <MismatchesTable data={data.orders} />
+          <CompletedWithoutInvoiceTotalTable data={data.completedWithoutInvoiceTotal} />
         </div>
       ) : null}
     </div>
