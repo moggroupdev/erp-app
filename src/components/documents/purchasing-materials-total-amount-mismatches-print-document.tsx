@@ -41,7 +41,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
       </header>
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
-        <PrintDetail label={translate("Mismatch Count", "عدد الفروقات")} value={String(overview.mismatchCount)} />
+        <PrintDetail label={translate("Invoices with Discrepancies", "عدد الفواتير ذات الفروقات")} value={String(overview.mismatchCount)} />
         <PrintDetail
           label={translate(`Calculated Total (${currency})`, `الإجمالي المحسوب (${currency})`)}
           value={formatMoney(overview.totalCalculatedAmount, currency)}
@@ -67,45 +67,56 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
         <PrintSectionHeading
           title={translate("Mismatched Orders", "أوامر ذات فروقات")}
           subtitle={translate(
-            "Relative difference of at least 1%.",
-            "فرق نسبي بنسبة 1% على الأقل.",
+            "Purchase orders where the calculated total amount differs from the invoice total purchases by at least 1%.",
+            "أوامر التوريد التي يختلف فيها الإجمالي المحسوب عن إجمالي مشتريات الفاتورة بنسبة 1% على الأقل.",
           )}
         />
         <PrintTable
           headers={[
             "#",
-            translate("Code", "الكود"),
+
             translate("Invoice Number", "رقم الفاتورة"),
             translate("Supplier", "المورد"),
             translate("Date", "التاريخ"),
-            translate("Status", "الحالة"),
             translate(`Calculated (${currency})`, `المحسوب (${currency})`),
             translate(`Invoice Purchases (${currency})`, `مشتريات الفاتورة (${currency})`),
             translate(`Difference (${currency})`, `الفرق (${currency})`),
           ]}
           rows={orders.map((row, index) => [
             String(index + 1),
-            row.orderCode,
             row.legacyInvoiceNumber ?? "-",
             row.supplierName,
-            formatDate(row.createdAt, locale),
-            row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
-            formatMoney(row.calculatedTotalAmount),
-            formatMoney(row.legacyInvoiceTotalPurchases),
-            formatMoney(row.difference),
+            <span className="text-gray-500">{formatDate(row.createdAt, locale)}</span>,
+            <span className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</span>,
+            <span className="font-semibold text-gray-800">{formatMoney(row.legacyInvoiceTotalPurchases)}</span>,
+            <span
+              className={`font-semibold ${
+                row.difference > 0 ? "text-emerald-700" : row.difference < 0 ? "text-rose-700" : "text-gray-800"
+              }`}
+            >
+              {formatMoney(row.difference)}
+            </span>,
           ])}
           footerRow={[
             "",
             translate("Total", "الإجمالي"),
             "",
             "",
-            "",
-            "",
-            formatMoney(overview.totalCalculatedAmount),
-            formatMoney(overview.totalLegacyInvoicePurchases),
-            formatMoney(overview.totalDifference),
+            <span className="font-semibold text-orange-600">{formatMoney(overview.totalCalculatedAmount)}</span>,
+            <span className="font-semibold text-gray-800">{formatMoney(overview.totalLegacyInvoicePurchases)}</span>,
+            <span
+              className={`font-semibold ${
+                overview.totalDifference > 0
+                  ? "text-emerald-700"
+                  : overview.totalDifference < 0
+                    ? "text-rose-700"
+                    : "text-gray-800"
+              }`}
+            >
+              {formatMoney(overview.totalDifference)}
+            </span>,
           ]}
-          monoColumnIndexes={[1, 2]}
+          monoColumnIndexes={[1]}
           emptyLabel={translate("No mismatches found for this period.", "لا توجد فروقات في هذه الفترة.")}
         />
       </section>

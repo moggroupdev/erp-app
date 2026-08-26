@@ -21,13 +21,13 @@ import MismatchesOverview from "./components/mismatches-overview";
 import MismatchesTable from "./components/mismatches-table";
 
 const PAGE_TITLE = {
-  en: "Total Amount Mismatches",
-  ar: "فروقات الإجمالي",
+  en: "Invoice Total Variance",
+  ar: "انحراف إجمالي الفاتورة",
 };
 
 const PAGE_SUBTITLE = {
-  en: "Orders where the calculated total amount differs from the legacy invoice total purchases by at least 1%.",
-  ar: "أوامر التوريد التي يختلف فيها الإجمالي المحسوب عن إجمالي مشتريات الفاتورة القديمة بنسبة 1% على الأقل.",
+  en: "Orders where the calculated total amount differs from the invoice total purchases by at least 1%.",
+  ar: "أوامر التوريد التي يختلف فيها الإجمالي المحسوب عن إجمالي مشتريات الفاتورة بنسبة 1% على الأقل.",
 };
 
 export default function Page() {
@@ -64,8 +64,7 @@ export default function Page() {
 
   const { data, isFetching, error, refetch } = useQuery({
     queryKey: queryKeys.reports.purchasingMaterials.totalAmountMismatches(filters),
-    queryFn: ({ signal }) =>
-      reportsApi.purchasingMaterials.getTotalAmountMismatches({ privateRequest, ...filters, signal }),
+    queryFn: ({ signal }) => reportsApi.purchasingMaterials.getTotalAmountMismatches({ privateRequest, ...filters, signal }),
     staleTime: staleTimes.reports.purchasingMaterialsTotalAmountMismatches,
   });
 

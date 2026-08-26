@@ -18,8 +18,8 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
     <ReportCard
       title={translate("Mismatched Orders", "أوامر ذات فروقات")}
       description={translate(
-        "Purchase orders where the calculated total amount differs from the legacy invoice total purchases by at least 1%.",
-        "أوامر التوريد التي يختلف فيها الإجمالي المحسوب عن إجمالي مشتريات الفاتورة القديمة بنسبة 1% على الأقل.",
+        "Purchase orders where the calculated total amount differs from the invoice total purchases by at least 1%.",
+        "أوامر التوريد التي يختلف فيها الإجمالي المحسوب عن إجمالي مشتريات الفاتورة بنسبة 1% على الأقل.",
       )}
       icon={AlertTriangle}
       accent="amber"

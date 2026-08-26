@@ -13,7 +13,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       <KpiCard
-        label={translate("Mismatch Count", "عدد الفروقات")}
+        label={translate("Invoices with Discrepancies", "عدد الفواتير ذات الفروقات")}
         value={overview.mismatchCount}
         hint={translate(
           "Orders where the relative difference is at least 1%.",

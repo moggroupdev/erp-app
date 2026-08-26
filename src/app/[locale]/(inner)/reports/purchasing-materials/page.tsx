@@ -88,10 +88,10 @@ export default function Page() {
           />
           <ReportLinkCard
             report={{
-              label: { en: "Total Amount Mismatches", ar: "فروقات الإجمالي" },
+              label: { en: "Invoice Total Variance", ar: "انحراف إجمالي الفاتورة" },
               description: {
-                en: "Compare calculated order totals against legacy invoice total purchases.",
-                ar: "مقارنة الإجمالي المحسوب لأوامر التوريد مع إجمالي مشتريات الفاتورة القديمة.",
+                en: "Compare calculated order totals against invoice total purchases.",
+                ar: "مقارنة الإجمالي المحسوب لأوامر التوريد مع إجمالي مشتريات الفاتورة.",
               },
               href: "/reports/purchasing-materials/total-amount-mismatches",
             }}
