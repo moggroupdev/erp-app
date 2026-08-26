@@ -20,6 +20,7 @@ export type MaterialPurchaseOrder = {
   id: string;
   code: string;
   legacyInvoiceNumber: string | null;
+  legacyInvoiceIssuedAt: Date | null;
   legacyInvoiceTotalPurchases: number | null;
   supplierId: string;
   totalAmount: number;

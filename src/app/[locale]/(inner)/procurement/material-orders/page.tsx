@@ -14,7 +14,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderWithSupplier } from "@/types/material-purchase-order";
 import { Table, TextInput } from "@mantine/core";
@@ -155,8 +155,9 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                    <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                     <Table.Th>{translate("Supplier", "المورد")}</Table.Th>
+                    <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
+                    <Table.Th>{translate("Invoice Issue Date", "تاريخ اصدار الفاتورة")}</Table.Th>
                     <Table.Th>
                       {translate(`Invoice Total (${translation.currency})`, `إجمالي الفاتورة (${translation.currency})`)}
                     </Table.Th>
@@ -164,7 +165,7 @@ export default function Page() {
                       {translate(`Calclated Total (${translation.currency})`, `الإجمالي المحسوب (${translation.currency})`)}
                     </Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
-                    <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
+                    <Table.Th>{translate("PO Date", "تاريخ أمر التوريد")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -184,6 +185,14 @@ export default function Page() {
                           </div>
                         </Table.Td>
                         <Table.Td>
+                          <Link
+                            href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)}
+                            className="hover:underline"
+                          >
+                            {order.supplier.name}
+                          </Link>
+                        </Table.Td>
+                        <Table.Td>
                           {order.legacyInvoiceNumber ? (
                             <div className="flex items-center gap-1.5">
                               <span className="font-mono">{order.legacyInvoiceNumber}</span>
@@ -194,13 +203,13 @@ export default function Page() {
                           )}
                         </Table.Td>
                         <Table.Td>
-                          <Link
-                            href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)}
-                            className="hover:underline"
-                          >
-                            {order.supplier.name}
-                          </Link>
+                          {order.legacyInvoiceIssuedAt ? (
+                            formatDate(order.legacyInvoiceIssuedAt, locale)
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </Table.Td>
+
                         <Table.Td>
                           {order.legacyInvoiceTotalPurchases != null ? (
                             formatMoney(order.legacyInvoiceTotalPurchases)
@@ -213,7 +222,7 @@ export default function Page() {
                             order.legacyInvoiceTotalPurchases != null &&
                             Math.abs(order.totalAmount - order.legacyInvoiceTotalPurchases) >=
                               Math.max(Math.abs(order.totalAmount), Math.abs(order.legacyInvoiceTotalPurchases)) * 0.01
-                              ? "text-orange-600 font-semibold"
+                              ? "font-semibold text-orange-600"
                               : undefined
                           }
                         >
