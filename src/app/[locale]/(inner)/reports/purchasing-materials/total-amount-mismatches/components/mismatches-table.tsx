@@ -45,9 +45,7 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                 <Table.Th className="text-gray-600">
                   {translate(`Invoice Purchases (${currency})`, `مشتريات الفاتورة (${currency})`)}
                 </Table.Th>
-                <Table.Th className="text-gray-600">
-                  {translate(`Difference (${currency})`, `الفرق (${currency})`)}
-                </Table.Th>
+                <Table.Th className="text-gray-600">{translate(`Difference (${currency})`, `الفرق (${currency})`)}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -90,25 +88,21 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                       day: "numeric",
                     })}
                   </Table.Td>
-                  <Table.Td className="text-center">
+                  <Table.Td>
                     {row.completedAt ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      <span className="inline-flex gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
                         <CheckCircle size={12} />
                         {translate("Completed", "مكتمل")}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      <span className="inline-flex gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
                         <Clock size={12} />
                         {translate("Open", "مفتوح")}
                       </span>
                     )}
                   </Table.Td>
-                  <Table.Td className="font-semibold text-orange-600">
-                    {formatMoney(row.calculatedTotalAmount)}
-                  </Table.Td>
-                  <Table.Td className="font-semibold text-gray-800">
-                    {formatMoney(row.legacyInvoiceTotalPurchases)}
-                  </Table.Td>
+                  <Table.Td className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.legacyInvoiceTotalPurchases)}</Table.Td>
                   <Table.Td
                     className={`font-semibold ${
                       row.difference > 0 ? "text-emerald-700" : row.difference < 0 ? "text-rose-700" : "text-gray-800"

@@ -9,9 +9,12 @@ import reportsApi from "@/lib/api/reports";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { FileDiff, RefreshCw } from "lucide-react";
+import { FileDiff, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
+import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
+import PurchasingMaterialsTotalAmountMismatchesPrintDocument from "@/components/documents/purchasing-materials-total-amount-mismatches-print-document";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
 import MismatchesOverview from "./components/mismatches-overview";
@@ -68,6 +71,15 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
   const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
+  const printDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
+  const printDateSuffix =
+    from && to
+      ? translate(
+          `from ${formatDate(from, locale)} to ${formatDate(to, locale)}`,
+          `من ${formatDate(from, locale)} إلى ${formatDate(to, locale)}`,
+        )
+      : printDate;
+  const printTitle = `${translate("Report", "تقرير")} - ${reportTitle} - ${printDateSuffix}`;
 
   return (
     <div className="space-y-6">
@@ -82,15 +94,32 @@ export default function Page() {
         title={reportTitle}
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
-          <button
-            type="button"
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-stone-600 transition hover:bg-stone-50 disabled:opacity-50"
-            title={translate("Refresh", "تحديث")}
-          >
-            <RefreshCw size={14} className={isFetching ? "animate-spin" : undefined} />
-          </button>
+          <div className="flex items-center gap-4">
+            {data && !isFetching && !errorMessage && (
+              <PrintDocument
+                title={printTitle}
+                buttonType="icon"
+                paperWidth={210}
+                paperHeight={297}
+                icon={<Printer size={14} />}
+              >
+                <PurchasingMaterialsTotalAmountMismatchesPrintDocument
+                  title={reportTitle}
+                  startDate={from}
+                  endDate={to}
+                  overview={data.overview}
+                  orders={data.orders}
+                />
+              </PrintDocument>
+            )}
+            <button
+              disabled={isFetching}
+              onClick={() => refetch()}
+              className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
+            </button>
+          </div>
         }
       />
 
