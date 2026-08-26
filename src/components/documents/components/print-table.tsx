@@ -7,6 +7,7 @@ export default function PrintTable({
   monoColumnIndexes = [],
   noWrapIndexes,
   footerRow,
+  footerRows,
   tableClassName,
   columnWidths,
 }: {
@@ -17,12 +18,15 @@ export default function PrintTable({
   /** Column indexes that get `text-nowrap`. When omitted, all columns wrap normally. */
   noWrapIndexes?: number[];
   footerRow?: ReactNode[];
+  footerRows?: ReactNode[][];
   /** Override the default table font-size class (e.g. `"text-[9px]"`). */
   tableClassName?: string;
   /** Optional fixed widths per column (e.g. `"8%"`, `"42%"`). */
   columnWidths?: string[];
 }) {
-  if (rows.length === 0 && !footerRow) {
+  const resolvedFooterRows = footerRows ?? (footerRow ? [footerRow] : []);
+
+  if (rows.length === 0 && resolvedFooterRows.length === 0) {
     return <p className="py-2 text-[10px] text-gray-500">{emptyLabel}</p>;
   }
 
@@ -69,15 +73,18 @@ export default function PrintTable({
             </tr>
           ))
         )}
-        {footerRow ? (
-          <tr className="break-inside-avoid border-b border-gray-200 bg-gray-50 font-semibold text-gray-700">
-            {footerRow.map((cell, cellIndex) => (
-              <td key={`footer-${cellIndex}`} className="px-2.5 py-2">
+        {resolvedFooterRows.map((footer, footerIndex) => (
+          <tr
+            key={`footer-${footerIndex}`}
+            className="break-inside-avoid border-b border-gray-200 bg-gray-50 font-semibold text-gray-700"
+          >
+            {footer.map((cell, cellIndex) => (
+              <td key={`footer-${footerIndex}-${cellIndex}`} className="px-2.5 py-2">
                 {cell}
               </td>
             ))}
           </tr>
-        ) : null}
+        ))}
       </tbody>
     </table>
   );

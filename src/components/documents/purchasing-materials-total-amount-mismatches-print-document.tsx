@@ -27,6 +27,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
   const currency = translation.currency;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
+  const totalNetDifference = orders.reduce((sum, row) => sum + row.difference, 0);
 
   return (
     <div className="flex flex-col gap-8 text-xs text-gray-900">
@@ -111,24 +112,35 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
               {formatMoney(row.difference)}
             </span>,
           ])}
-          footerRow={[
-            "",
-            translate("Total", "الإجمالي"),
-            "",
-            "",
-            <span className="font-semibold text-orange-600">{formatMoney(overview.totalCalculatedAmount)}</span>,
-            <span className="font-semibold text-gray-800">{formatMoney(overview.totalLegacyInvoicePurchases)}</span>,
-            <span
-              className={`font-semibold ${
-                overview.totalDifference > 0
-                  ? "text-emerald-700"
-                  : overview.totalDifference < 0
-                    ? "text-rose-700"
-                    : "text-gray-800"
-              }`}
-            >
-              {formatMoney(overview.totalDifference)}
-            </span>,
+          footerRows={[
+            [
+              "",
+              translate("Total", "الإجمالي"),
+              "",
+              "",
+              <span className="font-semibold text-orange-600">{formatMoney(overview.totalCalculatedAmount)}</span>,
+              <span className="font-semibold text-gray-800">{formatMoney(overview.totalLegacyInvoicePurchases)}</span>,
+              <span
+                className={`font-semibold ${
+                  totalNetDifference > 0
+                    ? "text-emerald-700"
+                    : totalNetDifference < 0
+                      ? "text-rose-700"
+                      : "text-gray-800"
+                }`}
+              >
+                {formatMoney(totalNetDifference)}
+              </span>,
+            ],
+            [
+              "",
+              translate("Absolute Total", "الإجمالي المطلق"),
+              "",
+              "",
+              "",
+              "",
+              <span className="font-semibold text-orange-600">{formatMoney(overview.totalDifference)}</span>,
+            ],
           ]}
           monoColumnIndexes={[1]}
           emptyLabel={translate("No mismatches found for this period.", "لا توجد فروقات في هذه الفترة.")}

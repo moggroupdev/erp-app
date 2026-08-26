@@ -11,7 +11,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
   const currency = translation.currency;
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
       <KpiCard
         label={translate("Invoices with Discrepancies", "عدد الفواتير ذات الفروقات")}
         value={overview.mismatchCount}
@@ -39,25 +39,12 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
       <KpiCard
         label={translate(`Difference (${currency})`, `الفرق (${currency})`)}
         value={formatMoney(overview.totalDifference, currency)}
-        hint={translate("Calculated total minus invoice total.", "الإجمالي المحسوب ناقص إجمالي الفاتورة.")}
-        icon={<FileDiff size={20} />}
-        valueClassName={
-          overview.totalDifference === 0
-            ? reportTheme.kpi.neutral
-            : overview.totalDifference > 0
-              ? reportTheme.kpi.positive
-              : reportTheme.kpi.negative
-        }
-      />
-      <KpiCard
-        label={translate("Completed Orders Without Invoice Total", "أوامر مكتملة بدون إجمالي فاتورة")}
-        value={overview.missingInvoiceTotalCount}
         hint={translate(
-          "Completed orders with no invoice total purchases value.",
-          "أوامر التوريد المكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
+          "Sum of absolute differences for mismatched orders.",
+          "مجموع القيم المطلقة لفروقات الأوامر ذات الفروقات.",
         )}
-        icon={<FileWarning size={20} />}
-        valueClassName={overview.missingInvoiceTotalCount > 0 ? "text-rose-700" : reportTheme.kpi.neutral}
+        icon={<FileDiff size={20} />}
+        valueClassName={overview.totalDifference > 0 ? "text-orange-700" : reportTheme.kpi.neutral}
       />
     </div>
   );

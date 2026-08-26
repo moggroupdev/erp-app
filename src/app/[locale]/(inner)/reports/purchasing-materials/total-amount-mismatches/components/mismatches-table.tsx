@@ -13,6 +13,10 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const currency = translation.currency;
+  const totalCalculatedAmount = data.reduce((sum, row) => sum + row.calculatedTotalAmount, 0);
+  const totalLegacyInvoicePurchases = data.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
+  const totalDifference = data.reduce((sum, row) => sum + row.difference, 0);
+  const totalAbsoluteDifference = data.reduce((sum, row) => sum + Math.abs(row.difference), 0);
 
   return (
     <ReportCard
@@ -113,6 +117,40 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                 </Table.Tr>
               ))}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th className="font-semibold text-orange-600">{formatMoney(totalCalculatedAmount)}</Table.Th>
+                <Table.Th className="font-semibold text-gray-800">{formatMoney(totalLegacyInvoicePurchases)}</Table.Th>
+                <Table.Th
+                  className={`font-semibold ${
+                    totalDifference > 0
+                      ? "text-emerald-700"
+                      : totalDifference < 0
+                        ? "text-rose-700"
+                        : "text-gray-800"
+                  }`}
+                >
+                  {formatMoney(totalDifference)}
+                </Table.Th>
+              </Table.Tr>
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Absolute Total", "الإجمالي المطلق")}</Table.Th>
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th className="font-semibold text-orange-600">{formatMoney(totalAbsoluteDifference)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}
