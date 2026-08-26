@@ -122,11 +122,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
               <span className="font-semibold text-gray-800">{formatMoney(overview.totalLegacyInvoicePurchases)}</span>,
               <span
                 className={`font-semibold ${
-                  totalNetDifference > 0
-                    ? "text-emerald-700"
-                    : totalNetDifference < 0
-                      ? "text-rose-700"
-                      : "text-gray-800"
+                  totalNetDifference > 0 ? "text-emerald-700" : totalNetDifference < 0 ? "text-rose-700" : "text-gray-800"
                 }`}
               >
                 {formatMoney(totalNetDifference)}
@@ -149,10 +145,10 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Completed Without Invoice Total", "مكتملة بدون إجمالي فاتورة")}
+          title={translate("Completed Orders Without Invoice Total", "أوامر مكتملة بدون إجمالي فاتورة")}
           subtitle={translate(
-            "Completed purchase orders that have no invoice total purchases value.",
-            "أوامر توريد مكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
+            "Completed purchase orders that have no invoice total purchases value. This may be due to an incorrect invoice number.",
+            "أوامر التوريد المكتملة بدون قيمة إجمالي مشتريات الفاتورة. قد يكون السبب رقم فاتورة غير صحيح.",
           )}
         />
         <PrintTable

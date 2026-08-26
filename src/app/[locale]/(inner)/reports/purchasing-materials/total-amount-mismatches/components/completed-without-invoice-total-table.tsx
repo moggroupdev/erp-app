@@ -23,8 +23,8 @@ export default function CompletedWithoutInvoiceTotalTable({
     <ReportCard
       title={translate("Completed Orders Without Invoice Total", "أوامر مكتملة بدون إجمالي فاتورة")}
       description={translate(
-        "Completed purchase orders that have no invoice total purchases value.",
-        "أوامر التوريد المكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
+        "Completed purchase orders that have no invoice total purchases value. This may be due to an incorrect invoice number.",
+        "أوامر التوريد المكتملة بدون قيمة إجمالي مشتريات الفاتورة. قد يكون السبب رقم فاتورة غير صحيح.",
       )}
       icon={FileWarning}
       accent="rose"
