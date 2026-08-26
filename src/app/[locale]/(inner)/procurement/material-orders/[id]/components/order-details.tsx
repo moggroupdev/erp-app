@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 import { FileText } from "lucide-react";
@@ -23,11 +23,6 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
   const rows: DetailRow[] = [
     { key: translate("Purchase Order Code", "كود أمر التوريد"), value: order.code, mono: true, copyText: order.code },
     {
-      key: translate("Invoice Number", "رقم الفاتورة"),
-      value: order.legacyInvoiceNumber ? <span className="font-mono">{order.legacyInvoiceNumber}</span> : <EmptyValue />,
-      copyText: order.legacyInvoiceNumber || undefined,
-    },
-    {
       key: translate("Supplier", "المورد"),
       value: (
         <Link href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)} className="hover:underline">
@@ -36,8 +31,34 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
       ),
     },
     {
-      key: translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`),
-      value: formatMoney(order.totalAmount),
+      key: translate("Invoice Number", "رقم الفاتورة"),
+      value: order.legacyInvoiceNumber ? <span className="font-mono">{order.legacyInvoiceNumber}</span> : <EmptyValue />,
+      copyText: order.legacyInvoiceNumber || undefined,
+    },
+    {
+      key: translate("Invoice Issue Date", "تاريخ اصدار الفاتورة"),
+      value: order.legacyInvoiceIssuedAt ? formatDate(order.legacyInvoiceIssuedAt, locale) : <EmptyValue />,
+    },
+
+    {
+      key: translate(`Invoice Total (${translation.currency})`, `إجمالي الفاتورة (${translation.currency})`),
+      value: order.legacyInvoiceTotalPurchases != null ? formatMoney(order.legacyInvoiceTotalPurchases) : <EmptyValue />,
+    },
+    {
+      key: translate(`Calculated Total (${translation.currency})`, `الإجمالي المحسوب (${translation.currency})`),
+      value: (
+        <span
+          className={
+            order.legacyInvoiceTotalPurchases != null &&
+            Math.abs(order.totalAmount - order.legacyInvoiceTotalPurchases) >=
+              Math.max(Math.abs(order.totalAmount), Math.abs(order.legacyInvoiceTotalPurchases)) * 0.01
+              ? "font-semibold text-orange-600"
+              : undefined
+          }
+        >
+          {formatMoney(order.totalAmount)}
+        </span>
+      ),
     },
     {
       key: translate("Status", "الحالة"),
@@ -60,16 +81,16 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
         ]
       : []),
     {
-      key: translate("Notes", "الملاحظات"),
-      value: order.notes ? <span className="font-normal whitespace-pre-wrap">{order.notes}</span> : <EmptyValue />,
+      key: translate("PO Date", "تاريخ أمر التوريد"),
+      value: formatDateAndTime(order.createdAt, locale),
     },
     {
       key: translate("Created By", "أنشئ بواسطة"),
       value: <CreatorLink creator={order.createdBy} />,
     },
     {
-      key: translate("Date", "التاريخ"),
-      value: formatDateAndTime(order.createdAt, locale),
+      key: translate("Notes", "الملاحظات"),
+      value: order.notes ? <span className="font-normal whitespace-pre-wrap">{order.notes}</span> : <EmptyValue />,
     },
   ];
 
