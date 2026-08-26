@@ -22,16 +22,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
         icon={<AlertTriangle size={20} />}
         valueClassName={overview.mismatchCount > 0 ? "text-orange-700" : reportTheme.kpi.neutral}
       />
-      <KpiCard
-        label={translate("Completed Without Invoice Total", "مكتملة بدون إجمالي فاتورة")}
-        value={overview.missingInvoiceTotalCount}
-        hint={translate(
-          "Completed orders with no invoice total purchases value.",
-          "أوامر مكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
-        )}
-        icon={<FileWarning size={20} />}
-        valueClassName={overview.missingInvoiceTotalCount > 0 ? "text-rose-700" : reportTheme.kpi.neutral}
-      />
+
       <KpiCard
         label={translate(`Calculated Total (${currency})`, `الإجمالي المحسوب (${currency})`)}
         value={formatMoney(overview.totalCalculatedAmount, currency)}
@@ -58,6 +49,16 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
               : reportTheme.kpi.negative
         }
       />
+      <KpiCard
+        label={translate("Completed Orders Without Invoice Total", "أوامر مكتملة بدون إجمالي فاتورة")}
+        value={overview.missingInvoiceTotalCount}
+        hint={translate(
+          "Completed orders with no invoice total purchases value.",
+          "أوامر التوريد المكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
+        )}
+        icon={<FileWarning size={20} />}
+        valueClassName={overview.missingInvoiceTotalCount > 0 ? "text-rose-700" : reportTheme.kpi.neutral}
+      />
     </div>
   );
 }
@@ -83,7 +84,7 @@ function KpiCard({
         <div>
           <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">{label}</p>
           <p className={`mt-1 text-2xl font-semibold ${valueClassName}`}>{value}</p>
-          {hint && <p className="mt-1.5 text-xs text-stone-500">{hint}</p>}
+          {hint && <p className="mt-1.5 text-xs leading-relaxed text-stone-500">{hint}</p>}
         </div>
       </div>
     </div>

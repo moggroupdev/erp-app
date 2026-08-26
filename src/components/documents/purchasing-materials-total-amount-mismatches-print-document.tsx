@@ -48,10 +48,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
           label={translate("Invoices with Discrepancies", "عدد الفواتير ذات الفروقات")}
           value={String(overview.mismatchCount)}
         />
-        <PrintDetail
-          label={translate("Completed Without Invoice Total", "مكتملة بدون إجمالي فاتورة")}
-          value={String(overview.missingInvoiceTotalCount)}
-        />
+
         <PrintDetail
           label={translate(`Calculated Total (${currency})`, `الإجمالي المحسوب (${currency})`)}
           value={formatMoney(overview.totalCalculatedAmount, currency)}
@@ -65,10 +62,11 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
           value={formatMoney(overview.totalDifference, currency)}
         />
         <PrintDetail
-          label={translate(
-            `Missing Invoice Total Amount (${currency})`,
-            `مبلغ الأوامر بدون إجمالي فاتورة (${currency})`,
-          )}
+          label={translate("Completed Orders Without Invoice Total", "أوامر مكتملة بدون إجمالي فاتورة")}
+          value={String(overview.missingInvoiceTotalCount)}
+        />
+        <PrintDetail
+          label={translate(`Missing Invoice Total Amount (${currency})`, `مبلغ الأوامر بدون إجمالي فاتورة (${currency})`)}
           value={formatMoney(overview.missingInvoiceTotalCalculatedAmount, currency)}
         />
         <PrintDetail
@@ -151,7 +149,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
             translate("Code", "الكود"),
             translate("Invoice Number", "رقم الفاتورة"),
             translate("Supplier", "المورد"),
-            translate(`Calculated (${currency})`, `المحسوب (${currency})`),
+            translate(`Calculated Total (${currency})`, `الإجمالي المحسوب (${currency})`),
           ]}
           rows={completedWithoutInvoiceTotal.map((row, index) => [
             String(index + 1),
@@ -171,8 +169,8 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
           ]}
           monoColumnIndexes={[1, 2]}
           emptyLabel={translate(
-            "No completed orders are missing an invoice total for this period.",
-            "لا توجد أوامر مكتملة بدون إجمالي فاتورة في هذه الفترة.",
+            "No completed orders are missing an invoice total purchases value for this period.",
+            "لا توجد أوامر مكتملة بدون قيمة إجمالي مشتريات الفاتورة في هذه الفترة.",
           )}
         />
       </section>

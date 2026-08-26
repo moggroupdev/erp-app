@@ -21,10 +21,10 @@ export default function CompletedWithoutInvoiceTotalTable({
 
   return (
     <ReportCard
-      title={translate("Completed Without Invoice Total", "مكتملة بدون إجمالي فاتورة")}
+      title={translate("Completed Orders Without Invoice Total", "أوامر مكتملة بدون إجمالي فاتورة")}
       description={translate(
         "Completed purchase orders that have no invoice total purchases value.",
-        "أوامر توريد مكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
+        "أوامر التوريد المكتملة بدون قيمة إجمالي مشتريات الفاتورة.",
       )}
       icon={FileWarning}
       accent="rose"
@@ -46,7 +46,7 @@ export default function CompletedWithoutInvoiceTotalTable({
                 <Table.Th className="text-gray-600">{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Calculated (${currency})`, `المحسوب (${currency})`)}
+                  {translate(`Calculated Total (${currency})`, `الإجمالي المحسوب (${currency})`)}
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -83,9 +83,7 @@ export default function CompletedWithoutInvoiceTotalTable({
                       {row.supplierName}
                     </Link>
                   </Table.Td>
-                  <Table.Td className="font-semibold text-orange-600">
-                    {formatMoney(row.calculatedTotalAmount)}
-                  </Table.Td>
+                  <Table.Td className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
