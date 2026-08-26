@@ -184,3 +184,30 @@ export type PurchasingMaterialsSupplierStats = {
   orders: PurchasingMaterialsSupplierOrder[];
   materials: PurchasingMaterialsByMaterial[];
 };
+
+// ================ Total Amount Mismatches ================
+
+export type PurchasingMaterialsTotalAmountMismatchOverview = {
+  mismatchCount: number;
+  totalCalculatedAmount: number;
+  totalLegacyInvoicePurchases: number;
+  totalDifference: number;
+};
+
+export type PurchasingMaterialsTotalAmountMismatchOrder = {
+  orderId: string;
+  orderCode: string;
+  legacyInvoiceNumber: string | null;
+  supplierId: string;
+  supplierName: string;
+  calculatedTotalAmount: number;
+  legacyInvoiceTotalPurchases: number;
+  difference: number;
+  createdAt: string;
+  completedAt: string | null;
+};
+
+export type PurchasingMaterialsTotalAmountMismatches = {
+  overview: PurchasingMaterialsTotalAmountMismatchOverview;
+  orders: PurchasingMaterialsTotalAmountMismatchOrder[];
+};

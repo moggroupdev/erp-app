@@ -7,6 +7,7 @@ import type {
   PurchasingMaterialsPriceHistory,
   PurchasingMaterialsSubCategoryStats,
   PurchasingMaterialsSupplierStats,
+  PurchasingMaterialsTotalAmountMismatches,
 } from "@/types/reports";
 
 const reportsApi = {
@@ -140,6 +141,24 @@ const reportsApi = {
       return await privateRequest<PurchasingMaterialsSupplierStats>({
         url: "reports/purchasing-materials/supplier-stats",
         params: { supplierId, from, to, groupBy },
+        signal,
+      });
+    },
+
+    async getTotalAmountMismatches({
+      privateRequest,
+      from,
+      to,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      from?: string;
+      to?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsTotalAmountMismatches>({
+        url: "reports/purchasing-materials/total-amount-mismatches",
+        params: { from, to },
         signal,
       });
     },

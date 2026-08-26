@@ -20,6 +20,7 @@ export const staleTimes = {
     purchasingMaterialsCategoryStats: 5 * MINUTE,
     purchasingMaterialsSubCategoryStats: 5 * MINUTE,
     purchasingMaterialsSupplierStats: 5 * MINUTE,
+    purchasingMaterialsTotalAmountMismatches: 5 * MINUTE,
   },
   locations: Infinity,
   departments: Infinity,

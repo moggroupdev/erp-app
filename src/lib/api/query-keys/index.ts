@@ -131,6 +131,8 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "subcategory-stats", subCategoryId, filters] as const,
       supplierStats: (supplierId: string, filters?: { from?: string; to?: string; groupBy?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "supplier-stats", supplierId, filters] as const,
+      totalAmountMismatches: (filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "total-amount-mismatches", filters] as const,
     },
   },
   profile: {

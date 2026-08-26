@@ -211,7 +211,8 @@ export default function Page() {
                         <Table.Td
                           className={
                             order.legacyInvoiceTotalPurchases != null &&
-                            Math.trunc(order.totalAmount) !== Math.trunc(order.legacyInvoiceTotalPurchases)
+                            Math.abs(order.totalAmount - order.legacyInvoiceTotalPurchases) >=
+                              Math.max(Math.abs(order.totalAmount), Math.abs(order.legacyInvoiceTotalPurchases)) * 0.01
                               ? "text-orange-600 font-semibold"
                               : undefined
                           }

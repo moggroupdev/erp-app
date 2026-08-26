@@ -86,6 +86,16 @@ export default function Page() {
               href: "/reports/purchasing-materials/supplier-stats",
             }}
           />
+          <ReportLinkCard
+            report={{
+              label: { en: "Total Amount Mismatches", ar: "فروقات الإجمالي" },
+              description: {
+                en: "Compare calculated order totals against legacy invoice total purchases.",
+                ar: "مقارنة الإجمالي المحسوب لأوامر التوريد مع إجمالي مشتريات الفاتورة القديمة.",
+              },
+              href: "/reports/purchasing-materials/total-amount-mismatches",
+            }}
+          />
         </div>
       </main>
     </div>
