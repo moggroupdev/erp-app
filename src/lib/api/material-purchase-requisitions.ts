@@ -118,25 +118,11 @@ const materialPurchaseRequisitionsApi = {
   async approvePlanning({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
     return await privateRequest<MaterialPurchaseRequisition>({
       method: "POST",
-      url: `material-purchase-requisitions/${id}/approve-planning`,
+      url: `material-purchase-requisitions/${id}/planning/approve`,
     });
   },
 
-  async approvePurchasingManager({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<MaterialPurchaseRequisition>({
-      method: "POST",
-      url: `material-purchase-requisitions/${id}/approve-purchasing-manager`,
-    });
-  },
-
-  async approveDirector({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
-    return await privateRequest<MaterialPurchaseRequisition>({
-      method: "POST",
-      url: `material-purchase-requisitions/${id}/approve-director`,
-    });
-  },
-
-  async reject({
+  async rejectPlanning({
     privateRequest,
     id,
     dto,
@@ -147,15 +133,54 @@ const materialPurchaseRequisitionsApi = {
   }) {
     return await privateRequest<MaterialPurchaseRequisition>({
       method: "POST",
-      url: `material-purchase-requisitions/${id}/reject`,
+      url: `material-purchase-requisitions/${id}/planning/reject`,
       data: dto,
     });
   },
 
-  async cancel({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+  async approvePurchasingManager({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
     return await privateRequest<MaterialPurchaseRequisition>({
       method: "POST",
-      url: `material-purchase-requisitions/${id}/cancel`,
+      url: `material-purchase-requisitions/${id}/purchasing-manager/approve`,
+    });
+  },
+
+  async rejectPurchasingManager({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: RejectMaterialPurchaseRequisitionDto;
+  }) {
+    return await privateRequest<MaterialPurchaseRequisition>({
+      method: "POST",
+      url: `material-purchase-requisitions/${id}/purchasing-manager/reject`,
+      data: dto,
+    });
+  },
+
+  async approveManager({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<MaterialPurchaseRequisition>({
+      method: "POST",
+      url: `material-purchase-requisitions/${id}/manager/approve`,
+    });
+  },
+
+  async rejectManager({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: RejectMaterialPurchaseRequisitionDto;
+  }) {
+    return await privateRequest<MaterialPurchaseRequisition>({
+      method: "POST",
+      url: `material-purchase-requisitions/${id}/manager/reject`,
+      data: dto,
     });
   },
 };

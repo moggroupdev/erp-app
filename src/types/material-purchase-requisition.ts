@@ -1,6 +1,7 @@
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
+import type { ApprovalDecision } from "@/lib/constants/enums/approval-decisions";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 
 type UserRef = { id: string; name: string };
@@ -14,6 +15,16 @@ type RequisitionMaterial = {
   unitConversions: MaterialUnitConversionSummary[];
 };
 
+type ApprovalGateFields<P extends string> = {
+  [K in `${P}Decision`]: ApprovalDecision;
+} & {
+  [K in `${P}DecidedAt`]: Date | null;
+} & {
+  [K in `${P}DecidedBy`]: string | null;
+} & {
+  [K in `${P}Reason`]: string | null;
+};
+
 // =============== Material Purchase Requisitions ===============
 
 export type MaterialPurchaseRequisition = {
@@ -22,19 +33,11 @@ export type MaterialPurchaseRequisition = {
   productionSubDepartment: ProductionSubDepartment;
   productionSubDepartmentManagerId: string | null;
   notes: string | null;
-  planningApprovedAt: Date | null;
-  planningApprovedBy: string | null;
-  purchasingManagerApprovedAt: Date | null;
-  purchasingManagerApprovedBy: string | null;
-  directorApprovedAt: Date | null;
-  directorApprovedBy: string | null;
-  rejectedAt: Date | null;
-  rejectedBy: string | null;
-  rejectionReason: string | null;
-  cancelledAt: Date | null;
   createdAt: Date;
   createdBy: string;
-};
+} & ApprovalGateFields<"planning"> &
+  ApprovalGateFields<"purchasingManager"> &
+  ApprovalGateFields<"manager">;
 
 export type MaterialPurchaseRequisitionListItem = Omit<
   MaterialPurchaseRequisition,
@@ -61,19 +64,13 @@ export type MaterialPurchaseRequisitionItemDetailed = MaterialPurchaseRequisitio
 
 export type MaterialPurchaseRequisitionDetailed = Omit<
   MaterialPurchaseRequisition,
-  | "createdBy"
-  | "productionSubDepartmentManagerId"
-  | "planningApprovedBy"
-  | "purchasingManagerApprovedBy"
-  | "directorApprovedBy"
-  | "rejectedBy"
+  "createdBy" | "productionSubDepartmentManagerId" | "planningDecidedBy" | "purchasingManagerDecidedBy" | "managerDecidedBy"
 > & {
   createdBy: UserRef;
   productionSubDepartmentManager: UserRef | null;
-  planningApprovedBy: UserRef | null;
-  purchasingManagerApprovedBy: UserRef | null;
-  directorApprovedBy: UserRef | null;
-  rejectedBy: UserRef | null;
+  planningDecidedBy: UserRef | null;
+  purchasingManagerDecidedBy: UserRef | null;
+  managerDecidedBy: UserRef | null;
   items: MaterialPurchaseRequisitionItemDetailed[];
 };
 
@@ -92,12 +89,10 @@ export type CreateMaterialPurchaseRequisitionDto = {
   items: CreateMaterialPurchaseRequisitionItemDto[];
 };
 
-export type UpdateMaterialPurchaseRequisitionDto = Partial<
-  Omit<CreateMaterialPurchaseRequisitionDto, "items">
->;
+export type UpdateMaterialPurchaseRequisitionDto = Partial<Omit<CreateMaterialPurchaseRequisitionDto, "items">>;
 
 export type UpdateMaterialPurchaseRequisitionItemDto = Partial<CreateMaterialPurchaseRequisitionItemDto>;
 
 export type RejectMaterialPurchaseRequisitionDto = {
-  rejectionReason: string;
+  reason: string;
 };

@@ -1,32 +1,43 @@
+import { APPROVAL_DECISIONS, type ApprovalDecision } from "@/lib/constants/enums/approval-decisions";
+
 export type RequisitionLockFields = {
-  planningApprovedAt: Date | null;
-  purchasingManagerApprovedAt: Date | null;
-  directorApprovedAt: Date | null;
-  rejectedAt: Date | null;
-  cancelledAt: Date | null;
+  planningDecision: ApprovalDecision;
+  purchasingManagerDecision: ApprovalDecision;
+  managerDecision: ApprovalDecision;
 };
 
 export function isRequisitionEditable(r: RequisitionLockFields) {
-  return !r.planningApprovedAt && !r.purchasingManagerApprovedAt && !r.directorApprovedAt && !r.rejectedAt && !r.cancelledAt;
+  return (
+    r.planningDecision === APPROVAL_DECISIONS.PENDING &&
+    r.purchasingManagerDecision === APPROVAL_DECISIONS.PENDING &&
+    r.managerDecision === APPROVAL_DECISIONS.PENDING
+  );
 }
 
-export function isRequisitionTerminal(r: Pick<RequisitionLockFields, "rejectedAt" | "cancelledAt">) {
-  return !!r.rejectedAt || !!r.cancelledAt;
+export function isRequisitionTerminal(r: RequisitionLockFields) {
+  return (
+    r.planningDecision === APPROVAL_DECISIONS.REJECTED ||
+    r.purchasingManagerDecision === APPROVAL_DECISIONS.REJECTED ||
+    r.managerDecision === APPROVAL_DECISIONS.REJECTED
+  );
 }
 
-export type RequisitionStatus = "cancelled" | "rejected" | "approved" | "pending";
+export type RequisitionStatus = "rejected" | "approved" | "pending";
 
 export function getRequisitionStatus(r: RequisitionLockFields): RequisitionStatus {
-  if (r.cancelledAt) return "cancelled";
-  if (r.rejectedAt) return "rejected";
-  if (r.planningApprovedAt && r.purchasingManagerApprovedAt && r.directorApprovedAt) return "approved";
+  if (isRequisitionTerminal(r)) return "rejected";
+  if (
+    r.planningDecision === APPROVAL_DECISIONS.APPROVED &&
+    r.purchasingManagerDecision === APPROVAL_DECISIONS.APPROVED &&
+    r.managerDecision === APPROVAL_DECISIONS.APPROVED
+  ) {
+    return "approved";
+  }
   return "pending";
 }
 
 export function getRequisitionStatusLabel(status: RequisitionStatus, translate: (en: string, ar: string) => string) {
   switch (status) {
-    case "cancelled":
-      return { label: translate("Cancelled", "ملغي"), className: "text-red-500 font-bold", color: "red" as const };
     case "rejected":
       return { label: translate("Rejected", "مرفوض"), className: "text-red-500 font-bold", color: "red" as const };
     case "approved":

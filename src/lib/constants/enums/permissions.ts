@@ -55,11 +55,9 @@ export const PERMISSION_VALUES = [
   "add_material_purchase_requisition",
   "read_material_purchase_requisitions",
   "update_material_purchase_requisition",
-  "cancel_material_purchase_requisition",
   "approve_material_purchase_requisition_planning",
   "approve_material_purchase_requisition_purchasing_manager",
-  "approve_material_purchase_requisition_director",
-  "reject_material_purchase_requisition",
+  "approve_material_purchase_requisition_manager",
   "read_product_purchase_orders",
   "read_trips",
   "read_deliveries",
@@ -440,39 +438,25 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث طلب شراء مواد",
     },
   },
-  cancel_material_purchase_requisition: {
-    value: "cancel_material_purchase_requisition",
-    label: {
-      en: "Cancel Material Purchase Requisition",
-      ar: "إلغاء طلب شراء مواد",
-    },
-  },
   approve_material_purchase_requisition_planning: {
     value: "approve_material_purchase_requisition_planning",
     label: {
-      en: "Approve Material Purchase Requisition (Planning)",
-      ar: "اعتماد طلب شراء مواد (التخطيط والمتابعة)",
+      en: "Approve/Reject Material Purchase Requisition (Planning)",
+      ar: "اعتماد/رفض طلب شراء مواد (التخطيط والمتابعة)",
     },
   },
   approve_material_purchase_requisition_purchasing_manager: {
     value: "approve_material_purchase_requisition_purchasing_manager",
     label: {
-      en: "Approve Material Purchase Requisition (Purchasing Manager)",
-      ar: "اعتماد طلب شراء مواد (مدير المشتريات)",
+      en: "Approve/Reject Material Purchase Requisition (Purchasing Manager)",
+      ar: "اعتماد/رفض طلب شراء مواد (مدير المشتريات)",
     },
   },
-  approve_material_purchase_requisition_director: {
-    value: "approve_material_purchase_requisition_director",
+  approve_material_purchase_requisition_manager: {
+    value: "approve_material_purchase_requisition_manager",
     label: {
-      en: "Approve Material Purchase Requisition (Director)",
-      ar: "اعتماد طلب شراء مواد (المدير)",
-    },
-  },
-  reject_material_purchase_requisition: {
-    value: "reject_material_purchase_requisition",
-    label: {
-      en: "Reject Material Purchase Requisition",
-      ar: "رفض طلب شراء مواد",
+      en: "Approve/Reject Material Purchase Requisition (Manager)",
+      ar: "اعتماد/رفض طلب شراء مواد (المدير)",
     },
   },
   read_product_purchase_orders: {
@@ -586,8 +570,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_department",
       "read_departments",
       "update_department",
-      "approve_material_purchase_requisition_director",
-      "reject_material_purchase_requisition",
+      "approve_material_purchase_requisition_manager",
     ],
   },
   {
@@ -626,7 +609,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_production_plans",
       "read_production_routing",
       "approve_material_purchase_requisition_planning",
-      "reject_material_purchase_requisition",
     ],
   },
   {
@@ -647,7 +629,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_material_purchase_requisition",
       "read_material_purchase_requisitions",
       "update_material_purchase_requisition",
-      "cancel_material_purchase_requisition",
     ],
   },
   {
@@ -662,7 +643,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_product_purchase_orders",
       "read_material_purchase_requisitions",
       "approve_material_purchase_requisition_purchasing_manager",
-      "reject_material_purchase_requisition",
     ],
   },
   {

@@ -26,7 +26,6 @@ import RequisitionDetails from "./components/requisition-details";
 import RequisitionUpdateModal from "./components/requisition-update-modal";
 import RequisitionItemModal from "./components/requisition-item-modal";
 import RequisitionItemsTable from "./components/requisition-items-table";
-import WorkflowActions from "./components/workflow-actions";
 import { isRequisitionEditable } from "../helpers";
 
 const PAGE_TITLE = { en: "Requisition Details", ar: "تفاصيل طلب الشراء" };
@@ -108,8 +107,6 @@ export default function Page() {
         requisition && (
           <>
             <RequisitionDetails requisition={requisition} />
-
-            <WorkflowActions requisition={requisition} />
 
             <section className="mt-4 flex flex-col gap-4">
               <div className="flex items-center justify-between gap-3">
