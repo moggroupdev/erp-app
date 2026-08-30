@@ -48,6 +48,7 @@ export type MaterialPurchaseRequisitionItem = {
   id: string;
   materialPurchaseRequisitionId: string;
   materialCode: string;
+  unitOfMeasurementSelected: MaterialUnit;
   quantityRequested: number;
   notes: string | null;
 };
@@ -80,6 +81,7 @@ export type MaterialPurchaseRequisitionDetailed = Omit<
 
 export type CreateMaterialPurchaseRequisitionItemDto = {
   materialCode: string;
+  unitOfMeasurementSelected: MaterialUnit;
   quantityRequested: number;
   notes: string | null;
 };
