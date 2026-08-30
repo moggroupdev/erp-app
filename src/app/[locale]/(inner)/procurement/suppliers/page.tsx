@@ -238,8 +238,8 @@ export default function Page() {
                       <Table.Td>
                         {supplier.classification ? getSupplierClassificationLabel(supplier.classification, locale) : "-"}
                       </Table.Td>
-                      <Table.Td>{supplier.phone}</Table.Td>
-                      <Table.Td>{supplier.email}</Table.Td>
+                      <Table.Td>{supplier.phone || "-"}</Table.Td>
+                      <Table.Td>{supplier.email || "-"}</Table.Td>
                       <Table.Td>{formatDateAndTime(supplier.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>
                         <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>

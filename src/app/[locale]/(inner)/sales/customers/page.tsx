@@ -214,8 +214,8 @@ export default function Page() {
                       <Table.Td>
                         {customer.classification ? getCustomerClassificationLabel(customer.classification, locale) : "-"}
                       </Table.Td>
-                      <Table.Td>{customer.phone}</Table.Td>
-                      <Table.Td>{customer.email}</Table.Td>
+                      <Table.Td>{customer.phone || "-"}</Table.Td>
+                      <Table.Td>{customer.email || "-"}</Table.Td>
                       <Table.Td>{formatDateAndTime(customer.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>
                         <PermissionGuard permission={PERMISSIONS.UPDATE_CUSTOMER}>
