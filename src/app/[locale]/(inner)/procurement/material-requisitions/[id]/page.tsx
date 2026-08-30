@@ -100,10 +100,7 @@ export default function Page() {
         <LoadingSection message={translate("Loading requisition data", "جاري تحميل بيانات طلب الشراء")} />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate(
-            "An error occurred while loading requisition data",
-            "حدث خطأ أثناء تحميل بيانات طلب الشراء",
-          )}
+          errorTitle={translate("An error occurred while loading requisition data", "حدث خطأ أثناء تحميل بيانات طلب الشراء")}
           errorMessage={errorMessage}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
         />
@@ -127,15 +124,6 @@ export default function Page() {
                 )}
               </div>
 
-              {!editable && (
-                <p className="text-sm text-gray-500">
-                  {translate(
-                    "Cannot edit after approval, rejection, or cancellation.",
-                    "لا يمكن التعديل بعد الاعتماد أو الرفض أو الإلغاء.",
-                  )}
-                </p>
-              )}
-
               {requisition.items.length === 0 ? (
                 <EmptySection message={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")} />
               ) : (
@@ -151,11 +139,7 @@ export default function Page() {
 
             {editable && (
               <>
-                <RequisitionUpdateModal
-                  opened={headerModalOpened}
-                  close={closeHeaderModal}
-                  requisition={requisition}
-                />
+                <RequisitionUpdateModal opened={headerModalOpened} close={closeHeaderModal} requisition={requisition} />
                 <RequisitionItemModal
                   opened={itemModalOpened}
                   close={closeItemModal}
