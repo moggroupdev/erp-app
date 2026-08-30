@@ -32,6 +32,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import SuppliersListPrintDocument from "@/components/documents/suppliers-list-print-document";
 import SupplierModal from "@/components/global/data-modals/supplier-modal";
+import SelectSupplierClassification from "@/components/global/selections/enum-based/select-supplier-classification";
 import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";
 
 const PAGE_TITLE = { en: "Suppliers", ar: "الموردون" };
@@ -56,22 +57,30 @@ export default function Page() {
     setPendingValue: setPendingKeyword,
     setImmediateValue: setImmediateKeyword,
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
+  const [classificationFilter, setClassificationFilter] = useState<string | null>(
+    urlSearchParams.get("classification") || null,
+  );
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
+    classification: classificationFilter,
   };
 
   const params = { limit: SUPPLIERS_PER_PAGE, ...removeEmptyParams(urlParams) };
 
-  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword);
+  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || classificationFilter);
 
   const resetAllFilters = () => {
     setActivePage(1);
     setImmediateKeyword("");
+    setClassificationFilter(null);
   };
 
-  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword });
+  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
+    debouncedKeyword,
+    classificationFilter,
+  });
 
   const {
     data: paginatedSuppliers,
@@ -98,7 +107,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword };
+    const newFilters = { debouncedKeyword, classificationFilter };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -109,7 +118,7 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword]);
+  }, [activePage, debouncedKeyword, classificationFilter]);
 
   // ========================= MODALS =========================
 
@@ -151,20 +160,32 @@ export default function Page() {
         ),
       }}
     >
-      <TextInput
-        value={keyword}
-        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-        placeholder={translate("Search for a supplier...", "ابحث عن مورد...")}
-        leftSection={<Search size={15} />}
-        radius="md"
-        rightSection={
-          keyword && (
-            <button onClick={() => setImmediateKeyword("")}>
-              <X size={15} />
-            </button>
-          )
-        }
-      />
+      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">
+        <div className="col-span-1 md:col-span-3">
+          <TextInput
+            value={keyword}
+            onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+            placeholder={translate("Search for a supplier...", "ابحث عن مورد...")}
+            leftSection={<Search size={15} />}
+            radius="md"
+            rightSection={
+              keyword && (
+                <button onClick={() => setImmediateKeyword("")}>
+                  <X size={15} />
+                </button>
+              )
+            }
+          />
+        </div>
+
+        <SelectSupplierClassification
+          value={classificationFilter}
+          setValue={setClassificationFilter}
+          placeholder={translate("Select classification...", "اختر التصنيف...")}
+          searchable
+          clearable
+        />
+      </div>
 
       {isFetching ? (
         <LoadingSection message={translate("Loading suppliers...", "جاري تحميل الموردين...")} />
@@ -177,10 +198,10 @@ export default function Page() {
       ) : (
         paginatedSuppliers &&
         (paginatedSuppliers.data.length === 0 ? (
-          debouncedKeyword ? (
+          debouncedKeyword || classificationFilter ? (
             <NoResultsSection
-              keyword={debouncedKeyword}
-              button={{ text: translate("View All", "عرض الكل"), onClick: () => setImmediateKeyword("") }}
+              keyword={debouncedKeyword || translate("selected filters", "الفلاتر المحددة")}
+              button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
             />
           ) : (
             <EmptySection useDefaultImg message={translate("No suppliers found", "لا يوجد موردون")} />
@@ -215,9 +236,7 @@ export default function Page() {
                         </div>
                       </Table.Td>
                       <Table.Td>
-                        {supplier.classification
-                          ? getSupplierClassificationLabel(supplier.classification, locale)
-                          : "-"}
+                        {supplier.classification ? getSupplierClassificationLabel(supplier.classification, locale) : "-"}
                       </Table.Td>
                       <Table.Td>{supplier.phone}</Table.Td>
                       <Table.Td>{supplier.email}</Table.Td>
