@@ -251,7 +251,7 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
           decision={requisition.planningDecision}
           decidedAt={requisition.planningDecidedAt}
           decidedBy={requisition.planningDecidedBy}
-          reason={requisition.planningReason}
+          reason={requisition.planningDecisionReason}
           canAct={!terminal}
           permission={PERMISSIONS.APPROVE_MATERIAL_PURCHASE_REQUISITION_PLANNING}
           onApprove={() => openConfirm("planning", "approve")}
@@ -266,7 +266,7 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
           decision={requisition.purchasingManagerDecision}
           decidedAt={requisition.purchasingManagerDecidedAt}
           decidedBy={requisition.purchasingManagerDecidedBy}
-          reason={requisition.purchasingManagerReason}
+          reason={requisition.purchasingManagerDecisionReason}
           canAct={!terminal}
           permission={PERMISSIONS.APPROVE_MATERIAL_PURCHASE_REQUISITION_PURCHASING_MANAGER}
           onApprove={() => openConfirm("purchasingManager", "approve")}
@@ -281,7 +281,7 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
           decision={requisition.managerDecision}
           decidedAt={requisition.managerDecidedAt}
           decidedBy={requisition.managerDecidedBy}
-          reason={requisition.managerReason}
+          reason={requisition.managerDecisionReason}
           canAct={!terminal}
           permission={PERMISSIONS.APPROVE_MATERIAL_PURCHASE_REQUISITION_MANAGER}
           onApprove={() => openConfirm("manager", "approve")}

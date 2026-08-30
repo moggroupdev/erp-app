@@ -22,7 +22,7 @@ type ApprovalGateFields<P extends string> = {
 } & {
   [K in `${P}DecidedBy`]: string | null;
 } & {
-  [K in `${P}Reason`]: string | null;
+  [K in `${P}DecisionReason`]: string | null;
 };
 
 // =============== Material Purchase Requisitions ===============
