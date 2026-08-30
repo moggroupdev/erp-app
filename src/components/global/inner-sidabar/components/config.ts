@@ -167,6 +167,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_SUPPLIERS,
       },
       {
+        label: { en: "Material Purchase Requisitions", ar: "طلبات شراء الخامات" },
+        href: "/procurement/material-requisitions",
+        icon: ClipboardList,
+        requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS,
+      },
+      {
         label: { en: "Material Purchase Orders", ar: "أوامر توريد الخامات" },
         href: "/procurement/material-orders",
         icon: FileText,
