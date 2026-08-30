@@ -66,10 +66,10 @@ export default function CompletedWithoutInvoiceTotalTable({
                     </div>
                   </Table.Td>
                   <Table.Td>
-                    {row.legacyInvoiceNumber ? (
+                    {row.invoiceNumber ? (
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-gray-600">{row.legacyInvoiceNumber}</span>
-                        <CopyButton text={row.legacyInvoiceNumber} />
+                        <span className="font-mono text-gray-600">{row.invoiceNumber}</span>
+                        <CopyButton text={row.invoiceNumber} />
                       </div>
                     ) : (
                       <span className="text-gray-400">-</span>

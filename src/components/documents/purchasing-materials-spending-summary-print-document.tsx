@@ -192,11 +192,11 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           rows={topOrders.map((row, index) => [
             String(index + 1),
             row.orderCode,
-            row.legacyInvoiceNumber ?? "-",
+            row.invoiceNumber ?? "-",
             row.supplierName,
             formatDate(row.createdAt, locale),
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
-            formatMoney(row.legacyInvoiceTotalPurchases),
+            formatMoney(row.invoiceTotalPurchases),
           ])}
           monoColumnIndexes={[1, 2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}

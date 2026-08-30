@@ -193,35 +193,35 @@ export default function Page() {
                           </Link>
                         </Table.Td>
                         <Table.Td>
-                          {order.legacyInvoiceNumber ? (
+                          {order.invoiceNumber ? (
                             <div className="flex items-center gap-1.5">
-                              <span className="font-mono">{order.legacyInvoiceNumber}</span>
-                              <CopyButton text={order.legacyInvoiceNumber} />
+                              <span className="font-mono">{order.invoiceNumber}</span>
+                              <CopyButton text={order.invoiceNumber} />
                             </div>
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
                         </Table.Td>
                         <Table.Td>
-                          {order.legacyInvoiceIssuedAt ? (
-                            formatDate(order.legacyInvoiceIssuedAt, locale)
+                          {order.invoiceIssuedAt ? (
+                            formatDate(order.invoiceIssuedAt, locale)
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
                         </Table.Td>
 
                         <Table.Td>
-                          {order.legacyInvoiceTotalPurchases != null ? (
-                            formatMoney(order.legacyInvoiceTotalPurchases)
+                          {order.invoiceTotalPurchases != null ? (
+                            formatMoney(order.invoiceTotalPurchases)
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
                         </Table.Td>
                         <Table.Td
                           className={
-                            order.legacyInvoiceTotalPurchases != null &&
-                            Math.abs(order.totalAmount - order.legacyInvoiceTotalPurchases) >=
-                              Math.max(Math.abs(order.totalAmount), Math.abs(order.legacyInvoiceTotalPurchases)) * 0.01
+                            order.invoiceTotalPurchases != null &&
+                            Math.abs(order.totalAmount - order.invoiceTotalPurchases) >=
+                              Math.max(Math.abs(order.totalAmount), Math.abs(order.invoiceTotalPurchases)) * 0.01
                               ? "font-semibold text-orange-600"
                               : undefined
                           }

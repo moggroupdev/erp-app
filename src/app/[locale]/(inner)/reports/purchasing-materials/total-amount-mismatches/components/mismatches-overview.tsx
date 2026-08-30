@@ -32,8 +32,8 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
       />
       <KpiCard
         label={translate(`Invoice Total Purchases (${currency})`, `إجمالي مشتريات الفاتورة (${currency})`)}
-        value={formatMoney(overview.totalLegacyInvoicePurchases, currency)}
-        hint={translate("Sum of legacy invoice totals for mismatches.", "مجموع إجماليات الفواتير للأوامر ذات الفروقات.")}
+        value={formatMoney(overview.totalInvoicePurchases, currency)}
+        hint={translate("Sum of invoice totals for mismatches.", "مجموع إجماليات الفواتير للأوامر ذات الفروقات.")}
         icon={<Receipt size={20} />}
       />
       <KpiCard

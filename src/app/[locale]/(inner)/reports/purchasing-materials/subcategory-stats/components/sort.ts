@@ -93,7 +93,7 @@ export function getSubCategoryMaterialsSortLabel(sort: SubCategoryMaterialsSort,
 }
 
 function invoiceDateValue(row: PurchasingMaterialsCategoryOrder) {
-  return row.legacyInvoiceIssuedAt ?? row.createdAt;
+  return row.invoiceIssuedAt ?? row.createdAt;
 }
 
 export function sortSubCategorySuppliers(data: PurchasingMaterialsBySupplier[], sort: SubCategorySuppliersSort) {
@@ -132,13 +132,13 @@ export function sortSubCategoryOrders(data: PurchasingMaterialsCategoryOrder[], 
       case "invoice-date-asc":
         return new Date(invoiceDateValue(a)).getTime() - new Date(invoiceDateValue(b)).getTime();
       case "amount-desc":
-        return b.legacyInvoiceTotalPurchases - a.legacyInvoiceTotalPurchases;
+        return b.invoiceTotalPurchases - a.invoiceTotalPurchases;
       case "amount-asc":
-        return a.legacyInvoiceTotalPurchases - b.legacyInvoiceTotalPurchases;
+        return a.invoiceTotalPurchases - b.invoiceTotalPurchases;
       case "invoice-number-asc":
-        return (a.legacyInvoiceNumber ?? "").localeCompare(b.legacyInvoiceNumber ?? "");
+        return (a.invoiceNumber ?? "").localeCompare(b.invoiceNumber ?? "");
       case "invoice-number-desc":
-        return (b.legacyInvoiceNumber ?? "").localeCompare(a.legacyInvoiceNumber ?? "");
+        return (b.invoiceNumber ?? "").localeCompare(a.invoiceNumber ?? "");
       case "supplier-asc":
         return a.supplierName.localeCompare(b.supplierName);
       case "supplier-desc":

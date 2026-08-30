@@ -49,7 +49,7 @@ export default function PurchasingMaterialsSubCategoryStatsPrintDocument({
   const totalSupplierOrders = suppliers.reduce((sum, row) => sum + row.orderCount, 0);
   const totalSupplierSpend = suppliers.reduce((sum, row) => sum + row.totalSpend, 0);
   const avgSupplierOrderValue = totalSupplierOrders === 0 ? 0 : totalSupplierSpend / totalSupplierOrders;
-  const totalOrderAmount = orders.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
+  const totalOrderAmount = orders.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
   const materialDisplayRows = materials.map((row) => {
     const { unit, factor } = resolveDisplayUnit(materialsDisplayUnit, row.unitOfMeasurement, row.unitConversions);
     return { row, unit, factor, displayQuantity: toDisplayQuantity(row.totalQuantity, factor) };
@@ -149,12 +149,12 @@ export default function PurchasingMaterialsSubCategoryStatsPrintDocument({
           rows={orders.map((row, index) => [
             String(index + 1),
             row.orderCode,
-            row.legacyInvoiceNumber ?? "-",
-            row.legacyInvoiceIssuedAt ? formatDate(row.legacyInvoiceIssuedAt, locale) : "-",
+            row.invoiceNumber ?? "-",
+            row.invoiceIssuedAt ? formatDate(row.invoiceIssuedAt, locale) : "-",
             row.inventoryTransactionLegacyNumbers.length > 0 ? row.inventoryTransactionLegacyNumbers.join(", ") : "-",
             row.supplierName,
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
-            formatMoney(row.legacyInvoiceTotalPurchases),
+            formatMoney(row.invoiceTotalPurchases),
           ])}
           footerRow={["", translate("Total", "الإجمالي"), "", "", "", "", "", formatMoney(totalOrderAmount)]}
           monoColumnIndexes={[1, 2, 4]}

@@ -56,7 +56,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
         />
         <PrintDetail
           label={translate(`Invoice Total Purchases (${currency})`, `إجمالي مشتريات الفاتورة (${currency})`)}
-          value={formatMoney(overview.totalLegacyInvoicePurchases, currency)}
+          value={formatMoney(overview.totalInvoicePurchases, currency)}
         />
         <PrintDetail
           label={translate(`Difference (${currency})`, `الفرق (${currency})`)}
@@ -99,11 +99,11 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
           ]}
           rows={orders.map((row, index) => [
             String(index + 1),
-            row.legacyInvoiceNumber ?? "-",
+            row.invoiceNumber ?? "-",
             row.supplierName,
             <span className="text-gray-500">{formatDate(row.createdAt, locale)}</span>,
             <span className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</span>,
-            <span className="font-semibold text-gray-800">{formatMoney(row.legacyInvoiceTotalPurchases)}</span>,
+            <span className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</span>,
             <span
               className={`font-semibold ${
                 row.difference > 0 ? "text-emerald-700" : row.difference < 0 ? "text-rose-700" : "text-gray-800"
@@ -119,7 +119,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
               "",
               "",
               <span className="font-semibold text-orange-600">{formatMoney(overview.totalCalculatedAmount)}</span>,
-              <span className="font-semibold text-gray-800">{formatMoney(overview.totalLegacyInvoicePurchases)}</span>,
+              <span className="font-semibold text-gray-800">{formatMoney(overview.totalInvoicePurchases)}</span>,
               <span
                 className={`font-semibold ${
                   totalNetDifference > 0 ? "text-emerald-700" : totalNetDifference < 0 ? "text-rose-700" : "text-gray-800"
@@ -162,7 +162,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
           rows={completedWithoutInvoiceTotal.map((row, index) => [
             String(index + 1),
             row.orderCode,
-            row.legacyInvoiceNumber ?? "-",
+            row.invoiceNumber ?? "-",
             row.supplierName,
             <span className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</span>,
           ])}

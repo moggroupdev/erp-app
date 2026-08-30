@@ -65,10 +65,10 @@ export type PurchasingMaterialsSupplierBySubCategory = PurchasingMaterialsBySubC
 export type PurchasingMaterialsTopOrder = {
   orderId: string;
   orderCode: string;
-  legacyInvoiceNumber: string | null;
+  invoiceNumber: string | null;
   supplierId: string;
   supplierName: string;
-  legacyInvoiceTotalPurchases: number;
+  invoiceTotalPurchases: number;
   createdAt: string;
   completedAt: string | null;
 };
@@ -121,11 +121,11 @@ export type PurchasingMaterialsCategoryStatsOverview = Pick<
 export type PurchasingMaterialsCategoryOrder = {
   orderId: string;
   orderCode: string;
-  legacyInvoiceNumber: string | null;
-  legacyInvoiceIssuedAt: string | null;
+  invoiceNumber: string | null;
+  invoiceIssuedAt: string | null;
   supplierId: string;
   supplierName: string;
-  legacyInvoiceTotalPurchases: number;
+  invoiceTotalPurchases: number;
   createdAt: string;
   completedAt: string | null;
   inventoryTransactionLegacyNumbers: string[];
@@ -163,9 +163,9 @@ export type PurchasingMaterialsSubCategoryStats = {
 export type PurchasingMaterialsSupplierOrder = {
   orderId: string;
   orderCode: string;
-  legacyInvoiceNumber: string | null;
-  legacyInvoiceIssuedAt: string | null;
-  legacyInvoiceTotalPurchases: number;
+  invoiceNumber: string | null;
+  invoiceIssuedAt: string | null;
+  invoiceTotalPurchases: number;
   createdAt: string;
   completedAt: string | null;
   inventoryTransactionLegacyNumbers: string[];
@@ -190,7 +190,7 @@ export type PurchasingMaterialsSupplierStats = {
 export type PurchasingMaterialsTotalAmountMismatchOverview = {
   mismatchCount: number;
   totalCalculatedAmount: number;
-  totalLegacyInvoicePurchases: number;
+  totalInvoicePurchases: number;
   totalDifference: number;
   missingInvoiceTotalCount: number;
   missingInvoiceTotalCalculatedAmount: number;
@@ -199,11 +199,11 @@ export type PurchasingMaterialsTotalAmountMismatchOverview = {
 export type PurchasingMaterialsTotalAmountMismatchOrder = {
   orderId: string;
   orderCode: string;
-  legacyInvoiceNumber: string | null;
+  invoiceNumber: string | null;
   supplierId: string;
   supplierName: string;
   calculatedTotalAmount: number;
-  legacyInvoiceTotalPurchases: number;
+  invoiceTotalPurchases: number;
   difference: number;
   createdAt: string;
   completedAt: string | null;
@@ -212,7 +212,7 @@ export type PurchasingMaterialsTotalAmountMismatchOrder = {
 export type PurchasingMaterialsCompletedWithoutInvoiceTotalOrder = {
   orderId: string;
   orderCode: string;
-  legacyInvoiceNumber: string | null;
+  invoiceNumber: string | null;
   supplierId: string;
   supplierName: string;
   calculatedTotalAmount: number;

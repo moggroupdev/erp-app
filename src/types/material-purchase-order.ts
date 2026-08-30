@@ -19,9 +19,9 @@ type PurchaseMaterialWithUnitConversion = PurchaseMaterial & {
 export type MaterialPurchaseOrder = {
   id: string;
   code: string;
-  legacyInvoiceNumber: string | null;
-  legacyInvoiceIssuedAt: Date | null;
-  legacyInvoiceTotalPurchases: number | null;
+  invoiceNumber: string | null;
+  invoiceIssuedAt: Date | null;
+  invoiceTotalPurchases: number | null;
   supplierId: string;
   totalAmount: number;
   completedAt: Date | null;
@@ -81,7 +81,7 @@ export type MaterialPurchaseReceiptItem = {
 };
 
 export type MaterialPurchaseReceiptDetailed = Omit<MaterialPurchaseReceipt, "createdBy" | "receivedBy"> & {
-  materialPurchaseOrder: { id: string; legacyInvoiceNumber: string | null };
+  materialPurchaseOrder: { id: string; invoiceNumber: string | null };
   inventoryTransactions: { id: string; legacyNumber: string | null }[];
   createdBy: { id: string; name: string };
   receivedBy: { id: string; name: string } | null;

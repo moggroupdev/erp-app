@@ -31,7 +31,7 @@ export default function CategoryOrdersTable({
     });
   }
 
-  const totalAmount = data.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
+  const totalAmount = data.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
 
   return (
     <ReportCard
@@ -115,16 +115,16 @@ export default function CategoryOrdersTable({
                       </div>
                     </Table.Td>
                     <Table.Td>
-                      {row.legacyInvoiceNumber ? (
+                      {row.invoiceNumber ? (
                         <div className="flex items-center gap-1.5">
-                          <span className="font-mono text-gray-600">{row.legacyInvoiceNumber}</span>
-                          <CopyButton text={row.legacyInvoiceNumber} />
+                          <span className="font-mono text-gray-600">{row.invoiceNumber}</span>
+                          <CopyButton text={row.invoiceNumber} />
                         </div>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
                     </Table.Td>
-                    <Table.Td>{formatDisplayDate(row.legacyInvoiceIssuedAt)}</Table.Td>
+                    <Table.Td>{formatDisplayDate(row.invoiceIssuedAt)}</Table.Td>
                     <Table.Td>
                       {row.inventoryTransactionLegacyNumbers.length > 0 ? (
                         <div className="flex max-w-64 flex-wrap gap-1.5">
@@ -161,7 +161,7 @@ export default function CategoryOrdersTable({
                       )}
                     </Table.Td>
                     <Table.Td className="font-semibold text-gray-800">
-                      {formatMoney(row.legacyInvoiceTotalPurchases)}
+                      {formatMoney(row.invoiceTotalPurchases)}
                     </Table.Td>
                   </Table.Tr>
                 ))}

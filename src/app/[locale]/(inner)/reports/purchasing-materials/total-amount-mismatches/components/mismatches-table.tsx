@@ -14,7 +14,7 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
   const getLocalizedHref = useLocaleHref();
   const currency = translation.currency;
   const totalCalculatedAmount = data.reduce((sum, row) => sum + row.calculatedTotalAmount, 0);
-  const totalLegacyInvoicePurchases = data.reduce((sum, row) => sum + row.legacyInvoiceTotalPurchases, 0);
+  const totalInvoicePurchases = data.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
   const totalDifference = data.reduce((sum, row) => sum + row.difference, 0);
   const totalAbsoluteDifference = data.reduce((sum, row) => sum + Math.abs(row.difference), 0);
 
@@ -68,10 +68,10 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                     </div>
                   </Table.Td>
                   <Table.Td>
-                    {row.legacyInvoiceNumber ? (
+                    {row.invoiceNumber ? (
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-gray-600">{row.legacyInvoiceNumber}</span>
-                        <CopyButton text={row.legacyInvoiceNumber} />
+                        <span className="font-mono text-gray-600">{row.invoiceNumber}</span>
+                        <CopyButton text={row.invoiceNumber} />
                       </div>
                     ) : (
                       <span className="text-gray-400">-</span>
@@ -106,7 +106,7 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                     )}
                   </Table.Td>
                   <Table.Td className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
-                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.legacyInvoiceTotalPurchases)}</Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</Table.Td>
                   <Table.Td
                     className={`font-semibold ${
                       row.difference > 0 ? "text-emerald-700" : row.difference < 0 ? "text-rose-700" : "text-gray-800"
@@ -126,7 +126,7 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                 <Table.Th />
                 <Table.Th />
                 <Table.Th className="font-semibold text-orange-600">{formatMoney(totalCalculatedAmount)}</Table.Th>
-                <Table.Th className="font-semibold text-gray-800">{formatMoney(totalLegacyInvoicePurchases)}</Table.Th>
+                <Table.Th className="font-semibold text-gray-800">{formatMoney(totalInvoicePurchases)}</Table.Th>
                 <Table.Th
                   className={`font-semibold ${
                     totalDifference > 0
