@@ -50,60 +50,54 @@ export default function RequisitionDetails({
       key: translate("Created At", "تاريخ الإنشاء"),
       value: formatDateAndTime(requisition.createdAt, locale),
     },
-    ...(requisition.planningApprovedAt
-      ? [
-          {
-            key: translate("Planning Approval", "اعتماد التخطيط والمتابعة"),
-            value: (
-              <span>
-                {formatDateAndTime(requisition.planningApprovedAt, locale)}
-                {requisition.planningApprovedBy ? (
-                  <>
-                    {" · "}
-                    <CreatorLink creator={requisition.planningApprovedBy} />
-                  </>
-                ) : null}
-              </span>
-            ),
-          },
-        ]
-      : []),
-    ...(requisition.purchasingManagerApprovedAt
-      ? [
-          {
-            key: translate("Purchasing Manager Approval", "اعتماد مدير المشتريات"),
-            value: (
-              <span>
-                {formatDateAndTime(requisition.purchasingManagerApprovedAt, locale)}
-                {requisition.purchasingManagerApprovedBy ? (
-                  <>
-                    {" · "}
-                    <CreatorLink creator={requisition.purchasingManagerApprovedBy} />
-                  </>
-                ) : null}
-              </span>
-            ),
-          },
-        ]
-      : []),
-    ...(requisition.directorApprovedAt
-      ? [
-          {
-            key: translate("Director Approval", "اعتماد المدير"),
-            value: (
-              <span>
-                {formatDateAndTime(requisition.directorApprovedAt, locale)}
-                {requisition.directorApprovedBy ? (
-                  <>
-                    {" · "}
-                    <CreatorLink creator={requisition.directorApprovedBy} />
-                  </>
-                ) : null}
-              </span>
-            ),
-          },
-        ]
-      : []),
+    {
+      key: translate("Planning Approval", "اعتماد التخطيط والمتابعة"),
+      value: requisition.planningApprovedAt ? (
+        <span>
+          {formatDateAndTime(requisition.planningApprovedAt, locale)}
+          {requisition.planningApprovedBy ? (
+            <>
+              {" · "}
+              <CreatorLink creator={requisition.planningApprovedBy} />
+            </>
+          ) : null}
+        </span>
+      ) : (
+        <EmptyValue />
+      ),
+    },
+    {
+      key: translate("Purchasing Manager Approval", "اعتماد مدير المشتريات"),
+      value: requisition.purchasingManagerApprovedAt ? (
+        <span>
+          {formatDateAndTime(requisition.purchasingManagerApprovedAt, locale)}
+          {requisition.purchasingManagerApprovedBy ? (
+            <>
+              {" · "}
+              <CreatorLink creator={requisition.purchasingManagerApprovedBy} />
+            </>
+          ) : null}
+        </span>
+      ) : (
+        <EmptyValue />
+      ),
+    },
+    {
+      key: translate("Director Approval", "اعتماد المدير"),
+      value: requisition.directorApprovedAt ? (
+        <span>
+          {formatDateAndTime(requisition.directorApprovedAt, locale)}
+          {requisition.directorApprovedBy ? (
+            <>
+              {" · "}
+              <CreatorLink creator={requisition.directorApprovedBy} />
+            </>
+          ) : null}
+        </span>
+      ) : (
+        <EmptyValue />
+      ),
+    },
     ...(requisition.rejectedAt
       ? [
           {
