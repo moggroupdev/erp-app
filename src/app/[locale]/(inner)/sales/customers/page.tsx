@@ -30,6 +30,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import CustomerModal from "@/components/global/data-modals/customer-modal";
+import { getCustomerClassificationLabel } from "@/lib/constants/enums/customer-classifications";
 
 const PAGE_TITLE = { en: "Customers", ar: "العملاء" };
 
@@ -171,6 +172,7 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Name", "الاسم")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                    <Table.Th>{translate("Classification", "التصنيف")}</Table.Th>
                     <Table.Th>{translate("Phone", "الهاتف")}</Table.Th>
                     <Table.Th>{translate("Email", "البريد الإلكتروني")}</Table.Th>
                     <Table.Th>{translate("Registration Date", "تاريخ التسجيل")}</Table.Th>
@@ -190,6 +192,11 @@ export default function Page() {
                           <span className="font-mono">{customer.code}</span>
                           <CopyButton text={customer.code} />
                         </div>
+                      </Table.Td>
+                      <Table.Td>
+                        {customer.classification
+                          ? getCustomerClassificationLabel(customer.classification, locale)
+                          : "-"}
                       </Table.Td>
                       <Table.Td>{customer.phone}</Table.Td>
                       <Table.Td>{customer.email}</Table.Td>

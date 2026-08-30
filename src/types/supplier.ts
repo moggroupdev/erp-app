@@ -1,4 +1,5 @@
 import { Address } from "./address";
+import type { SupplierClassification } from "@/lib/constants/enums/supplier-classifications";
 
 export type Supplier = {
   id: string;
@@ -6,13 +7,19 @@ export type Supplier = {
   name: string;
   phone: string | null;
   email: string | null;
+  taxNumber: string | null;
+  classification: SupplierClassification | null;
   notes: string | null;
-  deletedAt: Date | null;
+  blacklistedAt: Date | null;
+  addedToBlacklistBy: string | null;
   createdAt: Date;
   createdBy: string;
 };
 
-export type SupplierWithCreator = Supplier & { createdBy: { id: string; name: string } };
+export type SupplierWithCreator = Supplier & {
+  createdBy: { id: string; name: string };
+  addedToBlacklistBy: { id: string; name: string } | null;
+};
 
 export type SupplierAddress = Address & { supplierId: string };
 
@@ -22,6 +29,8 @@ export type CreateSupplierDto = {
   name: string;
   phone: string | null;
   email: string | null;
+  taxNumber: string | null;
+  classification: SupplierClassification | null;
   notes: string | null;
 };
 

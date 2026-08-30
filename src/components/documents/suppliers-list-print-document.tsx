@@ -2,6 +2,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PrintTable } from "./components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import type { Supplier } from "@/types/supplier";
+import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";
 
 export default function SuppliersListPrintDocument({ suppliers }: { suppliers: Supplier[] }) {
   const { locale, translate } = useI18n();
@@ -11,6 +12,7 @@ export default function SuppliersListPrintDocument({ suppliers }: { suppliers: S
   const headers = [
     translate("Code", "الكود"),
     translate("Name", "الاسم"),
+    translate("Classification", "التصنيف"),
     translate("Phone", "الهاتف"),
     translate("Email", "البريد الإلكتروني"),
     translate("Registration Date", "تاريخ التسجيل"),
@@ -19,6 +21,7 @@ export default function SuppliersListPrintDocument({ suppliers }: { suppliers: S
   const rows = suppliers.map((supplier) => [
     supplier.code,
     supplier.name,
+    supplier.classification ? getSupplierClassificationLabel(supplier.classification, locale) : "-",
     supplier.phone || "-",
     supplier.email || "-",
     formatDate(supplier.createdAt, locale),
@@ -41,7 +44,7 @@ export default function SuppliersListPrintDocument({ suppliers }: { suppliers: S
         headers={headers}
         rows={rows}
         monoColumnIndexes={[0]}
-        noWrapIndexes={[0, 2, 4]}
+        noWrapIndexes={[0, 3, 5]}
         tableClassName="break-before-avoid text-[9px] [&_td]:align-top"
         emptyLabel={translate("No suppliers", "لا يوجد موردون")}
       />

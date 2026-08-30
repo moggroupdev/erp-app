@@ -32,6 +32,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import SuppliersListPrintDocument from "@/components/documents/suppliers-list-print-document";
 import SupplierModal from "@/components/global/data-modals/supplier-modal";
+import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";
 
 const PAGE_TITLE = { en: "Suppliers", ar: "الموردون" };
 
@@ -192,6 +193,7 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Name", "الاسم")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                    <Table.Th>{translate("Classification", "التصنيف")}</Table.Th>
                     <Table.Th>{translate("Phone", "الهاتف")}</Table.Th>
                     <Table.Th>{translate("Email", "البريد الإلكتروني")}</Table.Th>
                     <Table.Th>{translate("Registration Date", "تاريخ التسجيل")}</Table.Th>
@@ -211,6 +213,11 @@ export default function Page() {
                           <span className="font-mono">{supplier.code}</span>
                           <CopyButton text={supplier.code} />
                         </div>
+                      </Table.Td>
+                      <Table.Td>
+                        {supplier.classification
+                          ? getSupplierClassificationLabel(supplier.classification, locale)
+                          : "-"}
                       </Table.Td>
                       <Table.Td>{supplier.phone}</Table.Td>
                       <Table.Td>{supplier.email}</Table.Td>

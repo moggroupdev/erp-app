@@ -7,9 +7,11 @@ import suppliersApi from "@/lib/api/suppliers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { validationRegex } from "@/lib/constants/regex";
+import { isValidSupplierClassification } from "@/lib/constants/enums/supplier-classifications";
 import { TextInput, Button, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
+import SelectSupplierClassification from "@/components/global/selections/enum-based/select-supplier-classification";
 
 export default function SupplierModal({
   opened,
@@ -35,12 +37,16 @@ export default function SupplierModal({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [taxNumber, setTaxNumber] = useState("");
+  const [classification, setClassification] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
   function reset() {
     setName("");
     setPhone("");
     setEmail("");
+    setTaxNumber("");
+    setClassification(null);
     setNotes("");
   }
 
@@ -50,13 +56,22 @@ export default function SupplierModal({
       setName(supplierToUpdate.name);
       setPhone(supplierToUpdate.phone || "");
       setEmail(supplierToUpdate.email || "");
+      setTaxNumber(supplierToUpdate.taxNumber || "");
+      setClassification(supplierToUpdate.classification);
       setNotes(supplierToUpdate.notes || "");
     } else reset();
   }, [supplierToUpdate]);
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const dto = { name, phone: phone || null, email: email || null, notes: notes || null };
+      const dto = {
+        name,
+        phone: phone || null,
+        email: email || null,
+        taxNumber: taxNumber || null,
+        classification: classification && isValidSupplierClassification(classification) ? classification : null,
+        notes: notes || null,
+      };
       return supplierToUpdate
         ? await suppliersApi.update({ privateRequest, id: supplierToUpdate.id, dto })
         : await suppliersApi.create({ privateRequest, dto });
@@ -76,6 +91,8 @@ export default function SupplierModal({
 
     // Validation
     if (!name.trim()) return setValidationError(translate("Please enter the supplier's name.", "يرجى إدخال اسم المورد."));
+    if (classification && !isValidSupplierClassification(classification))
+      return setValidationError(translate("Please select a valid supplier classification.", "يرجى اختيار تصنيف مورد صالح."));
     if (!validationRegex.name.test(name))
       return setValidationError(
         translate("The supplier's name contains invalid characters.", "اسم المورد يحتوي على أحرف غير صالحة."),
@@ -111,6 +128,8 @@ export default function SupplierModal({
     ? name !== supplierToUpdate.name ||
       (phone || null) !== supplierToUpdate.phone ||
       (email || null) !== supplierToUpdate.email ||
+      (taxNumber || null) !== supplierToUpdate.taxNumber ||
+      classification !== supplierToUpdate.classification ||
       (notes || null) !== supplierToUpdate.notes
     : false;
 
@@ -127,6 +146,23 @@ export default function SupplierModal({
           required
           autoFocus
           flex={1}
+          radius="md"
+        />
+
+        <SelectSupplierClassification
+          value={classification}
+          setValue={setClassification}
+          label={translate("Classification (Optional)", "التصنيف (اختياري)")}
+          placeholder={translate("Select classification", "اختر التصنيف")}
+          searchable
+          clearable
+        />
+
+        <TextInput
+          value={taxNumber}
+          onChange={(e) => setTaxNumber(e.target.value)}
+          label={translate("Tax Number (Optional)", "الرقم الضريبي (اختياري)")}
+          placeholder={translate("Enter Tax Number", "أدخل الرقم الضريبي")}
           radius="md"
         />
 
