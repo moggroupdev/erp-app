@@ -64,8 +64,6 @@ export default function RequisitionItemsTable({
               <Table.Th>{translate("Category", "الفئة")}</Table.Th>
               <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
               <Table.Th>{translate("Quantity Requested", "الكمية المطلوبة")}</Table.Th>
-              <Table.Th>{translate("Quantity Allocated", "الكمية المخصصة")}</Table.Th>
-              <Table.Th>{translate("Quantity Remaining", "الكمية المتبقية")}</Table.Th>
               <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
               {editable && <Table.Th className="w-10" />}
             </Table.Tr>
@@ -99,8 +97,6 @@ export default function RequisitionItemsTable({
                   </div>
                 </Table.Td>
                 <Table.Td>{formatQuantity(item.quantityRequested)}</Table.Td>
-                <Table.Td>{formatQuantity(item.quantityAllocated)}</Table.Td>
-                <Table.Td>{formatQuantity(item.quantityRemaining)}</Table.Td>
                 <Table.Td className="max-w-xs truncate">{item.notes || <EmptyValue />}</Table.Td>
                 {editable && (
                   <Table.Td>

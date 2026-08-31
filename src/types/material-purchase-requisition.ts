@@ -44,7 +44,6 @@ export type MaterialPurchaseRequisitionListItem = Omit<
   "createdBy" | "productionSubDepartmentManagerId"
 > & {
   createdBy: UserRef;
-  productionSubDepartmentManager: UserRef | null;
 };
 
 export type MaterialPurchaseRequisitionItem = {
@@ -58,8 +57,6 @@ export type MaterialPurchaseRequisitionItem = {
 
 export type MaterialPurchaseRequisitionItemDetailed = MaterialPurchaseRequisitionItem & {
   material: RequisitionMaterial;
-  quantityAllocated: number;
-  quantityRemaining: number;
 };
 
 export type MaterialPurchaseRequisitionDetailed = Omit<
