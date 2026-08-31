@@ -45,10 +45,10 @@ function getDecisionMeta(decision: ApprovalDecision, translate: (en: string, ar:
   }
   return {
     label: translate("Pending", "قيد الانتظار"),
-    color: "gray" as const,
+    color: "dark" as const,
     Icon: Clock,
     stepClass: "border-gray-300 bg-white text-gray-500",
-    badgeVariant: "outline" as const,
+    badgeVariant: "light" as const,
   };
 }
 
@@ -158,7 +158,7 @@ function ApprovalGateCard({
         ) : isSuperseded ? (
           <SupersededGateContent />
         ) : (
-          <div className="flex flex-1 flex-col justify-center gap-1 py-2">
+          <div className="flex flex-1 flex-col gap-1 py-2">
             <p className="text-sm text-gray-600">{translate("Awaiting formal decision", "بانتظار القرار الرسمي")}</p>
             <p className="text-xs text-gray-400">
               {translate("No record has been submitted yet.", "لم يُسجَّل أي قرار بعد.")}
@@ -168,11 +168,11 @@ function ApprovalGateCard({
       </div>
 
       {showActions ? (
-        <div className="flex gap-2 border-t border-gray-100 px-4 py-3">
-          <Button size="xs" variant="outline" color="teal" radius="sm" onClick={onApprove} className="flex-1">
+        <div className="flex justify-end gap-2 border-t border-gray-100 px-4 py-3">
+          <Button size="xs" variant="light" color="teal" leftSection={<CheckCircle size={14} />} onClick={onApprove}>
             {translate("Record Approval", "تسجيل الاعتماد")}
           </Button>
-          <Button size="xs" variant="outline" color="red" radius="sm" onClick={onReject} className="flex-1">
+          <Button size="xs" variant="light" color="red" leftSection={<XCircle size={14} />} onClick={onReject}>
             {translate("Record Rejection", "تسجيل الرفض")}
           </Button>
         </div>
@@ -334,7 +334,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
   return (
     <>
       <section className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-slate-50/50">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 bg-white px-5 py-4">
+        <header className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 bg-white px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
               <ShieldCheck size={20} />
