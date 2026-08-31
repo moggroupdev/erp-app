@@ -57,6 +57,12 @@ export type MaterialPurchaseRequisitionItem = {
 
 export type MaterialPurchaseRequisitionItemDetailed = MaterialPurchaseRequisitionItem & {
   material: RequisitionMaterial;
+  unitPrice: number;
+  quantity: number;
+  minimumStock: number | null;
+  lastPurchasePrice: number | null;
+  lastPurchaseDate: Date | null;
+  lastPurchaseVendor: string | null;
 };
 
 export type MaterialPurchaseRequisitionDetailed = Omit<
