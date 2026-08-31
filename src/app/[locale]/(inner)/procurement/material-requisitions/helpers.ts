@@ -39,13 +39,13 @@ export function getRequisitionStatus(r: RequisitionLockFields): RequisitionStatu
 export function getRequisitionStatusLabel(status: RequisitionStatus, translate: (en: string, ar: string) => string) {
   switch (status) {
     case "rejected":
-      return { label: translate("Rejected", "مرفوض"), className: "text-red-500 font-bold", color: "red" as const };
+      return { label: translate("Rejected", "مرفوض"), className: "text-red-500 font-semibold", color: "red" as const };
     case "approved":
-      return { label: translate("Approved", "معتمد"), className: "text-teal-500 font-bold", color: "teal" as const };
+      return { label: translate("Approved", "معتمد"), className: "text-teal-500 font-semibold", color: "teal" as const };
     default:
       return {
         label: translate("Pending", "قيد الانتظار"),
-        className: "text-orange-500 font-bold",
+        className: "text-orange-500 font-semibold",
         color: "orange" as const,
       };
   }

@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Badge, Button, Table } from "@mantine/core";
-import { Pencil, Trash2 } from "lucide-react";
+import { ActionIcon, Badge, Menu, Table } from "@mantine/core";
+import { EllipsisVertical, Pencil, Trash2 } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
@@ -105,38 +105,43 @@ export default function RequisitionItemsTable({
                 {editable && (
                   <Table.Td>
                     <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL_PURCHASE_REQUISITION}>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="light"
-                          color="dark"
-                          size="xs"
-                          radius="md"
-                          p={6}
-                          onClick={() => onEdit(item)}
-                          title={translate("Edit item", "تعديل البند")}
-                        >
-                          <Pencil size={12} />
-                        </Button>
-                        <Button
-                          variant="light"
-                          color="red"
-                          size="xs"
-                          radius="md"
-                          p={6}
-                          disabled={!canDelete}
-                          onClick={() => {
-                            deleteMutation.reset();
-                            setItemToDelete(item);
-                          }}
-                          title={
-                            canDelete
-                              ? translate("Delete item", "حذف البند")
-                              : translate("A requisition must keep at least one item.", "يجب أن يحتفظ طلب الشراء ببند واحد على الأقل.")
-                          }
-                        >
-                          <Trash2 size={12} />
-                        </Button>
-                      </div>
+                      <Menu position="bottom-end" withinPortal>
+                        <Menu.Target>
+                          <ActionIcon
+                            variant="subtle"
+                            color="gray"
+                            size="sm"
+                            radius="md"
+                            aria-label={translate("Item actions", "إجراءات البند")}
+                          >
+                            <EllipsisVertical size={16} />
+                          </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          <Menu.Item leftSection={<Pencil size={14} />} onClick={() => onEdit(item)}>
+                            {translate("Edit", "تعديل")}
+                          </Menu.Item>
+                          <Menu.Item
+                            leftSection={<Trash2 size={14} />}
+                            color="red"
+                            disabled={!canDelete}
+                            title={
+                              canDelete
+                                ? undefined
+                                : translate(
+                                    "A requisition must keep at least one item.",
+                                    "يجب أن يحتفظ طلب الشراء ببند واحد على الأقل.",
+                                  )
+                            }
+                            onClick={() => {
+                              deleteMutation.reset();
+                              setItemToDelete(item);
+                            }}
+                          >
+                            {translate("Delete", "حذف")}
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
                     </PermissionGuard>
                   </Table.Td>
                 )}

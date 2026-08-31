@@ -168,7 +168,6 @@ export default function Page() {
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Production Sub-Department", "قسم الانتاج")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
-                    <Table.Th>{translate("Manager", "المدير")}</Table.Th>
                     <Table.Th>{translate("Created By", "أنشئ بواسطة")}</Table.Th>
                     <Table.Th>{translate("Created At", "تاريخ الإنشاء")}</Table.Th>
                   </Table.Tr>
@@ -189,26 +188,11 @@ export default function Page() {
                             <CopyButton text={requisition.code} />
                           </div>
                         </Table.Td>
-                        <Table.Td>
-                          {getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}
-                        </Table.Td>
+                        <Table.Td>{getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}</Table.Td>
                         <Table.Td>
                           <span className={status.className}>{status.label}</span>
                         </Table.Td>
-                        <Table.Td>
-                          {requisition.productionSubDepartmentManager ? (
-                            <Link
-                              href={getLocalizedHref(
-                                `/organization/users/${requisition.productionSubDepartmentManager.id}`,
-                              )}
-                              className="hover:underline"
-                            >
-                              {requisition.productionSubDepartmentManager.name}
-                            </Link>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </Table.Td>
+
                         <Table.Td>
                           <Link
                             href={getLocalizedHref(`/organization/users/${requisition.createdBy.id}`)}
