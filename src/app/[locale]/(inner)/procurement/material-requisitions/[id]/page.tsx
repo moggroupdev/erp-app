@@ -22,6 +22,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
+import RequisitionApprovals from "./components/requisition-approvals";
 import RequisitionDetails from "./components/requisition-details";
 import RequisitionUpdateModal from "./components/requisition-update-modal";
 import RequisitionItemModal from "./components/requisition-item-modal";
@@ -107,6 +108,7 @@ export default function Page() {
         requisition && (
           <>
             <RequisitionDetails requisition={requisition} />
+            <RequisitionApprovals requisition={requisition} />
 
             <section className="mt-4 flex flex-col gap-4">
               <div className="flex items-center justify-between gap-3">
