@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button } from "@mantine/core";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Printer } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -27,6 +27,8 @@ import RequisitionDetails from "./components/requisition-details";
 import RequisitionUpdateModal from "./components/requisition-update-modal";
 import RequisitionItemModal from "./components/requisition-item-modal";
 import RequisitionItemsTable from "./components/requisition-items-table";
+import PrintDocument from "@/components/ui/print-document";
+import MaterialPurchaseRequisitionPrintDocument from "@/components/documents/material-purchase-requisition-print-document";
 import { isRequisitionEditable } from "../helpers";
 
 const PAGE_TITLE = { en: "Requisition Details", ar: "تفاصيل طلب الشراء" };
@@ -84,6 +86,22 @@ export default function Page() {
         backLink: getLocalizedHref("/procurement/material-requisitions"),
         sideElements: (
           <div className="flex gap-2">
+            {requisition && (
+              <div className="mx-2 flex items-center">
+                <PrintDocument
+                  title={`${translate("Material Purchase Requisition", "طلب شراء خامات")} - ${requisition.code}`}
+                  buttonLabel={translate("Print", "طباعة")}
+                  buttonType="icon"
+                  paperWidth={297}
+                  paperHeight={210}
+                >
+                  <MaterialPurchaseRequisitionPrintDocument
+                    requisition={requisition}
+                    getMainCategoryTitle={getMainCategoryTitle}
+                  />
+                </PrintDocument>
+              </div>
+            )}
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             {requisition && editable && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL_PURCHASE_REQUISITION}>
