@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
@@ -10,6 +10,7 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useProductCategories from "@/hooks/reference/use-product-categories";
+import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -53,6 +54,7 @@ import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entit
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
+import CopyButton from "@/components/ui/copy-button";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 
@@ -72,6 +74,16 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
   const { helpers: productCategoryHelpers } = useProductCategories();
+  const { helpers: materialCategoryHelpers } = useMaterialCategories();
+
+  const getMaterialMainCategoryTitle = useCallback(
+    (subCategoryId: string) => {
+      const sub = materialCategoryHelpers.getMaterialCategorySubById(subCategoryId);
+      const main = sub ? materialCategoryHelpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
+      return main?.title ?? "";
+    },
+    [materialCategoryHelpers],
+  );
 
   const bomQuery = useQuery({
     queryKey: queryKeys.boms.detail(dimensionId),
@@ -119,7 +131,18 @@ export default function Page() {
   const hasBom = bomItems.length > 0;
 
   const materialRows = useMemo(() => getFlattenedMaterialRows(bomItems), [bomItems]);
-  const manufacturingRows = useMemo(() => getManufacturingCostRows(bomItems), [bomItems]);
+  const manufacturingRows = useMemo(() => {
+    const rows = getManufacturingCostRows(bomItems);
+
+    return [...rows].sort((a, b) => {
+      const categoryCompare = getMaterialMainCategoryTitle(a.sourceBomItem.material.subCategoryId).localeCompare(
+        getMaterialMainCategoryTitle(b.sourceBomItem.material.subCategoryId),
+        locale,
+      );
+
+      return categoryCompare || a.materialTitle.localeCompare(b.materialTitle, locale);
+    });
+  }, [bomItems, getMaterialMainCategoryTitle, locale]);
 
   const totals = useMemo(() => {
     return getBomDisplayTotals({
@@ -160,16 +183,20 @@ export default function Page() {
     const totalCost = totals.totalMaterialCost;
     const rows = Array.from(groups.values()).map((group) => ({
       ...group,
-      items: [...group.items].sort(
-        (a, b) =>
-          a.material.title.localeCompare(b.material.title, locale) || a.material.code.localeCompare(b.material.code, locale),
-      ),
+      items: [...group.items].sort((a, b) => {
+        const categoryCompare = getMaterialMainCategoryTitle(a.material.subCategoryId).localeCompare(
+          getMaterialMainCategoryTitle(b.material.subCategoryId),
+          locale,
+        );
+
+        return categoryCompare || a.material.title.localeCompare(b.material.title, locale);
+      }),
       sharePercent: totalCost > 0 ? (group.totalCost / totalCost) * 100 : 0,
     }));
 
     rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
     return rows;
-  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod]);
+  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
 
   const currency = translation.currency;
 
@@ -352,7 +379,7 @@ export default function Page() {
                                 {translate("Material Name", "الصنف")}
                               </Table.Th>
                               <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                {translate("Production Department", "قسم الانتاج")}
+                                {translate("Category", "الفئة")}
                               </Table.Th>
                               <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit", "الوحدة")}
@@ -377,6 +404,12 @@ export default function Page() {
                               const unitCost = getMaterialCostPrice(item.material, costingMethod);
                               const lineCost = item.quantityRequired * unitCost;
                               const zeroValueClass = "text-orange-500";
+                              const subCategory = materialCategoryHelpers.getMaterialCategorySubById(
+                                item.material.subCategoryId,
+                              );
+                              const mainCategory = subCategory
+                                ? materialCategoryHelpers.getMaterialCategoryMainById(subCategory.mainCategoryId)
+                                : null;
 
                               return (
                                 <UnitToggle
@@ -384,19 +417,21 @@ export default function Page() {
                                   baseUnit={item.material.unitOfMeasurement}
                                   unitConversions={item.material.unitConversions}
                                   defaultUnit={
-                                    item.sourceBomItem?.unitOfMeasurementSelected ??
-                                    item.material.unitOfMeasurement
+                                    item.sourceBomItem?.unitOfMeasurementSelected ?? item.material.unitOfMeasurement
                                   }
                                 >
                                   {({ unit, factor, toggleButton }) => (
                                     <Table.Tr className="text-gray-600">
                                       <Table.Td>
-                                        <Link
-                                          href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                          className="font-mono text-xs text-gray-500 hover:underline"
-                                        >
-                                          {item.material.code}
-                                        </Link>
+                                        <div className="flex items-center gap-1.5">
+                                          <Link
+                                            href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                            className="font-mono text-xs text-gray-500 hover:underline"
+                                          >
+                                            {item.material.code}
+                                          </Link>
+                                          <CopyButton text={item.material.code} />
+                                        </div>
                                       </Table.Td>
                                       <Table.Td>
                                         <Link
@@ -408,12 +443,7 @@ export default function Page() {
                                       </Table.Td>
                                       <Table.Td>
                                         <span className="text-sm text-gray-600">
-                                          {item.sourceBomItem?.productionSubDepartment
-                                            ? getProductionSubDepartmentLabel(
-                                                item.sourceBomItem.productionSubDepartment,
-                                                locale,
-                                              )
-                                            : "-"}
+                                          {mainCategory?.title || <EmptyValue />}
                                         </span>
                                       </Table.Td>
                                       <Table.Td>
@@ -523,6 +553,11 @@ export default function Page() {
                     <ManufacturingCostsSection
                       rows={manufacturingRows}
                       totalManufacturingCost={totals.totalManufacturingCost}
+                      onEditItem={handleOpenUpdateModal}
+                      onDeleteItem={(item) => {
+                        deleteMutation.reset();
+                        setItemToDelete(item);
+                      }}
                     />
                   </>
                 )}
@@ -634,11 +669,15 @@ function CalculationCard({
 function ManufacturingCostsSection({
   rows,
   totalManufacturingCost,
+  onEditItem,
+  onDeleteItem,
 }: {
   rows: ManufacturingCostRow[];
   totalManufacturingCost: number;
+  onEditItem: (item: BomItemWithMaterial) => void;
+  onDeleteItem: (item: BomItemWithMaterial) => void;
 }) {
-  const { translate, translation } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
   return (
@@ -654,7 +693,7 @@ function ManufacturingCostsSection({
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-gray-200">
-        <Table className="text-nowrap" highlightOnHover>
+        <Table className="text-nowrap" highlightOnHover verticalSpacing="xs">
           <Table.Thead className="bg-gray-50">
             <Table.Tr className="h-10">
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -662,6 +701,9 @@ function ManufacturingCostsSection({
               </Table.Th>
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {translate("Manufactured Material", "المادة المصنعة")}
+              </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Production Department", "قسم الانتاج")}
               </Table.Th>
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {translate("Quantity", "الكمية")}
@@ -678,18 +720,22 @@ function ManufacturingCostsSection({
                   `إجمالي تكلفة التصنيع (${translation.currency})`,
                 )}
               </Table.Th>
+              <Table.Th w={0} />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {rows.map((row) => (
               <Table.Tr key={row.id} className="text-gray-600">
                 <Table.Td>
-                  <Link
-                    href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
-                    className="font-mono text-xs text-gray-500 hover:underline"
-                  >
-                    {row.materialCode}
-                  </Link>
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+                      className="font-mono text-xs text-gray-500 hover:underline"
+                    >
+                      {row.materialCode}
+                    </Link>
+                    <CopyButton text={row.materialCode} />
+                  </div>
                 </Table.Td>
                 <Table.Td>
                   <Link
@@ -699,19 +745,56 @@ function ManufacturingCostsSection({
                     {row.materialTitle}
                   </Link>
                 </Table.Td>
+                <Table.Td>
+                  <span className="text-sm text-gray-600">
+                    {row.productionSubDepartment
+                      ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
+                      : "-"}
+                  </span>
+                </Table.Td>
                 <Table.Td className="font-medium text-gray-800">{formatQuantity(row.quantityRequired)}</Table.Td>
                 <Table.Td>{formatMoney(row.unitManufacturingCost)}</Table.Td>
                 <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalManufacturingCost)}</Table.Td>
+                <Table.Td>
+                  <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
+                    <Menu position="bottom-end" withinPortal>
+                      <Menu.Target>
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          size="sm"
+                          radius="md"
+                          aria-label={translate("Item actions", "إجراءات البند")}
+                        >
+                          <EllipsisVertical size={14} />
+                        </ActionIcon>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item leftSection={<Pencil size={14} />} onClick={() => onEditItem(row.sourceBomItem)}>
+                          {translate("Edit", "تعديل")}
+                        </Menu.Item>
+                        <Menu.Item
+                          leftSection={<Trash2 size={14} />}
+                          color="red"
+                          onClick={() => onDeleteItem(row.sourceBomItem)}
+                        >
+                          {translate("Delete", "حذف")}
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
+                  </PermissionGuard>
+                </Table.Td>
               </Table.Tr>
             ))}
           </Table.Tbody>
           <Table.Tfoot className="bg-gray-50">
             <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
               <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
-              <Table.Td colSpan={3} className="text-gray-500">
+              <Table.Td colSpan={4} className="text-gray-500">
                 {rows.length} {translate("Items", "بند")}
               </Table.Td>
               <Table.Td>{formatMoney(totalManufacturingCost)}</Table.Td>
+              <Table.Td />
             </Table.Tr>
           </Table.Tfoot>
         </Table>
