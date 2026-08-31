@@ -13,6 +13,8 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { formatDate } from "@/lib/helpers/date-formaters";
+import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
 import PermissionGuard from "@/components/guards/permission";
@@ -33,7 +35,7 @@ export default function RequisitionItemsTable({
   getMainCategoryTitle: (subCategoryId: string | undefined) => string | null;
   onEdit: (item: MaterialPurchaseRequisitionItemDetailed) => void;
 }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
@@ -64,6 +66,11 @@ export default function RequisitionItemsTable({
               <Table.Th>{translate("Category", "الفئة")}</Table.Th>
               <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
               <Table.Th>{translate("Quantity Requested", "الكمية المطلوبة")}</Table.Th>
+              <Table.Th>
+                {translate(`Last Purchase Price (${translation.currency})`, `آخر سعر شراء (${translation.currency})`)}
+              </Table.Th>
+              <Table.Th>{translate("Last Purchase Date", "تاريخ آخر شراء")}</Table.Th>
+              <Table.Th>{translate("Last Purchase Vendor", "آخر مورد")}</Table.Th>
               <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
               {editable && <Table.Th className="w-10" />}
             </Table.Tr>
@@ -97,6 +104,17 @@ export default function RequisitionItemsTable({
                   </div>
                 </Table.Td>
                 <Table.Td>{formatQuantity(item.quantityRequested)}</Table.Td>
+                <Table.Td>
+                  {item.lastPurchasePrice != null ? (
+                    formatMoney(item.lastPurchasePrice)
+                  ) : (
+                    <EmptyValue />
+                  )}
+                </Table.Td>
+                <Table.Td>
+                  {item.lastPurchaseDate ? formatDate(item.lastPurchaseDate, locale) : <EmptyValue />}
+                </Table.Td>
+                <Table.Td>{item.lastPurchaseVendor || <EmptyValue />}</Table.Td>
                 <Table.Td className="max-w-xs truncate">{item.notes || <EmptyValue />}</Table.Td>
                 {editable && (
                   <Table.Td>
