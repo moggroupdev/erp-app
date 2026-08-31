@@ -5,7 +5,8 @@ import { getManufacturingCostRows, getMaterialCostPrice, type FlattenedBomRow } 
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatDisplayQuantity, formatQuantity } from "@/lib/helpers/format-quantity";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail } from "./components";
 
@@ -106,14 +107,19 @@ export default function BomPrintDocument({
                 {group.items.map((item) => {
                   const unitCost = getMaterialCostPrice(item.material, costingMethod);
                   const lineCost = item.quantityRequired * unitCost;
+                  const { unit, factor } = resolveDisplayUnit(
+                    item.sourceBomItem?.unitOfMeasurementSelected,
+                    item.material.unitOfMeasurement,
+                    item.material.unitConversions,
+                  );
 
                   return (
                     <tr key={item.id} className="border-b border-gray-200">
                       <td className="px-2.5 py-2 font-mono text-[10px] text-gray-600">{item.material.code}</td>
                       <td className="px-2.5 py-2 font-medium wrap-break-word text-gray-800">{item.material.title}</td>
-                      <td className="px-2.5 py-2">{getMaterialUnitLabel(item.material.unitOfMeasurement, locale)}</td>
-                      <td className="px-2.5 py-2">{formatQuantity(item.quantityRequired)}</td>
-                      <td className="px-2.5 py-2">{formatMoney(unitCost)}</td>
+                      <td className="px-2.5 py-2">{getMaterialUnitLabel(unit, locale)}</td>
+                      <td className="px-2.5 py-2">{formatDisplayQuantity(item.quantityRequired, factor)}</td>
+                      <td className="px-2.5 py-2">{formatMoney(toDisplayUnitPrice(unitCost, factor))}</td>
                       <td className="px-2.5 py-2 font-medium">{formatMoney(lineCost)}</td>
                       <td className="px-2.5 py-2 wrap-break-word text-gray-600">
                         <div className="flex flex-col gap-0.5 leading-relaxed">
