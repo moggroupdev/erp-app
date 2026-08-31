@@ -252,21 +252,22 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {bom && hasBom && (
               <PrintDocument
                 title={`${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
                 buttonLabel={translate("Print", "طباعة")}
-                buttonType="button"
+                buttonType="icon"
                 paperWidth={210}
                 paperHeight={297}
-                icon={<Printer size={14} />}
               >
                 <BomPrintDocument
                   bom={bom}
                   totals={totals}
                   departmentBreakdown={departmentBreakdown}
+                  manufacturingRows={manufacturingRows}
                   mainCategoryTitle={productMainCategory?.title || null}
+                  getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
                   costingMethod={costingMethod}
                 />
               </PrintDocument>
