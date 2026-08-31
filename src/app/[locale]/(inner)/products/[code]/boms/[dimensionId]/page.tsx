@@ -340,7 +340,7 @@ export default function Page() {
                                 {translate("Material Name", "الصنف")}
                               </Table.Th>
                               <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                {translate("Production Dep.", "قسم الإنتاج")}
+                                {translate("Production Department", "قسم الانتاج")}
                               </Table.Th>
                               <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit", "الوحدة")}

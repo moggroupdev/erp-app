@@ -217,15 +217,15 @@ export default function Page() {
 
     if (!productionSubDepartment) {
       return setValidationError(
-        translate("Please select a production sub-department.", "يرجى اختيار القسم الفرعي للإنتاج."),
+        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
       );
     }
 
     if (selectedDepartmentHasBom) {
       return setValidationError(
         translate(
-          "A BOM already exists for this production sub-department.",
-          "توجد بالفعل قائمة مواد لهذا القسم الفرعي للإنتاج.",
+          "A BOM already exists for this production department.",
+          "توجد بالفعل قائمة مواد لقسم الانتاج هذا.",
         ),
       );
     }
@@ -310,8 +310,8 @@ export default function Page() {
         <SelectProductionSubDepartment
           value={productionSubDepartment}
           setValue={setProductionSubDepartment}
-          label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
-          placeholder={translate("Select sub-department", "اختر القسم الفرعي")}
+          label={translate("Production Department", "قسم الانتاج")}
+          placeholder={translate("Select department", "اختر القسم")}
           excludeValues={[...departmentsWithBom]}
           required
         />

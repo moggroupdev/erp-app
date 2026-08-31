@@ -148,7 +148,7 @@ export default function BomItemModal({
 
     if (!productionSubDepartment) {
       return setValidationError(
-        translate("Please select a production sub-department.", "يرجى اختيار القسم الفرعي للإنتاج."),
+        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
       );
     }
 
@@ -222,8 +222,8 @@ export default function BomItemModal({
         <SelectProductionSubDepartment
           value={productionSubDepartment}
           setValue={setProductionSubDepartment}
-          label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
-          placeholder={translate("Select sub-department", "اختر القسم الفرعي")}
+          label={translate("Production Department", "قسم الانتاج")}
+          placeholder={translate("Select department", "اختر القسم")}
           required
         />
 
