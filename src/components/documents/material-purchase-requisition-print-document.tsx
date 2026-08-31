@@ -23,7 +23,7 @@ type MaterialPurchaseRequisitionPrintDocumentProps = {
 function getDecisionLabel(decision: ApprovalDecision, translate: (en: string, ar: string) => string) {
   if (decision === APPROVAL_DECISIONS.APPROVED) return translate("Approved", "معتمد");
   if (decision === APPROVAL_DECISIONS.REJECTED) return translate("Rejected", "مرفوض");
-  return translate("Pending", "قيد الانتظار");
+  return null;
 }
 
 function ApprovalGateBlock({
@@ -43,19 +43,21 @@ function ApprovalGateBlock({
   locale: Locale;
   translate: (en: string, ar: string) => string;
 }) {
+  const decisionLabel = getDecisionLabel(decision, translate);
+
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-1">
-      <p className="text-[10px] font-semibold text-gray-800">{title}</p>
-      <p className="text-xs text-gray-800">{getDecisionLabel(decision, translate)}</p>
-      {decidedBy ? (
-        <p className="text-[10px] text-gray-600">
-          {translate("Decided by", "بواسطة")}: {decidedBy}
-        </p>
-      ) : null}
-      {decidedAt ? <p className="text-[10px] text-gray-600">{formatDateAndTime(decidedAt, locale)}</p> : null}
+    <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <p className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">{title}</p>
+
+      <div className="flex min-h-14 flex-1 flex-col justify-end gap-1">
+        {decisionLabel ? <p className="text-xs font-semibold text-gray-900">{decisionLabel}</p> : null}
+        {decidedBy ? <p className="text-[10px] font-medium text-gray-800">{decidedBy}</p> : null}
+        {decidedAt ? <p className="text-[10px] text-gray-500">{formatDateAndTime(decidedAt, locale)}</p> : null}
+      </div>
+
       {reason ? (
-        <p className="text-[10px] text-gray-600">
-          {translate("Reason", "السبب")}: {reason}
+        <p className="text-[9px] leading-snug text-gray-600">
+          <span className="font-medium text-gray-500">{translate("Reason", "السبب")}:</span> {reason}
         </p>
       ) : null}
     </div>
@@ -210,8 +212,11 @@ export default function MaterialPurchaseRequisitionPrintDocument({
         ) : null}
       </section>
 
-      <section>
-        <div className="flex break-inside-avoid gap-8">
+      <section className="break-inside-avoid pt-2">
+        <p className="mb-4 text-[9px] font-semibold tracking-wide text-gray-500 uppercase">
+          {translate("Approvals", "الاعتمادات")}
+        </p>
+        <div className="flex gap-8">
           {approvalGates.map((gate) => (
             <ApprovalGateBlock key={gate.title} locale={locale} translate={translate} {...gate} />
           ))}
