@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Badge, Button, Textarea } from "@mantine/core";
-import { CheckCircle, ChevronLeft, ChevronRight, Clock, ShieldCheck, XCircle, type LucideIcon } from "lucide-react";
+import { Badge, Button, Divider, Textarea } from "@mantine/core";
+import { CheckCircle, Clock, Lock, ShieldCheck, XCircle, type LucideIcon } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
@@ -18,7 +18,7 @@ import { type MaterialPurchaseRequisitionDetailed } from "@/types/material-purch
 import { CreatorLink } from "@/components/ui/entity-details";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
-import { isRequisitionTerminal } from "../../helpers";
+import { getRequisitionStatus, getRequisitionStatusLabel, isRequisitionTerminal } from "../../helpers";
 
 type Gate = "planning" | "purchasingManager" | "manager";
 type ConfirmKind = "approve" | "reject";
@@ -30,9 +30,8 @@ function getDecisionMeta(decision: ApprovalDecision, translate: (en: string, ar:
       label: translate("Approved", "معتمد"),
       color: "teal" as const,
       Icon: CheckCircle,
-      iconClass: "bg-teal-50 text-teal-600 ring-1 ring-teal-100",
-      cardClass: "border-teal-200/80 bg-linear-to-b from-teal-50/60 to-white",
-      accentClass: "bg-teal-500",
+      stepClass: "border-teal-600 bg-teal-600 text-white",
+      badgeVariant: "light" as const,
     };
   }
   if (decision === APPROVAL_DECISIONS.REJECTED) {
@@ -40,40 +39,69 @@ function getDecisionMeta(decision: ApprovalDecision, translate: (en: string, ar:
       label: translate("Rejected", "مرفوض"),
       color: "red" as const,
       Icon: XCircle,
-      iconClass: "bg-red-50 text-red-600 ring-1 ring-red-100",
-      cardClass: "border-red-200/80 bg-linear-to-b from-red-50/60 to-white",
-      accentClass: "bg-red-500",
+      stepClass: "border-red-600 bg-red-600 text-white",
+      badgeVariant: "light" as const,
     };
   }
   return {
     label: translate("Pending", "قيد الانتظار"),
-    color: "orange" as const,
+    color: "gray" as const,
     Icon: Clock,
-    iconClass: "bg-orange-50 text-orange-600 ring-1 ring-orange-100",
-    cardClass: "border-gray-200/80 bg-linear-to-b from-slate-50/80 to-white",
-    accentClass: "bg-orange-400",
+    stepClass: "border-gray-300 bg-white text-gray-500",
+    badgeVariant: "outline" as const,
   };
 }
 
+function DecisionField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[11px] font-medium tracking-wide text-gray-500 uppercase">{label}</span>
+      <div className="text-sm text-gray-800">{children}</div>
+    </div>
+  );
+}
+
+function SupersededGateContent() {
+  const { translate } = useI18n();
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-slate-50/80 px-4 py-6 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400">
+        <Lock size={18} />
+      </div>
+      <p className="max-w-[220px] text-xs leading-relaxed text-gray-400">
+        {translate(
+          "This stage was not reached because the requisition was rejected at a previous approval stage.",
+          "لم تُستكمل هذه المرحلة لأن الطلب رُفض في مرحلة اعتماد سابقة.",
+        )}
+      </p>
+    </div>
+  );
+}
+
 function ApprovalGateCard({
-  label,
+  step,
+  title,
+  subtitle,
   decision,
   decidedAt,
   decidedBy,
   reason,
   canAct,
-  hidePendingBadge,
+  hidePendingState,
   permission,
   onApprove,
   onReject,
 }: {
-  label: string;
+  step: number;
+  title: string;
+  subtitle: string;
   decision: ApprovalDecision;
   decidedAt: Date | null;
   decidedBy: UserRef;
   reason: string | null;
   canAct: boolean;
-  hidePendingBadge: boolean;
+  hidePendingState: boolean;
   permission: Permission;
   onApprove: () => void;
   onReject: () => void;
@@ -83,69 +111,69 @@ function ApprovalGateCard({
   const meta = getDecisionMeta(decision, translate);
   const Icon: LucideIcon = meta.Icon;
   const showActions = decision === APPROVAL_DECISIONS.PENDING && canAct && hasPermission;
-  const showBadge = !(decision === APPROVAL_DECISIONS.PENDING && hidePendingBadge);
+  const showStatusBadge = !(decision === APPROVAL_DECISIONS.PENDING && hidePendingState);
+  const isDecided = decision !== APPROVAL_DECISIONS.PENDING;
+  const isSuperseded = decision === APPROVAL_DECISIONS.PENDING && hidePendingState;
 
   return (
     <article
-      className={`relative flex min-w-0 flex-1 flex-col gap-3 overflow-hidden rounded-xl border p-4 shadow-sm ${meta.cardClass}`}
+      className={`flex min-w-0 flex-1 flex-col rounded-2xl border bg-white ${
+        isSuperseded ? "border-gray-200/60 opacity-90" : "border-gray-200/75"
+      }`}
     >
-      <div className={`absolute inset-x-0 top-0 h-1 ${meta.accentClass}`} />
-
-      <div className="flex items-start gap-3">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${meta.iconClass}`}>
-          <Icon size={20} />
+      <div className="flex items-start gap-3 border-b border-gray-100 px-4 py-3.5">
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold ${
+            isSuperseded ? "border-gray-200 bg-gray-50 text-gray-400" : meta.stepClass
+          }`}
+        >
+          {step}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-gray-900">{label}</p>
-          {showBadge ? (
-            <Badge size="sm" variant="light" color={meta.color} radius="md" className="mt-1.5">
-              {meta.label}
-            </Badge>
-          ) : null}
+          <p className={`text-sm font-semibold ${isSuperseded ? "text-gray-500" : "text-gray-900"}`}>{title}</p>
+          <p className="mt-0.5 text-xs text-gray-500">{subtitle}</p>
         </div>
+        {showStatusBadge ? (
+          <Badge variant={meta.badgeVariant} color={meta.color} leftSection={<Icon size={12} />}>
+            {meta.label}
+          </Badge>
+        ) : null}
       </div>
 
-      {decision !== APPROVAL_DECISIONS.PENDING && (decidedBy || decidedAt) ? (
-        <p className="text-sm text-gray-500">
-          {decidedBy ? <CreatorLink creator={decidedBy} /> : null}
-          {decidedBy && decidedAt ? " · " : null}
-          {decidedAt ? formatDateAndTime(decidedAt, locale) : null}
-        </p>
-      ) : hidePendingBadge ? null : (
-        <p className="text-sm text-gray-400">{translate("Awaiting decision", "بانتظار القرار")}</p>
-      )}
-
-      {decision === APPROVAL_DECISIONS.REJECTED && reason ? (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-normal whitespace-pre-wrap text-red-800 ring-1 ring-red-100">
-          {reason}
-        </p>
-      ) : (
-        <div className="min-h-0 flex-1" />
-      )}
+      <div className="flex flex-1 flex-col gap-3 px-4 py-3.5">
+        {isDecided ? (
+          <>
+            <DecisionField label={translate("Decided By", "قرر بواسطة")}>
+              {decidedBy ? <CreatorLink creator={decidedBy} /> : <span className="text-gray-400">-</span>}
+            </DecisionField>
+            <DecisionField label={translate("Decision Date", "تاريخ القرار")}>
+              {decidedAt ? formatDateAndTime(decidedAt, locale) : <span className="text-gray-400">-</span>}
+            </DecisionField>
+            {decision === APPROVAL_DECISIONS.REJECTED && reason ? (
+              <DecisionField label={translate("Rejection Reason", "سبب الرفض")}>
+                <p className="text-sm font-normal whitespace-pre-wrap text-red-800">{reason}</p>
+              </DecisionField>
+            ) : null}
+          </>
+        ) : isSuperseded ? (
+          <SupersededGateContent />
+        ) : (
+          <div className="flex flex-1 flex-col justify-center gap-1 py-2">
+            <p className="text-sm text-gray-600">{translate("Awaiting formal decision", "بانتظار القرار الرسمي")}</p>
+            <p className="text-xs text-gray-400">
+              {translate("No record has been submitted yet.", "لم يُسجَّل أي قرار بعد.")}
+            </p>
+          </div>
+        )}
+      </div>
 
       {showActions ? (
-        <div className="mt-auto flex flex-wrap gap-2 border-t border-gray-100 pt-3">
-          <Button
-            size="xs"
-            variant="light"
-            color="teal"
-            radius="md"
-            leftSection={<CheckCircle size={14} />}
-            onClick={onApprove}
-            className="flex-1"
-          >
-            {translate("Approve", "اعتماد")}
+        <div className="flex gap-2 border-t border-gray-100 px-4 py-3">
+          <Button size="xs" variant="outline" color="teal" radius="sm" onClick={onApprove} className="flex-1">
+            {translate("Record Approval", "تسجيل الاعتماد")}
           </Button>
-          <Button
-            size="xs"
-            variant="light"
-            color="red"
-            radius="md"
-            leftSection={<XCircle size={14} />}
-            onClick={onReject}
-            className="flex-1"
-          >
-            {translate("Reject", "رفض")}
+          <Button size="xs" variant="outline" color="red" radius="sm" onClick={onReject} className="flex-1">
+            {translate("Record Rejection", "تسجيل الرفض")}
           </Button>
         </div>
       ) : null}
@@ -163,6 +191,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
   const [rejectValidationError, setRejectValidationError] = useState("");
 
   const terminal = isRequisitionTerminal(requisition);
+  const overallStatus = getRequisitionStatusLabel(getRequisitionStatus(requisition), translate);
 
   const approveMutation = useMutation({
     mutationFn: async (gate: Gate) => {
@@ -200,33 +229,39 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
   });
 
   const approveError = approveMutation.error ? getErrorMessage(locale, approveMutation.error) : "";
-  const rejectError =
-    rejectValidationError || (rejectMutation.error ? getErrorMessage(locale, rejectMutation.error) : "");
+  const rejectError = rejectValidationError || (rejectMutation.error ? getErrorMessage(locale, rejectMutation.error) : "");
 
   const confirmCopy: Record<Gate, { approveTitle: string; approveBody: string; rejectTitle: string }> = {
     planning: {
-      approveTitle: translate("Approve as Planning?", "اعتماد التخطيط والمتابعة؟"),
+      approveTitle: translate("Confirm Planning Approval", "تأكيد اعتماد التخطيط والمتابعة"),
       approveBody: translate(
-        "Record planning & follow-up approval for this requisition.",
-        "تسجيل اعتماد التخطيط والمتابعة لهذا الطلب.",
+        "You are about to record the formal approval of the Planning & Follow-up department for this requisition.",
+        "أنت على وشك تسجيل الاعتماد الرسمي من قسم التخطيط والمتابعة على هذا الطلب.",
       ),
-      rejectTitle: translate("Reject as Planning?", "رفض التخطيط والمتابعة؟"),
+      rejectTitle: translate("Confirm Planning Rejection", "تأكيد رفض التخطيط والمتابعة"),
     },
     purchasingManager: {
-      approveTitle: translate("Approve as Purchasing Manager?", "اعتماد مدير المشتريات؟"),
-      approveBody: translate("Record purchasing manager approval for this requisition.", "تسجيل اعتماد مدير المشتريات لهذا الطلب."),
-      rejectTitle: translate("Reject as Purchasing Manager?", "رفض مدير المشتريات؟"),
+      approveTitle: translate("Confirm Purchasing Manager Approval", "تأكيد اعتماد مدير المشتريات"),
+      approveBody: translate(
+        "You are about to record the formal approval of the Purchasing Manager for this requisition.",
+        "أنت على وشك تسجيل الاعتماد الرسمي من مدير المشتريات على هذا الطلب.",
+      ),
+      rejectTitle: translate("Confirm Purchasing Manager Rejection", "تأكيد رفض مدير المشتريات"),
     },
     manager: {
-      approveTitle: translate("Approve as Manager?", "اعتماد المدير؟"),
-      approveBody: translate("Record manager approval for this requisition.", "تسجيل اعتماد المدير لهذا الطلب."),
-      rejectTitle: translate("Reject as Manager?", "رفض المدير؟"),
+      approveTitle: translate("Confirm Manager Approval", "تأكيد اعتماد المدير"),
+      approveBody: translate(
+        "You are about to record the formal approval of the Manager for this requisition.",
+        "أنت على وشك تسجيل الاعتماد الرسمي من المدير على هذا الطلب.",
+      ),
+      rejectTitle: translate("Confirm Manager Rejection", "تأكيد رفض المدير"),
     },
   };
 
   const gates: {
     id: Gate;
-    label: string;
+    title: string;
+    subtitle: string;
     decision: ApprovalDecision;
     decidedAt: Date | null;
     decidedBy: UserRef;
@@ -235,7 +270,8 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
   }[] = [
     {
       id: "planning",
-      label: translate("Planning", "التخطيط والمتابعة"),
+      title: translate("Planning & Follow-up", "التخطيط والمتابعة"),
+      subtitle: translate("Planning department review", "مراجعة قسم التخطيط والمتابعة"),
       decision: requisition.planningDecision,
       decidedAt: requisition.planningDecidedAt,
       decidedBy: requisition.planningDecidedBy,
@@ -244,7 +280,8 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
     },
     {
       id: "purchasingManager",
-      label: translate("Purchasing Manager", "مدير المشتريات"),
+      title: translate("Purchasing Manager", "مدير المشتريات"),
+      subtitle: translate("Procurement authority review", "مراجعة قسم المشتريات"),
       decision: requisition.purchasingManagerDecision,
       decidedAt: requisition.purchasingManagerDecidedAt,
       decidedBy: requisition.purchasingManagerDecidedBy,
@@ -253,7 +290,8 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
     },
     {
       id: "manager",
-      label: translate("Manager", "المدير"),
+      title: translate("Manager", "المدير"),
+      subtitle: translate("Final management review", "المراجعة الإدارية النهائية"),
       decision: requisition.managerDecision,
       decidedAt: requisition.managerDecidedAt,
       decidedBy: requisition.managerDecidedBy,
@@ -261,6 +299,8 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
       permission: PERMISSIONS.APPROVE_MATERIAL_PURCHASE_REQUISITION_MANAGER,
     },
   ];
+
+  const approvedCount = gates.filter((gate) => gate.decision === APPROVAL_DECISIONS.APPROVED).length;
 
   function closeConfirm() {
     setConfirmGate(null);
@@ -293,44 +333,50 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
 
   return (
     <>
-      <section className="mt-4 flex flex-col gap-3">
-        <header className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-white text-indigo-600">
-            <ShieldCheck size={20} />
+      <section className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-slate-50/50">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 bg-white px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <h4 className="text-base font-semibold text-gray-900">{translate("Approval Workflow", "سير عمل الاعتماد")}</h4>
+              <p className="text-sm text-gray-500">
+                {translate(
+                  "Formal review and decision record for each authorized party.",
+                  "المراجعة الرسمية وسجل القرار لكل جهة مخوّلة.",
+                )}
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900">{translate("Approvals", "الاعتمادات")}</h4>
-            <p className="text-sm text-gray-500">
-              {translate(
-                "Planning, purchasing manager, and manager decisions on this requisition.",
-                "قرارات التخطيط ومدير المشتريات والمدير على هذا الطلب.",
-              )}
-            </p>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-gray-500">
+              {translate(`${approvedCount} of 3 approved`, `${approvedCount} من 3 معتمد`)}
+            </span>
+            <Badge size="md" variant="light" color={overallStatus.color} radius="sm">
+              {overallStatus.label}
+            </Badge>
           </div>
         </header>
 
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
+        <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-stretch">
           {gates.map((gate, index) => (
-            <div key={gate.id} className="contents">
-              <ApprovalGateCard
-                label={gate.label}
-                decision={gate.decision}
-                decidedAt={gate.decidedAt}
-                decidedBy={gate.decidedBy}
-                reason={gate.reason}
-                canAct={!terminal}
-                hidePendingBadge={terminal && gate.decision === APPROVAL_DECISIONS.PENDING}
-                permission={gate.permission}
-                onApprove={() => openConfirm(gate.id, "approve")}
-                onReject={() => openConfirm(gate.id, "reject")}
-              />
-              {index < gates.length - 1 ? (
-                <div className="hidden shrink-0 items-center justify-center text-gray-300 lg:flex lg:w-6">
-                  <ChevronRight size={18} className="rtl:hidden" />
-                  <ChevronLeft size={18} className="hidden rtl:block" />
-                </div>
-              ) : null}
-            </div>
+            <ApprovalGateCard
+              key={gate.id}
+              step={index + 1}
+              title={gate.title}
+              subtitle={gate.subtitle}
+              decision={gate.decision}
+              decidedAt={gate.decidedAt}
+              decidedBy={gate.decidedBy}
+              reason={gate.reason}
+              canAct={!terminal}
+              hidePendingState={terminal && gate.decision === APPROVAL_DECISIONS.PENDING}
+              permission={gate.permission}
+              onApprove={() => openConfirm(gate.id, "approve")}
+              onReject={() => openConfirm(gate.id, "reject")}
+            />
           ))}
         </div>
       </section>
@@ -342,7 +388,8 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
       >
         {confirmGate && (
           <div className="flex flex-col gap-3">
-            <p>{confirmCopy[confirmGate].approveBody}</p>
+            <p className="text-sm text-gray-600">{confirmCopy[confirmGate].approveBody}</p>
+            <Divider />
             <div className="flex gap-2">
               <Button variant="light" color="dark" radius="md" onClick={closeConfirm} fullWidth>
                 {translation.cancel}
@@ -354,7 +401,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
                 onClick={() => approveMutation.mutate(confirmGate)}
                 fullWidth
               >
-                {translate("Confirm", "تأكيد")}
+                {translate("Confirm Approval", "تأكيد الاعتماد")}
               </Button>
             </div>
             {approveError && <ErrorAlert error={approveError} />}
@@ -369,28 +416,33 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
       >
         {confirmGate && (
           <form onSubmit={handleRejectSubmit} className="flex flex-col gap-3">
-            <p>
+            <p className="text-sm text-gray-600">
               {translate(
-                "This requisition will be rejected. Remaining approvals cannot be recorded afterwards.",
-                "سيتم رفض طلب الشراء ولن يمكن تسجيل الاعتمادات المتبقية بعد ذلك.",
+                "Recording a rejection will close this requisition. Remaining approval stages will no longer accept decisions.",
+                "تسجيل الرفض سيُغلق هذا الطلب. لن تقبل مراحل الاعتماد المتبقية أي قرارات.",
               )}
             </p>
             <Textarea
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               label={translate("Rejection Reason", "سبب الرفض")}
-              placeholder={translate("Enter rejection reason", "أدخل سبب الرفض")}
+              description={translate(
+                "Provide a clear justification. This will be recorded permanently.",
+                "قدّم مبرراً واضحاً. سيتم تسجيله بشكل دائم.",
+              )}
+              placeholder={translate("Enter the reason for rejection", "أدخل سبب الرفض")}
               required
               radius="md"
               autosize
               minRows={3}
             />
+            <Divider />
             <div className="flex gap-2">
               <Button variant="light" color="dark" radius="md" onClick={closeConfirm} fullWidth>
                 {translation.cancel}
               </Button>
               <Button type="submit" color="red" loading={rejectMutation.isPending} radius="md" fullWidth>
-                {translate("Reject", "رفض")}
+                {translate("Confirm Rejection", "تأكيد الرفض")}
               </Button>
             </div>
             {rejectError && <ErrorAlert error={rejectError} />}

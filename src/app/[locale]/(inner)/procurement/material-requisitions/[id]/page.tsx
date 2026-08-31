@@ -108,9 +108,8 @@ export default function Page() {
         requisition && (
           <>
             <RequisitionDetails requisition={requisition} />
-            <RequisitionApprovals requisition={requisition} />
 
-            <section className="mt-4 flex flex-col gap-4">
+            <section className="mb-4 flex flex-col gap-4">
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
 
@@ -135,6 +134,8 @@ export default function Page() {
                 />
               )}
             </section>
+
+            <RequisitionApprovals requisition={requisition} />
 
             {editable && (
               <>
