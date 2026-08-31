@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
+import { toast } from "sonner";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -39,8 +40,8 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatDisplayQuantity, formatQuantity } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { Badge, Button, Divider, SegmentedControl, Table } from "@mantine/core";
-import { Calculator, Layers, Pencil, Plus, Printer, Wallet } from "lucide-react";
+import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table } from "@mantine/core";
+import { Calculator, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -52,6 +53,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom-print-document";
+import DeleteModal from "@/components/ui/delete-modal";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 
@@ -69,6 +71,7 @@ export default function Page() {
   const getLocalizedHref = useLocaleHref();
   const { code, dimensionId } = useParams<{ code: string; dimensionId: string }>();
   const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
   const { helpers: productCategoryHelpers } = useProductCategories();
   const { helpers: materialCategoryHelpers } = useMaterialCategories();
 
@@ -86,7 +89,19 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
   const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.AVERAGE_PRICE);
+
+  const deleteMutation = useMutation({
+    mutationFn: (itemId: string) => bomsApi.deleteItem({ privateRequest, itemId }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionId) });
+      toast.success(translate("BOM item deleted successfully.", "تم حذف بند قائمة المواد بنجاح."));
+      setItemToDelete(null);
+    },
+  });
+
+  const deleteError = deleteMutation.error ? getErrorMessage(locale, deleteMutation.error) : "";
 
   function handleCostingMethodChange(value: string) {
     if (isValidCostingMethod(value)) setCostingMethod(value);
@@ -330,7 +345,7 @@ export default function Page() {
                       <h5 className="px-0.5 text-sm font-semibold text-gray-800">{group.title}</h5>
 
                       <div className="overflow-x-auto rounded-xl border border-gray-200">
-                        <Table className="w-full table-fixed text-nowrap" highlightOnHover>
+                        <Table className="w-full table-fixed text-nowrap" highlightOnHover verticalSpacing="xs">
                           <Table.Thead className="bg-gray-50">
                             <Table.Tr className="h-10">
                               <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -373,71 +388,104 @@ export default function Page() {
                                   unitConversions={item.material.unitConversions}
                                 >
                                   {({ unit, factor, toggleButton }) => (
-                                <Table.Tr className="text-gray-600">
-                                  <Table.Td>
-                                    <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
-                                  </Table.Td>
-                                  <Table.Td>
-                                    <span className="block truncate font-medium text-gray-800">{item.material.title}</span>
-                                  </Table.Td>
-                                  <Table.Td>
-                                    <span className="text-sm text-gray-600">
-                                      {item.sourceBomItem?.productionSubDepartment
-                                        ? getProductionSubDepartmentLabel(
-                                            item.sourceBomItem.productionSubDepartment,
-                                            locale,
-                                          )
-                                        : "-"}
-                                    </span>
-                                  </Table.Td>
-                                  <Table.Td>
-                                    <div className="flex items-center gap-1">
-                                      {getMaterialUnitLabel(unit, locale)}
-                                      {toggleButton}
-                                    </div>
-                                  </Table.Td>
-                                  <Table.Td
-                                    className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
-                                  >
-                                    {formatDisplayQuantity(item.quantityRequired, factor)}
-                                  </Table.Td>
-                                  <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
-                                    {formatMoney(toDisplayUnitPrice(unitCost, factor))}
-                                  </Table.Td>
-                                  <Table.Td className={`font-medium ${lineCost === 0 ? zeroValueClass : "text-gray-800"}`}>
-                                    {formatMoney(lineCost)}
-                                  </Table.Td>
-                                  <Table.Td className="text-gray-500">
-                                    <div className="flex flex-col gap-0.5 overflow-hidden">
-                                      {item.notes ? <span className="truncate">{item.notes}</span> : null}
-                                      {item.parentManufacturedMaterialTitle && (
-                                        <span className="truncate text-xs text-gray-400">
-                                          {translate("Required for", "مطلوب لـ")}:{" "}
-                                          <span className="font-medium text-gray-800">
-                                            {item.parentManufacturedMaterialTitle}
-                                          </span>
-                                        </span>
-                                      )}
-                                      {!item.notes && !item.parentManufacturedMaterialTitle ? "-" : null}
-                                    </div>
-                                  </Table.Td>
-                                  <Table.Td>
-                                    {!item.parentManufacturedMaterialTitle && (
-                                      <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
-                                        <Button
-                                          onClick={() => item.sourceBomItem && handleOpenUpdateModal(item.sourceBomItem)}
-                                          variant="light"
-                                          color="gray"
-                                          size="xs"
-                                          radius="md"
-                                          p={6}
+                                    <Table.Tr className="text-gray-600">
+                                      <Table.Td>
+                                        <Link
+                                          href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                          className="font-mono text-xs text-gray-500 hover:underline"
                                         >
-                                          <Pencil size={12} />
-                                        </Button>
-                                      </PermissionGuard>
-                                    )}
-                                  </Table.Td>
-                                </Table.Tr>
+                                          {item.material.code}
+                                        </Link>
+                                      </Table.Td>
+                                      <Table.Td>
+                                        <Link
+                                          href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                          className="block truncate font-medium text-gray-800 hover:underline"
+                                        >
+                                          {item.material.title}
+                                        </Link>
+                                      </Table.Td>
+                                      <Table.Td>
+                                        <span className="text-sm text-gray-600">
+                                          {item.sourceBomItem?.productionSubDepartment
+                                            ? getProductionSubDepartmentLabel(
+                                                item.sourceBomItem.productionSubDepartment,
+                                                locale,
+                                              )
+                                            : "-"}
+                                        </span>
+                                      </Table.Td>
+                                      <Table.Td>
+                                        <div className="flex items-center gap-1">
+                                          {getMaterialUnitLabel(unit, locale)}
+                                          {toggleButton}
+                                        </div>
+                                      </Table.Td>
+                                      <Table.Td
+                                        className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
+                                      >
+                                        {formatDisplayQuantity(item.quantityRequired, factor)}
+                                      </Table.Td>
+                                      <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
+                                        {formatMoney(toDisplayUnitPrice(unitCost, factor))}
+                                      </Table.Td>
+                                      <Table.Td
+                                        className={`font-medium ${lineCost === 0 ? zeroValueClass : "text-gray-800"}`}
+                                      >
+                                        {formatMoney(lineCost)}
+                                      </Table.Td>
+                                      <Table.Td className="text-gray-500">
+                                        <div className="flex flex-col gap-0.5 overflow-hidden">
+                                          {item.notes ? <span className="truncate">{item.notes}</span> : null}
+                                          {item.parentManufacturedMaterialTitle && (
+                                            <span className="truncate text-xs text-gray-400">
+                                              {translate("Required for", "مطلوب لـ")}:{" "}
+                                              <span className="font-medium text-gray-800">
+                                                {item.parentManufacturedMaterialTitle}
+                                              </span>
+                                            </span>
+                                          )}
+                                          {!item.notes && !item.parentManufacturedMaterialTitle ? "-" : null}
+                                        </div>
+                                      </Table.Td>
+                                      <Table.Td>
+                                        {!item.parentManufacturedMaterialTitle && item.sourceBomItem && (
+                                          <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
+                                            <Menu position="bottom-end" withinPortal>
+                                              <Menu.Target>
+                                                <ActionIcon
+                                                  variant="subtle"
+                                                  color="gray"
+                                                  size="sm"
+                                                  radius="md"
+                                                  aria-label={translate("Item actions", "إجراءات البند")}
+                                                >
+                                                  <EllipsisVertical size={14} />
+                                                </ActionIcon>
+                                              </Menu.Target>
+                                              <Menu.Dropdown>
+                                                <Menu.Item
+                                                  leftSection={<Pencil size={14} />}
+                                                  onClick={() => handleOpenUpdateModal(item.sourceBomItem!)}
+                                                >
+                                                  {translate("Edit", "تعديل")}
+                                                </Menu.Item>
+                                                <Menu.Item
+                                                  leftSection={<Trash2 size={14} />}
+                                                  color="red"
+                                                  onClick={() => {
+                                                    deleteMutation.reset();
+                                                    setItemToDelete(item.sourceBomItem);
+                                                  }}
+                                                >
+                                                  {translate("Delete", "حذف")}
+                                                </Menu.Item>
+                                              </Menu.Dropdown>
+                                            </Menu>
+                                          </PermissionGuard>
+                                        )}
+                                      </Table.Td>
+                                    </Table.Tr>
                                   )}
                                 </UnitToggle>
                               );
@@ -529,6 +577,29 @@ export default function Page() {
                   setItemToUpdate={setItemToUpdate}
                   existingItems={bomItems}
                 />
+
+                <DeleteModal
+                  opened={!!itemToDelete}
+                  onClose={() => {
+                    setItemToDelete(null);
+                    deleteMutation.reset();
+                  }}
+                  title={translate("Delete BOM item?", "حذف بند قائمة المواد؟")}
+                  subTitle={
+                    itemToDelete
+                      ? translate(
+                          `You're about to delete "${itemToDelete.material.title}" from this BOM.`,
+                          `أنت على وشك حذف "${itemToDelete.material.title}" من قائمة المواد.`,
+                        )
+                      : ""
+                  }
+                  warning={translate("This action cannot be undone.", "هذا الإجراء لا يمكن التراجع عنه.")}
+                  action={() => {
+                    if (itemToDelete) deleteMutation.mutate(itemToDelete.id);
+                  }}
+                  loading={deleteMutation.isPending}
+                  error={deleteError}
+                />
               </section>
             )}
           </>
@@ -567,6 +638,7 @@ function ManufacturingCostsSection({
   totalManufacturingCost: number;
 }) {
   const { translate, translation } = useI18n();
+  const getLocalizedHref = useLocaleHref();
 
   return (
     <section className="flex flex-col gap-3">
@@ -611,10 +683,20 @@ function ManufacturingCostsSection({
             {rows.map((row) => (
               <Table.Tr key={row.id} className="text-gray-600">
                 <Table.Td>
-                  <span className="font-mono text-xs text-gray-500">{row.materialCode}</span>
+                  <Link
+                    href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+                    className="font-mono text-xs text-gray-500 hover:underline"
+                  >
+                    {row.materialCode}
+                  </Link>
                 </Table.Td>
                 <Table.Td>
-                  <span className="font-medium text-gray-800">{row.materialTitle}</span>
+                  <Link
+                    href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+                    className="font-medium text-gray-800 hover:underline"
+                  >
+                    {row.materialTitle}
+                  </Link>
                 </Table.Td>
                 <Table.Td className="font-medium text-gray-800">{formatQuantity(row.quantityRequired)}</Table.Td>
                 <Table.Td>{formatMoney(row.unitManufacturingCost)}</Table.Td>
