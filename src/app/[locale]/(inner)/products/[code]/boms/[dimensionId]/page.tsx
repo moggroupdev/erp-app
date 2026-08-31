@@ -18,6 +18,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import {
   getBomDisplayTotals,
   getFlattenedMaterialRows,
@@ -157,8 +158,6 @@ export default function Page() {
     rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
     return rows;
   }, [materialRows, totals.totalMaterialCost, materialCategoryHelpers, translate, locale, costingMethod]);
-
-  const excludeMaterialCodes = useMemo(() => bomItems.map((item) => item.materialCode), [bomItems]);
 
   const currency = translation.currency;
 
@@ -303,6 +302,16 @@ export default function Page() {
 
                     <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
                       <Button
+                        component={Link}
+                        href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
+                        variant="light"
+                        color="gray"
+                        radius="md"
+                        leftSection={<Plus size={15} />}
+                      >
+                        {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
+                      </Button>
+                      <Button
                         onClick={handleOpenAppendModal}
                         variant="light"
                         color="teal"
@@ -327,22 +336,25 @@ export default function Page() {
                               <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Code", "كود")}
                               </Table.Th>
-                              <Table.Th w="26%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="22%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Name", "الصنف")}
                               </Table.Th>
-                              <Table.Th w="9%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                {translate("Production Dep.", "قسم الإنتاج")}
+                              </Table.Th>
+                              <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit", "الوحدة")}
                               </Table.Th>
-                              <Table.Th w="9%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Quantity", "الكمية")}
                               </Table.Th>
-                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
                               </Table.Th>
-                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Total (EGP)", "الإجمالي (ج.م)")}
                               </Table.Th>
-                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Notes", "الملاحظات")}
                               </Table.Th>
                               <Table.Th w="5%" />
@@ -367,6 +379,16 @@ export default function Page() {
                                   </Table.Td>
                                   <Table.Td>
                                     <span className="block truncate font-medium text-gray-800">{item.material.title}</span>
+                                  </Table.Td>
+                                  <Table.Td>
+                                    <span className="text-sm text-gray-600">
+                                      {item.sourceBomItem?.productionSubDepartment
+                                        ? getProductionSubDepartmentLabel(
+                                            item.sourceBomItem.productionSubDepartment,
+                                            locale,
+                                          )
+                                        : "-"}
+                                    </span>
                                   </Table.Td>
                                   <Table.Td>
                                     <div className="flex items-center gap-1">
@@ -424,7 +446,7 @@ export default function Page() {
                           <Table.Tfoot className="bg-gray-50">
                             <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
                               <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
-                              <Table.Td colSpan={4} className="text-gray-500">
+                              <Table.Td colSpan={5} className="text-gray-500">
                                 {group.itemCount} {translate("Items", "بند")}
                               </Table.Td>
                               <Table.Td className={group.totalCost === 0 ? "text-orange-500" : undefined}>
@@ -505,7 +527,7 @@ export default function Page() {
                   dimensionId={dimensionId}
                   itemToUpdate={itemToUpdate}
                   setItemToUpdate={setItemToUpdate}
-                  excludeMaterialCodes={excludeMaterialCodes}
+                  existingItems={bomItems}
                 />
               </section>
             )}

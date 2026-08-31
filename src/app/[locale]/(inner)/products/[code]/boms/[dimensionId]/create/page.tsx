@@ -17,6 +17,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { isManufacturedMaterial, isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
@@ -26,6 +27,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
+import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import MmComponentsSection from "./components/mm-components-section";
 
 const PAGE_TITLE = { en: "Create BOM", ar: "إنشاء قائمة مواد" };
@@ -88,6 +90,7 @@ export default function Page() {
   const queryClient = useQueryClient();
 
   const [rows, setRows] = useState<BomDraftRow[]>([createEmptyRow()]);
+  const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [validationError, setValidationError] = useState("");
   const [duplicateCodes, setDuplicateCodes] = useState<Set<string>>(new Set());
 
@@ -100,13 +103,12 @@ export default function Page() {
   });
 
   const bom = bomQuery.data || null;
-  const alreadyHasBom = (bom?.standardBoms.length ?? 0) > 0;
-
-  useEffect(() => {
-    if (alreadyHasBom) {
-      router.replace(getLocalizedHref(`/products/${code}/boms/${dimensionId}`));
-    }
-  }, [alreadyHasBom, router, getLocalizedHref, code, dimensionId]);
+  const departmentsWithBom = useMemo(
+    () => new Set(bom?.standardBoms.map((item) => item.productionSubDepartment).filter(Boolean) as ProductionSubDepartment[]),
+    [bom?.standardBoms],
+  );
+  const selectedDepartmentHasBom =
+    !!productionSubDepartment && departmentsWithBom.has(productionSubDepartment as ProductionSubDepartment);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -117,6 +119,7 @@ export default function Page() {
           items: rows.map((row) => ({
             materialCode: row.materialCode!,
             quantityRequired: Number(row.quantityRequired),
+            productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
             unit: showUnitSelect(row) && row.unit ? row.unit : undefined,
             notes: row.notes.trim() || null,
           })),
@@ -212,6 +215,21 @@ export default function Page() {
     setValidationError("");
     setDuplicateCodes(new Set());
 
+    if (!productionSubDepartment) {
+      return setValidationError(
+        translate("Please select a production sub-department.", "يرجى اختيار القسم الفرعي للإنتاج."),
+      );
+    }
+
+    if (selectedDepartmentHasBom) {
+      return setValidationError(
+        translate(
+          "A BOM already exists for this production sub-department.",
+          "توجد بالفعل قائمة مواد لهذا القسم الفرعي للإنتاج.",
+        ),
+      );
+    }
+
     // Validation Layer
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index];
@@ -258,7 +276,7 @@ export default function Page() {
     mutation.mutate();
   }
 
-  if (bomQuery.isFetching || alreadyHasBom) {
+  if (bomQuery.isFetching) {
     return (
       <LayoutBox header={{ title: translate(PAGE_TITLE.en, PAGE_TITLE.ar), backLink: true }}>
         <LoadingSection message={translate("Loading...", "جاري التحميل...")} />
@@ -289,6 +307,15 @@ export default function Page() {
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <SelectProductionSubDepartment
+          value={productionSubDepartment}
+          setValue={setProductionSubDepartment}
+          label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
+          placeholder={translate("Select sub-department", "اختر القسم الفرعي")}
+          excludeValues={[...departmentsWithBom]}
+          required
+        />
+
         <div className="overflow-x-auto rounded-xl">
           <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">

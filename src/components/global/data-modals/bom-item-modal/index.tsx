@@ -10,6 +10,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
 import type { MaterialWithUnitConversions } from "@/types/material";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
@@ -17,6 +18,7 @@ import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
+import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 
 export default function BomItemModal({
   opened,
@@ -24,14 +26,14 @@ export default function BomItemModal({
   dimensionId,
   itemToUpdate,
   setItemToUpdate,
-  excludeMaterialCodes = [],
+  existingItems = [],
 }: {
   opened: boolean;
   close: () => void;
   dimensionId: string;
   itemToUpdate: BomItemWithMaterial | null;
   setItemToUpdate: React.Dispatch<React.SetStateAction<BomItemWithMaterial | null>>;
-  excludeMaterialCodes?: string[];
+  existingItems?: BomItemWithMaterial[];
 }) {
   const { locale, translate, translation } = useI18n();
 
@@ -43,6 +45,7 @@ export default function BomItemModal({
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
+  const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
   const isUpdate = !!itemToUpdate;
@@ -50,6 +53,17 @@ export default function BomItemModal({
   const unitConversions = itemToUpdate?.material.unitConversions ?? selectedMaterial?.unitConversions ?? [];
   const materialType = itemToUpdate?.material.materialType || selectedMaterial?.materialType || null;
   const showUnitSelect = !!materialType && isRawMaterial(materialType);
+
+  const departmentMaterialCodes = useMemo(() => {
+    if (!productionSubDepartment) return [];
+    return (
+      existingItems
+        .filter(
+          (item) => item.productionSubDepartment === productionSubDepartment && item.id !== itemToUpdate?.id,
+        )
+        .map((item) => item.materialCode)
+    );
+  }, [productionSubDepartment, existingItems, itemToUpdate?.id]);
 
   const unitOptions = useMemo(() => {
     if (!baseUnit) return [];
@@ -63,6 +77,7 @@ export default function BomItemModal({
     setSelectedMaterial(null);
     setUnit(null);
     setQuantityRequired("");
+    setProductionSubDepartment(null);
     setNotes("");
   }
 
@@ -70,6 +85,7 @@ export default function BomItemModal({
     if (itemToUpdate) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuantityRequired(itemToUpdate.quantityRequired);
+      setProductionSubDepartment(itemToUpdate.productionSubDepartment);
       setNotes(itemToUpdate.notes || "");
       setUnit(itemToUpdate.material.unitOfMeasurement);
     } else reset();
@@ -91,6 +107,7 @@ export default function BomItemModal({
           dto: {
             quantityRequired: Number(quantityRequired),
             unit: payloadUnit,
+            productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
             notes: notes.trim() || null,
           },
         });
@@ -103,6 +120,7 @@ export default function BomItemModal({
           materialCode: materialCode!,
           quantityRequired: Number(quantityRequired),
           unit: payloadUnit,
+          productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
           notes: notes.trim() || null,
         },
       });
@@ -126,6 +144,12 @@ export default function BomItemModal({
 
     if (!isUpdate && !materialCode) {
       return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
+    }
+
+    if (!productionSubDepartment) {
+      return setValidationError(
+        translate("Please select a production sub-department.", "يرجى اختيار القسم الفرعي للإنتاج."),
+      );
     }
 
     if (showUnitSelect && !unit) {
@@ -156,6 +180,7 @@ export default function BomItemModal({
 
   const isDataChanged = itemToUpdate
     ? Number(quantityRequired) !== itemToUpdate.quantityRequired ||
+      productionSubDepartment !== itemToUpdate.productionSubDepartment ||
       (showUnitSelect && unit !== itemToUpdate.material.unitOfMeasurement) ||
       (notes.trim() || null) !== itemToUpdate.notes
     : true;
@@ -163,6 +188,7 @@ export default function BomItemModal({
   const isReadyToSubmit =
     quantityRequired !== "" &&
     Number(quantityRequired) > 0 &&
+    !!productionSubDepartment &&
     (!showUnitSelect || !!unit) &&
     isDataChanged &&
     (isUpdate || !!materialCode);
@@ -185,13 +211,21 @@ export default function BomItemModal({
               setSelectedMaterial(material);
               setUnit(material?.unitOfMeasurement ?? null);
             }}
-            excludeCodes={excludeMaterialCodes}
+            excludeCodes={departmentMaterialCodes}
             label={translate("Material", "المادة")}
             placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
             required
             withBrowseModal
           />
         )}
+
+        <SelectProductionSubDepartment
+          value={productionSubDepartment}
+          setValue={setProductionSubDepartment}
+          label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
+          placeholder={translate("Select sub-department", "اختر القسم الفرعي")}
+          required
+        />
 
         <div className={showUnitSelect ? "grid gap-3 sm:grid-cols-2" : undefined}>
           <NumberInput
