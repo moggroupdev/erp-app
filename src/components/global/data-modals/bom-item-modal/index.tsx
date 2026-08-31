@@ -87,7 +87,7 @@ export default function BomItemModal({
       setQuantityRequired(itemToUpdate.quantityRequired);
       setProductionSubDepartment(itemToUpdate.productionSubDepartment);
       setNotes(itemToUpdate.notes || "");
-      setUnit(itemToUpdate.material.unitOfMeasurement);
+      setUnit(itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement);
     } else reset();
   }, [itemToUpdate]);
 
@@ -98,15 +98,13 @@ export default function BomItemModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const payloadUnit = showUnitSelect ? (unit as MaterialUnit) || undefined : undefined;
-
       if (itemToUpdate) {
         return await bomsApi.updateItem({
           privateRequest,
           itemId: itemToUpdate.id,
           dto: {
             quantityRequired: Number(quantityRequired),
-            unit: payloadUnit,
+            unitOfMeasurementSelected: unit as MaterialUnit,
             productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
             notes: notes.trim() || null,
           },
@@ -119,7 +117,7 @@ export default function BomItemModal({
         dto: {
           materialCode: materialCode!,
           quantityRequired: Number(quantityRequired),
-          unit: payloadUnit,
+          unitOfMeasurementSelected: unit as MaterialUnit,
           productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
           notes: notes.trim() || null,
         },
@@ -152,7 +150,7 @@ export default function BomItemModal({
       );
     }
 
-    if (showUnitSelect && !unit) {
+    if (!unit) {
       return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
     }
 
@@ -181,7 +179,7 @@ export default function BomItemModal({
   const isDataChanged = itemToUpdate
     ? Number(quantityRequired) !== itemToUpdate.quantityRequired ||
       productionSubDepartment !== itemToUpdate.productionSubDepartment ||
-      (showUnitSelect && unit !== itemToUpdate.material.unitOfMeasurement) ||
+      unit !== (itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement) ||
       (notes.trim() || null) !== itemToUpdate.notes
     : true;
 
@@ -189,7 +187,7 @@ export default function BomItemModal({
     quantityRequired !== "" &&
     Number(quantityRequired) > 0 &&
     !!productionSubDepartment &&
-    (!showUnitSelect || !!unit) &&
+    !!unit &&
     isDataChanged &&
     (isUpdate || !!materialCode);
 

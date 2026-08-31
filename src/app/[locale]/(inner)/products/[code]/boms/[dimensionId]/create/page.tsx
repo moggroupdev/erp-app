@@ -120,7 +120,7 @@ export default function Page() {
             materialCode: row.materialCode!,
             quantityRequired: Number(row.quantityRequired),
             productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
-            unit: showUnitSelect(row) && row.unit ? row.unit : undefined,
+            unitOfMeasurementSelected: row.unit as MaterialUnit,
             notes: row.notes.trim() || null,
           })),
         },

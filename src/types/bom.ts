@@ -9,6 +9,7 @@ export type BomItem = {
   productDimensionId: string;
   materialCode: string;
   quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit | null;
   productionSubDepartment: ProductionSubDepartment | null;
   notes: string | null;
   createdAt: Date;
@@ -37,6 +38,7 @@ export type BomItemWithMaterial = {
   productDimensionId: string;
   materialCode: string;
   quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit | null;
   productionSubDepartment: ProductionSubDepartment | null;
   notes: string | null;
   material: {
@@ -77,13 +79,14 @@ export type Bom = {
 export type CreateBomItemDto = {
   materialCode: string;
   quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit;
   productionSubDepartment: ProductionSubDepartment;
-  unit?: MaterialUnit;
   notes: string | null;
 };
 
 export type CreateBomDto = { items: CreateBomItemDto[] };
 
-export type UpdateBomItemDto = Partial<Pick<CreateBomItemDto, "quantityRequired" | "unit" | "notes">> & {
+export type UpdateBomItemDto = Partial<Pick<CreateBomItemDto, "quantityRequired" | "notes">> & {
+  unitOfMeasurementSelected: MaterialUnit;
   productionSubDepartment: ProductionSubDepartment;
 };
