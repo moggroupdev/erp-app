@@ -1,4 +1,8 @@
 import { APPROVAL_DECISIONS, type ApprovalDecision } from "@/lib/constants/enums/approval-decisions";
+import { toDisplayUnitPrice, resolveDisplayUnit } from "@/lib/helpers/unit-conversion";
+import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
+
+export const REQUISITION_VAT_RATE = 0.14;
 
 export type RequisitionLockFields = {
   planningDecision: ApprovalDecision;
@@ -49,4 +53,36 @@ export function getRequisitionStatusLabel(status: RequisitionStatus, translate: 
         color: "orange" as const,
       };
   }
+}
+
+export function getRequisitionItemLineTotal(item: MaterialPurchaseRequisitionItemDetailed): number | null {
+  if (item.lastPurchasePrice == null) return null;
+
+  const { factor } = resolveDisplayUnit(
+    item.unitOfMeasurementSelected,
+    item.material.unitOfMeasurement,
+    item.material.unitConversions,
+  );
+
+  return item.quantityRequested * toDisplayUnitPrice(item.lastPurchasePrice, factor);
+}
+
+export function computeRequisitionLastPurchaseTotals(items: MaterialPurchaseRequisitionItemDetailed[]) {
+  let subtotal = 0;
+  let missingPriceCount = 0;
+
+  for (const item of items) {
+    const lineTotal = getRequisitionItemLineTotal(item);
+    if (lineTotal == null) {
+      missingPriceCount++;
+      continue;
+    }
+
+    subtotal += lineTotal;
+  }
+
+  const vat = subtotal * REQUISITION_VAT_RATE;
+  const grandTotal = subtotal + vat;
+
+  return { subtotal, vat, grandTotal, missingPriceCount };
 }
