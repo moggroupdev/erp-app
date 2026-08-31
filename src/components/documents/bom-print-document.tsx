@@ -10,8 +10,8 @@ import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conve
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail } from "./components";
 
-export type BomPrintCategoryGroup = {
-  mainCategoryId: string;
+export type BomPrintDepartmentGroup = {
+  departmentId: string;
   title: string;
   itemCount: number;
   totalCost: number;
@@ -21,7 +21,7 @@ export type BomPrintCategoryGroup = {
 
 type BomPrintDocumentProps = {
   bom: Bom;
-  categoryBreakdown: BomPrintCategoryGroup[];
+  departmentBreakdown: BomPrintDepartmentGroup[];
   totals: {
     totalMaterialCost: number;
     totalManufacturingCost: number;
@@ -36,7 +36,7 @@ type BomPrintDocumentProps = {
 
 export default function BomPrintDocument({
   bom,
-  categoryBreakdown,
+  departmentBreakdown,
   totals,
   mainCategoryTitle,
   costingMethod,
@@ -83,8 +83,8 @@ export default function BomPrintDocument({
       <hr className="border-gray-300" />
 
       <section className="flex flex-col gap-8">
-        {categoryBreakdown.map((group) => (
-          <div key={group.mainCategoryId} className="flex break-inside-avoid flex-col gap-2">
+        {departmentBreakdown.map((group) => (
+          <div key={group.departmentId} className="flex break-inside-avoid flex-col gap-2">
             <h3 className="text-sm font-semibold">{group.title}</h3>
 
             <table className="w-full table-fixed border-collapse text-[8.5px]">
@@ -200,11 +200,13 @@ export default function BomPrintDocument({
       )}
 
       <section className="mt-8 flex break-inside-avoid flex-col gap-2.5">
-        <h2 className="text-base font-semibold">{translate("Categories Summary", "ملخص الأقسام")}</h2>
+        <h2 className="text-base font-semibold">{translate("Departments Summary", "ملخص الأقسام")}</h2>
         <table className="w-full border-collapse break-inside-avoid text-[9px]">
           <thead>
             <tr className="border-b border-gray-300 bg-gray-50 text-start text-[9px] font-medium tracking-wide text-gray-500 uppercase">
-              <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Category", "الفئة")}</th>
+              <th className="px-2.5 py-2 text-start whitespace-nowrap">
+                {translate("Production Department", "قسم الانتاج")}
+              </th>
               <th className="px-2.5 py-2 text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
               <th className="px-2.5 py-2 text-start whitespace-nowrap">
                 {translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}
@@ -213,8 +215,8 @@ export default function BomPrintDocument({
             </tr>
           </thead>
           <tbody>
-            {categoryBreakdown.map((group) => (
-              <tr key={group.mainCategoryId} className="border-b border-gray-200">
+            {departmentBreakdown.map((group) => (
+              <tr key={group.departmentId} className="border-b border-gray-200">
                 <td className="px-2.5 py-2 font-medium">{group.title}</td>
                 <td className="px-2.5 py-2">{group.itemCount}</td>
                 <td className="px-2.5 py-2">{formatMoney(group.totalCost)}</td>

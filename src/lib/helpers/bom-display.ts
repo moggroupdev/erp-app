@@ -2,6 +2,7 @@ import { TEMP_GLOBAL_MANUFACTURING_COST } from "@/lib/constants/global";
 import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
 import { COSTING_METHODS, type CostingMethod } from "@/lib/constants/enums/derived/costing-methods";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial, BomMmComponent } from "@/types/bom";
 import type { MmBom } from "@/types/mm-bom";
 
@@ -15,6 +16,7 @@ export type FlattenedBomRow = {
   material: BomItemWithMaterial["material"] | BomMmComponent["material"];
   parentManufacturedMaterialTitle: string | null;
   sourceBomItem: BomItemWithMaterial | null;
+  productionSubDepartment: ProductionSubDepartment | null;
 };
 
 export type ManufacturingCostRow = {
@@ -65,6 +67,7 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
           material: component.material,
           parentManufacturedMaterialTitle: item.material.title,
           sourceBomItem: null,
+          productionSubDepartment: item.productionSubDepartment,
         });
       }
 
@@ -79,6 +82,7 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
       material: item.material,
       parentManufacturedMaterialTitle: null,
       sourceBomItem: item,
+      productionSubDepartment: item.productionSubDepartment,
     });
   }
 

@@ -10,7 +10,6 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useProductCategories from "@/hooks/reference/use-product-categories";
-import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -57,8 +56,8 @@ import DeleteModal from "@/components/ui/delete-modal";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 
-type CategoryBreakdown = {
-  mainCategoryId: string;
+type DepartmentBreakdown = {
+  departmentId: string;
   title: string;
   itemCount: number;
   totalCost: number;
@@ -73,7 +72,6 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
   const { helpers: productCategoryHelpers } = useProductCategories();
-  const { helpers: materialCategoryHelpers } = useMaterialCategories();
 
   const bomQuery = useQuery({
     queryKey: queryKeys.boms.detail(dimensionId),
@@ -132,25 +130,24 @@ export default function Page() {
     });
   }, [materialRows, manufacturingRows, bom?.product.pricingFactor, costingMethod]);
 
-  const categoryBreakdown = useMemo((): CategoryBreakdown[] => {
+  const departmentBreakdown = useMemo((): DepartmentBreakdown[] => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
-    const groups = new Map<string, CategoryBreakdown>();
+    const groups = new Map<string, DepartmentBreakdown>();
 
     for (const item of materialRows) {
-      const sub = materialCategoryHelpers.getMaterialCategorySubById(item.material.subCategoryId);
-      const main = sub ? materialCategoryHelpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
-      const mainCategoryId = main?.id ?? UNCATEGORIZED_ID;
-      const title = main?.title ?? uncategorizedTitle;
+      const department = item.productionSubDepartment;
+      const departmentId = department ?? UNCATEGORIZED_ID;
+      const title = department ? getProductionSubDepartmentLabel(department, locale) : uncategorizedTitle;
       const lineCost = item.quantityRequired * getMaterialCostPrice(item.material, costingMethod);
 
-      const existing = groups.get(mainCategoryId);
+      const existing = groups.get(departmentId);
       if (existing) {
         existing.itemCount += 1;
         existing.totalCost += lineCost;
         existing.items.push(item);
       } else {
-        groups.set(mainCategoryId, {
-          mainCategoryId,
+        groups.set(departmentId, {
+          departmentId,
           title,
           itemCount: 1,
           totalCost: lineCost,
@@ -172,7 +169,7 @@ export default function Page() {
 
     rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
     return rows;
-  }, [materialRows, totals.totalMaterialCost, materialCategoryHelpers, translate, locale, costingMethod]);
+  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod]);
 
   const currency = translation.currency;
 
@@ -241,7 +238,7 @@ export default function Page() {
                 <BomPrintDocument
                   bom={bom}
                   totals={totals}
-                  categoryBreakdown={categoryBreakdown}
+                  departmentBreakdown={departmentBreakdown}
                   mainCategoryTitle={productMainCategory?.title || null}
                   costingMethod={costingMethod}
                 />
@@ -340,8 +337,8 @@ export default function Page() {
                 </div>
 
                 <div className="flex flex-col gap-8">
-                  {categoryBreakdown.map((group) => (
-                    <div key={group.mainCategoryId} className="flex flex-col gap-3">
+                  {departmentBreakdown.map((group) => (
+                    <div key={group.departmentId} className="flex flex-col gap-3">
                       <h5 className="px-0.5 text-sm font-semibold text-gray-800">{group.title}</h5>
 
                       <div className="overflow-x-auto rounded-xl border border-gray-200">
