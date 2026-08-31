@@ -166,7 +166,7 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                    <Table.Th>{translate("Production Sub-Department", "قسم الانتاج")}</Table.Th>
+                    <Table.Th>{translate("Production Department", "قسم الانتاج")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate("Created By", "أنشئ بواسطة")}</Table.Th>
                     <Table.Th>{translate("Created At", "تاريخ الإنشاء")}</Table.Th>

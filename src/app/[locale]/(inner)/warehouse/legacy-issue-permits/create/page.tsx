@@ -541,7 +541,7 @@ export default function Page() {
           <SelectProductionSubDepartment
             value={productionSubDepartment}
             setValue={setProductionSubDepartment}
-            label={translate("Production Sub-Department", "قسم الانتاج")}
+            label={translate("Production Department", "قسم الانتاج")}
             placeholder={translate("Select department...", "اختر القسم...")}
             clearable
             radius="md"

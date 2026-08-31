@@ -173,7 +173,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
         <PrintDetail
-          label={translate("Production Sub-Department", "قسم الانتاج")}
+          label={translate("Production Department", "قسم الانتاج")}
           value={getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}
         />
         <PrintDetail

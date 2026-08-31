@@ -29,7 +29,7 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
       ),
     },
     {
-      key: translate("Production Sub-Department", "قسم الانتاج"),
+      key: translate("Production Department", "قسم الانتاج"),
       value: getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale),
     },
     {

@@ -41,7 +41,7 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
       value: department ? translate(department.nameEn, department.nameAr) : <EmptyValue />,
     },
     {
-      key: translate("Production Sub-Department", "القسم الفرعي للإنتاج"),
+      key: translate("Production Department", "قسم الانتاج"),
       value: user.productionSubDepartment ? (
         getProductionSubDepartmentLabel(user.productionSubDepartment, locale)
       ) : (

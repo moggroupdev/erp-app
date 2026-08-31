@@ -289,7 +289,7 @@ export default function Page() {
 
     if (!productionSubDepartment) {
       return setValidationError(
-        translate("Please select a production sub-department.", "يرجى اختيار قسم الانتاج."),
+        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
       );
     }
 
@@ -358,7 +358,7 @@ export default function Page() {
           <SelectProductionSubDepartment
             value={productionSubDepartment}
             setValue={setProductionSubDepartment}
-            label={translate("Production Sub-Department", "قسم الانتاج")}
+            label={translate("Production Department", "قسم الانتاج")}
             placeholder={translate("Select department...", "اختر القسم...")}
             required
             radius="md"

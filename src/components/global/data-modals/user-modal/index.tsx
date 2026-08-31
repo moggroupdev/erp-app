@@ -165,8 +165,8 @@ export default function UserModal({
     if (isProductionDepartment && !productionSubDepartment)
       return setValidationError(
         translate(
-          "Production sub-department is required when the department is Production.",
-          "القسم الفرعي للإنتاج مطلوب عندما يكون القسم هو الإنتاج.",
+          "Production department is required when the department is Production.",
+          "قسم الانتاج مطلوب عندما يكون القسم هو الإنتاج.",
         ),
       );
 
@@ -233,8 +233,8 @@ export default function UserModal({
           <SelectProductionSubDepartment
             value={productionSubDepartment}
             setValue={setProductionSubDepartment}
-            label={translate("Production Sub-Department", "القسم الفرعي للإنتاج")}
-            placeholder={translate("Select sub-department", "اختر القسم الفرعي")}
+            label={translate("Production Department", "قسم الانتاج")}
+            placeholder={translate("Select department", "اختر القسم")}
             searchable
             required
           />

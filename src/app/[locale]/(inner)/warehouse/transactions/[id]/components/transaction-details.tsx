@@ -83,7 +83,7 @@ function getSourceRows(
         copyText: item.productUnit.serialNumber,
       },
       {
-        key: translate("Production Department", "قسم الإنتاج"),
+        key: translate("Production Department", "قسم الانتاج"),
         value: getProductionSubDepartmentLabel(item.productionStage, locale),
       },
     ];
