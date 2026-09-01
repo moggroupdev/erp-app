@@ -11,12 +11,12 @@ import bomsApi from "@/lib/api/boms";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { isManufacturedMaterial, isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
@@ -69,16 +69,13 @@ function showUnitSelect(row: BomDraftRow) {
 }
 
 function getRowUnitOptions(row: BomDraftRow, locale: Locale) {
-  if (!row.unitOfMeasurement) return [];
-  const altUnits = row.unitConversions.map((conversion) => conversion.unit);
-  const allUnits = [row.unitOfMeasurement, ...altUnits.filter((unit) => unit !== row.unitOfMeasurement)];
-  return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
+  return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
 }
 
 function getRowFactor(row: BomDraftRow) {
-  if (!row.unit || !row.unitOfMeasurement || row.unit === row.unitOfMeasurement) return 1;
-  const conversion = row.unitConversions.find((item) => item.unit === row.unit);
-  return conversion ? Number(conversion.conversionFactorToBase) : 1;
+  if (!row.unit || !row.unitOfMeasurement) return 1;
+
+  return resolveDisplayUnit(row.unit, row.unitOfMeasurement, row.unitConversions).factor;
 }
 
 export default function Page() {

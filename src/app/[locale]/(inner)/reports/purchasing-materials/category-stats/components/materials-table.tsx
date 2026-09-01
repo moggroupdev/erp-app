@@ -11,8 +11,11 @@ import {
   type MaterialUnit,
 } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
-import { resolveDisplayUnit, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import {
+  mapBaseQuantityMaterialRowsForDisplay,
+  sumDisplayQuantitiesWhenUnitsMatch,
+} from "@/lib/helpers/unit-conversion";
 import type { PurchasingMaterialsByMaterial } from "@/types/reports";
 import ReportCard from "../../components/report-card";
 import type { CategoryMaterialsSort } from "./sort";
@@ -35,21 +38,8 @@ export default function CategoryMaterialsTable({
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
 
-  const displayRows = data.map((row) => {
-    const { unit, factor } = resolveDisplayUnit(displayUnit, row.unitOfMeasurement, row.unitConversions);
-    return {
-      row,
-      unit,
-      factor,
-      displayQuantity: toDisplayQuantity(row.totalQuantity, factor),
-    };
-  });
-
-  const allUnitsMatch =
-    displayRows.length > 0 && displayRows.every((item) => item.unit === displayRows[0].unit);
-  const totalQuantity = allUnitsMatch
-    ? displayRows.reduce((sum, item) => sum + item.displayQuantity, 0)
-    : null;
+  const displayRows = mapBaseQuantityMaterialRowsForDisplay(data, displayUnit);
+  const totalQuantity = sumDisplayQuantitiesWhenUnitsMatch(displayRows);
   const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
@@ -133,7 +123,7 @@ export default function CategoryMaterialsTable({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {displayRows.map(({ row, unit, factor }, index) => (
+              {displayRows.map(({ row, unit, factor, displayAvgUnitPrice }, index) => (
                 <Table.Tr key={row.materialCode} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td className="max-w-60 truncate font-medium text-gray-800">
@@ -152,9 +142,9 @@ export default function CategoryMaterialsTable({
                     </div>
                   </Table.Td>
                   <Table.Td>{getMaterialUnitLabel(unit, locale)}</Table.Td>
-                  <Table.Td>{formatDisplayQuantity(row.totalQuantity, factor)}</Table.Td>
+                  <Table.Td>{formatBaseQuantityForDisplay(row.totalQuantity, factor)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
-                  <Table.Td>{formatMoney(toDisplayUnitPrice(row.avgUnitPrice, factor))}</Table.Td>
+                  <Table.Td>{formatMoney(displayAvgUnitPrice)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -164,7 +154,7 @@ export default function CategoryMaterialsTable({
                 <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
                 <Table.Th />
                 <Table.Th />
-                <Table.Th>{totalQuantity == null ? "" : formatDisplayQuantity(totalQuantity, 1)}</Table.Th>
+                <Table.Th>{totalQuantity == null ? "" : formatBaseQuantityForDisplay(totalQuantity, 1)}</Table.Th>
                 <Table.Th>{formatMoney(totalSpend)}</Table.Th>
                 <Table.Th />
               </Table.Tr>

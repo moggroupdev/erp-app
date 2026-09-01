@@ -2,9 +2,9 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "./components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { mapBaseQuantityMaterialRowForDisplay } from "@/lib/helpers/unit-conversion";
 import type {
   PurchasingMaterialsByMainCategory,
   PurchasingMaterialsByMaterial,
@@ -247,15 +247,16 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
           ]}
           rows={byMaterial.map((row, index) => {
-            const { unit, factor } = resolveDisplayUnit(materialsDisplayUnit, row.unitOfMeasurement, row.unitConversions);
+            const { unit, factor, displayAvgUnitPrice } = mapBaseQuantityMaterialRowForDisplay(row, materialsDisplayUnit);
+
             return [
               String(index + 1),
               row.materialTitle,
               row.materialCode,
               getMaterialUnitLabel(unit, locale),
-              formatDisplayQuantity(row.totalQuantity, factor),
+              formatBaseQuantityForDisplay(row.totalQuantity, factor),
               formatMoney(row.totalSpend),
-              formatMoney(toDisplayUnitPrice(row.avgUnitPrice, factor)),
+              formatMoney(displayAvgUnitPrice),
             ];
           })}
           monoColumnIndexes={[2]}

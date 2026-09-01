@@ -21,7 +21,6 @@ import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/fo
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import {
-  formatQuantityInUnit,
   getBomDisplayTotals,
   getFlattenedMaterialRows,
   getFlattenedRowLineCost,
@@ -39,7 +38,7 @@ import {
   type CostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table } from "@mantine/core";
@@ -457,7 +456,7 @@ export default function Page() {
                                       <Table.Td
                                         className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
                                       >
-                                        {formatQuantityInUnit(item.quantityRequired, enteredUnit, unit, item.material)}
+                                        {formatEnteredQuantityForDisplay(item.quantityRequired, enteredUnit, unit, item.material)}
                                       </Table.Td>
                                       <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
                                         {formatMoney(toDisplayUnitPrice(unitCost, factor))}

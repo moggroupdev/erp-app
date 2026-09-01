@@ -4,10 +4,8 @@ import { useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
-import {
-  formatQuantityInUnit,
-  getMaterialLineCost,
-} from "@/lib/helpers/bom-display";
+import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { getMaterialLineCost } from "@/lib/helpers/bom-display";
 import { COSTING_METHODS } from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
@@ -197,7 +195,7 @@ export default function MaterialBomSection({
                         </div>
                       </Table.Td>
                       <Table.Td className="font-medium text-gray-800">
-                        {formatQuantityInUnit(item.quantityRequired, enteredUnit, unit, item.material)}
+                        {formatEnteredQuantityForDisplay(item.quantityRequired, enteredUnit, unit, item.material)}
                       </Table.Td>
                       <Table.Td>{formatMoney(toDisplayUnitPrice(item.material.unitPrice, factor))}</Table.Td>
                       <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>

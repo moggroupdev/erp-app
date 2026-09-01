@@ -16,13 +16,12 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
 import PermissionGuard from "@/components/guards/permission";
 import { EmptyValue } from "@/components/ui/entity-details";
 import CopyButton from "@/components/ui/copy-button";
 import DeleteModal from "@/components/ui/delete-modal";
-import { computeRequisitionLastPurchaseTotals, getRequisitionItemLineTotal } from "../../helpers";
+import { computeRequisitionLastPurchaseTotals, getRequisitionItemDisplayLastPurchasePrice, getRequisitionItemLineTotal } from "../../helpers";
 
 export default function RequisitionItemsTable({
   requisitionId,
@@ -87,13 +86,7 @@ export default function RequisitionItemsTable({
           </Table.Thead>
           <Table.Tbody>
             {items.map((item) => {
-              const { factor } = resolveDisplayUnit(
-                item.unitOfMeasurementSelected,
-                item.material.unitOfMeasurement,
-                item.material.unitConversions,
-              );
-              const displayLastPurchasePrice =
-                item.lastPurchasePrice != null ? toDisplayUnitPrice(item.lastPurchasePrice, factor) : null;
+              const displayLastPurchasePrice = getRequisitionItemDisplayLastPurchasePrice(item);
               const lineTotal = getRequisitionItemLineTotal(item);
 
               return (

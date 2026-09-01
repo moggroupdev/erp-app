@@ -8,10 +8,10 @@ import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { APPROVAL_DECISIONS, type ApprovalDecision } from "@/lib/constants/enums/approval-decisions";
-import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { MaterialPurchaseRequisitionDetailed } from "@/types/material-purchase-requisition";
 import {
   computeRequisitionLastPurchaseTotals,
+  getRequisitionItemDisplayLastPurchasePrice,
   getRequisitionItemLineTotal,
 } from "@/app/[locale]/(inner)/procurement/material-requisitions/helpers";
 
@@ -92,13 +92,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
   ];
 
   const itemRows = requisition.items.map((item) => {
-    const { factor } = resolveDisplayUnit(
-      item.unitOfMeasurementSelected,
-      item.material.unitOfMeasurement,
-      item.material.unitConversions,
-    );
-    const displayLastPurchasePrice =
-      item.lastPurchasePrice != null ? toDisplayUnitPrice(item.lastPurchasePrice, factor) : null;
+    const displayLastPurchasePrice = getRequisitionItemDisplayLastPurchasePrice(item);
     const lineTotal = getRequisitionItemLineTotal(item);
 
     return [

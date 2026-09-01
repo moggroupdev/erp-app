@@ -15,7 +15,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -157,7 +157,7 @@ export default function Page() {
                                 {toggleButton}
                               </div>
                             </Table.Td>
-                            <Table.Td>{formatDisplayQuantity(item.quantityOrdered, factor)}</Table.Td>
+                            <Table.Td>{formatBaseQuantityForDisplay(item.quantityOrdered, factor)}</Table.Td>
                             <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
                             <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
                           </Table.Tr>

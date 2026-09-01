@@ -10,7 +10,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
 import type { MaterialWithUnitConversions } from "@/types/material";
@@ -66,12 +66,10 @@ export default function BomItemModal({
     );
   }, [productionSubDepartment, existingItems, itemToUpdate?.id]);
 
-  const unitOptions = useMemo(() => {
-    if (!baseUnit) return [];
-    const altUnits = unitConversions.map((row) => row.unit);
-    const allUnits = [baseUnit, ...altUnits.filter((u) => u !== baseUnit)];
-    return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
-  }, [baseUnit, unitConversions, locale]);
+  const unitOptions = useMemo(
+    () => getMaterialUnitSelectOptions(baseUnit, unitConversions, locale),
+    [baseUnit, unitConversions, locale],
+  );
 
   function reset() {
     setMaterialCode(null);

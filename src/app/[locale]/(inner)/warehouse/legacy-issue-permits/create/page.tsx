@@ -35,7 +35,7 @@ import {
   type LegacyIssuePermitWorkOrderType,
 } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
 import { Button, Checkbox, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
@@ -95,10 +95,7 @@ function isEmptyRow(row: ItemDraftRow) {
 }
 
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
-  if (!row.unitOfMeasurement) return [];
-  const altUnits = row.unitConversions.map((conversion) => conversion.unit);
-  const allUnits = [row.unitOfMeasurement, ...altUnits.filter((unit) => unit !== row.unitOfMeasurement)];
-  return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
+  return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
 }
 
 function SortableItemRow({

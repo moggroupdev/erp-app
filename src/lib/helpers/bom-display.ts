@@ -1,5 +1,4 @@
-import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { resolveDisplayUnit, toBaseQuantity, toDisplayQuantity } from "@/lib/helpers/unit-conversion";
+import { getEnteredQuantityInBaseUnit } from "@/lib/helpers/unit-conversion";
 import { TEMP_GLOBAL_MANUFACTURING_COST } from "@/lib/constants/global";
 import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
 import { COSTING_METHODS, type CostingMethod } from "@/lib/constants/enums/derived/costing-methods";
@@ -70,20 +69,6 @@ type UnitConvertibleMaterial = {
   unitConversions: { unit: MaterialUnit; conversionFactorToBase: number }[];
 };
 
-export function getEnteredQuantityInBaseUnit(
-  quantity: number,
-  unitOfMeasurementSelected: MaterialUnit | null | undefined,
-  material: UnitConvertibleMaterial,
-): number {
-  const { factor } = resolveDisplayUnit(
-    unitOfMeasurementSelected,
-    material.unitOfMeasurement,
-    material.unitConversions,
-  );
-
-  return toBaseQuantity(quantity, factor);
-}
-
 export function getMaterialLineCost(
   quantity: number,
   unitOfMeasurementSelected: MaterialUnit | null | undefined,
@@ -92,20 +77,6 @@ export function getMaterialLineCost(
 ): number {
   const baseQuantity = getEnteredQuantityInBaseUnit(quantity, unitOfMeasurementSelected, material);
   return baseQuantity * getMaterialCostPrice(material, costingMethod);
-}
-
-export function formatQuantityInUnit(
-  enteredQuantity: number,
-  enteredUnit: MaterialUnit,
-  displayUnit: MaterialUnit,
-  material: UnitConvertibleMaterial,
-): string {
-  if (enteredUnit === displayUnit) return formatQuantity(enteredQuantity);
-
-  const baseQuantity = getEnteredQuantityInBaseUnit(enteredQuantity, enteredUnit, material);
-  const { factor } = resolveDisplayUnit(displayUnit, material.unitOfMeasurement, material.unitConversions);
-
-  return formatQuantity(toDisplayQuantity(baseQuantity, factor));
 }
 
 export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): FlattenedBomRow[] {

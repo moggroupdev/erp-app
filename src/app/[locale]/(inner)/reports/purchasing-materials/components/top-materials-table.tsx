@@ -11,8 +11,8 @@ import {
   type MaterialUnit,
 } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
-import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { mapBaseQuantityMaterialRowForDisplay } from "@/lib/helpers/unit-conversion";
 import type { PurchasingMaterialsByMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
 
@@ -82,11 +82,8 @@ export default function TopMaterialsTable({
             </Table.Thead>
             <Table.Tbody>
               {data.map((row, index) => {
-                const { unit, factor } = resolveDisplayUnit(
-                  displayUnit,
-                  row.unitOfMeasurement,
-                  row.unitConversions,
-                );
+                const { unit, factor, displayAvgUnitPrice } = mapBaseQuantityMaterialRowForDisplay(row, displayUnit);
+
                 return (
                   <Table.Tr key={row.materialCode} className="text-gray-600">
                     <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
@@ -106,9 +103,9 @@ export default function TopMaterialsTable({
                       </div>
                     </Table.Td>
                     <Table.Td>{getMaterialUnitLabel(unit, locale)}</Table.Td>
-                    <Table.Td>{formatDisplayQuantity(row.totalQuantity, factor)}</Table.Td>
+                    <Table.Td>{formatBaseQuantityForDisplay(row.totalQuantity, factor)}</Table.Td>
                     <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
-                    <Table.Td>{formatMoney(toDisplayUnitPrice(row.avgUnitPrice, factor))}</Table.Td>
+                    <Table.Td>{formatMoney(displayAvgUnitPrice)}</Table.Td>
                   </Table.Tr>
                 );
               })}

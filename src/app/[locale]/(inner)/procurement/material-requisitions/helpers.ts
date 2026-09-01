@@ -55,7 +55,9 @@ export function getRequisitionStatusLabel(status: RequisitionStatus, translate: 
   }
 }
 
-export function getRequisitionItemLineTotal(item: MaterialPurchaseRequisitionItemDetailed): number | null {
+export function getRequisitionItemDisplayLastPurchasePrice(
+  item: MaterialPurchaseRequisitionItemDetailed,
+): number | null {
   if (item.lastPurchasePrice == null) return null;
 
   const { factor } = resolveDisplayUnit(
@@ -64,7 +66,14 @@ export function getRequisitionItemLineTotal(item: MaterialPurchaseRequisitionIte
     item.material.unitConversions,
   );
 
-  return item.quantityRequested * toDisplayUnitPrice(item.lastPurchasePrice, factor);
+  return toDisplayUnitPrice(item.lastPurchasePrice, factor);
+}
+
+export function getRequisitionItemLineTotal(item: MaterialPurchaseRequisitionItemDetailed): number | null {
+  const displayLastPurchasePrice = getRequisitionItemDisplayLastPurchasePrice(item);
+  if (displayLastPurchasePrice == null) return null;
+
+  return item.quantityRequested * displayLastPurchasePrice;
 }
 
 export function computeRequisitionLastPurchaseTotals(items: MaterialPurchaseRequisitionItemDetailed[]) {

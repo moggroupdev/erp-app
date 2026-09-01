@@ -2,9 +2,12 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "./components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity, formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatBaseQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { resolveDisplayUnit, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import {
+  mapBaseQuantityMaterialRowsForDisplay,
+  sumDisplayQuantitiesWhenUnitsMatch,
+} from "@/lib/helpers/unit-conversion";
 import type {
   PurchasingMaterialsByMaterial,
   PurchasingMaterialsBySupplier,
@@ -50,15 +53,8 @@ export default function PurchasingMaterialsSubCategoryStatsPrintDocument({
   const totalSupplierSpend = suppliers.reduce((sum, row) => sum + row.totalSpend, 0);
   const avgSupplierOrderValue = totalSupplierOrders === 0 ? 0 : totalSupplierSpend / totalSupplierOrders;
   const totalOrderAmount = orders.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
-  const materialDisplayRows = materials.map((row) => {
-    const { unit, factor } = resolveDisplayUnit(materialsDisplayUnit, row.unitOfMeasurement, row.unitConversions);
-    return { row, unit, factor, displayQuantity: toDisplayQuantity(row.totalQuantity, factor) };
-  });
-  const allMaterialUnitsMatch =
-    materialDisplayRows.length > 0 && materialDisplayRows.every((item) => item.unit === materialDisplayRows[0].unit);
-  const totalMaterialQuantity = allMaterialUnitsMatch
-    ? materialDisplayRows.reduce((sum, item) => sum + item.displayQuantity, 0)
-    : null;
+  const materialDisplayRows = mapBaseQuantityMaterialRowsForDisplay(materials, materialsDisplayUnit);
+  const totalMaterialQuantity = sumDisplayQuantitiesWhenUnitsMatch(materialDisplayRows);
   const totalMaterialSpend = materials.reduce((sum, row) => sum + row.totalSpend, 0);
 
   return (
@@ -187,14 +183,14 @@ export default function PurchasingMaterialsSubCategoryStatsPrintDocument({
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
           ]}
-          rows={materialDisplayRows.map(({ row, unit, factor }, index) => [
+          rows={materialDisplayRows.map(({ row, unit, factor, displayAvgUnitPrice }, index) => [
             String(index + 1),
             row.materialTitle,
             row.materialCode,
             getMaterialUnitLabel(unit, locale),
-            formatDisplayQuantity(row.totalQuantity, factor),
+            formatBaseQuantityForDisplay(row.totalQuantity, factor),
             formatMoney(row.totalSpend),
-            formatMoney(toDisplayUnitPrice(row.avgUnitPrice, factor)),
+            formatMoney(displayAvgUnitPrice),
           ])}
           footerRow={[
             "",

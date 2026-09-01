@@ -20,7 +20,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { type Material, type MaterialWithUnitConversions } from "@/types/material";
 import { Button, Table, TextInput } from "@mantine/core";
@@ -298,7 +298,7 @@ export default function Page() {
                                 {toggleButton}
                               </div>
                             </Table.Td>
-                            <Table.Td>{formatDisplayQuantity(material.quantity, factor)}</Table.Td>
+                            <Table.Td>{formatBaseQuantityForDisplay(material.quantity, factor)}</Table.Td>
                             <Table.Td>{formatMoney(toDisplayUnitPrice(material.unitPrice, factor))}</Table.Td>
                             <Table.Td w={0}>
                               <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>

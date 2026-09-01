@@ -91,6 +91,19 @@ export const MATERIAL_UNIT_LABELS_LIST = Object.values(MATERIAL_UNIT_LABELS);
 
 // ================ Helpers ================
 
+export function getMaterialUnitSelectOptions(
+  baseUnit: MaterialUnit | null | undefined,
+  unitConversions: { unit: MaterialUnit }[] = [],
+  locale: Locale,
+): { value: MaterialUnit; label: string }[] {
+  if (!baseUnit) return [];
+
+  const altUnits = unitConversions.map((row) => row.unit);
+  const allUnits = [baseUnit, ...altUnits.filter((unit) => unit !== baseUnit)];
+
+  return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
+}
+
 export function getMaterialUnitLabel(materialUnit: MaterialUnit, locale: Locale) {
   if (!MATERIAL_UNIT_LABELS[materialUnit]) {
     console.warn(`MaterialUnit \`${materialUnit}\` does not exist in predefined labels.`);
