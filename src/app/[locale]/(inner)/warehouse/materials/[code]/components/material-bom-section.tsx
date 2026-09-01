@@ -152,9 +152,10 @@ export default function MaterialBomSection({
 
                   return (
                     <UnitToggle
-                      key={item.id}
+                      key={`${item.id}:${item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement}`}
                       baseUnit={item.material.unitOfMeasurement}
                       unitConversions={item.material.unitConversions}
+                      defaultUnit={item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement}
                     >
                       {({ unit, factor, toggleButton }) => (
                     <Table.Tr className="text-gray-600">

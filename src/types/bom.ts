@@ -20,6 +20,7 @@ export type BomMmComponent = {
   id: string;
   materialCode: string;
   quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit | null;
   notes: string | null;
   material: {
     code: string;
