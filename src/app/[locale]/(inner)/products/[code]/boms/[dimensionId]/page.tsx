@@ -21,8 +21,10 @@ import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/fo
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import {
+  formatQuantityInUnit,
   getBomDisplayTotals,
   getFlattenedMaterialRows,
+  getFlattenedRowLineCost,
   getManufacturingCostRows,
   getMaterialCostPrice,
   type FlattenedBomRow,
@@ -37,7 +39,7 @@ import {
   type CostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity, formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table } from "@mantine/core";
@@ -161,7 +163,7 @@ export default function Page() {
       const department = item.productionSubDepartment;
       const departmentId = department ?? UNCATEGORIZED_ID;
       const title = department ? getProductionSubDepartmentLabel(department, locale) : uncategorizedTitle;
-      const lineCost = item.quantityRequired * getMaterialCostPrice(item.material, costingMethod);
+      const lineCost = getFlattenedRowLineCost(item, costingMethod);
 
       const existing = groups.get(departmentId);
       if (existing) {
@@ -403,7 +405,8 @@ export default function Page() {
                           <Table.Tbody>
                             {group.items.map((item) => {
                               const unitCost = getMaterialCostPrice(item.material, costingMethod);
-                              const lineCost = item.quantityRequired * unitCost;
+                              const lineCost = getFlattenedRowLineCost(item, costingMethod);
+                              const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
                               const zeroValueClass = "text-orange-500";
                               const subCategory = materialCategoryHelpers.getMaterialCategorySubById(
                                 item.material.subCategoryId,
@@ -414,12 +417,10 @@ export default function Page() {
 
                               return (
                                 <UnitToggle
-                                  key={`${item.id}:${item.sourceBomItem?.unitOfMeasurementSelected ?? item.material.unitOfMeasurement}`}
+                                  key={`${item.id}:${enteredUnit}`}
                                   baseUnit={item.material.unitOfMeasurement}
                                   unitConversions={item.material.unitConversions}
-                                  defaultUnit={
-                                    item.sourceBomItem?.unitOfMeasurementSelected ?? item.material.unitOfMeasurement
-                                  }
+                                  defaultUnit={enteredUnit}
                                 >
                                   {({ unit, factor, toggleButton }) => (
                                     <Table.Tr className="text-gray-600">
@@ -456,7 +457,7 @@ export default function Page() {
                                       <Table.Td
                                         className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
                                       >
-                                        {formatDisplayQuantity(item.quantityRequired, factor)}
+                                        {formatQuantityInUnit(item.quantityRequired, enteredUnit, unit, item.material)}
                                       </Table.Td>
                                       <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
                                         {formatMoney(toDisplayUnitPrice(unitCost, factor))}

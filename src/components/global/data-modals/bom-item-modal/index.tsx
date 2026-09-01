@@ -8,7 +8,6 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { resolveDisplayUnit, toDisplayQuantity } from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
@@ -86,17 +85,9 @@ export default function BomItemModal({
   const initialEditValues = useMemo(() => {
     if (!itemToUpdate) return null;
 
-    const materialBaseUnit = itemToUpdate.material.unitOfMeasurement;
-    const selectedUnit = itemToUpdate.unitOfMeasurementSelected ?? materialBaseUnit;
-    const { factor } = resolveDisplayUnit(
-      selectedUnit,
-      materialBaseUnit,
-      itemToUpdate.material.unitConversions ?? [],
-    );
-
     return {
-      unit: selectedUnit,
-      displayQuantity: toDisplayQuantity(itemToUpdate.quantityRequired, factor),
+      unit: itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement,
+      quantityRequired: itemToUpdate.quantityRequired,
       productionSubDepartment: itemToUpdate.productionSubDepartment,
       notes: itemToUpdate.notes,
     };
@@ -105,7 +96,7 @@ export default function BomItemModal({
   useEffect(() => {
     if (initialEditValues) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setQuantityRequired(initialEditValues.displayQuantity);
+      setQuantityRequired(initialEditValues.quantityRequired);
       setProductionSubDepartment(initialEditValues.productionSubDepartment);
       setNotes(initialEditValues.notes || "");
       setUnit(initialEditValues.unit);
@@ -198,7 +189,7 @@ export default function BomItemModal({
     : translate("Add BOM Item", "إضافة بند لقائمة المواد");
 
   const isDataChanged = initialEditValues
-    ? formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.displayQuantity) ||
+    ? formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
       productionSubDepartment !== initialEditValues.productionSubDepartment ||
       unit !== initialEditValues.unit ||
       (notes.trim() || null) !== initialEditValues.notes

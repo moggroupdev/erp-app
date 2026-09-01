@@ -68,6 +68,10 @@ export function formatConversionLabel(
   return `1 ${alternateUnitLabel} = ${formatFactorForDisplay(factor)} ${baseUnitLabel}`;
 }
 
+export function toBaseQuantity(enteredQuantity: number, factor: number): number {
+  return Number(enteredQuantity) * factor;
+}
+
 export function toDisplayQuantity(baseQuantity: number, factor: number): number {
   return factor === 0 ? Number(baseQuantity) : Number(baseQuantity) / factor;
 }

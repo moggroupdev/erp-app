@@ -3,6 +3,7 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getCostingMethodLabel, type CostingMethod } from "@/lib/constants/enums/derived/costing-methods";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import {
+  getFlattenedRowLineCost,
   getMaterialCostPrice,
   type FlattenedBomRow,
   type ManufacturingCostRow,
@@ -10,7 +11,7 @@ import {
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity, formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail } from "./components";
@@ -115,9 +116,10 @@ export default function BomPrintDocument({
               <tbody>
                 {group.items.map((item) => {
                   const unitCost = getMaterialCostPrice(item.material, costingMethod);
-                  const lineCost = item.quantityRequired * unitCost;
-                  const { unit, factor } = resolveDisplayUnit(
-                    item.sourceBomItem?.unitOfMeasurementSelected,
+                  const lineCost = getFlattenedRowLineCost(item, costingMethod);
+                  const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
+                  const { factor } = resolveDisplayUnit(
+                    enteredUnit,
                     item.material.unitOfMeasurement,
                     item.material.unitConversions,
                   );
@@ -129,8 +131,8 @@ export default function BomPrintDocument({
                       <td className="text-gray-600">
                         {getMaterialMainCategoryTitle(item.material.subCategoryId) || "-"}
                       </td>
-                      <td>{getMaterialUnitLabel(unit, locale)}</td>
-                      <td>{formatDisplayQuantity(item.quantityRequired, factor)}</td>
+                      <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
+                      <td>{formatQuantity(item.quantityRequired)}</td>
                       <td>{formatMoney(toDisplayUnitPrice(unitCost, factor))}</td>
                       <td className="font-medium">{formatMoney(lineCost)}</td>
                       <td className="wrap-break-word text-gray-600">
