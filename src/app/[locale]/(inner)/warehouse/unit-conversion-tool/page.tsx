@@ -17,8 +17,8 @@ import {
   toDisplayUnitPrice,
 } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Badge, Button, NumberInput, Table } from "@mantine/core";
-import { Calculator, Layers, Package, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
+import { Button, NumberInput, Table } from "@mantine/core";
+import { Calculator, Layers, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
@@ -58,12 +58,6 @@ type RowComputation = {
   enteredUnit: MaterialUnit;
   enteredQuantity: number | null;
   otherUnits: OtherUnitConversion[];
-};
-
-type QuantityByUnit = {
-  unit: MaterialUnit;
-  quantity: number;
-  rowCount: number;
 };
 
 function createRowKey() {
@@ -386,33 +380,12 @@ export default function Page() {
 
   const totals = useMemo(() => {
     const filled = Array.from(computations.values()).filter(
-      (row): row is RowComputation & { lineValue: number; enteredQuantity: number } =>
-        row.lineValue != null && row.enteredQuantity != null,
+      (row): row is RowComputation & { lineValue: number } => row.lineValue != null,
     );
     const totalValue = filled.reduce((sum, row) => sum + row.lineValue, 0);
-    const itemCount = filled.length;
 
-    const byUnit = new Map<MaterialUnit, QuantityByUnit>();
-    for (const row of filled) {
-      const existing = byUnit.get(row.enteredUnit);
-      if (existing) {
-        existing.quantity += row.enteredQuantity;
-        existing.rowCount += 1;
-      } else {
-        byUnit.set(row.enteredUnit, {
-          unit: row.enteredUnit,
-          quantity: row.enteredQuantity,
-          rowCount: 1,
-        });
-      }
-    }
-
-    const quantitiesByUnit = Array.from(byUnit.values()).sort((a, b) =>
-      getMaterialUnitLabel(a.unit, locale).localeCompare(getMaterialUnitLabel(b.unit, locale), locale),
-    );
-
-    return { totalValue, itemCount, quantitiesByUnit };
-  }, [computations, locale]);
+    return { totalValue };
+  }, [computations]);
 
   function updateRow(key: string, patch: Partial<CalculatorRow>) {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -573,67 +546,27 @@ export default function Page() {
           </div>
 
           <div className="overflow-hidden rounded-3xl border border-gray-200 bg-linear-to-br from-slate-50 via-white to-teal-50/40">
-            <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
-              <div className="flex flex-col gap-4 border-b border-gray-200 p-5 md:border-e md:border-b-0 md:p-6">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
-                    <Wallet size={15} />
-                  </div>
-                  <h5 className="text-sm font-semibold text-gray-800">{translate("Value summary", "ملخص القيمة")}</h5>
+            <div className="flex flex-col gap-4 p-5 md:p-6">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
+                  <Wallet size={15} />
                 </div>
-
-                <div className="flex flex-col gap-1">
-                  <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Grand total", "الإجمالي الكلي")}
-                  </p>
-                  <p className="text-3xl font-semibold tracking-tight text-teal-700">
-                    {formatMoney(totals.totalValue, translation.currency)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {translate(
-                      "Sum of quantity × entered unit price for all filled rows",
-                      "مجموع الكمية × سعر الوحدة المدخل لكل البنود المكتملة",
-                    )}
-                  </p>
-                </div>
+                <h5 className="text-sm font-semibold text-gray-800">{translate("Value summary", "ملخص القيمة")}</h5>
               </div>
 
-              <div className="flex flex-col gap-4 p-5 md:p-6">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
-                    <Package size={15} />
-                  </div>
-                  <h5 className="text-sm font-semibold text-gray-800">
-                    {translate("Quantities by unit", "الكميات حسب الوحدة")}
-                  </h5>
-                </div>
-
-                {totals.quantitiesByUnit.length === 0 ? (
-                  <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-200 bg-white/60 px-4 py-10 text-center">
-                    <Package size={22} className="text-gray-300" />
-                    <p className="text-sm text-gray-500">
-                      {translate(
-                        "Enter quantities to see totals grouped by unit.",
-                        "أدخل الكميات لعرض الإجماليات مجمّعة حسب الوحدة.",
-                      )}
-                    </p>
-                  </div>
-                ) : (
-                  <ul className="flex flex-col gap-2">
-                    {totals.quantitiesByUnit.map((group) => (
-                      <li
-                        key={group.unit}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3"
-                      >
-                        <Badge size="md" variant="light" color="indigo" radius="md">
-                          {getMaterialUnitLabel(group.unit, locale)}
-                        </Badge>
-
-                        <p className="shrink-0 text-lg font-semibold text-gray-900">{formatQuantity(group.quantity)}</p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+              <div className="flex flex-col gap-1">
+                <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  {translate("Grand total", "الإجمالي الكلي")}
+                </p>
+                <p className="text-3xl font-semibold tracking-tight text-teal-700">
+                  {formatMoney(totals.totalValue, translation.currency)}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {translate(
+                    "Sum of quantity × entered unit price for all filled rows",
+                    "مجموع الكمية × سعر الوحدة المدخل لكل البنود المكتملة",
+                  )}
+                </p>
               </div>
             </div>
           </div>
