@@ -10,10 +10,15 @@ import materialsApi from "@/lib/api/materials";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { getEnteredQuantityInBaseUnit, resolveDisplayUnit, toDisplayQuantity } from "@/lib/helpers/unit-conversion";
+import {
+  getEnteredQuantityInBaseUnit,
+  resolveDisplayUnit,
+  toDisplayQuantity,
+  toDisplayUnitPrice,
+} from "@/lib/helpers/unit-conversion";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Table } from "@mantine/core";
-import { Calculator, Layers, Package, Plus, Ruler, Trash2, Wallet } from "lucide-react";
+import { Calculator, Layers, Package, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
@@ -29,13 +34,19 @@ type CalculatorRow = {
   unitPrice: number | "";
 };
 
+type OtherUnitConversion = {
+  unit: MaterialUnit;
+  quantity: number | null;
+  unitPrice: number | null;
+};
+
 type RowComputation = {
   key: string;
-  baseQuantity: number;
-  lineValue: number;
+  baseQuantity: number | null;
+  lineValue: number | null;
   enteredUnit: MaterialUnit;
-  enteredQuantity: number;
-  conversions: { unit: MaterialUnit; quantity: number }[];
+  enteredQuantity: number | null;
+  otherUnits: OtherUnitConversion[];
 };
 
 type QuantityByUnit = {
@@ -63,12 +74,14 @@ function isEmptyRow(row: CalculatorRow) {
   return row.materialCode === null && row.quantity === "" && row.unitPrice === "";
 }
 
-function isFilledRow(row: CalculatorRow): row is CalculatorRow & {
+function hasConversionInputs(row: CalculatorRow): row is CalculatorRow & {
   material: MaterialWithUnitConversionsSelection;
   enteredUnit: MaterialUnit;
-  quantity: number;
 } {
-  return !!row.material && !!row.enteredUnit && row.quantity !== "" && Number(row.quantity) > 0;
+  if (!row.material || !row.enteredUnit) return false;
+  const hasQuantity = row.quantity !== "" && Number(row.quantity) > 0;
+  const hasUnitPrice = row.unitPrice !== "";
+  return hasQuantity || hasUnitPrice;
 }
 
 function getRowUnitOptions(row: CalculatorRow, locale: Locale) {
@@ -80,33 +93,138 @@ function showUnitSelect(row: CalculatorRow) {
   return !!row.material && row.material.unitConversions.length > 0;
 }
 
-function computeRow(row: CalculatorRow): RowComputation | null {
-  if (!isFilledRow(row)) return null;
-
-  const baseQuantity = getEnteredQuantityInBaseUnit(Number(row.quantity), row.enteredUnit, row.material);
-  const enteredUnitPrice = row.unitPrice === "" ? 0 : Number(row.unitPrice);
-  const lineValue = Number(row.quantity) * enteredUnitPrice;
-
-  const knownUnits: MaterialUnit[] = [
-    row.material.unitOfMeasurement,
-    ...row.material.unitConversions.map((c) => c.unit).filter((u) => u !== row.material!.unitOfMeasurement),
+function getKnownUnits(material: MaterialWithUnitConversionsSelection): MaterialUnit[] {
+  return [
+    material.unitOfMeasurement,
+    ...material.unitConversions.map((c) => c.unit).filter((u) => u !== material.unitOfMeasurement),
   ];
+}
 
-  const conversions = knownUnits
+function computeOtherUnits(
+  row: CalculatorRow & { material: MaterialWithUnitConversionsSelection; enteredUnit: MaterialUnit },
+): OtherUnitConversion[] {
+  const hasQuantity = row.quantity !== "" && Number(row.quantity) > 0;
+  const hasUnitPrice = row.unitPrice !== "";
+
+  const { factor: enteredFactor } = resolveDisplayUnit(
+    row.enteredUnit,
+    row.material.unitOfMeasurement,
+    row.material.unitConversions,
+  );
+
+  const baseQuantity = hasQuantity
+    ? getEnteredQuantityInBaseUnit(Number(row.quantity), row.enteredUnit, row.material)
+    : null;
+  const baseUnitPrice = hasUnitPrice ? Number(row.unitPrice) / enteredFactor : null;
+
+  return getKnownUnits(row.material)
     .filter((unit) => unit !== row.enteredUnit)
     .map((unit) => {
       const { factor } = resolveDisplayUnit(unit, row.material.unitOfMeasurement, row.material.unitConversions);
-      return { unit, quantity: toDisplayQuantity(baseQuantity, factor) };
-    });
+      return {
+        unit,
+        quantity: baseQuantity != null ? toDisplayQuantity(baseQuantity, factor) : null,
+        unitPrice: baseUnitPrice != null ? toDisplayUnitPrice(baseUnitPrice, factor) : null,
+      };
+    })
+    .filter((item) => item.quantity != null || item.unitPrice != null);
+}
+
+function computeRow(row: CalculatorRow): RowComputation | null {
+  if (!hasConversionInputs(row)) return null;
+
+  const hasQuantity = row.quantity !== "" && Number(row.quantity) > 0;
+  const hasUnitPrice = row.unitPrice !== "";
 
   return {
     key: row.key,
-    baseQuantity,
-    lineValue,
+    baseQuantity: hasQuantity ? getEnteredQuantityInBaseUnit(Number(row.quantity), row.enteredUnit, row.material) : null,
+    lineValue: hasQuantity && hasUnitPrice ? Number(row.quantity) * Number(row.unitPrice) : null,
     enteredUnit: row.enteredUnit,
-    enteredQuantity: Number(row.quantity),
-    conversions,
+    enteredQuantity: hasQuantity ? Number(row.quantity) : null,
+    otherUnits: computeOtherUnits(row),
   };
+}
+
+function ConversionUnitCard({
+  unit,
+  quantity,
+  unitPrice,
+  locale,
+  currency,
+}: {
+  unit: MaterialUnit;
+  quantity: number | null;
+  unitPrice: number | null;
+  locale: Locale;
+  currency: string;
+}) {
+  const { translate } = useI18n();
+  const unitLabel = getMaterialUnitLabel(unit, locale);
+
+  return (
+    <div className="relative min-w-36 overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="flex flex-col gap-2 px-3 py-2.5 ps-3.5">
+        <div className="flex items-center gap-1.5">
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+            <Ruler size={11} strokeWidth={2.25} />
+          </div>
+          <span className="text-xs font-semibold tracking-wide text-indigo-700 uppercase">{unitLabel}</span>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          {quantity != null ? (
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-2 py-1.5">
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <Scale size={12} strokeWidth={2} />
+                <span className="text-[11px] font-medium">{translate("Qty", "الكمية")}</span>
+              </div>
+              <span className="text-xs font-semibold text-gray-900 tabular-nums">{formatQuantity(quantity)}</span>
+            </div>
+          ) : null}
+
+          {unitPrice != null ? (
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-teal-50/70 px-2 py-1.5">
+              <div className="flex items-center gap-1.5 text-teal-700/80">
+                <Tag size={12} strokeWidth={2} />
+                <span className="text-[11px] font-medium">{translate("Unit Price", "سعر الوحدة")}</span>
+              </div>
+              <span className="text-xs font-semibold text-teal-800 tabular-nums">{formatMoney(unitPrice, currency)}</span>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OtherUnitsCell({
+  computation,
+  locale,
+  currency,
+}: {
+  computation: RowComputation | null;
+  locale: Locale;
+  currency: string;
+}) {
+  if (!computation || computation.otherUnits.length === 0) {
+    return <span className="text-sm text-gray-400">—</span>;
+  }
+
+  return (
+    <div className="flex flex-nowrap gap-2 overflow-x-auto py-0.5">
+      {computation.otherUnits.map((item) => (
+        <ConversionUnitCard
+          key={item.unit}
+          unit={item.unit}
+          quantity={item.quantity}
+          unitPrice={item.unitPrice}
+          locale={locale}
+          currency={currency}
+        />
+      ))}
+    </div>
+  );
 }
 
 function ItemRow({
@@ -206,21 +324,15 @@ function ItemRow({
           />
         ) : null}
       </Table.Td>
-      <Table.Td>
-        {computation && computation.conversions.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {computation.conversions.map((item) => (
-              <Badge key={item.unit} size="sm" variant="light" radius="md">
-                {formatQuantity(item.quantity)} {getMaterialUnitLabel(item.unit, locale)}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <span className="text-sm text-gray-400">—</span>
-        )}
+      <Table.Td className="py-2! align-top!">
+        <OtherUnitsCell computation={computation} locale={locale} currency={translation.currency} />
       </Table.Td>
       <Table.Td className="font-medium text-gray-800">
-        {computation ? formatMoney(computation.lineValue, translation.currency) : <span className="text-gray-400">—</span>}
+        {computation?.lineValue != null ? (
+          formatMoney(computation.lineValue, translation.currency)
+        ) : (
+          <span className="text-gray-400">—</span>
+        )}
       </Table.Td>
       <Table.Td className="w-[2.5%]">
         <Button
@@ -262,7 +374,10 @@ export default function Page() {
   }, [rows]);
 
   const totals = useMemo(() => {
-    const filled = Array.from(computations.values());
+    const filled = Array.from(computations.values()).filter(
+      (row): row is RowComputation & { lineValue: number; enteredQuantity: number } =>
+        row.lineValue != null && row.enteredQuantity != null,
+    );
     const totalValue = filled.reduce((sum, row) => sum + row.lineValue, 0);
     const itemCount = filled.length;
 
@@ -386,11 +501,11 @@ export default function Page() {
                   <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                   </Table.Th>
-                  <Table.Th className="w-[18%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Converted Quantities", "الكميات المحوّلة")}
+                  <Table.Th className="w-[24%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Other Units", "الوحدات الأخرى")}
                   </Table.Th>
-                  <Table.Th className="w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate(`Line Value (${translation.currency})`, `قيمة البند (${translation.currency})`)}
+                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
                   </Table.Th>
                   <Table.Th className="w-[3%]" />
                 </Table.Tr>
