@@ -37,6 +37,7 @@ export const PERMISSION_VALUES = [
   "update_material",
   "set_material_market_price",
   "print_materials_list",
+  "use_unit_conversion_tool",
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
   "update_manufactured_material_bom",
@@ -368,6 +369,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "طباعة قائمة المواد",
     },
   },
+  use_unit_conversion_tool: {
+    value: "use_unit_conversion_tool",
+    label: {
+      en: "Use Unit Calculator",
+      ar: "استخدام حاسبة الوحدات",
+    },
+  },
   add_manufactured_material_bom: {
     value: "add_manufactured_material_bom",
     label: {
@@ -628,6 +636,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "update_material",
       "set_material_market_price",
       "print_materials_list",
+      "use_unit_conversion_tool",
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",
       "update_manufactured_material_bom",

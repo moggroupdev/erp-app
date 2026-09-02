@@ -16,6 +16,7 @@ import {
   Home,
   PackageSearch,
   ReceiptText,
+  Ruler,
   Shield,
   ShoppingCart,
   Truck,
@@ -141,6 +142,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         href: "/warehouse/materials",
         icon: PackageSearch,
         requiredPermission: PERMISSIONS.READ_MATERIALS,
+      },
+      {
+        label: { en: "Unit Calculator", ar: "حاسبة الوحدات" },
+        href: "/warehouse/unit-conversion-tool",
+        icon: Ruler,
+        requiredPermission: PERMISSIONS.USE_UNIT_CONVERSION_TOOL,
       },
       {
         label: { en: "Inventory Transactions", ar: "حركات المخزون" },
