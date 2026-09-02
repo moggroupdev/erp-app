@@ -49,6 +49,28 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
     },
     { key: translate("Quantity", "الكمية"), value: material.quantity },
     { key: translate("Unit Price", "سعر الوحدة"), value: formatMoney(material.unitPrice, translation.currency) },
+    ...(material.marketUnitPrice != null
+      ? [
+          {
+            key: translate("Market Price", "سعر السوق"),
+            value: formatMoney(material.marketUnitPrice, translation.currency),
+          },
+          {
+            key: translate("Market Price Set At", "تاريخ تحديد سعر السوق"),
+            value: formatDateAndTime(material.marketUnitPriceSetAt!, locale),
+          },
+          {
+            key: translate("Market Price Set By", "حدد سعر السوق بواسطة"),
+            value: (
+              <CreatorLink
+                creator={
+                  typeof material.marketUnitPriceSetBy === "object" ? material.marketUnitPriceSetBy : null
+                }
+              />
+            ),
+          },
+        ]
+      : []),
     {
       key: translate("Minimum Stock", "الحد الأدنى للمخزون"),
       value: material.minimumStock ?? <EmptyValue />,

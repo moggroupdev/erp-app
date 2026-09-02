@@ -35,6 +35,7 @@ export const PERMISSION_VALUES = [
   "read_materials",
   "add_material",
   "update_material",
+  "set_material_market_price",
   "print_materials_list",
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
@@ -353,6 +354,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث المادة",
     },
   },
+  set_material_market_price: {
+    value: "set_material_market_price",
+    label: {
+      en: "Set Material Market Price",
+      ar: "تعيين سعر السوق للمادة",
+    },
+  },
   print_materials_list: {
     value: "print_materials_list",
     label: {
@@ -618,6 +626,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_materials",
       "add_material",
       "update_material",
+      "set_material_market_price",
       "print_materials_list",
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",

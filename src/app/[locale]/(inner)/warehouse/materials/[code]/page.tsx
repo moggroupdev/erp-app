@@ -15,13 +15,14 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
 import { Button } from "@mantine/core";
-import { Pencil } from "lucide-react";
+import { Pencil, Tag } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import MaterialModal from "@/components/global/data-modals/material-modal";
+import MaterialMarketPriceModal from "./components/material-market-price-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
 import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
@@ -64,6 +65,7 @@ export default function Page() {
   // ========================= MODALS =========================
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
+  const [marketPriceModalOpened, { open: openMarketPriceModal, close: closeMarketPriceModal }] = useDisclosure(false);
 
   return (
     <LayoutBox
@@ -77,6 +79,13 @@ export default function Page() {
               <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
                 <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
                   {translate("Edit", "تعديل")}
+                </Button>
+              </PermissionGuard>
+            )}
+            {material && (
+              <PermissionGuard permission={PERMISSIONS.SET_MATERIAL_MARKET_PRICE}>
+                <Button onClick={openMarketPriceModal} variant="light" color="teal" radius="md" leftSection={<Tag size={15} />}>
+                  {translate("Set Market Price", "تعيين سعر السوق")}
                 </Button>
               </PermissionGuard>
             )}
@@ -101,6 +110,13 @@ export default function Page() {
               materialToUpdate={material}
               setMaterialToUpdate={() => {}}
               isForList={false}
+            />
+
+            <MaterialMarketPriceModal
+              opened={marketPriceModalOpened}
+              close={closeMarketPriceModal}
+              materialCode={code}
+              currentValue={material.marketUnitPrice}
             />
 
             <MaterialDetails material={material} />

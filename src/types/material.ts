@@ -14,9 +14,12 @@ export type Material = {
   openingUnitPrice: number | null;
   openingQuantity: number | null;
   minimumStock: number | null;
+  marketUnitPrice: number | null;
+  marketUnitPriceSetAt: Date | null;
+  marketUnitPriceSetBy: string | { id: string; name: string } | null;
   deletedAt: Date | null;
   createdAt: Date;
-  createdBy: string;
+  createdBy: string | { id: string; name: string };
 };
 
 export type MaterialUnitConversion = {
@@ -55,4 +58,8 @@ export type UpdateMaterialDto = Partial<CreateMaterialDto>;
 export type CreateMaterialUnitConversionDto = {
   unit: MaterialUnit;
   conversionFactorToBase: number;
+};
+
+export type SetMaterialMarketPriceDto = {
+  marketUnitPrice: number;
 };
