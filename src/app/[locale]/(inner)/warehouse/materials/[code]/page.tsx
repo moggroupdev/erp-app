@@ -26,6 +26,7 @@ import MaterialMarketPriceModal from "./components/material-market-price-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
 import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
+import MaterialQuickLinks from "./components/material-quick-links";
 
 const PAGE_TITLE = { en: "Material Details", ar: "تفاصيل المادة" };
 
@@ -126,6 +127,8 @@ export default function Page() {
             {isManufacturedMaterial(material.materialType) && (
               <MaterialBomSection material={material} bom={bomQuery.data || null} />
             )}
+
+            <MaterialQuickLinks materialCode={code} />
           </>
         )
       )}
