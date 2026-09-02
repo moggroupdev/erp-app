@@ -25,6 +25,17 @@ import SelectMaterial from "@/components/global/selections/remote-based/select-m
 
 const PAGE_TITLE = { en: "Unit Calculator", ar: "حاسبة الوحدات" };
 
+const TABLE_COLUMN_CLASS = {
+  index: "min-w-10 w-10",
+  material: "min-w-112",
+  quantity: "min-w-20",
+  unit: "min-w-20",
+  unitPrice: "min-w-28",
+  otherUnits: "min-w-100",
+  lineValue: "min-w-32",
+  actions: "min-w-12 w-12",
+} as const;
+
 type CalculatorRow = {
   key: string;
   materialCode: string | null;
@@ -250,8 +261,8 @@ function ItemRow({
 
   return (
     <Table.Tr className="text-nowrap">
-      <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td className="max-w-0 transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className={`${TABLE_COLUMN_CLASS.index} text-center text-xs font-medium text-gray-500`}>{index + 1}</Table.Td>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.material} transition-colors focus-within:bg-teal-50/60`}>
         <SelectMaterial
           value={row.materialCode}
           setValue={(next) => {
@@ -267,7 +278,7 @@ function ItemRow({
           withBrowseModal
         />
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className={`${TABLE_COLUMN_CLASS.quantity} transition-colors focus-within:bg-teal-50/60`}>
         {row.material ? (
           <NumberInput
             value={row.quantity}
@@ -283,7 +294,7 @@ function ItemRow({
           />
         ) : null}
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className={`${TABLE_COLUMN_CLASS.unit} transition-colors focus-within:bg-teal-50/60`}>
         {row.material ? (
           showUnitSelect(row) ? (
             <DataSelect
@@ -308,7 +319,7 @@ function ItemRow({
           )
         ) : null}
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className={`${TABLE_COLUMN_CLASS.unitPrice} transition-colors focus-within:bg-teal-50/60`}>
         {row.material ? (
           <NumberInput
             value={row.unitPrice}
@@ -324,17 +335,17 @@ function ItemRow({
           />
         ) : null}
       </Table.Td>
-      <Table.Td className="py-2! align-top!">
+      <Table.Td className={`${TABLE_COLUMN_CLASS.otherUnits} py-2! align-top!`}>
         <OtherUnitsCell computation={computation} locale={locale} currency={translation.currency} />
       </Table.Td>
-      <Table.Td className="font-medium text-gray-800">
+      <Table.Td className={`${TABLE_COLUMN_CLASS.lineValue} font-medium text-gray-800`}>
         {computation?.lineValue != null ? (
           formatMoney(computation.lineValue, translation.currency)
         ) : (
           <span className="text-gray-400">—</span>
         )}
       </Table.Td>
-      <Table.Td className="w-[2.5%]">
+      <Table.Td className={TABLE_COLUMN_CLASS.actions}>
         <Button
           type="button"
           variant="subtle"
@@ -485,29 +496,29 @@ export default function Page() {
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-gray-200">
-            <Table withColumnBorders className="w-full table-fixed text-nowrap" horizontalSpacing="xs" verticalSpacing="xs">
+            <Table withColumnBorders className="w-full min-w-max text-nowrap" horizontalSpacing="xs" verticalSpacing="xs">
               <Table.Thead className="bg-gray-50">
                 <Table.Tr className="h-10">
-                  <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
-                  <Table.Th className="w-[38%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className={`${TABLE_COLUMN_CLASS.index} text-center! text-gray-500`}>#</Table.Th>
+                  <Table.Th className={`${TABLE_COLUMN_CLASS.material} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
                     {translate("Material", "المادة")}
                   </Table.Th>
-                  <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className={`${TABLE_COLUMN_CLASS.quantity} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
                     {translate("Quantity", "الكمية")}
                   </Table.Th>
-                  <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className={`${TABLE_COLUMN_CLASS.unit} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
                     {translate("Unit", "الوحدة")}
                   </Table.Th>
-                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className={`${TABLE_COLUMN_CLASS.unitPrice} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
                     {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                   </Table.Th>
-                  <Table.Th className="w-[24%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className={`${TABLE_COLUMN_CLASS.otherUnits} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
                     {translate("Other Units", "الوحدات الأخرى")}
                   </Table.Th>
-                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className={`${TABLE_COLUMN_CLASS.lineValue} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
                     {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
                   </Table.Th>
-                  <Table.Th className="w-[3%]" />
+                  <Table.Th className={TABLE_COLUMN_CLASS.actions} />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -527,8 +538,8 @@ export default function Page() {
               </Table.Tbody>
               <Table.Tfoot className="bg-gray-50">
                 <Table.Tr className="h-10">
-                  <Table.Td />
-                  <Table.Td>
+                  <Table.Td className={TABLE_COLUMN_CLASS.index} />
+                  <Table.Td className={TABLE_COLUMN_CLASS.material}>
                     <Button
                       type="button"
                       variant="light"
@@ -541,12 +552,12 @@ export default function Page() {
                       {translate("Add Row", "إضافة صف")}
                     </Button>
                   </Table.Td>
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
+                  <Table.Td className={TABLE_COLUMN_CLASS.quantity} />
+                  <Table.Td className={TABLE_COLUMN_CLASS.unit} />
+                  <Table.Td className={TABLE_COLUMN_CLASS.unitPrice} />
+                  <Table.Td className={TABLE_COLUMN_CLASS.otherUnits} />
+                  <Table.Td className={TABLE_COLUMN_CLASS.lineValue} />
+                  <Table.Td className={TABLE_COLUMN_CLASS.actions} />
                 </Table.Tr>
               </Table.Tfoot>
             </Table>
