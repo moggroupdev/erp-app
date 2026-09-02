@@ -15,7 +15,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
-import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -83,7 +83,7 @@ function ItemRow({
   locale: Locale;
   usedMaterialCodes: string[];
   canRemove: boolean;
-  onMaterialSelect: (key: string, material: MaterialWithUnitConversions | null) => void;
+  onMaterialSelect: (key: string, material: MaterialWithUnitConversionsSelection | null) => void;
   onUpdate: (key: string, patch: Partial<ItemDraftRow>) => void;
   onRemove: (key: string) => void;
 }) {
@@ -237,7 +237,7 @@ export default function Page() {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
-  function handleMaterialSelect(key: string, material: MaterialWithUnitConversions | null) {
+  function handleMaterialSelect(key: string, material: MaterialWithUnitConversionsSelection | null) {
     updateRow(key, {
       materialCode: material?.code ?? null,
       materialTitle: material?.title ?? "",

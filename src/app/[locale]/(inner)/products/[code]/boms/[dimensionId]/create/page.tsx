@@ -18,7 +18,7 @@ import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { isManufacturedMaterial, isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
-import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -160,7 +160,7 @@ export default function Page() {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
-  function handleMaterialSelect(key: string, material: MaterialWithUnitConversions | null) {
+  function handleMaterialSelect(key: string, material: MaterialWithUnitConversionsSelection | null) {
     updateRow(key, {
       materialCode: material?.code ?? null,
       materialTitle: material?.title ?? "",

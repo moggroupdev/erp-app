@@ -13,7 +13,7 @@ import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
-import type { MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -43,7 +43,7 @@ export default function BomItemModal({
   const [validationError, setValidationError] = useState("");
 
   const [materialCode, setMaterialCode] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);

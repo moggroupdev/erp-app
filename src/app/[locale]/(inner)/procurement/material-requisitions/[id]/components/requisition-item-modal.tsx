@@ -12,7 +12,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
-import type { MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, TextInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -40,7 +40,7 @@ export default function RequisitionItemModal({
   const [validationError, setValidationError] = useState("");
 
   const [materialCode, setMaterialCode] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
   const [unitOfMeasurementSelected, setUnitOfMeasurementSelected] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number | string>("");
   const [notes, setNotes] = useState("");

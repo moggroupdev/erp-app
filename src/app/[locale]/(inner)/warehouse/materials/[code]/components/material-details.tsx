@@ -4,11 +4,11 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
-import { type MaterialWithCreator } from "@/types/material";
+import { type MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import { PackageSearch } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
-export default function MaterialDetails({ material }: { material: MaterialWithCreator }) {
+export default function MaterialDetails({ material }: { material: MaterialWithCreatorAndUnitConversions }) {
   const { locale, translate, translation } = useI18n();
   const { helpers } = useMaterialCategories();
 
@@ -61,13 +61,7 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
           },
           {
             key: translate("Market Price Set By", "حدد سعر السوق بواسطة"),
-            value: (
-              <CreatorLink
-                creator={
-                  typeof material.marketUnitPriceSetBy === "object" ? material.marketUnitPriceSetBy : null
-                }
-              />
-            ),
+            value: <CreatorLink creator={material.marketUnitPriceSetBy} />,
           },
         ]
       : []),

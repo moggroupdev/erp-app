@@ -16,10 +16,10 @@ export type Material = {
   minimumStock: number | null;
   marketUnitPrice: number | null;
   marketUnitPriceSetAt: Date | null;
-  marketUnitPriceSetBy: string | { id: string; name: string } | null;
+  marketUnitPriceSetBy: string | null;
   deletedAt: Date | null;
   createdAt: Date;
-  createdBy: string | { id: string; name: string };
+  createdBy: string;
 };
 
 export type MaterialUnitConversion = {
@@ -28,18 +28,24 @@ export type MaterialUnitConversion = {
   unit: MaterialUnit;
   conversionFactorToBase: number;
   createdAt: Date;
-  createdBy: string | { id: string; name: string };
+  createdBy: string;
 };
 
 export type MaterialUnitConversionSummary = Pick<MaterialUnitConversion, "id" | "unit" | "conversionFactorToBase">;
 
-export type MaterialWithCreator = Material & { createdBy: { id: string; name: string } };
+export type MaterialWithCreator = Omit<Material, "createdBy" | "marketUnitPriceSetBy"> & {
+  createdBy: { id: string; name: string };
+  marketUnitPriceSetBy: { id: string; name: string } | null;
+};
 
 export type MaterialWithUnitConversions = Material & { unitConversions: MaterialUnitConversionSummary[] };
 
 export type MaterialWithCreatorAndUnitConversions = MaterialWithCreator & {
   unitConversions: MaterialUnitConversionSummary[];
 };
+
+/** List rows or detail fetches in material selection flows. */
+export type MaterialWithUnitConversionsSelection = MaterialWithUnitConversions | MaterialWithCreatorAndUnitConversions;
 
 // ==================== DTOs ====================
 
