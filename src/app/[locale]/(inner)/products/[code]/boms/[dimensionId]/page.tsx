@@ -54,6 +54,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom-print-document";
+import BomZeroPricePrintDocument from "@/components/documents/bom-zero-price-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
 
@@ -153,6 +154,52 @@ export default function Page() {
       costingMethod,
     });
   }, [materialRows, manufacturingRows, bom?.product.pricingFactor, costingMethod]);
+
+  const zeroPriceDepartmentBreakdown = useMemo((): Omit<DepartmentBreakdown, "totalCost" | "sharePercent">[] => {
+    const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
+    const groups = new Map<string, Omit<DepartmentBreakdown, "totalCost" | "sharePercent">>();
+
+    for (const item of materialRows) {
+      if (getMaterialCostPrice(item.material, costingMethod) !== 0) continue;
+
+      const department = item.productionSubDepartment;
+      const departmentId = department ?? UNCATEGORIZED_ID;
+      const title = department ? getProductionSubDepartmentLabel(department, locale) : uncategorizedTitle;
+
+      const existing = groups.get(departmentId);
+      if (existing) {
+        existing.itemCount += 1;
+        existing.items.push(item);
+      } else {
+        groups.set(departmentId, {
+          departmentId,
+          title,
+          itemCount: 1,
+          items: [item],
+        });
+      }
+    }
+
+    const rows = Array.from(groups.values()).map((group) => ({
+      ...group,
+      items: [...group.items].sort((a, b) => {
+        const categoryCompare = getMaterialMainCategoryTitle(a.material.subCategoryId).localeCompare(
+          getMaterialMainCategoryTitle(b.material.subCategoryId),
+          locale,
+        );
+
+        return categoryCompare || a.material.title.localeCompare(b.material.title, locale);
+      }),
+    }));
+
+    rows.sort((a, b) => b.itemCount - a.itemCount || a.title.localeCompare(b.title, locale));
+    return rows;
+  }, [materialRows, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
+
+  const zeroPriceItemCount = useMemo(
+    () => zeroPriceDepartmentBreakdown.reduce((sum, group) => sum + group.itemCount, 0),
+    [zeroPriceDepartmentBreakdown],
+  );
 
   const departmentBreakdown = useMemo((): DepartmentBreakdown[] => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
@@ -340,6 +387,25 @@ export default function Page() {
                         }))}
                       />
                     </div>
+
+                    {zeroPriceItemCount > 0 && (
+                      <PrintDocument
+                        title={`${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
+                        buttonLabel={translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
+                        buttonType="button"
+                        paperWidth={210}
+                        paperHeight={297}
+                      >
+                        <BomZeroPricePrintDocument
+                          bom={bom}
+                          departmentBreakdown={zeroPriceDepartmentBreakdown}
+                          mainCategoryTitle={productMainCategory?.title || null}
+                          getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
+                          costingMethod={costingMethod}
+                          totalItemCount={zeroPriceItemCount}
+                        />
+                      </PrintDocument>
+                    )}
 
                     <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
                       <Button
