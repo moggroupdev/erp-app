@@ -139,10 +139,17 @@ export default function SelectMaterial({
 
   function getSelectedLabel() {
     if (selectedMaterial && selectedMaterial.code === value) {
-      return `${selectedMaterial.title} - ${selectedMaterial.code}`;
+      return selectedMaterial.title;
     }
 
-    return data.find((option) => option.value === value)?.label;
+    const material = materials.find((item) => item.code === value);
+    if (material) return material.title;
+
+    const optionLabel = data.find((option) => option.value === value)?.label;
+    if (!optionLabel) return undefined;
+
+    const separatorIndex = optionLabel.lastIndexOf(" - ");
+    return separatorIndex >= 0 ? optionLabel.slice(0, separatorIndex) : optionLabel;
   }
 
   function captureBrowseKeyword() {
