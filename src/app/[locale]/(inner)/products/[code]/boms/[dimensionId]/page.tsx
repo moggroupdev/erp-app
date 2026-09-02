@@ -302,23 +302,53 @@ export default function Page() {
         sideElements: (
           <div className="flex items-center gap-3">
             {bom && hasBom && (
-              <PrintDocument
-                title={`${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
-                buttonLabel={translate("Print", "طباعة")}
-                buttonType="icon"
-                paperWidth={210}
-                paperHeight={297}
-              >
-                <BomPrintDocument
-                  bom={bom}
-                  totals={totals}
-                  departmentBreakdown={departmentBreakdown}
-                  manufacturingRows={manufacturingRows}
-                  mainCategoryTitle={productMainCategory?.title || null}
-                  getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
-                  costingMethod={costingMethod}
-                />
-              </PrintDocument>
+              <Menu offset={12} withinPortal withArrow>
+                <Menu.Target>
+                  <button
+                    title={translate("Print", "طباعة")}
+                    className="rounded-md text-xs text-gray-800 hover:text-gray-800/75"
+                  >
+                    <Printer size={15} />
+                  </button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <PrintDocument
+                    title={`${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
+                    buttonLabel={translate("Print BOM", "طباعة قائمة المواد")}
+                    buttonType="menu"
+                    paperWidth={210}
+                    paperHeight={297}
+                  >
+                    <BomPrintDocument
+                      bom={bom}
+                      totals={totals}
+                      departmentBreakdown={departmentBreakdown}
+                      manufacturingRows={manufacturingRows}
+                      mainCategoryTitle={productMainCategory?.title || null}
+                      getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
+                      costingMethod={costingMethod}
+                    />
+                  </PrintDocument>
+                  {zeroPriceItemCount > 0 && (
+                    <PrintDocument
+                      title={`${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
+                      buttonLabel={translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
+                      buttonType="menu"
+                      paperWidth={210}
+                      paperHeight={297}
+                    >
+                      <BomZeroPricePrintDocument
+                        bom={bom}
+                        departmentBreakdown={zeroPriceDepartmentBreakdown}
+                        mainCategoryTitle={productMainCategory?.title || null}
+                        getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
+                        costingMethod={costingMethod}
+                        totalItemCount={zeroPriceItemCount}
+                      />
+                    </PrintDocument>
+                  )}
+                </Menu.Dropdown>
+              </Menu>
             )}
             <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} />
           </div>
@@ -387,25 +417,6 @@ export default function Page() {
                         }))}
                       />
                     </div>
-
-                    {zeroPriceItemCount > 0 && (
-                      <PrintDocument
-                        title={`${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
-                        buttonLabel={translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
-                        buttonType="button"
-                        paperWidth={210}
-                        paperHeight={297}
-                      >
-                        <BomZeroPricePrintDocument
-                          bom={bom}
-                          departmentBreakdown={zeroPriceDepartmentBreakdown}
-                          mainCategoryTitle={productMainCategory?.title || null}
-                          getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
-                          costingMethod={costingMethod}
-                          totalItemCount={zeroPriceItemCount}
-                        />
-                      </PrintDocument>
-                    )}
 
                     <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
                       <Button
@@ -522,7 +533,12 @@ export default function Page() {
                                       <Table.Td
                                         className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
                                       >
-                                        {formatEnteredQuantityForDisplay(item.quantityRequired, enteredUnit, unit, item.material)}
+                                        {formatEnteredQuantityForDisplay(
+                                          item.quantityRequired,
+                                          enteredUnit,
+                                          unit,
+                                          item.material,
+                                        )}
                                       </Table.Td>
                                       <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
                                         {formatMoney(toDisplayUnitPrice(unitCost, factor))}
