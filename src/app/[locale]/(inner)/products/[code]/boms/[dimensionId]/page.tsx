@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
@@ -69,6 +69,8 @@ type DepartmentBreakdown = {
   items: FlattenedBomRow[];
 };
 
+type BomPrintVariant = "full" | "zero-price";
+
 export default function Page() {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
@@ -103,6 +105,14 @@ export default function Page() {
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
   const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.AVERAGE_PRICE);
+  const [printVariant, setPrintVariant] = useState<BomPrintVariant>("full");
+  const printHandlerRef = useRef<(() => void) | null>(null);
+
+  const triggerPrint = useCallback(async (variant: BomPrintVariant) => {
+    setPrintVariant(variant);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    printHandlerRef.current?.();
+  }, []);
 
   const deleteMutation = useMutation({
     mutationFn: (itemId: string) => bomsApi.deleteItem({ privateRequest, itemId }),
@@ -302,23 +312,54 @@ export default function Page() {
         sideElements: (
           <div className="flex items-center gap-3">
             {bom && hasBom && (
-              <Menu offset={12} withinPortal withArrow>
-                <Menu.Target>
-                  <button
-                    title={translate("Print", "طباعة")}
-                    className="rounded-md text-xs text-gray-800 hover:text-gray-800/75"
-                  >
-                    <Printer size={15} />
-                  </button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <PrintDocument
-                    title={`${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
-                    buttonLabel={translate("Print BOM", "طباعة قائمة المواد")}
-                    buttonType="menu"
-                    paperWidth={210}
-                    paperHeight={297}
-                  >
+              <>
+                <Menu offset={12} withinPortal withArrow>
+                  <Menu.Target>
+                    <button
+                      title={translate("Print", "طباعة")}
+                      className="rounded-md text-xs text-gray-800 hover:text-gray-800/75"
+                    >
+                      <Printer size={15} />
+                    </button>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item
+                      leftSection={<Printer size={14} />}
+                      onClick={() => {
+                        void triggerPrint("full");
+                      }}
+                    >
+                      {translate("Print BOM", "طباعة قائمة المواد")}
+                    </Menu.Item>
+                    {zeroPriceItemCount > 0 && (
+                      <Menu.Item
+                        leftSection={<Printer size={14} />}
+                        onClick={() => {
+                          void triggerPrint("zero-price");
+                        }}
+                      >
+                        {translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
+                      </Menu.Item>
+                    )}
+                  </Menu.Dropdown>
+                </Menu>
+                <PrintDocument
+                  title={
+                    printVariant === "zero-price"
+                      ? `${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                      : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                  }
+                  renderTrigger={({ onClick }) => {
+                    printHandlerRef.current = onClick;
+                    return null;
+                  }}
+                  onBeforePrint={async () => {
+                    await new Promise((resolve) => setTimeout(resolve, 0));
+                  }}
+                  paperWidth={210}
+                  paperHeight={297}
+                >
+                  {printVariant === "full" ? (
                     <BomPrintDocument
                       bom={bom}
                       totals={totals}
@@ -328,27 +369,18 @@ export default function Page() {
                       getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
                       costingMethod={costingMethod}
                     />
-                  </PrintDocument>
-                  {zeroPriceItemCount > 0 && (
-                    <PrintDocument
-                      title={`${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`}
-                      buttonLabel={translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
-                      buttonType="menu"
-                      paperWidth={210}
-                      paperHeight={297}
-                    >
-                      <BomZeroPricePrintDocument
-                        bom={bom}
-                        departmentBreakdown={zeroPriceDepartmentBreakdown}
-                        mainCategoryTitle={productMainCategory?.title || null}
-                        getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
-                        costingMethod={costingMethod}
-                        totalItemCount={zeroPriceItemCount}
-                      />
-                    </PrintDocument>
+                  ) : (
+                    <BomZeroPricePrintDocument
+                      bom={bom}
+                      departmentBreakdown={zeroPriceDepartmentBreakdown}
+                      mainCategoryTitle={productMainCategory?.title || null}
+                      getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
+                      costingMethod={costingMethod}
+                      totalItemCount={zeroPriceItemCount}
+                    />
                   )}
-                </Menu.Dropdown>
-              </Menu>
+                </PrintDocument>
+              </>
             )}
             <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} />
           </div>
