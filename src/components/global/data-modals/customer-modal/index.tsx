@@ -7,9 +7,11 @@ import customersApi from "@/lib/api/customers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { validationRegex } from "@/lib/constants/regex";
+import { isValidCustomerClassification } from "@/lib/constants/enums/customer-classifications";
 import { TextInput, Button, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
+import SelectCustomerClassification from "@/components/global/selections/enum-based/select-customer-classification";
 
 export default function CustomerModal({
   opened,
@@ -35,12 +37,14 @@ export default function CustomerModal({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [classification, setClassification] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
   function reset() {
     setName("");
     setPhone("");
     setEmail("");
+    setClassification(null);
     setNotes("");
   }
 
@@ -50,13 +54,20 @@ export default function CustomerModal({
       setName(customerToUpdate.name);
       setPhone(customerToUpdate.phone || "");
       setEmail(customerToUpdate.email || "");
+      setClassification(customerToUpdate.classification);
       setNotes(customerToUpdate.notes || "");
     } else reset();
   }, [customerToUpdate]);
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const dto = { name, phone: phone || null, email: email || null, notes: notes || null };
+      const dto = {
+        name,
+        phone: phone || null,
+        email: email || null,
+        classification: classification && isValidCustomerClassification(classification) ? classification : null,
+        notes: notes || null,
+      };
       return customerToUpdate
         ? await customersApi.update({ privateRequest, id: customerToUpdate.id, dto })
         : await customersApi.create({ privateRequest, dto });
@@ -76,6 +87,8 @@ export default function CustomerModal({
 
     // Validation
     if (!name.trim()) return setValidationError(translate("Please enter the customer's name.", "يرجى إدخال اسم العميل."));
+    if (classification && !isValidCustomerClassification(classification))
+      return setValidationError(translate("Please select a valid customer classification.", "يرجى اختيار تصنيف عميل صالح."));
     if (!validationRegex.name.test(name))
       return setValidationError(
         translate("The customer's name contains invalid characters.", "اسم العميل يحتوي على أحرف غير صالحة."),
@@ -111,6 +124,7 @@ export default function CustomerModal({
     ? name !== customerToUpdate.name ||
       (phone || null) !== customerToUpdate.phone ||
       (email || null) !== customerToUpdate.email ||
+      classification !== customerToUpdate.classification ||
       (notes || null) !== customerToUpdate.notes
     : false;
 
@@ -128,6 +142,15 @@ export default function CustomerModal({
           autoFocus
           flex={1}
           radius="md"
+        />
+
+        <SelectCustomerClassification
+          value={classification}
+          setValue={setClassification}
+          label={translate("Classification (Optional)", "التصنيف (اختياري)")}
+          placeholder={translate("Select classification", "اختر التصنيف")}
+          searchable
+          clearable
         />
 
         <TextInput

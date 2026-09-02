@@ -1,7 +1,9 @@
+import { getEnteredQuantityInBaseUnit } from "@/lib/helpers/unit-conversion";
 import { TEMP_GLOBAL_MANUFACTURING_COST } from "@/lib/constants/global";
 import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
 import { COSTING_METHODS, type CostingMethod } from "@/lib/constants/enums/derived/costing-methods";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial, BomMmComponent } from "@/types/bom";
 import type { MmBom } from "@/types/mm-bom";
 
@@ -11,10 +13,19 @@ export type FlattenedBomRow = {
   id: string;
   materialCode: string;
   quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit | null;
   notes: string | null;
   material: BomItemWithMaterial["material"] | BomMmComponent["material"];
   parentManufacturedMaterialTitle: string | null;
   sourceBomItem: BomItemWithMaterial | null;
+  productionSubDepartment: ProductionSubDepartment | null;
+  manufacturedComponentContext?: {
+    parentQuantity: number;
+    parentUnit: MaterialUnit | null;
+    parentMaterial: UnitConvertibleMaterial;
+    componentQuantity: number;
+    componentUnit: MaterialUnit | null;
+  };
 };
 
 export type ManufacturingCostRow = {
@@ -24,6 +35,8 @@ export type ManufacturingCostRow = {
   quantityRequired: number;
   unitManufacturingCost: number;
   totalManufacturingCost: number;
+  productionSubDepartment: ProductionSubDepartment | null;
+  sourceBomItem: BomItemWithMaterial;
 };
 
 export type BomDisplayTotals = {
@@ -51,20 +64,46 @@ export function getMaterialCostPrice(
   return material.unitPrice;
 }
 
+type UnitConvertibleMaterial = {
+  unitOfMeasurement: MaterialUnit;
+  unitConversions: { unit: MaterialUnit; conversionFactorToBase: number }[];
+};
+
+export function getMaterialLineCost(
+  quantity: number,
+  unitOfMeasurementSelected: MaterialUnit | null | undefined,
+  material: UnitConvertibleMaterial & { unitPrice: number; lastPurchasePrice: number | null },
+  costingMethod: CostingMethod,
+): number {
+  const baseQuantity = getEnteredQuantityInBaseUnit(quantity, unitOfMeasurementSelected, material);
+  return baseQuantity * getMaterialCostPrice(material, costingMethod);
+}
+
 export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): FlattenedBomRow[] {
   const rows: FlattenedBomRow[] = [];
 
   for (const item of items) {
     if (isManufacturedMaterial(item.material.materialType)) {
       for (const component of item.material.manufacturedMaterialBoms ?? []) {
+        const componentUnit = component.unitOfMeasurementSelected ?? component.material.unitOfMeasurement;
+
         rows.push({
           id: `${item.id}:${component.id}`,
           materialCode: component.materialCode,
           quantityRequired: item.quantityRequired * component.quantityRequired,
+          unitOfMeasurementSelected: componentUnit,
           notes: component.notes,
           material: component.material,
           parentManufacturedMaterialTitle: item.material.title,
           sourceBomItem: null,
+          productionSubDepartment: item.productionSubDepartment,
+          manufacturedComponentContext: {
+            parentQuantity: item.quantityRequired,
+            parentUnit: item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
+            parentMaterial: item.material,
+            componentQuantity: component.quantityRequired,
+            componentUnit,
+          },
         });
       }
 
@@ -75,10 +114,12 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
       id: item.id,
       materialCode: item.materialCode,
       quantityRequired: item.quantityRequired,
+      unitOfMeasurementSelected: item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
       notes: item.notes,
       material: item.material,
       parentManufacturedMaterialTitle: null,
       sourceBomItem: item,
+      productionSubDepartment: item.productionSubDepartment,
     });
   }
 
@@ -95,7 +136,25 @@ export function getManufacturingCostRows(items: BomItemWithMaterial[]): Manufact
       quantityRequired: item.quantityRequired,
       unitManufacturingCost: TEMP_GLOBAL_MANUFACTURING_COST,
       totalManufacturingCost: item.quantityRequired * TEMP_GLOBAL_MANUFACTURING_COST,
+      productionSubDepartment: item.productionSubDepartment,
+      sourceBomItem: item,
     }));
+}
+
+export function getFlattenedRowLineCost(row: FlattenedBomRow, costingMethod: CostingMethod): number {
+  if (row.manufacturedComponentContext) {
+    const ctx = row.manufacturedComponentContext;
+    const parentBaseQuantity = getEnteredQuantityInBaseUnit(ctx.parentQuantity, ctx.parentUnit, ctx.parentMaterial);
+    const componentBaseQuantity = getEnteredQuantityInBaseUnit(
+      ctx.componentQuantity,
+      ctx.componentUnit,
+      row.material,
+    );
+
+    return parentBaseQuantity * componentBaseQuantity * getMaterialCostPrice(row.material, costingMethod);
+  }
+
+  return getMaterialLineCost(row.quantityRequired, row.unitOfMeasurementSelected, row.material, costingMethod);
 }
 
 export function getBomDisplayTotals(args: {
@@ -105,7 +164,7 @@ export function getBomDisplayTotals(args: {
   costingMethod: CostingMethod;
 }): BomDisplayTotals {
   const totalMaterialCost = args.materialRows.reduce(
-    (sum, row) => sum + row.quantityRequired * getMaterialCostPrice(row.material, args.costingMethod),
+    (sum, row) => sum + getFlattenedRowLineCost(row, args.costingMethod),
     0,
   );
   const totalManufacturingCost = args.manufacturingRows.reduce((sum, row) => sum + row.totalManufacturingCost, 0);
@@ -130,7 +189,12 @@ export function aggregateMmComponentRequirements(
     if (!mmBom || multiplier <= 0) continue;
 
     for (const component of mmBom.manufacturedMaterialBoms) {
-      const quantityRequired = component.quantityRequired * multiplier;
+      const componentBaseQuantity = getEnteredQuantityInBaseUnit(
+        component.quantityRequired,
+        component.unitOfMeasurementSelected,
+        component.material,
+      );
+      const quantityRequired = componentBaseQuantity * multiplier;
       const existing = byMaterialCode.get(component.materialCode);
 
       if (existing) {

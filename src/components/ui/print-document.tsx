@@ -73,6 +73,13 @@ export default function PrintDocument({
           margin: ${paperMarginTop}mm ${paperMarginX}mm ${paperMarginBottom}mm;
           size: ${paperWidth}mm ${paperHeight}mm;${pageNumberRule}
         }
+        html, body {
+          height: auto !important;
+          min-height: 0 !important;
+          overflow: visible !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
         body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         body > *:not(#${printId}) { display: none !important; }
         #${printId} {

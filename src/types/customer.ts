@@ -1,4 +1,5 @@
 import { Address } from "./address";
+import type { CustomerClassification } from "@/lib/constants/enums/customer-classifications";
 
 export type Customer = {
   id: string;
@@ -6,13 +7,18 @@ export type Customer = {
   name: string;
   phone: string | null;
   email: string | null;
+  classification: CustomerClassification | null;
   notes: string | null;
-  deletedAt: Date | null;
+  blacklistedAt: Date | null;
+  addedToBlacklistBy: string | null;
   createdAt: Date;
   createdBy: string;
 };
 
-export type CustomerWithCreator = Customer & { createdBy: { id: string; name: string } };
+export type CustomerWithCreator = Customer & {
+  createdBy: { id: string; name: string };
+  addedToBlacklistBy: { id: string; name: string } | null;
+};
 
 export type CustomerAddress = Address & { customerId: string };
 
@@ -22,6 +28,7 @@ export type CreateCustomerDto = {
   name: string;
   phone: string | null;
   email: string | null;
+  classification: CustomerClassification | null;
   notes: string | null;
 };
 

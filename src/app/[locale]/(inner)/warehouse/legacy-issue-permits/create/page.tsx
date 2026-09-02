@@ -24,6 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
+import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import usePrivateRequest from "@/hooks/use-private-request";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import materialsApi from "@/lib/api/materials";
@@ -34,9 +35,9 @@ import {
   type LegacyIssuePermitWorkOrderType,
 } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
-import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Button, Checkbox, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -89,11 +90,12 @@ function showUnitSelect(row: ItemDraftRow) {
   return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
 }
 
+function isEmptyRow(row: ItemDraftRow) {
+  return row.materialCode === null && row.quantity === "" && row.notes.trim() === "";
+}
+
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
-  if (!row.unitOfMeasurement) return [];
-  const altUnits = row.unitConversions.map((conversion) => conversion.unit);
-  const allUnits = [row.unitOfMeasurement, ...altUnits.filter((unit) => unit !== row.unitOfMeasurement)];
-  return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
+  return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
 }
 
 function SortableItemRow({
@@ -113,7 +115,7 @@ function SortableItemRow({
   usedMaterialCodes: string[];
   canRemove: boolean;
   canReorder: boolean;
-  onMaterialSelect: (key: string, material: MaterialWithUnitConversions | null) => void;
+  onMaterialSelect: (key: string, material: MaterialWithUnitConversionsSelection | null) => void;
   onUpdate: (key: string, patch: Partial<ItemDraftRow>) => void;
   onRemove: (key: string) => void;
 }) {
@@ -256,6 +258,7 @@ export default function Page() {
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   useDocumentTitle(
     `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Legacy Issue Permits", "أذونات الصرف المرحلية")}`,
@@ -289,12 +292,48 @@ export default function Page() {
       });
     },
     onSuccess: async (created) => {
+      setSubmitted(true);
       await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.all });
       router.push(getLocalizedHref(`/warehouse/legacy-issue-permits/${created.id}`));
     },
   });
 
   const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
+
+  const isDirty = useMemo(
+    () =>
+      issuePermitNumber.trim() !== "" ||
+      issueOrderNumber.trim() !== "" ||
+      issueOrderDate !== null ||
+      date !== null ||
+      creatorId !== null ||
+      productionSubDepartment !== null ||
+      contractNumber.trim() !== "" ||
+      workOrderNumber.trim() !== "" ||
+      isMaintenance ||
+      maintenanceWorkOrderType !== null ||
+      isCancelled ||
+      notes.trim() !== "" ||
+      rows.length > 1 ||
+      rows.some((row) => !isEmptyRow(row)),
+    [
+      issuePermitNumber,
+      issueOrderNumber,
+      issueOrderDate,
+      date,
+      creatorId,
+      productionSubDepartment,
+      contractNumber,
+      workOrderNumber,
+      isMaintenance,
+      maintenanceWorkOrderType,
+      isCancelled,
+      notes,
+      rows,
+    ],
+  );
+
+  const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
   const usedMaterialCodes = useMemo(
     () => rows.map((row) => row.materialCode).filter((code): code is string => !!code),
@@ -311,7 +350,7 @@ export default function Page() {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
-  function handleMaterialSelect(key: string, material: MaterialWithUnitConversions | null) {
+  function handleMaterialSelect(key: string, material: MaterialWithUnitConversionsSelection | null) {
     updateRow(key, {
       materialCode: material?.code ?? null,
       materialTitle: material?.title ?? "",
@@ -452,6 +491,7 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref("/warehouse/legacy-issue-permits"),
+        confirmNavigate: confirmNavigation,
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -498,7 +538,7 @@ export default function Page() {
           <SelectProductionSubDepartment
             value={productionSubDepartment}
             setValue={setProductionSubDepartment}
-            label={translate("Production Sub-Department", "قسم الانتاج")}
+            label={translate("Production Department", "قسم الانتاج")}
             placeholder={translate("Select department...", "اختر القسم...")}
             clearable
             radius="md"
@@ -652,7 +692,9 @@ export default function Page() {
             variant="light"
             color="dark"
             radius="md"
-            onClick={() => router.push(getLocalizedHref("/warehouse/legacy-issue-permits"))}
+            onClick={() => {
+              if (confirmNavigation()) router.push(getLocalizedHref("/warehouse/legacy-issue-permits"));
+            }}
           >
             {translation.cancel}
           </Button>

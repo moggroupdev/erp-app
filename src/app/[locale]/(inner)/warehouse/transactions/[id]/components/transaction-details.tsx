@@ -20,14 +20,14 @@ function getSourceRows(
     return [
       {
         key: translate("Invoice Number", "رقم الفاتورة"),
-        value: order.legacyInvoiceNumber ? (
+        value: order.invoiceNumber ? (
           <Link href={getLocalizedHref(`/procurement/material-orders/${order.id}`)} className="font-mono hover:underline">
-            {order.legacyInvoiceNumber}
+            {order.invoiceNumber}
           </Link>
         ) : (
           <EmptyValue />
         ),
-        copyText: order.legacyInvoiceNumber || undefined,
+        copyText: order.invoiceNumber || undefined,
       },
       {
         key: translate("Materials Receipt Number", "رقم سند استلام الخامات"),
@@ -83,7 +83,7 @@ function getSourceRows(
         copyText: item.productUnit.serialNumber,
       },
       {
-        key: translate("Production Department", "قسم الإنتاج"),
+        key: translate("Production Department", "قسم الانتاج"),
         value: getProductionSubDepartmentLabel(item.productionStage, locale),
       },
     ];

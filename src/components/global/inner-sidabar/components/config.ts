@@ -59,10 +59,16 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     icon: ChartNoAxesCombined,
     items: [
       {
-        label: { en: "Materials", ar: "المواد" },
+        label: { en: "Inventory", ar: "المخزون" },
         href: "/reports/materials",
         icon: Boxes,
         requiredPermission: PERMISSIONS.READ_MATERIAL_REPORTS,
+      },
+      {
+        label: { en: "Purchases", ar: "المشتريات" },
+        href: "/reports/purchasing-materials",
+        icon: ShoppingCart,
+        requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASING_REPORTS,
       },
     ],
   },
@@ -161,13 +167,19 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_SUPPLIERS,
       },
       {
-        label: { en: "Material Purchase Orders", ar: "أوامر شراء الخامات" },
+        label: { en: "Material Purchase Requisitions", ar: "طلبات شراء الخامات" },
+        href: "/procurement/material-requisitions",
+        icon: ClipboardList,
+        requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS,
+      },
+      {
+        label: { en: "Material Purchase Orders", ar: "أوامر توريد الخامات" },
         href: "/procurement/material-orders",
         icon: FileText,
         requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS,
       },
       {
-        label: { en: "Product Purchase Orders", ar: "أوامر شراء المنتجات" },
+        label: { en: "Product Purchase Orders", ar: "أوامر توريد المنتجات" },
         href: "/procurement/product-orders",
         icon: FileText,
         requiredPermission: PERMISSIONS.READ_PRODUCT_PURCHASE_ORDERS,

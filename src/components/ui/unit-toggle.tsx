@@ -12,12 +12,12 @@ type UnitOption = { unit: MaterialUnit; factor: number };
 type UnitToggleProps = {
   baseUnit: MaterialUnit;
   unitConversions: MaterialUnitConversionSummary[];
+  defaultUnit?: MaterialUnit;
   children: (props: { unit: MaterialUnit; factor: number; toggleButton: ReactNode }) => ReactNode;
 };
 
-export default function UnitToggle({ baseUnit, unitConversions, children }: UnitToggleProps) {
+export default function UnitToggle({ baseUnit, unitConversions, defaultUnit, children }: UnitToggleProps) {
   const { translate } = useI18n();
-  const [index, setIndex] = useState(0);
 
   const options = useMemo<UnitOption[]>(() => {
     const alts = unitConversions
@@ -26,6 +26,14 @@ export default function UnitToggle({ baseUnit, unitConversions, children }: Unit
 
     return [{ unit: baseUnit, factor: 1 }, ...alts];
   }, [baseUnit, unitConversions]);
+
+  const defaultIndex = useMemo(() => {
+    const preferredUnit = defaultUnit ?? baseUnit;
+    const index = options.findIndex((option) => option.unit === preferredUnit);
+    return index >= 0 ? index : 0;
+  }, [defaultUnit, baseUnit, options]);
+
+  const [index, setIndex] = useState(defaultIndex);
 
   const current = options[index % options.length];
   const canToggle = options.length > 1;

@@ -254,7 +254,7 @@ export default function ProductProductionRoutesModal({
     for (const row of rows) {
       if (!row.productionSubDepartment || !isValidProductionSubDepartment(row.productionSubDepartment)) {
         return setValidationError(
-          translate("Please select a production sub-department for every step.", "يرجى اختيار قسم فرعي للإنتاج لكل خطوة."),
+          translate("Please select a production department for every step.", "يرجى اختيار قسم الانتاج لكل خطوة."),
         );
       }
 
@@ -275,8 +275,8 @@ export default function ProductProductionRoutesModal({
       if (seen.has(subDepartment)) {
         return setValidationError(
           translate(
-            "Each production sub-department can only appear once.",
-            "لا يمكن تكرار القسم الفرعي للإنتاج أكثر من مرة.",
+            "Each production department can only appear once.",
+            "لا يمكن تكرار قسم الانتاج أكثر من مرة.",
           ),
         );
       }

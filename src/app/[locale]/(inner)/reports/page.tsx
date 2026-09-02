@@ -31,12 +31,22 @@ export default function Page() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ReportLinkCard
             report={{
-              label: { en: "Materials Reports", ar: "تقارير المواد" },
+              label: { en: "Inventory Reports", ar: "تقارير المخزون" },
               description: {
-                en: "Inventory value, stock levels, and category performance across warehouse materials.",
+                en: "Inventory value, stock levels, and category performance across warehouse inventory.",
                 ar: "قيمة المخزون ومستوياته وأداء الفئات المختلفة عبر المواد المخزنة.",
               },
               href: "/reports/materials",
+            }}
+          />
+          <ReportLinkCard
+            report={{
+              label: { en: "Purchases Reports", ar: "تقارير المشتريات" },
+              description: {
+                en: "Spending analytics for purchases, covering cost trends, supplier rankings, and price history.",
+                ar: "تحليلات الإنفاق على المشتريات، تشمل اتجاهات التكلفة وترتيب الموردين وتاريخ الأسعار.",
+              },
+              href: "/reports/purchasing-materials",
             }}
           />
         </div>

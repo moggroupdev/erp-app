@@ -7,16 +7,19 @@ import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
-import type { MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
+import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 
 export default function BomItemModal({
   opened,
@@ -24,14 +27,14 @@ export default function BomItemModal({
   dimensionId,
   itemToUpdate,
   setItemToUpdate,
-  excludeMaterialCodes = [],
+  existingItems = [],
 }: {
   opened: boolean;
   close: () => void;
   dimensionId: string;
   itemToUpdate: BomItemWithMaterial | null;
   setItemToUpdate: React.Dispatch<React.SetStateAction<BomItemWithMaterial | null>>;
-  excludeMaterialCodes?: string[];
+  existingItems?: BomItemWithMaterial[];
 }) {
   const { locale, translate, translation } = useI18n();
 
@@ -40,9 +43,10 @@ export default function BomItemModal({
   const [validationError, setValidationError] = useState("");
 
   const [materialCode, setMaterialCode] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
+  const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
   const isUpdate = !!itemToUpdate;
@@ -51,29 +55,51 @@ export default function BomItemModal({
   const materialType = itemToUpdate?.material.materialType || selectedMaterial?.materialType || null;
   const showUnitSelect = !!materialType && isRawMaterial(materialType);
 
-  const unitOptions = useMemo(() => {
-    if (!baseUnit) return [];
-    const altUnits = unitConversions.map((row) => row.unit);
-    const allUnits = [baseUnit, ...altUnits.filter((u) => u !== baseUnit)];
-    return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
-  }, [baseUnit, unitConversions, locale]);
+  const departmentMaterialCodes = useMemo(() => {
+    if (!productionSubDepartment) return [];
+    return (
+      existingItems
+        .filter(
+          (item) => item.productionSubDepartment === productionSubDepartment && item.id !== itemToUpdate?.id,
+        )
+        .map((item) => item.materialCode)
+    );
+  }, [productionSubDepartment, existingItems, itemToUpdate?.id]);
+
+  const unitOptions = useMemo(
+    () => getMaterialUnitSelectOptions(baseUnit, unitConversions, locale),
+    [baseUnit, unitConversions, locale],
+  );
 
   function reset() {
     setMaterialCode(null);
     setSelectedMaterial(null);
     setUnit(null);
     setQuantityRequired("");
+    setProductionSubDepartment(null);
     setNotes("");
   }
 
-  useEffect(() => {
-    if (itemToUpdate) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setQuantityRequired(itemToUpdate.quantityRequired);
-      setNotes(itemToUpdate.notes || "");
-      setUnit(itemToUpdate.material.unitOfMeasurement);
-    } else reset();
+  const initialEditValues = useMemo(() => {
+    if (!itemToUpdate) return null;
+
+    return {
+      unit: itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement,
+      quantityRequired: itemToUpdate.quantityRequired,
+      productionSubDepartment: itemToUpdate.productionSubDepartment,
+      notes: itemToUpdate.notes,
+    };
   }, [itemToUpdate]);
+
+  useEffect(() => {
+    if (initialEditValues) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQuantityRequired(initialEditValues.quantityRequired);
+      setProductionSubDepartment(initialEditValues.productionSubDepartment);
+      setNotes(initialEditValues.notes || "");
+      setUnit(initialEditValues.unit);
+    } else reset();
+  }, [initialEditValues]);
 
   useEffect(() => {
     if (!baseUnit) return;
@@ -82,15 +108,14 @@ export default function BomItemModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const payloadUnit = showUnitSelect ? (unit as MaterialUnit) || undefined : undefined;
-
       if (itemToUpdate) {
         return await bomsApi.updateItem({
           privateRequest,
           itemId: itemToUpdate.id,
           dto: {
             quantityRequired: Number(quantityRequired),
-            unit: payloadUnit,
+            unitOfMeasurementSelected: unit as MaterialUnit,
+            productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
             notes: notes.trim() || null,
           },
         });
@@ -102,7 +127,8 @@ export default function BomItemModal({
         dto: {
           materialCode: materialCode!,
           quantityRequired: Number(quantityRequired),
-          unit: payloadUnit,
+          unitOfMeasurementSelected: unit as MaterialUnit,
+          productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
           notes: notes.trim() || null,
         },
       });
@@ -128,7 +154,13 @@ export default function BomItemModal({
       return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
     }
 
-    if (showUnitSelect && !unit) {
+    if (!productionSubDepartment) {
+      return setValidationError(
+        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
+      );
+    }
+
+    if (!unit) {
       return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
     }
 
@@ -154,16 +186,18 @@ export default function BomItemModal({
     ? translate("Edit BOM Item", "تعديل بند قائمة المواد")
     : translate("Add BOM Item", "إضافة بند لقائمة المواد");
 
-  const isDataChanged = itemToUpdate
-    ? Number(quantityRequired) !== itemToUpdate.quantityRequired ||
-      (showUnitSelect && unit !== itemToUpdate.material.unitOfMeasurement) ||
-      (notes.trim() || null) !== itemToUpdate.notes
+  const isDataChanged = initialEditValues
+    ? formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
+      productionSubDepartment !== initialEditValues.productionSubDepartment ||
+      unit !== initialEditValues.unit ||
+      (notes.trim() || null) !== initialEditValues.notes
     : true;
 
   const isReadyToSubmit =
     quantityRequired !== "" &&
     Number(quantityRequired) > 0 &&
-    (!showUnitSelect || !!unit) &&
+    !!productionSubDepartment &&
+    !!unit &&
     isDataChanged &&
     (isUpdate || !!materialCode);
 
@@ -185,13 +219,21 @@ export default function BomItemModal({
               setSelectedMaterial(material);
               setUnit(material?.unitOfMeasurement ?? null);
             }}
-            excludeCodes={excludeMaterialCodes}
+            excludeCodes={departmentMaterialCodes}
             label={translate("Material", "المادة")}
             placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
             required
             withBrowseModal
           />
         )}
+
+        <SelectProductionSubDepartment
+          value={productionSubDepartment}
+          setValue={setProductionSubDepartment}
+          label={translate("Production Department", "قسم الانتاج")}
+          placeholder={translate("Select department", "اختر القسم")}
+          required
+        />
 
         <div className={showUnitSelect ? "grid gap-3 sm:grid-cols-2" : undefined}>
           <NumberInput

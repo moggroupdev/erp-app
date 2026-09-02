@@ -7,8 +7,8 @@ import { Boxes } from "lucide-react";
 import ReportLinkCard from "../components/report-link-card";
 
 const PAGE_TITLE = {
-  en: "Materials Reports",
-  ar: "تقارير المواد",
+  en: "Inventory Reports",
+  ar: "تقارير المخزون",
 };
 
 const PAGE_SUBTITLE = {
@@ -38,7 +38,7 @@ export default function Page() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ReportLinkCard
             report={{
-              label: { en: "Materials Summary", ar: "ملخص المواد" },
+              label: { en: "Inventory Summary", ar: "ملخص المخزون" },
               description: {
                 en: "Full warehouse overview with total inventory value, breakdown by type and category, and items requiring replenishment.",
                 ar: "نظرة شاملة على المستودع تشمل إجمالي قيمة المخزون والتوزيع حسب النوع والفئة والمواد التي تحتاج إعادة تزويد.",

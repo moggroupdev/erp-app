@@ -10,9 +10,9 @@ import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { LegacyIssuePermitItemDetailed } from "@/types/legacy-issue-permit";
-import type { MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, TextInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -40,7 +40,7 @@ export default function LegacyIssueItemModal({
   const [validationError, setValidationError] = useState("");
 
   const [materialCode, setMaterialCode] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
   const [unitOfMeasurementSelected, setUnitOfMeasurementSelected] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number | string>("");
   const [notes, setNotes] = useState("");
@@ -50,12 +50,10 @@ export default function LegacyIssueItemModal({
   const unitConversions = selectedMaterial?.unitConversions ?? [];
   const showUnitSelect = !!materialType && isRawMaterial(materialType) && unitConversions.length > 0;
 
-  const unitOptions = useMemo(() => {
-    if (!baseUnit) return [];
-    const altUnits = unitConversions.map((row) => row.unit);
-    const allUnits = [baseUnit, ...altUnits.filter((u) => u !== baseUnit)];
-    return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
-  }, [baseUnit, unitConversions, locale]);
+  const unitOptions = useMemo(
+    () => getMaterialUnitSelectOptions(baseUnit, unitConversions, locale),
+    [baseUnit, unitConversions, locale],
+  );
 
   function reset() {
     setMaterialCode(null);

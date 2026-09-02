@@ -7,11 +7,12 @@ import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import mmBomsApi from "@/lib/api/mm-boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MmBomItemWithMaterial } from "@/types/mm-bom";
-import type { MaterialWithUnitConversions } from "@/types/material";
+import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -40,7 +41,7 @@ export default function MmBomItemModal({
   const [validationError, setValidationError] = useState("");
 
   const [materialCode, setMaterialCode] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversions | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
   const [notes, setNotes] = useState("");
@@ -56,12 +57,10 @@ export default function MmBomItemModal({
     [excludeMaterialCodes, manufacturedMaterialCode],
   );
 
-  const unitOptions = useMemo(() => {
-    if (!baseUnit) return [];
-    const altUnits = unitConversions.map((row) => row.unit);
-    const allUnits = [baseUnit, ...altUnits.filter((u) => u !== baseUnit)];
-    return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
-  }, [baseUnit, unitConversions, locale]);
+  const unitOptions = useMemo(
+    () => getMaterialUnitSelectOptions(baseUnit, unitConversions, locale),
+    [baseUnit, unitConversions, locale],
+  );
 
   function reset() {
     setMaterialCode(null);
@@ -71,14 +70,24 @@ export default function MmBomItemModal({
     setNotes("");
   }
 
-  useEffect(() => {
-    if (itemToUpdate) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setQuantityRequired(itemToUpdate.quantityRequired);
-      setNotes(itemToUpdate.notes || "");
-      setUnit(itemToUpdate.material.unitOfMeasurement);
-    } else reset();
+  const initialEditValues = useMemo(() => {
+    if (!itemToUpdate) return null;
+
+    return {
+      unit: itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement,
+      quantityRequired: itemToUpdate.quantityRequired,
+      notes: itemToUpdate.notes,
+    };
   }, [itemToUpdate]);
+
+  useEffect(() => {
+    if (initialEditValues) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQuantityRequired(initialEditValues.quantityRequired);
+      setNotes(initialEditValues.notes || "");
+      setUnit(initialEditValues.unit);
+    } else reset();
+  }, [initialEditValues]);
 
   useEffect(() => {
     if (!baseUnit) return;
@@ -87,15 +96,13 @@ export default function MmBomItemModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const payloadUnit = showUnitSelect ? (unit as MaterialUnit) || undefined : undefined;
-
       if (itemToUpdate) {
         return await mmBomsApi.updateItem({
           privateRequest,
           itemId: itemToUpdate.id,
           dto: {
             quantityRequired: Number(quantityRequired),
-            unit: payloadUnit,
+            unitOfMeasurementSelected: unit as MaterialUnit,
             notes: notes.trim() || null,
           },
         });
@@ -107,7 +114,7 @@ export default function MmBomItemModal({
         dto: {
           materialCode: materialCode!,
           quantityRequired: Number(quantityRequired),
-          unit: payloadUnit,
+          unitOfMeasurementSelected: unit as MaterialUnit,
           notes: notes.trim() || null,
         },
       });
@@ -133,7 +140,7 @@ export default function MmBomItemModal({
       return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
     }
 
-    if (showUnitSelect && !unit) {
+    if (!unit) {
       return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
     }
 
@@ -159,16 +166,16 @@ export default function MmBomItemModal({
     ? translate("Edit BOM Item", "تعديل بند قائمة المواد")
     : translate("Add BOM Item", "إضافة بند لقائمة المواد");
 
-  const isDataChanged = itemToUpdate
-    ? Number(quantityRequired) !== itemToUpdate.quantityRequired ||
-      (showUnitSelect && unit !== itemToUpdate.material.unitOfMeasurement) ||
-      (notes.trim() || null) !== itemToUpdate.notes
+  const isDataChanged = initialEditValues
+    ? formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
+      unit !== initialEditValues.unit ||
+      (notes.trim() || null) !== initialEditValues.notes
     : true;
 
   const isReadyToSubmit =
     quantityRequired !== "" &&
     Number(quantityRequired) > 0 &&
-    (!showUnitSelect || !!unit) &&
+    !!unit &&
     isDataChanged &&
     (isUpdate || !!materialCode);
 

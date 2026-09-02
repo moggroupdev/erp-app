@@ -308,7 +308,11 @@ Typical list/detail body: `isFetching` → `LoadingSection` → else `ErrorSecti
 - Icons: prefer `lucide-react`.
 - Do **not** use heavy hover translate/lift (`translate-y`, etc.) or heavy hover shadow changes on cards and list items. Prefer quiet hover.
 - **Repeated same-format tables:** When a page or printable document renders **more than one** table of the same format (same columns / same entity shape — e.g. category-grouped BOM rows), give columns **fixed widths** (`table-fixed` / `w-full` plus shared `%` or pixel widths on headers) so columns align across tables. Not required when the page has only one such table.
-- **Material unit toggle:** Quantities and unit prices are stored in the material's **base** unit. For display, wrap the row in `UnitToggle` (`src/components/ui/unit-toggle.tsx`) and convert with `toDisplayQuantity` / `toDisplayUnitPrice` (`src/lib/helpers/unit-conversion.ts`). The toggle is display-only (does not persist); leave line totals computed from base values. Reuse this component; do not reimplement per table.
+- **Material units:** Two storage conventions coexist:
+  - **Entered-unit storage** (BOMs, requisitions, legacy issue permits): `quantity` is stored in `unitOfMeasurementSelected` as entered. Use `formatEnteredQuantityForDisplay` when toggling display units.
+  - **Base-unit storage** (`materials.quantity`, inventory, purchasing reports): quantities are in the material's base unit. Use `UnitToggle` with `formatBaseQuantityForDisplay` / `toDisplayUnitPrice` for display-only conversion.
+  - Build unit select options with `getMaterialUnitSelectOptions(baseUnit, unitConversions, locale)`.
+  - Reuse `UnitToggle` (`src/components/ui/unit-toggle.tsx`); do not reimplement per table.
 
 **Selects:** enum options → `selections/enum-based/`; reference-hook options (locations, departments, roles, categories, …) → `selections/reference-based/`; large paginated entities with server keyword search (users, materials, …) → `selections/remote-based/`. Do not leave new shared selects at `components/global/select-*`.
 

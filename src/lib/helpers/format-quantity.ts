@@ -1,4 +1,9 @@
-import { toDisplayQuantity } from "@/lib/helpers/unit-conversion";
+import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import {
+  getEnteredQuantityInBaseUnit,
+  resolveDisplayUnit,
+  toDisplayQuantity,
+} from "@/lib/helpers/unit-conversion";
 
 const QUANTITY_MAX_FRACTION_DIGITS = 2;
 
@@ -17,7 +22,35 @@ export function formatQuantity(value: number | string): string {
   return normalized;
 }
 
-/** Convert base quantity to display unit, then apply quantity display formatting. */
-export function formatDisplayQuantity(baseQuantity: number, factor: number): string {
+/** Format a base-unit quantity after converting it to the target display unit. */
+export function formatBaseQuantityForDisplay(baseQuantity: number, factor: number): string {
   return formatQuantity(toDisplayQuantity(baseQuantity, factor));
 }
+
+/** @deprecated Use `formatBaseQuantityForDisplay` — input quantity must be in the material's base unit. */
+export function formatDisplayQuantity(baseQuantity: number, factor: number): string {
+  return formatBaseQuantityForDisplay(baseQuantity, factor);
+}
+
+type UnitConvertibleMaterial = {
+  unitOfMeasurement: MaterialUnit;
+  unitConversions: { unit: MaterialUnit; conversionFactorToBase: number }[];
+};
+
+/** Format an entered-unit quantity for display in another unit. */
+export function formatEnteredQuantityForDisplay(
+  enteredQuantity: number,
+  enteredUnit: MaterialUnit,
+  displayUnit: MaterialUnit,
+  material: UnitConvertibleMaterial,
+): string {
+  if (enteredUnit === displayUnit) return formatQuantity(enteredQuantity);
+
+  const baseQuantity = getEnteredQuantityInBaseUnit(enteredQuantity, enteredUnit, material);
+  const { factor } = resolveDisplayUnit(displayUnit, material.unitOfMeasurement, material.unitConversions);
+
+  return formatQuantity(toDisplayQuantity(baseQuantity, factor));
+}
+
+/** @deprecated Use `formatEnteredQuantityForDisplay`. */
+export const formatQuantityInUnit = formatEnteredQuantityForDisplay;

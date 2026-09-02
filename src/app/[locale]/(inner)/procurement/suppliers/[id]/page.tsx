@@ -24,6 +24,7 @@ import SupplierModal from "@/components/global/data-modals/supplier-modal";
 import AddressModal from "@/components/global/data-modals/address-modal";
 import AddressCard from "@/components/global/address-card";
 import SupplierDetails from "./components/supplier-details";
+import SupplierQuickLinks from "./components/quick-links";
 
 const PAGE_TITLE = { en: "Supplier Data", ar: "ملف المورد" };
 
@@ -150,6 +151,8 @@ export default function Page() {
                 </div>
               )}
             </section>
+
+            <SupplierQuickLinks supplierId={supplier.id} />
           </>
         )
       )}

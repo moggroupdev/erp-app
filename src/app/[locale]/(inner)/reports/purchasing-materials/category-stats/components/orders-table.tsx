@@ -1,0 +1,200 @@
+"use client";
+
+import Link from "next/link";
+import { Alert, Select, Table } from "@mantine/core";
+import { FileText, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import CopyButton from "@/components/ui/copy-button";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { formatMoney } from "@/lib/helpers/format-money";
+import type { PurchasingMaterialsCategoryOrder } from "@/types/reports";
+import ReportCard from "../../components/report-card";
+import type { CategoryOrdersSort } from "./sort";
+
+export default function CategoryOrdersTable({
+  data,
+  sort,
+  onSortChange,
+}: {
+  data: PurchasingMaterialsCategoryOrder[];
+  sort: CategoryOrdersSort;
+  onSortChange: (sort: CategoryOrdersSort) => void;
+}) {
+  const { locale, translate, translation } = useI18n();
+  const getLocalizedHref = useLocaleHref();
+
+  function formatDisplayDate(value: string | null) {
+    if (!value) return "-";
+    return new Date(value).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  const totalAmount = data.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
+
+  return (
+    <ReportCard
+      title={translate("Purchase Orders", "أوامر التوريد")}
+      description={translate(
+        "All purchase orders that include materials from this category.",
+        "جميع أوامر التوريد التي تتضمن مواداً من هذه الفئة.",
+      )}
+      icon={FileText}
+      accent="amber"
+      headerAction={
+        <Select
+          value={sort}
+          onChange={(value) => {
+            if (value) onSortChange(value as CategoryOrdersSort);
+          }}
+          label={translate("Sort by", "ترتيب حسب")}
+          data={[
+            {
+              value: "invoice-date-desc",
+              label: translate("Invoice date (newest)", "تاريخ الفاتورة (الأحدث)"),
+            },
+            {
+              value: "invoice-date-asc",
+              label: translate("Invoice date (oldest)", "تاريخ الفاتورة (الأقدم)"),
+            },
+            { value: "amount-desc", label: translate("Amount (high to low)", "المبلغ (من الأعلى للأقل)") },
+            { value: "amount-asc", label: translate("Amount (low to high)", "المبلغ (من الأقل للأعلى)") },
+            {
+              value: "invoice-number-asc",
+              label: translate("Invoice number (A–Z)", "رقم الفاتورة (أ–ي)"),
+            },
+            {
+              value: "invoice-number-desc",
+              label: translate("Invoice number (Z–A)", "رقم الفاتورة (ي–أ)"),
+            },
+            { value: "supplier-asc", label: translate("Supplier (A–Z)", "المورد (أ–ي)") },
+            { value: "supplier-desc", label: translate("Supplier (Z–A)", "المورد (ي–أ)") },
+            { value: "code-asc", label: translate("Code (A–Z)", "الكود (أ–ي)") },
+            { value: "code-desc", label: translate("Code (Z–A)", "الكود (ي–أ)") },
+          ]}
+          allowDeselect={false}
+          radius="md"
+          w={240}
+        />
+      }
+    >
+      {data.length === 0 ? (
+        <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <div className="overflow-x-auto rounded-xl">
+            <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
+              <Table.Thead className="bg-gray-50">
+                <Table.Tr>
+                  <Table.Th className="text-gray-600">#</Table.Th>
+                  <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
+                  <Table.Th className="text-gray-600">{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
+                  <Table.Th className="text-gray-600">{translate("Invoice Date", "تاريخ الفاتورة")}</Table.Th>
+                  <Table.Th className="text-gray-600">{translate("Addition Permit Numbers", "أرقام إذن الإضافة")}</Table.Th>
+                  <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
+                  <Table.Th className="text-center text-gray-600">{translate("Status", "الحالة")}</Table.Th>
+                  <Table.Th className="text-gray-600">
+                    {translate(`Amount (${translation.currency})`, `المبلغ (${translation.currency})`)}
+                  </Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {data.map((row, index) => (
+                  <Table.Tr key={row.orderId} className="text-gray-600">
+                    <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
+                    <Table.Td>
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={getLocalizedHref(`/procurement/material-orders/${row.orderId}`)}
+                          className="font-mono font-medium text-gray-800 hover:underline"
+                        >
+                          {row.orderCode}
+                        </Link>
+                        <CopyButton text={row.orderCode} />
+                      </div>
+                    </Table.Td>
+                    <Table.Td>
+                      {row.invoiceNumber ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-gray-600">{row.invoiceNumber}</span>
+                          <CopyButton text={row.invoiceNumber} />
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </Table.Td>
+                    <Table.Td>{formatDisplayDate(row.invoiceIssuedAt)}</Table.Td>
+                    <Table.Td>
+                      {row.inventoryTransactionLegacyNumbers.length > 0 ? (
+                        <div className="flex max-w-64 flex-wrap gap-1.5">
+                          {row.inventoryTransactionLegacyNumbers.map((legacyNumber) => (
+                            <div key={legacyNumber} className="flex items-center gap-1">
+                              <span className="font-mono text-xs text-gray-600">{legacyNumber}</span>
+                              <CopyButton text={legacyNumber} />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      <Link
+                        href={getLocalizedHref(`/procurement/suppliers/${row.supplierId}`)}
+                        className="text-gray-800 hover:underline"
+                      >
+                        {row.supplierName}
+                      </Link>
+                    </Table.Td>
+                    <Table.Td>
+                      {row.completedAt ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                          <CheckCircle size={12} />
+                          {translate("Completed", "مكتمل")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                          <Clock size={12} />
+                          {translate("Open", "مفتوح")}
+                        </span>
+                      )}
+                    </Table.Td>
+                    <Table.Td className="font-semibold text-gray-800">
+                      {formatMoney(row.invoiceTotalPurchases)}
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+              <Table.Tfoot className="bg-gray-50">
+                <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                  <Table.Th />
+                  <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                  <Table.Th />
+                  <Table.Th />
+                  <Table.Th />
+                  <Table.Th />
+                  <Table.Th />
+                  <Table.Th>{formatMoney(totalAmount)}</Table.Th>
+                </Table.Tr>
+              </Table.Tfoot>
+            </Table>
+          </div>
+
+          <Alert
+            color="orange"
+            variant="light"
+            radius="lg"
+            icon={<AlertTriangle size={18} />}
+            title={translate("Important", "هام")}
+          >
+            {translate(
+              "The total of these invoices may differ from the report total because these invoices may include other line items that do not belong to the selected category.",
+              "إجمالي هذه الفواتير قد يختلف عن إجمالي التقرير لأن هذه الفواتير قد تتضمن بنوداً أخرى لا تنتمي للفئة المختارة.",
+            )}
+          </Alert>
+        </div>
+      )}
+    </ReportCard>
+  );
+}

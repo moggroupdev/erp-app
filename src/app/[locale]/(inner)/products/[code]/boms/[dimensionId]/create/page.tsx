@@ -11,13 +11,14 @@ import bomsApi from "@/lib/api/boms";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { isManufacturedMaterial, isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
-import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import type { MaterialUnitConversionSummary, MaterialWithUnitConversions } from "@/types/material";
+import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
+import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -26,6 +27,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
+import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import MmComponentsSection from "./components/mm-components-section";
 
 const PAGE_TITLE = { en: "Create BOM", ar: "إنشاء قائمة مواد" };
@@ -67,16 +69,13 @@ function showUnitSelect(row: BomDraftRow) {
 }
 
 function getRowUnitOptions(row: BomDraftRow, locale: Locale) {
-  if (!row.unitOfMeasurement) return [];
-  const altUnits = row.unitConversions.map((conversion) => conversion.unit);
-  const allUnits = [row.unitOfMeasurement, ...altUnits.filter((unit) => unit !== row.unitOfMeasurement)];
-  return allUnits.map((value) => ({ value, label: getMaterialUnitLabel(value, locale) }));
+  return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
 }
 
 function getRowFactor(row: BomDraftRow) {
-  if (!row.unit || !row.unitOfMeasurement || row.unit === row.unitOfMeasurement) return 1;
-  const conversion = row.unitConversions.find((item) => item.unit === row.unit);
-  return conversion ? Number(conversion.conversionFactorToBase) : 1;
+  if (!row.unit || !row.unitOfMeasurement) return 1;
+
+  return resolveDisplayUnit(row.unit, row.unitOfMeasurement, row.unitConversions).factor;
 }
 
 export default function Page() {
@@ -88,6 +87,7 @@ export default function Page() {
   const queryClient = useQueryClient();
 
   const [rows, setRows] = useState<BomDraftRow[]>([createEmptyRow()]);
+  const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [validationError, setValidationError] = useState("");
   const [duplicateCodes, setDuplicateCodes] = useState<Set<string>>(new Set());
 
@@ -100,13 +100,12 @@ export default function Page() {
   });
 
   const bom = bomQuery.data || null;
-  const alreadyHasBom = (bom?.standardBoms.length ?? 0) > 0;
-
-  useEffect(() => {
-    if (alreadyHasBom) {
-      router.replace(getLocalizedHref(`/products/${code}/boms/${dimensionId}`));
-    }
-  }, [alreadyHasBom, router, getLocalizedHref, code, dimensionId]);
+  const departmentsWithBom = useMemo(
+    () => new Set(bom?.standardBoms.map((item) => item.productionSubDepartment).filter(Boolean) as ProductionSubDepartment[]),
+    [bom?.standardBoms],
+  );
+  const selectedDepartmentHasBom =
+    !!productionSubDepartment && departmentsWithBom.has(productionSubDepartment as ProductionSubDepartment);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -117,7 +116,8 @@ export default function Page() {
           items: rows.map((row) => ({
             materialCode: row.materialCode!,
             quantityRequired: Number(row.quantityRequired),
-            unit: showUnitSelect(row) && row.unit ? row.unit : undefined,
+            productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
+            unitOfMeasurementSelected: row.unit as MaterialUnit,
             notes: row.notes.trim() || null,
           })),
         },
@@ -160,7 +160,7 @@ export default function Page() {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
-  function handleMaterialSelect(key: string, material: MaterialWithUnitConversions | null) {
+  function handleMaterialSelect(key: string, material: MaterialWithUnitConversionsSelection | null) {
     updateRow(key, {
       materialCode: material?.code ?? null,
       materialTitle: material?.title ?? "",
@@ -212,6 +212,21 @@ export default function Page() {
     setValidationError("");
     setDuplicateCodes(new Set());
 
+    if (!productionSubDepartment) {
+      return setValidationError(
+        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
+      );
+    }
+
+    if (selectedDepartmentHasBom) {
+      return setValidationError(
+        translate(
+          "A BOM already exists for this production department.",
+          "توجد بالفعل قائمة مواد لقسم الانتاج هذا.",
+        ),
+      );
+    }
+
     // Validation Layer
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index];
@@ -258,7 +273,7 @@ export default function Page() {
     mutation.mutate();
   }
 
-  if (bomQuery.isFetching || alreadyHasBom) {
+  if (bomQuery.isFetching) {
     return (
       <LayoutBox header={{ title: translate(PAGE_TITLE.en, PAGE_TITLE.ar), backLink: true }}>
         <LoadingSection message={translate("Loading...", "جاري التحميل...")} />
@@ -289,6 +304,15 @@ export default function Page() {
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <SelectProductionSubDepartment
+          value={productionSubDepartment}
+          setValue={setProductionSubDepartment}
+          label={translate("Production Department", "قسم الانتاج")}
+          placeholder={translate("Select department", "اختر القسم")}
+          excludeValues={[...departmentsWithBom]}
+          required
+        />
+
         <div className="overflow-x-auto rounded-xl">
           <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">

@@ -15,7 +15,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
+import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -26,7 +26,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import OrderDetails from "./components/order-details";
 
-const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر شراء خامات" };
+const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خامات" };
 
 const RECEIPTS_LIMIT = 100;
 
@@ -75,7 +75,7 @@ export default function Page() {
   }
 
   useDocumentTitle(
-    `${order?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر شراء الخامات")}`,
+    `${order?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
   );
 
   return (
@@ -87,12 +87,12 @@ export default function Page() {
       }}
     >
       {isOrderFetching ? (
-        <LoadingSection message={translate("Loading purchase order data", "جاري تحميل بيانات أمر الشراء")} />
+        <LoadingSection message={translate("Loading purchase order data", "جاري تحميل بيانات أمر التوريد")} />
       ) : orderError ? (
         <ErrorSection
           errorTitle={translate(
             "An error occurred while loading purchase order data",
-            "حدث خطأ أثناء تحميل بيانات أمر الشراء",
+            "حدث خطأ أثناء تحميل بيانات أمر التوريد",
           )}
           errorMessage={getErrorMessage(locale, orderError)}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetchOrder() }}
@@ -157,7 +157,7 @@ export default function Page() {
                                 {toggleButton}
                               </div>
                             </Table.Td>
-                            <Table.Td>{formatDisplayQuantity(item.quantityOrdered, factor)}</Table.Td>
+                            <Table.Td>{formatBaseQuantityForDisplay(item.quantityOrdered, factor)}</Table.Td>
                             <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
                             <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
                           </Table.Tr>

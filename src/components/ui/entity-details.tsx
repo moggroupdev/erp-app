@@ -60,6 +60,7 @@ type EntityDetailsProps = {
   icon?: LucideIcon;
   titleAside?: ReactNode;
   deletedAt?: number | string | Date | null;
+  inactiveLabel?: string;
   rows: DetailRow[];
   children?: ReactNode;
   className?: string;
@@ -70,6 +71,7 @@ export default function EntityDetails({
   icon: Icon,
   titleAside,
   deletedAt,
+  inactiveLabel,
   rows,
   children,
   className,
@@ -112,7 +114,7 @@ export default function EntityDetails({
               {isDeleted && (
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-600 ring-1 ring-red-100 ring-inset">
-                    {translate("Deleted", "محذوف")}
+                    {inactiveLabel ?? translate("Deleted", "محذوف")}
                   </span>
                   <span className="text-sm text-red-500/80">{formatDateAndTime(deletedAt, locale)}</span>
                 </div>

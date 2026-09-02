@@ -14,7 +14,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderWithSupplier } from "@/types/material-purchase-order";
 import { Table, TextInput } from "@mantine/core";
@@ -28,7 +28,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 
-const PAGE_TITLE = { en: "Material Purchase Orders", ar: "أوامر شراء الخامات" };
+const PAGE_TITLE = { en: "Material Purchase Orders", ar: "أوامر توريد الخامات" };
 
 const ORDERS_PER_PAGE = 25;
 
@@ -127,10 +127,10 @@ export default function Page() {
       />
 
       {isFetching ? (
-        <LoadingSection message={translate("Loading material purchase orders...", "جاري تحميل أوامر شراء الخامات...")} />
+        <LoadingSection message={translate("Loading material purchase orders...", "جاري تحميل أوامر توريد الخامات...")} />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate("Error loading material purchase orders", "خطأ في تحميل أوامر شراء الخامات")}
+          errorTitle={translate("Error loading material purchase orders", "خطأ في تحميل أوامر توريد الخامات")}
           errorMessage={errorMessage}
           button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
@@ -145,7 +145,7 @@ export default function Page() {
           ) : (
             <EmptySection
               useDefaultImg
-              message={translate("No material purchase orders found", "لا توجد أوامر شراء خامات")}
+              message={translate("No material purchase orders found", "لا توجد أوامر توريد خامات")}
             />
           )
         ) : (
@@ -155,11 +155,17 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                    <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                     <Table.Th>{translate("Supplier", "المورد")}</Table.Th>
-                    <Table.Th>{translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}</Table.Th>
+                    <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
+                    <Table.Th>{translate("Invoice Issue Date", "تاريخ اصدار الفاتورة")}</Table.Th>
+                    <Table.Th>
+                      {translate(`Invoice Total (${translation.currency})`, `إجمالي الفاتورة (${translation.currency})`)}
+                    </Table.Th>
+                    <Table.Th>
+                      {translate(`Calclated Total (${translation.currency})`, `الإجمالي المحسوب (${translation.currency})`)}
+                    </Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
-                    <Table.Th>{translate("Date", "التاريخ")}</Table.Th>
+                    <Table.Th>{translate("PO Date", "تاريخ أمر التوريد")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -179,16 +185,6 @@ export default function Page() {
                           </div>
                         </Table.Td>
                         <Table.Td>
-                          {order.legacyInvoiceNumber ? (
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono">{order.legacyInvoiceNumber}</span>
-                              <CopyButton text={order.legacyInvoiceNumber} />
-                            </div>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </Table.Td>
-                        <Table.Td>
                           <Link
                             href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)}
                             className="hover:underline"
@@ -196,7 +192,42 @@ export default function Page() {
                             {order.supplier.name}
                           </Link>
                         </Table.Td>
-                        <Table.Td>{formatMoney(order.totalAmount)}</Table.Td>
+                        <Table.Td>
+                          {order.invoiceNumber ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono">{order.invoiceNumber}</span>
+                              <CopyButton text={order.invoiceNumber} />
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </Table.Td>
+                        <Table.Td>
+                          {order.invoiceIssuedAt ? (
+                            formatDate(order.invoiceIssuedAt, locale)
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </Table.Td>
+
+                        <Table.Td>
+                          {order.invoiceTotalPurchases != null ? (
+                            formatMoney(order.invoiceTotalPurchases)
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </Table.Td>
+                        <Table.Td
+                          className={
+                            order.invoiceTotalPurchases != null &&
+                            Math.abs(order.totalAmount - order.invoiceTotalPurchases) >=
+                              Math.max(Math.abs(order.totalAmount), Math.abs(order.invoiceTotalPurchases)) * 0.01
+                              ? "font-semibold text-orange-600"
+                              : undefined
+                          }
+                        >
+                          {formatMoney(order.totalAmount)}
+                        </Table.Td>
                         <Table.Td>
                           <span className={status.className}>{status.label}</span>
                         </Table.Td>

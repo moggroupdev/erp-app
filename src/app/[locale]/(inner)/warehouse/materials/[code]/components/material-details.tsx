@@ -4,11 +4,11 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
-import { type MaterialWithCreator } from "@/types/material";
+import { type MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import { PackageSearch } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
-export default function MaterialDetails({ material }: { material: MaterialWithCreator }) {
+export default function MaterialDetails({ material }: { material: MaterialWithCreatorAndUnitConversions }) {
   const { locale, translate, translation } = useI18n();
   const { helpers } = useMaterialCategories();
 
@@ -49,6 +49,22 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
     },
     { key: translate("Quantity", "الكمية"), value: material.quantity },
     { key: translate("Unit Price", "سعر الوحدة"), value: formatMoney(material.unitPrice, translation.currency) },
+    ...(material.marketUnitPrice != null
+      ? [
+          {
+            key: translate("Market Price", "سعر السوق"),
+            value: formatMoney(material.marketUnitPrice, translation.currency),
+          },
+          {
+            key: translate("Market Price Set At", "تاريخ تحديد سعر السوق"),
+            value: formatDateAndTime(material.marketUnitPriceSetAt!, locale),
+          },
+          {
+            key: translate("Market Price Set By", "حدد سعر السوق بواسطة"),
+            value: <CreatorLink creator={material.marketUnitPriceSetBy} />,
+          },
+        ]
+      : []),
     {
       key: translate("Minimum Stock", "الحد الأدنى للمخزون"),
       value: material.minimumStock ?? <EmptyValue />,

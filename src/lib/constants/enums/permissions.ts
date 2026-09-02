@@ -17,6 +17,7 @@ export const PERMISSION_VALUES = [
   "add_supplier",
   "read_suppliers",
   "update_supplier",
+  "print_suppliers_list",
   "add_customer",
   "read_customers",
   "update_customer",
@@ -34,6 +35,7 @@ export const PERMISSION_VALUES = [
   "read_materials",
   "add_material",
   "update_material",
+  "set_material_market_price",
   "print_materials_list",
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
@@ -51,6 +53,12 @@ export const PERMISSION_VALUES = [
   "read_legacy_issue_permits",
   "update_legacy_issue_permit",
   "read_material_purchase_orders",
+  "add_material_purchase_requisition",
+  "read_material_purchase_requisitions",
+  "update_material_purchase_requisition",
+  "approve_material_purchase_requisition_planning",
+  "approve_material_purchase_requisition_purchasing_manager",
+  "approve_material_purchase_requisition_manager",
   "read_product_purchase_orders",
   "read_trips",
   "read_deliveries",
@@ -59,6 +67,7 @@ export const PERMISSION_VALUES = [
   "read_maintenance_orders",
   "show_analytics",
   "read_material_reports",
+  "read_material_purchasing_reports",
 ] as const;
 
 export type Permission = (typeof PERMISSION_VALUES)[number];
@@ -182,6 +191,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Supplier",
       ar: "تحديث المورد",
+    },
+  },
+  print_suppliers_list: {
+    value: "print_suppliers_list",
+    label: {
+      en: "Print Suppliers List",
+      ar: "طباعة قائمة الموردين",
     },
   },
   read_products: {
@@ -338,6 +354,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث المادة",
     },
   },
+  set_material_market_price: {
+    value: "set_material_market_price",
+    label: {
+      en: "Set Material Market Price",
+      ar: "تعيين سعر السوق للمادة",
+    },
+  },
   print_materials_list: {
     value: "print_materials_list",
     label: {
@@ -399,14 +422,56 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     value: "read_material_purchase_orders",
     label: {
       en: "Read Material Purchase Orders",
-      ar: "عرض أوامر شراء المواد",
+      ar: "عرض أوامر توريد المواد",
+    },
+  },
+  add_material_purchase_requisition: {
+    value: "add_material_purchase_requisition",
+    label: {
+      en: "Add Material Purchase Requisition",
+      ar: "إنشاء طلب شراء مواد",
+    },
+  },
+  read_material_purchase_requisitions: {
+    value: "read_material_purchase_requisitions",
+    label: {
+      en: "Read Material Purchase Requisitions",
+      ar: "عرض طلبات شراء المواد",
+    },
+  },
+  update_material_purchase_requisition: {
+    value: "update_material_purchase_requisition",
+    label: {
+      en: "Update Material Purchase Requisition",
+      ar: "تحديث طلب شراء مواد",
+    },
+  },
+  approve_material_purchase_requisition_planning: {
+    value: "approve_material_purchase_requisition_planning",
+    label: {
+      en: "Approve/Reject Material Purchase Requisition (Planning)",
+      ar: "اعتماد/رفض طلب شراء مواد (التخطيط والمتابعة)",
+    },
+  },
+  approve_material_purchase_requisition_purchasing_manager: {
+    value: "approve_material_purchase_requisition_purchasing_manager",
+    label: {
+      en: "Approve/Reject Material Purchase Requisition (Purchasing Manager)",
+      ar: "اعتماد/رفض طلب شراء مواد (مدير المشتريات)",
+    },
+  },
+  approve_material_purchase_requisition_manager: {
+    value: "approve_material_purchase_requisition_manager",
+    label: {
+      en: "Approve/Reject Material Purchase Requisition (Manager)",
+      ar: "اعتماد/رفض طلب شراء مواد (المدير)",
     },
   },
   read_product_purchase_orders: {
     value: "read_product_purchase_orders",
     label: {
       en: "Read Product Purchase Orders",
-      ar: "عرض أوامر شراء المنتجات",
+      ar: "عرض أوامر توريد المنتجات",
     },
   },
   read_trips: {
@@ -447,8 +512,15 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
   read_material_reports: {
     value: "read_material_reports",
     label: {
-      en: "Read Material Reports",
-      ar: "عرض تقارير المواد",
+      en: "Read Inventory Reports",
+      ar: "عرض تقارير المخزون",
+    },
+  },
+  read_material_purchasing_reports: {
+    value: "read_material_purchasing_reports",
+    label: {
+      en: "Read Purchases Reports",
+      ar: "عرض تقارير المشتريات",
     },
   },
 };
@@ -506,6 +578,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_department",
       "read_departments",
       "update_department",
+      "approve_material_purchase_requisition_manager",
     ],
   },
   {
@@ -540,7 +613,11 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "production",
     label: { en: "Production", ar: "الإنتاج" },
-    permissions: ["read_production_plans", "read_production_routing"],
+    permissions: [
+      "read_production_plans",
+      "read_production_routing",
+      "approve_material_purchase_requisition_planning",
+    ],
   },
   {
     domain: "warehouse",
@@ -549,6 +626,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_materials",
       "add_material",
       "update_material",
+      "set_material_market_price",
       "print_materials_list",
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",
@@ -557,6 +635,9 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_legacy_issue_permit",
       "read_legacy_issue_permits",
       "update_legacy_issue_permit",
+      "add_material_purchase_requisition",
+      "read_material_purchase_requisitions",
+      "update_material_purchase_requisition",
     ],
   },
   {
@@ -566,8 +647,11 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_supplier",
       "read_suppliers",
       "update_supplier",
+      "print_suppliers_list",
       "read_material_purchase_orders",
       "read_product_purchase_orders",
+      "read_material_purchase_requisitions",
+      "approve_material_purchase_requisition_purchasing_manager",
     ],
   },
   {
@@ -583,7 +667,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "reports",
     label: { en: "Reports", ar: "التقارير" },
-    permissions: ["read_material_reports"],
+    permissions: ["read_material_reports", "read_material_purchasing_reports"],
   },
   {
     domain: "analytics",

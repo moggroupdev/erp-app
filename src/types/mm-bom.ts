@@ -7,6 +7,7 @@ export type MmBomItem = {
   manufacturedMaterialCode: string;
   materialCode: string;
   quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit | null;
   notes: string | null;
   createdAt: Date;
   createdBy: string;
@@ -17,6 +18,7 @@ export type MmBomItemWithMaterial = {
   manufacturedMaterialCode: string;
   materialCode: string;
   quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit | null;
   notes: string | null;
   material: {
     code: string;
@@ -46,8 +48,10 @@ export type MmBom = {
 export type CreateMmBomItemDto = {
   materialCode: string;
   quantityRequired: number;
-  unit?: MaterialUnit;
+  unitOfMeasurementSelected: MaterialUnit;
   notes: string | null;
 };
 
-export type UpdateMmBomItemDto = Partial<Pick<CreateMmBomItemDto, "quantityRequired" | "unit" | "notes">>;
+export type UpdateMmBomItemDto = Partial<Pick<CreateMmBomItemDto, "quantityRequired" | "notes">> & {
+  unitOfMeasurementSelected: MaterialUnit;
+};

@@ -30,6 +30,8 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import CustomerModal from "@/components/global/data-modals/customer-modal";
+import SelectCustomerClassification from "@/components/global/selections/enum-based/select-customer-classification";
+import { getCustomerClassificationLabel } from "@/lib/constants/enums/customer-classifications";
 
 const PAGE_TITLE = { en: "Customers", ar: "العملاء" };
 
@@ -52,25 +54,30 @@ export default function Page() {
     setPendingValue: setPendingKeyword,
     setImmediateValue: setImmediateKeyword,
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
-  const [typeFilter, setTypeFilter] = useState<string | null>(urlSearchParams.get("type") || null);
+  const [classificationFilter, setClassificationFilter] = useState<string | null>(
+    urlSearchParams.get("classification") || null,
+  );
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
-    type: typeFilter,
+    classification: classificationFilter,
   };
 
   const params = { limit: CUSTOMERS_PER_PAGE, ...removeEmptyParams(urlParams) };
 
-  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || typeFilter);
+  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || classificationFilter);
 
   const resetAllFilters = () => {
     setActivePage(1);
     setImmediateKeyword("");
-    setTypeFilter(null);
+    setClassificationFilter(null);
   };
 
-  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword, typeFilter });
+  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
+    debouncedKeyword,
+    classificationFilter,
+  });
 
   const {
     data: paginatedCustomers,
@@ -89,7 +96,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword, typeFilter };
+    const newFilters = { debouncedKeyword, classificationFilter };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -100,7 +107,7 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword, typeFilter]);
+  }, [activePage, debouncedKeyword, classificationFilter]);
 
   // ========================= MODALS =========================
 
@@ -129,20 +136,32 @@ export default function Page() {
         ),
       }}
     >
-      <TextInput
-        value={keyword}
-        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-        placeholder={translate("Search for a customer...", "ابحث عن عميل...")}
-        leftSection={<Search size={15} />}
-        radius="md"
-        rightSection={
-          keyword && (
-            <button onClick={() => setImmediateKeyword("")}>
-              <X size={15} />
-            </button>
-          )
-        }
-      />
+      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">
+        <div className="col-span-1 md:col-span-3">
+          <TextInput
+            value={keyword}
+            onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+            placeholder={translate("Search for a customer...", "ابحث عن عميل...")}
+            leftSection={<Search size={15} />}
+            radius="md"
+            rightSection={
+              keyword && (
+                <button onClick={() => setImmediateKeyword("")}>
+                  <X size={15} />
+                </button>
+              )
+            }
+          />
+        </div>
+
+        <SelectCustomerClassification
+          value={classificationFilter}
+          setValue={setClassificationFilter}
+          placeholder={translate("Select classification...", "اختر التصنيف...")}
+          searchable
+          clearable
+        />
+      </div>
 
       {isFetching ? (
         <LoadingSection message={translate("Loading customers...", "جاري تحميل العملاء...")} />
@@ -155,10 +174,10 @@ export default function Page() {
       ) : (
         paginatedCustomers &&
         (paginatedCustomers.data.length === 0 ? (
-          debouncedKeyword ? (
+          debouncedKeyword || classificationFilter ? (
             <NoResultsSection
-              keyword={debouncedKeyword}
-              button={{ text: translate("View All", "عرض الكل"), onClick: () => setImmediateKeyword("") }}
+              keyword={debouncedKeyword || translate("selected filters", "الفلاتر المحددة")}
+              button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
             />
           ) : (
             <EmptySection useDefaultImg message={translate("No customers found", "لا يوجد عملاء")} />
@@ -171,6 +190,7 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Name", "الاسم")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                    <Table.Th>{translate("Classification", "التصنيف")}</Table.Th>
                     <Table.Th>{translate("Phone", "الهاتف")}</Table.Th>
                     <Table.Th>{translate("Email", "البريد الإلكتروني")}</Table.Th>
                     <Table.Th>{translate("Registration Date", "تاريخ التسجيل")}</Table.Th>
@@ -191,8 +211,11 @@ export default function Page() {
                           <CopyButton text={customer.code} />
                         </div>
                       </Table.Td>
-                      <Table.Td>{customer.phone}</Table.Td>
-                      <Table.Td>{customer.email}</Table.Td>
+                      <Table.Td>
+                        {customer.classification ? getCustomerClassificationLabel(customer.classification, locale) : "-"}
+                      </Table.Td>
+                      <Table.Td>{customer.phone || "-"}</Table.Td>
+                      <Table.Td>{customer.email || "-"}</Table.Td>
                       <Table.Td>{formatDateAndTime(customer.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>
                         <PermissionGuard permission={PERMISSIONS.UPDATE_CUSTOMER}>

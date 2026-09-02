@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
+import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { getMaterialLineCost } from "@/lib/helpers/bom-display";
+import { COSTING_METHODS } from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatDisplayQuantity } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
@@ -46,7 +48,18 @@ export default function MaterialBomSection({
   const hasBom = items.length > 0;
 
   const totalMaterialCost = useMemo(
-    () => items.reduce((sum, item) => sum + item.quantityRequired * item.material.unitPrice, 0),
+    () =>
+      items.reduce(
+        (sum, item) =>
+          sum +
+          getMaterialLineCost(
+            item.quantityRequired,
+            item.unitOfMeasurementSelected,
+            { ...item.material, lastPurchasePrice: null },
+            COSTING_METHODS.AVERAGE_PRICE,
+          ),
+        0,
+      ),
     [items],
   );
 
@@ -144,7 +157,13 @@ export default function MaterialBomSection({
               </Table.Thead>
               <Table.Tbody>
                 {items.map((item) => {
-                  const lineCost = item.quantityRequired * item.material.unitPrice;
+                  const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
+                  const lineCost = getMaterialLineCost(
+                    item.quantityRequired,
+                    item.unitOfMeasurementSelected,
+                    { ...item.material, lastPurchasePrice: null },
+                    COSTING_METHODS.AVERAGE_PRICE,
+                  );
                   const subCategory = materialCategoryHelpers.getMaterialCategorySubById(item.material.subCategoryId);
                   const mainCategory = subCategory
                     ? materialCategoryHelpers.getMaterialCategoryMainById(subCategory.mainCategoryId)
@@ -152,9 +171,10 @@ export default function MaterialBomSection({
 
                   return (
                     <UnitToggle
-                      key={item.id}
+                      key={`${item.id}:${item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement}`}
                       baseUnit={item.material.unitOfMeasurement}
                       unitConversions={item.material.unitConversions}
+                      defaultUnit={item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement}
                     >
                       {({ unit, factor, toggleButton }) => (
                     <Table.Tr className="text-gray-600">
@@ -175,7 +195,7 @@ export default function MaterialBomSection({
                         </div>
                       </Table.Td>
                       <Table.Td className="font-medium text-gray-800">
-                        {formatDisplayQuantity(item.quantityRequired, factor)}
+                        {formatEnteredQuantityForDisplay(item.quantityRequired, enteredUnit, unit, item.material)}
                       </Table.Td>
                       <Table.Td>{formatMoney(toDisplayUnitPrice(item.material.unitPrice, factor))}</Table.Td>
                       <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>

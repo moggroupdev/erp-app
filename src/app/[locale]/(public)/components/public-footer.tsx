@@ -36,7 +36,7 @@ export default function PublicFooter() {
 
   const navLinks = publicLinks.map((link) => {
     if (link.href !== "/login") return link;
-    if (user) return { href: DEFAULT_HOME_HREF, en: "Dashboard", ar: "لوحة التحكم" };
+    if (user) return { href: user.role?.homeUrl || DEFAULT_HOME_HREF, en: "Dashboard", ar: "لوحة التحكم" };
     return link;
   });
 

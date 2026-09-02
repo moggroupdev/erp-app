@@ -111,6 +111,13 @@ export const queryKeys = {
       detail: (id: string) => [...queryKeys.materialPurchaseOrders.receipts.details(), id] as const,
     },
   },
+  materialPurchaseRequisitions: {
+    all: ["material-purchase-requisitions"] as const,
+    lists: () => [...queryKeys.materialPurchaseRequisitions.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.materialPurchaseRequisitions.lists(), filters] as const,
+    details: () => [...queryKeys.materialPurchaseRequisitions.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.materialPurchaseRequisitions.details(), id] as const,
+  },
   reports: {
     all: ["reports"] as const,
     materials: {
@@ -118,6 +125,21 @@ export const queryKeys = {
       inventorySummary: () => [...queryKeys.reports.materials.all, "inventory-summary"] as const,
       categoryStats: (mainCategoryId: string) =>
         [...queryKeys.reports.materials.all, "category-stats", mainCategoryId] as const,
+    },
+    purchasingMaterials: {
+      all: ["reports", "purchasing-materials"] as const,
+      spendingSummary: (filters?: { from?: string; to?: string; groupBy?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "spending-summary", filters] as const,
+      priceHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "price-history", materialCode, filters] as const,
+      categoryStats: (mainCategoryId: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "category-stats", mainCategoryId, filters] as const,
+      subCategoryStats: (subCategoryId: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "subcategory-stats", subCategoryId, filters] as const,
+      supplierStats: (supplierId: string, filters?: { from?: string; to?: string; groupBy?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "supplier-stats", supplierId, filters] as const,
+      totalAmountMismatches: (filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "total-amount-mismatches", filters] as const,
     },
   },
   profile: {
