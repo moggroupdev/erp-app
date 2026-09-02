@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -10,19 +10,15 @@ import materialsApi from "@/lib/api/materials";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import {
-  getEnteredQuantityInBaseUnit,
-  resolveDisplayUnit,
-  toDisplayQuantity,
-} from "@/lib/helpers/unit-conversion";
+import { getEnteredQuantityInBaseUnit, resolveDisplayUnit, toDisplayQuantity } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Badge, Button, Divider, NumberInput, Table } from "@mantine/core";
+import { Badge, Button, NumberInput, Table } from "@mantine/core";
 import { Calculator, Layers, Package, Plus, Ruler, Trash2, Wallet } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
-const PAGE_TITLE = { en: "Unit Conversion Tool", ar: "أداة تحويل الوحدات" };
+const PAGE_TITLE = { en: "Unit Calculator", ar: "حاسبة الوحدات" };
 
 type CalculatorRow = {
   key: string;
@@ -135,9 +131,9 @@ function ItemRow({
   const { translate, translation } = useI18n();
 
   return (
-    <Table.Tr>
+    <Table.Tr className="text-nowrap">
       <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="max-w-0 transition-colors focus-within:bg-teal-50/60">
         <SelectMaterial
           value={row.materialCode}
           setValue={(next) => {
@@ -154,63 +150,67 @@ function ItemRow({
         />
       </Table.Td>
       <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <NumberInput
-          value={row.quantity}
-          onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
-          min={0}
-          allowNegative={false}
-          decimalScale={6}
-          hideControls
-          variant="unstyled"
-          radius={0}
-          placeholder={translate("Qty", "الكمية")}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-          disabled={!row.material}
-        />
-      </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        {showUnitSelect(row) ? (
-          <DataSelect
-            value={row.enteredUnit}
-            setValue={(next) => {
-              const resolved = typeof next === "function" ? next(row.enteredUnit) : next;
-              onUpdate(row.key, {
-                enteredUnit: (resolved as MaterialUnit | null) ?? row.material?.unitOfMeasurement ?? null,
-              });
-            }}
-            data={getRowUnitOptions(row, locale)}
+        {row.material ? (
+          <NumberInput
+            value={row.quantity}
+            onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
+            min={0}
+            allowNegative={false}
+            decimalScale={6}
+            hideControls
             variant="unstyled"
             radius={0}
-            searchable
-            placeholder={translate("Unit", "الوحدة")}
-            styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+            placeholder={translate("Qty", "الكمية")}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
           />
-        ) : (
-          <span className="text-sm text-gray-600">
-            {row.enteredUnit ? getMaterialUnitLabel(row.enteredUnit, locale) : ""}
-          </span>
-        )}
+        ) : null}
       </Table.Td>
       <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <NumberInput
-          value={row.unitPrice}
-          onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
-          min={0}
-          allowNegative={false}
-          decimalScale={6}
-          hideControls
-          variant="unstyled"
-          radius={0}
-          placeholder={translate("Unit price", "سعر الوحدة")}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-          disabled={!row.material}
-        />
+        {row.material ? (
+          showUnitSelect(row) ? (
+            <DataSelect
+              value={row.enteredUnit}
+              setValue={(next) => {
+                const resolved = typeof next === "function" ? next(row.enteredUnit) : next;
+                onUpdate(row.key, {
+                  enteredUnit: (resolved as MaterialUnit | null) ?? row.material?.unitOfMeasurement ?? null,
+                });
+              }}
+              data={getRowUnitOptions(row, locale)}
+              variant="unstyled"
+              radius={0}
+              searchable
+              placeholder={translate("Unit", "الوحدة")}
+              styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+            />
+          ) : (
+            <span className="text-sm text-gray-600">
+              {row.enteredUnit ? getMaterialUnitLabel(row.enteredUnit, locale) : ""}
+            </span>
+          )
+        ) : null}
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        {row.material ? (
+          <NumberInput
+            value={row.unitPrice}
+            onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
+            min={0}
+            allowNegative={false}
+            decimalScale={6}
+            hideControls
+            variant="unstyled"
+            radius={0}
+            placeholder={translate("Unit price", "سعر الوحدة")}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          />
+        ) : null}
       </Table.Td>
       <Table.Td>
         {computation && computation.conversions.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
             {computation.conversions.map((item) => (
-              <Badge key={item.unit} size="sm" variant="light" color="indigo" radius="md">
+              <Badge key={item.unit} size="sm" variant="light" radius="md">
                 {formatQuantity(item.quantity)} {getMaterialUnitLabel(item.unit, locale)}
               </Badge>
             ))}
@@ -241,52 +241,14 @@ function ItemRow({
   );
 }
 
-function SummaryStat({
-  label,
-  value,
-  hint,
-  icon,
-  accent = "teal",
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: string;
-  icon: ReactNode;
-  accent?: "teal" | "indigo" | "amber";
-}) {
-  const accentClasses = {
-    teal: "bg-teal-50 text-teal-600 ring-teal-100",
-    indigo: "bg-indigo-50 text-indigo-600 ring-indigo-100",
-    amber: "bg-amber-50 text-amber-600 ring-amber-100",
-  }[accent];
-
-  return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ring-4 ${accentClasses}`}>{icon}</div>
-      </div>
-      <div className="flex flex-col gap-0.5">
-        <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
-        <p className="text-2xl font-semibold tracking-tight text-gray-900">{value}</p>
-        {hint && <p className="text-xs text-gray-500">{hint}</p>}
-      </div>
-    </div>
-  );
-}
-
 export default function Page() {
   const { locale, translate, translation } = useI18n();
   const privateRequest = usePrivateRequest();
   const [rows, setRows] = useState<CalculatorRow[]>([createEmptyRow()]);
 
-  useDocumentTitle(
-    `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Warehouse", "المخازن")}`,
-  );
+  useDocumentTitle(`${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Warehouse", "المخازن")}`);
 
-  const isDirty = useMemo(
-    () => rows.length > 1 || rows.some((row) => !isEmptyRow(row)),
-    [rows],
-  );
+  const isDirty = useMemo(() => rows.length > 1 || rows.some((row) => !isEmptyRow(row)), [rows]);
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
 
@@ -374,11 +336,7 @@ export default function Page() {
       setRows([createEmptyRow()]);
       return;
     }
-    if (
-      window.confirm(
-        translate("Clear all rows and start over?", "مسح كل الصفوف والبدء من جديد؟"),
-      )
-    ) {
+    if (window.confirm(translate("Clear all rows and start over?", "مسح كل الصفوف والبدء من جديد؟"))) {
       setRows([createEmptyRow()]);
     }
   }
@@ -387,6 +345,10 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+        subTitle: translate(
+          "Add materials, enter quantities and unit prices in any supported unit, and see live conversions and totals.",
+          "أضف موادًا وأدخل الكميات وأسعار الوحدات بأي وحدة مدعومة لعرض التحويلات والإجماليات مباشرة.`.",
+        ),
         backLink: true,
         confirmNavigate: confirmNavigation,
         sideElements: (
@@ -396,62 +358,38 @@ export default function Page() {
         ),
       }}
     >
-      <div className="flex flex-col gap-8">
-        <div className="rounded-2xl border border-indigo-100 bg-linear-to-br from-indigo-50/80 via-white to-teal-50/50 px-5 py-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-              <Ruler size={20} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <h3 className="text-base font-semibold text-gray-900">
-                {translate("Live conversion calculator", "حاسبة التحويل المباشرة")}
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-600">
-                {translate(
-                  "Add materials, enter quantities and unit prices in any supported unit, and see live conversions and totals. Nothing is saved to the database.",
-                  "أضف موادًا وأدخل الكميات وأسعار الوحدات بأي وحدة مدعومة لعرض التحويلات والإجماليات مباشرة. لا يتم حفظ أي شيء في قاعدة البيانات.",
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-
+      <div className="flex flex-col gap-8 not-italic">
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                 <Layers size={16} />
               </div>
-              <div className="flex items-center gap-2">
-                <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                  {totals.itemCount}
-                </span>
-              </div>
+              <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
-            <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+          <div className="overflow-x-auto rounded-2xl border border-gray-200">
+            <Table withColumnBorders className="w-full table-fixed text-nowrap" horizontalSpacing="xs" verticalSpacing="xs">
               <Table.Thead className="bg-gray-50">
                 <Table.Tr className="h-10">
                   <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
-                  <Table.Th className="w-[24%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[38%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Material", "المادة")}
                   </Table.Th>
-                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Quantity", "الكمية")}
                   </Table.Th>
-                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Unit", "الوحدة")}
                   </Table.Th>
-                  <Table.Th className="w-[11%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                   </Table.Th>
-                  <Table.Th className="w-[24%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[18%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Converted Quantities", "الكميات المحوّلة")}
                   </Table.Th>
-                  <Table.Th className="w-[17.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate(`Line Value (${translation.currency})`, `قيمة البند (${translation.currency})`)}
                   </Table.Th>
                   <Table.Th className="w-[3%]" />
@@ -508,16 +446,14 @@ export default function Page() {
             <h4 className="text-lg font-semibold text-gray-900">{translate("Totals", "الإجماليات")}</h4>
           </div>
 
-          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-linear-to-br from-slate-50 via-white to-teal-50/40 shadow-sm">
+          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-linear-to-br from-slate-50 via-white to-teal-50/40">
             <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
               <div className="flex flex-col gap-4 border-b border-gray-200 p-5 md:border-e md:border-b-0 md:p-6">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
                     <Wallet size={15} />
                   </div>
-                  <h5 className="text-sm font-semibold text-gray-800">
-                    {translate("Value summary", "ملخص القيمة")}
-                  </h5>
+                  <h5 className="text-sm font-semibold text-gray-800">{translate("Value summary", "ملخص القيمة")}</h5>
                 </div>
 
                 <div className="flex flex-col gap-1">
@@ -533,25 +469,6 @@ export default function Page() {
                       "مجموع الكمية × سعر الوحدة المدخل لكل البنود المكتملة",
                     )}
                   </p>
-                </div>
-
-                <Divider variant="dashed" />
-
-                <div className="grid grid-cols-2 gap-3">
-                  <SummaryStat
-                    label={translate("Item Count", "عدد البنود")}
-                    value={totals.itemCount}
-                    hint={translate("Filled rows", "الصفوف المكتملة")}
-                    icon={<Layers size={16} />}
-                    accent="indigo"
-                  />
-                  <SummaryStat
-                    label={translate("Unit groups", "مجموعات الوحدات")}
-                    value={totals.quantitiesByUnit.length}
-                    hint={translate("Distinct entered units", "وحدات الإدخال المختلفة")}
-                    icon={<Package size={16} />}
-                    accent="amber"
-                  />
                 </div>
               </div>
 
@@ -580,22 +497,13 @@ export default function Page() {
                     {totals.quantitiesByUnit.map((group) => (
                       <li
                         key={group.unit}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm"
+                        className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3"
                       >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <Badge size="md" variant="light" color="indigo" radius="md">
-                            {getMaterialUnitLabel(group.unit, locale)}
-                          </Badge>
-                          <span className="truncate text-xs text-gray-500">
-                            {group.rowCount}{" "}
-                            {group.rowCount === 1
-                              ? translate("row", "صف")
-                              : translate("rows", "صفوف")}
-                          </span>
-                        </div>
-                        <p className="shrink-0 text-lg font-semibold text-gray-900">
-                          {formatQuantity(group.quantity)}
-                        </p>
+                        <Badge size="md" variant="light" color="indigo" radius="md">
+                          {getMaterialUnitLabel(group.unit, locale)}
+                        </Badge>
+
+                        <p className="shrink-0 text-lg font-semibold text-gray-900">{formatQuantity(group.quantity)}</p>
                       </li>
                     ))}
                   </ul>

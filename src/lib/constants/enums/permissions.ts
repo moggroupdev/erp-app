@@ -372,8 +372,8 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
   use_unit_conversion_tool: {
     value: "use_unit_conversion_tool",
     label: {
-      en: "Use Unit Conversion Tool",
-      ar: "استخدام أداة تحويل الوحدات",
+      en: "Use Unit Calculator",
+      ar: "استخدام حاسبة الوحدات",
     },
   },
   add_manufactured_material_bom: {
