@@ -34,9 +34,10 @@ export default function MaterialPicker({
             value={value}
             setValue={setValue}
             placeholder={translate("Search or select a material...", "ابحث أو اختر مادة...")}
+            nothingFoundMessage={translate("No materials found", "لا توجد مواد")}
             clearable
             searchable
-            nothingFoundMessage={translate("No materials found", "لا توجد مواد")}
+            withBrowseModal
           />
         </div>
       </div>
