@@ -12,6 +12,8 @@ import SelectSupplier from "@/components/global/selections/remote-based/select-s
 import SupplierQuotationRequestPrintDocument from "@/components/documents/supplier-quotation-request-print-document";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
+import useUser from "@/contexts/user/hook";
 import materialsApi from "@/lib/api/materials";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
@@ -22,7 +24,6 @@ import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelectio
 const PAGE_TITLE = { en: "Quotation Request", ar: "طلب عرض سعر" };
 
 type SupplierMode = "existing" | "custom";
-type DocumentLanguage = "ar" | "en";
 
 type ItemDraftRow = {
   key: string;
@@ -177,12 +178,12 @@ export default function Page() {
   const { locale, translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
+  const { user } = useUser();
 
   const [supplierMode, setSupplierMode] = useState<SupplierMode>("existing");
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [supplierName, setSupplierName] = useState("");
   const [customSupplierName, setCustomSupplierName] = useState("");
-  const [documentLanguage, setDocumentLanguage] = useState<DocumentLanguage>(locale === "en" ? "en" : "ar");
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
@@ -195,6 +196,18 @@ export default function Page() {
   );
 
   const supplierDisplayName = supplierMode === "existing" ? supplierName.trim() : customSupplierName.trim();
+
+  const isDirty = useMemo(
+    () =>
+      supplierId !== null ||
+      customSupplierName.trim() !== "" ||
+      notes.trim() !== "" ||
+      rows.length > 1 ||
+      rows.some((row) => !isEmptyRow(row)),
+    [supplierId, customSupplierName, notes, rows],
+  );
+
+  const confirmNavigation = useUnsavedChangesWarning(isDirty);
 
   function updateRow(key: string, patch: Partial<ItemDraftRow>) {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -296,26 +309,33 @@ export default function Page() {
       .map((row) => ({
         materialTitle: row.materialTitle || row.materialCode!,
         materialCode: row.materialCode!,
-        unitLabel: getMaterialUnitLabel(row.unitOfMeasurementSelected!, documentLanguage),
+        unitLabel: getMaterialUnitLabel(row.unitOfMeasurementSelected!, locale),
         quantity: Number(row.quantity),
         specifications: row.specifications.trim() || null,
       }));
-  }, [rows, documentLanguage]);
+  }, [rows, locale]);
 
-  const printTitle =
-    documentLanguage === "ar"
-      ? `طلب عرض سعر - ${supplierDisplayName || "مورد"}`
-      : `Request for Quotation - ${supplierDisplayName || "Supplier"}`;
+  const printTitle = translate(
+    `Request for Quotation - ${supplierDisplayName || "Supplier"}`,
+    `طلب عرض سعر - ${supplierDisplayName || "مورد"}`,
+  );
+
+  const preparedBy = {
+    name: user?.name ?? "",
+    email: user?.email ?? null,
+    phone: user?.phone ?? null,
+  };
 
   return (
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref("/procurement"),
+        confirmNavigate: confirmNavigation,
         sideElements: (
           <PrintDocument
             buttonType="button"
-            buttonLabel={translate("Print PDF", "طباعة PDF")}
+            buttonLabel={translate("Print", "طباعة")}
             title={printTitle}
             paperWidth={210}
             paperHeight={297}
@@ -334,19 +354,18 @@ export default function Page() {
                 loading={loading}
                 disabled={disabled}
                 leftSection={icon}
-                color="teal"
                 radius="md"
               >
                 {label}
               </Button>
             )}
           >
-            {supplierDisplayName && printItems.length > 0 ? (
+            {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
               <SupplierQuotationRequestPrintDocument
-                documentLanguage={documentLanguage}
                 supplierDisplayName={supplierDisplayName}
                 notes={notes.trim() || null}
                 items={printItems}
+                preparedBy={preparedBy}
               />
             ) : null}
           </PrintDocument>
@@ -355,23 +374,7 @@ export default function Page() {
     >
       <div className="flex flex-col gap-6">
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-800">
-              {translate("Document Language", "لغة المستند")}
-            </label>
-            <SegmentedControl
-              value={documentLanguage}
-              onChange={(value) => setDocumentLanguage(value as DocumentLanguage)}
-              data={[
-                { value: "ar", label: translate("Arabic", "العربية") },
-                { value: "en", label: translate("English", "الإنجليزية") },
-              ]}
-              radius="md"
-              fullWidth
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 md:col-span-2">
             <label className="text-sm font-medium text-gray-800">
               {translate("Supplier Name Source", "مصدر اسم المورد")}
             </label>
@@ -386,7 +389,7 @@ export default function Page() {
                 { value: "custom", label: translate("Custom Name", "اسم مخصص") },
               ]}
               radius="md"
-              fullWidth
+              className="max-w-md"
             />
           </div>
 
@@ -418,18 +421,6 @@ export default function Page() {
               radius="md"
             />
           )}
-
-          <div className="md:col-span-2">
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              label={translate("Additional Notes", "ملاحظات إضافية")}
-              placeholder={translate("Optional notes included in the letter", "ملاحظات اختيارية تُدرج في الخطاب")}
-              radius="md"
-              autosize
-              minRows={2}
-            />
-          </div>
         </section>
 
         <section className="flex flex-col gap-3">
@@ -495,6 +486,18 @@ export default function Page() {
             </Table>
           </div>
         </section>
+
+        <div>
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            label={translate("Additional Notes", "ملاحظات إضافية")}
+            placeholder={translate("Optional notes included in the letter", "ملاحظات اختيارية تُدرج في الخطاب")}
+            radius="md"
+            autosize
+            minRows={2}
+          />
+        </div>
 
         {validationError ? <ErrorAlert error={validationError} /> : null}
       </div>
