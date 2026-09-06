@@ -35,12 +35,13 @@ export default function SupplierQuotationRequestPrintDocument({
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDate(new Date(), locale);
   const companyName = translate("MOG 10th of Ramadan Company", "شركة موج العاشر من رمضان");
+  const showSpecifications = items.some((item) => !!item.specifications?.trim());
 
   const headers = [
     translate("#", "م"),
     translate("Item", "الصنف"),
     translate("Code", "الكود"),
-    translate("Specifications", "المواصفات"),
+    ...(showSpecifications ? [translate("Specifications", "المواصفات")] : []),
     translate("Unit", "الوحدة"),
     translate("Qty", "الكمية"),
   ];
@@ -49,7 +50,7 @@ export default function SupplierQuotationRequestPrintDocument({
     String(index + 1),
     item.materialTitle,
     item.materialCode,
-    item.specifications || "-",
+    ...(showSpecifications ? [item.specifications || "-"] : []),
     item.unitLabel,
     formatQuantity(item.quantity),
   ]);
@@ -85,13 +86,13 @@ export default function SupplierQuotationRequestPrintDocument({
         <p className="leading-relaxed">
           {translate(
             "We kindly request that you provide us with a competitive price quotation for the supply of the materials listed in the table below to our factories in 10th of Ramadan City. Kindly include unit prices, payment and delivery terms, and the expected delivery lead time, at your earliest convenience.",
-            "نرجو من سيادتكم التكرم بموافاتنا بعرض أسعار منافس لتوريد الأصناف المبينة في الجدول أدناه إلى مصانعنا بمدينة العاشر من رمضان. ويُرجى أن يتضمن العرض أسعار الوحدات، وشروط الدفع والتوريد، والمدة المتوقعة للتسليم، وذلك في أقرب وقت ممكن.",
+            "نرجو من سيادتكم التكرم بموافاتنا بعرض أسعار لتوريد الأصناف المبينة في الجدول أدناه إلى مصانعنا بمدينة العاشر من رمضان. ويُرجى أن يتضمن العرض أسعار الوحدات، وشروط الدفع والتوريد، والمدة المتوقعة للتسليم، وذلك في أقرب وقت ممكن.",
           )}
         </p>
         <p className="leading-relaxed font-medium text-gray-800">
           {translate(
-            "Please quote and describe the items exactly as listed and clarified in this letter, without omission or alteration.",
-            "يُرجى تسعير ووصف الأصناف تماماً كما هي موضحة ومبينة في هذا الخطاب، دون حذف أو تعديل.",
+            "Please quote and describe the items exactly as listed and clarified in this letter.",
+            "يُرجى تسعير ووصف الأصناف تماماً كما هي موضحة ومبينة في هذا الخطاب.",
           )}
         </p>
       </section>
@@ -102,9 +103,13 @@ export default function SupplierQuotationRequestPrintDocument({
           headers={headers}
           rows={rows}
           monoColumnIndexes={[2]}
-          noWrapIndexes={[0, 2, 4, 5]}
+          noWrapIndexes={showSpecifications ? [0, 2, 4, 5] : [0, 2, 3, 4]}
           tableClassName="text-[9px] [&_td]:align-top"
-          columnWidths={["6%", "28%", "12%", "30%", "12%", "12%"]}
+          columnWidths={
+            showSpecifications
+              ? ["6%", "28%", "12%", "30%", "12%", "12%"]
+              : ["6%", "46%", "16%", "16%", "16%"]
+          }
           emptyLabel={translate("No items", "لا توجد أصناف")}
         />
       </section>
