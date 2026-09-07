@@ -41,7 +41,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table } from "@mantine/core";
+import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
 import { Calculator, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
@@ -59,6 +59,7 @@ import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
+const DELETE_ALL_CONFIRM_PHRASE = "DELETE";
 
 type DepartmentBreakdown = {
   departmentId: string;
@@ -102,8 +103,10 @@ export default function Page() {
   useDocumentTitle(`${bom?.product.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("BOM", "قائمة المواد")}`);
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
+  const [deleteAllOpened, { open: openDeleteAll, close: closeDeleteAll }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
+  const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.AVERAGE_PRICE);
   const [printVariant, setPrintVariant] = useState<BomPrintVariant>("full");
   const printHandlerRef = useRef<(() => void) | null>(null);
@@ -123,7 +126,30 @@ export default function Page() {
     },
   });
 
+  const deleteAllMutation = useMutation({
+    mutationFn: () => bomsApi.deleteAll({ privateRequest, dimensionId }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionId) });
+      toast.success(translate("All BOM items deleted successfully.", "تم حذف جميع بنود قائمة المواد بنجاح."));
+      handleCloseDeleteAll();
+    },
+  });
+
   const deleteError = deleteMutation.error ? getErrorMessage(locale, deleteMutation.error) : "";
+  const deleteAllError = deleteAllMutation.error ? getErrorMessage(locale, deleteAllMutation.error) : "";
+  const canConfirmDeleteAll = deleteAllConfirmText.trim() === DELETE_ALL_CONFIRM_PHRASE;
+
+  function handleOpenDeleteAll() {
+    deleteAllMutation.reset();
+    setDeleteAllConfirmText("");
+    openDeleteAll();
+  }
+
+  function handleCloseDeleteAll() {
+    closeDeleteAll();
+    setDeleteAllConfirmText("");
+    deleteAllMutation.reset();
+  }
 
   function handleCostingMethodChange(value: string) {
     if (isValidCostingMethod(value)) setCostingMethod(value);
@@ -471,6 +497,18 @@ export default function Page() {
                         {translate("Add Item", "إضافة بند")}
                       </Button>
                     </PermissionGuard>
+
+                    <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
+                      <Button
+                        onClick={handleOpenDeleteAll}
+                        variant="light"
+                        color="red"
+                        radius="md"
+                        leftSection={<Trash2 size={15} />}
+                      >
+                        {translate("Delete All BOM", "حذف كل قائمة المواد")}
+                      </Button>
+                    </PermissionGuard>
                   </div>
                 </div>
 
@@ -751,6 +789,39 @@ export default function Page() {
                   loading={deleteMutation.isPending}
                   error={deleteError}
                 />
+
+                <DeleteModal
+                  opened={deleteAllOpened}
+                  onClose={handleCloseDeleteAll}
+                  title={translate("Delete all BOM items?", "حذف جميع بنود قائمة المواد؟")}
+                  subTitle={translate(
+                    `You're about to permanently delete the entire BOM for this dimension (${bomItems.length} items across all production departments).`,
+                    `أنت على وشك حذف قائمة المواد بالكامل لهذا المقاس بشكل دائم (${bomItems.length} بند عبر جميع أقسام الانتاج).`,
+                  )}
+                  warning={translate(
+                    "This removes every BOM row for this dimension and cannot be undone.",
+                    "سيؤدي هذا إلى إزالة كل صفوف قائمة المواد لهذا المقاس ولا يمكن التراجع عنه.",
+                  )}
+                  action={() => {
+                    if (canConfirmDeleteAll) deleteAllMutation.mutate();
+                  }}
+                  loading={deleteAllMutation.isPending}
+                  error={deleteAllError}
+                  disabled={!canConfirmDeleteAll}
+                >
+                  <TextInput
+                    label={translate(
+                      `Type ${DELETE_ALL_CONFIRM_PHRASE} to confirm`,
+                      `اكتب ${DELETE_ALL_CONFIRM_PHRASE} للتأكيد`,
+                    )}
+                    placeholder={DELETE_ALL_CONFIRM_PHRASE}
+                    value={deleteAllConfirmText}
+                    onChange={(event) => setDeleteAllConfirmText(event.currentTarget.value)}
+                    radius="md"
+                    autoComplete="off"
+                    data-autofocus
+                  />
+                </DeleteModal>
               </section>
             )}
           </>

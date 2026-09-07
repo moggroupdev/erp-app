@@ -53,6 +53,19 @@ const bomsApi = {
   async deleteItem({ privateRequest, itemId }: { privateRequest: PrivateRequest; itemId: string }) {
     return await privateRequest<BomItem>({ method: "DELETE", url: `boms/${itemId}` });
   },
+
+  async deleteAll({
+    privateRequest,
+    dimensionId,
+  }: {
+    privateRequest: PrivateRequest;
+    dimensionId: string;
+  }) {
+    return await privateRequest<{ deletedCount: number }>({
+      method: "DELETE",
+      url: `boms/${dimensionId}/all`,
+    });
+  },
 };
 
 export default bomsApi;
