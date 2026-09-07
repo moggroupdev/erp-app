@@ -914,6 +914,9 @@ function ManufacturingCostsSection({
                   `إجمالي تكلفة التصنيع (${translation.currency})`,
                 )}
               </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Notes", "الملاحظات")}
+              </Table.Th>
               <Table.Th w={0} />
             </Table.Tr>
           </Table.Thead>
@@ -949,6 +952,9 @@ function ManufacturingCostsSection({
                 <Table.Td className="font-medium text-gray-800">{formatQuantity(row.quantityRequired)}</Table.Td>
                 <Table.Td>{formatMoney(row.unitManufacturingCost)}</Table.Td>
                 <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalManufacturingCost)}</Table.Td>
+                <Table.Td className="text-gray-500">
+                  {row.notes ? <span className="truncate">{row.notes}</span> : "-"}
+                </Table.Td>
                 <Table.Td>
                   <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
                     <Menu position="bottom-end" withinPortal>
@@ -988,6 +994,7 @@ function ManufacturingCostsSection({
                 {rows.length} {translate("Items", "بند")}
               </Table.Td>
               <Table.Td>{formatMoney(totalManufacturingCost)}</Table.Td>
+              <Table.Td />
               <Table.Td />
             </Table.Tr>
           </Table.Tfoot>
