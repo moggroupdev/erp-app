@@ -62,10 +62,7 @@ export default function ProductsListPrintDocument({
     return (
       <div className="flex flex-col gap-1">
         {sortDimensions(dimensions).map((dimension) => (
-          <span key={dimension.id}>
-            {formatDimensionLabel(dimension)}
-            {dimension.notes ? ` — ${dimension.notes}` : ""}
-          </span>
+          <span key={dimension.id}>{formatDimensionLabel(dimension)}</span>
         ))}
       </div>
     );
@@ -93,6 +90,7 @@ export default function ProductsListPrintDocument({
         headers={headers}
         rows={productRows(list)}
         footerRow={categoryFooter(list)}
+        columnWidths={["12%", "44%", "28%", "16%"]}
         monoColumnIndexes={[0]}
         noWrapIndexes={[0, 3]}
         tableClassName="break-before-avoid text-[9px] [&_td]:align-top"
