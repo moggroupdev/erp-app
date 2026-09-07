@@ -335,7 +335,7 @@ export default function Page() {
         },
         {
           key: translate("Notes", "ملاحظات"),
-          value: bom.notes || <EmptyValue />,
+          value: bom.notes ? <span className="whitespace-pre-wrap">{bom.notes}</span> : <EmptyValue />,
         },
       ]
     : [];

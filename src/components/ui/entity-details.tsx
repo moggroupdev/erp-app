@@ -42,7 +42,7 @@ export function DetailsTable({ rows }: { rows: DetailRow[] }) {
                 {row.key}
               </Table.Th>
               <Table.Td className="font-medium text-gray-900">
-                <div className={`flex items-center gap-1.5 ${row.mono ? "font-mono" : ""}`}>
+                <div className={`flex items-start gap-1.5 ${row.mono ? "font-mono" : ""}`}>
                   {row.value}
                   {row.copyText && <CopyButton text={row.copyText} />}
                 </div>
