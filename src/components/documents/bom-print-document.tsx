@@ -14,7 +14,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail } from "./components";
+import { PrintDetail, PrintSectionHeading } from "./components";
 
 export type BomPrintDepartmentGroup = {
   departmentId: string;
@@ -267,6 +267,13 @@ export default function BomPrintDocument({
           value={formatMoney(totals.grandTotalCost, translation.currency)}
         />
       </section>
+
+      {bom.notes ? (
+        <section className="flex flex-col gap-1.5">
+          <PrintSectionHeading title={translate("Notes", "ملاحظات")} />
+          <p className="text-[11px] leading-relaxed whitespace-pre-wrap text-gray-800">{bom.notes}</p>
+        </section>
+      ) : null}
     </div>
   );
 }
