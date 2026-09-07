@@ -24,6 +24,7 @@ export type ProductDimension = {
   diameter: number | null;
   height: number;
   isDefault: boolean;
+  notes: string | null;
   createdAt: Date;
   createdBy: string;
 };
@@ -57,6 +58,11 @@ export type CreateProductDimensionDto = {
   diameter: number | null;
   height: number;
   isDefault: boolean | null;
+  notes: string | null;
+};
+
+export type UpdateProductDimensionDto = {
+  notes: string | null;
 };
 
 export type CreateProductProductionRouteDto = {

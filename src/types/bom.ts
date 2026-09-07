@@ -64,6 +64,7 @@ export type Bom = {
   diameter: number | null;
   height: number;
   isDefault: boolean;
+  notes: string | null;
   product: {
     code: string;
     title: string;

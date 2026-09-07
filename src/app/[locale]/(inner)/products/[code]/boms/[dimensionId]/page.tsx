@@ -41,8 +41,9 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table } from "@mantine/core";
-import { Calculator, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
+import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
+import { Calculator, ChevronDown, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
+import { useUser } from "@/contexts/user/hook";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -59,6 +60,7 @@ import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
+const DELETE_ALL_CONFIRM_PHRASE = "DELETE";
 
 type DepartmentBreakdown = {
   departmentId: string;
@@ -77,8 +79,13 @@ export default function Page() {
   const { code, dimensionId } = useParams<{ code: string; dimensionId: string }>();
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
+  const { user } = useUser();
   const { helpers: productCategoryHelpers } = useProductCategories();
   const { helpers: materialCategoryHelpers } = useMaterialCategories();
+
+  const canAddBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.ADD_PRODUCT_BOM));
+  const canUpdateBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.UPDATE_PRODUCT_BOM));
+  const canManageBom = canAddBom || canUpdateBom;
 
   const getMaterialMainCategoryTitle = useCallback(
     (subCategoryId: string) => {
@@ -102,8 +109,10 @@ export default function Page() {
   useDocumentTitle(`${bom?.product.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("BOM", "قائمة المواد")}`);
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
+  const [deleteAllOpened, { open: openDeleteAll, close: closeDeleteAll }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
+  const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.AVERAGE_PRICE);
   const [printVariant, setPrintVariant] = useState<BomPrintVariant>("full");
   const printHandlerRef = useRef<(() => void) | null>(null);
@@ -123,7 +132,30 @@ export default function Page() {
     },
   });
 
+  const deleteAllMutation = useMutation({
+    mutationFn: () => bomsApi.deleteAll({ privateRequest, dimensionId }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionId) });
+      toast.success(translate("All BOM items deleted successfully.", "تم حذف جميع بنود قائمة المواد بنجاح."));
+      handleCloseDeleteAll();
+    },
+  });
+
   const deleteError = deleteMutation.error ? getErrorMessage(locale, deleteMutation.error) : "";
+  const deleteAllError = deleteAllMutation.error ? getErrorMessage(locale, deleteAllMutation.error) : "";
+  const canConfirmDeleteAll = deleteAllConfirmText.trim() === DELETE_ALL_CONFIRM_PHRASE;
+
+  function handleOpenDeleteAll() {
+    deleteAllMutation.reset();
+    setDeleteAllConfirmText("");
+    openDeleteAll();
+  }
+
+  function handleCloseDeleteAll() {
+    closeDeleteAll();
+    setDeleteAllConfirmText("");
+    deleteAllMutation.reset();
+  }
 
   function handleCostingMethodChange(value: string) {
     if (isValidCostingMethod(value)) setCostingMethod(value);
@@ -301,6 +333,10 @@ export default function Page() {
           key: translate("Pricing Factor", "معامل التسعير"),
           value: bom.product.pricingFactor,
         },
+        {
+          key: translate("Notes", "ملاحظات"),
+          value: bom.notes ? <span className="whitespace-pre-wrap">{bom.notes}</span> : <EmptyValue />,
+        },
       ]
     : [];
 
@@ -450,27 +486,37 @@ export default function Page() {
                       />
                     </div>
 
-                    <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
-                      <Button
-                        component={Link}
-                        href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
-                        variant="light"
-                        color="gray"
-                        radius="md"
-                        leftSection={<Plus size={15} />}
-                      >
-                        {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
-                      </Button>
-                      <Button
-                        onClick={handleOpenAppendModal}
-                        variant="light"
-                        color="teal"
-                        radius="md"
-                        leftSection={<Plus size={15} />}
-                      >
-                        {translate("Add Item", "إضافة بند")}
-                      </Button>
-                    </PermissionGuard>
+                    {canManageBom && (
+                      <Menu offset={8} withinPortal withArrow>
+                        <Menu.Target>
+                          <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
+                            {translate("Actions", "الإجراءات")}
+                          </Button>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          {canAddBom && (
+                            <>
+                              <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
+                                {translate("Add Item", "إضافة بند")}
+                              </Menu.Item>
+                              <Menu.Item
+                                component={Link}
+                                href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
+                                leftSection={<Plus size={14} />}
+                              >
+                                {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
+                              </Menu.Item>
+                            </>
+                          )}
+                          {canAddBom && canUpdateBom && <Menu.Divider />}
+                          {canUpdateBom && (
+                            <Menu.Item leftSection={<Trash2 size={14} />} color="red" onClick={handleOpenDeleteAll}>
+                              {translate("Delete All BOM", "حذف كل قائمة المواد")}
+                            </Menu.Item>
+                          )}
+                        </Menu.Dropdown>
+                      </Menu>
+                    )}
                   </div>
                 </div>
 
@@ -751,6 +797,39 @@ export default function Page() {
                   loading={deleteMutation.isPending}
                   error={deleteError}
                 />
+
+                <DeleteModal
+                  opened={deleteAllOpened}
+                  onClose={handleCloseDeleteAll}
+                  title={translate("Delete all BOM items?", "حذف جميع بنود قائمة المواد؟")}
+                  subTitle={translate(
+                    `You're about to permanently delete the entire BOM for this dimension (${bomItems.length} items across all production departments).`,
+                    `أنت على وشك حذف قائمة المواد بالكامل لهذا المقاس بشكل دائم (${bomItems.length} بند عبر جميع أقسام الانتاج).`,
+                  )}
+                  warning={translate(
+                    "This removes every BOM row for this dimension and cannot be undone.",
+                    "سيؤدي هذا إلى إزالة كل صفوف قائمة المواد لهذا المقاس ولا يمكن التراجع عنه.",
+                  )}
+                  action={() => {
+                    if (canConfirmDeleteAll) deleteAllMutation.mutate();
+                  }}
+                  loading={deleteAllMutation.isPending}
+                  error={deleteAllError}
+                  disabled={!canConfirmDeleteAll}
+                >
+                  <TextInput
+                    label={translate(
+                      `Type ${DELETE_ALL_CONFIRM_PHRASE} to confirm`,
+                      `اكتب ${DELETE_ALL_CONFIRM_PHRASE} للتأكيد`,
+                    )}
+                    placeholder={DELETE_ALL_CONFIRM_PHRASE}
+                    value={deleteAllConfirmText}
+                    onChange={(event) => setDeleteAllConfirmText(event.currentTarget.value)}
+                    radius="md"
+                    autoComplete="off"
+                    data-autofocus
+                  />
+                </DeleteModal>
               </section>
             )}
           </>
@@ -835,6 +914,9 @@ function ManufacturingCostsSection({
                   `إجمالي تكلفة التصنيع (${translation.currency})`,
                 )}
               </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Notes", "الملاحظات")}
+              </Table.Th>
               <Table.Th w={0} />
             </Table.Tr>
           </Table.Thead>
@@ -870,6 +952,9 @@ function ManufacturingCostsSection({
                 <Table.Td className="font-medium text-gray-800">{formatQuantity(row.quantityRequired)}</Table.Td>
                 <Table.Td>{formatMoney(row.unitManufacturingCost)}</Table.Td>
                 <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalManufacturingCost)}</Table.Td>
+                <Table.Td className="text-gray-500">
+                  {row.notes ? <span className="truncate">{row.notes}</span> : "-"}
+                </Table.Td>
                 <Table.Td>
                   <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
                     <Menu position="bottom-end" withinPortal>
@@ -909,6 +994,7 @@ function ManufacturingCostsSection({
                 {rows.length} {translate("Items", "بند")}
               </Table.Td>
               <Table.Td>{formatMoney(totalManufacturingCost)}</Table.Td>
+              <Table.Td />
               <Table.Td />
             </Table.Tr>
           </Table.Tfoot>

@@ -36,6 +36,7 @@ export type ManufacturingCostRow = {
   unitManufacturingCost: number;
   totalManufacturingCost: number;
   productionSubDepartment: ProductionSubDepartment | null;
+  notes: string | null;
   sourceBomItem: BomItemWithMaterial;
 };
 
@@ -137,6 +138,7 @@ export function getManufacturingCostRows(items: BomItemWithMaterial[]): Manufact
       unitManufacturingCost: TEMP_GLOBAL_MANUFACTURING_COST,
       totalManufacturingCost: item.quantityRequired * TEMP_GLOBAL_MANUFACTURING_COST,
       productionSubDepartment: item.productionSubDepartment,
+      notes: item.notes,
       sourceBomItem: item,
     }));
 }
