@@ -14,12 +14,13 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufactured } from "@/lib/constants/enums/product-source-types";
 import type { ProductDimension, ProductWithCreator } from "@/types/product";
-import { Badge, Button, FloatingPosition, Table, Tooltip } from "@mantine/core";
-import { Box, Plus, Star } from "lucide-react";
+import { ActionIcon, Badge, Button, FloatingPosition, Table, Tooltip } from "@mantine/core";
+import { Box, Pencil, Plus, Star } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
+import { EmptyValue } from "@/components/ui/entity-details";
 import ProductDimensionModal from "@/components/global/data-modals/product-dimension-modal";
 
 export default function ProductDimensionsSection({
@@ -40,6 +41,7 @@ export default function ProductDimensionsSection({
   const [dimensionModalOpened, { open: openDimensionModal, close: closeDimensionModal }] = useDisclosure(false);
   const [defaultModalOpened, { open: openDefaultModal, close: closeDefaultModal }] = useDisclosure(false);
   const [pendingDefaultDimensionId, setPendingDefaultDimensionId] = useState<string | null>(null);
+  const [dimensionToUpdate, setDimensionToUpdate] = useState<ProductDimension | null>(null);
 
   const setDefaultDimensionMutation = useMutation({
     mutationFn: (dimensionId: string) =>
@@ -60,6 +62,16 @@ export default function ProductDimensionsSection({
   // Schema: each row is (length + depth) XOR diameter. Show only columns that appear in the list.
   const showLengthDepth = dimensions.some((d) => d.length != null && d.depth != null);
   const showDiameter = dimensions.some((d) => d.diameter != null);
+
+  function handleOpenCreateModal() {
+    setDimensionToUpdate(null);
+    openDimensionModal();
+  }
+
+  function handleOpenEditModal(dimension: ProductDimension) {
+    setDimensionToUpdate(dimension);
+    openDimensionModal();
+  }
 
   function handleOpenDefaultModal(dimensionId: string) {
     setPendingDefaultDimensionId(dimensionId);
@@ -85,6 +97,8 @@ export default function ProductDimensionsSection({
         close={closeDimensionModal}
         productCode={product.code}
         isFirstDimension={dimensions.length === 0}
+        dimensionToUpdate={dimensionToUpdate}
+        setDimensionToUpdate={setDimensionToUpdate}
       />
 
       <div className="flex items-center justify-between gap-3">
@@ -104,7 +118,7 @@ export default function ProductDimensionsSection({
 
         <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
           <Button
-            onClick={openDimensionModal}
+            onClick={handleOpenCreateModal}
             variant="light"
             color="blue"
             radius="md"
@@ -142,9 +156,12 @@ export default function ProductDimensionsSection({
                   {translate("Height", "الارتفاع")} ({translation.productDimensionUnit})
                 </Table.Th>
                 <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  {translate("Notes", "الملاحظات")}
+                </Table.Th>
+                <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Default", "افتراضي")}
                 </Table.Th>
-                {manufactured && <Table.Th />}
+                {(manufactured || canUpdateProduct) && <Table.Th />}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -161,6 +178,9 @@ export default function ProductDimensionsSection({
                     <Table.Td className="font-medium text-gray-800">{dimension.diameter ?? "-"}</Table.Td>
                   )}
                   <Table.Td className="font-medium text-gray-800">{dimension.height}</Table.Td>
+                  <Table.Td className="max-w-48 truncate text-gray-600" title={dimension.notes || undefined}>
+                    {dimension.notes || <EmptyValue />}
+                  </Table.Td>
                   <Table.Td>
                     {dimension.isDefault ? (
                       <Badge
@@ -191,18 +211,41 @@ export default function ProductDimensionsSection({
                       )
                     )}
                   </Table.Td>
-                  {manufactured && (
+                  {(manufactured || canUpdateProduct) && (
                     <Table.Td w={0}>
-                      <Button
-                        component={Link}
-                        href={getLocalizedHref(`/products/${product.code}/boms/${dimension.id}`)}
-                        variant="light"
-                        color="blue"
-                        size="xs"
-                        radius="md"
-                      >
-                        {translate("View BOM", "عرض قائمة المواد")}
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        {canUpdateProduct && (
+                          <Tooltip
+                            withArrow
+                            offset={10}
+                            label={translate("Edit notes", "تعديل الملاحظات")}
+                            position={translate("right", "left") as FloatingPosition}
+                          >
+                            <ActionIcon
+                              variant="subtle"
+                              color="gray"
+                              size="sm"
+                              radius="md"
+                              onClick={() => handleOpenEditModal(dimension)}
+                              aria-label={translate("Edit notes", "تعديل الملاحظات")}
+                            >
+                              <Pencil size={14} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
+                        {manufactured && (
+                          <Button
+                            component={Link}
+                            href={getLocalizedHref(`/products/${product.code}/boms/${dimension.id}`)}
+                            variant="light"
+                            color="blue"
+                            size="xs"
+                            radius="md"
+                          >
+                            {translate("View BOM", "عرض قائمة المواد")}
+                          </Button>
+                        )}
+                      </div>
                     </Table.Td>
                   )}
                 </Table.Tr>

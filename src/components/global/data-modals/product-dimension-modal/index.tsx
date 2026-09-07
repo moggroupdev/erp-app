@@ -5,7 +5,8 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import productsApi from "@/lib/api/products";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { Button, Checkbox, NumberInput, SegmentedControl } from "@mantine/core";
+import type { ProductDimension } from "@/types/product";
+import { Button, Checkbox, NumberInput, SegmentedControl, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 
@@ -16,11 +17,15 @@ export default function ProductDimensionModal({
   close,
   productCode,
   isFirstDimension,
+  dimensionToUpdate = null,
+  setDimensionToUpdate,
 }: {
   opened: boolean;
   close: () => void;
   productCode: string;
   isFirstDimension: boolean;
+  dimensionToUpdate?: ProductDimension | null;
+  setDimensionToUpdate?: (dimension: ProductDimension | null) => void;
 }) {
   const { locale, translate, translation } = useI18n();
 
@@ -34,6 +39,11 @@ export default function ProductDimensionModal({
   const [diameter, setDiameter] = useState<number | string>("");
   const [height, setHeight] = useState<number | string>("");
   const [isDefault, setIsDefault] = useState(false);
+  const [notes, setNotes] = useState("");
+
+  const isEditMode = !!dimensionToUpdate;
+
+  const initialEditNotes = dimensionToUpdate?.notes ?? null;
 
   function reset() {
     setMode("rectangular");
@@ -42,13 +52,29 @@ export default function ProductDimensionModal({
     setDiameter("");
     setHeight("");
     setIsDefault(isFirstDimension);
+    setNotes("");
   }
 
   useEffect(() => {
-    if (opened) setIsDefault(isFirstDimension);
-  }, [opened, isFirstDimension]);
+    if (!opened) return;
 
-  const mutation = useMutation({
+    if (dimensionToUpdate) {
+      const isRectangular = dimensionToUpdate.diameter == null;
+      setMode(isRectangular ? "rectangular" : "cylindrical");
+      setLength(dimensionToUpdate.length ?? "");
+      setDepth(dimensionToUpdate.depth ?? "");
+      setDiameter(dimensionToUpdate.diameter ?? "");
+      setHeight(dimensionToUpdate.height);
+      setIsDefault(dimensionToUpdate.isDefault);
+      setNotes(dimensionToUpdate.notes || "");
+      return;
+    }
+
+    setIsDefault(isFirstDimension);
+    setNotes("");
+  }, [opened, isFirstDimension, dimensionToUpdate]);
+
+  const createMutation = useMutation({
     mutationFn: async () => {
       const isRectangular = mode === "rectangular";
       return await productsApi.addDimension({
@@ -60,6 +86,7 @@ export default function ProductDimensionModal({
           diameter: isRectangular ? null : Number(diameter),
           height: Number(height),
           isDefault: isFirstDimension || isDefault,
+          notes: notes.trim() || null,
         },
       });
     },
@@ -71,11 +98,35 @@ export default function ProductDimensionModal({
     },
   });
 
-  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      if (!dimensionToUpdate) throw new Error("No dimension to update");
+      return await productsApi.updateDimension({
+        privateRequest,
+        code: productCode,
+        dimensionId: dimensionToUpdate.id,
+        dto: { notes: notes.trim() || null },
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(productCode) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.products.dimensions(productCode) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionToUpdate!.id) });
+      handleClose();
+    },
+  });
+
+  const activeMutation = isEditMode ? updateMutation : createMutation;
+  const error = validationError || (activeMutation.error ? getErrorMessage(locale, activeMutation.error) : "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidationError("");
+
+    if (isEditMode) {
+      updateMutation.mutate();
+      return;
+    }
 
     const normalizedHeight = Number(height);
     if (Number.isNaN(normalizedHeight) || normalizedHeight < 0)
@@ -94,7 +145,7 @@ export default function ProductDimensionModal({
         return setValidationError(translate("Diameter must be a non-negative number.", "يجب أن يكون القطر رقماً غير سالب."));
     }
 
-    mutation.mutate();
+    createMutation.mutate();
   }
 
   function handleClose() {
@@ -102,29 +153,36 @@ export default function ProductDimensionModal({
     setTimeout(() => {
       reset();
       setValidationError("");
-      mutation.reset();
+      createMutation.reset();
+      updateMutation.reset();
+      setDimensionToUpdate?.(null);
     }, 250);
   }
 
-  const title = translate("Add New Dimension", "إضافة مقاس جديد");
+  const title = isEditMode
+    ? translate("Edit Dimension Notes", "تعديل ملاحظات المقاس")
+    : translate("Add New Dimension", "إضافة مقاس جديد");
   const unit = translation.productDimensionUnit;
 
-  const isReadyToSubmit =
-    height !== "" && (mode === "rectangular" ? length !== "" && depth !== "" : diameter !== "");
+  const isReadyToSubmit = isEditMode
+    ? (notes.trim() || null) !== initialEditNotes
+    : height !== "" && (mode === "rectangular" ? length !== "" && depth !== "" : diameter !== "");
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <SegmentedControl
-          value={mode}
-          onChange={(value) => setMode(value as DimensionMode)}
-          data={[
-            { value: "rectangular", label: translate("Length & Depth", "الطول والعمق") },
-            { value: "cylindrical", label: translate("Diameter", "القطر") },
-          ]}
-          fullWidth
-          radius="md"
-        />
+        {!isEditMode && (
+          <SegmentedControl
+            value={mode}
+            onChange={(value) => setMode(value as DimensionMode)}
+            data={[
+              { value: "rectangular", label: translate("Length & Depth", "الطول والعمق") },
+              { value: "cylindrical", label: translate("Diameter", "القطر") },
+            ]}
+            fullWidth
+            radius="md"
+          />
+        )}
 
         <div className="grid grid-cols-1 gap-2.5 md:grid-cols-3">
           {mode === "rectangular" ? (
@@ -139,6 +197,7 @@ export default function ProductDimensionModal({
                 decimalScale={6}
                 required
                 radius="md"
+                disabled={isEditMode}
               />
 
               <NumberInput
@@ -151,6 +210,7 @@ export default function ProductDimensionModal({
                 decimalScale={6}
                 required
                 radius="md"
+                disabled={isEditMode}
               />
             </>
           ) : (
@@ -164,6 +224,7 @@ export default function ProductDimensionModal({
               decimalScale={6}
               required
               radius="md"
+              disabled={isEditMode}
             />
           )}
 
@@ -177,22 +238,35 @@ export default function ProductDimensionModal({
             decimalScale={6}
             required
             radius="md"
+            disabled={isEditMode}
           />
         </div>
 
-        <Checkbox
-          checked={isFirstDimension || isDefault}
-          onChange={(e) => setIsDefault(e.currentTarget.checked)}
-          label={translate("Set as default dimension", "تعيين كمقاس افتراضي")}
-          disabled={isFirstDimension}
+        <Textarea
+          value={notes}
+          onChange={(e) => setNotes(e.currentTarget.value)}
+          label={translate("Notes", "الملاحظات")}
+          placeholder={translate("Enter notes", "أدخل الملاحظات")}
+          radius="md"
+          minRows={2}
+          autosize
         />
+
+        {!isEditMode && (
+          <Checkbox
+            checked={isFirstDimension || isDefault}
+            onChange={(e) => setIsDefault(e.currentTarget.checked)}
+            label={translate("Set as default dimension", "تعيين كمقاس افتراضي")}
+            disabled={isFirstDimension}
+          />
+        )}
 
         <div className="flex gap-2">
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
-            {title}
+          <Button type="submit" loading={activeMutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
+            {isEditMode ? translate("Save Changes", "حفظ التغييرات") : title}
           </Button>
         </div>
 

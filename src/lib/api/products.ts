@@ -9,6 +9,7 @@ import type {
   CreateProductDto,
   UpdateProductDto,
   CreateProductDimensionDto,
+  UpdateProductDimensionDto,
   SetProductProductionRoutesDto,
 } from "@/types/product";
 
@@ -71,6 +72,24 @@ const productsApi = {
     signal?: AbortSignal;
   }) {
     return await privateRequest<ProductDimension[]>({ url: `products/${code}/dimensions`, signal });
+  },
+
+  async updateDimension({
+    privateRequest,
+    code,
+    dimensionId,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dimensionId: string;
+    dto: UpdateProductDimensionDto;
+  }) {
+    return await privateRequest<ProductDimension>({
+      method: "PUT",
+      url: `products/${code}/dimensions/${dimensionId}`,
+      data: dto,
+    });
   },
 
   async setDefaultDimension({

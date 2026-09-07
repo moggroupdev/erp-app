@@ -62,7 +62,10 @@ export default function ProductsListPrintDocument({
     return (
       <div className="flex flex-col gap-1">
         {sortDimensions(dimensions).map((dimension) => (
-          <span key={dimension.id}>{formatDimensionLabel(dimension)}</span>
+          <span key={dimension.id}>
+            {formatDimensionLabel(dimension)}
+            {dimension.notes ? ` — ${dimension.notes}` : ""}
+          </span>
         ))}
       </div>
     );

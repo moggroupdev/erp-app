@@ -333,6 +333,10 @@ export default function Page() {
           key: translate("Pricing Factor", "معامل التسعير"),
           value: bom.product.pricingFactor,
         },
+        {
+          key: translate("Notes", "ملاحظات"),
+          value: bom.notes || <EmptyValue />,
+        },
       ]
     : [];
 
