@@ -42,7 +42,8 @@ import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/f
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
-import { Calculator, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
+import { Calculator, ChevronDown, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
+import { useUser } from "@/contexts/user/hook";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -78,8 +79,13 @@ export default function Page() {
   const { code, dimensionId } = useParams<{ code: string; dimensionId: string }>();
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
+  const { user } = useUser();
   const { helpers: productCategoryHelpers } = useProductCategories();
   const { helpers: materialCategoryHelpers } = useMaterialCategories();
+
+  const canAddBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.ADD_PRODUCT_BOM));
+  const canUpdateBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.UPDATE_PRODUCT_BOM));
+  const canManageBom = canAddBom || canUpdateBom;
 
   const getMaterialMainCategoryTitle = useCallback(
     (subCategoryId: string) => {
@@ -476,39 +482,37 @@ export default function Page() {
                       />
                     </div>
 
-                    <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
-                      <Button
-                        component={Link}
-                        href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
-                        variant="light"
-                        color="gray"
-                        radius="md"
-                        leftSection={<Plus size={15} />}
-                      >
-                        {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
-                      </Button>
-                      <Button
-                        onClick={handleOpenAppendModal}
-                        variant="light"
-                        color="teal"
-                        radius="md"
-                        leftSection={<Plus size={15} />}
-                      >
-                        {translate("Add Item", "إضافة بند")}
-                      </Button>
-                    </PermissionGuard>
-
-                    <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
-                      <Button
-                        onClick={handleOpenDeleteAll}
-                        variant="light"
-                        color="red"
-                        radius="md"
-                        leftSection={<Trash2 size={15} />}
-                      >
-                        {translate("Delete All BOM", "حذف كل قائمة المواد")}
-                      </Button>
-                    </PermissionGuard>
+                    {canManageBom && (
+                      <Menu offset={8} withinPortal withArrow>
+                        <Menu.Target>
+                          <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
+                            {translate("Actions", "الإجراءات")}
+                          </Button>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          {canAddBom && (
+                            <>
+                              <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
+                                {translate("Add Item", "إضافة بند")}
+                              </Menu.Item>
+                              <Menu.Item
+                                component={Link}
+                                href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
+                                leftSection={<Plus size={14} />}
+                              >
+                                {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
+                              </Menu.Item>
+                            </>
+                          )}
+                          {canAddBom && canUpdateBom && <Menu.Divider />}
+                          {canUpdateBom && (
+                            <Menu.Item leftSection={<Trash2 size={14} />} color="red" onClick={handleOpenDeleteAll}>
+                              {translate("Delete All BOM", "حذف كل قائمة المواد")}
+                            </Menu.Item>
+                          )}
+                        </Menu.Dropdown>
+                      </Menu>
+                    )}
                   </div>
                 </div>
 
