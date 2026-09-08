@@ -36,7 +36,7 @@ export type MaterialPurchaseRequisition = {
   createdAt: Date;
   createdBy: string;
 } & ApprovalGateFields<"planning"> &
-  ApprovalGateFields<"purchasingManager"> &
+  ApprovalGateFields<"inventoryControl"> &
   ApprovalGateFields<"manager">;
 
 export type MaterialPurchaseRequisitionListItem = Omit<
@@ -67,12 +67,12 @@ export type MaterialPurchaseRequisitionItemDetailed = MaterialPurchaseRequisitio
 
 export type MaterialPurchaseRequisitionDetailed = Omit<
   MaterialPurchaseRequisition,
-  "createdBy" | "productionSubDepartmentManagerId" | "planningDecidedBy" | "purchasingManagerDecidedBy" | "managerDecidedBy"
+  "createdBy" | "productionSubDepartmentManagerId" | "planningDecidedBy" | "inventoryControlDecidedBy" | "managerDecidedBy"
 > & {
   createdBy: UserRef;
   productionSubDepartmentManager: UserRef | null;
   planningDecidedBy: UserRef | null;
-  purchasingManagerDecidedBy: UserRef | null;
+  inventoryControlDecidedBy: UserRef | null;
   managerDecidedBy: UserRef | null;
   items: MaterialPurchaseRequisitionItemDetailed[];
 };

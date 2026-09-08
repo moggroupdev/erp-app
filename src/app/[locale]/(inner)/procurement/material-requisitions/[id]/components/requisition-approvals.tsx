@@ -20,7 +20,7 @@ import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
 import { getRequisitionStatus, getRequisitionStatusLabel, isRequisitionTerminal } from "../../helpers";
 
-type Gate = "planning" | "purchasingManager" | "manager";
+type Gate = "planning" | "inventoryControl" | "manager";
 type ConfirmKind = "approve" | "reject";
 type UserRef = MaterialPurchaseRequisitionDetailed["planningDecidedBy"];
 
@@ -198,8 +198,8 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
       if (gate === "planning") {
         return materialPurchaseRequisitionsApi.approvePlanning({ privateRequest, id: requisition.id });
       }
-      if (gate === "purchasingManager") {
-        return materialPurchaseRequisitionsApi.approvePurchasingManager({ privateRequest, id: requisition.id });
+      if (gate === "inventoryControl") {
+        return materialPurchaseRequisitionsApi.approveInventoryControl({ privateRequest, id: requisition.id });
       }
       return materialPurchaseRequisitionsApi.approveManager({ privateRequest, id: requisition.id });
     },
@@ -216,8 +216,8 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
       if (gate === "planning") {
         return materialPurchaseRequisitionsApi.rejectPlanning({ privateRequest, id: requisition.id, dto });
       }
-      if (gate === "purchasingManager") {
-        return materialPurchaseRequisitionsApi.rejectPurchasingManager({ privateRequest, id: requisition.id, dto });
+      if (gate === "inventoryControl") {
+        return materialPurchaseRequisitionsApi.rejectInventoryControl({ privateRequest, id: requisition.id, dto });
       }
       return materialPurchaseRequisitionsApi.rejectManager({ privateRequest, id: requisition.id, dto });
     },
@@ -240,13 +240,13 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
       ),
       rejectTitle: translate("Confirm Planning Rejection", "تأكيد رفض التخطيط والمتابعة"),
     },
-    purchasingManager: {
-      approveTitle: translate("Confirm Purchasing Manager Approval", "تأكيد اعتماد مدير المشتريات"),
+    inventoryControl: {
+      approveTitle: translate("Confirm Inventory Control Approval", "تأكيد اعتماد مراقبة المخزون"),
       approveBody: translate(
-        "You are about to record the formal approval of the Purchasing Manager for this requisition.",
-        "أنت على وشك تسجيل الاعتماد الرسمي من مدير المشتريات على هذا الطلب.",
+        "You are about to record the formal approval of Inventory Control for this requisition.",
+        "أنت على وشك تسجيل الاعتماد الرسمي من مراقبة المخزون على هذا الطلب.",
       ),
-      rejectTitle: translate("Confirm Purchasing Manager Rejection", "تأكيد رفض مدير المشتريات"),
+      rejectTitle: translate("Confirm Inventory Control Rejection", "تأكيد رفض مراقبة المخزون"),
     },
     manager: {
       approveTitle: translate("Confirm Manager Approval", "تأكيد اعتماد المدير"),
@@ -279,14 +279,14 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
       permission: PERMISSIONS.APPROVE_MATERIAL_PURCHASE_REQUISITION_PLANNING,
     },
     {
-      id: "purchasingManager",
-      title: translate("Purchasing Manager", "مدير المشتريات"),
-      subtitle: translate("Procurement authority review", "مراجعة قسم المشتريات"),
-      decision: requisition.purchasingManagerDecision,
-      decidedAt: requisition.purchasingManagerDecidedAt,
-      decidedBy: requisition.purchasingManagerDecidedBy,
-      reason: requisition.purchasingManagerDecisionReason,
-      permission: PERMISSIONS.APPROVE_MATERIAL_PURCHASE_REQUISITION_PURCHASING_MANAGER,
+      id: "inventoryControl",
+      title: translate("Inventory Control", "مراقبة المخزون"),
+      subtitle: translate("Inventory control review", "مراجعة مراقبة المخزون"),
+      decision: requisition.inventoryControlDecision,
+      decidedAt: requisition.inventoryControlDecidedAt,
+      decidedBy: requisition.inventoryControlDecidedBy,
+      reason: requisition.inventoryControlDecisionReason,
+      permission: PERMISSIONS.APPROVE_MATERIAL_PURCHASE_REQUISITION_INVENTORY_CONTROL,
     },
     {
       id: "manager",

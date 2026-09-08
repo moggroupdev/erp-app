@@ -135,11 +135,11 @@ export default function MaterialPurchaseRequisitionPrintDocument({
       reason: requisition.planningDecisionReason,
     },
     {
-      title: translate("Purchasing Manager Approval", "اعتماد مدير المشتريات"),
-      decision: requisition.purchasingManagerDecision,
-      decidedBy: requisition.purchasingManagerDecidedBy?.name ?? null,
-      decidedAt: requisition.purchasingManagerDecidedAt,
-      reason: requisition.purchasingManagerDecisionReason,
+      title: translate("Inventory Control Approval", "اعتماد مراقبة المخزون"),
+      decision: requisition.inventoryControlDecision,
+      decidedBy: requisition.inventoryControlDecidedBy?.name ?? null,
+      decidedAt: requisition.inventoryControlDecidedAt,
+      reason: requisition.inventoryControlDecisionReason,
     },
     {
       title: translate("Manager Approval", "اعتماد المدير"),
