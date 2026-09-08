@@ -67,7 +67,7 @@ export default function RequisitionUpdateModal({
 
     if (!productionSubDepartment) {
       return setValidationError(
-        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
+        translate("Please select a requesting party.", "يرجى اختيار جهة الطلب."),
       );
     }
 
@@ -99,7 +99,7 @@ export default function RequisitionUpdateModal({
         <SelectProductionSubDepartment
           value={productionSubDepartment}
           setValue={setProductionSubDepartment}
-          label={translate("Production Department", "قسم الانتاج")}
+          label={translate("Requesting Party", "جهة الطلب")}
           placeholder={translate("Select department...", "اختر القسم...")}
           required
           radius="md"

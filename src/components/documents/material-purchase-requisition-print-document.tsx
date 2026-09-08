@@ -167,18 +167,18 @@ export default function MaterialPurchaseRequisitionPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
         <PrintDetail
-          label={translate("Production Department", "قسم الانتاج")}
+          label={translate("Requesting Party", "جهة الطلب")}
           value={getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}
         />
         <PrintDetail
-          label={translate("Department Manager", "مدير القسم")}
+          label={translate("Department Manager", "رئيس القسم")}
           value={requisition.productionSubDepartmentManager?.name ?? "-"}
         />
         <PrintDetail
-          label={translate("MPReq Created At", "تاريخ إنشاء طلب الشراء")}
+          label={translate("Requisition Date", "تاريخ طلب الشراء")}
           value={formatDateAndTime(requisition.createdAt, locale)}
         />
-        <PrintDetail label={translate("Created By", "أنشئ بواسطة")} value={requisition.createdBy.name} />
+        <PrintDetail label={translate("Editor", "المحرر")} value={requisition.createdBy.name} />
         {requisition.notes ? <PrintDetail label={translate("Notes", "الملاحظات")} value={requisition.notes} /> : null}
       </section>
 

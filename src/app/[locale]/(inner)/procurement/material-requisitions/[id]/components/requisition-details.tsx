@@ -15,10 +15,14 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
 
   const rows: DetailRow[] = [
     {
-      key: translate("Requisition Code", "كود طلب الشراء"),
+      key: translate("Requisition Number", "رقم طلب الشراء"),
       value: requisition.code,
       mono: true,
       copyText: requisition.code,
+    },
+    {
+      key: translate("Requisition Date", "تاريخ طلب الشراء"),
+      value: formatDateAndTime(requisition.createdAt, locale),
     },
     {
       key: translate("Status", "الحالة"),
@@ -29,13 +33,19 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
       ),
     },
     {
-      key: translate("Production Department", "قسم الانتاج"),
+      key: translate("Requesting Party", "جهة الطلب"),
       value: getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale),
     },
     {
-      key: translate("Department Manager", "مدير القسم"),
+      key: translate("Department Manager", "رئيس القسم"),
       value: <CreatorLink creator={requisition.productionSubDepartmentManager} />,
     },
+
+    {
+      key: translate("Editor", "المحرر"),
+      value: <CreatorLink creator={requisition.createdBy} />,
+    },
+
     {
       key: translate("Notes", "الملاحظات"),
       value: requisition.notes ? (
@@ -43,14 +53,6 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
       ) : (
         <EmptyValue />
       ),
-    },
-    {
-      key: translate("Created By", "أنشئ بواسطة"),
-      value: <CreatorLink creator={requisition.createdBy} />,
-    },
-    {
-      key: translate("Created At", "تاريخ الإنشاء"),
-      value: formatDateAndTime(requisition.createdAt, locale),
     },
   ];
 
