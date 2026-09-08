@@ -9,7 +9,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import inventoryTransactionsApi from "@/lib/api/inventory-transactions";
-import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
+import supplierInvoicesApi from "@/lib/api/supplier-invoices";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
@@ -68,9 +68,9 @@ export default function Page() {
     error: invoicesError,
     refetch: refetchInvoices,
   } = useQuery({
-    queryKey: queryKeys.materialPurchaseOrders.invoices.list(invoicesParams),
-    queryFn: ({ signal }) => materialPurchaseOrdersApi.listInvoices({ privateRequest, params: invoicesParams, signal }),
-    staleTime: staleTimes.materialPurchaseOrders,
+    queryKey: queryKeys.supplierInvoices.list(invoicesParams),
+    queryFn: ({ signal }) => supplierInvoicesApi.list({ privateRequest, params: invoicesParams, signal }),
+    staleTime: staleTimes.supplierInvoices,
     enabled: !!materialPurchaseOrderId,
   });
 

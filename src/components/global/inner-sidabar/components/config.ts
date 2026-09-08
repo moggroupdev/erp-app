@@ -192,6 +192,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS,
       },
       {
+        label: { en: "Supplier Invoices", ar: "فواتير الموردين" },
+        href: "/procurement/supplier-invoices",
+        icon: ReceiptText,
+        requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS,
+      },
+      {
         label: { en: "Product Purchase Orders", ar: "أوامر توريد المنتجات" },
         href: "/procurement/product-orders",
         icon: FileText,

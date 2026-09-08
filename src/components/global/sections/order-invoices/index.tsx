@@ -1,5 +1,6 @@
 import { Table } from "@mantine/core";
-import { useI18n } from "@/lib/i18n/hooks";
+import Link from "next/link";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type SupplierInvoice } from "@/types/material-purchase-order";
@@ -78,6 +79,7 @@ export default function OrderInvoicesSection({
   orderTotalAmount,
 }: OrderInvoicesSectionProps) {
   const { locale, translate, translation } = useI18n();
+  const getLocalizedHref = useLocaleHref();
 
   return (
     <section className="mt-8 flex flex-col gap-4">
@@ -120,7 +122,12 @@ export default function OrderInvoicesSection({
                 <Table.Tr key={invoice.id} className="text-gray-600">
                   <Table.Td className="font-semibold text-gray-800">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono">{invoice.invoiceNumber}</span>
+                      <Link
+                        href={getLocalizedHref(`/procurement/supplier-invoices/${invoice.id}`)}
+                        className="font-mono hover:underline"
+                      >
+                        {invoice.invoiceNumber}
+                      </Link>
                       <CopyButton text={invoice.invoiceNumber} />
                     </div>
                   </Table.Td>

@@ -32,6 +32,21 @@ export type SupplierInvoice = {
   createdBy: string;
 };
 
+type SupplierInvoiceOrderLink = { id: string; code: string };
+
+export type SupplierInvoiceWithLinks = SupplierInvoice & {
+  supplier: { id: string; name: string };
+  materialPurchaseOrder: SupplierInvoiceOrderLink | null;
+  outsourcingOrder: SupplierInvoiceOrderLink | null;
+};
+
+export type SupplierInvoiceDetailed = Omit<SupplierInvoice, "createdBy"> & {
+  supplier: { id: string; name: string };
+  materialPurchaseOrder: SupplierInvoiceOrderLink | null;
+  outsourcingOrder: SupplierInvoiceOrderLink | null;
+  createdBy: { id: string; name: string };
+};
+
 // =============== Material Purchase Orders ===============
 
 export type MaterialPurchaseOrder = {
