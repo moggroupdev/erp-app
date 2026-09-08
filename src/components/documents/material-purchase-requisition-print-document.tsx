@@ -26,6 +26,15 @@ function getDecisionLabel(decision: ApprovalDecision, translate: (en: string, ar
   return null;
 }
 
+function ApprovalSignatureBlock({ title, name }: { title: string; name: string | null }) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
+      <p className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">{title}</p>
+      <p className="text-[10px] font-medium text-gray-800">{name ?? "-"}</p>
+    </div>
+  );
+}
+
 function ApprovalGateBlock({
   title,
   decision,
@@ -46,7 +55,7 @@ function ApprovalGateBlock({
   const decisionLabel = getDecisionLabel(decision, translate);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
+    <div className="flex min-w-0 flex-1 flex-col gap-1">
       <p className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">{title}</p>
 
       <div className="flex min-h-14 flex-1 flex-col justify-end gap-1">
@@ -126,6 +135,17 @@ export default function MaterialPurchaseRequisitionPrintDocument({
     ],
   ];
 
+  const signatureParties = [
+    {
+      title: translate("Warehouse Keeper", "أمين المخزن"),
+      name: requisition.createdBy.name,
+    },
+    {
+      title: translate("Department Manager", "رئيس القسم"),
+      name: requisition.productionSubDepartmentManager?.name ?? null,
+    },
+  ];
+
   const approvalGates = [
     {
       title: translate("Planning Approval", "اعتماد التخطيط"),
@@ -142,7 +162,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
       reason: requisition.inventoryControlDecisionReason,
     },
     {
-      title: translate("Manager Approval", "اعتماد المدير"),
+      title: translate("Authorized", "يُعتمد"),
       decision: requisition.managerDecision,
       decidedBy: requisition.managerDecidedBy?.name ?? null,
       decidedAt: requisition.managerDecidedAt,
@@ -167,18 +187,13 @@ export default function MaterialPurchaseRequisitionPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
         <PrintDetail
-          label={translate("Requesting Party", "جهة الطلب")}
-          value={getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}
-        />
-        <PrintDetail
-          label={translate("Department Manager", "رئيس القسم")}
-          value={requisition.productionSubDepartmentManager?.name ?? "-"}
-        />
-        <PrintDetail
           label={translate("Requisition Date", "تاريخ طلب الشراء")}
           value={formatDateAndTime(requisition.createdAt, locale)}
         />
-        <PrintDetail label={translate("Editor", "المحرر")} value={requisition.createdBy.name} />
+        <PrintDetail
+          label={translate("Requesting Party", "جهة الطلب")}
+          value={getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}
+        />
         {requisition.notes ? <PrintDetail label={translate("Notes", "الملاحظات")} value={requisition.notes} /> : null}
       </section>
 
@@ -210,7 +225,10 @@ export default function MaterialPurchaseRequisitionPrintDocument({
         <p className="mb-4 text-[9px] font-semibold tracking-wide text-gray-500 uppercase">
           {translate("Approvals", "الاعتمادات")}
         </p>
-        <div className="flex gap-8">
+        <div className="flex gap-6">
+          {signatureParties.map((party) => (
+            <ApprovalSignatureBlock key={party.title} title={party.title} name={party.name} />
+          ))}
           {approvalGates.map((gate) => (
             <ApprovalGateBlock key={gate.title} locale={locale} translate={translate} {...gate} />
           ))}
