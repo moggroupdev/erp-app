@@ -99,7 +99,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
           ]}
           rows={orders.map((row, index) => [
             String(index + 1),
-            row.invoiceNumber ?? "-",
+            row.invoiceNumbers.join(", ") || "-",
             row.supplierName,
             <span className="text-gray-500">{formatDate(row.createdAt, locale)}</span>,
             <span className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</span>,
@@ -162,7 +162,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
           rows={completedWithoutInvoiceTotal.map((row, index) => [
             String(index + 1),
             row.orderCode,
-            row.invoiceNumber ?? "-",
+            row.invoiceNumbers.join(", ") || "-",
             row.supplierName,
             <span className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</span>,
           ])}

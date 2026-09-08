@@ -6,14 +6,14 @@ export const REQUISITION_VAT_RATE = 0.14;
 
 export type RequisitionLockFields = {
   planningDecision: ApprovalDecision;
-  purchasingManagerDecision: ApprovalDecision;
+  inventoryControlDecision: ApprovalDecision;
   managerDecision: ApprovalDecision;
 };
 
 export function isRequisitionEditable(r: RequisitionLockFields) {
   return (
     r.planningDecision === APPROVAL_DECISIONS.PENDING &&
-    r.purchasingManagerDecision === APPROVAL_DECISIONS.PENDING &&
+    r.inventoryControlDecision === APPROVAL_DECISIONS.PENDING &&
     r.managerDecision === APPROVAL_DECISIONS.PENDING
   );
 }
@@ -21,7 +21,7 @@ export function isRequisitionEditable(r: RequisitionLockFields) {
 export function isRequisitionTerminal(r: RequisitionLockFields) {
   return (
     r.planningDecision === APPROVAL_DECISIONS.REJECTED ||
-    r.purchasingManagerDecision === APPROVAL_DECISIONS.REJECTED ||
+    r.inventoryControlDecision === APPROVAL_DECISIONS.REJECTED ||
     r.managerDecision === APPROVAL_DECISIONS.REJECTED
   );
 }
@@ -32,7 +32,7 @@ export function getRequisitionStatus(r: RequisitionLockFields): RequisitionStatu
   if (isRequisitionTerminal(r)) return "rejected";
   if (
     r.planningDecision === APPROVAL_DECISIONS.APPROVED &&
-    r.purchasingManagerDecision === APPROVAL_DECISIONS.APPROVED &&
+    r.inventoryControlDecision === APPROVAL_DECISIONS.APPROVED &&
     r.managerDecision === APPROVAL_DECISIONS.APPROVED
   ) {
     return "approved";

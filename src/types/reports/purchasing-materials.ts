@@ -65,7 +65,7 @@ export type PurchasingMaterialsSupplierBySubCategory = PurchasingMaterialsBySubC
 export type PurchasingMaterialsTopOrder = {
   orderId: string;
   orderCode: string;
-  invoiceNumber: string | null;
+  invoiceNumbers: string[];
   supplierId: string;
   supplierName: string;
   invoiceTotalPurchases: number;
@@ -121,7 +121,7 @@ export type PurchasingMaterialsCategoryStatsOverview = Pick<
 export type PurchasingMaterialsCategoryOrder = {
   orderId: string;
   orderCode: string;
-  invoiceNumber: string | null;
+  invoiceNumbers: string[];
   invoiceIssuedAt: string | null;
   supplierId: string;
   supplierName: string;
@@ -163,7 +163,7 @@ export type PurchasingMaterialsSubCategoryStats = {
 export type PurchasingMaterialsSupplierOrder = {
   orderId: string;
   orderCode: string;
-  invoiceNumber: string | null;
+  invoiceNumbers: string[];
   invoiceIssuedAt: string | null;
   invoiceTotalPurchases: number;
   createdAt: string;
@@ -199,7 +199,7 @@ export type PurchasingMaterialsTotalAmountMismatchOverview = {
 export type PurchasingMaterialsTotalAmountMismatchOrder = {
   orderId: string;
   orderCode: string;
-  invoiceNumber: string | null;
+  invoiceNumbers: string[];
   supplierId: string;
   supplierName: string;
   calculatedTotalAmount: number;
@@ -212,7 +212,7 @@ export type PurchasingMaterialsTotalAmountMismatchOrder = {
 export type PurchasingMaterialsCompletedWithoutInvoiceTotalOrder = {
   orderId: string;
   orderCode: string;
-  invoiceNumber: string | null;
+  invoiceNumbers: string[];
   supplierId: string;
   supplierName: string;
   calculatedTotalAmount: number;

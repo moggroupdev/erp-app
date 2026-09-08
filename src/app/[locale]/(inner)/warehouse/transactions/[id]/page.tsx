@@ -7,11 +7,14 @@ import { Table } from "@mantine/core";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import inventoryTransactionsApi from "@/lib/api/inventory-transactions";
+import supplierInvoicesApi from "@/lib/api/supplier-invoices";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
@@ -23,9 +26,12 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
+import OrderInvoicesSection from "@/components/global/sections/order-invoices";
 import TransactionDetails from "./components/transaction-details";
 
 const PAGE_TITLE = { en: "Transaction Details", ar: "تفاصيل الإذن" };
+
+const INVOICES_LIMIT = 100;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -33,6 +39,7 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+  const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -42,14 +49,41 @@ export default function Page() {
 
   const {
     data: transaction,
-    isFetching,
+    isFetching: isTransactionFetching,
     error,
-    refetch,
+    refetch: refetchTransaction,
   } = useQuery({
     queryKey: queryKeys.inventoryTransactions.detail(id),
     queryFn: ({ signal }) => inventoryTransactionsApi.get({ privateRequest, id, signal }),
     staleTime: staleTimes.inventoryTransactions,
   });
+
+  const materialPurchaseOrderId = transaction?.materialPurchaseReceipt?.materialPurchaseOrder.id;
+  const invoicesParams = {
+    materialPurchaseOrderId: materialPurchaseOrderId || "",
+    limit: INVOICES_LIMIT,
+    sortBy: "-issuedAt",
+  };
+
+  const {
+    data: paginatedInvoices,
+    isFetching: isInvoicesFetching,
+    error: invoicesError,
+    refetch: refetchInvoices,
+  } = useQuery({
+    queryKey: queryKeys.supplierInvoices.list(invoicesParams),
+    queryFn: ({ signal }) => supplierInvoicesApi.list({ privateRequest, params: invoicesParams, signal }),
+    staleTime: staleTimes.supplierInvoices,
+    enabled: canReadSupplierInvoices && !!materialPurchaseOrderId,
+  });
+
+  const isFetching =
+    isTransactionFetching || (canReadSupplierInvoices && !!materialPurchaseOrderId && isInvoicesFetching);
+
+  function refetch() {
+    refetchTransaction();
+    if (canReadSupplierInvoices && materialPurchaseOrderId) refetchInvoices();
+  }
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
@@ -62,16 +96,16 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref("/warehouse/transactions"),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: <RefetchButton isFetching={isFetching} onRefetch={refetch} />,
       }}
     >
-      {isFetching ? (
+      {isTransactionFetching ? (
         <LoadingSection message={translate("Loading transaction data", "جاري تحميل بيانات الحركة")} />
       ) : errorMessage ? (
         <ErrorSection
           errorTitle={translate("An error occurred while loading transaction data", "حدث خطأ أثناء تحميل بيانات الحركة")}
           errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetchTransaction() }}
         />
       ) : (
         transaction && (
@@ -111,32 +145,32 @@ export default function Page() {
                             unitConversions={item.material.unitConversions}
                           >
                             {({ unit, factor, toggleButton }) => (
-                          <Table.Tr className="text-gray-600">
-                            <Table.Td className="font-semibold text-gray-800">
-                              <Link
-                                href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                className="hover:underline"
-                              >
-                                {item.material.title}
-                              </Link>
-                            </Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-mono">{item.material.code}</span>
-                                <CopyButton text={item.material.code} />
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1">
-                                {getMaterialUnitLabel(unit, locale)}
-                                {toggleButton}
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{formatBaseQuantityForDisplay(item.quantity, factor)}</Table.Td>
-                            <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
-                            <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                          </Table.Tr>
+                              <Table.Tr className="text-gray-600">
+                                <Table.Td className="font-semibold text-gray-800">
+                                  <Link
+                                    href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                    className="hover:underline"
+                                  >
+                                    {item.material.title}
+                                  </Link>
+                                </Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono">{item.material.code}</span>
+                                    <CopyButton text={item.material.code} />
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1">
+                                    {getMaterialUnitLabel(unit, locale)}
+                                    {toggleButton}
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>{formatBaseQuantityForDisplay(item.quantity, factor)}</Table.Td>
+                                <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
+                                <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                              </Table.Tr>
                             )}
                           </UnitToggle>
                         );
@@ -156,6 +190,15 @@ export default function Page() {
                 </div>
               )}
             </section>
+
+            {canReadSupplierInvoices && materialPurchaseOrderId && (
+              <OrderInvoicesSection
+                invoices={paginatedInvoices?.data}
+                isFetching={isInvoicesFetching}
+                errorMessage={invoicesError ? getErrorMessage(locale, invoicesError) : null}
+                onRetry={() => refetchInvoices()}
+              />
+            )}
           </>
         )
       )}

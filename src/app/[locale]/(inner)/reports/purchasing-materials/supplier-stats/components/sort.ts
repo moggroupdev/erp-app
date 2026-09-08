@@ -217,9 +217,9 @@ export function sortSupplierOrders(data: PurchasingMaterialsSupplierOrder[], sor
       case "amount-asc":
         return a.invoiceTotalPurchases - b.invoiceTotalPurchases;
       case "invoice-number-asc":
-        return (a.invoiceNumber ?? "").localeCompare(b.invoiceNumber ?? "");
+        return (a.invoiceNumbers.join(",") || "").localeCompare(b.invoiceNumbers.join(",") || "");
       case "invoice-number-desc":
-        return (b.invoiceNumber ?? "").localeCompare(a.invoiceNumber ?? "");
+        return (b.invoiceNumbers.join(",") || "").localeCompare(a.invoiceNumbers.join(",") || "");
       case "code-asc":
         return a.orderCode.localeCompare(b.orderCode);
       case "code-desc":

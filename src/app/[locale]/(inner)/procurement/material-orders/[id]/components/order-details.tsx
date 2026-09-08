@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 import { FileText } from "lucide-react";
@@ -28,36 +28,6 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
         <Link href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)} className="hover:underline">
           {order.supplier.name}
         </Link>
-      ),
-    },
-    {
-      key: translate("Invoice Number", "رقم الفاتورة"),
-      value: order.invoiceNumber ? <span className="font-mono">{order.invoiceNumber}</span> : <EmptyValue />,
-      copyText: order.invoiceNumber || undefined,
-    },
-    {
-      key: translate("Invoice Issue Date", "تاريخ اصدار الفاتورة"),
-      value: order.invoiceIssuedAt ? formatDate(order.invoiceIssuedAt, locale) : <EmptyValue />,
-    },
-
-    {
-      key: translate(`Invoice Total (${translation.currency})`, `إجمالي الفاتورة (${translation.currency})`),
-      value: order.invoiceTotalPurchases != null ? formatMoney(order.invoiceTotalPurchases) : <EmptyValue />,
-    },
-    {
-      key: translate(`Calculated Total (${translation.currency})`, `الإجمالي المحسوب (${translation.currency})`),
-      value: (
-        <span
-          className={
-            order.invoiceTotalPurchases != null &&
-            Math.abs(order.totalAmount - order.invoiceTotalPurchases) >=
-              Math.max(Math.abs(order.totalAmount), Math.abs(order.invoiceTotalPurchases)) * 0.01
-              ? "font-semibold text-orange-600"
-              : undefined
-          }
-        >
-          {formatMoney(order.totalAmount)}
-        </span>
       ),
     },
     {

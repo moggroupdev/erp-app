@@ -82,7 +82,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-stone-200/25 bg-stone-50/60 p-4 sm:p-5">
+    <section className="flex flex-col gap-4 rounded-xl bg-stone-50/60 p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-stone-200">
@@ -464,6 +464,8 @@ export default function Page() {
           </div>
         </Section>
 
+        <hr className="border-stone-200/35" />
+
         <Section
           icon={ClipboardList}
           title={translate("Items", "البنود")}
@@ -529,6 +531,8 @@ export default function Page() {
           </div>
         </Section>
 
+        <hr className="border-stone-200/35" />
+
         <Section
           icon={NotebookPen}
           title={translate("Additional Notes", "ملاحظات إضافية")}
@@ -553,18 +557,9 @@ export default function Page() {
 
         {validationError ? <ErrorAlert error={validationError} /> : null}
 
-        <div className="flex flex-col gap-3 border-t border-stone-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-stone-500">
-            {supplierDisplayName
-              ? translate(
-                  `Letter for ${supplierDisplayName} · ${filledItemCount} item(s)`,
-                  `خطاب إلى ${supplierDisplayName} · ${filledItemCount} بند`,
-                )
-              : translate(
-                  "Select a supplier and add items, then print the letter.",
-                  "اختر مورداً وأضف البنود، ثم اطبع الخطاب.",
-                )}
-          </p>
+        <hr className="border-stone-200/35" />
+
+        <div className="flex justify-end">
           <PrintDocument
             buttonType="button"
             buttonLabel={translate("Print", "طباعة")}

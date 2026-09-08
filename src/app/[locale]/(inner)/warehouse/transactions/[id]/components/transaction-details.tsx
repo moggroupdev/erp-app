@@ -19,17 +19,6 @@ function getSourceRows(
     const order = receipt.materialPurchaseOrder;
     return [
       {
-        key: translate("Invoice Number", "رقم الفاتورة"),
-        value: order.invoiceNumber ? (
-          <Link href={getLocalizedHref(`/procurement/material-orders/${order.id}`)} className="font-mono hover:underline">
-            {order.invoiceNumber}
-          </Link>
-        ) : (
-          <EmptyValue />
-        ),
-        copyText: order.invoiceNumber || undefined,
-      },
-      {
         key: translate("Materials Receipt Number", "رقم سند استلام الخامات"),
         value: (
           <Link
@@ -40,6 +29,15 @@ function getSourceRows(
           </Link>
         ),
         copyText: receipt.code,
+      },
+      {
+        key: translate("Purchase Order Number", "رقم أمر التوريد"),
+        value: (
+          <Link href={getLocalizedHref(`/procurement/material-orders/${order.id}`)} className="font-mono hover:underline">
+            {order.code}
+          </Link>
+        ),
+        copyText: order.code,
       },
     ];
   }

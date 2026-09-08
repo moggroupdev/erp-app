@@ -138,14 +138,14 @@ const materialPurchaseRequisitionsApi = {
     });
   },
 
-  async approvePurchasingManager({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+  async approveInventoryControl({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
     return await privateRequest<MaterialPurchaseRequisition>({
       method: "POST",
-      url: `material-purchase-requisitions/${id}/purchasing-manager/approve`,
+      url: `material-purchase-requisitions/${id}/inventory-control/approve`,
     });
   },
 
-  async rejectPurchasingManager({
+  async rejectInventoryControl({
     privateRequest,
     id,
     dto,
@@ -156,7 +156,7 @@ const materialPurchaseRequisitionsApi = {
   }) {
     return await privateRequest<MaterialPurchaseRequisition>({
       method: "POST",
-      url: `material-purchase-requisitions/${id}/purchasing-manager/reject`,
+      url: `material-purchase-requisitions/${id}/inventory-control/reject`,
       data: dto,
     });
   },

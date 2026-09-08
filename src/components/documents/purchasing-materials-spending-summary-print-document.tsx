@@ -192,7 +192,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           rows={topOrders.map((row, index) => [
             String(index + 1),
             row.orderCode,
-            row.invoiceNumber ?? "-",
+            row.invoiceNumbers.join(", ") || "-",
             row.supplierName,
             formatDate(row.createdAt, locale),
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),

@@ -7,11 +7,14 @@ import { Table } from "@mantine/core";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
+import supplierInvoicesApi from "@/lib/api/supplier-invoices";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -25,10 +28,12 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import OrderDetails from "./components/order-details";
+import OrderInvoicesSection from "@/components/global/sections/order-invoices";
 
 const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خامات" };
 
 const RECEIPTS_LIMIT = 100;
+const INVOICES_LIMIT = 100;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -36,6 +41,7 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+  const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -67,11 +73,26 @@ export default function Page() {
     staleTime: staleTimes.materialPurchaseOrders,
   });
 
-  const isFetching = isOrderFetching || isReceiptsFetching;
+  const invoicesParams = { materialPurchaseOrderId: id, limit: INVOICES_LIMIT, sortBy: "-issuedAt" };
+
+  const {
+    data: paginatedInvoices,
+    isFetching: isInvoicesFetching,
+    error: invoicesError,
+    refetch: refetchInvoices,
+  } = useQuery({
+    queryKey: queryKeys.supplierInvoices.list(invoicesParams),
+    queryFn: ({ signal }) => supplierInvoicesApi.list({ privateRequest, params: invoicesParams, signal }),
+    staleTime: staleTimes.supplierInvoices,
+    enabled: canReadSupplierInvoices,
+  });
+
+  const isFetching = isOrderFetching || isReceiptsFetching || (canReadSupplierInvoices && isInvoicesFetching);
 
   function refetch() {
     refetchOrder();
     refetchReceipts();
+    if (canReadSupplierInvoices) refetchInvoices();
   }
 
   useDocumentTitle(
@@ -135,32 +156,32 @@ export default function Page() {
                             unitConversions={item.material.unitConversions}
                           >
                             {({ unit, factor, toggleButton }) => (
-                          <Table.Tr className="text-gray-600">
-                            <Table.Td className="font-semibold text-gray-800">
-                              <Link
-                                href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                className="hover:underline"
-                              >
-                                {item.material.title}
-                              </Link>
-                            </Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-mono">{item.material.code}</span>
-                                <CopyButton text={item.material.code} />
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1">
-                                {getMaterialUnitLabel(unit, locale)}
-                                {toggleButton}
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{formatBaseQuantityForDisplay(item.quantityOrdered, factor)}</Table.Td>
-                            <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
-                            <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                          </Table.Tr>
+                              <Table.Tr className="text-gray-600">
+                                <Table.Td className="font-semibold text-gray-800">
+                                  <Link
+                                    href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                    className="hover:underline"
+                                  >
+                                    {item.material.title}
+                                  </Link>
+                                </Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono">{item.material.code}</span>
+                                    <CopyButton text={item.material.code} />
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1">
+                                    {getMaterialUnitLabel(unit, locale)}
+                                    {toggleButton}
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>{formatBaseQuantityForDisplay(item.quantityOrdered, factor)}</Table.Td>
+                                <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
+                                <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                              </Table.Tr>
                             )}
                           </UnitToggle>
                         );
@@ -231,6 +252,16 @@ export default function Page() {
                 </div>
               )}
             </section>
+
+            {canReadSupplierInvoices && (
+              <OrderInvoicesSection
+                invoices={paginatedInvoices?.data}
+                isFetching={isInvoicesFetching}
+                errorMessage={invoicesError ? getErrorMessage(locale, invoicesError) : null}
+                onRetry={() => refetchInvoices()}
+                orderTotalAmount={order.totalAmount}
+              />
+            )}
           </>
         )
       )}

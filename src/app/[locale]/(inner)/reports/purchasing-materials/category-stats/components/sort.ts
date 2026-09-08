@@ -190,9 +190,9 @@ export function sortCategoryOrders(data: PurchasingMaterialsCategoryOrder[], sor
       case "amount-asc":
         return a.invoiceTotalPurchases - b.invoiceTotalPurchases;
       case "invoice-number-asc":
-        return (a.invoiceNumber ?? "").localeCompare(b.invoiceNumber ?? "");
+        return (a.invoiceNumbers.join(",") || "").localeCompare(b.invoiceNumbers.join(",") || "");
       case "invoice-number-desc":
-        return (b.invoiceNumber ?? "").localeCompare(a.invoiceNumber ?? "");
+        return (b.invoiceNumbers.join(",") || "").localeCompare(a.invoiceNumbers.join(",") || "");
       case "supplier-asc":
         return a.supplierName.localeCompare(b.supplierName);
       case "supplier-desc":
