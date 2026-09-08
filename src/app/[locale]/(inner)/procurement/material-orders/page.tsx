@@ -209,7 +209,7 @@ export default function Page() {
                         </Table.Td>
                         <Table.Td>
                           {invoices.length > 0 ? (
-                            <div className="flex flex-col gap-1">
+                            <div className="flex max-w-xs flex-wrap gap-2">
                               {invoices.map((invoice) => (
                                 <div key={invoice.id} className="flex items-center gap-1.5">
                                   <span className="font-mono">{invoice.invoiceNumber}</span>

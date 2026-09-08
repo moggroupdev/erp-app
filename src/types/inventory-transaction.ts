@@ -39,7 +39,7 @@ export type InventoryTransactionSource = {
   materialPurchaseReceipt: {
     id: string;
     code: string;
-    materialPurchaseOrder: { id: string; invoices: { id: string; invoiceNumber: string }[] };
+    materialPurchaseOrder: { id: string; code: string };
   } | null;
   outsourcingReceipt: {
     id: string;

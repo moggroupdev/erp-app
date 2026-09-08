@@ -9,7 +9,7 @@ export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseR
   const { locale, translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const { inventoryTransactions } = receipt;
-  const invoiceNumbers = receipt.materialPurchaseOrder.invoices.map((invoice) => invoice.invoiceNumber);
+  const { id: orderId, code: orderCode } = receipt.materialPurchaseOrder;
 
   const rows: DetailRow[] = [
     {
@@ -19,19 +19,13 @@ export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseR
       copyText: receipt.code,
     },
     {
-      key: translate("Invoice Numbers", "أرقام الفواتير"),
-      value:
-        invoiceNumbers.length > 0 ? (
-          <Link
-            href={getLocalizedHref(`/procurement/material-orders/${receipt.materialPurchaseOrder.id}`)}
-            className="font-mono hover:underline"
-          >
-            {invoiceNumbers.join(", ")}
-          </Link>
-        ) : (
-          <EmptyValue />
-        ),
-      copyText: invoiceNumbers.length > 0 ? invoiceNumbers.join(", ") : undefined,
+      key: translate("Purchase Order Code", "كود أمر التوريد"),
+      value: (
+        <Link href={getLocalizedHref(`/procurement/material-orders/${orderId}`)} className="font-mono hover:underline">
+          {orderCode}
+        </Link>
+      ),
+      copyText: orderCode,
     },
   ];
 

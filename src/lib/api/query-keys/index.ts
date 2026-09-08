@@ -110,6 +110,11 @@ export const queryKeys = {
       details: () => [...queryKeys.materialPurchaseOrders.receipts.all(), "detail"] as const,
       detail: (id: string) => [...queryKeys.materialPurchaseOrders.receipts.details(), id] as const,
     },
+    invoices: {
+      all: () => [...queryKeys.materialPurchaseOrders.all, "invoices"] as const,
+      lists: () => [...queryKeys.materialPurchaseOrders.invoices.all(), "list"] as const,
+      list: (filters: ListFilters) => [...queryKeys.materialPurchaseOrders.invoices.lists(), filters] as const,
+    },
   },
   materialPurchaseRequisitions: {
     all: ["material-purchase-requisitions"] as const,

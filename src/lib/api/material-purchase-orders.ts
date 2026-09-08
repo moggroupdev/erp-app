@@ -5,6 +5,7 @@ import type {
   MaterialPurchaseOrderWithSupplier,
   MaterialPurchaseReceipt,
   MaterialPurchaseReceiptDetailed,
+  SupplierInvoice,
 } from "@/types/material-purchase-order";
 
 const materialPurchaseOrdersApi = {
@@ -50,6 +51,22 @@ const materialPurchaseOrdersApi = {
   async getReceipt({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<MaterialPurchaseReceiptDetailed>({
       url: `material-purchase-receipts/${id}`,
+      signal,
+    });
+  },
+
+  async listInvoices({
+    privateRequest,
+    params,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    params: Dictionary;
+    signal: AbortSignal;
+  }) {
+    return await privateRequest<PaginatedData<SupplierInvoice>>({
+      url: "supplier-invoices",
+      params,
       signal,
     });
   },

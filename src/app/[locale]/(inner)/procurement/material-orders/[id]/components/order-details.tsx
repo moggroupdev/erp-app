@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 import { FileText } from "lucide-react";
@@ -15,22 +15,10 @@ function getOrderStatusLabel(
   return { label: translate("Open", "مفتوح"), className: "text-orange-600 font-bold" };
 }
 
-function sumInvoicePurchases(order: MaterialPurchaseOrderDetailed): number | null {
-  const withTotals = order.invoices.filter((invoice) => invoice.totalPurchases != null);
-  if (withTotals.length === 0) return null;
-  return withTotals.reduce((sum, invoice) => sum + Number(invoice.totalPurchases), 0);
-}
-
 export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDetailed }) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const status = getOrderStatusLabel(order, translate);
-  const invoiceTotalPurchases = sumInvoicePurchases(order);
-  const invoiceNumbers = order.invoices.map((invoice) => invoice.invoiceNumber);
-  const latestIssuedAt = order.invoices
-    .filter((invoice) => invoice.issuedAt)
-    .map((invoice) => invoice.issuedAt as Date)
-    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
 
   const rows: DetailRow[] = [
     { key: translate("Purchase Order Code", "كود أمر التوريد"), value: order.code, mono: true, copyText: order.code },
@@ -40,40 +28,6 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
         <Link href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)} className="hover:underline">
           {order.supplier.name}
         </Link>
-      ),
-    },
-    {
-      key: translate("Invoice Numbers", "أرقام الفواتير"),
-      value:
-        invoiceNumbers.length > 0 ? (
-          <span className="font-mono">{invoiceNumbers.join(", ")}</span>
-        ) : (
-          <EmptyValue />
-        ),
-      copyText: invoiceNumbers.length > 0 ? invoiceNumbers.join(", ") : undefined,
-    },
-    {
-      key: translate("Latest Invoice Issue Date", "أحدث تاريخ اصدار فاتورة"),
-      value: latestIssuedAt ? formatDate(latestIssuedAt, locale) : <EmptyValue />,
-    },
-    {
-      key: translate(`Invoice Total (${translation.currency})`, `إجمالي الفاتورة (${translation.currency})`),
-      value: invoiceTotalPurchases != null ? formatMoney(invoiceTotalPurchases) : <EmptyValue />,
-    },
-    {
-      key: translate(`Calculated Total (${translation.currency})`, `الإجمالي المحسوب (${translation.currency})`),
-      value: (
-        <span
-          className={
-            invoiceTotalPurchases != null &&
-            Math.abs(order.totalAmount - invoiceTotalPurchases) >=
-              Math.max(Math.abs(order.totalAmount), Math.abs(invoiceTotalPurchases)) * 0.01
-              ? "font-semibold text-orange-600"
-              : undefined
-          }
-        >
-          {formatMoney(order.totalAmount)}
-        </span>
       ),
     },
     {

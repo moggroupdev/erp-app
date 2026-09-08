@@ -32,11 +32,6 @@ export type SupplierInvoice = {
   createdBy: string;
 };
 
-export type SupplierInvoiceSummary = {
-  id: string;
-  invoiceNumber: string;
-};
-
 // =============== Material Purchase Orders ===============
 
 export type MaterialPurchaseOrder = {
@@ -70,7 +65,6 @@ export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "created
   supplier: { id: string; name: string };
   createdBy: { id: string; name: string };
   items: MaterialPurchaseOrderItem[];
-  invoices: SupplierInvoice[];
 };
 
 // =============== Material Purchase Receipts ===============
@@ -103,7 +97,7 @@ export type MaterialPurchaseReceiptItem = {
 };
 
 export type MaterialPurchaseReceiptDetailed = Omit<MaterialPurchaseReceipt, "createdBy" | "receivedBy"> & {
-  materialPurchaseOrder: { id: string; invoices: SupplierInvoiceSummary[] };
+  materialPurchaseOrder: { id: string; code: string };
   inventoryTransactions: { id: string; legacyNumber: string | null }[];
   createdBy: { id: string; name: string };
   receivedBy: { id: string; name: string } | null;

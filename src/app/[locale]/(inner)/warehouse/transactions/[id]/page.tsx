@@ -9,6 +9,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import inventoryTransactionsApi from "@/lib/api/inventory-transactions";
+import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
@@ -23,9 +24,12 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
+import OrderInvoicesSection from "@/components/global/sections/order-invoices";
 import TransactionDetails from "./components/transaction-details";
 
 const PAGE_TITLE = { en: "Transaction Details", ar: "تفاصيل الإذن" };
+
+const INVOICES_LIMIT = 100;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -42,14 +46,40 @@ export default function Page() {
 
   const {
     data: transaction,
-    isFetching,
+    isFetching: isTransactionFetching,
     error,
-    refetch,
+    refetch: refetchTransaction,
   } = useQuery({
     queryKey: queryKeys.inventoryTransactions.detail(id),
     queryFn: ({ signal }) => inventoryTransactionsApi.get({ privateRequest, id, signal }),
     staleTime: staleTimes.inventoryTransactions,
   });
+
+  const materialPurchaseOrderId = transaction?.materialPurchaseReceipt?.materialPurchaseOrder.id;
+  const invoicesParams = {
+    materialPurchaseOrderId: materialPurchaseOrderId || "",
+    limit: INVOICES_LIMIT,
+    sortBy: "-issuedAt",
+  };
+
+  const {
+    data: paginatedInvoices,
+    isFetching: isInvoicesFetching,
+    error: invoicesError,
+    refetch: refetchInvoices,
+  } = useQuery({
+    queryKey: queryKeys.materialPurchaseOrders.invoices.list(invoicesParams),
+    queryFn: ({ signal }) => materialPurchaseOrdersApi.listInvoices({ privateRequest, params: invoicesParams, signal }),
+    staleTime: staleTimes.materialPurchaseOrders,
+    enabled: !!materialPurchaseOrderId,
+  });
+
+  const isFetching = isTransactionFetching || (!!materialPurchaseOrderId && isInvoicesFetching);
+
+  function refetch() {
+    refetchTransaction();
+    if (materialPurchaseOrderId) refetchInvoices();
+  }
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
@@ -62,16 +92,16 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: getLocalizedHref("/warehouse/transactions"),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: <RefetchButton isFetching={isFetching} onRefetch={refetch} />,
       }}
     >
-      {isFetching ? (
+      {isTransactionFetching ? (
         <LoadingSection message={translate("Loading transaction data", "جاري تحميل بيانات الحركة")} />
       ) : errorMessage ? (
         <ErrorSection
           errorTitle={translate("An error occurred while loading transaction data", "حدث خطأ أثناء تحميل بيانات الحركة")}
           errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetchTransaction() }}
         />
       ) : (
         transaction && (
@@ -111,32 +141,32 @@ export default function Page() {
                             unitConversions={item.material.unitConversions}
                           >
                             {({ unit, factor, toggleButton }) => (
-                          <Table.Tr className="text-gray-600">
-                            <Table.Td className="font-semibold text-gray-800">
-                              <Link
-                                href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                className="hover:underline"
-                              >
-                                {item.material.title}
-                              </Link>
-                            </Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-mono">{item.material.code}</span>
-                                <CopyButton text={item.material.code} />
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1">
-                                {getMaterialUnitLabel(unit, locale)}
-                                {toggleButton}
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{formatBaseQuantityForDisplay(item.quantity, factor)}</Table.Td>
-                            <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
-                            <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                          </Table.Tr>
+                              <Table.Tr className="text-gray-600">
+                                <Table.Td className="font-semibold text-gray-800">
+                                  <Link
+                                    href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                    className="hover:underline"
+                                  >
+                                    {item.material.title}
+                                  </Link>
+                                </Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono">{item.material.code}</span>
+                                    <CopyButton text={item.material.code} />
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1">
+                                    {getMaterialUnitLabel(unit, locale)}
+                                    {toggleButton}
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>{formatBaseQuantityForDisplay(item.quantity, factor)}</Table.Td>
+                                <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
+                                <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                              </Table.Tr>
                             )}
                           </UnitToggle>
                         );
@@ -156,6 +186,15 @@ export default function Page() {
                 </div>
               )}
             </section>
+
+            {materialPurchaseOrderId && (
+              <OrderInvoicesSection
+                invoices={paginatedInvoices?.data}
+                isFetching={isInvoicesFetching}
+                errorMessage={invoicesError ? getErrorMessage(locale, invoicesError) : null}
+                onRetry={() => refetchInvoices()}
+              />
+            )}
           </>
         )
       )}
