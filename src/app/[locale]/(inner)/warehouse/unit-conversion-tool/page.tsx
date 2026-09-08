@@ -255,7 +255,9 @@ function ItemRow({
 
   return (
     <Table.Tr className="text-nowrap">
-      <Table.Td className={`${TABLE_COLUMN_CLASS.index} text-center text-xs font-medium text-gray-500`}>{index + 1}</Table.Td>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.index} text-center text-xs font-medium text-gray-500`}>
+        {index + 1}
+      </Table.Td>
       <Table.Td className={`${TABLE_COLUMN_CLASS.material} transition-colors focus-within:bg-teal-50/60`}>
         <SelectMaterial
           value={row.materialCode}
@@ -446,7 +448,7 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         subTitle: translate(
           "Add materials, enter quantities and unit prices in any supported unit, and see live conversions and totals.",
-          "أضف موادًا وأدخل الكميات وأسعار الوحدات بأي وحدة مدعومة لعرض التحويلات والإجماليات مباشرة.`.",
+          "أضف موادًا وأدخل الكميات وأسعار الوحدات بأي وحدة مدعومة لعرض التحويلات والإجماليات مباشرة.",
         ),
         backLink: true,
         confirmNavigate: confirmNavigation,
@@ -468,27 +470,39 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-gray-200">
+          <div className="overflow-x-auto rounded-xl">
             <Table withColumnBorders className="w-full min-w-max text-nowrap" horizontalSpacing="xs" verticalSpacing="xs">
               <Table.Thead className="bg-gray-50">
                 <Table.Tr className="h-10">
                   <Table.Th className={`${TABLE_COLUMN_CLASS.index} text-center! text-gray-500`}>#</Table.Th>
-                  <Table.Th className={`${TABLE_COLUMN_CLASS.material} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
+                  <Table.Th
+                    className={`${TABLE_COLUMN_CLASS.material} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                  >
                     {translate("Material", "المادة")}
                   </Table.Th>
-                  <Table.Th className={`${TABLE_COLUMN_CLASS.quantity} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
+                  <Table.Th
+                    className={`${TABLE_COLUMN_CLASS.quantity} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                  >
                     {translate("Quantity", "الكمية")}
                   </Table.Th>
-                  <Table.Th className={`${TABLE_COLUMN_CLASS.unit} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
+                  <Table.Th
+                    className={`${TABLE_COLUMN_CLASS.unit} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                  >
                     {translate("Unit", "الوحدة")}
                   </Table.Th>
-                  <Table.Th className={`${TABLE_COLUMN_CLASS.unitPrice} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
+                  <Table.Th
+                    className={`${TABLE_COLUMN_CLASS.unitPrice} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                  >
                     {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                   </Table.Th>
-                  <Table.Th className={`${TABLE_COLUMN_CLASS.otherUnits} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
+                  <Table.Th
+                    className={`${TABLE_COLUMN_CLASS.otherUnits} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                  >
                     {translate("Other Units", "الوحدات الأخرى")}
                   </Table.Th>
-                  <Table.Th className={`${TABLE_COLUMN_CLASS.lineValue} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
+                  <Table.Th
+                    className={`${TABLE_COLUMN_CLASS.lineValue} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                  >
                     {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
                   </Table.Th>
                   <Table.Th className={TABLE_COLUMN_CLASS.actions} />
@@ -545,7 +559,7 @@ export default function Page() {
             <h4 className="text-lg font-semibold text-gray-900">{translate("Totals", "الإجماليات")}</h4>
           </div>
 
-          <div className="overflow-hidden rounded-3xl border border-gray-200 bg-linear-to-br from-slate-50 via-white to-teal-50/40">
+          <div className="overflow-hidden rounded-3xl border border-gray-200/75 bg-linear-to-br from-slate-50 via-white to-teal-50/40">
             <div className="flex flex-col gap-4 p-5 md:p-6">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
