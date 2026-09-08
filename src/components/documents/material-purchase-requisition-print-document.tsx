@@ -175,7 +175,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
           value={requisition.productionSubDepartmentManager?.name ?? "-"}
         />
         <PrintDetail
-          label={translate("MPQ Created At", "تاريخ إنشاء طلب الشراء")}
+          label={translate("MPReq Created At", "تاريخ إنشاء طلب الشراء")}
           value={formatDateAndTime(requisition.createdAt, locale)}
         />
         <PrintDetail label={translate("Created By", "أنشئ بواسطة")} value={requisition.createdBy.name} />
