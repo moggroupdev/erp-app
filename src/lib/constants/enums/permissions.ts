@@ -55,6 +55,7 @@ export const PERMISSION_VALUES = [
   "read_legacy_issue_permits",
   "update_legacy_issue_permit",
   "read_material_purchase_orders",
+  "read_supplier_invoices",
   "add_material_purchase_requisition",
   "read_material_purchase_requisitions",
   "update_material_purchase_requisition",
@@ -441,6 +442,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض أوامر توريد المواد",
     },
   },
+  read_supplier_invoices: {
+    value: "read_supplier_invoices",
+    label: {
+      en: "Read Supplier Invoices",
+      ar: "عرض فواتير الموردين",
+    },
+  },
   add_material_purchase_requisition: {
     value: "add_material_purchase_requisition",
     label: {
@@ -667,6 +675,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "print_suppliers_list",
       "print_supplier_quotation_request",
       "read_material_purchase_orders",
+      "read_supplier_invoices",
       "read_product_purchase_orders",
       "read_material_purchase_requisitions",
       "approve_material_purchase_requisition_purchasing_manager",

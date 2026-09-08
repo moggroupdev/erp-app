@@ -26,6 +26,7 @@ export type SupplierInvoice = {
   withholdingTaxAmount: number | null;
   totalAmount: number | null;
   materialPurchaseOrderId: string | null;
+  productPurchaseOrderId: string | null;
   outsourcingOrderId: string | null;
   supplierId: string;
   createdAt: Date;
@@ -37,12 +38,14 @@ type SupplierInvoiceOrderLink = { id: string; code: string };
 export type SupplierInvoiceWithLinks = SupplierInvoice & {
   supplier: { id: string; name: string };
   materialPurchaseOrder: SupplierInvoiceOrderLink | null;
+  productPurchaseOrder: SupplierInvoiceOrderLink | null;
   outsourcingOrder: SupplierInvoiceOrderLink | null;
 };
 
 export type SupplierInvoiceDetailed = Omit<SupplierInvoice, "createdBy"> & {
   supplier: { id: string; name: string };
   materialPurchaseOrder: SupplierInvoiceOrderLink | null;
+  productPurchaseOrder: SupplierInvoiceOrderLink | null;
   outsourcingOrder: SupplierInvoiceOrderLink | null;
   createdBy: { id: string; name: string };
 };

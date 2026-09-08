@@ -7,12 +7,14 @@ import { Table } from "@mantine/core";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import inventoryTransactionsApi from "@/lib/api/inventory-transactions";
 import supplierInvoicesApi from "@/lib/api/supplier-invoices";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
@@ -37,6 +39,7 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+  const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -71,14 +74,15 @@ export default function Page() {
     queryKey: queryKeys.supplierInvoices.list(invoicesParams),
     queryFn: ({ signal }) => supplierInvoicesApi.list({ privateRequest, params: invoicesParams, signal }),
     staleTime: staleTimes.supplierInvoices,
-    enabled: !!materialPurchaseOrderId,
+    enabled: canReadSupplierInvoices && !!materialPurchaseOrderId,
   });
 
-  const isFetching = isTransactionFetching || (!!materialPurchaseOrderId && isInvoicesFetching);
+  const isFetching =
+    isTransactionFetching || (canReadSupplierInvoices && !!materialPurchaseOrderId && isInvoicesFetching);
 
   function refetch() {
     refetchTransaction();
-    if (materialPurchaseOrderId) refetchInvoices();
+    if (canReadSupplierInvoices && materialPurchaseOrderId) refetchInvoices();
   }
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
@@ -187,7 +191,7 @@ export default function Page() {
               )}
             </section>
 
-            {materialPurchaseOrderId && (
+            {canReadSupplierInvoices && materialPurchaseOrderId && (
               <OrderInvoicesSection
                 invoices={paginatedInvoices?.data}
                 isFetching={isInvoicesFetching}

@@ -7,12 +7,14 @@ import { Table } from "@mantine/core";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import supplierInvoicesApi from "@/lib/api/supplier-invoices";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -39,6 +41,7 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+  const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -81,14 +84,15 @@ export default function Page() {
     queryKey: queryKeys.supplierInvoices.list(invoicesParams),
     queryFn: ({ signal }) => supplierInvoicesApi.list({ privateRequest, params: invoicesParams, signal }),
     staleTime: staleTimes.supplierInvoices,
+    enabled: canReadSupplierInvoices,
   });
 
-  const isFetching = isOrderFetching || isReceiptsFetching || isInvoicesFetching;
+  const isFetching = isOrderFetching || isReceiptsFetching || (canReadSupplierInvoices && isInvoicesFetching);
 
   function refetch() {
     refetchOrder();
     refetchReceipts();
-    refetchInvoices();
+    if (canReadSupplierInvoices) refetchInvoices();
   }
 
   useDocumentTitle(
@@ -249,13 +253,15 @@ export default function Page() {
               )}
             </section>
 
-            <OrderInvoicesSection
-              invoices={paginatedInvoices?.data}
-              isFetching={isInvoicesFetching}
-              errorMessage={invoicesError ? getErrorMessage(locale, invoicesError) : null}
-              onRetry={() => refetchInvoices()}
-              orderTotalAmount={order.totalAmount}
-            />
+            {canReadSupplierInvoices && (
+              <OrderInvoicesSection
+                invoices={paginatedInvoices?.data}
+                isFetching={isInvoicesFetching}
+                errorMessage={invoicesError ? getErrorMessage(locale, invoicesError) : null}
+                onRetry={() => refetchInvoices()}
+                orderTotalAmount={order.totalAmount}
+              />
+            )}
           </>
         )
       )}

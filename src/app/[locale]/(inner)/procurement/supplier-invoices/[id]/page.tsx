@@ -37,6 +37,9 @@ function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDetailed }) {
         </Link>
       );
     }
+    if (invoice.productPurchaseOrder) {
+      return <span className="font-mono">{invoice.productPurchaseOrder.code}</span>;
+    }
     if (invoice.outsourcingOrder) {
       return <span className="font-mono">{invoice.outsourcingOrder.code}</span>;
     }

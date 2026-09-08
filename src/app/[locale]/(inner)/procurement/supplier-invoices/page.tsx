@@ -46,6 +46,10 @@ function OrderCell({ invoice }: { invoice: SupplierInvoiceWithLinks }) {
     );
   }
 
+  if (invoice.productPurchaseOrder) {
+    return <span className="font-mono">{invoice.productPurchaseOrder.code}</span>;
+  }
+
   if (invoice.outsourcingOrder) {
     return <span className="font-mono">{invoice.outsourcingOrder.code}</span>;
   }
