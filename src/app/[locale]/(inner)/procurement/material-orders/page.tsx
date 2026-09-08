@@ -156,8 +156,8 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Supplier", "المورد")}</Table.Th>
-                    <Table.Th>{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
-                    <Table.Th>{translate("Invoice Issue Date", "تاريخ اصدار الفاتورة")}</Table.Th>
+                    <Table.Th>{translate("Invoice Numbers", "أرقام الفواتير")}</Table.Th>
+                    <Table.Th>{translate("Latest Invoice Date", "أحدث تاريخ فاتورة")}</Table.Th>
                     <Table.Th>
                       {translate(`Invoice Total (${translation.currency})`, `إجمالي الفاتورة (${translation.currency})`)}
                     </Table.Th>
@@ -171,6 +171,21 @@ export default function Page() {
                 <Table.Tbody>
                   {paginatedOrders.data.map((order) => {
                     const status = getOrderStatusLabel(order, translate);
+                    const invoices = order.invoices ?? [];
+                    const invoicesWithTotals = invoices.filter((invoice) => invoice.totalPurchases != null);
+                    const invoiceTotalPurchases =
+                      invoicesWithTotals.length > 0
+                        ? invoicesWithTotals.reduce((sum, invoice) => sum + Number(invoice.totalPurchases), 0)
+                        : null;
+                    const latestIssuedAt = invoices
+                      .filter((invoice) => invoice.issuedAt)
+                      .map((invoice) => invoice.issuedAt as Date)
+                      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+                    const hasMismatch =
+                      invoiceTotalPurchases != null &&
+                      Math.abs(order.totalAmount - invoiceTotalPurchases) >=
+                        Math.max(Math.abs(order.totalAmount), Math.abs(invoiceTotalPurchases)) * 0.01;
+
                     return (
                       <Table.Tr key={order.id} className="text-gray-600">
                         <Table.Td className="font-semibold text-gray-800">
@@ -193,39 +208,30 @@ export default function Page() {
                           </Link>
                         </Table.Td>
                         <Table.Td>
-                          {order.invoiceNumber ? (
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono">{order.invoiceNumber}</span>
-                              <CopyButton text={order.invoiceNumber} />
+                          {invoices.length > 0 ? (
+                            <div className="flex flex-col gap-1">
+                              {invoices.map((invoice) => (
+                                <div key={invoice.id} className="flex items-center gap-1.5">
+                                  <span className="font-mono">{invoice.invoiceNumber}</span>
+                                  <CopyButton text={invoice.invoiceNumber} />
+                                </div>
+                              ))}
                             </div>
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
                         </Table.Td>
                         <Table.Td>
-                          {order.invoiceIssuedAt ? (
-                            formatDate(order.invoiceIssuedAt, locale)
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
+                          {latestIssuedAt ? formatDate(latestIssuedAt, locale) : <span className="text-gray-400">-</span>}
                         </Table.Td>
-
                         <Table.Td>
-                          {order.invoiceTotalPurchases != null ? (
-                            formatMoney(order.invoiceTotalPurchases)
+                          {invoiceTotalPurchases != null ? (
+                            formatMoney(invoiceTotalPurchases)
                           ) : (
                             <span className="text-gray-400">-</span>
                           )}
                         </Table.Td>
-                        <Table.Td
-                          className={
-                            order.invoiceTotalPurchases != null &&
-                            Math.abs(order.totalAmount - order.invoiceTotalPurchases) >=
-                              Math.max(Math.abs(order.totalAmount), Math.abs(order.invoiceTotalPurchases)) * 0.01
-                              ? "font-semibold text-orange-600"
-                              : undefined
-                          }
-                        >
+                        <Table.Td className={hasMismatch ? "font-semibold text-orange-600" : undefined}>
                           {formatMoney(order.totalAmount)}
                         </Table.Td>
                         <Table.Td>

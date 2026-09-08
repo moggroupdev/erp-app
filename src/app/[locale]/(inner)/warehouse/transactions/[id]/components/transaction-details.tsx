@@ -17,17 +17,19 @@ function getSourceRows(
   if (transaction.materialPurchaseReceipt) {
     const receipt = transaction.materialPurchaseReceipt;
     const order = receipt.materialPurchaseOrder;
+    const invoiceNumbers = order.invoices.map((invoice) => invoice.invoiceNumber);
     return [
       {
-        key: translate("Invoice Number", "رقم الفاتورة"),
-        value: order.invoiceNumber ? (
-          <Link href={getLocalizedHref(`/procurement/material-orders/${order.id}`)} className="font-mono hover:underline">
-            {order.invoiceNumber}
-          </Link>
-        ) : (
-          <EmptyValue />
-        ),
-        copyText: order.invoiceNumber || undefined,
+        key: translate("Invoice Numbers", "أرقام الفواتير"),
+        value:
+          invoiceNumbers.length > 0 ? (
+            <Link href={getLocalizedHref(`/procurement/material-orders/${order.id}`)} className="font-mono hover:underline">
+              {invoiceNumbers.join(", ")}
+            </Link>
+          ) : (
+            <EmptyValue />
+          ),
+        copyText: invoiceNumbers.length > 0 ? invoiceNumbers.join(", ") : undefined,
       },
       {
         key: translate("Materials Receipt Number", "رقم سند استلام الخامات"),

@@ -14,14 +14,34 @@ type PurchaseMaterialWithUnitConversion = PurchaseMaterial & {
   unitConversions: MaterialUnitConversionSummary[];
 };
 
+// =============== Supplier Invoices ===============
+
+export type SupplierInvoice = {
+  id: string;
+  invoiceNumber: string;
+  issuedAt: Date | null;
+  totalPurchases: number | null;
+  totalDiscount: number | null;
+  vatAmount: number | null;
+  withholdingTaxAmount: number | null;
+  totalAmount: number | null;
+  materialPurchaseOrderId: string | null;
+  outsourcingOrderId: string | null;
+  supplierId: string;
+  createdAt: Date;
+  createdBy: string;
+};
+
+export type SupplierInvoiceSummary = {
+  id: string;
+  invoiceNumber: string;
+};
+
 // =============== Material Purchase Orders ===============
 
 export type MaterialPurchaseOrder = {
   id: string;
   code: string;
-  invoiceNumber: string | null;
-  invoiceIssuedAt: Date | null;
-  invoiceTotalPurchases: number | null;
   supplierId: string;
   totalAmount: number;
   completedAt: Date | null;
@@ -33,6 +53,7 @@ export type MaterialPurchaseOrder = {
 
 export type MaterialPurchaseOrderWithSupplier = MaterialPurchaseOrder & {
   supplier: { id: string; name: string };
+  invoices?: Pick<SupplierInvoice, "id" | "invoiceNumber" | "issuedAt" | "totalPurchases">[];
 };
 
 export type MaterialPurchaseOrderItem = {
@@ -49,6 +70,7 @@ export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "created
   supplier: { id: string; name: string };
   createdBy: { id: string; name: string };
   items: MaterialPurchaseOrderItem[];
+  invoices: SupplierInvoice[];
 };
 
 // =============== Material Purchase Receipts ===============
@@ -81,7 +103,7 @@ export type MaterialPurchaseReceiptItem = {
 };
 
 export type MaterialPurchaseReceiptDetailed = Omit<MaterialPurchaseReceipt, "createdBy" | "receivedBy"> & {
-  materialPurchaseOrder: { id: string; invoiceNumber: string | null };
+  materialPurchaseOrder: { id: string; invoices: SupplierInvoiceSummary[] };
   inventoryTransactions: { id: string; legacyNumber: string | null }[];
   createdBy: { id: string; name: string };
   receivedBy: { id: string; name: string } | null;

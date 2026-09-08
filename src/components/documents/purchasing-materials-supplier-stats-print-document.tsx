@@ -237,7 +237,7 @@ export default function PurchasingMaterialsSupplierStatsPrintDocument({
           rows={orders.map((row, index) => [
             String(index + 1),
             row.orderCode,
-            row.invoiceNumber ?? "-",
+            row.invoiceNumbers.join(", ") || "-",
             row.invoiceIssuedAt ? formatDate(row.invoiceIssuedAt, locale) : "-",
             row.inventoryTransactionLegacyNumbers.length > 0 ? row.inventoryTransactionLegacyNumbers.join(", ") : "-",
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
