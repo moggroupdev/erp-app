@@ -285,16 +285,12 @@ export default function Page() {
     setValidationError("");
 
     if (!productionSubDepartment) {
-      return setValidationError(
-        translate("Please select a requesting party.", "يرجى اختيار جهة الطلب."),
-      );
+      return setValidationError(translate("Please select a requesting party.", "يرجى اختيار جهة الطلب."));
     }
 
     const filledRows = rows.filter((row) => !isEmptyRow(row));
     if (filledRows.length === 0) {
-      return setValidationError(
-        translate("Please add at least one item.", "يرجى إضافة بند واحد على الأقل."),
-      );
+      return setValidationError(translate("Please add at least one item.", "يرجى إضافة بند واحد على الأقل."));
     }
 
     for (let index = 0; index < rows.length; index++) {
@@ -305,9 +301,7 @@ export default function Page() {
       const materialName = row.materialTitle || row.materialCode;
 
       if (!row.materialCode) {
-        return setValidationError(
-          translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`),
-        );
+        return setValidationError(translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
       }
 
       if (!row.unitOfMeasurementSelected) {
@@ -360,7 +354,7 @@ export default function Page() {
             required
             radius="md"
           />
-          <div className="md:col-span-2">
+          <div>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -368,7 +362,6 @@ export default function Page() {
               placeholder={translate("Optional", "اختياري")}
               radius="md"
               autosize
-              minRows={2}
             />
           </div>
         </section>

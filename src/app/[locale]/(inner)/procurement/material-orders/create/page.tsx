@@ -413,7 +413,7 @@ export default function Page() {
             required
             radius="md"
           />
-          <div className="md:col-span-2">
+          <div>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -421,7 +421,6 @@ export default function Page() {
               placeholder={translate("Optional", "اختياري")}
               radius="md"
               autosize
-              minRows={2}
             />
           </div>
         </section>
