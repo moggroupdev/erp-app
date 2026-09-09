@@ -9,8 +9,8 @@ export const FROM_QUERY_PARAM = "from";
 export const REFRESH_TOKEN_COOKIE = "refresh_token";
 export const NEXT_LOCALE_COOKIE = "NEXT_LOCALE";
 
-export const ADMIN_SIDEBAR_EXPANDED_WIDTH = 300;
-export const ADMIN_SIDEBAR_COLLAPSED_WIDTH = 75;
+export const ADMIN_SIDEBAR_EXPANDED_WIDTH = 315;
+export const ADMIN_SIDEBAR_COLLAPSED_WIDTH = 65;
 
 export const DEFAULT_HOME_HREF = "/dashboard";
 

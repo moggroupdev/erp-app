@@ -18,8 +18,8 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
-import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -149,11 +149,20 @@ export default function Page() {
                     <Table.Tbody>
                       {order.items.map((item) => {
                         const subtotal = Number(item.quantityOrdered) * Number(item.unitPrice);
+                        const selectedFactor = resolveDisplayUnit(
+                          item.unitOfMeasurementSelected,
+                          item.material.unitOfMeasurement,
+                          item.material.unitConversions,
+                        ).factor;
+                        const baseUnitPrice =
+                          selectedFactor === 0 ? Number(item.unitPrice) : Number(item.unitPrice) / selectedFactor;
+
                         return (
                           <UnitToggle
-                            key={item.id}
+                            key={`${item.id}:${item.unitOfMeasurementSelected}`}
                             baseUnit={item.material.unitOfMeasurement}
                             unitConversions={item.material.unitConversions}
+                            defaultUnit={item.unitOfMeasurementSelected}
                           >
                             {({ unit, factor, toggleButton }) => (
                               <Table.Tr className="text-gray-600">
@@ -178,8 +187,15 @@ export default function Page() {
                                     {toggleButton}
                                   </div>
                                 </Table.Td>
-                                <Table.Td>{formatBaseQuantityForDisplay(item.quantityOrdered, factor)}</Table.Td>
-                                <Table.Td>{formatMoney(toDisplayUnitPrice(item.unitPrice, factor))}</Table.Td>
+                                <Table.Td>
+                                  {formatEnteredQuantityForDisplay(
+                                    item.quantityOrdered,
+                                    item.unitOfMeasurementSelected,
+                                    unit,
+                                    item.material,
+                                  )}
+                                </Table.Td>
+                                <Table.Td>{formatMoney(toDisplayUnitPrice(baseUnitPrice, factor))}</Table.Td>
                                 <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
                               </Table.Tr>
                             )}

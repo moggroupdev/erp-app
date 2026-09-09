@@ -17,8 +17,10 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderWithSupplier } from "@/types/material-purchase-order";
-import { Table, TextInput } from "@mantine/core";
-import { Search, X } from "lucide-react";
+import { Button, Table, TextInput } from "@mantine/core";
+import { Plus, Search, X } from "lucide-react";
+import PermissionGuard from "@/components/guards/permission";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -108,7 +110,22 @@ export default function Page() {
       header={{
         backLink: getLocalizedHref("/procurement"),
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: (
+          <div className="flex gap-2">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL_PURCHASE_ORDER}>
+              <Button
+                radius="md"
+                variant="light"
+                component={Link}
+                href={getLocalizedHref("/procurement/material-orders/create")}
+                leftSection={<Plus size={15} />}
+              >
+                {translate("Create", "إنشاء")}
+              </Button>
+            </PermissionGuard>
+          </div>
+        ),
       }}
     >
       <TextInput

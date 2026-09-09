@@ -8,23 +8,23 @@ import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import usePrivateRequest from "@/hooks/use-private-request";
-import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
+import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
+import { formatMoney } from "@/lib/helpers/format-money";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
+import { Badge, Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
-import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
+import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
 
-const PAGE_TITLE = { en: "Create Material Purchase Requisition", ar: "إنشاء طلب شراء خامات" };
+const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
 
 type ItemDraftRow = {
   key: string;
@@ -35,11 +35,12 @@ type ItemDraftRow = {
   unitConversions: MaterialUnitConversionSummary[];
   unitOfMeasurementSelected: MaterialUnit | null;
   quantity: number | "";
+  unitPrice: number | "";
   notes: string;
 };
 
 function createRowKey() {
-  return `mpq-item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `mpo-item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function createEmptyRow(): ItemDraftRow {
@@ -52,6 +53,7 @@ function createEmptyRow(): ItemDraftRow {
     unitConversions: [],
     unitOfMeasurementSelected: null,
     quantity: "",
+    unitPrice: "",
     notes: "",
   };
 }
@@ -61,7 +63,7 @@ function showUnitSelect(row: ItemDraftRow) {
 }
 
 function isEmptyRow(row: ItemDraftRow) {
-  return row.materialCode === null && row.quantity === "" && row.notes.trim() === "";
+  return row.materialCode === null && row.quantity === "" && row.unitPrice === "" && row.notes.trim() === "";
 }
 
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
@@ -72,6 +74,7 @@ function ItemRow({
   row,
   index,
   locale,
+  currency,
   usedMaterialCodes,
   canRemove,
   onMaterialSelect,
@@ -81,6 +84,7 @@ function ItemRow({
   row: ItemDraftRow;
   index: number;
   locale: Locale;
+  currency: string;
   usedMaterialCodes: string[];
   canRemove: boolean;
   onMaterialSelect: (key: string, material: MaterialWithUnitConversionsSelection | null) => void;
@@ -88,6 +92,9 @@ function ItemRow({
   onRemove: (key: string) => void;
 }) {
   const { translate } = useI18n();
+  const quantity = typeof row.quantity === "number" ? row.quantity : null;
+  const unitPrice = typeof row.unitPrice === "number" ? row.unitPrice : null;
+  const lineTotal = quantity !== null && unitPrice !== null ? quantity * unitPrice : null;
 
   return (
     <Table.Tr>
@@ -147,6 +154,24 @@ function ItemRow({
         )}
       </Table.Td>
       <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <NumberInput
+          value={row.unitPrice}
+          onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
+          min={0}
+          allowNegative={false}
+          decimalScale={6}
+          hideControls
+          variant="unstyled"
+          radius={0}
+          placeholder={translate("Enter price", "أدخل السعر")}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
+        />
+      </Table.Td>
+      <Table.Td>
+        <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
         <TextInput
           value={row.notes}
           onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
@@ -182,14 +207,14 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
 
-  const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
+  const [supplierId, setSupplierId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   useDocumentTitle(
-    `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Requisitions", "طلبات شراء الخامات")}`,
+    `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
   );
 
   const mutation = useMutation({
@@ -199,14 +224,15 @@ export default function Page() {
         .map((row) => ({
           materialCode: row.materialCode!,
           unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
-          quantityRequested: Number(row.quantity),
+          quantityOrdered: Number(row.quantity),
+          unitPrice: Number(row.unitPrice),
           notes: row.notes.trim() || null,
         }));
 
-      return await materialPurchaseRequisitionsApi.create({
+      return await materialPurchaseOrdersApi.create({
         privateRequest,
         dto: {
-          productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
+          supplierId: supplierId!,
           notes: notes.trim() || null,
           items,
         },
@@ -214,22 +240,32 @@ export default function Page() {
     },
     onSuccess: async (created) => {
       setSubmitted(true);
-      await queryClient.invalidateQueries({ queryKey: queryKeys.materialPurchaseRequisitions.all });
-      router.push(getLocalizedHref(`/procurement/material-requisitions/${created.id}`));
+      await queryClient.invalidateQueries({ queryKey: queryKeys.materialPurchaseOrders.all });
+      router.push(getLocalizedHref(`/procurement/material-orders/${created.id}`));
     },
   });
 
   const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
   const isDirty = useMemo(
-    () => productionSubDepartment !== null || notes.trim() !== "" || rows.length > 1 || rows.some((row) => !isEmptyRow(row)),
-    [productionSubDepartment, notes, rows],
+    () => supplierId !== null || notes.trim() !== "" || rows.length > 1 || rows.some((row) => !isEmptyRow(row)),
+    [supplierId, notes, rows],
   );
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
   const usedMaterialCodes = useMemo(
     () => rows.map((row) => row.materialCode).filter((code): code is string => !!code),
+    [rows],
+  );
+
+  const grandTotal = useMemo(
+    () =>
+      rows.reduce((sum, row) => {
+        const qty = typeof row.quantity === "number" ? row.quantity : 0;
+        const price = typeof row.unitPrice === "number" ? row.unitPrice : 0;
+        return sum + qty * price;
+      }, 0),
     [rows],
   );
 
@@ -245,6 +281,7 @@ export default function Page() {
       unitOfMeasurement: material?.unitOfMeasurement ?? null,
       unitConversions: material?.unitConversions ?? [],
       unitOfMeasurementSelected: material?.unitOfMeasurement ?? null,
+      unitPrice: material?.unitPrice ?? "",
     });
     setValidationError("");
   }
@@ -284,8 +321,8 @@ export default function Page() {
     e.preventDefault();
     setValidationError("");
 
-    if (!productionSubDepartment) {
-      return setValidationError(translate("Please select a requesting party.", "يرجى اختيار جهة الطلب."));
+    if (!supplierId) {
+      return setValidationError(translate("Please select a supplier.", "يرجى اختيار مورد."));
     }
 
     const filledRows = rows.filter((row) => !isEmptyRow(row));
@@ -331,6 +368,25 @@ export default function Page() {
           ),
         );
       }
+
+      if (row.unitPrice === "") {
+        return setValidationError(
+          translate(
+            `${rowLabel}: please enter the unit price for material ${materialName}.`,
+            `${rowLabel}: يرجى إدخال سعر الوحدة للمادة ${materialName}.`,
+          ),
+        );
+      }
+
+      const price = Number(row.unitPrice);
+      if (Number.isNaN(price) || price <= 0) {
+        return setValidationError(
+          translate(
+            `${rowLabel}: unit price for material ${materialName} must be greater than zero.`,
+            `${rowLabel}: يجب أن يكون سعر الوحدة للمادة ${materialName} أكبر من صفر.`,
+          ),
+        );
+      }
     }
 
     mutation.mutate();
@@ -340,17 +396,20 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/procurement/material-requisitions"),
+        backLink: getLocalizedHref("/procurement/material-orders"),
         confirmNavigate: confirmNavigation,
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <SelectProductionSubDepartment
-            value={productionSubDepartment}
-            setValue={setProductionSubDepartment}
-            label={translate("Requesting Party", "جهة الطلب")}
-            placeholder={translate("Select department...", "اختر القسم...")}
+          <SelectSupplier
+            value={supplierId}
+            setValue={setSupplierId}
+            onSupplierSelect={() => setValidationError("")}
+            label={translate("Supplier", "المورد")}
+            placeholder={translate("Search or select a supplier...", "ابحث أو اختر مورداً...")}
+            searchable
+            clearable
             required
             radius="md"
           />
@@ -374,7 +433,7 @@ export default function Page() {
               <Table.Thead className="bg-gray-50">
                 <Table.Tr className="h-9">
                   <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
-                  <Table.Th className="w-[47.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[28%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Material", "المادة")}
                   </Table.Th>
                   <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -383,10 +442,16 @@ export default function Page() {
                   <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Unit", "الوحدة")}
                   </Table.Th>
-                  <Table.Th className="w-[27.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
+                  </Table.Th>
+                  <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Line Total", "إجمالي البند")} ({translation.currency})
+                  </Table.Th>
+                  <Table.Th className="w-[22.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Notes", "الملاحظات")}
                   </Table.Th>
-                  <Table.Th className="w-[2.5%]" />
+                  <Table.Th className="w-[3%]" />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -396,6 +461,7 @@ export default function Page() {
                     row={row}
                     index={index}
                     locale={locale}
+                    currency={translation.currency}
                     usedMaterialCodes={usedMaterialCodes}
                     canRemove={rows.length > 1}
                     onMaterialSelect={handleMaterialSelect}
@@ -422,6 +488,14 @@ export default function Page() {
                   </Table.Td>
                   <Table.Td />
                   <Table.Td />
+                  <Table.Td>
+                    <Badge size="sm" variant="light" color="dark" radius="md">
+                      {translate("Total", "الإجمالي")}
+                    </Badge>
+                  </Table.Td>
+                  <Table.Td>
+                    <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
+                  </Table.Td>
                   <Table.Td />
                   <Table.Td />
                 </Table.Tr>
@@ -439,7 +513,7 @@ export default function Page() {
             color="dark"
             radius="md"
             onClick={() => {
-              if (confirmNavigation()) router.push(getLocalizedHref("/procurement/material-requisitions"));
+              if (confirmNavigation()) router.push(getLocalizedHref("/procurement/material-orders"));
             }}
           >
             {translation.cancel}
