@@ -610,7 +610,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_department",
       "read_departments",
       "update_department",
-      "approve_material_purchase_requisition_manager",
     ],
   },
   {
@@ -645,11 +644,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "production",
     label: { en: "Production", ar: "الإنتاج" },
-    permissions: [
-      "read_production_plans",
-      "read_production_routing",
-      "approve_material_purchase_requisition_planning",
-    ],
+    permissions: ["read_production_plans", "read_production_routing"],
   },
   {
     domain: "warehouse",
@@ -668,10 +663,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_legacy_issue_permit",
       "read_legacy_issue_permits",
       "update_legacy_issue_permit",
-      "add_material_purchase_requisition",
-      "read_material_purchase_requisitions",
-      "update_material_purchase_requisition",
-      "approve_material_purchase_requisition_inventory_control",
     ],
   },
   {
@@ -683,11 +674,16 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "update_supplier",
       "print_suppliers_list",
       "print_supplier_quotation_request",
+      "add_material_purchase_requisition",
+      "read_material_purchase_requisitions",
+      "update_material_purchase_requisition",
+      "approve_material_purchase_requisition_planning",
+      "approve_material_purchase_requisition_inventory_control",
+      "approve_material_purchase_requisition_manager",
       "read_material_purchase_orders",
       "add_material_purchase_order",
       "read_supplier_invoices",
       "read_product_purchase_orders",
-      "read_material_purchase_requisitions",
     ],
   },
   {
