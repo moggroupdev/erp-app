@@ -248,6 +248,11 @@ export default function Page() {
                               {translate("Admin", "مسؤول")}
                             </Badge>
                           )}
+                          {!user.isLoginEnabled && (
+                            <Badge size="sm" variant="light" color="gray">
+                              {translate("No login", "بدون دخول")}
+                            </Badge>
+                          )}
                         </div>
                       </Table.Td>
                       <Table.Td>

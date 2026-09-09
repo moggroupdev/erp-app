@@ -11,6 +11,7 @@ export type User = {
   isPhoneVerified: boolean;
   email: string | null;
   isEmailVerified: boolean;
+  isLoginEnabled: boolean;
   departmentId: string | null;
   productionSubDepartment: ProductionSubDepartment | null;
   isAdmin: boolean;
@@ -53,7 +54,8 @@ export type CreateUserDto = {
   gender: Gender | null;
   phone: string | null;
   email: string | null;
-  password: string;
+  isLoginEnabled: boolean;
+  password: string | null;
   departmentId: string | null;
   productionSubDepartment: ProductionSubDepartment | null;
   roleId: string;

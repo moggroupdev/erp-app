@@ -47,6 +47,7 @@ export default function UserModal({
   const [gender, setGender] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [isLoginEnabled, setIsLoginEnabled] = useState(true);
   const [departmentId, setDepartmentId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [roleId, setRoleId] = useState<string | null>(null);
@@ -55,13 +56,14 @@ export default function UserModal({
 
   const isAdminUser = !!userToUpdate?.isAdmin;
   const isProductionDepartment = departmentId === PRODUCTION_DEPARTMENT_ID;
-  const showPasswordField = !userToUpdate || changePassword;
+  const showPasswordField = isLoginEnabled && (!userToUpdate || changePassword || !userToUpdate.isLoginEnabled);
 
   function reset() {
     setName("");
     setGender(null);
     setPhone("");
     setEmail("");
+    setIsLoginEnabled(true);
     setDepartmentId(null);
     setProductionSubDepartment(null);
     setRoleId(null);
@@ -76,6 +78,7 @@ export default function UserModal({
       setGender(userToUpdate.gender);
       setPhone(userToUpdate.phone || "");
       setEmail(userToUpdate.email || "");
+      setIsLoginEnabled(userToUpdate.isLoginEnabled);
       setDepartmentId(userToUpdate.departmentId);
       setProductionSubDepartment(userToUpdate.productionSubDepartment);
       setRoleId(userToUpdate.roleId);
@@ -102,6 +105,7 @@ export default function UserModal({
           gender: Gender | null;
           phone: string | null;
           email: string | null;
+          isLoginEnabled: boolean;
           departmentId: string | null;
           productionSubDepartment: ProductionSubDepartment | null;
           roleId?: string;
@@ -111,11 +115,12 @@ export default function UserModal({
           gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
+          isLoginEnabled,
           departmentId,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
         };
 
-        if (changePassword && password) dto.password = password;
+        if (showPasswordField && password) dto.password = password;
         if (!isAdminUser && roleId) dto.roleId = roleId;
 
         return await usersApi.update({ privateRequest, id: userToUpdate.id, dto });
@@ -128,9 +133,10 @@ export default function UserModal({
           gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
+          isLoginEnabled,
           departmentId,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
-          password,
+          password: showPasswordField ? password : null,
           roleId: roleId!,
         },
       });
@@ -154,7 +160,7 @@ export default function UserModal({
       return setValidationError(
         translate("The user's name contains invalid characters.", "اسم المستخدم يحتوي على أحرف غير صالحة."),
       );
-    if (!phone && !email)
+    if (isLoginEnabled && !phone && !email)
       return setValidationError(
         translate("Either email or phone must be provided.", "يجب إدخال البريد الإلكتروني أو رقم الهاتف."),
       );
@@ -197,7 +203,7 @@ export default function UserModal({
 
   const isRequiredInputFilled =
     !!name &&
-    (!!phone || !!email) &&
+    (!isLoginEnabled || !!phone || !!email) &&
     (!showPasswordField || !!password) &&
     !!departmentId &&
     (isAdminUser || !!roleId) &&
@@ -208,6 +214,7 @@ export default function UserModal({
       (gender || null) !== userToUpdate.gender ||
       (phone || null) !== userToUpdate.phone ||
       (email || null) !== userToUpdate.email ||
+      isLoginEnabled !== userToUpdate.isLoginEnabled ||
       (changePassword && !!password) ||
       roleId !== userToUpdate.roleId ||
       departmentId !== userToUpdate.departmentId ||
@@ -269,13 +276,31 @@ export default function UserModal({
           />
         )}
 
+        <Checkbox
+          checked={isLoginEnabled}
+          onChange={(e) => {
+            const checked = e.currentTarget.checked;
+            setIsLoginEnabled(checked);
+            if (!checked) {
+              setPassword("");
+              setChangePassword(false);
+            }
+          }}
+          label={translate("Can log in and use the system", "يمكنه تسجيل الدخول واستخدام النظام")}
+          radius="sm"
+        />
+
         <div className="grid gap-3 sm:grid-cols-2">
           <TextInput
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             label={translate("Phone", "الهاتف")}
-            description={translate("Required if email is empty", "مطلوب إذا كان البريد فارغًا")}
+            description={
+              isLoginEnabled
+                ? translate("Required if email is empty", "مطلوب إذا كان البريد فارغًا")
+                : undefined
+            }
             placeholder={translate("Enter phone", "أدخل الهاتف")}
             autoComplete="off"
             radius="md"
@@ -286,14 +311,18 @@ export default function UserModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             label={translate("Email", "البريد الإلكتروني")}
-            description={translate("Required if phone is empty", "مطلوب إذا كان الهاتف فارغًا")}
+            description={
+              isLoginEnabled
+                ? translate("Required if phone is empty", "مطلوب إذا كان الهاتف فارغًا")
+                : undefined
+            }
             placeholder={translate("Enter email", "أدخل البريد الإلكتروني")}
             autoComplete="off"
             radius="md"
           />
         </div>
 
-        {userToUpdate && (
+        {userToUpdate && isLoginEnabled && (
           <Checkbox
             checked={changePassword}
             onChange={(e) => {

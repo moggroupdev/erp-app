@@ -37,6 +37,10 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
       value: user.isEmailVerified ? translate("Yes", "نعم") : translate("No", "لا"),
     },
     {
+      key: translate("Can Log In", "يمكنه تسجيل الدخول"),
+      value: user.isLoginEnabled ? translate("Yes", "نعم") : translate("No", "لا"),
+    },
+    {
       key: translate("Department", "القسم"),
       value: department ? translate(department.nameEn, department.nameAr) : <EmptyValue />,
     },
