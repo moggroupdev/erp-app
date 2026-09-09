@@ -6,6 +6,7 @@ export type User = {
   id: string;
   code: string;
   name: string;
+  jobTitle: string | null;
   gender: Gender | null;
   phone: string | null;
   isPhoneVerified: boolean;
@@ -51,6 +52,7 @@ export type LoginDto = {
 
 export type CreateUserDto = {
   name: string;
+  jobTitle: string | null;
   gender: Gender | null;
   phone: string | null;
   email: string | null;
@@ -58,7 +60,7 @@ export type CreateUserDto = {
   password: string | null;
   departmentId: string | null;
   productionSubDepartment: ProductionSubDepartment | null;
-  roleId: string;
+  roleId: string | null;
 };
 
 export type UpdateUserDto = Partial<CreateUserDto>;

@@ -44,6 +44,7 @@ export default function UserModal({
   const [validationError, setValidationError] = useState("");
 
   const [name, setName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [gender, setGender] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -57,9 +58,11 @@ export default function UserModal({
   const isAdminUser = !!userToUpdate?.isAdmin;
   const isProductionDepartment = departmentId === PRODUCTION_DEPARTMENT_ID;
   const showPasswordField = isLoginEnabled && (!userToUpdate || changePassword || !userToUpdate.isLoginEnabled);
+  const showRoleField = isLoginEnabled && !isAdminUser;
 
   function reset() {
     setName("");
+    setJobTitle("");
     setGender(null);
     setPhone("");
     setEmail("");
@@ -75,6 +78,7 @@ export default function UserModal({
     if (userToUpdate) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(userToUpdate.name);
+      setJobTitle(userToUpdate.jobTitle || "");
       setGender(userToUpdate.gender);
       setPhone(userToUpdate.phone || "");
       setEmail(userToUpdate.email || "");
@@ -102,26 +106,28 @@ export default function UserModal({
       if (userToUpdate) {
         const dto: {
           name: string;
+          jobTitle: string | null;
           gender: Gender | null;
           phone: string | null;
           email: string | null;
           isLoginEnabled: boolean;
           departmentId: string | null;
           productionSubDepartment: ProductionSubDepartment | null;
-          roleId?: string;
+          roleId: string | null;
           password?: string;
         } = {
           name,
+          jobTitle: jobTitle.trim() || null,
           gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
           isLoginEnabled,
           departmentId,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
+          roleId: showRoleField ? roleId : null,
         };
 
         if (showPasswordField && password) dto.password = password;
-        if (!isAdminUser && roleId) dto.roleId = roleId;
 
         return await usersApi.update({ privateRequest, id: userToUpdate.id, dto });
       }
@@ -130,6 +136,7 @@ export default function UserModal({
         privateRequest,
         dto: {
           name,
+          jobTitle: jobTitle.trim() || null,
           gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
@@ -137,7 +144,7 @@ export default function UserModal({
           departmentId,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           password: showPasswordField ? password : null,
-          roleId: roleId!,
+          roleId: showRoleField ? roleId : null,
         },
       });
     },
@@ -175,7 +182,7 @@ export default function UserModal({
         translate("Password must be at least 8 characters.", "يجب أن تكون كلمة المرور 8 أحرف على الأقل."),
       );
     if (!departmentId) return setValidationError(translate("Please select a department.", "يرجى اختيار قسم."));
-    if (!isAdminUser && !roleId) return setValidationError(translate("Please select a role.", "يرجى اختيار دور."));
+    if (showRoleField && !roleId) return setValidationError(translate("Please select a role.", "يرجى اختيار دور."));
     if (isProductionDepartment && !productionSubDepartment)
       return setValidationError(
         translate(
@@ -206,11 +213,12 @@ export default function UserModal({
     (!isLoginEnabled || !!phone || !!email) &&
     (!showPasswordField || !!password) &&
     !!departmentId &&
-    (isAdminUser || !!roleId) &&
+    (!showRoleField || !!roleId) &&
     (!isProductionDepartment || !!productionSubDepartment);
 
   const isDataChanged = userToUpdate
     ? name !== userToUpdate.name ||
+      (jobTitle.trim() || null) !== userToUpdate.jobTitle ||
       (gender || null) !== userToUpdate.gender ||
       (phone || null) !== userToUpdate.phone ||
       (email || null) !== userToUpdate.email ||
@@ -233,6 +241,14 @@ export default function UserModal({
           placeholder={translate("Enter user name", "أدخل اسم المستخدم")}
           required
           autoFocus
+          radius="md"
+        />
+
+        <TextInput
+          value={jobTitle}
+          onChange={(e) => setJobTitle(e.target.value)}
+          label={translate("Job Title", "المسمى الوظيفي")}
+          placeholder={translate("Enter job title", "أدخل المسمى الوظيفي")}
           radius="md"
         />
 
@@ -264,7 +280,22 @@ export default function UserModal({
           />
         )}
 
-        {!isAdminUser && (
+        <Checkbox
+          checked={isLoginEnabled}
+          onChange={(e) => {
+            const checked = e.currentTarget.checked;
+            setIsLoginEnabled(checked);
+            if (!checked) {
+              setPassword("");
+              setChangePassword(false);
+              setRoleId(null);
+            }
+          }}
+          label={translate("Can log in and use the system", "يمكنه تسجيل الدخول واستخدام النظام")}
+          radius="sm"
+        />
+
+        {showRoleField && (
           <SelectRole
             value={roleId}
             setValue={setRoleId}
@@ -275,20 +306,6 @@ export default function UserModal({
             required
           />
         )}
-
-        <Checkbox
-          checked={isLoginEnabled}
-          onChange={(e) => {
-            const checked = e.currentTarget.checked;
-            setIsLoginEnabled(checked);
-            if (!checked) {
-              setPassword("");
-              setChangePassword(false);
-            }
-          }}
-          label={translate("Can log in and use the system", "يمكنه تسجيل الدخول واستخدام النظام")}
-          radius="sm"
-        />
 
         <div className="grid gap-3 sm:grid-cols-2">
           <TextInput

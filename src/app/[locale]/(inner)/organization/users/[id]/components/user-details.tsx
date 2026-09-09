@@ -21,6 +21,10 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
   const rows: DetailRow[] = [
     { key: translate("Code", "الكود"), value: user.code, mono: true, copyText: user.code },
     {
+      key: translate("Job Title", "المسمى الوظيفي"),
+      value: user.jobTitle || <EmptyValue />,
+    },
+    {
       key: translate("Phone", "الهاتف"),
       value: user.phone ? <a href={`tel:${user.phone}`}>{user.phone}</a> : <EmptyValue />,
     },
