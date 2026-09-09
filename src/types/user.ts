@@ -1,10 +1,12 @@
 import { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
+import { Gender } from "@/lib/constants/enums/genders";
 import { RoleWithPermissions } from "./roles";
 
 export type User = {
   id: string;
   code: string;
   name: string;
+  gender: Gender | null;
   phone: string | null;
   isPhoneVerified: boolean;
   email: string | null;
@@ -48,6 +50,7 @@ export type LoginDto = {
 
 export type CreateUserDto = {
   name: string;
+  gender: Gender | null;
   phone: string | null;
   email: string | null;
   password: string;
