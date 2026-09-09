@@ -44,9 +44,11 @@ export default function UserModal({
   const [validationError, setValidationError] = useState("");
 
   const [name, setName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
   const [gender, setGender] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [isLoginEnabled, setIsLoginEnabled] = useState(true);
   const [departmentId, setDepartmentId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [roleId, setRoleId] = useState<string | null>(null);
@@ -55,13 +57,16 @@ export default function UserModal({
 
   const isAdminUser = !!userToUpdate?.isAdmin;
   const isProductionDepartment = departmentId === PRODUCTION_DEPARTMENT_ID;
-  const showPasswordField = !userToUpdate || changePassword;
+  const showPasswordField = isLoginEnabled && (!userToUpdate || changePassword || !userToUpdate.isLoginEnabled);
+  const showRoleField = isLoginEnabled && !isAdminUser;
 
   function reset() {
     setName("");
+    setJobTitle("");
     setGender(null);
     setPhone("");
     setEmail("");
+    setIsLoginEnabled(true);
     setDepartmentId(null);
     setProductionSubDepartment(null);
     setRoleId(null);
@@ -73,9 +78,11 @@ export default function UserModal({
     if (userToUpdate) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(userToUpdate.name);
+      setJobTitle(userToUpdate.jobTitle || "");
       setGender(userToUpdate.gender);
       setPhone(userToUpdate.phone || "");
       setEmail(userToUpdate.email || "");
+      setIsLoginEnabled(userToUpdate.isLoginEnabled);
       setDepartmentId(userToUpdate.departmentId);
       setProductionSubDepartment(userToUpdate.productionSubDepartment);
       setRoleId(userToUpdate.roleId);
@@ -99,24 +106,28 @@ export default function UserModal({
       if (userToUpdate) {
         const dto: {
           name: string;
+          jobTitle: string | null;
           gender: Gender | null;
           phone: string | null;
           email: string | null;
+          isLoginEnabled: boolean;
           departmentId: string | null;
           productionSubDepartment: ProductionSubDepartment | null;
-          roleId?: string;
+          roleId: string | null;
           password?: string;
         } = {
           name,
+          jobTitle: jobTitle.trim() || null,
           gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
+          isLoginEnabled,
           departmentId,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
+          roleId: showRoleField ? roleId : null,
         };
 
-        if (changePassword && password) dto.password = password;
-        if (!isAdminUser && roleId) dto.roleId = roleId;
+        if (showPasswordField && password) dto.password = password;
 
         return await usersApi.update({ privateRequest, id: userToUpdate.id, dto });
       }
@@ -125,13 +136,15 @@ export default function UserModal({
         privateRequest,
         dto: {
           name,
+          jobTitle: jobTitle.trim() || null,
           gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
+          isLoginEnabled,
           departmentId,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
-          password,
-          roleId: roleId!,
+          password: showPasswordField ? password : null,
+          roleId: showRoleField ? roleId : null,
         },
       });
     },
@@ -154,7 +167,7 @@ export default function UserModal({
       return setValidationError(
         translate("The user's name contains invalid characters.", "اسم المستخدم يحتوي على أحرف غير صالحة."),
       );
-    if (!phone && !email)
+    if (isLoginEnabled && !phone && !email)
       return setValidationError(
         translate("Either email or phone must be provided.", "يجب إدخال البريد الإلكتروني أو رقم الهاتف."),
       );
@@ -169,7 +182,7 @@ export default function UserModal({
         translate("Password must be at least 8 characters.", "يجب أن تكون كلمة المرور 8 أحرف على الأقل."),
       );
     if (!departmentId) return setValidationError(translate("Please select a department.", "يرجى اختيار قسم."));
-    if (!isAdminUser && !roleId) return setValidationError(translate("Please select a role.", "يرجى اختيار دور."));
+    if (showRoleField && !roleId) return setValidationError(translate("Please select a role.", "يرجى اختيار دور."));
     if (isProductionDepartment && !productionSubDepartment)
       return setValidationError(
         translate(
@@ -197,17 +210,19 @@ export default function UserModal({
 
   const isRequiredInputFilled =
     !!name &&
-    (!!phone || !!email) &&
+    (!isLoginEnabled || !!phone || !!email) &&
     (!showPasswordField || !!password) &&
     !!departmentId &&
-    (isAdminUser || !!roleId) &&
+    (!showRoleField || !!roleId) &&
     (!isProductionDepartment || !!productionSubDepartment);
 
   const isDataChanged = userToUpdate
     ? name !== userToUpdate.name ||
+      (jobTitle.trim() || null) !== userToUpdate.jobTitle ||
       (gender || null) !== userToUpdate.gender ||
       (phone || null) !== userToUpdate.phone ||
       (email || null) !== userToUpdate.email ||
+      isLoginEnabled !== userToUpdate.isLoginEnabled ||
       (changePassword && !!password) ||
       roleId !== userToUpdate.roleId ||
       departmentId !== userToUpdate.departmentId ||
@@ -226,6 +241,14 @@ export default function UserModal({
           placeholder={translate("Enter user name", "أدخل اسم المستخدم")}
           required
           autoFocus
+          radius="md"
+        />
+
+        <TextInput
+          value={jobTitle}
+          onChange={(e) => setJobTitle(e.target.value)}
+          label={translate("Job Title", "المسمى الوظيفي")}
+          placeholder={translate("Enter job title", "أدخل المسمى الوظيفي")}
           radius="md"
         />
 
@@ -257,7 +280,22 @@ export default function UserModal({
           />
         )}
 
-        {!isAdminUser && (
+        <Checkbox
+          checked={isLoginEnabled}
+          onChange={(e) => {
+            const checked = e.currentTarget.checked;
+            setIsLoginEnabled(checked);
+            if (!checked) {
+              setPassword("");
+              setChangePassword(false);
+              setRoleId(null);
+            }
+          }}
+          label={translate("Can log in and use the system", "يمكنه تسجيل الدخول واستخدام النظام")}
+          radius="sm"
+        />
+
+        {showRoleField && (
           <SelectRole
             value={roleId}
             setValue={setRoleId}
@@ -275,7 +313,11 @@ export default function UserModal({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             label={translate("Phone", "الهاتف")}
-            description={translate("Required if email is empty", "مطلوب إذا كان البريد فارغًا")}
+            description={
+              isLoginEnabled
+                ? translate("Required if email is empty", "مطلوب إذا كان البريد فارغًا")
+                : undefined
+            }
             placeholder={translate("Enter phone", "أدخل الهاتف")}
             autoComplete="off"
             radius="md"
@@ -286,14 +328,18 @@ export default function UserModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             label={translate("Email", "البريد الإلكتروني")}
-            description={translate("Required if phone is empty", "مطلوب إذا كان الهاتف فارغًا")}
+            description={
+              isLoginEnabled
+                ? translate("Required if phone is empty", "مطلوب إذا كان الهاتف فارغًا")
+                : undefined
+            }
             placeholder={translate("Enter email", "أدخل البريد الإلكتروني")}
             autoComplete="off"
             radius="md"
           />
         </div>
 
-        {userToUpdate && (
+        {userToUpdate && isLoginEnabled && (
           <Checkbox
             checked={changePassword}
             onChange={(e) => {

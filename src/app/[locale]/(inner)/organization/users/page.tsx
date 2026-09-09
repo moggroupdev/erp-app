@@ -129,8 +129,7 @@ export default function Page() {
     return department ? translate(department.nameEn, department.nameAr) : "";
   }
 
-  function getRoleLabel(roleId: string | null, isAdmin: boolean) {
-    if (isAdmin) return translate("Admin", "مسؤول");
+  function getRoleLabel(roleId: string | null) {
     return roleHelpers.getRoleById(roleId)?.name || "";
   }
 
@@ -226,6 +225,7 @@ export default function Page() {
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th>{translate("Name", "الاسم")}</Table.Th>
+                    <Table.Th>{translate("Job Title", "الوظيفة")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Phone", "الهاتف")}</Table.Th>
                     <Table.Th>{translate("Email", "البريد الإلكتروني")}</Table.Th>
@@ -239,17 +239,11 @@ export default function Page() {
                   {paginatedUsers.data.map((user) => (
                     <Table.Tr key={user.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
-                        <div className="flex items-center gap-2">
-                          <Link href={getLocalizedHref(`/organization/users/${user.id}`)} className="hover:underline">
-                            {user.name}
-                          </Link>
-                          {user.isAdmin && (
-                            <Badge size="sm" variant="light" color="dark">
-                              {translate("Admin", "مسؤول")}
-                            </Badge>
-                          )}
-                        </div>
+                        <Link href={getLocalizedHref(`/organization/users/${user.id}`)} className="hover:underline">
+                          {user.name}
+                        </Link>
                       </Table.Td>
+                      <Table.Td>{user.jobTitle}</Table.Td>
                       <Table.Td>
                         <div className="flex items-center gap-1.5">
                           <span className="font-mono">{user.code}</span>
@@ -273,11 +267,25 @@ export default function Page() {
                         )}
                       </Table.Td>
                       <Table.Td>
-                        {rolesLoading && !user.isAdmin ? (
-                          <Skeleton height={12} width={70} />
-                        ) : (
-                          getRoleLabel(user.roleId, user.isAdmin)
-                        )}
+                        <div className="flex items-center gap-2">
+                          {rolesLoading && !user.isAdmin && user.isLoginEnabled ? (
+                            <Skeleton height={12} width={70} />
+                          ) : (
+                            <>
+                              {user.isLoginEnabled && !user.isAdmin && <span>{getRoleLabel(user.roleId)}</span>}
+                              {user.isAdmin && (
+                                <Badge size="sm" variant="light" color="dark">
+                                  {translate("Admin", "مسؤول")}
+                                </Badge>
+                              )}
+                              {!user.isLoginEnabled && (
+                                <Badge size="sm" variant="light" color="gray">
+                                  {translate("No login", "بدون دخول")}
+                                </Badge>
+                              )}
+                            </>
+                          )}
+                        </div>
                       </Table.Td>
                       <Table.Td>{formatDateAndTime(user.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>

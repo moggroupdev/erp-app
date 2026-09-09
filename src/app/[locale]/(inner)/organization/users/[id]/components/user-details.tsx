@@ -21,6 +21,10 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
   const rows: DetailRow[] = [
     { key: translate("Code", "الكود"), value: user.code, mono: true, copyText: user.code },
     {
+      key: translate("Job Title", "المسمى الوظيفي"),
+      value: user.jobTitle || <EmptyValue />,
+    },
+    {
       key: translate("Phone", "الهاتف"),
       value: user.phone ? <a href={`tel:${user.phone}`}>{user.phone}</a> : <EmptyValue />,
     },
@@ -37,6 +41,10 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
       value: user.isEmailVerified ? translate("Yes", "نعم") : translate("No", "لا"),
     },
     {
+      key: translate("Can Log In", "يمكنه تسجيل الدخول"),
+      value: user.isLoginEnabled ? translate("Yes", "نعم") : translate("No", "لا"),
+    },
+    {
       key: translate("Department", "القسم"),
       value: department ? translate(department.nameEn, department.nameAr) : <EmptyValue />,
     },
@@ -50,14 +58,20 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
     },
     {
       key: translate("Role", "الدور"),
-      value: user.isAdmin ? (
-        <Badge size="sm" variant="light" color="dark">
-          {translate("Admin", "مسؤول")}
-        </Badge>
-      ) : role ? (
-        role.name
-      ) : (
-        <EmptyValue />
+      value: (
+        <div className="flex items-center gap-2">
+          {user.isLoginEnabled && !user.isAdmin && (role ? role.name : <EmptyValue />)}
+          {user.isAdmin && (
+            <Badge size="sm" variant="light" color="dark">
+              {translate("Admin", "مسؤول")}
+            </Badge>
+          )}
+          {!user.isLoginEnabled && (
+            <Badge size="sm" variant="light" color="gray">
+              {translate("No login", "بدون دخول")}
+            </Badge>
+          )}
+        </div>
       ),
     },
     {
@@ -74,18 +88,6 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
   ];
 
   return (
-    <EntityDetails
-      title={user.name}
-      icon={UserCog}
-      titleAside={
-        user.isAdmin ? (
-          <Badge size="lg" variant="light" color="dark">
-            {translate("Admin", "مسؤول")}
-          </Badge>
-        ) : undefined
-      }
-      deletedAt={user.deletedAt}
-      rows={rows}
-    />
+    <EntityDetails title={user.name} icon={UserCog} deletedAt={user.deletedAt} rows={rows} />
   );
 }

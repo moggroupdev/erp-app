@@ -26,6 +26,16 @@ function getDecisionLabel(decision: ApprovalDecision, translate: (en: string, ar
   return null;
 }
 
+function PrintOrgHeader() {
+  return (
+    <div className="flex flex-col gap-2 font-semibold">
+      <p className="text-xs text-gray-800">موج العاشر من رمضــــان</p>
+      <p className="text-xs text-gray-800">إدارة المشتريات والمخازن</p>
+      <p className="text-xs text-gray-800">المخــــــــزن الرئيســـــــــــــي</p>
+    </div>
+  );
+}
+
 function ApprovalSignatureBlock({ title, name }: { title: string; name: string | null }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -88,7 +98,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
   );
 
   const itemHeaders = [
-    translate("Material", "المادة"),
+    translate("Material", "الصنف"),
     translate("Code", "الكود"),
     translate("Category", "الفئة"),
     translate("Unit", "الوحدة"),
@@ -148,21 +158,21 @@ export default function MaterialPurchaseRequisitionPrintDocument({
 
   const approvalGates = [
     {
-      title: translate("Planning Approval", "اعتماد التخطيط"),
+      title: translate("Planning & Follow Up", "التخطيط والمتابعة"),
       decision: requisition.planningDecision,
       decidedBy: requisition.planningDecidedBy?.name ?? null,
       decidedAt: requisition.planningDecidedAt,
       reason: requisition.planningDecisionReason,
     },
     {
-      title: translate("Inventory Control Approval", "اعتماد مراقبة المخزون"),
+      title: translate("Inventory Control", "مراقبة المخزون"),
       decision: requisition.inventoryControlDecision,
       decidedBy: requisition.inventoryControlDecidedBy?.name ?? null,
       decidedAt: requisition.inventoryControlDecidedAt,
       reason: requisition.inventoryControlDecisionReason,
     },
     {
-      title: translate("Authorized", "يُعتمد"),
+      title: translate("Confirmed", "يُعتمد"),
       decision: requisition.managerDecision,
       decidedBy: requisition.managerDecidedBy?.name ?? null,
       decidedAt: requisition.managerDecidedAt,
@@ -172,20 +182,21 @@ export default function MaterialPurchaseRequisitionPrintDocument({
 
   return (
     <div className="flex flex-col gap-5 text-xs text-gray-900">
-      <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
-        <div className="flex min-w-0 flex-col gap-1">
+      <header className="grid grid-cols-3 items-center gap-4 border-b border-gray-300 pb-2">
+        <PrintOrgHeader />
+        <div className="flex flex-col items-center gap-1 text-center">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             {translate("Material Purchase Requisition", "طلب شراء خامات")}
           </p>
           <h1 className="font-mono text-2xl font-semibold">{requisition.code}</h1>
-          <p className="text-[10px] text-gray-500">
-            <span className="font-medium text-gray-600">{translate("Printing date", "تاريخ الطباعة")}:</span> {printedAt}
-          </p>
         </div>
-        <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
+        <div className="flex justify-end">
+          <img src={logoSrc} alt="" width={100} height={100} className="h-24 w-24 shrink-0 rounded object-contain" />
+        </div>
       </header>
 
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
+        <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
         <PrintDetail
           label={translate("Requisition Date", "تاريخ طلب الشراء")}
           value={formatDateAndTime(requisition.createdAt, locale)}
@@ -200,14 +211,13 @@ export default function MaterialPurchaseRequisitionPrintDocument({
       <hr className="border-gray-300" />
 
       <section className="flex flex-col gap-2.5">
-        <PrintSectionHeading title={translate("Items", "البنود")} />
         <PrintTable
           headers={itemHeaders}
           rows={itemRows}
           footerRows={itemFooterRows}
           monoColumnIndexes={[1]}
           noWrapIndexes={[1, 4, 5, 6, 7]}
-          tableClassName="text-[8px] [&_td]:align-top"
+          tableClassName="text-[8px] [&_td]:align-top [&_thead]:text-[7px]"
           columnWidths={["16%", "8%", "10%", "7%", "8%", "10%", "9%", "9%", "11%", "12%"]}
           emptyLabel={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")}
         />
@@ -222,9 +232,6 @@ export default function MaterialPurchaseRequisitionPrintDocument({
       </section>
 
       <section className="break-inside-avoid pt-2">
-        <p className="mb-4 text-[9px] font-semibold tracking-wide text-gray-500 uppercase">
-          {translate("Approvals", "الاعتمادات")}
-        </p>
         <div className="flex gap-6">
           {signatureParties.map((party) => (
             <ApprovalSignatureBlock key={party.title} title={party.title} name={party.name} />

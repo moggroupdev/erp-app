@@ -6,11 +6,13 @@ export type User = {
   id: string;
   code: string;
   name: string;
+  jobTitle: string | null;
   gender: Gender | null;
   phone: string | null;
   isPhoneVerified: boolean;
   email: string | null;
   isEmailVerified: boolean;
+  isLoginEnabled: boolean;
   departmentId: string | null;
   productionSubDepartment: ProductionSubDepartment | null;
   isAdmin: boolean;
@@ -50,13 +52,15 @@ export type LoginDto = {
 
 export type CreateUserDto = {
   name: string;
+  jobTitle: string | null;
   gender: Gender | null;
   phone: string | null;
   email: string | null;
-  password: string;
+  isLoginEnabled: boolean;
+  password: string | null;
   departmentId: string | null;
   productionSubDepartment: ProductionSubDepartment | null;
-  roleId: string;
+  roleId: string | null;
 };
 
 export type UpdateUserDto = Partial<CreateUserDto>;
