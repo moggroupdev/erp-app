@@ -12,7 +12,6 @@ import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { getEnteredQuantityInBaseUnit, resolveDisplayUnit } from "@/lib/helpers/unit-conversion";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
@@ -69,12 +68,6 @@ function isEmptyRow(row: ItemDraftRow) {
 
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
   return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
-}
-
-function getRowFactor(row: ItemDraftRow) {
-  if (!row.unitOfMeasurementSelected || !row.unitOfMeasurement) return 1;
-
-  return resolveDisplayUnit(row.unitOfMeasurementSelected, row.unitOfMeasurement, row.unitConversions).factor;
 }
 
 function ItemRow({
@@ -228,21 +221,13 @@ export default function Page() {
     mutationFn: async () => {
       const items = rows
         .filter((row) => !isEmptyRow(row))
-        .map((row) => {
-          const factor = getRowFactor(row);
-          const quantityOrdered = getEnteredQuantityInBaseUnit(Number(row.quantity), row.unitOfMeasurementSelected, {
-            unitOfMeasurement: row.unitOfMeasurement!,
-            unitConversions: row.unitConversions,
-          });
-          const unitPrice = factor === 0 ? Number(row.unitPrice) : Number(row.unitPrice) / factor;
-
-          return {
-            materialCode: row.materialCode!,
-            quantityOrdered,
-            unitPrice,
-            notes: row.notes.trim() || null,
-          };
-        });
+        .map((row) => ({
+          materialCode: row.materialCode!,
+          unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
+          quantityOrdered: Number(row.quantity),
+          unitPrice: Number(row.unitPrice),
+          notes: row.notes.trim() || null,
+        }));
 
       return await materialPurchaseOrdersApi.create({
         privateRequest,

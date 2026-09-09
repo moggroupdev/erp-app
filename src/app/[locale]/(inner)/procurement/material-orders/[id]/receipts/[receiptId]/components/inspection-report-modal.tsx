@@ -2,6 +2,8 @@
 
 import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
+import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { MaterialPurchaseReceiptItem } from "@/types/material-purchase-order";
 import Modal from "@/components/ui/modal";
 import { EmptyValue } from "@/components/ui/entity-details";
@@ -24,7 +26,7 @@ function getInspectionSummary(items: MaterialPurchaseReceiptItem[]) {
 }
 
 export default function InspectionReportModal({ opened, onClose, items }: InspectionReportModalProps) {
-  const { translate } = useI18n();
+  const { translate, locale } = useI18n();
   const summary = getInspectionSummary(items);
   const sortedItems = [...items].sort((a, b) => Number(b.quantityRejected) - Number(a.quantityRejected));
 
@@ -62,11 +64,12 @@ export default function InspectionReportModal({ opened, onClose, items }: Inspec
         {items.length === 0 ? (
           <p className="text-gray-500">{translate("No items in this receipt", "لا توجد بنود في سند الاستلام هذا")}</p>
         ) : (
-          sortedItems.map((item, index) => {
+          sortedItems.map((item) => {
             const { material } = item.materialPurchaseOrderItem;
             const quantityReceived = Number(item.quantityReceived);
             const quantityRejected = Number(item.quantityRejected);
             const hasRejection = quantityRejected > 0;
+            const unitLabel = getMaterialUnitLabel(item.unitOfMeasurementSelected, locale);
 
             return (
               <div
@@ -97,15 +100,21 @@ export default function InspectionReportModal({ opened, onClose, items }: Inspec
                 <div className="mb-3 grid grid-cols-3 gap-2">
                   <div className="rounded-lg bg-white/80 px-2.5 py-2 ring-1 ring-gray-200">
                     <p className="text-xs text-gray-500">{translate("Quantity Received", "الكمية المستلمة")}</p>
-                    <p className="font-semibold text-gray-900">{quantityReceived}</p>
+                    <p className="font-semibold text-gray-900">
+                      {formatQuantity(quantityReceived)} {unitLabel}
+                    </p>
                   </div>
                   <div className="rounded-lg bg-white/80 px-2.5 py-2 ring-1 ring-gray-200">
                     <p className="text-xs text-gray-500">{translate("Quantity Rejected", "الكمية المرفوضة")}</p>
-                    <p className={`font-semibold ${hasRejection ? "text-red-600" : "text-gray-900"}`}>{quantityRejected}</p>
+                    <p className={`font-semibold ${hasRejection ? "text-red-600" : "text-gray-900"}`}>
+                      {formatQuantity(quantityRejected)} {unitLabel}
+                    </p>
                   </div>
                   <div className="rounded-lg bg-white/80 px-2.5 py-2 ring-1 ring-gray-200">
                     <p className="text-xs text-gray-500">{translate("Total inspected", "إجمالي المفحوص")}</p>
-                    <p className="font-semibold text-gray-900">{quantityReceived + quantityRejected}</p>
+                    <p className="font-semibold text-gray-900">
+                      {formatQuantity(quantityReceived + quantityRejected)} {unitLabel}
+                    </p>
                   </div>
                 </div>
 

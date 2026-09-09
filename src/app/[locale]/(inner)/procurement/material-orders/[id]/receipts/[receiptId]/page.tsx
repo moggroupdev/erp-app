@@ -16,8 +16,8 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
-import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -125,43 +125,75 @@ export default function Page() {
                     </Table.Thead>
                     <Table.Tbody>
                       {receipt.items.map((item) => {
-                        const { material, quantityOrdered, unitPrice } = item.materialPurchaseOrderItem;
+                        const { material, quantityOrdered, unitPrice, unitOfMeasurementSelected: orderUnit } =
+                          item.materialPurchaseOrderItem;
+                        const receiptUnit = item.unitOfMeasurementSelected;
                         const subtotal = Number(item.quantityReceived) * Number(unitPrice);
+                        const selectedFactor = resolveDisplayUnit(
+                          orderUnit,
+                          material.unitOfMeasurement,
+                          material.unitConversions,
+                        ).factor;
+                        const baseUnitPrice = selectedFactor === 0 ? Number(unitPrice) : Number(unitPrice) / selectedFactor;
+
                         return (
                           <UnitToggle
-                            key={item.id}
+                            key={`${item.id}:${receiptUnit}`}
                             baseUnit={material.unitOfMeasurement}
                             unitConversions={material.unitConversions}
+                            defaultUnit={receiptUnit}
                           >
                             {({ unit, factor, toggleButton }) => (
-                          <Table.Tr className="text-gray-600">
-                            <Table.Td className="font-semibold text-gray-800">
-                              <Link
-                                href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
-                                className="hover:underline"
-                              >
-                                {material.title}
-                              </Link>
-                            </Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-mono">{material.code}</span>
-                                <CopyButton text={material.code} />
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{getMainCategoryTitle(material.subCategoryId)}</Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1">
-                                {getMaterialUnitLabel(unit, locale)}
-                                {toggleButton}
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{formatBaseQuantityForDisplay(quantityOrdered, factor)}</Table.Td>
-                            <Table.Td>{formatBaseQuantityForDisplay(item.quantityReceived, factor)}</Table.Td>
-                            <Table.Td>{formatBaseQuantityForDisplay(item.quantityRejected, factor)}</Table.Td>
-                            <Table.Td>{formatMoney(toDisplayUnitPrice(unitPrice, factor))}</Table.Td>
-                            <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                          </Table.Tr>
+                              <Table.Tr className="text-gray-600">
+                                <Table.Td className="font-semibold text-gray-800">
+                                  <Link
+                                    href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
+                                    className="hover:underline"
+                                  >
+                                    {material.title}
+                                  </Link>
+                                </Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono">{material.code}</span>
+                                    <CopyButton text={material.code} />
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>{getMainCategoryTitle(material.subCategoryId)}</Table.Td>
+                                <Table.Td>
+                                  <div className="flex items-center gap-1">
+                                    {getMaterialUnitLabel(unit, locale)}
+                                    {toggleButton}
+                                  </div>
+                                </Table.Td>
+                                <Table.Td>
+                                  {formatEnteredQuantityForDisplay(quantityOrdered, orderUnit, unit, material)}
+                                </Table.Td>
+                                <Table.Td>
+                                  {formatEnteredQuantityForDisplay(
+                                    item.quantityReceived,
+                                    receiptUnit,
+                                    unit,
+                                    material,
+                                  )}{" "}
+                                  <span className="text-xs text-gray-500">
+                                    {getMaterialUnitLabel(receiptUnit, locale)}
+                                  </span>
+                                </Table.Td>
+                                <Table.Td>
+                                  {formatEnteredQuantityForDisplay(
+                                    item.quantityRejected,
+                                    receiptUnit,
+                                    unit,
+                                    material,
+                                  )}{" "}
+                                  <span className="text-xs text-gray-500">
+                                    {getMaterialUnitLabel(receiptUnit, locale)}
+                                  </span>
+                                </Table.Td>
+                                <Table.Td>{formatMoney(toDisplayUnitPrice(baseUnitPrice, factor))}</Table.Td>
+                                <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                              </Table.Tr>
                             )}
                           </UnitToggle>
                         );

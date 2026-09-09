@@ -73,6 +73,7 @@ export type MaterialPurchaseOrderItem = {
   id: string;
   materialPurchaseOrderId: string;
   materialCode: string;
+  unitOfMeasurementSelected: MaterialUnit;
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
@@ -87,6 +88,7 @@ export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "created
 
 export type CreateMaterialPurchaseOrderItemDto = {
   materialCode: string;
+  unitOfMeasurementSelected: MaterialUnit;
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
@@ -115,12 +117,14 @@ export type MaterialPurchaseReceiptItem = {
   id: string;
   materialPurchaseReceiptId: string;
   materialPurchaseOrderItemId: string;
+  unitOfMeasurementSelected: MaterialUnit;
   quantityReceived: number;
   quantityRejected: number;
   inspectionNotes: string | null;
   materialPurchaseOrderItem: {
     id: string;
     materialCode: string;
+    unitOfMeasurementSelected: MaterialUnit;
     quantityOrdered: number;
     unitPrice: number;
     material: PurchaseMaterialWithUnitConversion;
