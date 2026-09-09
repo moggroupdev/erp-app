@@ -1,13 +1,30 @@
 import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type {
+  CreateMaterialPurchaseOrderDto,
+  MaterialPurchaseOrder,
   MaterialPurchaseOrderDetailed,
+  MaterialPurchaseOrderItem,
   MaterialPurchaseOrderWithSupplier,
   MaterialPurchaseReceipt,
   MaterialPurchaseReceiptDetailed,
 } from "@/types/material-purchase-order";
 
 const materialPurchaseOrdersApi = {
+  async create({
+    privateRequest,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    dto: CreateMaterialPurchaseOrderDto;
+  }) {
+    return await privateRequest<MaterialPurchaseOrder & { items: MaterialPurchaseOrderItem[] }>({
+      method: "POST",
+      url: "material-purchase-orders",
+      data: dto,
+    });
+  },
+
   async listOrders({
     privateRequest,
     params,

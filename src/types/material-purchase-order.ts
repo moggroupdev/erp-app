@@ -85,6 +85,19 @@ export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "created
   items: MaterialPurchaseOrderItem[];
 };
 
+export type CreateMaterialPurchaseOrderItemDto = {
+  materialCode: string;
+  quantityOrdered: number;
+  unitPrice: number;
+  notes: string | null;
+};
+
+export type CreateMaterialPurchaseOrderDto = {
+  supplierId: string;
+  notes: string | null;
+  items: CreateMaterialPurchaseOrderItemDto[];
+};
+
 // =============== Material Purchase Receipts ===============
 
 export type MaterialPurchaseReceipt = {
