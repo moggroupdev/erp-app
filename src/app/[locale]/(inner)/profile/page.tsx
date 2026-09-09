@@ -18,16 +18,6 @@ export async function generateMetadata({ params }: LocalePageProps) {
   });
 }
 
-export default async function Page({ params }: LocalePageProps) {
-  const { translate, translation } = await getI18nFromParams(params);
-
-  return (
-    <div className="root-flex-1">
-      <div className="container mx-auto flex flex-col gap-4 px-4 py-12">
-        <h1>{translate(title.en, title.ar)}</h1>
-        <p>{translation.underConstruction}</p>
-        <ProfileContent />
-      </div>
-    </div>
-  );
+export default function Page() {
+  return <ProfileContent />;
 }
