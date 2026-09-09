@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useDisclosure } from "@mantine/hooks";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useHasPermission from "@/hooks/use-has-permission";
 import useDepartments from "@/hooks/reference/use-departments";
@@ -21,6 +22,7 @@ const title = { en: "Departments", ar: "الأقسام" };
 
 export default function Page() {
   const { translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
 
   useDocumentTitle(translate(title.en, title.ar), "dashboard");
 
@@ -51,6 +53,17 @@ export default function Page() {
 
         <div className="flex gap-2">
           <RefetchButton isFetching={loading} onRefetch={reload} />
+          <PermissionGuard permission={PERMISSIONS.READ_PRODUCTION_DEPARTMENT_MANAGERS}>
+            <Button
+              component={Link}
+              href={getLocalizedHref("/organization/production-department-managers")}
+              variant="light"
+              color="dark"
+              radius="md"
+            >
+              {translate("Production Department Managers", "مدراء أقسام الإنتاج")}
+            </Button>
+          </PermissionGuard>
           <PermissionGuard permission={PERMISSIONS.ADD_DEPARTMENT}>
             <Button color="blue" variant="light" radius="md" onClick={openModal}>
               {translate("Add New Department", "إضافة قسم جديد")}

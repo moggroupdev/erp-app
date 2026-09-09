@@ -26,6 +26,9 @@ export const queryKeys = {
   departments: {
     all: ["departments"] as const,
   },
+  productionDepartmentManagers: {
+    all: ["production-department-managers"] as const,
+  },
   roles: {
     all: ["roles"] as const,
     lists: () => [...queryKeys.roles.all, "list"] as const,

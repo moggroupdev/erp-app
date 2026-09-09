@@ -26,6 +26,7 @@ export const staleTimes = {
   },
   locations: Infinity,
   departments: Infinity,
+  productionDepartmentManagers: Infinity,
   roles: Infinity,
   categories: Infinity,
 } as const;
