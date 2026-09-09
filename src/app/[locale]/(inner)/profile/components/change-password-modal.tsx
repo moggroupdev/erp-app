@@ -144,7 +144,6 @@ export default function ChangePasswordModal({ opened, onClose }: { opened: boole
             loading={passwordMutation.isPending}
             disabled={!currentPassword || !newPassword || !confirmPassword}
             fullWidth
-            className="bg-teal-800! hover:bg-teal-900!"
           >
             {translate("Update password", "تحديث كلمة المرور")}
           </Button>
