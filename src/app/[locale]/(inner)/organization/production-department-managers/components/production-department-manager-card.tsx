@@ -2,7 +2,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { type ProductionDepartmentManagerAssignment } from "@/types/production-department-managers";
 import { CreatorLink } from "@/components/ui/entity-details";
-import ProductionDepartmentIcon from "./production-department-icon";
+import ProductionDepartmentIcon from "@/components/global/production-department-icon";
 
 export default function ProductionDepartmentManagerCard({
   assignment,
