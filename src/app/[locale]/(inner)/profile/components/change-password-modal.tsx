@@ -64,9 +64,7 @@ export default function ChangePasswordModal({ opened, onClose }: { opened: boole
       return;
     }
     if (!validationRegex.password.test(newPassword)) {
-      setValidationError(
-        translate("Password must be at least 8 characters.", "يجب أن تكون كلمة المرور 8 أحرف على الأقل."),
-      );
+      setValidationError(translate("Password must be at least 8 characters.", "يجب أن تكون كلمة المرور 8 أحرف على الأقل."));
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -89,18 +87,10 @@ export default function ChangePasswordModal({ opened, onClose }: { opened: boole
   }
 
   return (
-    <Modal
-      opened={opened}
-      onClose={handleClose}
-      title={translate("Change password", "تغيير كلمة المرور")}
-      size="md"
-    >
+    <Modal opened={opened} onClose={handleClose} title={translate("Change password", "تغيير كلمة المرور")} size="md">
       <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col gap-3">
         <p className="mb-1 text-sm text-gray-500">
-          {translate(
-            "Use a strong password with at least 8 characters.",
-            "استخدم كلمة مرور قوية من 8 أحرف على الأقل.",
-          )}
+          {translate("Use a strong password with at least 8 characters.", "استخدم كلمة مرور قوية من 8 أحرف على الأقل.")}
         </p>
 
         <PasswordInput
@@ -151,10 +141,10 @@ export default function ChangePasswordModal({ opened, onClose }: { opened: boole
           <Button
             type="submit"
             radius="md"
-            color="teal"
             loading={passwordMutation.isPending}
             disabled={!currentPassword || !newPassword || !confirmPassword}
             fullWidth
+            className="bg-teal-800! hover:bg-teal-900!"
           >
             {translate("Update password", "تحديث كلمة المرور")}
           </Button>
