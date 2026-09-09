@@ -54,8 +54,8 @@ export default function ProfileContent() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         subTitle: translate(
-          "Review the personal and organizational details linked to your login. Contact information, department, and role are shown here for reference. You can update your password from this page; other account fields are managed by administrators.",
-          "راجع البيانات الشخصية والتنظيمية المرتبطة بتسجيل دخولك. تُعرض هنا معلومات التواصل والقسم والدور للمرجعية. يمكنك تحديث كلمة المرور من هذه الصفحة، أما بقية حقول الحساب فيديرها المسؤولون.",
+          "Your personal and organizational details for reference. You can update your password here; other fields are managed by administrators.",
+          "بياناتك الشخصية والتنظيمية للمرجعية. يمكنك تحديث كلمة المرور من هنا، أما بقية الحقول فيديرها المسؤولون.",
         ),
       }}
     >
