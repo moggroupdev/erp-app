@@ -48,7 +48,7 @@ export default function UserModal({
   const [gender, setGender] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [isLoginEnabled, setIsLoginEnabled] = useState(true);
+  const [isLoginEnabled, setIsLoginEnabled] = useState(false);
   const [departmentId, setDepartmentId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [roleId, setRoleId] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export default function UserModal({
     setGender(null);
     setPhone("");
     setEmail("");
-    setIsLoginEnabled(true);
+    setIsLoginEnabled(false);
     setDepartmentId(null);
     setProductionSubDepartment(null);
     setRoleId(null);
@@ -234,15 +234,25 @@ export default function UserModal({
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
       <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col gap-3">
-        <TextInput
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          label={translate("Name", "الاسم")}
-          placeholder={translate("Enter user name", "أدخل اسم المستخدم")}
-          required
-          autoFocus
-          radius="md"
-        />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TextInput
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            label={translate("Name", "الاسم")}
+            placeholder={translate("Enter user name", "أدخل اسم المستخدم")}
+            required
+            autoFocus
+            radius="md"
+          />
+
+          <SelectGender
+            value={gender}
+            setValue={setGender}
+            label={translate("Gender", "النوع")}
+            placeholder={translate("Select gender", "اختر النوع")}
+            clearable
+          />
+        </div>
 
         <TextInput
           value={jobTitle}
@@ -250,14 +260,6 @@ export default function UserModal({
           label={translate("Job Title", "المسمى الوظيفي")}
           placeholder={translate("Enter job title", "أدخل المسمى الوظيفي")}
           radius="md"
-        />
-
-        <SelectGender
-          value={gender}
-          setValue={setGender}
-          label={translate("Gender", "النوع")}
-          placeholder={translate("Select gender", "اختر النوع")}
-          clearable
         />
 
         <SelectDepartment
@@ -313,11 +315,7 @@ export default function UserModal({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             label={translate("Phone", "الهاتف")}
-            description={
-              isLoginEnabled
-                ? translate("Required if email is empty", "مطلوب إذا كان البريد فارغًا")
-                : undefined
-            }
+            description={isLoginEnabled ? translate("Required if email is empty", "مطلوب إذا كان البريد فارغًا") : undefined}
             placeholder={translate("Enter phone", "أدخل الهاتف")}
             autoComplete="off"
             radius="md"
@@ -328,11 +326,7 @@ export default function UserModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             label={translate("Email", "البريد الإلكتروني")}
-            description={
-              isLoginEnabled
-                ? translate("Required if phone is empty", "مطلوب إذا كان الهاتف فارغًا")
-                : undefined
-            }
+            description={isLoginEnabled ? translate("Required if phone is empty", "مطلوب إذا كان الهاتف فارغًا") : undefined}
             placeholder={translate("Enter email", "أدخل البريد الإلكتروني")}
             autoComplete="off"
             radius="md"
