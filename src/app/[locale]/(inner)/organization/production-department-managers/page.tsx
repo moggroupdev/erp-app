@@ -20,7 +20,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import ProductionDepartmentManagerModal from "@/components/global/data-modals/production-department-manager-modal";
 import ProductionDepartmentManagerCard from "./components/production-department-manager-card";
 
-const title = { en: "Production Department Managers", ar: "مدراء أقسام الإنتاج" };
+const title = { en: "Production Departments", ar: "أقسام الإنتاج" };
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -55,11 +55,11 @@ export default function Page() {
   }
 
   return (
-    <div className="root-flex-1 flex h-full flex-col gap-4">
-      <header className="flex flex-wrap justify-between gap-2">
-        <div className="flex flex-col gap-2">
-          <h1>{translate(title.en, title.ar)}</h1>
-          <p className="text-gray-500">
+    <div className="root-flex-1 flex h-full flex-col gap-6 rounded-2xl">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-gray-800 sm:text-2xl">{translate(title.en, title.ar)}</h1>
+          <p className="text-sm text-gray-500">
             {translate(
               "Assign a manager and deputy manager to each production department.",
               "تعيين مدير ونائب مدير لكل قسم من أقسام الإنتاج.",
@@ -67,33 +67,26 @@ export default function Page() {
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-        </div>
+        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
       </header>
 
       {isFetching ? (
-        <LoadingSection
-          message={translate("Loading production department managers...", "جاري تحميل مدراء أقسام الإنتاج...")}
-        />
+        <LoadingSection message={translate("Loading production departments...", "جاري تحميل أقسام الإنتاج...")} />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate(
-            "Error loading production department managers",
-            "خطأ في تحميل مدراء أقسام الإنتاج",
-          )}
+          errorTitle={translate("Error loading production departments", "خطأ في تحميل أقسام الإنتاج")}
           errorMessage={errorMessage}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
-          className="rounded-lg border border-red-100"
+          className="rounded-2xl border border-red-100 bg-white"
         />
       ) : !assignments || assignments.length === 0 ? (
         <EmptySection
           useDefaultImg
           message={translate("No production departments found", "لا توجد أقسام إنتاج")}
-          className="rounded-lg bg-white shadow"
+          className="rounded-2xl bg-white shadow-sm"
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {assignments.map((assignment) => (
             <ProductionDepartmentManagerCard
               key={assignment.department}
@@ -104,7 +97,6 @@ export default function Page() {
         </div>
       )}
 
-      {/* Modals */}
       <ProductionDepartmentManagerModal
         opened={modalOpened}
         close={closeModal}
