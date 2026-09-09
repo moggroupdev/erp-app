@@ -58,14 +58,20 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
     },
     {
       key: translate("Role", "الدور"),
-      value: user.isAdmin ? (
-        <Badge size="sm" variant="light" color="dark">
-          {translate("Admin", "مسؤول")}
-        </Badge>
-      ) : role ? (
-        role.name
-      ) : (
-        <EmptyValue />
+      value: (
+        <div className="flex items-center gap-2">
+          {user.isLoginEnabled && !user.isAdmin && (role ? role.name : <EmptyValue />)}
+          {user.isAdmin && (
+            <Badge size="sm" variant="light" color="dark">
+              {translate("Admin", "مسؤول")}
+            </Badge>
+          )}
+          {!user.isLoginEnabled && (
+            <Badge size="sm" variant="light" color="gray">
+              {translate("No login", "بدون دخول")}
+            </Badge>
+          )}
+        </div>
       ),
     },
     {
@@ -82,18 +88,6 @@ export default function UserDetails({ user }: { user: UserWithCreator }) {
   ];
 
   return (
-    <EntityDetails
-      title={user.name}
-      icon={UserCog}
-      titleAside={
-        user.isAdmin ? (
-          <Badge size="lg" variant="light" color="dark">
-            {translate("Admin", "مسؤول")}
-          </Badge>
-        ) : undefined
-      }
-      deletedAt={user.deletedAt}
-      rows={rows}
-    />
+    <EntityDetails title={user.name} icon={UserCog} deletedAt={user.deletedAt} rows={rows} />
   );
 }
