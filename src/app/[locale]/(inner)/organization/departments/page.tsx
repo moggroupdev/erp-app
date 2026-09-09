@@ -56,12 +56,12 @@ export default function Page() {
           <PermissionGuard permission={PERMISSIONS.READ_PRODUCTION_DEPARTMENT_MANAGERS}>
             <Button
               component={Link}
-              href={getLocalizedHref("/organization/production-department-managers")}
+              href={getLocalizedHref("/organization/departments/production-department-managers")}
               variant="light"
               color="dark"
               radius="md"
             >
-              {translate("Production Department Managers", "مدراء أقسام الإنتاج")}
+              {translate("Production Departments", "أقسام الإنتاج")}
             </Button>
           </PermissionGuard>
           <PermissionGuard permission={PERMISSIONS.ADD_DEPARTMENT}>
