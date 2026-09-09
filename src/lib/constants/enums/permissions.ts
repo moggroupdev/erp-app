@@ -14,6 +14,8 @@ export const PERMISSION_VALUES = [
   "add_department",
   "read_departments",
   "update_department",
+  "read_production_department_managers",
+  "update_production_department_managers",
   "add_supplier",
   "read_suppliers",
   "update_supplier",
@@ -174,6 +176,20 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Department",
       ar: "تحديث القسم",
+    },
+  },
+  read_production_department_managers: {
+    value: "read_production_department_managers",
+    label: {
+      en: "Read Production Department Managers",
+      ar: "عرض مدراء أقسام الإنتاج",
+    },
+  },
+  update_production_department_managers: {
+    value: "update_production_department_managers",
+    label: {
+      en: "Update Production Department Managers",
+      ar: "تحديث مدراء أقسام الإنتاج",
     },
   },
   read_suppliers: {
@@ -644,7 +660,12 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "production",
     label: { en: "Production", ar: "الإنتاج" },
-    permissions: ["read_production_plans", "read_production_routing"],
+    permissions: [
+      "read_production_plans",
+      "read_production_routing",
+      "read_production_department_managers",
+      "update_production_department_managers",
+    ],
   },
   {
     domain: "warehouse",

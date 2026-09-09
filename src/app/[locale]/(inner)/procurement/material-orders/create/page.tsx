@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -20,6 +21,7 @@ import { Badge, Button, NumberInput, Table, TextInput, Textarea } from "@mantine
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
+import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
@@ -212,6 +214,7 @@ export default function Page() {
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
 
   useDocumentTitle(
     `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
@@ -389,7 +392,16 @@ export default function Page() {
       }
     }
 
+    handleOpenConfirm();
+  }
+
+  function handleConfirmCreate() {
     mutation.mutate();
+  }
+
+  function handleOpenConfirm() {
+    mutation.reset();
+    openConfirm();
   }
 
   return (
@@ -504,7 +516,7 @@ export default function Page() {
           </div>
         </section>
 
-        {error && <ErrorAlert error={error} />}
+        {error && !confirmOpened && <ErrorAlert error={error} />}
 
         <div className="flex justify-end gap-2">
           <Button
@@ -518,11 +530,50 @@ export default function Page() {
           >
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={mutation.isPending} radius="md" color="teal">
+          <Button type="submit" radius="md" color="teal" disabled={mutation.isPending}>
             {translate("Create", "إنشاء")}
           </Button>
         </div>
       </form>
+
+      <Modal
+        opened={confirmOpened}
+        onClose={() => {
+          if (!mutation.isPending) closeConfirm();
+        }}
+        title={translate("Confirm create order", "تأكيد إنشاء الأمر")}
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-gray-600">
+            {translate(
+              "Are you sure you want to create this material purchase order?",
+              "هل أنت متأكد من إنشاء أمر توريد الخامات هذا؟",
+            )}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="light"
+              color="dark"
+              radius="md"
+              onClick={closeConfirm}
+              disabled={mutation.isPending}
+              fullWidth
+            >
+              {translation.cancel}
+            </Button>
+            <Button
+              radius="md"
+              color="teal"
+              loading={mutation.isPending}
+              onClick={handleConfirmCreate}
+              fullWidth
+            >
+              {translate("Confirm & Create", "تأكيد وإنشاء")}
+            </Button>
+          </div>
+          {error && <ErrorAlert error={error} />}
+        </div>
+      </Modal>
     </LayoutBox>
   );
 }
