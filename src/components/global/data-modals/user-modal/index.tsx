@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { User } from "@/types/user";
 import { PRODUCTION_DEPARTMENT_ID } from "@/lib/constants/global";
+import { Gender } from "@/lib/constants/enums/genders";
 import { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useRoles from "@/hooks/reference/use-roles";
@@ -14,6 +15,7 @@ import { TextInput, Button, PasswordInput, Checkbox } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import SelectDepartment from "@/components/global/selections/reference-based/select-department";
+import SelectGender from "@/components/global/selections/enum-based/select-gender";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
 import SelectRole from "@/components/global/selections/reference-based/select-role";
 
@@ -42,6 +44,7 @@ export default function UserModal({
   const [validationError, setValidationError] = useState("");
 
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<string | null>(null);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [departmentId, setDepartmentId] = useState<string | null>(null);
@@ -56,6 +59,7 @@ export default function UserModal({
 
   function reset() {
     setName("");
+    setGender(null);
     setPhone("");
     setEmail("");
     setDepartmentId(null);
@@ -69,6 +73,7 @@ export default function UserModal({
     if (userToUpdate) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(userToUpdate.name);
+      setGender(userToUpdate.gender);
       setPhone(userToUpdate.phone || "");
       setEmail(userToUpdate.email || "");
       setDepartmentId(userToUpdate.departmentId);
@@ -94,6 +99,7 @@ export default function UserModal({
       if (userToUpdate) {
         const dto: {
           name: string;
+          gender: Gender | null;
           phone: string | null;
           email: string | null;
           departmentId: string | null;
@@ -102,6 +108,7 @@ export default function UserModal({
           password?: string;
         } = {
           name,
+          gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
           departmentId,
@@ -118,6 +125,7 @@ export default function UserModal({
         privateRequest,
         dto: {
           name,
+          gender: (gender as Gender) || null,
           phone: phone || null,
           email: email || null,
           departmentId,
@@ -197,6 +205,7 @@ export default function UserModal({
 
   const isDataChanged = userToUpdate
     ? name !== userToUpdate.name ||
+      (gender || null) !== userToUpdate.gender ||
       (phone || null) !== userToUpdate.phone ||
       (email || null) !== userToUpdate.email ||
       (changePassword && !!password) ||
@@ -218,6 +227,14 @@ export default function UserModal({
           required
           autoFocus
           radius="md"
+        />
+
+        <SelectGender
+          value={gender}
+          setValue={setGender}
+          label={translate("Gender", "النوع")}
+          placeholder={translate("Select gender", "اختر النوع")}
+          clearable
         />
 
         <SelectDepartment
