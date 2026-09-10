@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "@mantine/core";
+import { Button, Table } from "@mantine/core";
+import { Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -34,6 +35,7 @@ const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خا
 
 const RECEIPTS_LIMIT = 100;
 const INVOICES_LIMIT = 100;
+const REMAINING_EPSILON = 1e-9;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -43,6 +45,7 @@ export default function Page() {
   const { helpers } = useMaterialCategories();
   const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
   const canAddSupplierInvoice = useHasPermission(PERMISSIONS.ADD_SUPPLIER_INVOICE);
+  const canAddReceipt = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_RECEIPT);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -216,7 +219,25 @@ export default function Page() {
             </section>
 
             <section className="mt-8 flex flex-col gap-4">
-              <h4 className="text-lg font-semibold text-gray-900">{translate("Receipts", "سندات الاستلام")}</h4>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h4 className="text-lg font-semibold text-gray-900">{translate("Receipts", "سندات الاستلام")}</h4>
+
+                {canAddReceipt &&
+                  !order.cancelledAt &&
+                  order.items.some((item) => (item.quantityRemaining ?? item.quantityOrdered) > REMAINING_EPSILON) && (
+                    <Button
+                      component={Link}
+                      href={getLocalizedHref(`/procurement/material-orders/${id}/receipts/create`)}
+                      variant="filled"
+                      color="teal"
+                      size="sm"
+                      radius="md"
+                      leftSection={<Plus size={15} />}
+                    >
+                      {translate("Add receipt", "إضافة سند استلام")}
+                    </Button>
+                  )}
+              </div>
 
               {isReceiptsFetching ? (
                 <LoadingSection message={translate("Loading receipts...", "جاري تحميل سندات الاستلام...")} />

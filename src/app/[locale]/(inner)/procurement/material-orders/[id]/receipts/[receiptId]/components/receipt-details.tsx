@@ -1,15 +1,27 @@
+"use client";
+
 import Link from "next/link";
+import { Button } from "@mantine/core";
+import { ClipboardCheck, PackagePlus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type MaterialPurchaseReceiptDetailed } from "@/types/material-purchase-order";
-import { ClipboardCheck } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
-export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseReceiptDetailed }) {
+export default function ReceiptDetails({
+  receipt,
+  canCreateInventoryTransaction = false,
+  onCreateInventoryTransaction,
+}: {
+  receipt: MaterialPurchaseReceiptDetailed;
+  canCreateInventoryTransaction?: boolean;
+  onCreateInventoryTransaction?: () => void;
+}) {
   const { locale, translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const { inventoryTransactions } = receipt;
   const { id: orderId, code: orderCode } = receipt.materialPurchaseOrder;
+  const hasAcceptedQty = receipt.items.some((item) => Number(item.quantityReceived) > 0);
 
   const rows: DetailRow[] = [
     {
@@ -32,11 +44,28 @@ export default function ReceiptDetails({ receipt }: { receipt: MaterialPurchaseR
   if (inventoryTransactions.length === 0) {
     rows.push({
       key: translate("Transaction Number", "رقم الإذن"),
-      value: (
-        <span className="font-semibold text-red-600">
-          {translate("Inventory transaction was not created yet", "لم يُنشأ إذن المخزون بعد")}
-        </span>
-      ),
+      value:
+        canCreateInventoryTransaction && hasAcceptedQty && onCreateInventoryTransaction ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-red-600">
+              {translate("Inventory transaction was not created yet", "لم يُنشأ إذن المخزون بعد")}
+            </span>
+            <Button
+              size="xs"
+              variant="light"
+              color="teal"
+              radius="md"
+              leftSection={<PackagePlus size={14} />}
+              onClick={onCreateInventoryTransaction}
+            >
+              {translate("Create اذن إضافة", "إنشاء إذن إضافة")}
+            </Button>
+          </div>
+        ) : (
+          <span className="font-semibold text-red-600">
+            {translate("Inventory transaction was not created yet", "لم يُنشأ إذن المخزون بعد")}
+          </span>
+        ),
     });
   } else if (inventoryTransactions.length === 1) {
     const transaction = inventoryTransactions[0];

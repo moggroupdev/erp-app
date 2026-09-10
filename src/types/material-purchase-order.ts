@@ -79,6 +79,8 @@ export type MaterialPurchaseOrderItem = {
   unitPrice: number;
   notes: string | null;
   material: PurchaseMaterialWithUnitConversion;
+  /** Remaining qty in the order line's selected unit (ordered − received − rejected across receipts). */
+  quantityRemaining?: number;
 };
 
 export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "createdBy"> & {
@@ -138,4 +140,23 @@ export type MaterialPurchaseReceiptDetailed = Omit<MaterialPurchaseReceipt, "cre
   createdBy: { id: string; name: string };
   receivedBy: { id: string; name: string } | null;
   items: MaterialPurchaseReceiptItem[];
+};
+
+export type CreateMaterialPurchaseReceiptItemDto = {
+  materialPurchaseOrderItemId: string;
+  unitOfMeasurementSelected: MaterialUnit;
+  quantityReceived: number;
+  quantityRejected: number;
+  inspectionNotes: string | null;
+};
+
+export type CreateMaterialPurchaseReceiptDto = {
+  materialPurchaseOrderId: string;
+  notes: string | null;
+  receivedAt?: string | null;
+  items: CreateMaterialPurchaseReceiptItemDto[];
+};
+
+export type CreatedMaterialPurchaseReceipt = MaterialPurchaseReceipt & {
+  items: Omit<MaterialPurchaseReceiptItem, "materialPurchaseOrderItem">[];
 };

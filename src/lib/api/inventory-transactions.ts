@@ -25,6 +25,22 @@ const inventoryTransactionsApi = {
       signal,
     });
   },
+
+  async createFromMaterialPurchaseReceipt({
+    privateRequest,
+    receiptId,
+    legacyNumber,
+  }: {
+    privateRequest: PrivateRequest;
+    receiptId: string;
+    legacyNumber: string;
+  }) {
+    return await privateRequest<{ id: string; code: string }>({
+      method: "POST",
+      url: `inventory-transactions/from-material-purchase-receipt/${receiptId}`,
+      data: { legacyNumber },
+    });
+  },
 };
 
 export default inventoryTransactionsApi;

@@ -5,15 +5,17 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button, Table } from "@mantine/core";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, PackagePlus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
@@ -27,6 +29,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import ReceiptDetails from "./components/receipt-details";
 import InspectionReportModal from "./components/inspection-report-modal";
+import CreateInventoryTransactionModal from "./components/create-inventory-transaction-modal";
 
 const PAGE_TITLE = { en: "Materials Receipt Details", ar: "سند استلام خامات" };
 
@@ -36,8 +39,10 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+  const canAddInventoryTransaction = useHasPermission(PERMISSIONS.ADD_INVENTORY_TRANSACTION);
 
   const [inspectionModalOpened, { open: openInspectionModal, close: closeInspectionModal }] = useDisclosure(false);
+  const [ivtModalOpened, { open: openIvtModal, close: closeIvtModal }] = useDisclosure(false);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -57,6 +62,11 @@ export default function Page() {
   });
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
+  const canCreateIvt =
+    canAddInventoryTransaction &&
+    !!receipt &&
+    receipt.inventoryTransactions.length === 0 &&
+    receipt.items.some((item) => Number(item.quantityReceived) > 0);
 
   useDocumentTitle(
     `${receipt?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
@@ -69,6 +79,17 @@ export default function Page() {
         backLink: getLocalizedHref(`/procurement/material-orders/${orderId}`),
         sideElements: (
           <div className="flex items-center gap-2">
+            {canCreateIvt && (
+              <Button
+                variant="light"
+                color="teal"
+                radius="md"
+                leftSection={<PackagePlus size={15} />}
+                onClick={openIvtModal}
+              >
+                {translate("Create اذن إضافة", "إنشاء إذن إضافة")}
+              </Button>
+            )}
             {receipt && receipt.items.length > 0 && (
               <Button
                 variant="light"
@@ -96,7 +117,11 @@ export default function Page() {
       ) : (
         receipt && (
           <>
-            <ReceiptDetails receipt={receipt} />
+            <ReceiptDetails
+              receipt={receipt}
+              canCreateInventoryTransaction={canAddInventoryTransaction}
+              onCreateInventoryTransaction={openIvtModal}
+            />
 
             <section className="mt-4 flex flex-col gap-4">
               <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
@@ -219,6 +244,12 @@ export default function Page() {
             </section>
 
             <InspectionReportModal opened={inspectionModalOpened} onClose={closeInspectionModal} items={receipt.items} />
+            <CreateInventoryTransactionModal
+              opened={ivtModalOpened}
+              onClose={closeIvtModal}
+              receiptId={receipt.id}
+              receiptCode={receipt.code}
+            />
           </>
         )
       )}
