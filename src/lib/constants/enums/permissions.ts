@@ -59,6 +59,7 @@ export const PERMISSION_VALUES = [
   "read_material_purchase_orders",
   "add_material_purchase_order",
   "read_supplier_invoices",
+  "add_supplier_invoice",
   "update_supplier_invoice",
   "add_material_purchase_requisition",
   "read_material_purchase_requisitions",
@@ -474,6 +475,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض فواتير الموردين",
     },
   },
+  add_supplier_invoice: {
+    value: "add_supplier_invoice",
+    label: {
+      en: "Add Supplier Invoice",
+      ar: "إضافة فاتورة مورد",
+    },
+  },
   update_supplier_invoice: {
     value: "update_supplier_invoice",
     label: {
@@ -712,6 +720,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_material_purchase_orders",
       "add_material_purchase_order",
       "read_supplier_invoices",
+      "add_supplier_invoice",
       "update_supplier_invoice",
       "read_product_purchase_orders",
     ],

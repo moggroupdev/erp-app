@@ -1,14 +1,21 @@
-import { Table } from "@mantine/core";
+"use client";
+
+import { useRef, useState } from "react";
+import { Button, FileButton, Table } from "@mantine/core";
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Upload } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import parseSupplierInvoicePdf, { type ParsedSupplierInvoice } from "@/lib/helpers/parse-supplier-invoice-pdf";
 import { type SupplierInvoice } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
+import ErrorAlert from "@/components/ui/error-alert";
+import UploadInvoiceConfirmModal from "./upload-invoice-confirm-modal";
 
 type OrderInvoicesSectionProps = {
   invoices: SupplierInvoice[] | undefined;
@@ -17,6 +24,9 @@ type OrderInvoicesSectionProps = {
   onRetry: () => void;
   /** When set, footer compares summed invoice purchases against this order total. */
   orderTotalAmount?: number;
+  /** When set with canAdd, enables uploading a new invoice from PDF. */
+  materialPurchaseOrderId?: string;
+  canAdd?: boolean;
 };
 
 function sumNullableField(
@@ -78,13 +88,78 @@ export default function OrderInvoicesSection({
   errorMessage,
   onRetry,
   orderTotalAmount,
+  materialPurchaseOrderId,
+  canAdd = false,
 }: OrderInvoicesSectionProps) {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
+  const resetFileRef = useRef<() => void>(null);
+
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [parsed, setParsed] = useState<ParsedSupplierInvoice | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
+  const [parseError, setParseError] = useState("");
+  const [confirmOpened, setConfirmOpened] = useState(false);
+
+  const showUpload = canAdd && !!materialPurchaseOrderId;
+
+  async function handleFileSelect(file: File | null) {
+    if (!file) return;
+    setParseError("");
+    setParsed(null);
+    setPendingFile(file);
+    setConfirmOpened(true);
+    setIsParsing(true);
+
+    try {
+      const result = await parseSupplierInvoicePdf(file);
+      setParsed(result);
+    } catch (err) {
+      setParseError(
+        getErrorMessage(locale, err) ||
+          translate("Failed to read the PDF file.", "فشل قراءة ملف PDF."),
+      );
+      setConfirmOpened(false);
+      setPendingFile(null);
+      resetFileRef.current?.();
+    } finally {
+      setIsParsing(false);
+    }
+  }
+
+  function handleConfirmClose() {
+    setConfirmOpened(false);
+    setPendingFile(null);
+    setParsed(null);
+    setParseError("");
+    resetFileRef.current?.();
+  }
 
   return (
     <section className="mt-8 flex flex-col gap-4">
-      <h4 className="text-lg font-semibold text-gray-900">{translate("Invoices", "الفواتير")}</h4>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h4 className="text-lg font-semibold text-gray-900">{translate("Invoices", "الفواتير")}</h4>
+
+        {showUpload && (
+          <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+            {(props) => (
+              <Button
+                {...props}
+                variant="filled"
+                color="teal"
+                size="sm"
+                radius="md"
+                leftSection={<Upload size={15} />}
+                loading={isParsing}
+              >
+                {translate("Upload invoice", "رفع فاتورة")}
+              </Button>
+            )}
+          </FileButton>
+        )}
+      </div>
+
+      {parseError && <ErrorAlert error={parseError} fade />}
 
       {isFetching ? (
         <LoadingSection message={translate("Loading invoices...", "جاري تحميل الفواتير...")} />
@@ -177,6 +252,16 @@ export default function OrderInvoicesSection({
             {orderTotalAmount != null && <InvoicePurchasesFooter invoices={invoices} orderTotalAmount={orderTotalAmount} />}
           </Table>
         </div>
+      )}
+
+      {showUpload && (
+        <UploadInvoiceConfirmModal
+          opened={confirmOpened}
+          onClose={handleConfirmClose}
+          materialPurchaseOrderId={materialPurchaseOrderId!}
+          file={pendingFile}
+          parsed={isParsing ? null : parsed}
+        />
       )}
     </section>
   );

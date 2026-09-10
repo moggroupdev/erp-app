@@ -2,6 +2,16 @@ import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type { SupplierInvoiceDetailed, SupplierInvoiceWithLinks } from "@/types/material-purchase-order";
 
+type CreateSupplierInvoiceFields = {
+  invoiceNumber: string;
+  issuedAt: string | null;
+  totalPurchases: number | null;
+  totalDiscount: number | null;
+  vatAmount: number | null;
+  withholdingTaxAmount: number | null;
+  totalAmount: number | null;
+};
+
 const supplierInvoicesApi = {
   async list({
     privateRequest,
@@ -23,6 +33,35 @@ const supplierInvoicesApi = {
     return await privateRequest<SupplierInvoiceDetailed>({
       url: `supplier-invoices/${id}`,
       signal,
+    });
+  },
+
+  async createFromPdf({
+    privateRequest,
+    materialPurchaseOrderId,
+    file,
+    fields,
+  }: {
+    privateRequest: PrivateRequest;
+    materialPurchaseOrderId: string;
+    file: File;
+    fields: CreateSupplierInvoiceFields;
+  }) {
+    const data = new FormData();
+    data.append("pdf", file);
+    data.append("materialPurchaseOrderId", materialPurchaseOrderId);
+    data.append("invoiceNumber", fields.invoiceNumber);
+    if (fields.issuedAt) data.append("issuedAt", fields.issuedAt);
+    if (fields.totalPurchases != null) data.append("totalPurchases", String(fields.totalPurchases));
+    if (fields.totalDiscount != null) data.append("totalDiscount", String(fields.totalDiscount));
+    if (fields.vatAmount != null) data.append("vatAmount", String(fields.vatAmount));
+    if (fields.withholdingTaxAmount != null) data.append("withholdingTaxAmount", String(fields.withholdingTaxAmount));
+    if (fields.totalAmount != null) data.append("totalAmount", String(fields.totalAmount));
+
+    return await privateRequest<SupplierInvoiceDetailed>({
+      url: "supplier-invoices",
+      method: "POST",
+      data,
     });
   },
 
