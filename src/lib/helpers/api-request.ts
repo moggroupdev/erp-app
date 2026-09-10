@@ -12,6 +12,7 @@ export default async function apiRequest<T>({
   credentials = "same-origin",
   signal,
   download,
+  blob,
   filename,
 }: ApiRequestOptions): Promise<T> {
   const locale = getLocaleFromPathname(window.location.pathname);
@@ -46,13 +47,16 @@ export default async function apiRequest<T>({
     // Throw an error if the response isn't ok
     if (!response.ok) throw await response.json();
 
+    // Return the raw blob (e.g. for PDF preview in an iframe)
+    if (blob) return (await response.blob()) as T;
+
     // If it's a download request, download the file and return null
     if (download) {
       const contentDisposition = response.headers.get("Content-Disposition");
       const serverFilename = contentDisposition ? contentDisposition.split("filename=")[1]?.replace(/["']/g, "") : undefined;
       const finalFilename = filename || serverFilename || "download";
-      const blob = await response.blob();
-      downloadBlob(blob, finalFilename);
+      const fileBlob = await response.blob();
+      downloadBlob(fileBlob, finalFilename);
       return null as T;
     }
 

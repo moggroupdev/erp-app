@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, FileButton } from "@mantine/core";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, FileButton, Loader } from "@mantine/core";
 import { Building2, CalendarDays, Download, FileText, Link2, Upload } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useHasPermission from "@/hooks/use-has-permission";
@@ -145,6 +145,30 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
   const queryClient = useQueryClient();
   const canUpdate = useHasPermission(PERMISSIONS.UPDATE_SUPPLIER_INVOICE);
   const resetFileRef = useRef<() => void>(null);
+  const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
+
+  const hasPdf = !!invoice.pdfFilename;
+
+  const {
+    data: pdfBlob,
+    isPending: isPdfLoading,
+    error: pdfQueryError,
+  } = useQuery({
+    queryKey: queryKeys.supplierInvoices.pdf(invoice.id, invoice.pdfFilename),
+    queryFn: ({ signal }) => supplierInvoicesApi.getPdfBlob({ privateRequest, id: invoice.id, signal }),
+    enabled: hasPdf,
+  });
+
+  useEffect(() => {
+    if (!pdfBlob) {
+      setPdfObjectUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(pdfBlob);
+    setPdfObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pdfBlob]);
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => supplierInvoicesApi.uploadPdf({ privateRequest, id: invoice.id, file }),
@@ -165,7 +189,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
 
   const uploadError = uploadMutation.error ? getErrorMessage(locale, uploadMutation.error) : "";
   const downloadError = downloadMutation.error ? getErrorMessage(locale, downloadMutation.error) : "";
-  const hasPdf = !!invoice.pdfFilename;
+  const previewError = pdfQueryError ? getErrorMessage(locale, pdfQueryError) : "";
 
   function handleFileSelect(file: File | null) {
     if (!file) return;
@@ -230,9 +254,28 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
         </div>
       </div>
 
-      {(uploadError || downloadError) && (
+      {(uploadError || downloadError || previewError) && (
         <div className="mt-3">
-          <ErrorAlert error={uploadError || downloadError} fade />
+          <ErrorAlert error={uploadError || downloadError || previewError} fade />
+        </div>
+      )}
+
+      {hasPdf && (
+        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+          {isPdfLoading && (
+            <div className="flex h-[min(70vh,720px)] items-center justify-center gap-2 text-sm text-gray-500">
+              <Loader size="sm" color="teal" />
+              {translate("Loading PDF…", "جاري تحميل PDF…")}
+            </div>
+          )}
+
+          {!isPdfLoading && pdfObjectUrl && (
+            <iframe
+              title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
+              src={pdfObjectUrl}
+              className="h-[min(70vh,720px)] w-full bg-white"
+            />
+          )}
         </div>
       )}
     </section>

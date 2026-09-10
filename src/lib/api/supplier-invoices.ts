@@ -61,6 +61,23 @@ const supplierInvoicesApi = {
       filename: `${invoiceNumber}.pdf`,
     });
   },
+
+  async getPdfBlob({
+    privateRequest,
+    id,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<Blob>({
+      url: `supplier-invoices/${id}/pdf`,
+      params: { _t: Date.now() },
+      blob: true,
+      signal,
+    });
+  },
 };
 
 export default supplierInvoicesApi;

@@ -33,6 +33,7 @@ export default function usePrivateRequest(): PrivateRequest {
     credentials = "same-origin",
     signal,
     download,
+    blob,
     filename,
   }: ApiRequestOptions): Promise<T> {
     try {
@@ -50,6 +51,7 @@ export default function usePrivateRequest(): PrivateRequest {
         credentials,
         signal,
         download,
+        blob,
         filename,
       });
     } catch (error) {
@@ -70,6 +72,7 @@ export default function usePrivateRequest(): PrivateRequest {
             credentials,
             signal,
             download,
+            blob,
             filename,
           });
         } catch (error) {
