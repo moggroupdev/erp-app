@@ -53,10 +53,7 @@ export default function PurchasingMaterialsPriceHistoryPrintDocument({
       </header>
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-4">
-        <PrintDetail
-          label={translate("Material Code", "كود الصنف")}
-          value={<span className="font-mono font-bold">{materialCode}</span>}
-        />
+        <PrintDetail label={translate("Material Code", "كود الصنف")} value={materialCode} mono />
         <PrintDetail label={translate("Unit of Measurement", "وحدة القياس")} value={unitLabel} />
         <PrintDetail
           label={translate("Start Date", "تاريخ البداية")}
