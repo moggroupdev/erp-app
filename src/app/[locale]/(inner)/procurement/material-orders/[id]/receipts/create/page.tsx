@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { Button, NumberInput, Table, Textarea, TextInput } from "@mantine/core";
+import { Badge, Button, NumberInput, Table, Textarea, TextInput } from "@mantine/core";
+import { CheckCircle2, ClipboardCheck, Package } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -32,6 +33,8 @@ import PermissionGuard from "@/components/guards/permission";
 const PAGE_TITLE = { en: "Create Materials Receipt", ar: "إنشاء سند استلام خامات" };
 const REMAINING_EPSILON = 1e-9;
 
+const UNSTYLED_INPUT_STYLES = { input: { minHeight: 0, height: "auto", padding: 0 } } as const;
+
 type ReceiptDraftRow = {
   orderItemId: string;
   materialCode: string;
@@ -48,11 +51,20 @@ type ReceiptDraftRow = {
   fullyReceived: boolean;
 };
 
-function remainingInUnit(remainingInOrderUnit: number, orderUnit: MaterialUnit, selectedUnit: MaterialUnit, item: Pick<ReceiptDraftRow, "baseUnit" | "unitConversions">) {
+function remainingInUnit(
+  remainingInOrderUnit: number,
+  orderUnit: MaterialUnit,
+  selectedUnit: MaterialUnit,
+  item: Pick<ReceiptDraftRow, "baseUnit" | "unitConversions">,
+) {
   const fromBase = resolveDisplayUnit(orderUnit, item.baseUnit, item.unitConversions).factor;
   const toBase = resolveDisplayUnit(selectedUnit, item.baseUnit, item.unitConversions).factor;
   const remainingBase = toBaseQuantity(remainingInOrderUnit, fromBase);
   return toDisplayQuantity(remainingBase, toBase);
+}
+
+function formatQty(value: number, locale: Locale) {
+  return value.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { maximumFractionDigits: 6 });
 }
 
 function buildRows(items: MaterialPurchaseOrderItem[]): ReceiptDraftRow[] {
@@ -70,8 +82,8 @@ function buildRows(items: MaterialPurchaseOrderItem[]): ReceiptDraftRow[] {
       orderUnit: item.unitOfMeasurementSelected,
       remainingInOrderUnit: remaining,
       unitOfMeasurementSelected: item.unitOfMeasurementSelected,
-      quantityReceived: fullyReceived ? 0 : remaining,
-      quantityRejected: 0,
+      quantityReceived: "",
+      quantityRejected: "",
       inspectionNotes: "",
       fullyReceived,
     };
@@ -100,21 +112,28 @@ function ReceiptItemRow({
   const unitOptions = getRowUnitOptions(row, locale);
 
   return (
-    <Table.Tr className={row.fullyReceived ? "bg-gray-50 text-gray-400" : "text-gray-700"}>
-      <Table.Td className="font-semibold text-gray-800">
-        <div className="flex flex-col gap-0.5">
-          <span>{row.materialTitle}</span>
+    <Table.Tr className={row.fullyReceived ? "bg-emerald-50/40 text-gray-500" : "text-gray-700"}>
+      <Table.Td className="min-w-56 font-semibold text-gray-800">
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={row.fullyReceived ? "text-gray-500" : "text-gray-800"}>{row.materialTitle}</span>
+            {row.fullyReceived && (
+              <Badge size="xs" variant="light" color="teal" leftSection={<CheckCircle2 size={11} />} className="normal-case">
+                {translate("Fully received", "مستلم بالكامل")}
+              </Badge>
+            )}
+          </div>
           <span className="font-mono text-xs font-normal text-gray-500">{row.materialCode}</span>
         </div>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
         {showUnitSelect(row) && !row.fullyReceived ? (
           <DataSelect
             value={row.unitOfMeasurementSelected}
             setValue={(value) => {
-              const nextUnit = (typeof value === "function" ? value(row.unitOfMeasurementSelected) : value) as
-                | MaterialUnit
-                | null;
+              const nextUnit = (
+                typeof value === "function" ? value(row.unitOfMeasurementSelected) : value
+              ) as MaterialUnit | null;
               if (!nextUnit || nextUnit === row.unitOfMeasurementSelected) return;
 
               const prevRemaining = remainingInUnit(
@@ -135,51 +154,72 @@ function ReceiptItemRow({
               });
             }}
             data={unitOptions}
-            size="xs"
+            variant="unstyled"
+            radius={0}
+            searchable
             allowDeselect={false}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
           />
         ) : (
-          getMaterialUnitLabel(row.unitOfMeasurementSelected, locale)
+          <span className="text-sm text-gray-600">{getMaterialUnitLabel(row.unitOfMeasurementSelected, locale)}</span>
         )}
       </Table.Td>
       <Table.Td>
-        {remaining.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { maximumFractionDigits: 6 })}
+        <span className={`text-sm tabular-nums ${row.fullyReceived ? "text-gray-400" : "font-medium text-gray-700"}`}>
+          {formatQty(remaining, locale)}
+        </span>
       </Table.Td>
-      <Table.Td>
-        <NumberInput
-          value={row.quantityReceived}
-          onChange={(value) => onUpdate(row.orderItemId, { quantityReceived: value === "" ? "" : Number(value) })}
-          min={0}
-          max={remaining}
-          decimalScale={6}
-          hideControls
-          radius="md"
-          size="xs"
-          disabled={row.fullyReceived}
-        />
+      <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
+        {row.fullyReceived ? (
+          <span className="text-sm text-gray-400">—</span>
+        ) : (
+          <NumberInput
+            value={row.quantityReceived}
+            onChange={(value) => onUpdate(row.orderItemId, { quantityReceived: value === "" ? "" : Number(value) })}
+            min={0}
+            max={remaining}
+            allowNegative={false}
+            decimalScale={6}
+            hideControls
+            variant="unstyled"
+            radius={0}
+            placeholder={translate("Enter quantity", "أدخل الكمية")}
+            styles={UNSTYLED_INPUT_STYLES}
+          />
+        )}
       </Table.Td>
-      <Table.Td>
-        <NumberInput
-          value={row.quantityRejected}
-          onChange={(value) => onUpdate(row.orderItemId, { quantityRejected: value === "" ? "" : Number(value) })}
-          min={0}
-          max={remaining}
-          decimalScale={6}
-          hideControls
-          radius="md"
-          size="xs"
-          disabled={row.fullyReceived}
-        />
+      <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
+        {row.fullyReceived ? (
+          <span className="text-sm text-gray-400">—</span>
+        ) : (
+          <NumberInput
+            value={row.quantityRejected}
+            onChange={(value) => onUpdate(row.orderItemId, { quantityRejected: value === "" ? "" : Number(value) })}
+            min={0}
+            max={remaining}
+            allowNegative={false}
+            decimalScale={6}
+            hideControls
+            variant="unstyled"
+            radius={0}
+            placeholder={translate("Enter quantity", "أدخل الكمية")}
+            styles={UNSTYLED_INPUT_STYLES}
+          />
+        )}
       </Table.Td>
-      <Table.Td>
-        <TextInput
-          value={row.inspectionNotes}
-          onChange={(e) => onUpdate(row.orderItemId, { inspectionNotes: e.target.value })}
-          placeholder={translate("Optional", "اختياري")}
-          radius="md"
-          size="xs"
-          disabled={row.fullyReceived}
-        />
+      <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
+        {row.fullyReceived ? (
+          <span className="text-sm text-gray-400">—</span>
+        ) : (
+          <TextInput
+            value={row.inspectionNotes}
+            onChange={(e) => onUpdate(row.orderItemId, { inspectionNotes: e.target.value })}
+            placeholder={translate("Optional", "اختياري")}
+            variant="unstyled"
+            radius={0}
+            styles={UNSTYLED_INPUT_STYLES}
+          />
+        )}
       </Table.Td>
     </Table.Tr>
   );
@@ -194,7 +234,7 @@ export default function Page() {
 }
 
 function CreateReceiptPage() {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const { id: orderId } = useParams<{ id: string }>();
   const getLocalizedHref = useLocaleHref();
   const router = useRouter();
@@ -266,8 +306,8 @@ function CreateReceiptPage() {
       rows.some(
         (row) =>
           !row.fullyReceived &&
-          (Number(row.quantityReceived) !== row.remainingInOrderUnit ||
-            Number(row.quantityRejected) !== 0 ||
+          (row.quantityReceived !== "" ||
+            row.quantityRejected !== "" ||
             row.inspectionNotes.trim() !== "" ||
             row.unitOfMeasurementSelected !== row.orderUnit),
       ),
@@ -277,7 +317,30 @@ function CreateReceiptPage() {
   const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
   const openLines = rows.filter((row) => !row.fullyReceived);
+  const completedCount = rows.length - openLines.length;
   const hasOpenLines = openLines.length > 0;
+
+  const linesToSubmit = useMemo(
+    () =>
+      openLines.filter((row) => {
+        const received = Number(row.quantityReceived) || 0;
+        const rejected = Number(row.quantityRejected) || 0;
+        return received + rejected > 0;
+      }),
+    [openLines],
+  );
+
+  const confirmSummary = useMemo(() => {
+    let receivedLines = 0;
+    let rejectedLines = 0;
+
+    for (const row of linesToSubmit) {
+      if ((Number(row.quantityReceived) || 0) > 0) receivedLines += 1;
+      if ((Number(row.quantityRejected) || 0) > 0) rejectedLines += 1;
+    }
+
+    return { lineCount: linesToSubmit.length, receivedLines, rejectedLines };
+  }, [linesToSubmit]);
 
   function updateRow(orderItemId: string, patch: Partial<ReceiptDraftRow>) {
     setRows((prev) => prev.map((row) => (row.orderItemId === orderItemId ? { ...row, ...patch } : row)));
@@ -374,12 +437,7 @@ function CreateReceiptPage() {
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <TextInput
-              value={order?.code ?? ""}
-              label={translate("Purchase Order", "أمر التوريد")}
-              radius="md"
-              readOnly
-            />
+            <TextInput value={order?.code ?? ""} label={translate("Purchase Order", "أمر التوريد")} radius="md" readOnly />
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -391,18 +449,43 @@ function CreateReceiptPage() {
           </section>
 
           <section className="flex flex-col gap-3">
-            <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                <span>{translate(`${openLines.length} open`, `${openLines.length} مفتوح`)}</span>
+                {completedCount > 0 && (
+                  <>
+                    <span className="text-gray-300">·</span>
+                    <span className="text-teal-700">
+                      {translate(`${completedCount} fully received`, `${completedCount} مستلم بالكامل`)}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
 
-            <div className="overflow-x-auto rounded-xl">
-              <Table withColumnBorders className="w-full text-nowrap" horizontalSpacing="xs" verticalSpacing="xs">
+            <div className="overflow-x-auto rounded-xl border border-gray-100">
+              <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
                 <Table.Thead className="bg-gray-50">
                   <Table.Tr className="h-9">
-                    <Table.Th>{translate("Material", "المادة")}</Table.Th>
-                    <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
-                    <Table.Th>{translate("Remaining", "المتبقي")}</Table.Th>
-                    <Table.Th>{translate("Quantity Received", "الكمية المستلمة")}</Table.Th>
-                    <Table.Th>{translate("Quantity Rejected", "الكمية المرفوضة")}</Table.Th>
-                    <Table.Th>{translate("Inspection Notes", "ملاحظات الفحص")}</Table.Th>
+                    <Table.Th className="w-[30%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Material", "المادة")}
+                    </Table.Th>
+                    <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Unit", "الوحدة")}
+                    </Table.Th>
+                    <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Remaining", "المتبقي")}
+                    </Table.Th>
+                    <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Quantity Received", "الكمية المستلمة")}
+                    </Table.Th>
+                    <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Quantity Rejected", "الكمية المرفوضة")}
+                    </Table.Th>
+                    <Table.Th className="w-[18%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Inspection Notes", "ملاحظات الفحص")}
+                    </Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -419,15 +502,16 @@ function CreateReceiptPage() {
           <div className="flex justify-end gap-2">
             <Button
               type="button"
-              variant="default"
+              variant="light"
+              color="dark"
               radius="md"
               onClick={() => {
                 if (confirmNavigation()) router.push(getLocalizedHref(`/procurement/material-orders/${orderId}`));
               }}
             >
-              {translate("Cancel", "إلغاء")}
+              {translation.cancel}
             </Button>
-            <Button type="submit" color="teal" radius="md" disabled={!hasOpenLines}>
+            <Button type="submit" color="teal" radius="md" disabled={!hasOpenLines || mutation.isPending}>
               {translate("Create receipt", "إنشاء سند الاستلام")}
             </Button>
           </div>
@@ -437,23 +521,60 @@ function CreateReceiptPage() {
       <Modal
         opened={confirmOpened}
         onClose={() => {
-          if (mutation.isPending) return;
-          closeConfirm();
+          if (!mutation.isPending) closeConfirm();
         }}
-        title={translate("Confirm receipt", "تأكيد سند الاستلام")}
-        centerTitle
+        title={translate("Confirm create receipt", "تأكيد إنشاء سند الاستلام")}
       >
-        <p className="mb-4 text-sm text-gray-600">
-          {translate("Create this materials receipt?", "إنشاء سند الاستلام هذا؟")}
-        </p>
-        {mutation.error && <ErrorAlert error={getErrorMessage(locale, mutation.error)} />}
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="default" radius="md" onClick={closeConfirm} disabled={mutation.isPending}>
-            {translate("Cancel", "إلغاء")}
-          </Button>
-          <Button color="teal" radius="md" loading={mutation.isPending} onClick={() => mutation.mutate()}>
-            {translate("Confirm", "تأكيد")}
-          </Button>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start gap-3 rounded-xl bg-teal-50/70 px-3.5 py-3">
+            <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700">
+              <ClipboardCheck size={18} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-900">
+                {translate("Create this materials receipt?", "إنشاء سند الاستلام هذا؟")}
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                {translate(
+                  "Accepted and rejected quantities will be recorded against the purchase order lines.",
+                  "سيتم تسجيل الكميات المقبولة والمرفوضة على بنود أمر التوريد.",
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+              <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-500">
+                <Package size={13} />
+                {translate("Purchase Order", "أمر التوريد")}
+              </div>
+              <p className="font-mono text-sm font-semibold text-gray-800">{order?.code}</p>
+            </div>
+            <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+              <div className="mb-1 text-xs text-gray-500">{translate("Lines included", "البنود المشمولة")}</div>
+              <p className="text-sm font-semibold text-gray-800">
+                {translate(`${confirmSummary.lineCount} line(s)`, `${confirmSummary.lineCount} بند`)}
+              </p>
+              <p className="mt-0.5 text-xs text-gray-500">
+                {translate(
+                  `${confirmSummary.receivedLines} with received · ${confirmSummary.rejectedLines} with rejected`,
+                  `${confirmSummary.receivedLines} بمستلم · ${confirmSummary.rejectedLines} بمرفوض`,
+                )}
+              </p>
+            </div>
+          </div>
+
+          {mutation.error && <ErrorAlert error={getErrorMessage(locale, mutation.error)} />}
+
+          <div className="flex gap-2">
+            <Button variant="light" color="dark" radius="md" onClick={closeConfirm} disabled={mutation.isPending} fullWidth>
+              {translation.cancel}
+            </Button>
+            <Button color="teal" radius="md" loading={mutation.isPending} onClick={() => mutation.mutate()} fullWidth>
+              {translate("Confirm & Create", "تأكيد وإنشاء")}
+            </Button>
+          </div>
         </div>
       </Modal>
     </LayoutBox>
