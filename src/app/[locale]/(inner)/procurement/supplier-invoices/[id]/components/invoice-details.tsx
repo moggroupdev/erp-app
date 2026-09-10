@@ -17,6 +17,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type SupplierInvoiceDetailed } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
+import DeleteModal from "@/components/ui/delete-modal";
 import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
 
@@ -146,6 +147,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
   const canUpdate = useHasPermission(PERMISSIONS.UPDATE_SUPPLIER_INVOICE);
   const resetFileRef = useRef<() => void>(null);
   const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
+  const [pendingReplaceFile, setPendingReplaceFile] = useState<File | null>(null);
 
   const hasPdf = !!invoice.pdfFilename;
 
@@ -174,6 +176,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
     mutationFn: (file: File) => supplierInvoicesApi.uploadPdf({ privateRequest, id: invoice.id, file }),
     onSuccess: () => {
       resetFileRef.current?.();
+      setPendingReplaceFile(null);
       queryClient.invalidateQueries({ queryKey: queryKeys.supplierInvoices.all });
     },
   });
@@ -196,7 +199,25 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
     if (!file) return;
     uploadMutation.reset();
     downloadMutation.reset();
+
+    if (hasPdf) {
+      setPendingReplaceFile(file);
+      return;
+    }
+
     uploadMutation.mutate(file);
+  }
+
+  function handleCancelReplace() {
+    if (uploadMutation.isPending) return;
+    setPendingReplaceFile(null);
+    resetFileRef.current?.();
+    uploadMutation.reset();
+  }
+
+  function handleConfirmReplace() {
+    if (!pendingReplaceFile) return;
+    uploadMutation.mutate(pendingReplaceFile);
   }
 
   return (
@@ -243,7 +264,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
                   size="sm"
                   radius="md"
                   leftSection={<Upload size={15} />}
-                  loading={uploadMutation.isPending}
+                  loading={uploadMutation.isPending && !pendingReplaceFile}
                 >
                   {hasPdf
                     ? translate("Replace PDF", "استبدال PDF")
@@ -255,7 +276,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
         </div>
       </div>
 
-      {(uploadError || downloadError || previewError) && (
+      {(uploadError || downloadError || previewError) && !pendingReplaceFile && (
         <div className="mt-3">
           <ErrorAlert error={uploadError || downloadError || previewError} fade />
         </div>
@@ -279,6 +300,23 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
           )}
         </div>
       )}
+
+      <DeleteModal
+        opened={!!pendingReplaceFile}
+        onClose={handleCancelReplace}
+        title={translate("Replace invoice PDF?", "استبدال ملف PDF للفاتورة؟")}
+        subTitle={translate(
+          "The selected file will replace the PDF currently attached to this invoice.",
+          "سيحل الملف المحدد محل ملف PDF المرفق حالياً بهذه الفاتورة.",
+        )}
+        warning={translate(
+          "The existing PDF will be permanently replaced and cannot be recovered.",
+          "سيتم استبدال ملف PDF الحالي بشكل دائم ولا يمكن استرجاعه.",
+        )}
+        action={handleConfirmReplace}
+        loading={uploadMutation.isPending}
+        error={uploadError}
+      />
     </section>
   );
 }
