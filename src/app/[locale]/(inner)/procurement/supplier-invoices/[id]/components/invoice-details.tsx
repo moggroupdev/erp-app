@@ -1,20 +1,30 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useRef } from "react";
 import Link from "next/link";
-import { Building2, CalendarDays, Link2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button, FileButton } from "@mantine/core";
+import { Building2, CalendarDays, Download, FileText, Link2, Upload } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import useHasPermission from "@/hooks/use-has-permission";
+import usePrivateRequest from "@/hooks/use-private-request";
+import supplierInvoicesApi from "@/lib/api/supplier-invoices";
+import { queryKeys } from "@/lib/api/query-keys";
+import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type SupplierInvoiceDetailed } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
+import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
 
 type LedgerTone = "base" | "deduction" | "tax" | "total";
 
 function MoneyCell({ value, signed = false, tone = "base" }: { value: number | null; signed?: boolean; tone?: LedgerTone }) {
   if (value == null) {
-    return <span className="font-mono text-gray-300">—</span>;
+    return <span className="font-mono text-gray-300">-</span>;
   }
 
   const amount = formatMoney(value);
@@ -126,7 +136,107 @@ function LinkedOrder({ invoice }: { invoice: SupplierInvoiceDetailed }) {
     return <span className="font-mono">{invoice.outsourcingOrder.code}</span>;
   }
 
-  return <span className="font-normal text-gray-400">—</span>;
+  return <span className="font-normal text-gray-400">-</span>;
+}
+
+function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
+  const { locale, translate } = useI18n();
+  const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
+  const canUpdate = useHasPermission(PERMISSIONS.UPDATE_SUPPLIER_INVOICE);
+  const resetFileRef = useRef<() => void>(null);
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => supplierInvoicesApi.uploadPdf({ privateRequest, id: invoice.id, file }),
+    onSuccess: () => {
+      resetFileRef.current?.();
+      queryClient.invalidateQueries({ queryKey: queryKeys.supplierInvoices.all });
+    },
+  });
+
+  const downloadMutation = useMutation({
+    mutationFn: () =>
+      supplierInvoicesApi.downloadPdf({
+        privateRequest,
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+      }),
+  });
+
+  const uploadError = uploadMutation.error ? getErrorMessage(locale, uploadMutation.error) : "";
+  const downloadError = downloadMutation.error ? getErrorMessage(locale, downloadMutation.error) : "";
+  const hasPdf = !!invoice.pdfFilename;
+
+  function handleFileSelect(file: File | null) {
+    if (!file) return;
+    uploadMutation.reset();
+    downloadMutation.reset();
+    uploadMutation.mutate(file);
+  }
+
+  return (
+    <section className="border-t border-gray-200 px-5 py-5 sm:px-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex gap-3">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-800">
+            <FileText size={15} strokeWidth={1.75} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-gray-500 uppercase">
+              {translate("Invoice PDF", "ملف PDF للفاتورة")}
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-gray-900">
+              {hasPdf
+                ? translate("A PDF file is attached to this invoice.", "يوجد ملف PDF مرفق بهذه الفاتورة.")
+                : translate("No PDF attached yet.", "لا يوجد ملف PDF مرفق بعد.")}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {hasPdf && (
+            <Button
+              variant="light"
+              color="teal"
+              size="sm"
+              radius="md"
+              leftSection={<Download size={15} />}
+              loading={downloadMutation.isPending}
+              onClick={() => downloadMutation.mutate()}
+            >
+              {translate("Download PDF", "تنزيل PDF")}
+            </Button>
+          )}
+
+          {canUpdate && (
+            <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+              {(props) => (
+                <Button
+                  {...props}
+                  variant={hasPdf ? "default" : "filled"}
+                  color="teal"
+                  size="sm"
+                  radius="md"
+                  leftSection={<Upload size={15} />}
+                  loading={uploadMutation.isPending}
+                >
+                  {hasPdf
+                    ? translate("Replace PDF", "استبدال PDF")
+                    : translate("Upload PDF", "رفع PDF")}
+                </Button>
+              )}
+            </FileButton>
+          )}
+        </div>
+      </div>
+
+      {(uploadError || downloadError) && (
+        <div className="mt-3">
+          <ErrorAlert error={uploadError || downloadError} fade />
+        </div>
+      )}
+    </section>
+  );
 }
 
 export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDetailed }) {
@@ -166,7 +276,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
               <CalendarDays size={14} className="text-teal-800/70" strokeWidth={1.75} />
               <span className="text-gray-500">{translate("Issued On", "صدرت في")}</span>
               <span className="font-semibold text-gray-900">
-                {invoice.issuedAt ? formatDate(invoice.issuedAt, locale) : "—"}
+                {invoice.issuedAt ? formatDate(invoice.issuedAt, locale) : "-"}
               </span>
             </span>
           </div>
@@ -177,7 +287,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
               {translate("Amount Due", "المبلغ المستحق")}
             </p>
             <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-white tabular-nums">
-              {invoice.totalAmount != null ? formatMoney(invoice.totalAmount) : "—"}
+              {invoice.totalAmount != null ? formatMoney(invoice.totalAmount) : "-"}
             </p>
             <p className="mt-1 text-xs font-medium text-teal-100/80">{currency}</p>
           </div>
@@ -270,6 +380,8 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
           </div>
         </section>
       </div>
+
+      <InvoicePdfSection invoice={invoice} />
     </article>
   );
 }

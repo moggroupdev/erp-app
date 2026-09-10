@@ -29,6 +29,7 @@ export type SupplierInvoice = {
   productPurchaseOrderId: string | null;
   outsourcingOrderId: string | null;
   supplierId: string;
+  pdfFilename: string | null;
   createdAt: Date;
   createdBy: string;
 };

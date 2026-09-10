@@ -25,6 +25,42 @@ const supplierInvoicesApi = {
       signal,
     });
   },
+
+  async uploadPdf({
+    privateRequest,
+    id,
+    file,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    file: File;
+  }) {
+    const data = new FormData();
+    data.append("pdf", file);
+
+    return await privateRequest<SupplierInvoiceDetailed>({
+      url: `supplier-invoices/${id}/pdf`,
+      method: "PATCH",
+      data,
+    });
+  },
+
+  async downloadPdf({
+    privateRequest,
+    id,
+    invoiceNumber,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    invoiceNumber: string;
+  }) {
+    return await privateRequest<null>({
+      url: `supplier-invoices/${id}/pdf`,
+      params: { _t: Date.now() },
+      download: true,
+      filename: `${invoiceNumber}.pdf`,
+    });
+  },
 };
 
 export default supplierInvoicesApi;

@@ -1,5 +1,6 @@
 import { Table } from "@mantine/core";
 import Link from "next/link";
+import { FileText } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -129,6 +130,11 @@ export default function OrderInvoicesSection({
                         {invoice.invoiceNumber}
                       </Link>
                       <CopyButton text={invoice.invoiceNumber} />
+                      {invoice.pdfFilename && (
+                        <span title={translate("PDF attached", "ملف PDF مرفق")} className="text-teal-700">
+                          <FileText size={14} strokeWidth={1.75} />
+                        </span>
+                      )}
                     </div>
                   </Table.Td>
                   <Table.Td>
