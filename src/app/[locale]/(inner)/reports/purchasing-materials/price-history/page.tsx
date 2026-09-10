@@ -128,9 +128,18 @@ export default function Page() {
         ) : (
           data && (
             <div className="flex flex-col gap-6">
-              <PriceSummary summary={data.summary} />
-              <PriceChart data={data.entries} />
-              <PriceEntriesTable data={data.entries} />
+              <PriceSummary
+                summary={data.summary}
+                unitOfMeasurement={data.material.unitOfMeasurement}
+                purchaseCount={data.entries.length}
+              />
+              <PriceChart
+                data={data.entries}
+                unitOfMeasurement={data.material.unitOfMeasurement}
+                materialTitle={data.material.title}
+                materialCode={data.material.code}
+              />
+              <PriceEntriesTable data={data.entries} unitOfMeasurement={data.material.unitOfMeasurement} />
             </div>
           )
         )}
