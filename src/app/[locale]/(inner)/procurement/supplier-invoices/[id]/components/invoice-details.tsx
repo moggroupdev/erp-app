@@ -202,9 +202,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
       const result = await parseSupplierInvoicePdf(file);
       setParsed(result);
     } catch (err) {
-      setParseError(
-        getErrorMessage(locale, err) || translate("Failed to read the PDF file.", "فشل قراءة ملف PDF."),
-      );
+      setParseError(getErrorMessage(locale, err) || translate("Failed to read the PDF file.", "فشل قراءة ملف PDF."));
       setConfirmOpened(false);
       setPendingFile(null);
       resetFileRef.current?.();
@@ -267,9 +265,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
                   leftSection={<Upload size={15} />}
                   loading={isParsing}
                 >
-                  {hasPdf
-                    ? translate("Replace PDF", "استبدال PDF")
-                    : translate("Upload PDF", "رفع PDF")}
+                  {hasPdf ? translate("Replace PDF", "استبدال PDF") : translate("Upload PDF", "رفع PDF")}
                 </Button>
               )}
             </FileButton>
@@ -395,15 +391,15 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
             </InfoRow>
           </div>
 
-          <div className="mt-auto rounded-lg bg-slate-50/80 px-4 py-3 text-gray-500">
+          <div className="mt-auto rounded-lg bg-slate-50/80 p-4 text-gray-500">
             <p className="text-xs">
               {translate("Entered by", "أدخل بواسطة")}{" "}
               <span className="font-medium text-gray-700">
                 <CreatorLink creator={invoice.createdBy} />
               </span>
             </p>
-            <p className="mt-2 text-xs">
-              {translate("Recorded at", "تاريخ التسجيل")}{" "}
+            <p className="mt-3 text-xs">
+              {translate("Entered at", "تاريخ الإدخال")}{" "}
               <span className="font-medium text-gray-700">{formatDateAndTime(invoice.createdAt, locale)}</span>
             </p>
           </div>
