@@ -32,10 +32,10 @@ export default function PriceChart({
   const materialIdentity =
     materialTitle && materialCode
       ? translate(
-          `${materialTitle} (${materialCode}) · base unit: ${unitLabel}`,
-          `${materialTitle} (${materialCode}) · الوحدة الأساسية: ${unitLabel}`,
+          `${materialTitle} (${materialCode}) · unit: ${unitLabel}`,
+          `${materialTitle} (${materialCode}) · الوحدة: ${unitLabel}`,
         )
-      : translate(`Unit price per base unit (${unitLabel}).`, `سعر الوحدة حسب الوحدة الأساسية (${unitLabel}).`);
+      : translate(`Unit price per ${unitLabel}.`, `سعر الوحدة حسب ${unitLabel}.`);
 
   if (data.length === 0) {
     return (

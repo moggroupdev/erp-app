@@ -106,6 +106,7 @@ export type PurchasingMaterialsPriceHistory = {
     code: string;
     title: string;
     unitOfMeasurement: MaterialUnit;
+    unitConversions: MaterialUnitConversionSummary[];
   };
   entries: PurchasingMaterialsPriceHistoryEntry[];
   summary: PurchasingMaterialsPriceHistorySummary;

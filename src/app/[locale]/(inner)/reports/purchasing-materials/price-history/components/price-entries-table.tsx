@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Table } from "@mantine/core";
 import { Table2 } from "lucide-react";
@@ -22,17 +23,22 @@ export default function PriceEntriesTable({
   const getLocalizedHref = useLocaleHref();
   const unitLabel = getMaterialUnitLabel(unitOfMeasurement, locale);
 
+  const rows = useMemo(
+    () => [...data].sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()),
+    [data],
+  );
+
   return (
     <ReportCard
       title={translate("Purchase History", "سجل المشتريات")}
       description={translate(
-        "Individual purchase order lines for this material (quantities and prices in base unit).",
-        "بنود أوامر التوريد الفردية لهذه المادة (الكميات والأسعار بالوحدة الأساسية).",
+        "Individual purchase order lines for this material (newest first).",
+        "بنود أوامر التوريد الفردية لهذه المادة (الأحدث أولاً).",
       )}
       icon={Table2}
       accent="slate"
     >
-      {data.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl">
@@ -42,19 +48,15 @@ export default function PriceEntriesTable({
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Date", "التاريخ")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Qty", "الكمية")}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Qty (${unitLabel})`, `الكمية (${unitLabel})`)}
-                </Table.Th>
-                <Table.Th className="text-gray-600">
-                  {translate(
-                    `Unit Price (${translation.currency} / ${unitLabel})`,
-                    `سعر الوحدة (${translation.currency} / ${unitLabel})`,
-                  )}
+                  {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {data.map((row) => (
+              {rows.map((row) => (
                 <Table.Tr key={`${row.orderId}-${row.orderDate}`} className="text-gray-600">
                   <Table.Td>
                     <div className="flex items-center gap-1.5">
@@ -82,9 +84,8 @@ export default function PriceEntriesTable({
                       {row.supplierName}
                     </Link>
                   </Table.Td>
-                  <Table.Td>
-                    {formatQuantity(row.quantityOrdered)} {unitLabel}
-                  </Table.Td>
+                  <Table.Td>{unitLabel}</Table.Td>
+                  <Table.Td>{formatQuantity(row.quantityOrdered)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.unitPrice)}</Table.Td>
                 </Table.Tr>
               ))}
