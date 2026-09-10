@@ -163,7 +163,8 @@ function extractInvoiceNoFromLine(line: LineBucket): string {
 }
 
 async function readPdfFromArrayBuffer(data: ArrayBuffer) {
-  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  // Use package main entry — Turbopack cannot resolve deep paths like legacy/build/pdf.mjs
+  const pdfjs = await import("pdfjs-dist");
 
   // Browser builds require an explicit worker URL (disableWorker is ignored in pdfjs-dist v4+)
   if (!pdfjs.GlobalWorkerOptions.workerSrc) {
