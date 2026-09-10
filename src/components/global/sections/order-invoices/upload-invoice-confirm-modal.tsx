@@ -16,19 +16,32 @@ import type { ParsedSupplierInvoice } from "@/lib/helpers/parse-supplier-invoice
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
 
-type UploadInvoiceConfirmModalProps = {
+type UploadInvoiceConfirmModalBaseProps = {
   opened: boolean;
   onClose: () => void;
-  materialPurchaseOrderId: string;
   file: File | null;
   parsed: ParsedSupplierInvoice | null;
 };
+
+type CreateModeProps = UploadInvoiceConfirmModalBaseProps & {
+  mode: "create";
+  materialPurchaseOrderId: string;
+};
+
+type UpdateModeProps = UploadInvoiceConfirmModalBaseProps & {
+  mode: "update";
+  supplierInvoiceId: string;
+  existingInvoiceNumber?: string;
+  hasExistingPdf?: boolean;
+};
+
+type UploadInvoiceConfirmModalProps = CreateModeProps | UpdateModeProps;
 
 function FieldRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-gray-100 py-2 text-sm last:border-b-0">
       <span className="text-gray-500">{label}</span>
-      <span className="font-medium text-gray-900 text-end">{value}</span>
+      <span className="text-end font-medium text-gray-900">{value}</span>
     </div>
   );
 }
@@ -37,17 +50,18 @@ function EmptyValue() {
   return <span className="text-gray-400">-</span>;
 }
 
-export default function UploadInvoiceConfirmModal({
-  opened,
-  onClose,
-  materialPurchaseOrderId,
-  file,
-  parsed,
-}: UploadInvoiceConfirmModalProps) {
+export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmModalProps) {
+  const { opened, onClose, file, parsed, mode } = props;
   const { locale, translate, translation } = useI18n();
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
   const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
+
+  const isUpdate = mode === "update";
+  const hasExistingPdf = isUpdate && !!props.hasExistingPdf;
+  const existingInvoiceNumber = isUpdate ? props.existingInvoiceNumber : undefined;
+  const invoiceNumberChanged =
+    !!parsed?.invoiceNumber && !!existingInvoiceNumber && parsed.invoiceNumber !== existingInvoiceNumber;
 
   useEffect(() => {
     if (!file) {
@@ -62,24 +76,39 @@ export default function UploadInvoiceConfirmModal({
   const mutation = useMutation({
     mutationFn: async () => {
       if (!file || !parsed) throw new Error("Missing file or parsed data");
-      return await supplierInvoicesApi.createFromPdf({
+      const fields = {
+        invoiceNumber: parsed.invoiceNumber,
+        issuedAt: parsed.issuedAt,
+        totalPurchases: parsed.totalPurchases,
+        totalDiscount: parsed.totalDiscount,
+        vatAmount: parsed.vatAmount,
+        withholdingTaxAmount: parsed.withholdingTaxAmount,
+        totalAmount: parsed.totalAmount,
+      };
+
+      if (mode === "create") {
+        return await supplierInvoicesApi.createFromPdf({
+          privateRequest,
+          materialPurchaseOrderId: props.materialPurchaseOrderId,
+          file,
+          fields,
+        });
+      }
+
+      return await supplierInvoicesApi.uploadPdf({
         privateRequest,
-        materialPurchaseOrderId,
+        id: props.supplierInvoiceId,
         file,
-        fields: {
-          invoiceNumber: parsed.invoiceNumber,
-          issuedAt: parsed.issuedAt,
-          totalPurchases: parsed.totalPurchases,
-          totalDiscount: parsed.totalDiscount,
-          vatAmount: parsed.vatAmount,
-          withholdingTaxAmount: parsed.withholdingTaxAmount,
-          totalAmount: parsed.totalAmount,
-        },
+        fields,
       });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.supplierInvoices.all });
-      toast.success(translate("Invoice uploaded successfully.", "تم رفع الفاتورة بنجاح."));
+      toast.success(
+        isUpdate
+          ? translate("Invoice PDF saved successfully.", "تم حفظ ملف PDF للفاتورة بنجاح.")
+          : translate("Invoice uploaded successfully.", "تم رفع الفاتورة بنجاح."),
+      );
       handleClose();
     },
   });
@@ -109,20 +138,33 @@ export default function UploadInvoiceConfirmModal({
     totalAmount: translate("Total Amount", "الإجمالي"),
   };
 
+  const title = isUpdate
+    ? hasExistingPdf
+      ? translate("Confirm PDF replacement", "تأكيد استبدال ملف PDF")
+      : translate("Confirm PDF upload", "تأكيد رفع ملف PDF")
+    : translate("Confirm invoice upload", "تأكيد رفع الفاتورة");
+
+  const description = isUpdate
+    ? hasExistingPdf
+      ? translate(
+          "Review the extracted invoice data before saving. The selected file will replace the current PDF and update this invoice.",
+          "راجع بيانات الفاتورة المستخرجة قبل الحفظ. سيحل الملف المحدد محل ملف PDF الحالي ويحدّث هذه الفاتورة.",
+        )
+      : translate(
+          "Review the extracted invoice data before saving. The PDF will be attached and this invoice will be updated.",
+          "راجع بيانات الفاتورة المستخرجة قبل الحفظ. سيتم إرفاق ملف PDF وتحديث هذه الفاتورة.",
+        )
+    : translate(
+        "Review the extracted invoice data before saving. The PDF will be attached to this purchase order.",
+        "راجع بيانات الفاتورة المستخرجة قبل الحفظ. سيتم إرفاق ملف PDF بأمر التوريد هذا.",
+      );
+
+  const submitLabel = isUpdate ? translate("Save PDF", "حفظ PDF") : translate("Save invoice", "حفظ الفاتورة");
+
   return (
-    <Modal
-      opened={opened}
-      onClose={handleClose}
-      title={translate("Confirm invoice upload", "تأكيد رفع الفاتورة")}
-      size="lg"
-    >
+    <Modal opened={opened} onClose={handleClose} title={title} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <p className="text-sm text-gray-600">
-          {translate(
-            "Review the extracted invoice data before saving. The PDF will be attached to this purchase order.",
-            "راجع بيانات الفاتورة المستخرجة قبل الحفظ. سيتم إرفاق ملف PDF بأمر التوريد هذا.",
-          )}
-        </p>
+        <p className="text-sm leading-relaxed text-gray-600">{description}</p>
 
         {!parsed ? (
           <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
@@ -138,11 +180,17 @@ export default function UploadInvoiceConfirmModal({
               </Alert>
             )}
 
+            {invoiceNumberChanged && (
+              <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
+                {translate(
+                  `The invoice number in the PDF (${parsed.invoiceNumber}) differs from the current number (${existingInvoiceNumber}). Saving will update the invoice number.`,
+                  `رقم الفاتورة في الملف (${parsed.invoiceNumber}) يختلف عن الرقم الحالي (${existingInvoiceNumber}). سيؤدي الحفظ إلى تحديث رقم الفاتورة.`,
+                )}
+              </Alert>
+            )}
+
             <div className="rounded-xl border border-gray-200 px-4 py-1">
-              <FieldRow
-                label={translate("Invoice Number", "رقم الفاتورة")}
-                value={parsed.invoiceNumber || <EmptyValue />}
-              />
+              <FieldRow label={translate("Invoice Number", "رقم الفاتورة")} value={parsed.invoiceNumber || <EmptyValue />} />
               <FieldRow
                 label={translate("Issue Date", "تاريخ الإصدار")}
                 value={parsed.issuedAt ? formatDate(parsed.issuedAt, locale) : <EmptyValue />}
@@ -161,9 +209,7 @@ export default function UploadInvoiceConfirmModal({
               />
               <FieldRow
                 label={translate(`Withholding Tax (${translation.currency})`, `ضريبة الخصم (${translation.currency})`)}
-                value={
-                  parsed.withholdingTaxAmount != null ? formatMoney(parsed.withholdingTaxAmount) : <EmptyValue />
-                }
+                value={parsed.withholdingTaxAmount != null ? formatMoney(parsed.withholdingTaxAmount) : <EmptyValue />}
               />
               <FieldRow
                 label={translate(`Total Amount (${translation.currency})`, `الإجمالي (${translation.currency})`)}
@@ -188,7 +234,7 @@ export default function UploadInvoiceConfirmModal({
             {translation.cancel}
           </Button>
           <Button type="submit" color="teal" loading={mutation.isPending} disabled={!canConfirm} radius="md" fullWidth>
-            {translate("Save invoice", "حفظ الفاتورة")}
+            {submitLabel}
           </Button>
         </div>
 
