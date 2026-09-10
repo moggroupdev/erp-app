@@ -79,6 +79,8 @@ export type MaterialPurchaseOrderItem = {
   unitPrice: number;
   notes: string | null;
   material: PurchaseMaterialWithUnitConversion;
+  /** Accepted qty across receipts, in the order line's selected unit. */
+  quantityReceived?: number;
   /** Remaining qty in the order line's selected unit (ordered − received − rejected across receipts). */
   quantityRemaining?: number;
 };

@@ -142,6 +142,7 @@ export default function Page() {
                         <Table.Th>{translate("Category", "الفئة")}</Table.Th>
                         <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
                         <Table.Th>{translate("Quantity Ordered", "الكمية المطلوبة")}</Table.Th>
+                        <Table.Th>{translate("Quantity Received", "الكمية المستلمة")}</Table.Th>
                         <Table.Th>
                           {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                         </Table.Th>
@@ -160,6 +161,7 @@ export default function Page() {
                         ).factor;
                         const baseUnitPrice =
                           selectedFactor === 0 ? Number(item.unitPrice) : Number(item.unitPrice) / selectedFactor;
+                        const quantityReceived = Number(item.quantityReceived ?? 0);
 
                         return (
                           <UnitToggle
@@ -199,6 +201,14 @@ export default function Page() {
                                     item.material,
                                   )}
                                 </Table.Td>
+                                <Table.Td>
+                                  {formatEnteredQuantityForDisplay(
+                                    quantityReceived,
+                                    item.unitOfMeasurementSelected,
+                                    unit,
+                                    item.material,
+                                  )}
+                                </Table.Td>
                                 <Table.Td>{formatMoney(toDisplayUnitPrice(baseUnitPrice, factor))}</Table.Td>
                                 <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
                               </Table.Tr>
@@ -209,7 +219,7 @@ export default function Page() {
                     </Table.Tbody>
                     <Table.Tfoot className="bg-gray-50">
                       <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
-                        <Table.Th colSpan={6}>{translate("Total", "الإجمالي")}</Table.Th>
+                        <Table.Th colSpan={7}>{translate("Total", "الإجمالي")}</Table.Th>
                         <Table.Th>{formatMoney(order.totalAmount)}</Table.Th>
                       </Table.Tr>
                     </Table.Tfoot>
