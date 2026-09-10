@@ -13,9 +13,12 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { resolveDisplayUnit, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
-import { History, RefreshCw } from "lucide-react";
+import { formatDate } from "@/lib/helpers/date-formaters";
+import { History, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
+import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
+import PurchasingMaterialsPriceHistoryPrintDocument from "@/components/documents/purchasing-materials-price-history-print-document";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
 import MaterialPicker from "./components/material-picker";
@@ -116,6 +119,19 @@ export default function Page() {
     ? getMaterialUnitSelectOptions(data.material.unitOfMeasurement, data.material.unitConversions, locale)
     : [];
 
+  const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
+  const printDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
+  const printDateSuffix =
+    from && to
+      ? translate(
+          `from ${formatDate(from, locale)} to ${formatDate(to, locale)}`,
+          `من ${formatDate(from, locale)} إلى ${formatDate(to, locale)}`,
+        )
+      : printDate;
+  const printTitle = displayData
+    ? `${translate("Report", "تقرير")} - ${reportTitle} - ${displayData.material.title} - ${printDateSuffix}`
+    : `${translate("Report", "تقرير")} - ${reportTitle} - ${printDateSuffix}`;
+
   return (
     <div className="space-y-6">
       <ReportPageHeader
@@ -126,17 +142,39 @@ export default function Page() {
           { label: PAGE_TITLE },
         ]}
         icon={History}
-        title={translate(PAGE_TITLE.en, PAGE_TITLE.ar)}
+        title={reportTitle}
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
           materialCode ? (
-            <button
-              disabled={isFetching}
-              onClick={() => refetch()}
-              className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
-            >
-              <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
-            </button>
+            <div className="flex items-center gap-4">
+              {displayData && !isFetching && !errorMessage && (
+                <PrintDocument
+                  title={printTitle}
+                  buttonType="icon"
+                  paperWidth={210}
+                  paperHeight={297}
+                  icon={<Printer size={14} />}
+                >
+                  <PurchasingMaterialsPriceHistoryPrintDocument
+                    title={reportTitle}
+                    startDate={from}
+                    endDate={to}
+                    materialTitle={displayData.material.title}
+                    materialCode={displayData.material.code}
+                    displayUnit={displayData.unit}
+                    summary={displayData.summary}
+                    entries={displayData.entries}
+                  />
+                </PrintDocument>
+              )}
+              <button
+                disabled={isFetching}
+                onClick={() => refetch()}
+                className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
+              >
+                <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
+              </button>
+            </div>
           ) : undefined
         }
       />

@@ -45,7 +45,7 @@ export default function PriceEntriesTable({
           <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
             <Table.Thead className="bg-gray-50">
               <Table.Tr>
-                <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("MPO Number", "رقم أمر التوريد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Date", "التاريخ")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
