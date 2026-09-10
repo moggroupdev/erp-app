@@ -49,16 +49,18 @@ const supplierInvoicesApi = {
     privateRequest,
     id,
     invoiceNumber,
+    supplierName,
   }: {
     privateRequest: PrivateRequest;
     id: string;
     invoiceNumber: string;
+    supplierName: string;
   }) {
     return await privateRequest<null>({
       url: `supplier-invoices/${id}/pdf`,
       params: { _t: Date.now() },
       download: true,
-      filename: `${invoiceNumber}.pdf`,
+      filename: buildDownloadFilename(invoiceNumber, supplierName),
     });
   },
 
@@ -79,5 +81,21 @@ const supplierInvoicesApi = {
     });
   },
 };
+
+function buildDownloadFilename(invoiceNumber: string, supplierName: string): string {
+  const numberPart = sanitizeDownloadPart(invoiceNumber) || "invoice";
+  const supplierPart = sanitizeDownloadPart(supplierName) || "supplier";
+  return `فاتورة - ${numberPart} - ${supplierPart}.pdf`;
+}
+
+function sanitizeDownloadPart(value: string): string {
+  return value
+    .trim()
+    .replace(/[<>:"/\\|?*\u0000-\u001f]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/\s+/g, " ")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
 
 export default supplierInvoicesApi;

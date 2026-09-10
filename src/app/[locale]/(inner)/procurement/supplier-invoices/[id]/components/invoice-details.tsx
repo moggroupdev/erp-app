@@ -184,6 +184,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
         privateRequest,
         id: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
+        supplierName: invoice.supplier.name,
       }),
   });
 
