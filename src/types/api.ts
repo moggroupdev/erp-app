@@ -14,6 +14,7 @@ export type ApiRequestOptions = {
   cache?: RequestCache;
   signal?: AbortSignal;
   download?: boolean;
+  blob?: boolean;
   filename?: string;
 };
 

@@ -120,6 +120,7 @@ export const queryKeys = {
     list: (filters: ListFilters) => [...queryKeys.supplierInvoices.lists(), filters] as const,
     details: () => [...queryKeys.supplierInvoices.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.supplierInvoices.details(), id] as const,
+    pdf: (id: string, filename: string | null) => [...queryKeys.supplierInvoices.detail(id), "pdf", filename] as const,
   },
   materialPurchaseRequisitions: {
     all: ["material-purchase-requisitions"] as const,

@@ -1,20 +1,31 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Building2, CalendarDays, Link2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, FileButton, Loader } from "@mantine/core";
+import { Building2, CalendarDays, Download, FileText, Link2, Upload } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import useHasPermission from "@/hooks/use-has-permission";
+import usePrivateRequest from "@/hooks/use-private-request";
+import supplierInvoicesApi from "@/lib/api/supplier-invoices";
+import { queryKeys } from "@/lib/api/query-keys";
+import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type SupplierInvoiceDetailed } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
+import DeleteModal from "@/components/ui/delete-modal";
+import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
 
 type LedgerTone = "base" | "deduction" | "tax" | "total";
 
 function MoneyCell({ value, signed = false, tone = "base" }: { value: number | null; signed?: boolean; tone?: LedgerTone }) {
   if (value == null) {
-    return <span className="font-mono text-gray-300">—</span>;
+    return <span className="font-mono text-gray-300">-</span>;
   }
 
   const amount = formatMoney(value);
@@ -126,7 +137,188 @@ function LinkedOrder({ invoice }: { invoice: SupplierInvoiceDetailed }) {
     return <span className="font-mono">{invoice.outsourcingOrder.code}</span>;
   }
 
-  return <span className="font-normal text-gray-400">—</span>;
+  return <span className="font-normal text-gray-400">-</span>;
+}
+
+function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
+  const { locale, translate } = useI18n();
+  const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
+  const canUpdate = useHasPermission(PERMISSIONS.UPDATE_SUPPLIER_INVOICE);
+  const resetFileRef = useRef<() => void>(null);
+  const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
+  const [pendingReplaceFile, setPendingReplaceFile] = useState<File | null>(null);
+
+  const hasPdf = !!invoice.pdfFilename;
+
+  const {
+    data: pdfBlob,
+    isPending: isPdfLoading,
+    error: pdfQueryError,
+  } = useQuery({
+    queryKey: queryKeys.supplierInvoices.pdf(invoice.id, invoice.pdfFilename),
+    queryFn: ({ signal }) => supplierInvoicesApi.getPdfBlob({ privateRequest, id: invoice.id, signal }),
+    enabled: hasPdf,
+  });
+
+  useEffect(() => {
+    if (!pdfBlob) {
+      setPdfObjectUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(pdfBlob);
+    setPdfObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pdfBlob]);
+
+  const uploadMutation = useMutation({
+    mutationFn: (file: File) => supplierInvoicesApi.uploadPdf({ privateRequest, id: invoice.id, file }),
+    onSuccess: () => {
+      resetFileRef.current?.();
+      setPendingReplaceFile(null);
+      queryClient.invalidateQueries({ queryKey: queryKeys.supplierInvoices.all });
+    },
+  });
+
+  const downloadMutation = useMutation({
+    mutationFn: () =>
+      supplierInvoicesApi.downloadPdf({
+        privateRequest,
+        id: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        supplierName: invoice.supplier.name,
+      }),
+  });
+
+  const uploadError = uploadMutation.error ? getErrorMessage(locale, uploadMutation.error) : "";
+  const downloadError = downloadMutation.error ? getErrorMessage(locale, downloadMutation.error) : "";
+  const previewError = pdfQueryError ? getErrorMessage(locale, pdfQueryError) : "";
+
+  function handleFileSelect(file: File | null) {
+    if (!file) return;
+    uploadMutation.reset();
+    downloadMutation.reset();
+
+    if (hasPdf) {
+      setPendingReplaceFile(file);
+      return;
+    }
+
+    uploadMutation.mutate(file);
+  }
+
+  function handleCancelReplace() {
+    if (uploadMutation.isPending) return;
+    setPendingReplaceFile(null);
+    resetFileRef.current?.();
+    uploadMutation.reset();
+  }
+
+  function handleConfirmReplace() {
+    if (!pendingReplaceFile) return;
+    uploadMutation.mutate(pendingReplaceFile);
+  }
+
+  return (
+    <section className="border-t border-gray-200 px-5 py-5 sm:px-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex gap-3">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-800">
+            <FileText size={15} strokeWidth={1.75} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold tracking-[0.12em] text-gray-500 uppercase">
+              {translate("Invoice PDF", "ملف PDF للفاتورة")}
+            </p>
+            <p className="mt-0.5 text-sm font-semibold text-gray-900">
+              {hasPdf
+                ? translate("A PDF file is attached to this invoice.", "يوجد ملف PDF مرفق بهذه الفاتورة.")
+                : translate("No PDF attached yet.", "لا يوجد ملف PDF مرفق بعد.")}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {hasPdf && (
+            <Button
+              variant="light"
+              color="teal"
+              size="sm"
+              radius="md"
+              leftSection={<Download size={15} />}
+              loading={downloadMutation.isPending}
+              onClick={() => downloadMutation.mutate()}
+            >
+              {translate("Download PDF", "تنزيل PDF")}
+            </Button>
+          )}
+
+          {canUpdate && (
+            <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+              {(props) => (
+                <Button
+                  {...props}
+                  variant={hasPdf ? "default" : "filled"}
+                  color="teal"
+                  size="sm"
+                  radius="md"
+                  leftSection={<Upload size={15} />}
+                  loading={uploadMutation.isPending && !pendingReplaceFile}
+                >
+                  {hasPdf
+                    ? translate("Replace PDF", "استبدال PDF")
+                    : translate("Upload PDF", "رفع PDF")}
+                </Button>
+              )}
+            </FileButton>
+          )}
+        </div>
+      </div>
+
+      {(uploadError || downloadError || previewError) && !pendingReplaceFile && (
+        <div className="mt-3">
+          <ErrorAlert error={uploadError || downloadError || previewError} fade />
+        </div>
+      )}
+
+      {hasPdf && (
+        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+          {isPdfLoading && (
+            <div className="flex h-[min(70vh,720px)] items-center justify-center gap-2 text-sm text-gray-500">
+              <Loader size="sm" color="teal" />
+              {translate("Loading PDF…", "جاري تحميل PDF…")}
+            </div>
+          )}
+
+          {!isPdfLoading && pdfObjectUrl && (
+            <iframe
+              title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
+              src={pdfObjectUrl}
+              className="h-[min(70vh,720px)] w-full bg-white"
+            />
+          )}
+        </div>
+      )}
+
+      <DeleteModal
+        opened={!!pendingReplaceFile}
+        onClose={handleCancelReplace}
+        title={translate("Replace invoice PDF?", "استبدال ملف PDF للفاتورة؟")}
+        subTitle={translate(
+          "The selected file will replace the PDF currently attached to this invoice.",
+          "سيحل الملف المحدد محل ملف PDF المرفق حالياً بهذه الفاتورة.",
+        )}
+        warning={translate(
+          "The existing PDF will be permanently replaced and cannot be recovered.",
+          "سيتم استبدال ملف PDF الحالي بشكل دائم ولا يمكن استرجاعه.",
+        )}
+        action={handleConfirmReplace}
+        loading={uploadMutation.isPending}
+        error={uploadError}
+      />
+    </section>
+  );
 }
 
 export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDetailed }) {
@@ -166,7 +358,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
               <CalendarDays size={14} className="text-teal-800/70" strokeWidth={1.75} />
               <span className="text-gray-500">{translate("Issued On", "صدرت في")}</span>
               <span className="font-semibold text-gray-900">
-                {invoice.issuedAt ? formatDate(invoice.issuedAt, locale) : "—"}
+                {invoice.issuedAt ? formatDate(invoice.issuedAt, locale) : "-"}
               </span>
             </span>
           </div>
@@ -177,7 +369,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
               {translate("Amount Due", "المبلغ المستحق")}
             </p>
             <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-white tabular-nums">
-              {invoice.totalAmount != null ? formatMoney(invoice.totalAmount) : "—"}
+              {invoice.totalAmount != null ? formatMoney(invoice.totalAmount) : "-"}
             </p>
             <p className="mt-1 text-xs font-medium text-teal-100/80">{currency}</p>
           </div>
@@ -270,6 +462,8 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
           </div>
         </section>
       </div>
+
+      <InvoicePdfSection invoice={invoice} />
     </article>
   );
 }

@@ -42,6 +42,7 @@ export default function Page() {
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
   const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
+  const canAddSupplierInvoice = useHasPermission(PERMISSIONS.ADD_SUPPLIER_INVOICE);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -276,6 +277,8 @@ export default function Page() {
                 errorMessage={invoicesError ? getErrorMessage(locale, invoicesError) : null}
                 onRetry={() => refetchInvoices()}
                 orderTotalAmount={order.totalAmount}
+                materialPurchaseOrderId={id}
+                canAdd={canAddSupplierInvoice}
               />
             )}
           </>
