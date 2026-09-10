@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Alert, Button, Loader } from "@mantine/core";
+import { Alert, Button, Loader, TextInput } from "@mantine/core";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -50,12 +50,97 @@ function EmptyValue() {
   return <span className="text-gray-400">-</span>;
 }
 
+function ConfirmInvoiceNumberModal({
+  opened,
+  onClose,
+  newInvoiceNumber,
+  existingInvoiceNumber,
+  onConfirm,
+  loading,
+  error,
+}: {
+  opened: boolean;
+  onClose: () => void;
+  newInvoiceNumber: string;
+  existingInvoiceNumber: string;
+  onConfirm: () => void;
+  loading: boolean;
+  error: string;
+}) {
+  const { translate, translation } = useI18n();
+  const [confirmedInvoiceNumber, setConfirmedInvoiceNumber] = useState("");
+  const matches = confirmedInvoiceNumber.trim() === newInvoiceNumber;
+
+  useEffect(() => {
+    if (!opened) setConfirmedInvoiceNumber("");
+  }, [opened, newInvoiceNumber]);
+
+  function handleClose() {
+    if (loading) return;
+    onClose();
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!matches || loading) return;
+    onConfirm();
+  }
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={handleClose}
+      title={translate("Confirm invoice number change", "تأكيد تغيير رقم الفاتورة")}
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
+          {translate(
+            `The invoice number will change from ${existingInvoiceNumber} to ${newInvoiceNumber}.`,
+            `سيتغير رقم الفاتورة من ${existingInvoiceNumber} إلى ${newInvoiceNumber}.`,
+          )}
+        </Alert>
+
+        <TextInput
+          label={translate("Type the new invoice number to confirm", "اكتب رقم الفاتورة الجديد للتأكيد")}
+          description={translate(
+            `Enter “${newInvoiceNumber}” exactly to allow saving.`,
+            `أدخل «${newInvoiceNumber}» كما هو للسماح بالحفظ.`,
+          )}
+          placeholder={newInvoiceNumber}
+          value={confirmedInvoiceNumber}
+          onChange={(e) => setConfirmedInvoiceNumber(e.currentTarget.value)}
+          radius="md"
+          autoComplete="off"
+          data-autofocus
+          error={
+            confirmedInvoiceNumber.length > 0 && !matches
+              ? translate("Does not match the new invoice number.", "لا يطابق رقم الفاتورة الجديد.")
+              : undefined
+          }
+        />
+
+        <div className="flex gap-2">
+          <Button variant="light" color="dark" radius="md" onClick={handleClose} disabled={loading} fullWidth>
+            {translation.cancel}
+          </Button>
+          <Button type="submit" color="teal" loading={loading} disabled={!matches || loading} radius="md" fullWidth>
+            {translate("Confirm and save", "تأكيد وحفظ")}
+          </Button>
+        </div>
+
+        {error && <ErrorAlert error={error} />}
+      </form>
+    </Modal>
+  );
+}
+
 export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmModalProps) {
   const { opened, onClose, file, parsed, mode } = props;
   const { locale, translate, translation } = useI18n();
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
   const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
+  const [numberConfirmOpened, setNumberConfirmOpened] = useState(false);
 
   const isUpdate = mode === "update";
   const hasExistingPdf = isUpdate && !!props.hasExistingPdf;
@@ -72,6 +157,10 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
     setPdfObjectUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [file]);
+
+  useEffect(() => {
+    if (!opened) setNumberConfirmOpened(false);
+  }, [opened]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -118,13 +207,27 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
 
   function handleClose() {
     if (mutation.isPending) return;
+    setNumberConfirmOpened(false);
     onClose();
     setTimeout(() => mutation.reset(), 250);
+  }
+
+  function handleNumberConfirmClose() {
+    if (mutation.isPending) return;
+    setNumberConfirmOpened(false);
+    mutation.reset();
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canConfirm) return;
+
+    if (invoiceNumberChanged) {
+      mutation.reset();
+      setNumberConfirmOpened(true);
+      return;
+    }
+
     mutation.mutate();
   }
 
@@ -162,84 +265,100 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
   const submitLabel = isUpdate ? translate("Save PDF", "حفظ PDF") : translate("Save invoice", "حفظ الفاتورة");
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={title} size="lg">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <p className="text-sm leading-relaxed text-gray-600">{description}</p>
+    <>
+      <Modal opened={opened && !numberConfirmOpened} onClose={handleClose} title={title} size="lg">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <p className="text-sm leading-relaxed text-gray-600">{description}</p>
 
-        {!parsed ? (
-          <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
-            <Loader size="sm" color="teal" />
-            {translate("Reading PDF…", "جاري قراءة PDF…")}
-          </div>
-        ) : (
-          <>
-            {parsed.missingFields.length > 0 && (
-              <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
-                {translate("Some fields could not be read:", "تعذر قراءة بعض الحقول:")}{" "}
-                {parsed.missingFields.map((key) => missingLabels[key] || key).join(locale === "ar" ? "، " : ", ")}
-              </Alert>
-            )}
-
-            {invoiceNumberChanged && (
-              <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
-                {translate(
-                  `The invoice number in the PDF (${parsed.invoiceNumber}) differs from the current number (${existingInvoiceNumber}). Saving will update the invoice number.`,
-                  `رقم الفاتورة في الملف (${parsed.invoiceNumber}) يختلف عن الرقم الحالي (${existingInvoiceNumber}). سيؤدي الحفظ إلى تحديث رقم الفاتورة.`,
-                )}
-              </Alert>
-            )}
-
-            <div className="rounded-xl border border-gray-200 px-4 py-1">
-              <FieldRow label={translate("Invoice Number", "رقم الفاتورة")} value={parsed.invoiceNumber || <EmptyValue />} />
-              <FieldRow
-                label={translate("Issue Date", "تاريخ الإصدار")}
-                value={parsed.issuedAt ? formatDate(parsed.issuedAt, locale) : <EmptyValue />}
-              />
-              <FieldRow
-                label={translate(`Total Purchases (${translation.currency})`, `إجمالي المشتريات (${translation.currency})`)}
-                value={parsed.totalPurchases != null ? formatMoney(parsed.totalPurchases) : <EmptyValue />}
-              />
-              <FieldRow
-                label={translate(`Discount (${translation.currency})`, `الخصم (${translation.currency})`)}
-                value={parsed.totalDiscount != null ? formatMoney(parsed.totalDiscount) : <EmptyValue />}
-              />
-              <FieldRow
-                label={translate(`VAT (${translation.currency})`, `ضريبة القيمة المضافة (${translation.currency})`)}
-                value={parsed.vatAmount != null ? formatMoney(parsed.vatAmount) : <EmptyValue />}
-              />
-              <FieldRow
-                label={translate(`Withholding Tax (${translation.currency})`, `ضريبة الخصم (${translation.currency})`)}
-                value={parsed.withholdingTaxAmount != null ? formatMoney(parsed.withholdingTaxAmount) : <EmptyValue />}
-              />
-              <FieldRow
-                label={translate(`Total Amount (${translation.currency})`, `الإجمالي (${translation.currency})`)}
-                value={parsed.totalAmount != null ? formatMoney(parsed.totalAmount) : <EmptyValue />}
-              />
+          {!parsed ? (
+            <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
+              <Loader size="sm" color="teal" />
+              {translate("Reading PDF…", "جاري قراءة PDF…")}
             </div>
+          ) : (
+            <>
+              {parsed.missingFields.length > 0 && (
+                <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
+                  {translate("Some fields could not be read:", "تعذر قراءة بعض الحقول:")}{" "}
+                  {parsed.missingFields.map((key) => missingLabels[key] || key).join(locale === "ar" ? "، " : ", ")}
+                </Alert>
+              )}
 
-            {pdfObjectUrl && (
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
-                <iframe
-                  title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
-                  src={pdfObjectUrl}
-                  className="h-[min(40vh,360px)] w-full bg-white"
+              {invoiceNumberChanged && (
+                <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
+                  {translate(
+                    `The invoice number in the PDF (${parsed.invoiceNumber}) differs from the current number (${existingInvoiceNumber}). Saving will require confirming the new number.`,
+                    `رقم الفاتورة في الملف (${parsed.invoiceNumber}) يختلف عن الرقم الحالي (${existingInvoiceNumber}). سيتطلب الحفظ تأكيد الرقم الجديد.`,
+                  )}
+                </Alert>
+              )}
+
+              <div className="rounded-xl border border-gray-200 px-4 py-1">
+                <FieldRow label={translate("Invoice Number", "رقم الفاتورة")} value={parsed.invoiceNumber || <EmptyValue />} />
+                <FieldRow
+                  label={translate("Issue Date", "تاريخ الإصدار")}
+                  value={parsed.issuedAt ? formatDate(parsed.issuedAt, locale) : <EmptyValue />}
+                />
+                <FieldRow
+                  label={translate(`Total Purchases (${translation.currency})`, `إجمالي المشتريات (${translation.currency})`)}
+                  value={parsed.totalPurchases != null ? formatMoney(parsed.totalPurchases) : <EmptyValue />}
+                />
+                <FieldRow
+                  label={translate(`Discount (${translation.currency})`, `الخصم (${translation.currency})`)}
+                  value={parsed.totalDiscount != null ? formatMoney(parsed.totalDiscount) : <EmptyValue />}
+                />
+                <FieldRow
+                  label={translate(`VAT (${translation.currency})`, `ضريبة القيمة المضافة (${translation.currency})`)}
+                  value={parsed.vatAmount != null ? formatMoney(parsed.vatAmount) : <EmptyValue />}
+                />
+                <FieldRow
+                  label={translate(`Withholding Tax (${translation.currency})`, `ضريبة الخصم (${translation.currency})`)}
+                  value={
+                    parsed.withholdingTaxAmount != null ? formatMoney(parsed.withholdingTaxAmount) : <EmptyValue />
+                  }
+                />
+                <FieldRow
+                  label={translate(`Total Amount (${translation.currency})`, `الإجمالي (${translation.currency})`)}
+                  value={parsed.totalAmount != null ? formatMoney(parsed.totalAmount) : <EmptyValue />}
                 />
               </div>
-            )}
-          </>
-        )}
 
-        <div className="flex gap-2">
-          <Button variant="light" color="dark" radius="md" onClick={handleClose} disabled={mutation.isPending} fullWidth>
-            {translation.cancel}
-          </Button>
-          <Button type="submit" color="teal" loading={mutation.isPending} disabled={!canConfirm} radius="md" fullWidth>
-            {submitLabel}
-          </Button>
-        </div>
+              {pdfObjectUrl && (
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+                  <iframe
+                    title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
+                    src={pdfObjectUrl}
+                    className="h-[min(40vh,360px)] w-full bg-white"
+                  />
+                </div>
+              )}
+            </>
+          )}
 
-        {error && <ErrorAlert error={error} />}
-      </form>
-    </Modal>
+          <div className="flex gap-2">
+            <Button variant="light" color="dark" radius="md" onClick={handleClose} disabled={mutation.isPending} fullWidth>
+              {translation.cancel}
+            </Button>
+            <Button type="submit" color="teal" loading={mutation.isPending} disabled={!canConfirm} radius="md" fullWidth>
+              {submitLabel}
+            </Button>
+          </div>
+
+          {error && !numberConfirmOpened && <ErrorAlert error={error} />}
+        </form>
+      </Modal>
+
+      {invoiceNumberChanged && parsed?.invoiceNumber && existingInvoiceNumber && (
+        <ConfirmInvoiceNumberModal
+          opened={numberConfirmOpened}
+          onClose={handleNumberConfirmClose}
+          newInvoiceNumber={parsed.invoiceNumber}
+          existingInvoiceNumber={existingInvoiceNumber}
+          onConfirm={() => mutation.mutate()}
+          loading={mutation.isPending}
+          error={error}
+        />
+      )}
+    </>
   );
 }
