@@ -94,6 +94,9 @@ export default function Page() {
                   buttonType="icon"
                   paperWidth={297}
                   paperHeight={210}
+                  paperMarginX={14}
+                  paperMarginTop={10}
+                  paperMarginBottom={12}
                 >
                   <MaterialPurchaseRequisitionPrintDocument
                     requisition={requisition}
