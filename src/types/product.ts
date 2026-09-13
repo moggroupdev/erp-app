@@ -8,7 +8,7 @@ export type Product = {
   subCategoryId: string;
   sourceType: ProductSourceType;
   estimatedProductionTime: number | null;
-  pricingFactor: number;
+  pricingFactor?: number | null;
   deletedAt: Date | null;
   createdAt: Date;
   createdBy: string;
@@ -47,10 +47,13 @@ export type CreateProductDto = {
   subCategoryId: string;
   sourceType: ProductSourceType;
   estimatedProductionTime: number | null;
-  pricingFactor: number;
 };
 
 export type UpdateProductDto = Partial<CreateProductDto>;
+
+export type SetProductPricingFactorDto = {
+  pricingFactor: number;
+};
 
 export type CreateProductDimensionDto = {
   length: number | null;

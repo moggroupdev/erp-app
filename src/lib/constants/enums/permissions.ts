@@ -29,6 +29,8 @@ export const PERMISSION_VALUES = [
   "update_product",
   "delete_product",
   "print_products_list",
+  "read_product_pricing_factor",
+  "set_product_pricing_factor",
   "add_product_bom",
   "read_product_boms",
   "update_product_bom",
@@ -51,7 +53,6 @@ export const PERMISSION_VALUES = [
   "read_receptions",
   "read_complaints",
   "read_production_plans",
-  "read_production_routing",
   "read_inventory_transactions",
   "add_inventory_transaction",
   "add_legacy_issue_permit",
@@ -266,6 +267,20 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "طباعة قائمة المنتجات",
     },
   },
+  read_product_pricing_factor: {
+    value: "read_product_pricing_factor",
+    label: {
+      en: "Read Product Pricing Factor",
+      ar: "عرض معامل تسعير المنتج",
+    },
+  },
+  set_product_pricing_factor: {
+    value: "set_product_pricing_factor",
+    label: {
+      en: "Set Product Pricing Factor",
+      ar: "تعيين معامل تسعير المنتج",
+    },
+  },
   add_product_bom: {
     value: "add_product_bom",
     label: {
@@ -355,13 +370,6 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Read Production Plans",
       ar: "عرض خطط الإنتاج",
-    },
-  },
-  read_production_routing: {
-    value: "read_production_routing",
-    label: {
-      en: "Read Production Routing",
-      ar: "عرض مسارات الإنتاج",
     },
   },
   read_materials: {
@@ -684,6 +692,8 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "update_product",
       "delete_product",
       "print_products_list",
+      "read_product_pricing_factor",
+      "set_product_pricing_factor",
       "add_product_bom",
       "read_product_boms",
       "update_product_bom",
@@ -694,7 +704,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
     label: { en: "Production", ar: "الإنتاج" },
     permissions: [
       "read_production_plans",
-      "read_production_routing",
       "read_production_department_managers",
       "update_production_department_managers",
     ],

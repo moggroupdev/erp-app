@@ -125,12 +125,14 @@ export const sidebarConfig: SidebarEntryConfig[] = [
     label: { en: "Product Catalog", ar: "كتالوج المنتجات" },
     href: "/products",
     icon: PackageSearch,
+    requiredPermission: PERMISSIONS.READ_PRODUCTS,
     items: [],
   },
   {
     label: { en: "Production Plans", ar: "خطط الإنتاج" },
     href: "/production/plans",
     icon: Factory,
+    requiredPermission: PERMISSIONS.READ_PRODUCTION_PLANS,
     items: [],
   },
   {
@@ -287,7 +289,12 @@ export function getSidebarEntryKey(entry: SidebarEntryConfig): string {
 export function canAccessEntry(entry: SidebarEntryConfig, user: UserState): boolean {
   if (!user) return false;
   if (user.isAdmin) return true;
-  if (isSidebarGroup(entry)) return entry.items.some((item) => canAccessEntry(item, user));
+
+  // Nested groups are visible if any child is. Empty `items` is a top-level link.
+  if (isSidebarGroup(entry) && entry.items.length > 0) {
+    return entry.items.some((item) => canAccessEntry(item, user));
+  }
+
   if (entry.requiredPermission) return user.role.permissions.includes(entry.requiredPermission);
   return true;
 }

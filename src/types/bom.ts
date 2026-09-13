@@ -71,7 +71,7 @@ export type Bom = {
     subCategoryId: string;
     sourceType: ProductSourceType;
     estimatedProductionTime: number | null;
-    pricingFactor: number;
+    pricingFactor?: number | null;
   };
   standardBoms: BomItemWithMaterial[];
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
@@ -18,6 +19,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toBaseQuantity, toDisplayQuantity } from "@/lib/helpers/unit-conversion";
 import type { MaterialPurchaseOrderItem } from "@/types/material-purchase-order";
 import type { MaterialUnitConversionSummary } from "@/types/material";
@@ -34,6 +36,8 @@ const PAGE_TITLE = { en: "Create Materials Receipt", ar: "إنشاء سند اس
 const REMAINING_EPSILON = 1e-9;
 
 const UNSTYLED_INPUT_STYLES = { input: { minHeight: 0, height: "auto", padding: 0 } } as const;
+const QUANTITY_ERROR_CELL_CLASS = "bg-red-50";
+const QUANTITY_CELL_CLASS = "transition-colors focus-within:bg-teal-50/60";
 
 type ReceiptDraftRow = {
   orderItemId: string;
@@ -46,10 +50,19 @@ type ReceiptDraftRow = {
   remainingInOrderUnit: number;
   unitOfMeasurementSelected: MaterialUnit;
   quantityReceived: number | "";
+  quantityAccepted: number | "";
   quantityRejected: number | "";
   inspectionNotes: string;
   fullyReceived: boolean;
 };
+
+function draftQuantity(value: number | ""): number {
+  return typeof value === "number" ? value : 0;
+}
+
+function quantitiesMatch(received: number, accepted: number, rejected: number) {
+  return Math.abs(received - (accepted + rejected)) <= REMAINING_EPSILON;
+}
 
 function remainingInUnit(
   remainingInOrderUnit: number,
@@ -61,10 +74,6 @@ function remainingInUnit(
   const toBase = resolveDisplayUnit(selectedUnit, item.baseUnit, item.unitConversions).factor;
   const remainingBase = toBaseQuantity(remainingInOrderUnit, fromBase);
   return toDisplayQuantity(remainingBase, toBase);
-}
-
-function formatQty(value: number, locale: Locale) {
-  return value.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { maximumFractionDigits: 6 });
 }
 
 function buildRows(items: MaterialPurchaseOrderItem[]): ReceiptDraftRow[] {
@@ -83,6 +92,7 @@ function buildRows(items: MaterialPurchaseOrderItem[]): ReceiptDraftRow[] {
       remainingInOrderUnit: remaining,
       unitOfMeasurementSelected: item.unitOfMeasurementSelected,
       quantityReceived: "",
+      quantityAccepted: "",
       quantityRejected: "",
       inspectionNotes: "",
       fullyReceived,
@@ -101,14 +111,27 @@ function getRowUnitOptions(row: ReceiptDraftRow, locale: Locale) {
 function ReceiptItemRow({
   row,
   locale,
+  highlightQuantityErrors,
   onUpdate,
 }: {
   row: ReceiptDraftRow;
   locale: Locale;
+  highlightQuantityErrors: boolean;
   onUpdate: (orderItemId: string, patch: Partial<ReceiptDraftRow>) => void;
 }) {
   const { translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
   const remaining = remainingInUnit(row.remainingInOrderUnit, row.orderUnit, row.unitOfMeasurementSelected, row);
+  const received = draftQuantity(row.quantityReceived);
+  const accepted = draftQuantity(row.quantityAccepted);
+  const rejected = draftQuantity(row.quantityRejected);
+  const hasQuantitySumError =
+    highlightQuantityErrors && !row.fullyReceived && !quantitiesMatch(received, accepted, rejected);
+  const quantityCellClass = row.fullyReceived
+    ? undefined
+    : hasQuantitySumError
+      ? QUANTITY_ERROR_CELL_CLASS
+      : QUANTITY_CELL_CLASS;
   const unitOptions = getRowUnitOptions(row, locale);
 
   return (
@@ -116,7 +139,12 @@ function ReceiptItemRow({
       <Table.Td className="min-w-56 font-semibold text-gray-800">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={row.fullyReceived ? "text-gray-500" : "text-gray-800"}>{row.materialTitle}</span>
+            <Link
+              href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+              className={`hover:underline ${row.fullyReceived ? "text-gray-500" : "text-gray-800"}`}
+            >
+              {row.materialTitle}
+            </Link>
             {row.fullyReceived && (
               <Badge size="xs" variant="light" color="teal" leftSection={<CheckCircle2 size={11} />} className="normal-case">
                 {translate("Fully received", "مستلم بالكامل")}
@@ -143,13 +171,12 @@ function ReceiptItemRow({
                 row,
               );
               const nextRemaining = remainingInUnit(row.remainingInOrderUnit, row.orderUnit, nextUnit, row);
-              const received = typeof row.quantityReceived === "number" ? row.quantityReceived : 0;
-              const rejected = typeof row.quantityRejected === "number" ? row.quantityRejected : 0;
               const scale = prevRemaining === 0 ? 1 : nextRemaining / prevRemaining;
 
               onUpdate(row.orderItemId, {
                 unitOfMeasurementSelected: nextUnit,
-                quantityReceived: row.quantityReceived === "" ? "" : Math.min(received * scale, nextRemaining),
+                quantityReceived: row.quantityReceived === "" ? "" : received * scale,
+                quantityAccepted: row.quantityAccepted === "" ? "" : accepted * scale,
                 quantityRejected: row.quantityRejected === "" ? "" : rejected * scale,
               });
             }}
@@ -165,14 +192,12 @@ function ReceiptItemRow({
         )}
       </Table.Td>
       <Table.Td>
-        <span className={`text-sm tabular-nums ${row.fullyReceived ? "text-gray-400" : "font-medium text-gray-700"}`}>
-          {formatQty(remaining, locale)}
+        <span className={`text-sm ${row.fullyReceived ? "text-gray-400" : "font-medium text-gray-700"}`}>
+          {formatQuantity(remaining)}
         </span>
       </Table.Td>
-      <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
-        {row.fullyReceived ? (
-          <span className="text-sm text-gray-400">—</span>
-        ) : (
+      <Table.Td className={quantityCellClass}>
+        {row.fullyReceived ? null : (
           <NumberInput
             value={row.quantityReceived}
             onChange={(value) => onUpdate(row.orderItemId, { quantityReceived: value === "" ? "" : Number(value) })}
@@ -188,10 +213,25 @@ function ReceiptItemRow({
           />
         )}
       </Table.Td>
-      <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
-        {row.fullyReceived ? (
-          <span className="text-sm text-gray-400">—</span>
-        ) : (
+      <Table.Td className={quantityCellClass}>
+        {row.fullyReceived ? null : (
+          <NumberInput
+            value={row.quantityAccepted}
+            onChange={(value) => onUpdate(row.orderItemId, { quantityAccepted: value === "" ? "" : Number(value) })}
+            min={0}
+            max={remaining}
+            allowNegative={false}
+            decimalScale={6}
+            hideControls
+            variant="unstyled"
+            radius={0}
+            placeholder={translate("Enter quantity", "أدخل الكمية")}
+            styles={UNSTYLED_INPUT_STYLES}
+          />
+        )}
+      </Table.Td>
+      <Table.Td className={quantityCellClass}>
+        {row.fullyReceived ? null : (
           <NumberInput
             value={row.quantityRejected}
             onChange={(value) => onUpdate(row.orderItemId, { quantityRejected: value === "" ? "" : Number(value) })}
@@ -208,13 +248,15 @@ function ReceiptItemRow({
         )}
       </Table.Td>
       <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
-        {row.fullyReceived ? (
-          <span className="text-sm text-gray-400">—</span>
-        ) : (
+        {row.fullyReceived ? null : (
           <TextInput
             value={row.inspectionNotes}
             onChange={(e) => onUpdate(row.orderItemId, { inspectionNotes: e.target.value })}
-            placeholder={translate("Optional", "اختياري")}
+            placeholder={
+              rejected > 0
+                ? translate("Required", "مطلوب")
+                : translate("Optional", "اختياري")
+            }
             variant="unstyled"
             radius={0}
             styles={UNSTYLED_INPUT_STYLES}
@@ -245,6 +287,7 @@ function CreateReceiptPage() {
   const [rows, setRows] = useState<ReceiptDraftRow[]>([]);
   const [rowsInitialized, setRowsInitialized] = useState(false);
   const [validationError, setValidationError] = useState("");
+  const [highlightQuantityErrors, setHighlightQuantityErrors] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
 
@@ -276,7 +319,7 @@ function CreateReceiptPage() {
         .map((row) => ({
           materialPurchaseOrderItemId: row.orderItemId,
           unitOfMeasurementSelected: row.unitOfMeasurementSelected,
-          quantityReceived: Number(row.quantityReceived) || 0,
+          quantityReceived: Number(row.quantityAccepted) || 0,
           quantityRejected: Number(row.quantityRejected) || 0,
           inspectionNotes: row.inspectionNotes.trim() || null,
         }))
@@ -307,6 +350,7 @@ function CreateReceiptPage() {
         (row) =>
           !row.fullyReceived &&
           (row.quantityReceived !== "" ||
+            row.quantityAccepted !== "" ||
             row.quantityRejected !== "" ||
             row.inspectionNotes.trim() !== "" ||
             row.unitOfMeasurementSelected !== row.orderUnit),
@@ -322,24 +366,20 @@ function CreateReceiptPage() {
 
   const linesToSubmit = useMemo(
     () =>
-      openLines.filter((row) => {
-        const received = Number(row.quantityReceived) || 0;
-        const rejected = Number(row.quantityRejected) || 0;
-        return received + rejected > 0;
-      }),
+      openLines.filter((row) => draftQuantity(row.quantityReceived) > 0),
     [openLines],
   );
 
   const confirmSummary = useMemo(() => {
-    let receivedLines = 0;
+    let acceptedLines = 0;
     let rejectedLines = 0;
 
     for (const row of linesToSubmit) {
-      if ((Number(row.quantityReceived) || 0) > 0) receivedLines += 1;
-      if ((Number(row.quantityRejected) || 0) > 0) rejectedLines += 1;
+      if (draftQuantity(row.quantityAccepted) > 0) acceptedLines += 1;
+      if (draftQuantity(row.quantityRejected) > 0) rejectedLines += 1;
     }
 
-    return { lineCount: linesToSubmit.length, receivedLines, rejectedLines };
+    return { lineCount: linesToSubmit.length, acceptedLines, rejectedLines };
   }, [linesToSubmit]);
 
   function updateRow(orderItemId: string, patch: Partial<ReceiptDraftRow>) {
@@ -366,11 +406,12 @@ function CreateReceiptPage() {
     let hasPositiveLine = false;
 
     for (const row of openLines) {
-      const received = Number(row.quantityReceived) || 0;
-      const rejected = Number(row.quantityRejected) || 0;
+      const received = draftQuantity(row.quantityReceived);
+      const accepted = draftQuantity(row.quantityAccepted);
+      const rejected = draftQuantity(row.quantityRejected);
       const remaining = remainingInUnit(row.remainingInOrderUnit, row.orderUnit, row.unitOfMeasurementSelected, row);
 
-      if (received < 0 || rejected < 0) {
+      if (received < 0 || accepted < 0 || rejected < 0) {
         return setValidationError(
           translate(
             `Quantities for material ${row.materialTitle} cannot be negative.`,
@@ -379,23 +420,42 @@ function CreateReceiptPage() {
         );
       }
 
-      if (received + rejected > remaining + REMAINING_EPSILON) {
+      if (!quantitiesMatch(received, accepted, rejected)) {
+        setHighlightQuantityErrors(true);
         return setValidationError(
           translate(
-            `Received and rejected quantities for material ${row.materialTitle} exceed the remaining quantity.`,
-            `الكميات المستلمة والمرفوضة للمادة ${row.materialTitle} تتجاوز الكمية المتبقية.`,
+            `The received quantity for material ${row.materialTitle} must equal the accepted quantity plus the rejected quantity.`,
+            `يجب أن تساوي الكمية المستلمة للمادة ${row.materialTitle} مجموع الكمية المقبولة والكمية المرفوضة.`,
           ),
         );
       }
 
-      if (received + rejected > 0) hasPositiveLine = true;
+      if (received > remaining + REMAINING_EPSILON) {
+        return setValidationError(
+          translate(
+            `The received quantity for material ${row.materialTitle} exceeds the remaining quantity.`,
+            `الكمية المستلمة للمادة ${row.materialTitle} تتجاوز الكمية المتبقية.`,
+          ),
+        );
+      }
+
+      if (rejected > 0 && !row.inspectionNotes.trim()) {
+        return setValidationError(
+          translate(
+            `Inspection notes are required for material ${row.materialTitle} when a rejected quantity is recorded.`,
+            `يجب إدخال ملاحظات الفحص للمادة ${row.materialTitle} عند تسجيل كمية مرفوضة.`,
+          ),
+        );
+      }
+
+      if (received > 0) hasPositiveLine = true;
     }
 
     if (!hasPositiveLine) {
       return setValidationError(
         translate(
-          "At least one receipt line must have a received or rejected quantity greater than zero.",
-          "يجب أن يحتوي بند واحد على الأقل على كمية مستلمة أو مرفوضة أكبر من صفر.",
+          "At least one receipt line must have an accepted or rejected quantity greater than zero.",
+          "يجب أن يحتوي بند واحد على الأقل على كمية مقبولة أو مرفوضة أكبر من صفر.",
         ),
       );
     }
@@ -468,29 +528,38 @@ function CreateReceiptPage() {
               <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
                 <Table.Thead className="bg-gray-50">
                   <Table.Tr className="h-9">
-                    <Table.Th className="w-[30%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[34%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Material", "المادة")}
                     </Table.Th>
-                    <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Unit", "الوحدة")}
                     </Table.Th>
-                    <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Remaining", "المتبقي")}
                     </Table.Th>
-                    <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Quantity Received", "الكمية المستلمة")}
                     </Table.Th>
-                    <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Quantity Accepted", "الكمية المقبولة")}
+                    </Table.Th>
+                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Quantity Rejected", "الكمية المرفوضة")}
                     </Table.Th>
-                    <Table.Th className="w-[18%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Inspection Notes", "ملاحظات الفحص")}
                     </Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {rows.map((row) => (
-                    <ReceiptItemRow key={row.orderItemId} row={row} locale={locale} onUpdate={updateRow} />
+                    <ReceiptItemRow
+                      key={row.orderItemId}
+                      row={row}
+                      locale={locale}
+                      highlightQuantityErrors={highlightQuantityErrors}
+                      onUpdate={updateRow}
+                    />
                   ))}
                 </Table.Tbody>
               </Table>
@@ -558,8 +627,8 @@ function CreateReceiptPage() {
               </p>
               <p className="mt-0.5 text-xs text-gray-500">
                 {translate(
-                  `${confirmSummary.receivedLines} with received · ${confirmSummary.rejectedLines} with rejected`,
-                  `${confirmSummary.receivedLines} بمستلم · ${confirmSummary.rejectedLines} بمرفوض`,
+                  `${confirmSummary.acceptedLines} with accepted · ${confirmSummary.rejectedLines} with rejected`,
+                  `${confirmSummary.acceptedLines} بمقبول · ${confirmSummary.rejectedLines} بمرفوض`,
                 )}
               </p>
             </div>
