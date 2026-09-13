@@ -18,7 +18,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -136,8 +136,8 @@ export default function Page() {
                         <Table.Th>{translate("Code", "الكود")}</Table.Th>
                         <Table.Th>{translate("Category", "الفئة")}</Table.Th>
                         <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
-                        <Table.Th>{translate("Quantity Ordered", "الكمية المطلوبة")}</Table.Th>
                         <Table.Th>{translate("Quantity Received", "الكمية المستلمة")}</Table.Th>
+                        <Table.Th>{translate("Quantity Accepted", "الكمية المقبولة")}</Table.Th>
                         <Table.Th>{translate("Quantity Rejected", "الكمية المرفوضة")}</Table.Th>
                         <Table.Th>
                           {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
@@ -149,7 +149,7 @@ export default function Page() {
                     </Table.Thead>
                     <Table.Tbody>
                       {receipt.items.map((item) => {
-                        const { material, quantityOrdered, unitPrice, unitOfMeasurementSelected: orderUnit } =
+                        const { material, unitPrice, unitOfMeasurementSelected: orderUnit } =
                           item.materialPurchaseOrderItem;
                         const receiptUnit = item.unitOfMeasurementSelected;
                         const orderFactor = resolveDisplayUnit(
@@ -164,8 +164,10 @@ export default function Page() {
                         ).factor;
                         const baseUnitPrice = orderFactor === 0 ? Number(unitPrice) : Number(unitPrice) / orderFactor;
                         const unitPriceInReceiptUnit = toDisplayUnitPrice(baseUnitPrice, receiptFactor);
-                        const quantityReceived = Number(item.quantityReceived);
-                        const subtotal = quantityReceived * unitPriceInReceiptUnit;
+                        const quantityAccepted = Number(item.quantityReceived);
+                        const quantityRejected = Number(item.quantityRejected);
+                        const quantityReceived = quantityAccepted + quantityRejected;
+                        const subtotal = quantityAccepted * unitPriceInReceiptUnit;
 
                         return (
                           <Table.Tr key={item.id} className="text-gray-600">
@@ -185,11 +187,9 @@ export default function Page() {
                             </Table.Td>
                             <Table.Td>{getMainCategoryTitle(material.subCategoryId)}</Table.Td>
                             <Table.Td>{getMaterialUnitLabel(receiptUnit, locale)}</Table.Td>
-                            <Table.Td>
-                              {formatEnteredQuantityForDisplay(quantityOrdered, orderUnit, receiptUnit, material)}
-                            </Table.Td>
                             <Table.Td>{formatQuantity(quantityReceived)}</Table.Td>
-                            <Table.Td>{formatQuantity(item.quantityRejected)}</Table.Td>
+                            <Table.Td>{formatQuantity(quantityAccepted)}</Table.Td>
+                            <Table.Td>{formatQuantity(quantityRejected)}</Table.Td>
                             <Table.Td>{formatMoney(unitPriceInReceiptUnit)}</Table.Td>
                             <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
                           </Table.Tr>
