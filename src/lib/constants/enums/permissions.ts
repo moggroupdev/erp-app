@@ -53,7 +53,6 @@ export const PERMISSION_VALUES = [
   "read_receptions",
   "read_complaints",
   "read_production_plans",
-  "read_production_routing",
   "read_inventory_transactions",
   "add_inventory_transaction",
   "add_legacy_issue_permit",
@@ -371,13 +370,6 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Read Production Plans",
       ar: "عرض خطط الإنتاج",
-    },
-  },
-  read_production_routing: {
-    value: "read_production_routing",
-    label: {
-      en: "Read Production Routing",
-      ar: "عرض مسارات الإنتاج",
     },
   },
   read_materials: {
@@ -712,7 +704,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
     label: { en: "Production", ar: "الإنتاج" },
     permissions: [
       "read_production_plans",
-      "read_production_routing",
       "read_production_department_managers",
       "update_production_department_managers",
     ],
