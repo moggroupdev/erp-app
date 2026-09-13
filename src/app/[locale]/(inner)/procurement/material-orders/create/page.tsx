@@ -21,7 +21,7 @@ import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
-import { Link2, Plus, Trash2 } from "lucide-react";
+import { Link2, Plus, Trash2, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -89,14 +89,8 @@ function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
   return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
 }
 
-function allocationSummaryLabel(row: ItemDraftRow, locale: Locale, translate: (en: string, ar: string) => string) {
-  if (row.allocations.length === 0) return translate("Not linked", "غير مربوط");
-  if (row.allocations.length === 1) {
-    const allocation = row.allocations[0];
-    const unit = row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : "";
-    return `${allocation.requisitionCode} · ${formatQuantity(allocation.quantityAllocated)} ${unit}`.trim();
-  }
-  return translate(`${row.allocations.length} requisitions`, `${row.allocations.length} طلبات شراء`);
+function allocationLinkedTotal(row: ItemDraftRow) {
+  return row.allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0);
 }
 
 function ItemRow({
@@ -110,6 +104,7 @@ function ItemRow({
   onUpdate,
   onRemove,
   onLinkRequisitions,
+  onRemoveAllocation,
 }: {
   row: ItemDraftRow;
   index: number;
@@ -121,142 +116,124 @@ function ItemRow({
   onUpdate: (key: string, patch: Partial<ItemDraftRow>) => void;
   onRemove: (key: string) => void;
   onLinkRequisitions: (key: string) => void;
+  onRemoveAllocation: (rowKey: string, requisitionItemId: string) => void;
 }) {
   const { translate } = useI18n();
   const quantity = typeof row.quantity === "number" ? row.quantity : null;
   const unitPrice = typeof row.unitPrice === "number" ? row.unitPrice : null;
   const lineTotal = quantity !== null && unitPrice !== null ? quantity * unitPrice : null;
-  const linkedTotal = row.allocations.reduce((sum, rowAllocation) => sum + rowAllocation.quantityAllocated, 0);
-  const underLinked = quantity !== null && linkedTotal + 1e-9 < quantity && row.allocations.length > 0;
+  const linkedTotal = allocationLinkedTotal(row);
+  const unitLabel = row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : "";
+  const underLinked = quantity !== null && row.allocations.length > 0 && linkedTotal + 1e-9 < quantity;
+  const fullyLinked = quantity !== null && row.allocations.length > 0 && Math.abs(linkedTotal - quantity) <= 1e-9;
+  const overLinked = quantity !== null && linkedTotal > quantity + 1e-9;
 
   return (
-    <>
-      <Table.Tr>
-        <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-          <SelectMaterial
-            value={row.materialCode}
+    <Table.Tr>
+      <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <SelectMaterial
+          value={row.materialCode}
+          setValue={(next) => {
+            const resolved = typeof next === "function" ? next(row.materialCode) : next;
+            if (!resolved) onMaterialSelect(row.key, null);
+            else onUpdate(row.key, { materialCode: resolved, allocations: [] });
+          }}
+          onMaterialSelect={(material) => onMaterialSelect(row.key, material)}
+          excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
+          placeholder={translate("Enter material...", "أدخل المادة...")}
+          variant="unstyled"
+          radius={0}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          withBrowseModal
+        />
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <NumberInput
+          value={row.quantity}
+          onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
+          min={0}
+          allowNegative={false}
+          decimalScale={6}
+          hideControls
+          variant="unstyled"
+          radius={0}
+          placeholder={translate("Enter quantity", "أدخل الكمية")}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+        />
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        {showUnitSelect(row) ? (
+          <DataSelect
+            value={row.unitOfMeasurementSelected}
             setValue={(next) => {
-              const resolved = typeof next === "function" ? next(row.materialCode) : next;
-              if (!resolved) onMaterialSelect(row.key, null);
-              else onUpdate(row.key, { materialCode: resolved, allocations: [] });
+              const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
+              const nextUnit = (resolved as MaterialUnit | null) ?? row.unitOfMeasurement;
+              if (!nextUnit || !row.unitOfMeasurement || !row.unitOfMeasurementSelected) {
+                onUpdate(row.key, { unitOfMeasurementSelected: nextUnit });
+                return;
+              }
+              const convertedAllocations = row.allocations.map((allocation) => ({
+                ...allocation,
+                quantityAllocated: convertEnteredQuantityBetweenUnits(
+                  allocation.quantityAllocated,
+                  row.unitOfMeasurementSelected!,
+                  nextUnit,
+                  row.unitOfMeasurement!,
+                  row.unitConversions,
+                ),
+              }));
+              onUpdate(row.key, {
+                unitOfMeasurementSelected: nextUnit,
+                allocations: convertedAllocations,
+              });
             }}
-            onMaterialSelect={(material) => onMaterialSelect(row.key, material)}
-            excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
-            placeholder={translate("Enter material...", "أدخل المادة...")}
+            data={getRowUnitOptions(row, locale)}
             variant="unstyled"
             radius={0}
-            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-            withBrowseModal
+            searchable
+            placeholder={translate("Select unit", "اختر الوحدة")}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
           />
-        </Table.Td>
-        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-          <NumberInput
-            value={row.quantity}
-            onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
-            min={0}
-            allowNegative={false}
-            decimalScale={6}
-            hideControls
-            variant="unstyled"
-            radius={0}
-            placeholder={translate("Enter quantity", "أدخل الكمية")}
-            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-          />
-        </Table.Td>
-        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-          {showUnitSelect(row) ? (
-            <DataSelect
-              value={row.unitOfMeasurementSelected}
-              setValue={(next) => {
-                const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
-                const nextUnit = (resolved as MaterialUnit | null) ?? row.unitOfMeasurement;
-                if (!nextUnit || !row.unitOfMeasurement || !row.unitOfMeasurementSelected) {
-                  onUpdate(row.key, { unitOfMeasurementSelected: nextUnit });
-                  return;
-                }
-                const convertedAllocations = row.allocations.map((allocation) => ({
-                  ...allocation,
-                  quantityAllocated: convertEnteredQuantityBetweenUnits(
-                    allocation.quantityAllocated,
-                    row.unitOfMeasurementSelected!,
-                    nextUnit,
-                    row.unitOfMeasurement!,
-                    row.unitConversions,
-                  ),
-                }));
-                onUpdate(row.key, {
-                  unitOfMeasurementSelected: nextUnit,
-                  allocations: convertedAllocations,
-                });
-              }}
-              data={getRowUnitOptions(row, locale)}
-              variant="unstyled"
-              radius={0}
-              searchable
-              placeholder={translate("Select unit", "اختر الوحدة")}
-              styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
-            />
-          ) : (
-            <span className="text-sm text-gray-600">
-              {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
-            </span>
-          )}
-        </Table.Td>
-        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-          <NumberInput
-            value={row.unitPrice}
-            onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
-            min={0}
-            allowNegative={false}
-            decimalScale={6}
-            hideControls
-            variant="unstyled"
-            radius={0}
-            placeholder={translate("Enter price", "أدخل السعر")}
-            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-            aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
-          />
-        </Table.Td>
-        <Table.Td>
-          <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
-        </Table.Td>
-        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-          <TextInput
-            value={row.notes}
-            onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
-            placeholder={translate("Optional", "اختياري")}
-            variant="unstyled"
-            radius={0}
-            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-          />
-        </Table.Td>
-        <Table.Td className="w-[2.5%]">
-          <Button
-            type="button"
-            variant="subtle"
-            color="red"
-            size="xs"
-            radius="md"
-            p={6}
-            disabled={!canRemove}
-            onClick={() => onRemove(row.key)}
-            title={translate("Remove row", "حذف الصف")}
-          >
-            <Trash2 size={14} />
-          </Button>
-        </Table.Td>
-      </Table.Tr>
-      <Table.Tr className="bg-gray-50/70">
-        <Table.Td />
-        <Table.Td colSpan={7}>
-          <div className="flex flex-wrap items-center gap-2 py-1">
-            <Badge size="sm" variant="light" color={row.allocations.length > 0 ? "teal" : "gray"} radius="md">
-              {allocationSummaryLabel(row, locale, translate)}
-            </Badge>
-            {underLinked && (
-              <Badge size="sm" variant="light" color="orange" radius="md">
-                {translate("Partially linked", "مربوط جزئياً")}
+        ) : (
+          <span className="text-sm text-gray-600">
+            {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
+          </span>
+        )}
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <NumberInput
+          value={row.unitPrice}
+          onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
+          min={0}
+          allowNegative={false}
+          decimalScale={6}
+          hideControls
+          variant="unstyled"
+          radius={0}
+          placeholder={translate("Enter price", "أدخل السعر")}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
+        />
+      </Table.Td>
+      <Table.Td>
+        <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
+      </Table.Td>
+      <Table.Td className="align-top!">
+        <div className="flex flex-col gap-1.5 py-0.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {row.allocations.length === 0 ? (
+              <span className="text-xs text-gray-400">{translate("Not linked", "غير مربوط")}</span>
+            ) : (
+              <Badge
+                size="xs"
+                variant="light"
+                color={overLinked ? "red" : fullyLinked ? "teal" : underLinked ? "orange" : "teal"}
+                radius="md"
+              >
+                {quantity !== null
+                  ? `${formatQuantity(linkedTotal)} / ${formatQuantity(quantity)}`
+                  : formatQuantity(linkedTotal)}
               </Badge>
             )}
             <Button
@@ -265,16 +242,73 @@ function ItemRow({
               color="teal"
               size="compact-xs"
               radius="md"
-              leftSection={<Link2 size={13} />}
+              px={6}
+              leftSection={<Link2 size={12} />}
               disabled={!row.materialCode || !row.unitOfMeasurementSelected}
               onClick={() => onLinkRequisitions(row.key)}
             >
-              {translate("Link requisitions", "ربط طلبات الشراء")}
+              {row.allocations.length > 0 ? translate("Edit", "تعديل") : translate("Link", "ربط")}
             </Button>
           </div>
-        </Table.Td>
-      </Table.Tr>
-    </>
+          {row.allocations.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {row.allocations.map((allocation) => (
+                <Badge
+                  key={allocation.materialPurchaseRequisitionItemId}
+                  size="sm"
+                  variant="outline"
+                  color="teal"
+                  radius="md"
+                  className="normal-case"
+                  rightSection={
+                    <button
+                      type="button"
+                      className="ms-0.5 inline-flex rounded-full p-0.5 text-teal-700 hover:bg-teal-100"
+                      onClick={() => onRemoveAllocation(row.key, allocation.materialPurchaseRequisitionItemId)}
+                      title={translate("Remove link", "إزالة الربط")}
+                      aria-label={translate("Remove link", "إزالة الربط")}
+                    >
+                      <X size={11} />
+                    </button>
+                  }
+                >
+                  <span className="font-mono text-[10px]">{allocation.requisitionCode}</span>
+                  <span className="mx-1 text-teal-400">·</span>
+                  <span className="text-[11px]">
+                    {formatQuantity(allocation.quantityAllocated)} {unitLabel}
+                  </span>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </Table.Td>
+      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+        <TextInput
+          value={row.notes}
+          onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
+          placeholder={translate("Optional", "اختياري")}
+          variant="unstyled"
+          radius={0}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+        />
+      </Table.Td>
+      <Table.Td className="w-[2.5%]">
+        <Button
+          type="button"
+          variant="subtle"
+          color="red"
+          size="xs"
+          radius="md"
+          p={6}
+          disabled={!canRemove}
+          onClick={() => onRemove(row.key)}
+          title={translate("Remove row", "حذف الصف")}
+        >
+          <Trash2 size={14} />
+        </Button>
+      </Table.Td>
+    </Table.Tr>
   );
 }
 
@@ -502,6 +536,21 @@ export default function Page() {
     setRows((prev) => (prev.length <= 1 ? prev : prev.filter((row) => row.key !== key)));
   }
 
+  function removeAllocation(rowKey: string, requisitionItemId: string) {
+    setRows((prev) =>
+      prev.map((row) =>
+        row.key === rowKey
+          ? {
+              ...row,
+              allocations: row.allocations.filter(
+                (allocation) => allocation.materialPurchaseRequisitionItemId !== requisitionItemId,
+              ),
+            }
+          : row,
+      ),
+    );
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidationError("");
@@ -679,22 +728,25 @@ export default function Page() {
               <Table.Thead className="bg-gray-50">
                 <Table.Tr className="h-9">
                   <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
-                  <Table.Th className="w-[28%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Material", "المادة")}
                   </Table.Th>
-                  <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Quantity", "الكمية")}
                   </Table.Th>
-                  <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Unit", "الوحدة")}
                   </Table.Th>
-                  <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
                   </Table.Th>
-                  <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Line Total", "إجمالي البند")} ({translation.currency})
                   </Table.Th>
-                  <Table.Th className="w-[22.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Requisitions", "طلبات الشراء")}
+                  </Table.Th>
+                  <Table.Th className="w-[14.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Notes", "الملاحظات")}
                   </Table.Th>
                   <Table.Th className="w-[3%]" />
@@ -714,6 +766,7 @@ export default function Page() {
                     onUpdate={updateRow}
                     onRemove={removeRow}
                     onLinkRequisitions={setLinkRowKey}
+                    onRemoveAllocation={removeAllocation}
                   />
                 ))}
               </Table.Tbody>
@@ -743,6 +796,7 @@ export default function Page() {
                   <Table.Td>
                     <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
                   </Table.Td>
+                  <Table.Td />
                   <Table.Td />
                   <Table.Td />
                 </Table.Tr>
@@ -808,7 +862,12 @@ export default function Page() {
           unitConversions={linkRow.unitConversions}
           quantityOrdered={linkRow.quantity}
           existingAllocations={linkRow.allocations}
-          onSave={(allocations) => updateRow(linkRow.key, { allocations })}
+          onSave={(allocations, nextQuantityOrdered) =>
+            updateRow(linkRow.key, {
+              allocations,
+              ...(nextQuantityOrdered != null ? { quantity: nextQuantityOrdered } : {}),
+            })
+          }
         />
       )}
     </LayoutBox>

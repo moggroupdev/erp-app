@@ -57,7 +57,7 @@ export default function LinkRequisitionsModal({
   unitConversions: MaterialUnitConversionSummary[];
   quantityOrdered: number | "";
   existingAllocations: AllocationDraft[];
-  onSave: (allocations: AllocationDraft[]) => void;
+  onSave: (allocations: AllocationDraft[], nextQuantityOrdered?: number) => void;
 }) {
   const { locale, translate, translation } = useI18n();
   const privateRequest = usePrivateRequest();
@@ -110,6 +110,7 @@ export default function LinkRequisitionsModal({
     [selections],
   );
 
+  const exceedsOrderQty = selectedTotal > orderedQty + 1e-9;
   const remainingOnOrder = Math.max(0, orderedQty - selectedTotal);
 
   function remainingInOrderUnit(item: MaterialPurchaseRequisitionOpenItem) {
@@ -131,18 +132,18 @@ export default function LinkRequisitionsModal({
         return next;
       }
 
-      const remainingOrder = Math.max(
+      const usedByOthers = Object.entries(prev).reduce(
+        (sum, [id, row]) =>
+          id === item.requisitionItemId
+            ? sum
+            : sum + (typeof row.quantityAllocated === "number" ? row.quantityAllocated : 0),
         0,
-        orderedQty -
-          Object.entries(prev).reduce(
-            (sum, [id, row]) =>
-              id === item.requisitionItemId
-                ? sum
-                : sum + (typeof row.quantityAllocated === "number" ? row.quantityAllocated : 0),
-            0,
-          ),
       );
-      const defaultQty = Math.min(remainingInOrderUnit(item), remainingOrder || remainingInOrderUnit(item));
+      const remainingOrder = Math.max(0, orderedQty - usedByOthers);
+      const reqRemaining = remainingInOrderUnit(item);
+      // Prefer filling leftover order capacity; if the line is already full, still default
+      // to the requisition remaining so consolidating multiple MPReqs can raise order qty on apply.
+      const defaultQty = remainingOrder > 1e-9 ? Math.min(reqRemaining, remainingOrder) : reqRemaining;
       next[item.requisitionItemId] = {
         openItem: item,
         quantityAllocated: defaultQty > 0 ? Number(defaultQty.toFixed(6)) : "",
@@ -192,26 +193,18 @@ export default function LinkRequisitionsModal({
       }
     }
 
-    if (selectedTotal > orderedQty + 1e-9) {
-      return setLocalError(
-        translate(
-          "Total allocated quantity cannot exceed the order line quantity.",
-          "لا يمكن أن تتجاوز الكمية الموزعة إجمالي كمية بند أمر التوريد.",
-        ),
-      );
-    }
+    const allocations = rows.map((row) => ({
+      materialPurchaseRequisitionItemId: row.openItem.requisitionItemId,
+      requisitionId: row.openItem.requisitionId,
+      requisitionCode: row.openItem.requisitionCode,
+      productionSubDepartment: row.openItem.productionSubDepartment,
+      unitOfMeasurementSelected: row.openItem.unitOfMeasurementSelected,
+      quantityRemaining: row.openItem.quantityRemaining,
+      quantityAllocated: Number(row.quantityAllocated),
+    }));
 
-    onSave(
-      rows.map((row) => ({
-        materialPurchaseRequisitionItemId: row.openItem.requisitionItemId,
-        requisitionId: row.openItem.requisitionId,
-        requisitionCode: row.openItem.requisitionCode,
-        productionSubDepartment: row.openItem.productionSubDepartment,
-        unitOfMeasurementSelected: row.openItem.unitOfMeasurementSelected,
-        quantityRemaining: row.openItem.quantityRemaining,
-        quantityAllocated: Number(row.quantityAllocated),
-      })),
-    );
+    // Consolidating several requisitions may need a higher order qty — raise it on apply.
+    onSave(allocations, selectedTotal > orderedQty + 1e-9 ? selectedTotal : undefined);
     onClose();
   }
 
@@ -308,13 +301,26 @@ export default function LinkRequisitionsModal({
         )}
 
         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
-          <Badge variant="light" color="teal" radius="md">
-            {translate("Linked total", "إجمالي المربوط")}: {formatQuantity(selectedTotal)} {getMaterialUnitLabel(orderUnit, locale)}
+          <Badge variant="light" color="gray" radius="md">
+            {translate("Order qty", "كمية الأمر")}: {formatQuantity(orderedQty)} {getMaterialUnitLabel(orderUnit, locale)}
           </Badge>
-          <Badge variant="light" color={remainingOnOrder > 1e-9 ? "orange" : "gray"} radius="md">
-            {translate("Unlinked on this line", "غير مربوط في هذا البند")}: {formatQuantity(remainingOnOrder)}{" "}
+          <Badge variant="light" color="teal" radius="md">
+            {translate("Linked total", "إجمالي المربوط")}: {formatQuantity(selectedTotal)}{" "}
             {getMaterialUnitLabel(orderUnit, locale)}
           </Badge>
+          {exceedsOrderQty ? (
+            <Badge variant="light" color="orange" radius="md">
+              {translate(
+                `Apply will set order qty to ${formatQuantity(selectedTotal)}`,
+                `عند التطبيق ستصبح كمية الأمر ${formatQuantity(selectedTotal)}`,
+              )}
+            </Badge>
+          ) : (
+            <Badge variant="light" color={remainingOnOrder > 1e-9 ? "orange" : "gray"} radius="md">
+              {translate("Unlinked on this line", "غير مربوط في هذا البند")}: {formatQuantity(remainingOnOrder)}{" "}
+              {getMaterialUnitLabel(orderUnit, locale)}
+            </Badge>
+          )}
         </div>
 
         {localError && <p className="text-sm text-red-600">{localError}</p>}
