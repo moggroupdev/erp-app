@@ -44,7 +44,7 @@ export type BomDisplayTotals = {
   totalMaterialCost: number;
   totalManufacturingCost: number;
   grandTotalCost: number;
-  estimatedUnitPrice: number;
+  estimatedUnitPrice: number | null;
   itemCount: number;
   manufacturingItemCount: number;
 };
@@ -162,7 +162,7 @@ export function getFlattenedRowLineCost(row: FlattenedBomRow, costingMethod: Cos
 export function getBomDisplayTotals(args: {
   materialRows: FlattenedBomRow[];
   manufacturingRows: ManufacturingCostRow[];
-  pricingFactor: number;
+  pricingFactor: number | null | undefined;
   costingMethod: CostingMethod;
 }): BomDisplayTotals {
   const totalMaterialCost = args.materialRows.reduce(
@@ -171,12 +171,13 @@ export function getBomDisplayTotals(args: {
   );
   const totalManufacturingCost = args.manufacturingRows.reduce((sum, row) => sum + row.totalManufacturingCost, 0);
   const grandTotalCost = totalMaterialCost + totalManufacturingCost;
+  const pricingFactor = args.pricingFactor != null ? Number(args.pricingFactor) : null;
 
   return {
     totalMaterialCost,
     totalManufacturingCost,
     grandTotalCost,
-    estimatedUnitPrice: grandTotalCost * args.pricingFactor,
+    estimatedUnitPrice: pricingFactor != null && pricingFactor > 0 ? grandTotalCost * pricingFactor : null,
     itemCount: args.materialRows.length,
     manufacturingItemCount: args.manufacturingRows.length,
   };

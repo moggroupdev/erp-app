@@ -33,7 +33,7 @@ type BomPrintDocumentProps = {
     totalMaterialCost: number;
     totalManufacturingCost: number;
     grandTotalCost: number;
-    estimatedUnitPrice: number;
+    estimatedUnitPrice: number | null;
     itemCount: number;
     manufacturingItemCount: number;
   };

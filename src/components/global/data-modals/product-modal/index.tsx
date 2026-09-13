@@ -45,7 +45,6 @@ export default function ProductModal({
   const [subCategoryId, setSubCategoryId] = useState<string | null>(null);
   const [sourceType, setSourceType] = useState<string | null>(null);
   const [estimatedProductionTime, setEstimatedProductionTime] = useState<number | string>("");
-  const [pricingFactor, setPricingFactor] = useState<number | string>("");
 
   function reset() {
     setTitle("");
@@ -54,7 +53,6 @@ export default function ProductModal({
     setSubCategoryId(null);
     setSourceType(null);
     setEstimatedProductionTime("");
-    setPricingFactor("");
   }
 
   useEffect(() => {
@@ -66,7 +64,6 @@ export default function ProductModal({
       setMainCategoryId(sub?.mainCategoryId ?? null);
       setSourceType(productToUpdate.sourceType);
       setEstimatedProductionTime(productToUpdate.estimatedProductionTime ?? "");
-      setPricingFactor(productToUpdate.pricingFactor);
     } else reset();
   }, [productToUpdate, helpers]);
 
@@ -84,15 +81,12 @@ export default function ProductModal({
           ? null
           : Number(estimatedProductionTime);
 
-      const normalizedPricingFactor = Number(pricingFactor);
-
       const dto = {
         title: title.trim(),
         description: description.trim() || null,
         subCategoryId: subCategoryId!,
         sourceType: sourceType as ProductSourceType,
         estimatedProductionTime: normalizedEstimatedProductionTime,
-        pricingFactor: normalizedPricingFactor,
       };
 
       return productToUpdate
@@ -134,13 +128,6 @@ export default function ProductModal({
       );
     }
 
-    const normalizedPricingFactor = Number(pricingFactor);
-    if (Number.isNaN(normalizedPricingFactor) || normalizedPricingFactor < 0) {
-      return setValidationError(
-        translate("Pricing factor must be a non-negative number.", "يجب أن يكون معامل التسعير رقماً غير سالب."),
-      );
-    }
-
     mutation.mutate();
   }
 
@@ -166,18 +153,14 @@ export default function ProductModal({
       ? null
       : Number(estimatedProductionTime);
 
-  const normalizedPricingFactor =
-    pricingFactor === "" || pricingFactor === null || pricingFactor === undefined ? null : Number(pricingFactor);
-
-  const isRequiredInputFilled = !!(title.trim() && mainCategoryId && subCategoryId && sourceType && pricingFactor !== "");
+  const isRequiredInputFilled = !!(title.trim() && mainCategoryId && subCategoryId && sourceType);
 
   const isDataChanged = productToUpdate
     ? title.trim() !== productToUpdate.title ||
       (description.trim() || null) !== productToUpdate.description ||
       subCategoryId !== productToUpdate.subCategoryId ||
       sourceType !== productToUpdate.sourceType ||
-      normalizedEstimatedProductionTime !== productToUpdate.estimatedProductionTime ||
-      normalizedPricingFactor !== productToUpdate.pricingFactor
+      normalizedEstimatedProductionTime !== productToUpdate.estimatedProductionTime
     : false;
 
   const isReadyToSubmit = isRequiredInputFilled && (productToUpdate ? isDataChanged : true);
@@ -229,18 +212,6 @@ export default function ProductModal({
           label={translate("Source Type", "نوع المصدر")}
           placeholder={translate("Select source type", "اختر نوع المصدر")}
           required
-        />
-
-        <NumberInput
-          value={pricingFactor}
-          onChange={setPricingFactor}
-          label={translate("Pricing Factor", "معامل التسعير")}
-          placeholder={translate("Enter pricing factor", "أدخل معامل التسعير")}
-          min={0}
-          allowNegative={false}
-          decimalScale={6}
-          required
-          radius="md"
         />
 
         <NumberInput

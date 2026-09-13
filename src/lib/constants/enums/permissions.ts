@@ -29,6 +29,8 @@ export const PERMISSION_VALUES = [
   "update_product",
   "delete_product",
   "print_products_list",
+  "read_product_pricing_factor",
+  "set_product_pricing_factor",
   "add_product_bom",
   "read_product_boms",
   "update_product_bom",
@@ -264,6 +266,20 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Print Products List",
       ar: "طباعة قائمة المنتجات",
+    },
+  },
+  read_product_pricing_factor: {
+    value: "read_product_pricing_factor",
+    label: {
+      en: "Read Product Pricing Factor",
+      ar: "عرض معامل تسعير المنتج",
+    },
+  },
+  set_product_pricing_factor: {
+    value: "set_product_pricing_factor",
+    label: {
+      en: "Set Product Pricing Factor",
+      ar: "تعيين معامل تسعير المنتج",
     },
   },
   add_product_bom: {
@@ -684,6 +700,8 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "update_product",
       "delete_product",
       "print_products_list",
+      "read_product_pricing_factor",
+      "set_product_pricing_factor",
       "add_product_bom",
       "read_product_boms",
       "update_product_bom",

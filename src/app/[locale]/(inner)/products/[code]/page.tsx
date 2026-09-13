@@ -6,21 +6,22 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import productsApi from "@/lib/api/products";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufactured } from "@/lib/constants/enums/product-source-types";
-import { Button } from "@mantine/core";
-import { Pencil } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
+import { Button, Menu } from "@mantine/core";
+import { ChevronDown, Pencil, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import ProductModal from "@/components/global/data-modals/product-modal";
 import ProductDetails from "./components/product-details";
+import ProductPricingFactorModal from "./components/product-pricing-factor-modal";
 import ProductDimensionsSection from "./components/product-dimensions-section";
 import ProductProductionRoutesSection from "./components/product-production-routes-section";
 
@@ -30,6 +31,9 @@ export default function Page() {
   const { locale, translate } = useI18n();
   const { code } = useParams<{ code: string }>();
   const privateRequest = usePrivateRequest();
+  const canUpdateProduct = useHasPermission(PERMISSIONS.UPDATE_PRODUCT);
+  const canSetPricingFactor = useHasPermission(PERMISSIONS.SET_PRODUCT_PRICING_FACTOR);
+  const canShowActions = canUpdateProduct || canSetPricingFactor;
 
   const productQuery = useQuery({
     queryKey: queryKeys.products.detail(code),
@@ -68,6 +72,7 @@ export default function Page() {
   }
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
+  const [pricingFactorModalOpened, { open: openPricingFactorModal, close: closePricingFactorModal }] = useDisclosure(false);
 
   return (
     <LayoutBox
@@ -77,12 +82,26 @@ export default function Page() {
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
-            {product && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
-                <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-                  {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
+            {product && canShowActions && (
+              <Menu offset={8} withinPortal withArrow>
+                <Menu.Target>
+                  <Button variant="light" radius="md" rightSection={<ChevronDown size={14} />}>
+                    {translate("Actions", "الإجراءات")}
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  {canUpdateProduct && (
+                    <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
+                      {translate("Edit Basic Information", "تعديل المعلومات الأساسية")}
+                    </Menu.Item>
+                  )}
+                  {canSetPricingFactor && (
+                    <Menu.Item leftSection={<Tag size={14} />} onClick={openPricingFactorModal}>
+                      {translate("Set Pricing Factor", "تعيين معامل التسعير")}
+                    </Menu.Item>
+                  )}
+                </Menu.Dropdown>
+              </Menu>
             )}
           </div>
         ),
@@ -104,6 +123,13 @@ export default function Page() {
               close={closeUpdateModal}
               productToUpdate={product}
               setProductToUpdate={() => {}}
+            />
+
+            <ProductPricingFactorModal
+              opened={pricingFactorModalOpened}
+              close={closePricingFactorModal}
+              productCode={product.code}
+              currentValue={product.pricingFactor ?? null}
             />
 
             <ProductDetails product={product} />

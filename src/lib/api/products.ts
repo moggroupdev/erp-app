@@ -11,6 +11,7 @@ import type {
   CreateProductDimensionDto,
   UpdateProductDimensionDto,
   SetProductProductionRoutesDto,
+  SetProductPricingFactorDto,
 } from "@/types/product";
 
 const productsApi = {
@@ -46,6 +47,18 @@ const productsApi = {
 
   async update({ privateRequest, code, dto }: { privateRequest: PrivateRequest; code: string; dto: UpdateProductDto }) {
     return await privateRequest<Product>({ method: "PUT", url: `products/${code}`, data: dto });
+  },
+
+  async setPricingFactor({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: SetProductPricingFactorDto;
+  }) {
+    return await privateRequest<Product>({ method: "PATCH", url: `products/${code}/pricing-factor`, data: dto });
   },
 
   // ========================= Dimensions =========================

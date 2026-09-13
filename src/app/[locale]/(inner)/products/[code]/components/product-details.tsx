@@ -1,6 +1,8 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import useHasPermission from "@/hooks/use-has-permission";
 import useProductCategories from "@/hooks/reference/use-product-categories";
 import { type ProductWithCreator } from "@/types/product";
 import { PackageSearch } from "lucide-react";
@@ -9,6 +11,9 @@ import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/compon
 export default function ProductDetails({ product }: { product: ProductWithCreator }) {
   const { locale, translate } = useI18n();
   const { helpers } = useProductCategories();
+  const canReadPricingFactor =
+    useHasPermission(PERMISSIONS.READ_PRODUCT_PRICING_FACTOR) ||
+    useHasPermission(PERMISSIONS.SET_PRODUCT_PRICING_FACTOR);
 
   const isDeleted = !!product.deletedAt;
   const subCategory = helpers.getProductCategorySubById(product.subCategoryId);
@@ -45,10 +50,14 @@ export default function ProductDetails({ product }: { product: ProductWithCreato
           <EmptyValue />
         ),
     },
-    {
-      key: translate("Pricing Factor", "معامل التسعير"),
-      value: product.pricingFactor,
-    },
+    ...(canReadPricingFactor && product.pricingFactor != null
+      ? [
+          {
+            key: translate("Pricing Factor", "معامل التسعير"),
+            value: product.pricingFactor,
+          },
+        ]
+      : []),
     {
       key: translate("Created By", "أنشئ بواسطة"),
       value: <CreatorLink creator={product.createdBy} />,

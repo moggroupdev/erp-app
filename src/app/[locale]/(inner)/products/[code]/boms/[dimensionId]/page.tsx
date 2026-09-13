@@ -86,6 +86,11 @@ export default function Page() {
   const canAddBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.ADD_PRODUCT_BOM));
   const canUpdateBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.UPDATE_PRODUCT_BOM));
   const canManageBom = canAddBom || canUpdateBom;
+  const canReadPricingFactor =
+    !!user &&
+    (user.isAdmin ||
+      user.role.permissions.includes(PERMISSIONS.READ_PRODUCT_PRICING_FACTOR) ||
+      user.role.permissions.includes(PERMISSIONS.SET_PRODUCT_PRICING_FACTOR));
 
   const getMaterialMainCategoryTitle = useCallback(
     (subCategoryId: string) => {
@@ -192,7 +197,7 @@ export default function Page() {
     return getBomDisplayTotals({
       materialRows,
       manufacturingRows,
-      pricingFactor: bom?.product.pricingFactor ?? 0,
+      pricingFactor: bom?.product.pricingFactor,
       costingMethod,
     });
   }, [materialRows, manufacturingRows, bom?.product.pricingFactor, costingMethod]);
@@ -329,10 +334,14 @@ export default function Page() {
           key: translate("Source Type", "نوع المصدر"),
           value: getProductSourceTypeLabel(bom.product.sourceType, locale),
         },
-        {
-          key: translate("Pricing Factor", "معامل التسعير"),
-          value: bom.product.pricingFactor,
-        },
+        ...(canReadPricingFactor && bom.product.pricingFactor != null
+          ? [
+              {
+                key: translate("Pricing Factor", "معامل التسعير"),
+                value: bom.product.pricingFactor,
+              },
+            ]
+          : []),
         {
           key: translate("Notes", "ملاحظات"),
           value: bom.notes ? <span className="whitespace-pre-wrap">{bom.notes}</span> : <EmptyValue />,
@@ -753,15 +762,17 @@ export default function Page() {
                     )}
                     icon={<Wallet size={18} />}
                   />
-                  <CalculationCard
-                    label={translate("Estimated Product Price", "السعر التقديري للمنتج")}
-                    value={formatMoney(totals.estimatedUnitPrice, currency)}
-                    hint={translate(
-                      "Material cost + manufacturing cost, then multiplied by pricing factor",
-                      "تكلفة المواد + تكلفة التصنيع ثم تضرب في معامل التسعير",
-                    )}
-                    icon={<Calculator size={18} />}
-                  />
+                  {canReadPricingFactor && totals.estimatedUnitPrice != null && (
+                    <CalculationCard
+                      label={translate("Estimated Product Price", "السعر التقديري للمنتج")}
+                      value={formatMoney(totals.estimatedUnitPrice, currency)}
+                      hint={translate(
+                        "Material cost + manufacturing cost, then multiplied by pricing factor",
+                        "تكلفة المواد + تكلفة التصنيع ثم تضرب في معامل التسعير",
+                      )}
+                      icon={<Calculator size={18} />}
+                    />
+                  )}
                 </div>
 
                 <Divider variant="dashed" />
