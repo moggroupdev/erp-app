@@ -2,6 +2,8 @@ import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type {
   CreateMaterialPurchaseOrderDto,
+  CreateMaterialPurchaseReceiptDto,
+  CreatedMaterialPurchaseReceipt,
   MaterialPurchaseOrder,
   MaterialPurchaseOrderDetailed,
   MaterialPurchaseOrderItem,
@@ -68,6 +70,20 @@ const materialPurchaseOrdersApi = {
     return await privateRequest<MaterialPurchaseReceiptDetailed>({
       url: `material-purchase-receipts/${id}`,
       signal,
+    });
+  },
+
+  async createReceipt({
+    privateRequest,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    dto: CreateMaterialPurchaseReceiptDto;
+  }) {
+    return await privateRequest<CreatedMaterialPurchaseReceipt>({
+      method: "POST",
+      url: "material-purchase-receipts",
+      data: dto,
     });
   },
 };

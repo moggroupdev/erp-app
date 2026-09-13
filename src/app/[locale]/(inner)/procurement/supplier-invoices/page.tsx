@@ -80,7 +80,7 @@ export default function Page() {
     keyword: debouncedKeyword,
   };
 
-  const params = { limit: INVOICES_PER_PAGE, sortBy: "-issuedAt", ...removeEmptyParams(urlParams) };
+  const params = { limit: INVOICES_PER_PAGE, sortBy: "-createdAt", ...removeEmptyParams(urlParams) };
 
   const resetAllFilters = () => {
     setActivePage(1);
@@ -177,28 +177,28 @@ export default function Page() {
                     <Table.Th>
                       {translate(`Total Amount (${translation.currency})`, `الإجمالي (${translation.currency})`)}
                     </Table.Th>
-                    <Table.Th>{translate("Created At", "تاريخ الإنشاء")}</Table.Th>
+                    <Table.Th>{translate("Entered At", "تاريخ الإدخال")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   {paginatedInvoices.data.map((invoice) => (
                     <Table.Tr key={invoice.id} className="text-gray-600">
-                  <Table.Td className="font-semibold text-gray-800">
-                    <div className="flex items-center gap-1.5">
-                      <Link
-                        href={getLocalizedHref(`/procurement/supplier-invoices/${invoice.id}`)}
-                        className="font-mono hover:underline"
-                      >
-                        {invoice.invoiceNumber}
-                      </Link>
-                      <CopyButton text={invoice.invoiceNumber} />
-                      {invoice.pdfFilename && (
-                        <span title={translate("PDF attached", "ملف PDF مرفق")} className="text-teal-700">
-                          <FileText size={14} strokeWidth={1.75} />
-                        </span>
-                      )}
-                    </div>
-                  </Table.Td>
+                      <Table.Td className="font-semibold text-gray-800">
+                        <div className="flex items-center gap-1.5">
+                          <Link
+                            href={getLocalizedHref(`/procurement/supplier-invoices/${invoice.id}`)}
+                            className="font-mono hover:underline"
+                          >
+                            {invoice.invoiceNumber}
+                          </Link>
+                          <CopyButton text={invoice.invoiceNumber} />
+                          {invoice.pdfFilename && (
+                            <span title={translate("PDF attached", "ملف PDF مرفق")} className="text-teal-700">
+                              <FileText size={14} strokeWidth={1.75} />
+                            </span>
+                          )}
+                        </div>
+                      </Table.Td>
                       <Table.Td>
                         <Link
                           href={getLocalizedHref(`/procurement/suppliers/${invoice.supplier.id}`)}

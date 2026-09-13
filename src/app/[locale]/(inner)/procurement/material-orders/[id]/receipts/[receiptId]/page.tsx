@@ -5,21 +5,22 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button, Table } from "@mantine/core";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, PackagePlus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
-import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -27,6 +28,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import ReceiptDetails from "./components/receipt-details";
 import InspectionReportModal from "./components/inspection-report-modal";
+import CreateInventoryTransactionModal from "./components/create-inventory-transaction-modal";
 
 const PAGE_TITLE = { en: "Materials Receipt Details", ar: "سند استلام خامات" };
 
@@ -36,8 +38,10 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+  const canAddInventoryTransaction = useHasPermission(PERMISSIONS.ADD_INVENTORY_TRANSACTION);
 
   const [inspectionModalOpened, { open: openInspectionModal, close: closeInspectionModal }] = useDisclosure(false);
+  const [ivtModalOpened, { open: openIvtModal, close: closeIvtModal }] = useDisclosure(false);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -57,6 +61,11 @@ export default function Page() {
   });
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
+  const canCreateIvt =
+    canAddInventoryTransaction &&
+    !!receipt &&
+    receipt.inventoryTransactions.length === 0 &&
+    receipt.items.some((item) => Number(item.quantityReceived) > 0);
 
   useDocumentTitle(
     `${receipt?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
@@ -69,6 +78,17 @@ export default function Page() {
         backLink: getLocalizedHref(`/procurement/material-orders/${orderId}`),
         sideElements: (
           <div className="flex items-center gap-2">
+            {canCreateIvt && (
+              <Button
+                variant="light"
+                color="teal"
+                radius="md"
+                leftSection={<PackagePlus size={15} />}
+                onClick={openIvtModal}
+              >
+                {translate("Create اذن إضافة", "إنشاء إذن إضافة")}
+              </Button>
+            )}
             {receipt && receipt.items.length > 0 && (
               <Button
                 variant="light"
@@ -96,7 +116,11 @@ export default function Page() {
       ) : (
         receipt && (
           <>
-            <ReceiptDetails receipt={receipt} />
+            <ReceiptDetails
+              receipt={receipt}
+              canCreateInventoryTransaction={canAddInventoryTransaction}
+              onCreateInventoryTransaction={openIvtModal}
+            />
 
             <section className="mt-4 flex flex-col gap-4">
               <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
@@ -128,74 +152,47 @@ export default function Page() {
                         const { material, quantityOrdered, unitPrice, unitOfMeasurementSelected: orderUnit } =
                           item.materialPurchaseOrderItem;
                         const receiptUnit = item.unitOfMeasurementSelected;
-                        const subtotal = Number(item.quantityReceived) * Number(unitPrice);
-                        const selectedFactor = resolveDisplayUnit(
+                        const orderFactor = resolveDisplayUnit(
                           orderUnit,
                           material.unitOfMeasurement,
                           material.unitConversions,
                         ).factor;
-                        const baseUnitPrice = selectedFactor === 0 ? Number(unitPrice) : Number(unitPrice) / selectedFactor;
+                        const receiptFactor = resolveDisplayUnit(
+                          receiptUnit,
+                          material.unitOfMeasurement,
+                          material.unitConversions,
+                        ).factor;
+                        const baseUnitPrice = orderFactor === 0 ? Number(unitPrice) : Number(unitPrice) / orderFactor;
+                        const unitPriceInReceiptUnit = toDisplayUnitPrice(baseUnitPrice, receiptFactor);
+                        const quantityReceived = Number(item.quantityReceived);
+                        const subtotal = quantityReceived * unitPriceInReceiptUnit;
 
                         return (
-                          <UnitToggle
-                            key={`${item.id}:${receiptUnit}`}
-                            baseUnit={material.unitOfMeasurement}
-                            unitConversions={material.unitConversions}
-                            defaultUnit={receiptUnit}
-                          >
-                            {({ unit, factor, toggleButton }) => (
-                              <Table.Tr className="text-gray-600">
-                                <Table.Td className="font-semibold text-gray-800">
-                                  <Link
-                                    href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
-                                    className="hover:underline"
-                                  >
-                                    {material.title}
-                                  </Link>
-                                </Table.Td>
-                                <Table.Td>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-mono">{material.code}</span>
-                                    <CopyButton text={material.code} />
-                                  </div>
-                                </Table.Td>
-                                <Table.Td>{getMainCategoryTitle(material.subCategoryId)}</Table.Td>
-                                <Table.Td>
-                                  <div className="flex items-center gap-1">
-                                    {getMaterialUnitLabel(unit, locale)}
-                                    {toggleButton}
-                                  </div>
-                                </Table.Td>
-                                <Table.Td>
-                                  {formatEnteredQuantityForDisplay(quantityOrdered, orderUnit, unit, material)}
-                                </Table.Td>
-                                <Table.Td>
-                                  {formatEnteredQuantityForDisplay(
-                                    item.quantityReceived,
-                                    receiptUnit,
-                                    unit,
-                                    material,
-                                  )}{" "}
-                                  <span className="text-xs text-gray-500">
-                                    {getMaterialUnitLabel(receiptUnit, locale)}
-                                  </span>
-                                </Table.Td>
-                                <Table.Td>
-                                  {formatEnteredQuantityForDisplay(
-                                    item.quantityRejected,
-                                    receiptUnit,
-                                    unit,
-                                    material,
-                                  )}{" "}
-                                  <span className="text-xs text-gray-500">
-                                    {getMaterialUnitLabel(receiptUnit, locale)}
-                                  </span>
-                                </Table.Td>
-                                <Table.Td>{formatMoney(toDisplayUnitPrice(baseUnitPrice, factor))}</Table.Td>
-                                <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                              </Table.Tr>
-                            )}
-                          </UnitToggle>
+                          <Table.Tr key={item.id} className="text-gray-600">
+                            <Table.Td className="font-semibold text-gray-800">
+                              <Link
+                                href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
+                                className="hover:underline"
+                              >
+                                {material.title}
+                              </Link>
+                            </Table.Td>
+                            <Table.Td>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono">{material.code}</span>
+                                <CopyButton text={material.code} />
+                              </div>
+                            </Table.Td>
+                            <Table.Td>{getMainCategoryTitle(material.subCategoryId)}</Table.Td>
+                            <Table.Td>{getMaterialUnitLabel(receiptUnit, locale)}</Table.Td>
+                            <Table.Td>
+                              {formatEnteredQuantityForDisplay(quantityOrdered, orderUnit, receiptUnit, material)}
+                            </Table.Td>
+                            <Table.Td>{formatQuantity(quantityReceived)}</Table.Td>
+                            <Table.Td>{formatQuantity(item.quantityRejected)}</Table.Td>
+                            <Table.Td>{formatMoney(unitPriceInReceiptUnit)}</Table.Td>
+                            <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                          </Table.Tr>
                         );
                       })}
                     </Table.Tbody>
@@ -204,11 +201,25 @@ export default function Page() {
                         <Table.Th colSpan={8}>{translate("Total", "الإجمالي")}</Table.Th>
                         <Table.Th>
                           {formatMoney(
-                            receipt.items.reduce(
-                              (sum, item) =>
-                                sum + Number(item.quantityReceived) * Number(item.materialPurchaseOrderItem.unitPrice),
-                              0,
-                            ),
+                            receipt.items.reduce((sum, item) => {
+                              const { material, unitPrice, unitOfMeasurementSelected: orderUnit } =
+                                item.materialPurchaseOrderItem;
+                              const receiptUnit = item.unitOfMeasurementSelected;
+                              const orderFactor = resolveDisplayUnit(
+                                orderUnit,
+                                material.unitOfMeasurement,
+                                material.unitConversions,
+                              ).factor;
+                              const receiptFactor = resolveDisplayUnit(
+                                receiptUnit,
+                                material.unitOfMeasurement,
+                                material.unitConversions,
+                              ).factor;
+                              const baseUnitPrice =
+                                orderFactor === 0 ? Number(unitPrice) : Number(unitPrice) / orderFactor;
+                              const unitPriceInReceiptUnit = toDisplayUnitPrice(baseUnitPrice, receiptFactor);
+                              return sum + Number(item.quantityReceived) * unitPriceInReceiptUnit;
+                            }, 0),
                           )}
                         </Table.Th>
                       </Table.Tr>
@@ -219,6 +230,12 @@ export default function Page() {
             </section>
 
             <InspectionReportModal opened={inspectionModalOpened} onClose={closeInspectionModal} items={receipt.items} />
+            <CreateInventoryTransactionModal
+              opened={ivtModalOpened}
+              onClose={closeIvtModal}
+              receiptId={receipt.id}
+              receiptCode={receipt.code}
+            />
           </>
         )
       )}

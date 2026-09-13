@@ -256,6 +256,7 @@ export default function OrderInvoicesSection({
 
       {showUpload && (
         <UploadInvoiceConfirmModal
+          mode="create"
           opened={confirmOpened}
           onClose={handleConfirmClose}
           materialPurchaseOrderId={materialPurchaseOrderId!}

@@ -29,18 +29,18 @@ function getDecisionLabel(decision: ApprovalDecision, translate: (en: string, ar
 function PrintOrgHeader() {
   return (
     <div className="flex flex-col gap-2 font-semibold">
-      <p className="text-xs text-gray-800">موج العاشر من رمضــــان</p>
-      <p className="text-xs text-gray-800">إدارة المشتريات والمخازن</p>
-      <p className="text-xs text-gray-800">المخــــــــزن الرئيســـــــــــــي</p>
+      <p className="text-xs text-gray-800">موج العاشر من رمضـــــان</p>
+      <p className="text-xs text-gray-800">إدارة المشتريات والمخـازن</p>
+      <p className="text-xs text-gray-800">المخــــــــزن الرئيســـــــــــــــي</p>
     </div>
   );
 }
 
 function ApprovalSignatureBlock({ title, name }: { title: string; name: string | null }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-1">
+    <div className="flex min-w-0 flex-1 flex-col gap-2">
       <p className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">{title}</p>
-      <p className="text-[10px] font-medium text-gray-800">{name ?? "-"}</p>
+      <p className="text-[11px] font-medium text-gray-800">{name ?? "-"}</p>
     </div>
   );
 }
@@ -65,20 +65,19 @@ function ApprovalGateBlock({
   const decisionLabel = getDecisionLabel(decision, translate);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-1">
+    <div className="flex min-w-0 flex-1 flex-col gap-2">
       <p className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">{title}</p>
 
-      <div className="flex min-h-14 flex-1 flex-col justify-end gap-1">
+      <div className="flex min-h-14 flex-1 flex-col gap-1">
         {decisionLabel ? <p className="text-xs font-semibold text-gray-900">{decisionLabel}</p> : null}
         {decidedBy ? <p className="text-[10px] font-medium text-gray-800">{decidedBy}</p> : null}
         {decidedAt ? <p className="text-[10px] text-gray-500">{formatDateAndTime(decidedAt, locale)}</p> : null}
+        {reason ? (
+          <p className="text-[9px] text-gray-600">
+            <span className="font-medium text-gray-500">{translate("Reason", "السبب")}:</span> {reason}
+          </p>
+        ) : null}
       </div>
-
-      {reason ? (
-        <p className="text-[9px] leading-snug text-gray-600">
-          <span className="font-medium text-gray-500">{translate("Reason", "السبب")}:</span> {reason}
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -217,15 +216,14 @@ export default function MaterialPurchaseRequisitionPrintDocument({
           footerRows={itemFooterRows}
           monoColumnIndexes={[1]}
           noWrapIndexes={[1, 4, 5, 6, 7]}
-          tableClassName="text-[8px] [&_td]:align-top [&_thead]:text-[7px]"
-          columnWidths={["16%", "8%", "10%", "7%", "8%", "10%", "9%", "9%", "11%", "12%"]}
+          tableClassName="text-[8px] [&_td]:align-top [&_th]:text-[8px]"
           emptyLabel={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")}
         />
         {missingPriceCount > 0 ? (
           <p className="text-[9px] leading-relaxed text-amber-700">
             {translate(
-              `${missingPriceCount} item(s) without a last purchase price were excluded from this estimate.`,
-              `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير.`,
+              `${missingPriceCount} item(s) without a last purchase price were excluded from this total estimate.`,
+              `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير الإجمالي.`,
             )}
           </p>
         ) : null}

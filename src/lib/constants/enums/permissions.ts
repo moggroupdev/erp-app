@@ -53,11 +53,13 @@ export const PERMISSION_VALUES = [
   "read_production_plans",
   "read_production_routing",
   "read_inventory_transactions",
+  "add_inventory_transaction",
   "add_legacy_issue_permit",
   "read_legacy_issue_permits",
   "update_legacy_issue_permit",
   "read_material_purchase_orders",
   "add_material_purchase_order",
+  "add_material_purchase_receipt",
   "read_supplier_invoices",
   "add_supplier_invoice",
   "update_supplier_invoice",
@@ -433,6 +435,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض حركات المخزون",
     },
   },
+  add_inventory_transaction: {
+    value: "add_inventory_transaction",
+    label: {
+      en: "Add Inventory Transaction",
+      ar: "إنشاء إذن مخزون",
+    },
+  },
   add_legacy_issue_permit: {
     value: "add_legacy_issue_permit",
     label: {
@@ -466,6 +475,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Add Material Purchase Order",
       ar: "إنشاء أمر توريد مواد",
+    },
+  },
+  add_material_purchase_receipt: {
+    value: "add_material_purchase_receipt",
+    label: {
+      en: "Add Material Purchase Receipt",
+      ar: "إنشاء سند استلام مواد",
     },
   },
   read_supplier_invoices: {
@@ -697,6 +713,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_manufactured_material_boms",
       "update_manufactured_material_bom",
       "read_inventory_transactions",
+      "add_inventory_transaction",
       "add_legacy_issue_permit",
       "read_legacy_issue_permits",
       "update_legacy_issue_permit",
@@ -719,6 +736,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "approve_material_purchase_requisition_manager",
       "read_material_purchase_orders",
       "add_material_purchase_order",
+      "add_material_purchase_receipt",
       "read_supplier_invoices",
       "add_supplier_invoice",
       "update_supplier_invoice",

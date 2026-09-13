@@ -69,13 +69,22 @@ const supplierInvoicesApi = {
     privateRequest,
     id,
     file,
+    fields,
   }: {
     privateRequest: PrivateRequest;
     id: string;
     file: File;
+    fields: CreateSupplierInvoiceFields;
   }) {
     const data = new FormData();
     data.append("pdf", file);
+    data.append("invoiceNumber", fields.invoiceNumber);
+    if (fields.issuedAt) data.append("issuedAt", fields.issuedAt);
+    if (fields.totalPurchases != null) data.append("totalPurchases", String(fields.totalPurchases));
+    if (fields.totalDiscount != null) data.append("totalDiscount", String(fields.totalDiscount));
+    if (fields.vatAmount != null) data.append("vatAmount", String(fields.vatAmount));
+    if (fields.withholdingTaxAmount != null) data.append("withholdingTaxAmount", String(fields.withholdingTaxAmount));
+    if (fields.totalAmount != null) data.append("totalAmount", String(fields.totalAmount));
 
     return await privateRequest<SupplierInvoiceDetailed>({
       url: `supplier-invoices/${id}/pdf`,
