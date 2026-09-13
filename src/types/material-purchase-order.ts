@@ -70,6 +70,18 @@ export type MaterialPurchaseOrderWithSupplier = MaterialPurchaseOrder & {
   invoices?: Pick<SupplierInvoice, "id" | "invoiceNumber" | "issuedAt" | "totalPurchases">[];
 };
 
+export type MaterialPurchaseOrderItemRequisitionAllocation = {
+  id: string;
+  materialPurchaseRequisitionItemId: string;
+  quantityAllocated: number;
+  unitOfMeasurementSelected: MaterialUnit;
+  requisition: {
+    id: string;
+    code: string;
+    productionSubDepartment: string;
+  };
+};
+
 export type MaterialPurchaseOrderItem = {
   id: string;
   materialPurchaseOrderId: string;
@@ -83,6 +95,7 @@ export type MaterialPurchaseOrderItem = {
   quantityReceived?: number;
   /** Remaining qty in the order line's selected unit (ordered − received − rejected across receipts). */
   quantityRemaining?: number;
+  requisitionAllocations?: MaterialPurchaseOrderItemRequisitionAllocation[];
 };
 
 export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "createdBy"> & {
@@ -91,12 +104,19 @@ export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "created
   items: MaterialPurchaseOrderItem[];
 };
 
+export type CreateMaterialPurchaseOrderItemRequisitionAllocationDto = {
+  materialPurchaseRequisitionItemId: string;
+  /** Quantity in the requisition line's selected unit. */
+  quantityAllocated: number;
+};
+
 export type CreateMaterialPurchaseOrderItemDto = {
   materialCode: string;
   unitOfMeasurementSelected: MaterialUnit;
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
+  requisitionAllocations?: CreateMaterialPurchaseOrderItemRequisitionAllocationDto[];
 };
 
 export type CreateMaterialPurchaseOrderDto = {

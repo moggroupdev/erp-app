@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button } from "@mantine/core";
-import { Pencil, Plus, Printer } from "lucide-react";
+import { Pencil, Plus, Printer, ShoppingCart } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -29,7 +30,7 @@ import RequisitionItemModal from "./components/requisition-item-modal";
 import RequisitionItemsTable from "./components/requisition-items-table";
 import PrintDocument from "@/components/ui/print-document";
 import MaterialPurchaseRequisitionPrintDocument from "@/components/documents/material-purchase-requisition-print-document";
-import { isRequisitionEditable } from "../helpers";
+import { getRequisitionStatus, isRequisitionEditable } from "../helpers";
 
 const PAGE_TITLE = { en: "Requisition Details", ar: "تفاصيل طلب الشراء" };
 
@@ -64,6 +65,10 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
   const editable = requisition ? isRequisitionEditable(requisition) : false;
+  const canCreateOrder =
+    !!requisition &&
+    getRequisitionStatus(requisition) === "approved" &&
+    requisition.items.some((item) => Number(item.quantityRemaining ?? 0) > 1e-9);
 
   useDocumentTitle(
     `${requisition?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Requisitions", "طلبات شراء الخامات")}`,
@@ -106,6 +111,20 @@ export default function Page() {
               </div>
             )}
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            {canCreateOrder && (
+              <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL_PURCHASE_ORDER}>
+                <Button
+                  component={Link}
+                  href={getLocalizedHref(`/procurement/material-orders/create?requisitionId=${requisition!.id}`)}
+                  variant="filled"
+                  color="teal"
+                  radius="md"
+                  leftSection={<ShoppingCart size={15} />}
+                >
+                  {translate("Create purchase order", "إنشاء أمر توريد")}
+                </Button>
+              </PermissionGuard>
+            )}
             {requisition && editable && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL_PURCHASE_REQUISITION}>
                 <Button onClick={openHeaderModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>

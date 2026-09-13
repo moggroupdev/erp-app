@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
@@ -10,21 +10,30 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import usePrivateRequest from "@/hooks/use-private-request";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
+import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
+import { staleTimes } from "@/lib/constants/stale-times";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
-import { Plus, Trash2 } from "lucide-react";
+import { Link2, Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
+import LoadingSection from "@/components/ui/sections/loading";
+import ErrorSection from "@/components/ui/sections/error";
+import { convertEnteredQuantityBetweenUnits } from "../helpers";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import LinkRequisitionsModal, { type AllocationDraft } from "./components/link-requisitions-modal";
+import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
 
@@ -39,6 +48,7 @@ type ItemDraftRow = {
   quantity: number | "";
   unitPrice: number | "";
   notes: string;
+  allocations: AllocationDraft[];
 };
 
 function createRowKey() {
@@ -57,6 +67,7 @@ function createEmptyRow(): ItemDraftRow {
     quantity: "",
     unitPrice: "",
     notes: "",
+    allocations: [],
   };
 }
 
@@ -65,11 +76,27 @@ function showUnitSelect(row: ItemDraftRow) {
 }
 
 function isEmptyRow(row: ItemDraftRow) {
-  return row.materialCode === null && row.quantity === "" && row.unitPrice === "" && row.notes.trim() === "";
+  return (
+    row.materialCode === null &&
+    row.quantity === "" &&
+    row.unitPrice === "" &&
+    row.notes.trim() === "" &&
+    row.allocations.length === 0
+  );
 }
 
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
   return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
+}
+
+function allocationSummaryLabel(row: ItemDraftRow, locale: Locale, translate: (en: string, ar: string) => string) {
+  if (row.allocations.length === 0) return translate("Not linked", "غير مربوط");
+  if (row.allocations.length === 1) {
+    const allocation = row.allocations[0];
+    const unit = row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : "";
+    return `${allocation.requisitionCode} · ${formatQuantity(allocation.quantityAllocated)} ${unit}`.trim();
+  }
+  return translate(`${row.allocations.length} requisitions`, `${row.allocations.length} طلبات شراء`);
 }
 
 function ItemRow({
@@ -82,6 +109,7 @@ function ItemRow({
   onMaterialSelect,
   onUpdate,
   onRemove,
+  onLinkRequisitions,
 }: {
   row: ItemDraftRow;
   index: number;
@@ -92,113 +120,161 @@ function ItemRow({
   onMaterialSelect: (key: string, material: MaterialWithUnitConversionsSelection | null) => void;
   onUpdate: (key: string, patch: Partial<ItemDraftRow>) => void;
   onRemove: (key: string) => void;
+  onLinkRequisitions: (key: string) => void;
 }) {
   const { translate } = useI18n();
   const quantity = typeof row.quantity === "number" ? row.quantity : null;
   const unitPrice = typeof row.unitPrice === "number" ? row.unitPrice : null;
   const lineTotal = quantity !== null && unitPrice !== null ? quantity * unitPrice : null;
+  const linkedTotal = row.allocations.reduce((sum, rowAllocation) => sum + rowAllocation.quantityAllocated, 0);
+  const underLinked = quantity !== null && linkedTotal + 1e-9 < quantity && row.allocations.length > 0;
 
   return (
-    <Table.Tr>
-      <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <SelectMaterial
-          value={row.materialCode}
-          setValue={(next) => {
-            const resolved = typeof next === "function" ? next(row.materialCode) : next;
-            if (!resolved) onMaterialSelect(row.key, null);
-            else onUpdate(row.key, { materialCode: resolved });
-          }}
-          onMaterialSelect={(material) => onMaterialSelect(row.key, material)}
-          excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
-          placeholder={translate("Enter material...", "أدخل المادة...")}
-          variant="unstyled"
-          radius={0}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-          withBrowseModal
-        />
-      </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <NumberInput
-          value={row.quantity}
-          onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
-          min={0}
-          allowNegative={false}
-          decimalScale={6}
-          hideControls
-          variant="unstyled"
-          radius={0}
-          placeholder={translate("Enter quantity", "أدخل الكمية")}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-        />
-      </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        {showUnitSelect(row) ? (
-          <DataSelect
-            value={row.unitOfMeasurementSelected}
+    <>
+      <Table.Tr>
+        <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
+        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+          <SelectMaterial
+            value={row.materialCode}
             setValue={(next) => {
-              const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
-              onUpdate(row.key, {
-                unitOfMeasurementSelected: (resolved as MaterialUnit | null) ?? row.unitOfMeasurement,
-              });
+              const resolved = typeof next === "function" ? next(row.materialCode) : next;
+              if (!resolved) onMaterialSelect(row.key, null);
+              else onUpdate(row.key, { materialCode: resolved, allocations: [] });
             }}
-            data={getRowUnitOptions(row, locale)}
+            onMaterialSelect={(material) => onMaterialSelect(row.key, material)}
+            excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
+            placeholder={translate("Enter material...", "أدخل المادة...")}
             variant="unstyled"
             radius={0}
-            searchable
-            placeholder={translate("Select unit", "اختر الوحدة")}
-            styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+            withBrowseModal
           />
-        ) : (
-          <span className="text-sm text-gray-600">
-            {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
-          </span>
-        )}
-      </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <NumberInput
-          value={row.unitPrice}
-          onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
-          min={0}
-          allowNegative={false}
-          decimalScale={6}
-          hideControls
-          variant="unstyled"
-          radius={0}
-          placeholder={translate("Enter price", "أدخل السعر")}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-          aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
-        />
-      </Table.Td>
-      <Table.Td>
-        <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
-      </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <TextInput
-          value={row.notes}
-          onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
-          placeholder={translate("Optional", "اختياري")}
-          variant="unstyled"
-          radius={0}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-        />
-      </Table.Td>
-      <Table.Td className="w-[2.5%]">
-        <Button
-          type="button"
-          variant="subtle"
-          color="red"
-          size="xs"
-          radius="md"
-          p={6}
-          disabled={!canRemove}
-          onClick={() => onRemove(row.key)}
-          title={translate("Remove row", "حذف الصف")}
-        >
-          <Trash2 size={14} />
-        </Button>
-      </Table.Td>
-    </Table.Tr>
+        </Table.Td>
+        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+          <NumberInput
+            value={row.quantity}
+            onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
+            min={0}
+            allowNegative={false}
+            decimalScale={6}
+            hideControls
+            variant="unstyled"
+            radius={0}
+            placeholder={translate("Enter quantity", "أدخل الكمية")}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          />
+        </Table.Td>
+        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+          {showUnitSelect(row) ? (
+            <DataSelect
+              value={row.unitOfMeasurementSelected}
+              setValue={(next) => {
+                const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
+                const nextUnit = (resolved as MaterialUnit | null) ?? row.unitOfMeasurement;
+                if (!nextUnit || !row.unitOfMeasurement || !row.unitOfMeasurementSelected) {
+                  onUpdate(row.key, { unitOfMeasurementSelected: nextUnit });
+                  return;
+                }
+                const convertedAllocations = row.allocations.map((allocation) => ({
+                  ...allocation,
+                  quantityAllocated: convertEnteredQuantityBetweenUnits(
+                    allocation.quantityAllocated,
+                    row.unitOfMeasurementSelected!,
+                    nextUnit,
+                    row.unitOfMeasurement!,
+                    row.unitConversions,
+                  ),
+                }));
+                onUpdate(row.key, {
+                  unitOfMeasurementSelected: nextUnit,
+                  allocations: convertedAllocations,
+                });
+              }}
+              data={getRowUnitOptions(row, locale)}
+              variant="unstyled"
+              radius={0}
+              searchable
+              placeholder={translate("Select unit", "اختر الوحدة")}
+              styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+            />
+          ) : (
+            <span className="text-sm text-gray-600">
+              {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
+            </span>
+          )}
+        </Table.Td>
+        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+          <NumberInput
+            value={row.unitPrice}
+            onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
+            min={0}
+            allowNegative={false}
+            decimalScale={6}
+            hideControls
+            variant="unstyled"
+            radius={0}
+            placeholder={translate("Enter price", "أدخل السعر")}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+            aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
+          />
+        </Table.Td>
+        <Table.Td>
+          <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
+        </Table.Td>
+        <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+          <TextInput
+            value={row.notes}
+            onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
+            placeholder={translate("Optional", "اختياري")}
+            variant="unstyled"
+            radius={0}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          />
+        </Table.Td>
+        <Table.Td className="w-[2.5%]">
+          <Button
+            type="button"
+            variant="subtle"
+            color="red"
+            size="xs"
+            radius="md"
+            p={6}
+            disabled={!canRemove}
+            onClick={() => onRemove(row.key)}
+            title={translate("Remove row", "حذف الصف")}
+          >
+            <Trash2 size={14} />
+          </Button>
+        </Table.Td>
+      </Table.Tr>
+      <Table.Tr className="bg-gray-50/70">
+        <Table.Td />
+        <Table.Td colSpan={7}>
+          <div className="flex flex-wrap items-center gap-2 py-1">
+            <Badge size="sm" variant="light" color={row.allocations.length > 0 ? "teal" : "gray"} radius="md">
+              {allocationSummaryLabel(row, locale, translate)}
+            </Badge>
+            {underLinked && (
+              <Badge size="sm" variant="light" color="orange" radius="md">
+                {translate("Partially linked", "مربوط جزئياً")}
+              </Badge>
+            )}
+            <Button
+              type="button"
+              variant="subtle"
+              color="teal"
+              size="compact-xs"
+              radius="md"
+              leftSection={<Link2 size={13} />}
+              disabled={!row.materialCode || !row.unitOfMeasurementSelected}
+              onClick={() => onLinkRequisitions(row.key)}
+            >
+              {translate("Link requisitions", "ربط طلبات الشراء")}
+            </Button>
+          </div>
+        </Table.Td>
+      </Table.Tr>
+    </>
   );
 }
 
@@ -206,6 +282,8 @@ export default function Page() {
   const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requisitionIdParam = searchParams.get("requisitionId");
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
 
@@ -214,23 +292,112 @@ export default function Page() {
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [prefillDone, setPrefillDone] = useState(!requisitionIdParam);
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
+  const [linkRowKey, setLinkRowKey] = useState<string | null>(null);
 
   useDocumentTitle(
     `${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
   );
 
+  const {
+    data: seedRequisition,
+    isFetching: isSeedFetching,
+    error: seedError,
+  } = useQuery({
+    queryKey: queryKeys.materialPurchaseRequisitions.detail(requisitionIdParam || "none"),
+    queryFn: ({ signal }) => materialPurchaseRequisitionsApi.get({ privateRequest, id: requisitionIdParam!, signal }),
+    staleTime: staleTimes.materialPurchaseRequisitions,
+    enabled: !!requisitionIdParam,
+  });
+
+  useEffect(() => {
+    if (!requisitionIdParam || !seedRequisition || prefillDone) return;
+
+    if (getRequisitionStatus(seedRequisition) !== "approved") {
+      setValidationError(
+        translate(
+          "Only fully approved requisitions can be used to create a purchase order.",
+          "يمكن إنشاء أمر توريد فقط من طلبات الشراء المعتمدة بالكامل.",
+        ),
+      );
+      setPrefillDone(true);
+      return;
+    }
+
+    const remainingItems = seedRequisition.items.filter((item) => Number(item.quantityRemaining) > 1e-9);
+    if (remainingItems.length === 0) {
+      setValidationError(
+        translate("This requisition has no remaining quantity to order.", "لا توجد كمية متبقية للطلب في طلب الشراء هذا."),
+      );
+      setPrefillDone(true);
+      return;
+    }
+
+    setRows(
+      remainingItems.map((item) => {
+        const { factor } = resolveDisplayUnit(
+          item.unitOfMeasurementSelected,
+          item.material.unitOfMeasurement,
+          item.material.unitConversions,
+        );
+        const unitPrice =
+          item.unitPrice != null && Number(item.unitPrice) > 0 ? toDisplayUnitPrice(Number(item.unitPrice), factor) : "";
+
+        return {
+          key: createRowKey(),
+          materialCode: item.materialCode,
+          materialTitle: item.material.title,
+          materialType: item.material.materialType,
+          unitOfMeasurement: item.material.unitOfMeasurement,
+          unitConversions: item.material.unitConversions,
+          unitOfMeasurementSelected: item.unitOfMeasurementSelected,
+          quantity: Number(item.quantityRemaining),
+          unitPrice,
+          notes: item.notes ?? "",
+          allocations: [
+            {
+              materialPurchaseRequisitionItemId: item.id,
+              requisitionId: seedRequisition.id,
+              requisitionCode: seedRequisition.code,
+              productionSubDepartment: seedRequisition.productionSubDepartment,
+              unitOfMeasurementSelected: item.unitOfMeasurementSelected,
+              quantityRemaining: Number(item.quantityRemaining),
+              quantityAllocated: Number(item.quantityRemaining),
+            },
+          ],
+        };
+      }),
+    );
+
+    setPrefillDone(true);
+  }, [requisitionIdParam, seedRequisition, prefillDone, translate]);
+
   const mutation = useMutation({
     mutationFn: async () => {
       const items = rows
         .filter((row) => !isEmptyRow(row))
-        .map((row) => ({
-          materialCode: row.materialCode!,
-          unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
-          quantityOrdered: Number(row.quantity),
-          unitPrice: Number(row.unitPrice),
-          notes: row.notes.trim() || null,
-        }));
+        .map((row) => {
+          const requisitionAllocations = row.allocations.map((allocation) => ({
+            materialPurchaseRequisitionItemId: allocation.materialPurchaseRequisitionItemId,
+            quantityAllocated: convertEnteredQuantityBetweenUnits(
+              allocation.quantityAllocated,
+              row.unitOfMeasurementSelected!,
+              allocation.unitOfMeasurementSelected,
+              row.unitOfMeasurement!,
+              row.unitConversions,
+            ),
+          }));
+
+          return {
+            materialCode: row.materialCode!,
+            unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
+            quantityOrdered: Number(row.quantity),
+            unitPrice: Number(row.unitPrice),
+            notes: row.notes.trim() || null,
+            ...(requisitionAllocations.length > 0 ? { requisitionAllocations } : {}),
+          };
+        });
 
       return await materialPurchaseOrdersApi.create({
         privateRequest,
@@ -243,7 +410,10 @@ export default function Page() {
     },
     onSuccess: async (created) => {
       setSubmitted(true);
-      await queryClient.invalidateQueries({ queryKey: queryKeys.materialPurchaseOrders.all });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.materialPurchaseOrders.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.materialPurchaseRequisitions.all }),
+      ]);
       router.push(getLocalizedHref(`/procurement/material-orders/${created.id}`));
     },
   });
@@ -272,6 +442,8 @@ export default function Page() {
     [rows],
   );
 
+  const linkRow = linkRowKey ? rows.find((row) => row.key === linkRowKey) : null;
+
   function updateRow(key: string, patch: Partial<ItemDraftRow>) {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
@@ -285,6 +457,7 @@ export default function Page() {
       unitConversions: material?.unitConversions ?? [],
       unitOfMeasurementSelected: material?.unitOfMeasurement ?? null,
       unitPrice: material?.unitPrice ?? "",
+      allocations: [],
     });
     setValidationError("");
   }
@@ -299,7 +472,16 @@ export default function Page() {
       incomplete.map(async (row) => {
         try {
           const material = await materialsApi.get({ privateRequest, code: row.materialCode! });
-          if (!cancelled) handleMaterialSelect(row.key, material);
+          if (!cancelled) {
+            updateRow(row.key, {
+              materialTitle: material.title,
+              materialType: material.materialType,
+              unitOfMeasurement: material.unitOfMeasurement,
+              unitConversions: material.unitConversions,
+              unitOfMeasurementSelected: row.unitOfMeasurementSelected ?? material.unitOfMeasurement,
+              unitPrice: row.unitPrice === "" ? (material.unitPrice ?? "") : row.unitPrice,
+            });
+          }
         } catch {
           // Leave the row as-is; user can re-select the material.
         }
@@ -344,7 +526,7 @@ export default function Page() {
         return setValidationError(translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
       }
 
-      if (!row.unitOfMeasurementSelected) {
+      if (!row.unitOfMeasurementSelected || !row.unitOfMeasurement) {
         return setValidationError(
           translate(
             `${rowLabel}: please select the unit for material ${materialName}.`,
@@ -390,6 +572,16 @@ export default function Page() {
           ),
         );
       }
+
+      const linkedTotal = row.allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0);
+      if (linkedTotal > qty + 1e-9) {
+        return setValidationError(
+          translate(
+            `${rowLabel}: linked requisition quantity exceeds ordered quantity for material ${materialName}.`,
+            `${rowLabel}: كمية طلبات الشراء المربوطة تتجاوز الكمية المطلوبة للمادة ${materialName}.`,
+          ),
+        );
+      }
     }
 
     handleOpenConfirm();
@@ -404,6 +596,39 @@ export default function Page() {
     openConfirm();
   }
 
+  if (requisitionIdParam && isSeedFetching && !prefillDone) {
+    return (
+      <LayoutBox
+        header={{
+          title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+          backLink: getLocalizedHref("/procurement/material-orders"),
+        }}
+      >
+        <LoadingSection message={translate("Loading requisition", "جاري تحميل طلب الشراء")} />
+      </LayoutBox>
+    );
+  }
+
+  if (requisitionIdParam && seedError && !prefillDone) {
+    return (
+      <LayoutBox
+        header={{
+          title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+          backLink: getLocalizedHref("/procurement/material-orders"),
+        }}
+      >
+        <ErrorSection
+          errorTitle={translate("Failed to load requisition", "تعذر تحميل طلب الشراء")}
+          errorMessage={getErrorMessage(locale, seedError)}
+          button={{
+            text: translate("Back to orders", "العودة إلى الأوامر"),
+            onClick: () => router.push(getLocalizedHref("/procurement/material-orders")),
+          }}
+        />
+      </LayoutBox>
+    );
+  }
+
   return (
     <LayoutBox
       header={{
@@ -413,6 +638,15 @@ export default function Page() {
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        {seedRequisition && getRequisitionStatus(seedRequisition) === "approved" && (
+          <div className="rounded-xl bg-teal-50/60 px-4 py-3 text-sm text-teal-800">
+            {translate(
+              `Prefilling from requisition ${seedRequisition.code}. You can adjust quantities, prices, and links before creating the order.`,
+              `يتم التعبئة من طلب الشراء ${seedRequisition.code}. يمكنك تعديل الكميات والأسعار والربط قبل إنشاء الأمر.`,
+            )}
+          </div>
+        )}
+
         <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <SelectSupplier
             value={supplierId}
@@ -479,6 +713,7 @@ export default function Page() {
                     onMaterialSelect={handleMaterialSelect}
                     onUpdate={updateRow}
                     onRemove={removeRow}
+                    onLinkRequisitions={setLinkRowKey}
                   />
                 ))}
               </Table.Tbody>
@@ -551,29 +786,31 @@ export default function Page() {
             )}
           </p>
           <div className="flex gap-2">
-            <Button
-              variant="light"
-              color="dark"
-              radius="md"
-              onClick={closeConfirm}
-              disabled={mutation.isPending}
-              fullWidth
-            >
+            <Button variant="light" color="dark" radius="md" onClick={closeConfirm} disabled={mutation.isPending} fullWidth>
               {translation.cancel}
             </Button>
-            <Button
-              radius="md"
-              color="teal"
-              loading={mutation.isPending}
-              onClick={handleConfirmCreate}
-              fullWidth
-            >
+            <Button radius="md" color="teal" loading={mutation.isPending} onClick={handleConfirmCreate} fullWidth>
               {translate("Confirm & Create", "تأكيد وإنشاء")}
             </Button>
           </div>
           {error && <ErrorAlert error={error} />}
         </div>
       </Modal>
+
+      {linkRow && linkRow.materialCode && linkRow.unitOfMeasurementSelected && linkRow.unitOfMeasurement && (
+        <LinkRequisitionsModal
+          opened={!!linkRowKey}
+          onClose={() => setLinkRowKey(null)}
+          materialCode={linkRow.materialCode}
+          materialTitle={linkRow.materialTitle}
+          orderUnit={linkRow.unitOfMeasurementSelected}
+          baseUnit={linkRow.unitOfMeasurement}
+          unitConversions={linkRow.unitConversions}
+          quantityOrdered={linkRow.quantity}
+          existingAllocations={linkRow.allocations}
+          onSave={(allocations) => updateRow(linkRow.key, { allocations })}
+        />
+      )}
     </LayoutBox>
   );
 }
