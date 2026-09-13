@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
@@ -18,6 +19,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toBaseQuantity, toDisplayQuantity } from "@/lib/helpers/unit-conversion";
 import type { MaterialPurchaseOrderItem } from "@/types/material-purchase-order";
 import type { MaterialUnitConversionSummary } from "@/types/material";
@@ -63,10 +65,6 @@ function remainingInUnit(
   return toDisplayQuantity(remainingBase, toBase);
 }
 
-function formatQty(value: number, locale: Locale) {
-  return value.toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { maximumFractionDigits: 6 });
-}
-
 function buildRows(items: MaterialPurchaseOrderItem[]): ReceiptDraftRow[] {
   return items.map((item) => {
     const remaining = Math.max(0, Number(item.quantityRemaining ?? item.quantityOrdered));
@@ -108,6 +106,7 @@ function ReceiptItemRow({
   onUpdate: (orderItemId: string, patch: Partial<ReceiptDraftRow>) => void;
 }) {
   const { translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
   const remaining = remainingInUnit(row.remainingInOrderUnit, row.orderUnit, row.unitOfMeasurementSelected, row);
   const unitOptions = getRowUnitOptions(row, locale);
 
@@ -116,7 +115,12 @@ function ReceiptItemRow({
       <Table.Td className="min-w-56 font-semibold text-gray-800">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={row.fullyReceived ? "text-gray-500" : "text-gray-800"}>{row.materialTitle}</span>
+            <Link
+              href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+              className={`hover:underline ${row.fullyReceived ? "text-gray-500" : "text-gray-800"}`}
+            >
+              {row.materialTitle}
+            </Link>
             {row.fullyReceived && (
               <Badge size="xs" variant="light" color="teal" leftSection={<CheckCircle2 size={11} />} className="normal-case">
                 {translate("Fully received", "مستلم بالكامل")}
@@ -165,14 +169,12 @@ function ReceiptItemRow({
         )}
       </Table.Td>
       <Table.Td>
-        <span className={`text-sm tabular-nums ${row.fullyReceived ? "text-gray-400" : "font-medium text-gray-700"}`}>
-          {formatQty(remaining, locale)}
+        <span className={`text-sm ${row.fullyReceived ? "text-gray-400" : "font-medium text-gray-700"}`}>
+          {formatQuantity(remaining)}
         </span>
       </Table.Td>
       <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
-        {row.fullyReceived ? (
-          <span className="text-sm text-gray-400">—</span>
-        ) : (
+        {row.fullyReceived ? null : (
           <NumberInput
             value={row.quantityReceived}
             onChange={(value) => onUpdate(row.orderItemId, { quantityReceived: value === "" ? "" : Number(value) })}
@@ -189,9 +191,7 @@ function ReceiptItemRow({
         )}
       </Table.Td>
       <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
-        {row.fullyReceived ? (
-          <span className="text-sm text-gray-400">—</span>
-        ) : (
+        {row.fullyReceived ? null : (
           <NumberInput
             value={row.quantityRejected}
             onChange={(value) => onUpdate(row.orderItemId, { quantityRejected: value === "" ? "" : Number(value) })}
@@ -208,9 +208,7 @@ function ReceiptItemRow({
         )}
       </Table.Td>
       <Table.Td className={row.fullyReceived ? undefined : "transition-colors focus-within:bg-teal-50/60"}>
-        {row.fullyReceived ? (
-          <span className="text-sm text-gray-400">—</span>
-        ) : (
+        {row.fullyReceived ? null : (
           <TextInput
             value={row.inspectionNotes}
             onChange={(e) => onUpdate(row.orderItemId, { inspectionNotes: e.target.value })}
@@ -468,22 +466,22 @@ function CreateReceiptPage() {
               <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
                 <Table.Thead className="bg-gray-50">
                   <Table.Tr className="h-9">
-                    <Table.Th className="w-[30%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[40%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Material", "المادة")}
                     </Table.Th>
-                    <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Unit", "الوحدة")}
                     </Table.Th>
-                    <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Remaining", "المتبقي")}
                     </Table.Th>
-                    <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Quantity Received", "الكمية المستلمة")}
                     </Table.Th>
-                    <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Quantity Rejected", "الكمية المرفوضة")}
                     </Table.Th>
-                    <Table.Th className="w-[18%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    <Table.Th className="w-[24%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Inspection Notes", "ملاحظات الفحص")}
                     </Table.Th>
                   </Table.Tr>
