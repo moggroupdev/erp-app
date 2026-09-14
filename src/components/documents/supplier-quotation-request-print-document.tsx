@@ -20,6 +20,7 @@ export type SupplierQuotationRequestContact = {
 
 export type SupplierQuotationRequestPrintDocumentProps = {
   supplierDisplayName: string;
+  supplierContactName?: string | null;
   notes: string | null;
   items: SupplierQuotationRequestItem[];
   preparedBy: SupplierQuotationRequestContact;
@@ -27,6 +28,7 @@ export type SupplierQuotationRequestPrintDocumentProps = {
 
 export default function SupplierQuotationRequestPrintDocument({
   supplierDisplayName,
+  supplierContactName,
   notes,
   items,
   preparedBy,
@@ -78,6 +80,12 @@ export default function SupplierQuotationRequestPrintDocument({
           <span className="font-semibold text-gray-700">{translate("To", "السادة شركة / مؤسسة")}:</span>{" "}
           {supplierDisplayName}
         </p>
+        {supplierContactName?.trim() ? (
+          <p>
+            <span className="font-semibold text-gray-700">{translate("Attn", "عناية السيد")}:</span>{" "}
+            {supplierContactName.trim()}
+          </p>
+        ) : null}
         <p>
           <span className="font-semibold text-gray-700">{translate("Subject", "الموضوع")}:</span>{" "}
           {translate("Request for Quotation for the Supply of Materials", "طلب عرض أسعار لتوريد أصناف")}
@@ -85,14 +93,8 @@ export default function SupplierQuotationRequestPrintDocument({
         <p className="pt-1">{translate("Dear Sir/Madam,", "تحية طيبة وبعد،")}</p>
         <p className="leading-relaxed">
           {translate(
-            "We kindly request that you provide us with a competitive price quotation for the supply of the materials listed in the table below to our factories in 10th of Ramadan City. Kindly include unit prices, payment and delivery terms, and the expected delivery lead time, at your earliest convenience.",
-            "نرجو من سيادتكم التكرم بموافاتنا بعرض أسعار لتوريد الأصناف المبينة في الجدول أدناه إلى مصانعنا بمدينة العاشر من رمضان. ويُرجى أن يتضمن العرض أسعار الوحدات، وشروط الدفع والتوريد، والمدة المتوقعة للتسليم، وذلك في أقرب وقت ممكن.",
-          )}
-        </p>
-        <p className="leading-relaxed font-medium text-gray-800">
-          {translate(
-            "Please quote and describe the items exactly as listed and clarified in this letter.",
-            "يُرجى تسعير ووصف الأصناف تماماً كما هي موضحة ومبينة في هذا الخطاب.",
+            "We kindly request that you provide us with a price quotation for the supply of the materials listed in the table below to our factories in 10th of Ramadan City, specifying payment terms and delivery lead time.",
+            "نرجو من سيادتكم التكرم بموافاتنا بعرض أسعار لتوريد الأصناف المبينة في الجدول أدناه إلى مصانعنا بمدينة العاشر من رمضان موضحًا شروط السداد ومدة التوريد.",
           )}
         </p>
       </section>
@@ -105,11 +107,7 @@ export default function SupplierQuotationRequestPrintDocument({
           monoColumnIndexes={[2]}
           noWrapIndexes={showSpecifications ? [0, 2, 4, 5] : [0, 2, 3, 4]}
           tableClassName="text-[9px] [&_td]:align-top"
-          columnWidths={
-            showSpecifications
-              ? ["6%", "28%", "12%", "30%", "12%", "12%"]
-              : ["6%", "46%", "16%", "16%", "16%"]
-          }
+          columnWidths={showSpecifications ? ["6%", "28%", "12%", "30%", "12%", "12%"] : ["6%", "46%", "16%", "16%", "16%"]}
           emptyLabel={translate("No items", "لا توجد أصناف")}
         />
       </section>
@@ -125,7 +123,7 @@ export default function SupplierQuotationRequestPrintDocument({
         <p className="text-[11px] leading-relaxed">
           {translate(
             "We look forward to receiving your quotation. Yours sincerely,",
-            "نتطلع إلى تلقي عرضكم، وتفضلوا بقبول فائق الاحترام والتقدير،",
+            "وتفضلوا بقبول فائق الاحترام والتقدير،",
           )}
         </p>
 

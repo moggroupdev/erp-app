@@ -217,6 +217,7 @@ export default function Page() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [supplierName, setSupplierName] = useState("");
   const [customSupplierName, setCustomSupplierName] = useState("");
+  const [supplierContactName, setSupplierContactName] = useState("");
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
@@ -236,10 +237,11 @@ export default function Page() {
     () =>
       supplierId !== null ||
       customSupplierName.trim() !== "" ||
+      supplierContactName.trim() !== "" ||
       notes.trim() !== "" ||
       rows.length > 1 ||
       rows.some((row) => !isEmptyRow(row)),
-    [supplierId, customSupplierName, notes, rows],
+    [supplierId, customSupplierName, supplierContactName, notes, rows],
   );
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
@@ -461,6 +463,20 @@ export default function Page() {
                 />
               </div>
             )}
+
+            <div className="max-w-xl">
+              <TextInput
+                value={supplierContactName}
+                onChange={(e) => setSupplierContactName(e.currentTarget.value)}
+                label={translate("Attention of", "عناية السيد")}
+                description={translate(
+                  "Optional. Printed under the company name, e.g. Attn: Ahmed Magdy.",
+                  "اختياري. يُطبع تحت اسم الشركة، مثل: عناية السيد: أحمد مجدي.",
+                )}
+                placeholder={translate("Contact person name...", "اسم المسؤول لدى المورد...")}
+                radius="md"
+              />
+            </div>
           </div>
         </Section>
 
@@ -583,6 +599,7 @@ export default function Page() {
             {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
               <SupplierQuotationRequestPrintDocument
                 supplierDisplayName={supplierDisplayName}
+                supplierContactName={supplierContactName.trim() || null}
                 notes={notes.trim() || null}
                 items={printItems}
                 preparedBy={preparedBy}
