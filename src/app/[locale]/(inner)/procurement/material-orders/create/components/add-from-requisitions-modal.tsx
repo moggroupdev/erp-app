@@ -56,6 +56,7 @@ export default function AddFromRequisitionsModal({
   const [selections, setSelections] = useState<Record<string, DraftSelection>>({});
   const [search, setSearch] = useState("");
   const [localError, setLocalError] = useState("");
+  const [errorItemId, setErrorItemId] = useState<string | null>(null);
 
   const {
     data: openItems,
@@ -72,6 +73,7 @@ export default function AddFromRequisitionsModal({
   useEffect(() => {
     if (!opened) return;
     setLocalError("");
+    setErrorItemId(null);
     setSearch("");
     setSelections({});
   }, [opened]);
@@ -90,10 +92,9 @@ export default function AddFromRequisitionsModal({
     );
   }, [openItems, excluded, search]);
 
-  const selectedCount = Object.keys(selections).length;
-
   function toggleItem(item: MaterialPurchaseRequisitionOpenItem, checked: boolean) {
     setLocalError("");
+    setErrorItemId(null);
     setSelections((prev) => {
       const next = { ...prev };
       if (!checked) {
@@ -110,6 +111,7 @@ export default function AddFromRequisitionsModal({
 
   function updateQty(itemId: string, value: number | "") {
     setLocalError("");
+    setErrorItemId(null);
     setSelections((prev) => {
       const current = prev[itemId];
       if (!current) return prev;
@@ -119,28 +121,30 @@ export default function AddFromRequisitionsModal({
 
   function handleAdd() {
     setLocalError("");
+    setErrorItemId(null);
     const rows = Object.values(selections);
     if (rows.length === 0) {
-      return setLocalError(
-        translate("Select at least one requisition line.", "يرجى اختيار بند طلب شراء واحد على الأقل."),
-      );
+      return setLocalError(translate("Select at least one requisition line.", "يرجى اختيار بند طلب شراء واحد على الأقل."));
     }
 
     for (const row of rows) {
       const qty = typeof row.quantityAllocated === "number" ? row.quantityAllocated : NaN;
+      const itemLabel = `${row.openItem.requisitionCode} / ${row.openItem.materialTitle}`;
       if (Number.isNaN(qty) || qty <= 0) {
+        setErrorItemId(row.openItem.requisitionItemId);
         return setLocalError(
           translate(
-            `Allocation for ${row.openItem.requisitionCode} / ${row.openItem.materialCode} must be greater than zero.`,
-            `يجب أن يكون التوزيع لـ ${row.openItem.requisitionCode} / ${row.openItem.materialCode} أكبر من صفر.`,
+            `Order quantity for ${itemLabel} must be greater than zero.`,
+            `يجب أن تكون كمية الأمر لـ ${itemLabel} أكبر من صفر.`,
           ),
         );
       }
       if (qty > row.openItem.quantityRemaining + 1e-9) {
+        setErrorItemId(row.openItem.requisitionItemId);
         return setLocalError(
           translate(
-            `Allocation for ${row.openItem.requisitionCode} / ${row.openItem.materialCode} exceeds remaining quantity.`,
-            `التوزيع لـ ${row.openItem.requisitionCode} / ${row.openItem.materialCode} يتجاوز الكمية المتبقية.`,
+            `Order quantity for ${itemLabel} exceeds remaining quantity.`,
+            `كمية الأمر لـ ${itemLabel} تتجاوز الكمية المتبقية.`,
           ),
         );
       }
@@ -197,19 +201,22 @@ export default function AddFromRequisitionsModal({
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   return (
-    <Modal opened={opened} onClose={onClose} title={translate("Add from requisitions", "إضافة من طلبات الشراء")} size="xl">
+    <Modal opened={opened} onClose={onClose} title={translate("Add from requisitions", "إضافة من طلبات الشراء")} size="60%">
       <div className="flex flex-col gap-3">
         <p className="text-sm text-gray-600">
           {translate(
-            "Select open approved requisition lines. Order lines are grouped by material and quantity is taken from the selected allocations.",
-            "اختر بنود طلبات الشراء المعتمدة المفتوحة. تُجمَّع بنود الأمر حسب المادة وتُؤخذ الكمية من التوزيعات المحددة.",
+            "Select open approved requisition lines. Order lines are grouped by material and quantity is taken from the selected order quantities.",
+            "اختر بنود طلبات الشراء المعتمدة المفتوحة. تُجمَّع بنود الأمر حسب المادة وتُؤخذ الكمية من كميات الأمر المحددة.",
           )}
         </p>
 
         <TextInput
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
-          placeholder={translate("Search by requisition, material code, or title...", "ابحث برقم الطلب أو كود/اسم المادة...")}
+          placeholder={translate(
+            "Search by requisition, material code, or title...",
+            "ابحث برقم الطلب أو كود/اسم المادة...",
+          )}
           radius="md"
         />
 
@@ -222,25 +229,25 @@ export default function AddFromRequisitionsModal({
             button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
           />
         ) : availableItems.length === 0 ? (
-          <EmptySection
-            message={translate("No open requisition lines available", "لا توجد بنود طلب شراء مفتوحة متاحة")}
-          />
+          <EmptySection message={translate("No open requisition lines available", "لا توجد بنود طلب شراء مفتوحة متاحة")} />
         ) : (
           <div className="max-h-[420px] overflow-auto rounded-xl border border-gray-100">
-            <Table className="text-nowrap" verticalSpacing="xs" horizontalSpacing="sm">
+            <Table className="text-nowrap" verticalSpacing="sm" horizontalSpacing="sm">
               <Table.Thead className="sticky top-0 bg-gray-50">
                 <Table.Tr>
                   <Table.Th className="w-10" />
-                  <Table.Th>{translate("Requisition", "طلب الشراء")}</Table.Th>
+                  <Table.Th>{translate("Requisition Number", "رقم طلب الشراء")}</Table.Th>
                   <Table.Th>{translate("Material", "المادة")}</Table.Th>
                   <Table.Th>{translate("Department", "القسم")}</Table.Th>
-                  <Table.Th>{translate("Remaining", "المتبقي")}</Table.Th>
-                  <Table.Th>{translate("Allocate", "توزيع")}</Table.Th>
+                  <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
+                  <Table.Th>{translate("Total quantity requested", "اجمالي الكمية المطلوبة")}</Table.Th>
+                  <Table.Th>{translate("Quantity on this order", "الكمية في هذا الأمر")}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {availableItems.map((item) => {
                   const selected = selections[item.requisitionItemId];
+                  const hasError = errorItemId === item.requisitionItemId;
                   return (
                     <Table.Tr key={item.requisitionItemId} className="text-gray-600">
                       <Table.Td>
@@ -250,32 +257,42 @@ export default function AddFromRequisitionsModal({
                           aria-label={`${item.requisitionCode} ${item.materialCode}`}
                         />
                       </Table.Td>
-                      <Table.Td className="font-medium text-gray-800">{item.requisitionCode}</Table.Td>
+                      <Table.Td className="font-mono font-medium text-gray-800">{item.requisitionCode}</Table.Td>
                       <Table.Td>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-800">{item.materialTitle}</span>
-                          <span className="font-mono text-xs text-gray-400">{item.materialCode}</span>
-                        </div>
+                        <span className="font-medium text-gray-800">{item.materialTitle}</span>
                       </Table.Td>
                       <Table.Td>{getProductionSubDepartmentLabel(item.productionSubDepartment, locale)}</Table.Td>
-                      <Table.Td>
-                        {formatQuantity(item.quantityRemaining)}{" "}
-                        {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
-                      </Table.Td>
-                      <Table.Td>
+                      <Table.Td>{getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}</Table.Td>
+                      <Table.Td>{formatQuantity(item.quantityRequested)}</Table.Td>
+                      <Table.Td
+                        className={`transition-colors ${
+                          hasError ? "bg-red-50 focus-within:bg-red-50" : "focus-within:bg-teal-50/60"
+                        }`}
+                      >
                         {selected ? (
                           <NumberInput
                             value={selected.quantityAllocated}
-                            onChange={(value) =>
-                              updateQty(item.requisitionItemId, value === "" ? "" : Number(value))
-                            }
+                            onChange={(value) => updateQty(item.requisitionItemId, value === "" ? "" : Number(value))}
                             min={0}
                             max={item.quantityRemaining}
                             allowNegative={false}
                             decimalScale={6}
                             hideControls
-                            radius="md"
+                            variant="unstyled"
+                            radius={0}
                             size="xs"
+                            className="w-20"
+                            styles={{
+                              root: { width: "5rem" },
+                              input: {
+                                minHeight: 0,
+                                height: "1.25rem",
+                                lineHeight: 1.25,
+                                padding: 0,
+                                fontSize: "0.8125rem",
+                                color: hasError ? "var(--mantine-color-red-7)" : undefined,
+                              },
+                            }}
                           />
                         ) : (
                           <span className="text-gray-300">-</span>
@@ -288,12 +305,6 @@ export default function AddFromRequisitionsModal({
             </Table>
           </div>
         )}
-
-        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
-          <Badge variant="light" color="teal" radius="md">
-            {translate("Selected", "المحدد")}: {selectedCount}
-          </Badge>
-        </div>
 
         {localError && <p className="text-sm text-red-600">{localError}</p>}
 
