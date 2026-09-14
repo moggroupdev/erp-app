@@ -20,7 +20,7 @@ import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
-import { Link2, Plus, Trash2, X } from "lucide-react";
+import { ClipboardList, Link2, Plus, Trash2, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -28,9 +28,9 @@ import DataSelect from "@/components/ui/data-select";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
-import EmptySection from "@/components/ui/sections/empty";
 import { convertEnteredQuantityBetweenUnits } from "../helpers";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import { getProductionSubDepartmentLabel, type ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import LinkRequisitionsModal, { type AllocationDraft } from "./components/link-requisitions-modal";
 import AddFromRequisitionsModal, { type AddedMaterialLine } from "./components/add-from-requisitions-modal";
 import { getRequisitionStatus } from "../../material-requisitions/helpers";
@@ -113,17 +113,19 @@ function ItemRow({
 
   return (
     <Table.Tr>
-      <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td>
+      <Table.Td className="w-[2.5%] align-top! pt-2 text-center text-xs font-medium text-gray-500">
+        {index + 1}
+      </Table.Td>
+      <Table.Td className="align-top!">
         <div className="flex flex-col py-0.5">
           <span className="text-sm font-medium text-gray-800">{row.materialTitle || row.materialCode}</span>
           {row.materialCode && <span className="font-mono text-xs text-gray-400">{row.materialCode}</span>}
         </div>
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="align-top! pt-2">
         <span className="text-sm text-gray-700">{quantity !== null ? formatQuantity(quantity) : ""}</span>
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="align-top! transition-colors focus-within:bg-slate-50">
         {showUnitSelect(row) ? (
           <DataSelect
             value={row.unitOfMeasurementSelected}
@@ -164,7 +166,7 @@ function ItemRow({
           </span>
         )}
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="align-top! transition-colors focus-within:bg-slate-50">
         <NumberInput
           value={row.unitPrice}
           onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
@@ -179,65 +181,79 @@ function ItemRow({
           aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
         />
       </Table.Td>
-      <Table.Td>
+      <Table.Td className="align-top! pt-2">
         <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
       </Table.Td>
       <Table.Td className="align-top!">
         <div className="flex flex-col gap-1.5 py-0.5">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Badge size="xs" variant="light" color={fullyLinked ? "teal" : "orange"} radius="md">
+          <div className="flex items-center justify-between gap-2">
+            <Badge
+              size="xs"
+              variant="light"
+              color={fullyLinked ? "dark" : "orange"}
+              radius="md"
+              leftSection={<Link2 size={10} />}
+              className={fullyLinked ? "bg-teal-900/10! text-teal-950!" : undefined}
+            >
               {quantity !== null
-                ? `${formatQuantity(linkedTotal)} / ${formatQuantity(quantity)}`
+                ? `${formatQuantity(linkedTotal)} ${unitLabel}`.trim()
                 : formatQuantity(linkedTotal)}
             </Badge>
             <Button
               type="button"
               variant="subtle"
-              color="teal"
+              color="gray"
               size="compact-xs"
               radius="md"
               px={6}
               leftSection={<Link2 size={12} />}
               disabled={!row.materialCode || !row.unitOfMeasurementSelected}
               onClick={() => onLinkRequisitions(row.key)}
+              className="text-teal-900!"
             >
               {translate("Edit", "تعديل")}
             </Button>
           </div>
-          {row.allocations.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {row.allocations.map((allocation) => (
-                <Badge
-                  key={allocation.materialPurchaseRequisitionItemId}
-                  size="sm"
-                  variant="outline"
-                  color="teal"
-                  radius="md"
-                  className="normal-case"
-                  rightSection={
-                    <button
-                      type="button"
-                      className="ms-0.5 inline-flex rounded-full p-0.5 text-teal-700 hover:bg-teal-100"
-                      onClick={() => onRemoveAllocation(row.key, allocation.materialPurchaseRequisitionItemId)}
-                      title={translate("Remove link", "إزالة الربط")}
-                      aria-label={translate("Remove link", "إزالة الربط")}
-                    >
-                      <X size={11} />
-                    </button>
-                  }
+
+          <ul className="m-0 flex list-none flex-col gap-1 p-0">
+            {row.allocations.map((allocation) => (
+              <li
+                key={allocation.materialPurchaseRequisitionItemId}
+                className="group flex items-start justify-between gap-2 rounded-md bg-slate-100/90 px-2 py-1.5 ring-1 ring-slate-200/90"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+                    <span className="font-mono text-[11px] font-semibold text-slate-800">
+                      {allocation.requisitionCode}
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      {formatQuantity(allocation.quantityAllocated)} {unitLabel}
+                    </span>
+                  </div>
+                  {allocation.productionSubDepartment && (
+                    <p className="mt-0.5 truncate text-[10px] text-slate-400">
+                      {getProductionSubDepartmentLabel(
+                        allocation.productionSubDepartment as ProductionSubDepartment,
+                        locale,
+                      )}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-md p-0.5 text-slate-400 opacity-70 transition-colors hover:bg-slate-200/80 hover:text-slate-700 group-hover:opacity-100"
+                  onClick={() => onRemoveAllocation(row.key, allocation.materialPurchaseRequisitionItemId)}
+                  title={translate("Remove link", "إزالة الربط")}
+                  aria-label={translate("Remove link", "إزالة الربط")}
                 >
-                  <span className="font-mono text-[10px]">{allocation.requisitionCode}</span>
-                  <span className="mx-1 text-teal-400">·</span>
-                  <span className="text-[11px]">
-                    {formatQuantity(allocation.quantityAllocated)} {unitLabel}
-                  </span>
-                </Badge>
-              ))}
-            </div>
-          )}
+                  <X size={12} />
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="align-top! transition-colors focus-within:bg-slate-50">
         <TextInput
           value={row.notes}
           onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
@@ -247,7 +263,7 @@ function ItemRow({
           styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
         />
       </Table.Td>
-      <Table.Td className="w-[2.5%]">
+      <Table.Td className="w-[2.5%] align-top!">
         <Button
           type="button"
           variant="subtle"
@@ -659,7 +675,7 @@ export default function Page() {
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         {seedRequisition && getRequisitionStatus(seedRequisition) === "approved" && (
-          <div className="rounded-xl bg-teal-50/60 px-4 py-3 text-sm text-teal-800">
+          <div className="rounded-xl bg-slate-100/80 px-4 py-3 text-sm text-slate-700">
             {translate(
               `Prefilling from requisition ${seedRequisition.code}. You can adjust prices and links, or add more open requisition lines before creating the order.`,
               `يتم التعبئة من طلب الشراء ${seedRequisition.code}. يمكنك تعديل الأسعار والربط أو إضافة المزيد من بنود طلبات الشراء المفتوحة قبل إنشاء الأمر.`,
@@ -708,12 +724,32 @@ export default function Page() {
           </div>
 
           {rows.length === 0 ? (
-            <EmptySection
-              message={translate(
-                "No items yet. Add lines from open purchase requisitions.",
-                "لا توجد بنود بعد. أضف بنوداً من طلبات الشراء المفتوحة.",
-              )}
-            />
+            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-300 bg-linear-to-b from-slate-50 to-white px-6 py-12 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-900/10 text-teal-950">
+                <ClipboardList size={26} strokeWidth={1.75} />
+              </div>
+              <div className="flex max-w-md flex-col gap-1.5">
+                <h5 className="text-base font-semibold text-gray-900">
+                  {translate("No items yet", "لا توجد بنود بعد")}
+                </h5>
+                <p className="text-sm leading-relaxed text-gray-500">
+                  {translate(
+                    "Start by adding open purchase requisition lines. Materials and quantities will be filled from the selected requisitions.",
+                    "ابدأ بإضافة بنود من طلبات الشراء المفتوحة. ستُعبأ المواد والكميات من الطلبات المحددة.",
+                  )}
+                </p>
+              </div>
+              <Button
+                type="button"
+                color="teal"
+                radius="md"
+                size="sm"
+                leftSection={<Plus size={15} />}
+                onClick={openAdd}
+              >
+                {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+              </Button>
+            </div>
           ) : (
             <div className="overflow-x-auto rounded-xl">
               <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
