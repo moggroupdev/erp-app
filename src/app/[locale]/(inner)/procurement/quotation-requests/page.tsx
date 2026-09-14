@@ -469,10 +469,6 @@ export default function Page() {
                 value={supplierContactName}
                 onChange={(e) => setSupplierContactName(e.currentTarget.value)}
                 label={translate("Attention of", "عناية السيد")}
-                description={translate(
-                  "Optional. Printed under the company name, e.g. Attn: Ahmed Magdy.",
-                  "اختياري. يُطبع تحت اسم الشركة، مثل: عناية السيد: أحمد مجدي.",
-                )}
                 placeholder={translate("Contact person name...", "اسم المسؤول لدى المورد...")}
                 radius="md"
               />
@@ -489,24 +485,6 @@ export default function Page() {
             "Add the materials to request prices for. You can include specifications, quantity, and unit per row.",
             "أضف المواد المطلوب تسعيرها. يمكنك إضافة المواصفات والكمية والوحدة لكل صف.",
           )}
-          action={
-            <div className="flex items-center gap-2">
-              <span className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-stone-600 ring-1 ring-stone-200">
-                {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
-              </span>
-              <Button
-                type="button"
-                variant="light"
-                color="teal"
-                radius="md"
-                size="xs"
-                leftSection={<Plus size={14} />}
-                onClick={addRow}
-              >
-                {translate("Add Row", "إضافة صف")}
-              </Button>
-            </div>
-          }
         >
           <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
             <Table withColumnBorders className="w-full min-w-160" horizontalSpacing="xs" verticalSpacing="xs">
@@ -543,6 +521,33 @@ export default function Page() {
                   />
                 ))}
               </Table.Tbody>
+              <Table.Tfoot className="bg-gray-50">
+                <Table.Tr className="h-9">
+                  <Table.Td />
+                  <Table.Td>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="light"
+                        color="teal"
+                        radius="md"
+                        size="xs"
+                        leftSection={<Plus size={14} />}
+                        onClick={addRow}
+                      >
+                        {translate("Add Row", "إضافة صف")}
+                      </Button>
+                      <span className="text-xs font-medium text-gray-500">
+                        {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
+                      </span>
+                    </div>
+                  </Table.Td>
+                  <Table.Td />
+                  <Table.Td />
+                  <Table.Td />
+                  <Table.Td />
+                </Table.Tr>
+              </Table.Tfoot>
             </Table>
           </div>
         </Section>
