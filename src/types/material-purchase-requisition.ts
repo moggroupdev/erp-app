@@ -63,6 +63,11 @@ export type MaterialPurchaseRequisitionItemDetailed = MaterialPurchaseRequisitio
   lastPurchasePrice: number | null;
   lastPurchaseDate: Date | null;
   lastPurchaseVendor: string | null;
+  /** Sum of MPO allocations in this line's selected unit. */
+  quantityAllocated: number;
+  /** Remaining = requested − allocated (line unit). */
+  quantityRemaining: number;
+  orders: { id: string; code: string; quantityAllocated: number }[];
 };
 
 export type MaterialPurchaseRequisitionDetailed = Omit<
@@ -75,6 +80,23 @@ export type MaterialPurchaseRequisitionDetailed = Omit<
   inventoryControlDecidedBy: UserRef | null;
   managerDecidedBy: UserRef | null;
   items: MaterialPurchaseRequisitionItemDetailed[];
+};
+
+/** Open (fully approved, remaining > 0) requisition lines for MPO allocation picker. */
+export type MaterialPurchaseRequisitionOpenItem = {
+  requisitionItemId: string;
+  requisitionId: string;
+  requisitionCode: string;
+  productionSubDepartment: ProductionSubDepartment;
+  materialCode: string;
+  materialTitle: string;
+  materialType: MaterialType;
+  unitOfMeasurement: MaterialUnit;
+  unitConversions: MaterialUnitConversionSummary[];
+  unitOfMeasurementSelected: MaterialUnit;
+  quantityRequested: number;
+  quantityAllocated: number;
+  quantityRemaining: number;
 };
 
 // ==================== DTOs ====================

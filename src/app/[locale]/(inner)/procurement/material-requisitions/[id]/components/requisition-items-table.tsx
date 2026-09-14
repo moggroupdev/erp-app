@@ -43,8 +43,8 @@ export default function RequisitionItemsTable({
   const [itemToDelete, setItemToDelete] = useState<MaterialPurchaseRequisitionItemDetailed | null>(null);
 
   const canDelete = editable && items.length > 1;
-  const colspanBeforeTotal = 6;
-  const colspanAfterTotal = editable ? 4 : 3;
+  const colspanBeforeTotal = 9;
+  const colspanAfterTotal = editable ? 5 : 4;
 
   const { subtotal, vat, grandTotal, missingPriceCount } = useMemo(
     () => computeRequisitionLastPurchaseTotals(items),
@@ -74,6 +74,9 @@ export default function RequisitionItemsTable({
               <Table.Th>{translate("Category", "الفئة")}</Table.Th>
               <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
               <Table.Th>{translate("Quantity Requested", "الكمية المطلوبة")}</Table.Th>
+              <Table.Th>{translate("Allocated", "الموزع")}</Table.Th>
+              <Table.Th>{translate("Remaining", "المتبقي")}</Table.Th>
+              <Table.Th>{translate("Purchase Orders", "أوامر التوريد")}</Table.Th>
               <Table.Th>
                 {translate(`Last Purchase Price (${translation.currency})`, `آخر سعر شراء (${translation.currency})`)}
               </Table.Th>
@@ -88,6 +91,9 @@ export default function RequisitionItemsTable({
             {items.map((item) => {
               const displayLastPurchasePrice = getRequisitionItemDisplayLastPurchasePrice(item);
               const lineTotal = getRequisitionItemLineTotal(item);
+              const quantityAllocated = Number(item.quantityAllocated ?? 0);
+              const quantityRemaining = Number(item.quantityRemaining ?? Math.max(0, item.quantityRequested - quantityAllocated));
+              const orders = item.orders ?? [];
 
               return (
                 <Table.Tr key={item.id} className="text-gray-600">
@@ -114,6 +120,29 @@ export default function RequisitionItemsTable({
                     </div>
                   </Table.Td>
                   <Table.Td>{formatQuantity(item.quantityRequested)}</Table.Td>
+                  <Table.Td>{formatQuantity(quantityAllocated)}</Table.Td>
+                  <Table.Td className={quantityRemaining > 1e-9 ? "font-medium text-orange-600" : "text-gray-500"}>
+                    {formatQuantity(quantityRemaining)}
+                  </Table.Td>
+                  <Table.Td>
+                    {orders.length === 0 ? (
+                      <EmptyValue />
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {orders.map((order) => (
+                          <Link
+                            key={`${order.id}-${order.quantityAllocated}`}
+                            href={getLocalizedHref(`/procurement/material-orders/${order.id}`)}
+                            className="inline-flex"
+                          >
+                            <Badge size="sm" variant="light" color="teal" radius="md" className="hover:underline">
+                              {order.code} · {formatQuantity(order.quantityAllocated)}
+                            </Badge>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </Table.Td>
                   <Table.Td>
                     {displayLastPurchasePrice != null ? formatMoney(displayLastPurchasePrice) : <EmptyValue />}
                   </Table.Td>

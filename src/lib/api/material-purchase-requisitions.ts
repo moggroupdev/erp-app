@@ -7,6 +7,7 @@ import type {
   MaterialPurchaseRequisitionDetailed,
   MaterialPurchaseRequisitionItem,
   MaterialPurchaseRequisitionListItem,
+  MaterialPurchaseRequisitionOpenItem,
   RejectMaterialPurchaseRequisitionDto,
   UpdateMaterialPurchaseRequisitionDto,
   UpdateMaterialPurchaseRequisitionItemDto,
@@ -46,6 +47,22 @@ const materialPurchaseRequisitionsApi = {
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<MaterialPurchaseRequisitionDetailed>({
       url: `material-purchase-requisitions/${id}`,
+      signal,
+    });
+  },
+
+  async listOpenItems({
+    privateRequest,
+    materialCode,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    materialCode?: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialPurchaseRequisitionOpenItem[]>({
+      url: "material-purchase-requisitions/open-items",
+      params: materialCode ? { materialCode } : undefined,
       signal,
     });
   },

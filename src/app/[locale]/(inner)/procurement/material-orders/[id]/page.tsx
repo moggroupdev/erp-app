@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Table } from "@mantine/core";
+import { Button, Badge, Table } from "@mantine/core";
 import { Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -19,7 +19,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -171,47 +171,75 @@ export default function Page() {
                             defaultUnit={item.unitOfMeasurementSelected}
                           >
                             {({ unit, factor, toggleButton }) => (
-                              <Table.Tr className="text-gray-600">
-                                <Table.Td className="font-semibold text-gray-800">
-                                  <Link
-                                    href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                    className="hover:underline"
-                                  >
-                                    {item.material.title}
-                                  </Link>
-                                </Table.Td>
-                                <Table.Td>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-mono">{item.material.code}</span>
-                                    <CopyButton text={item.material.code} />
-                                  </div>
-                                </Table.Td>
-                                <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
-                                <Table.Td>
-                                  <div className="flex items-center gap-1">
-                                    {getMaterialUnitLabel(unit, locale)}
-                                    {toggleButton}
-                                  </div>
-                                </Table.Td>
-                                <Table.Td>
-                                  {formatEnteredQuantityForDisplay(
-                                    item.quantityOrdered,
-                                    item.unitOfMeasurementSelected,
-                                    unit,
-                                    item.material,
-                                  )}
-                                </Table.Td>
-                                <Table.Td>
-                                  {formatEnteredQuantityForDisplay(
-                                    quantityReceived,
-                                    item.unitOfMeasurementSelected,
-                                    unit,
-                                    item.material,
-                                  )}
-                                </Table.Td>
-                                <Table.Td>{formatMoney(toDisplayUnitPrice(baseUnitPrice, factor))}</Table.Td>
-                                <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
-                              </Table.Tr>
+                              <>
+                                <Table.Tr className="text-gray-600">
+                                  <Table.Td className="font-semibold text-gray-800">
+                                    <Link
+                                      href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                      className="hover:underline"
+                                    >
+                                      {item.material.title}
+                                    </Link>
+                                  </Table.Td>
+                                  <Table.Td>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-mono">{item.material.code}</span>
+                                      <CopyButton text={item.material.code} />
+                                    </div>
+                                  </Table.Td>
+                                  <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
+                                  <Table.Td>
+                                    <div className="flex items-center gap-1">
+                                      {getMaterialUnitLabel(unit, locale)}
+                                      {toggleButton}
+                                    </div>
+                                  </Table.Td>
+                                  <Table.Td>
+                                    {formatEnteredQuantityForDisplay(
+                                      item.quantityOrdered,
+                                      item.unitOfMeasurementSelected,
+                                      unit,
+                                      item.material,
+                                    )}
+                                  </Table.Td>
+                                  <Table.Td>
+                                    {formatEnteredQuantityForDisplay(
+                                      quantityReceived,
+                                      item.unitOfMeasurementSelected,
+                                      unit,
+                                      item.material,
+                                    )}
+                                  </Table.Td>
+                                  <Table.Td>{formatMoney(toDisplayUnitPrice(baseUnitPrice, factor))}</Table.Td>
+                                  <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                                </Table.Tr>
+                                {(item.requisitionAllocations?.length ?? 0) > 0 && (
+                                  <Table.Tr className="bg-gray-50/80">
+                                    <Table.Td />
+                                    <Table.Td colSpan={7}>
+                                      <div className="flex flex-wrap items-center gap-2 py-1">
+                                        <span className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                          {translate("Requisitions", "طلبات الشراء")}
+                                        </span>
+                                        {item.requisitionAllocations!.map((allocation) => (
+                                          <Link
+                                            key={allocation.id}
+                                            href={getLocalizedHref(
+                                              `/procurement/material-requisitions/${allocation.requisition.id}`,
+                                            )}
+                                            className="inline-flex"
+                                          >
+                                            <Badge size="sm" variant="light" color="teal" radius="md" className="hover:underline">
+                                              {allocation.requisition.code} · {formatQuantity(allocation.quantityAllocated)}{" "}
+                                              {getMaterialUnitLabel(allocation.unitOfMeasurementSelected, locale)}
+                                            </Badge>
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    </Table.Td>
+                                  </Table.Tr>
+                                )}
+                              </>
                             )}
                           </UnitToggle>
                         );

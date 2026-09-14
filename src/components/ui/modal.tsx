@@ -16,7 +16,8 @@ export default function Modal({
   onClose: () => void;
   title?: string;
   centerTitle?: boolean;
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  /** Mantine size token, pixel width, or CSS width (e.g. `"90%"`). */
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | number | (string & {});
   children: React.ReactNode;
 }) {
   const locale = useLocale();

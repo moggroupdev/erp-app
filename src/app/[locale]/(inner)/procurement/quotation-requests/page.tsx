@@ -217,6 +217,7 @@ export default function Page() {
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [supplierName, setSupplierName] = useState("");
   const [customSupplierName, setCustomSupplierName] = useState("");
+  const [supplierContactName, setSupplierContactName] = useState("");
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
@@ -236,10 +237,11 @@ export default function Page() {
     () =>
       supplierId !== null ||
       customSupplierName.trim() !== "" ||
+      supplierContactName.trim() !== "" ||
       notes.trim() !== "" ||
       rows.length > 1 ||
       rows.some((row) => !isEmptyRow(row)),
-    [supplierId, customSupplierName, notes, rows],
+    [supplierId, customSupplierName, supplierContactName, notes, rows],
   );
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
@@ -461,6 +463,16 @@ export default function Page() {
                 />
               </div>
             )}
+
+            <div className="max-w-xl">
+              <TextInput
+                value={supplierContactName}
+                onChange={(e) => setSupplierContactName(e.currentTarget.value)}
+                label={translate("Attention of", "عناية السيد")}
+                placeholder={translate("Contact person name...", "اسم المسؤول لدى المورد...")}
+                radius="md"
+              />
+            </div>
           </div>
         </Section>
 
@@ -473,24 +485,6 @@ export default function Page() {
             "Add the materials to request prices for. You can include specifications, quantity, and unit per row.",
             "أضف المواد المطلوب تسعيرها. يمكنك إضافة المواصفات والكمية والوحدة لكل صف.",
           )}
-          action={
-            <div className="flex items-center gap-2">
-              <span className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-stone-600 ring-1 ring-stone-200">
-                {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
-              </span>
-              <Button
-                type="button"
-                variant="light"
-                color="teal"
-                radius="md"
-                size="xs"
-                leftSection={<Plus size={14} />}
-                onClick={addRow}
-              >
-                {translate("Add Row", "إضافة صف")}
-              </Button>
-            </div>
-          }
         >
           <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
             <Table withColumnBorders className="w-full min-w-160" horizontalSpacing="xs" verticalSpacing="xs">
@@ -527,6 +521,33 @@ export default function Page() {
                   />
                 ))}
               </Table.Tbody>
+              <Table.Tfoot className="bg-gray-50">
+                <Table.Tr className="h-9">
+                  <Table.Td />
+                  <Table.Td>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="light"
+                        color="teal"
+                        radius="md"
+                        size="xs"
+                        leftSection={<Plus size={14} />}
+                        onClick={addRow}
+                      >
+                        {translate("Add Row", "إضافة صف")}
+                      </Button>
+                      <span className="text-xs font-medium text-gray-500">
+                        {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
+                      </span>
+                    </div>
+                  </Table.Td>
+                  <Table.Td />
+                  <Table.Td />
+                  <Table.Td />
+                  <Table.Td />
+                </Table.Tr>
+              </Table.Tfoot>
             </Table>
           </div>
         </Section>
@@ -583,6 +604,7 @@ export default function Page() {
             {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
               <SupplierQuotationRequestPrintDocument
                 supplierDisplayName={supplierDisplayName}
+                supplierContactName={supplierContactName.trim() || null}
                 notes={notes.trim() || null}
                 items={printItems}
                 preparedBy={preparedBy}
