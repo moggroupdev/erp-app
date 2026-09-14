@@ -29,6 +29,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import { EmptyValue } from "@/components/ui/entity-details";
 import { getRequisitionStatus, getRequisitionStatusLabel } from "./helpers";
 
 const PAGE_TITLE = { en: "Material Purchase Requisitions", ar: "طلبات شراء الخامات" };
@@ -169,6 +170,7 @@ export default function Page() {
                     <Table.Th>{translate("Requesting Party", "جهة الطلب")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate("Editor", "المحرر")}</Table.Th>
+                    <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                     <Table.Th>{translate("Requisition Date", "تاريخ طلب الشراء")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -200,6 +202,9 @@ export default function Page() {
                           >
                             {requisition.createdBy.name}
                           </Link>
+                        </Table.Td>
+                        <Table.Td className="max-w-xs truncate" title={requisition.notes || undefined}>
+                          {requisition.notes || <EmptyValue />}
                         </Table.Td>
                         <Table.Td>{formatDateAndTime(requisition.createdAt, locale)}</Table.Td>
                       </Table.Tr>
