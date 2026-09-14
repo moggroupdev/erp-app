@@ -294,7 +294,14 @@ export default function LinkRequisitionsModal({
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>
             {translation.cancel}
           </Button>
-          <Button radius="md" color="teal" onClick={handleSave} fullWidth disabled={isFetching}>
+          <Button
+            radius="md"
+            color="teal"
+            onClick={handleSave}
+            fullWidth
+            disabled={isFetching}
+            className="bg-teal-800! hover:bg-teal-900! data-disabled:bg-teal-800/45!"
+          >
             {translate("Apply links", "تطبيق الربط")}
           </Button>
         </div>

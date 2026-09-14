@@ -312,7 +312,14 @@ export default function AddFromRequisitionsModal({
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>
             {translation.cancel}
           </Button>
-          <Button radius="md" color="teal" onClick={handleAdd} fullWidth disabled={isFetching}>
+          <Button
+            radius="md"
+            color="teal"
+            onClick={handleAdd}
+            fullWidth
+            disabled={isFetching}
+            className="bg-teal-800! hover:bg-teal-900! data-disabled:bg-teal-800/45!"
+          >
             {translate("Add to order", "إضافة إلى الأمر")}
           </Button>
         </div>

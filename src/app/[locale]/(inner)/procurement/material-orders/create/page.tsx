@@ -30,12 +30,19 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import { convertEnteredQuantityBetweenUnits } from "../helpers";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
-import { getProductionSubDepartmentLabel, type ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
+import {
+  getProductionSubDepartmentLabel,
+  type ProductionSubDepartment,
+} from "@/lib/constants/enums/production-sub-departments";
 import LinkRequisitionsModal, { type AllocationDraft } from "./components/link-requisitions-modal";
 import AddFromRequisitionsModal, { type AddedMaterialLine } from "./components/add-from-requisitions-modal";
 import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
+
+const DARK_TEAL_FILLED_BTN = "bg-teal-800! hover:bg-teal-900! data-disabled:bg-teal-800/45! data-loading:bg-teal-800!";
+const DARK_TEAL_LIGHT_BTN = "bg-teal-800/12! text-teal-900! hover:bg-teal-800/18! [&_svg]:text-teal-800!";
+const DARK_TEAL_SUBTLE_BTN = "text-teal-800! hover:bg-teal-800/10!";
 
 type ItemDraftRow = {
   key: string;
@@ -113,19 +120,17 @@ function ItemRow({
 
   return (
     <Table.Tr>
-      <Table.Td className="w-[2.5%] align-top! pt-2 text-center text-xs font-medium text-gray-500">
-        {index + 1}
-      </Table.Td>
+      <Table.Td className="w-[2.5%] pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
       <Table.Td className="align-top!">
-        <div className="flex flex-col py-0.5">
+        <div className="flex flex-col gap-1.5 py-0.5">
           <span className="text-sm font-medium text-gray-800">{row.materialTitle || row.materialCode}</span>
           {row.materialCode && <span className="font-mono text-xs text-gray-400">{row.materialCode}</span>}
         </div>
       </Table.Td>
-      <Table.Td className="align-top! pt-2">
+      <Table.Td className="pt-2 align-top!">
         <span className="text-sm text-gray-700">{quantity !== null ? formatQuantity(quantity) : ""}</span>
       </Table.Td>
-      <Table.Td className="align-top! transition-colors focus-within:bg-slate-50">
+      <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
         {showUnitSelect(row) ? (
           <DataSelect
             value={row.unitOfMeasurementSelected}
@@ -166,7 +171,7 @@ function ItemRow({
           </span>
         )}
       </Table.Td>
-      <Table.Td className="align-top! transition-colors focus-within:bg-slate-50">
+      <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
         <NumberInput
           value={row.unitPrice}
           onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
@@ -181,7 +186,7 @@ function ItemRow({
           aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
         />
       </Table.Td>
-      <Table.Td className="align-top! pt-2">
+      <Table.Td className="pt-2 align-top!">
         <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
       </Table.Td>
       <Table.Td className="align-top!">
@@ -190,26 +195,24 @@ function ItemRow({
             <Badge
               size="xs"
               variant="light"
-              color={fullyLinked ? "dark" : "orange"}
+              color={fullyLinked ? "teal" : "orange"}
               radius="md"
               leftSection={<Link2 size={10} />}
-              className={fullyLinked ? "bg-teal-900/10! text-teal-950!" : undefined}
+              className={fullyLinked ? "bg-teal-800/15! text-teal-900! [&_svg]:text-teal-800!" : undefined}
             >
-              {quantity !== null
-                ? `${formatQuantity(linkedTotal)} ${unitLabel}`.trim()
-                : formatQuantity(linkedTotal)}
+              {quantity !== null ? `${formatQuantity(linkedTotal)} ${unitLabel}`.trim() : formatQuantity(linkedTotal)}
             </Badge>
             <Button
               type="button"
               variant="subtle"
-              color="gray"
+              color="teal"
               size="compact-xs"
               radius="md"
               px={6}
               leftSection={<Link2 size={12} />}
               disabled={!row.materialCode || !row.unitOfMeasurementSelected}
               onClick={() => onLinkRequisitions(row.key)}
-              className="text-teal-900!"
+              className={DARK_TEAL_SUBTLE_BTN}
             >
               {translate("Edit", "تعديل")}
             </Button>
@@ -219,19 +222,17 @@ function ItemRow({
             {row.allocations.map((allocation) => (
               <li
                 key={allocation.materialPurchaseRequisitionItemId}
-                className="group flex items-start justify-between gap-2 rounded-md bg-slate-100/90 px-2 py-1.5 ring-1 ring-slate-200/90"
+                className="group flex items-start justify-between gap-2 rounded-md bg-teal-800/[0.07] px-2 py-1.5"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-                    <span className="font-mono text-[11px] font-semibold text-slate-800">
-                      {allocation.requisitionCode}
-                    </span>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="font-mono text-[11px] font-semibold text-teal-900">{allocation.requisitionCode}</span>
+                    <span className="text-[11px] text-teal-800/75">
                       {formatQuantity(allocation.quantityAllocated)} {unitLabel}
                     </span>
                   </div>
                   {allocation.productionSubDepartment && (
-                    <p className="mt-0.5 truncate text-[10px] text-slate-400">
+                    <p className="mt-0.5 truncate text-[10px] text-teal-800/50">
                       {getProductionSubDepartmentLabel(
                         allocation.productionSubDepartment as ProductionSubDepartment,
                         locale,
@@ -241,7 +242,7 @@ function ItemRow({
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 rounded-md p-0.5 text-slate-400 opacity-70 transition-colors hover:bg-slate-200/80 hover:text-slate-700 group-hover:opacity-100"
+                  className="shrink-0 rounded-md p-0.5 text-teal-800/50 opacity-70 transition-colors group-hover:opacity-100 hover:bg-teal-800/10 hover:text-teal-900"
                   onClick={() => onRemoveAllocation(row.key, allocation.materialPurchaseRequisitionItemId)}
                   title={translate("Remove link", "إزالة الربط")}
                   aria-label={translate("Remove link", "إزالة الربط")}
@@ -253,7 +254,7 @@ function ItemRow({
           </ul>
         </div>
       </Table.Td>
-      <Table.Td className="align-top! transition-colors focus-within:bg-slate-50">
+      <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
         <TextInput
           value={row.notes}
           onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
@@ -422,18 +423,12 @@ export default function Page() {
 
   const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
-  const isDirty = useMemo(
-    () => supplierId !== null || notes.trim() !== "" || rows.length > 0,
-    [supplierId, notes, rows],
-  );
+  const isDirty = useMemo(() => supplierId !== null || notes.trim() !== "" || rows.length > 0, [supplierId, notes, rows]);
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
   const excludedRequisitionItemIds = useMemo(
-    () =>
-      rows.flatMap((row) =>
-        row.allocations.map((allocation) => allocation.materialPurchaseRequisitionItemId),
-      ),
+    () => rows.flatMap((row) => row.allocations.map((allocation) => allocation.materialPurchaseRequisitionItemId)),
     [rows],
   );
 
@@ -491,9 +486,7 @@ export default function Page() {
             ),
           }));
           const allocations = mergeAllocations(existing.allocations, convertedIncoming);
-          const quantity = Number(
-            allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0).toFixed(6),
-          );
+          const quantity = Number(allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0).toFixed(6));
           next[existingIndex] = { ...existing, allocations, quantity };
         } else {
           next.push({
@@ -675,7 +668,7 @@ export default function Page() {
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         {seedRequisition && getRequisitionStatus(seedRequisition) === "approved" && (
-          <div className="rounded-xl bg-slate-100/80 px-4 py-3 text-sm text-slate-700">
+          <div className="rounded-xl bg-teal-800/[0.07] px-4 py-3 text-sm text-teal-900">
             {translate(
               `Prefilling from requisition ${seedRequisition.code}. You can adjust prices and links, or add more open requisition lines before creating the order.`,
               `يتم التعبئة من طلب الشراء ${seedRequisition.code}. يمكنك تعديل الأسعار والربط أو إضافة المزيد من بنود طلبات الشراء المفتوحة قبل إنشاء الأمر.`,
@@ -718,20 +711,19 @@ export default function Page() {
               size="sm"
               leftSection={<Plus size={14} />}
               onClick={openAdd}
+              className={DARK_TEAL_LIGHT_BTN}
             >
               {translate("Add from requisitions", "إضافة من طلبات الشراء")}
             </Button>
           </div>
 
           {rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-300 bg-linear-to-b from-slate-50 to-white px-6 py-12 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-900/10 text-teal-950">
+            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-teal-800/10 bg-teal-800/2.5 to-white px-6 py-12 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-800/15 text-teal-900">
                 <ClipboardList size={26} strokeWidth={1.75} />
               </div>
               <div className="flex max-w-md flex-col gap-1.5">
-                <h5 className="text-base font-semibold text-gray-900">
-                  {translate("No items yet", "لا توجد بنود بعد")}
-                </h5>
+                <h5 className="text-base font-semibold text-gray-900">{translate("No items yet", "لا توجد بنود بعد")}</h5>
                 <p className="text-sm leading-relaxed text-gray-500">
                   {translate(
                     "Start by adding open purchase requisition lines. Materials and quantities will be filled from the selected requisitions.",
@@ -746,6 +738,7 @@ export default function Page() {
                 size="sm"
                 leftSection={<Plus size={15} />}
                 onClick={openAdd}
+                className={DARK_TEAL_FILLED_BTN}
               >
                 {translate("Add from requisitions", "إضافة من طلبات الشراء")}
               </Button>
@@ -833,7 +826,7 @@ export default function Page() {
           >
             {translation.cancel}
           </Button>
-          <Button type="submit" radius="md" color="teal" disabled={mutation.isPending}>
+          <Button type="submit" radius="md" color="teal" disabled={mutation.isPending} className={DARK_TEAL_FILLED_BTN}>
             {translate("Create", "إنشاء")}
           </Button>
         </div>
@@ -857,7 +850,14 @@ export default function Page() {
             <Button variant="light" color="dark" radius="md" onClick={closeConfirm} disabled={mutation.isPending} fullWidth>
               {translation.cancel}
             </Button>
-            <Button radius="md" color="teal" loading={mutation.isPending} onClick={handleConfirmCreate} fullWidth>
+            <Button
+              radius="md"
+              color="teal"
+              loading={mutation.isPending}
+              onClick={handleConfirmCreate}
+              fullWidth
+              className={DARK_TEAL_FILLED_BTN}
+            >
               {translate("Confirm & Create", "تأكيد وإنشاء")}
             </Button>
           </div>
