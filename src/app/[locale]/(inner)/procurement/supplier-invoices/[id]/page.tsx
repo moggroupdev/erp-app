@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import supplierInvoicesApi from "@/lib/api/supplier-invoices";
@@ -21,7 +21,6 @@ export default function Page() {
   const { locale, translate } = useI18n();
   const { id } = useParams<{ id: string }>();
   const privateRequest = usePrivateRequest();
-  const getLocalizedHref = useLocaleHref();
 
   const {
     data: invoice,
@@ -42,7 +41,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/procurement/supplier-invoices"),
+        backLink: true,
         sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
       }}
     >

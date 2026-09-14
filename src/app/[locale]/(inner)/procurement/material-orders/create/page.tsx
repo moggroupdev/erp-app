@@ -630,7 +630,7 @@ export default function Page() {
       <LayoutBox
         header={{
           title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-          backLink: getLocalizedHref("/procurement/material-orders"),
+          backLink: true,
         }}
       >
         <LoadingSection message={translate("Loading requisition", "جاري تحميل طلب الشراء")} />
@@ -643,7 +643,7 @@ export default function Page() {
       <LayoutBox
         header={{
           title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-          backLink: getLocalizedHref("/procurement/material-orders"),
+          backLink: true,
         }}
       >
         <ErrorSection
@@ -662,7 +662,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/procurement/material-orders"),
+        backLink: true,
         confirmNavigate: confirmNavigation,
       }}
     >

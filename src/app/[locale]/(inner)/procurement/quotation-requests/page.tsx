@@ -18,7 +18,7 @@ import useUser from "@/contexts/user/hook";
 import materialsApi from "@/lib/api/materials";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 
@@ -209,7 +209,6 @@ function ItemRow({
 
 export default function Page() {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
   const { user } = useUser();
 
@@ -377,7 +376,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/procurement"),
+        backLink: true,
         confirmNavigate: confirmNavigation,
       }}
     >

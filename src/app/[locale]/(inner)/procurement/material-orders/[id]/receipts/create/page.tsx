@@ -468,7 +468,7 @@ function CreateReceiptPage() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref(`/procurement/material-orders/${orderId}`),
+        backLink: true,
         confirmNavigate: confirmNavigation,
       }}
     >

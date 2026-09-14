@@ -490,7 +490,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/warehouse/legacy-issue-permits"),
+        backLink: true,
         confirmNavigate: confirmNavigation,
       }}
     >

@@ -47,7 +47,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/organization/roles"),
+        backLink: true,
         sideElements: (
           <div className="flex items-center gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />

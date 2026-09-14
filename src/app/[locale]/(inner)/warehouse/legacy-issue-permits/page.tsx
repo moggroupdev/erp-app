@@ -100,7 +100,7 @@ export default function Page() {
   return (
     <LayoutBox
       header={{
-        backLink: getLocalizedHref("/warehouse"),
+        backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <div className="flex gap-2">
