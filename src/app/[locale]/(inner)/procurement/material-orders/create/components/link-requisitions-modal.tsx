@@ -44,7 +44,6 @@ export default function LinkRequisitionsModal({
   orderUnit,
   baseUnit,
   unitConversions,
-  quantityOrdered,
   existingAllocations,
   onSave,
 }: {
@@ -55,9 +54,9 @@ export default function LinkRequisitionsModal({
   orderUnit: MaterialUnit;
   baseUnit: MaterialUnit;
   unitConversions: MaterialUnitConversionSummary[];
-  quantityOrdered: number | "";
   existingAllocations: AllocationDraft[];
-  onSave: (allocations: AllocationDraft[], nextQuantityOrdered?: number) => void;
+  /** Always sets order line quantity to the linked total. Empty allocations remove the line. */
+  onSave: (allocations: AllocationDraft[], nextQuantityOrdered: number) => void;
 }) {
   const { locale, translate, translation } = useI18n();
   const privateRequest = usePrivateRequest();
@@ -91,6 +90,10 @@ export default function LinkRequisitionsModal({
           requisitionCode: allocation.requisitionCode,
           productionSubDepartment: allocation.productionSubDepartment as MaterialPurchaseRequisitionOpenItem["productionSubDepartment"],
           materialCode,
+          materialTitle,
+          materialType: "raw_materials",
+          unitOfMeasurement: baseUnit,
+          unitConversions,
           unitOfMeasurementSelected: allocation.unitOfMeasurementSelected,
           quantityRequested: allocation.quantityRemaining + allocation.quantityAllocated,
           quantityAllocated: 0,
@@ -100,18 +103,13 @@ export default function LinkRequisitionsModal({
       };
     }
     setSelections(next);
-  }, [opened, existingAllocations, openItems, materialCode]);
-
-  const orderedQty = typeof quantityOrdered === "number" ? quantityOrdered : 0;
+  }, [opened, existingAllocations, openItems, materialCode, materialTitle, baseUnit, unitConversions]);
 
   const selectedTotal = useMemo(
     () =>
       Object.values(selections).reduce((sum, row) => sum + (typeof row.quantityAllocated === "number" ? row.quantityAllocated : 0), 0),
     [selections],
   );
-
-  const exceedsOrderQty = selectedTotal > orderedQty + 1e-9;
-  const remainingOnOrder = Math.max(0, orderedQty - selectedTotal);
 
   function remainingInOrderUnit(item: MaterialPurchaseRequisitionOpenItem) {
     return convertEnteredQuantityBetweenUnits(
@@ -132,21 +130,10 @@ export default function LinkRequisitionsModal({
         return next;
       }
 
-      const usedByOthers = Object.entries(prev).reduce(
-        (sum, [id, row]) =>
-          id === item.requisitionItemId
-            ? sum
-            : sum + (typeof row.quantityAllocated === "number" ? row.quantityAllocated : 0),
-        0,
-      );
-      const remainingOrder = Math.max(0, orderedQty - usedByOthers);
       const reqRemaining = remainingInOrderUnit(item);
-      // Prefer filling leftover order capacity; if the line is already full, still default
-      // to the requisition remaining so consolidating multiple MPReqs can raise order qty on apply.
-      const defaultQty = remainingOrder > 1e-9 ? Math.min(reqRemaining, remainingOrder) : reqRemaining;
       next[item.requisitionItemId] = {
         openItem: item,
-        quantityAllocated: defaultQty > 0 ? Number(defaultQty.toFixed(6)) : "",
+        quantityAllocated: reqRemaining > 0 ? Number(reqRemaining.toFixed(6)) : "",
       };
       return next;
     });
@@ -166,7 +153,7 @@ export default function LinkRequisitionsModal({
     const rows = Object.values(selections);
 
     if (rows.length === 0) {
-      onSave([]);
+      onSave([], 0);
       onClose();
       return;
     }
@@ -203,25 +190,19 @@ export default function LinkRequisitionsModal({
       quantityAllocated: Number(row.quantityAllocated),
     }));
 
-    // Consolidating several requisitions may need a higher order qty — raise it on apply.
-    onSave(allocations, selectedTotal > orderedQty + 1e-9 ? selectedTotal : undefined);
+    onSave(allocations, Number(selectedTotal.toFixed(6)));
     onClose();
   }
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={translate("Link requisitions", "ربط طلبات الشراء")}
-      size="xl"
-    >
+    <Modal opened={opened} onClose={onClose} title={translate("Link requisitions", "ربط طلبات الشراء")} size="xl">
       <div className="flex flex-col gap-3">
         <p className="text-sm text-gray-600">
           {translate(
-            `Select approved requisition lines for ${materialTitle || materialCode}. Quantities are entered in the order line unit (${getMaterialUnitLabel(orderUnit, locale)}).`,
-            `اختر بنود طلبات الشراء المعتمدة للمادة ${materialTitle || materialCode}. تُدخل الكميات بوحدة بند أمر التوريد (${getMaterialUnitLabel(orderUnit, locale)}).`,
+            `Select approved requisition lines for ${materialTitle || materialCode}. Order quantity will match the linked total (${getMaterialUnitLabel(orderUnit, locale)}).`,
+            `اختر بنود طلبات الشراء المعتمدة للمادة ${materialTitle || materialCode}. ستطابق كمية الأمر إجمالي المربوط (${getMaterialUnitLabel(orderUnit, locale)}).`,
           )}
         </p>
 
@@ -301,26 +282,10 @@ export default function LinkRequisitionsModal({
         )}
 
         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
-          <Badge variant="light" color="gray" radius="md">
-            {translate("Order qty", "كمية الأمر")}: {formatQuantity(orderedQty)} {getMaterialUnitLabel(orderUnit, locale)}
-          </Badge>
           <Badge variant="light" color="teal" radius="md">
-            {translate("Linked total", "إجمالي المربوط")}: {formatQuantity(selectedTotal)}{" "}
+            {translate("Order qty will be", "ستصبح كمية الأمر")}: {formatQuantity(selectedTotal)}{" "}
             {getMaterialUnitLabel(orderUnit, locale)}
           </Badge>
-          {exceedsOrderQty ? (
-            <Badge variant="light" color="orange" radius="md">
-              {translate(
-                `Apply will set order qty to ${formatQuantity(selectedTotal)}`,
-                `عند التطبيق ستصبح كمية الأمر ${formatQuantity(selectedTotal)}`,
-              )}
-            </Badge>
-          ) : (
-            <Badge variant="light" color={remainingOnOrder > 1e-9 ? "orange" : "gray"} radius="md">
-              {translate("Unlinked on this line", "غير مربوط في هذا البند")}: {formatQuantity(remainingOnOrder)}{" "}
-              {getMaterialUnitLabel(orderUnit, locale)}
-            </Badge>
-          )}
         </div>
 
         {localError && <p className="text-sm text-red-600">{localError}</p>}

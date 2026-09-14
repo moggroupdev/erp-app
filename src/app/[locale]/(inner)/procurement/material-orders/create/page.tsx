@@ -11,7 +11,6 @@ import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import usePrivateRequest from "@/hooks/use-private-request";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
-import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -19,20 +18,21 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
 import { Link2, Plus, Trash2, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
-import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
+import EmptySection from "@/components/ui/sections/empty";
 import { convertEnteredQuantityBetweenUnits } from "../helpers";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LinkRequisitionsModal, { type AllocationDraft } from "./components/link-requisitions-modal";
+import AddFromRequisitionsModal, { type AddedMaterialLine } from "./components/add-from-requisitions-modal";
 import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
@@ -55,34 +55,8 @@ function createRowKey() {
   return `mpo-item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function createEmptyRow(): ItemDraftRow {
-  return {
-    key: createRowKey(),
-    materialCode: null,
-    materialTitle: "",
-    materialType: null,
-    unitOfMeasurement: null,
-    unitConversions: [],
-    unitOfMeasurementSelected: null,
-    quantity: "",
-    unitPrice: "",
-    notes: "",
-    allocations: [],
-  };
-}
-
 function showUnitSelect(row: ItemDraftRow) {
   return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
-}
-
-function isEmptyRow(row: ItemDraftRow) {
-  return (
-    row.materialCode === null &&
-    row.quantity === "" &&
-    row.unitPrice === "" &&
-    row.notes.trim() === "" &&
-    row.allocations.length === 0
-  );
 }
 
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
@@ -93,14 +67,28 @@ function allocationLinkedTotal(row: ItemDraftRow) {
   return row.allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0);
 }
 
+function mergeAllocations(existing: AllocationDraft[], incoming: AllocationDraft[]): AllocationDraft[] {
+  const byId = new Map(existing.map((allocation) => [allocation.materialPurchaseRequisitionItemId, allocation]));
+  for (const allocation of incoming) {
+    const prev = byId.get(allocation.materialPurchaseRequisitionItemId);
+    if (prev) {
+      byId.set(allocation.materialPurchaseRequisitionItemId, {
+        ...prev,
+        quantityAllocated: Number((prev.quantityAllocated + allocation.quantityAllocated).toFixed(6)),
+        quantityRemaining: allocation.quantityRemaining,
+      });
+    } else {
+      byId.set(allocation.materialPurchaseRequisitionItemId, allocation);
+    }
+  }
+  return [...byId.values()];
+}
+
 function ItemRow({
   row,
   index,
   locale,
   currency,
-  usedMaterialCodes,
-  canRemove,
-  onMaterialSelect,
   onUpdate,
   onRemove,
   onLinkRequisitions,
@@ -110,9 +98,6 @@ function ItemRow({
   index: number;
   locale: Locale;
   currency: string;
-  usedMaterialCodes: string[];
-  canRemove: boolean;
-  onMaterialSelect: (key: string, material: MaterialWithUnitConversionsSelection | null) => void;
   onUpdate: (key: string, patch: Partial<ItemDraftRow>) => void;
   onRemove: (key: string) => void;
   onLinkRequisitions: (key: string) => void;
@@ -124,43 +109,19 @@ function ItemRow({
   const lineTotal = quantity !== null && unitPrice !== null ? quantity * unitPrice : null;
   const linkedTotal = allocationLinkedTotal(row);
   const unitLabel = row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : "";
-  const underLinked = quantity !== null && row.allocations.length > 0 && linkedTotal + 1e-9 < quantity;
   const fullyLinked = quantity !== null && row.allocations.length > 0 && Math.abs(linkedTotal - quantity) <= 1e-9;
-  const overLinked = quantity !== null && linkedTotal > quantity + 1e-9;
 
   return (
     <Table.Tr>
       <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <SelectMaterial
-          value={row.materialCode}
-          setValue={(next) => {
-            const resolved = typeof next === "function" ? next(row.materialCode) : next;
-            if (!resolved) onMaterialSelect(row.key, null);
-            else onUpdate(row.key, { materialCode: resolved, allocations: [] });
-          }}
-          onMaterialSelect={(material) => onMaterialSelect(row.key, material)}
-          excludeCodes={usedMaterialCodes.filter((c) => c !== row.materialCode)}
-          placeholder={translate("Enter material...", "أدخل المادة...")}
-          variant="unstyled"
-          radius={0}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-          withBrowseModal
-        />
+      <Table.Td>
+        <div className="flex flex-col py-0.5">
+          <span className="text-sm font-medium text-gray-800">{row.materialTitle || row.materialCode}</span>
+          {row.materialCode && <span className="font-mono text-xs text-gray-400">{row.materialCode}</span>}
+        </div>
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-        <NumberInput
-          value={row.quantity}
-          onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
-          min={0}
-          allowNegative={false}
-          decimalScale={6}
-          hideControls
-          variant="unstyled"
-          radius={0}
-          placeholder={translate("Enter quantity", "أدخل الكمية")}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-        />
+      <Table.Td>
+        <span className="text-sm text-gray-700">{quantity !== null ? formatQuantity(quantity) : ""}</span>
       </Table.Td>
       <Table.Td className="transition-colors focus-within:bg-teal-50/60">
         {showUnitSelect(row) ? (
@@ -183,9 +144,11 @@ function ItemRow({
                   row.unitConversions,
                 ),
               }));
+              const nextQty = convertedAllocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0);
               onUpdate(row.key, {
                 unitOfMeasurementSelected: nextUnit,
                 allocations: convertedAllocations,
+                quantity: Number(nextQty.toFixed(6)),
               });
             }}
             data={getRowUnitOptions(row, locale)}
@@ -222,20 +185,11 @@ function ItemRow({
       <Table.Td className="align-top!">
         <div className="flex flex-col gap-1.5 py-0.5">
           <div className="flex flex-wrap items-center gap-1.5">
-            {row.allocations.length === 0 ? (
-              <span className="text-xs text-gray-400">{translate("Not linked", "غير مربوط")}</span>
-            ) : (
-              <Badge
-                size="xs"
-                variant="light"
-                color={overLinked ? "red" : fullyLinked ? "teal" : underLinked ? "orange" : "teal"}
-                radius="md"
-              >
-                {quantity !== null
-                  ? `${formatQuantity(linkedTotal)} / ${formatQuantity(quantity)}`
-                  : formatQuantity(linkedTotal)}
-              </Badge>
-            )}
+            <Badge size="xs" variant="light" color={fullyLinked ? "teal" : "orange"} radius="md">
+              {quantity !== null
+                ? `${formatQuantity(linkedTotal)} / ${formatQuantity(quantity)}`
+                : formatQuantity(linkedTotal)}
+            </Badge>
             <Button
               type="button"
               variant="subtle"
@@ -247,7 +201,7 @@ function ItemRow({
               disabled={!row.materialCode || !row.unitOfMeasurementSelected}
               onClick={() => onLinkRequisitions(row.key)}
             >
-              {row.allocations.length > 0 ? translate("Edit", "تعديل") : translate("Link", "ربط")}
+              {translate("Edit", "تعديل")}
             </Button>
           </div>
           {row.allocations.length > 0 && (
@@ -301,7 +255,6 @@ function ItemRow({
           size="xs"
           radius="md"
           p={6}
-          disabled={!canRemove}
           onClick={() => onRemove(row.key)}
           title={translate("Remove row", "حذف الصف")}
         >
@@ -323,11 +276,12 @@ export default function Page() {
 
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
-  const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
+  const [rows, setRows] = useState<ItemDraftRow[]>([]);
   const [validationError, setValidationError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [prefillDone, setPrefillDone] = useState(!requisitionIdParam);
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
+  const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
   const [linkRowKey, setLinkRowKey] = useState<string | null>(null);
 
   useDocumentTitle(
@@ -409,29 +363,27 @@ export default function Page() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const items = rows
-        .filter((row) => !isEmptyRow(row))
-        .map((row) => {
-          const requisitionAllocations = row.allocations.map((allocation) => ({
-            materialPurchaseRequisitionItemId: allocation.materialPurchaseRequisitionItemId,
-            quantityAllocated: convertEnteredQuantityBetweenUnits(
-              allocation.quantityAllocated,
-              row.unitOfMeasurementSelected!,
-              allocation.unitOfMeasurementSelected,
-              row.unitOfMeasurement!,
-              row.unitConversions,
-            ),
-          }));
+      const items = rows.map((row) => {
+        const requisitionAllocations = row.allocations.map((allocation) => ({
+          materialPurchaseRequisitionItemId: allocation.materialPurchaseRequisitionItemId,
+          quantityAllocated: convertEnteredQuantityBetweenUnits(
+            allocation.quantityAllocated,
+            row.unitOfMeasurementSelected!,
+            allocation.unitOfMeasurementSelected,
+            row.unitOfMeasurement!,
+            row.unitConversions,
+          ),
+        }));
 
-          return {
-            materialCode: row.materialCode!,
-            unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
-            quantityOrdered: Number(row.quantity),
-            unitPrice: Number(row.unitPrice),
-            notes: row.notes.trim() || null,
-            ...(requisitionAllocations.length > 0 ? { requisitionAllocations } : {}),
-          };
-        });
+        return {
+          materialCode: row.materialCode!,
+          unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
+          quantityOrdered: Number(row.quantity),
+          unitPrice: Number(row.unitPrice),
+          notes: row.notes.trim() || null,
+          requisitionAllocations,
+        };
+      });
 
       return await materialPurchaseOrdersApi.create({
         privateRequest,
@@ -455,14 +407,17 @@ export default function Page() {
   const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
   const isDirty = useMemo(
-    () => supplierId !== null || notes.trim() !== "" || rows.length > 1 || rows.some((row) => !isEmptyRow(row)),
+    () => supplierId !== null || notes.trim() !== "" || rows.length > 0,
     [supplierId, notes, rows],
   );
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
-  const usedMaterialCodes = useMemo(
-    () => rows.map((row) => row.materialCode).filter((code): code is string => !!code),
+  const excludedRequisitionItemIds = useMemo(
+    () =>
+      rows.flatMap((row) =>
+        row.allocations.map((allocation) => allocation.materialPurchaseRequisitionItemId),
+      ),
     [rows],
   );
 
@@ -482,73 +437,78 @@ export default function Page() {
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
-  function handleMaterialSelect(key: string, material: MaterialWithUnitConversionsSelection | null) {
-    updateRow(key, {
-      materialCode: material?.code ?? null,
-      materialTitle: material?.title ?? "",
-      materialType: material?.materialType ?? null,
-      unitOfMeasurement: material?.unitOfMeasurement ?? null,
-      unitConversions: material?.unitConversions ?? [],
-      unitOfMeasurementSelected: material?.unitOfMeasurement ?? null,
-      unitPrice: material?.unitPrice ?? "",
-      allocations: [],
-    });
-    setValidationError("");
-  }
-
-  useEffect(() => {
-    const incomplete = rows.filter((row) => row.materialCode && !row.materialType);
-    if (incomplete.length === 0) return;
-
-    let cancelled = false;
-
-    Promise.all(
-      incomplete.map(async (row) => {
-        try {
-          const material = await materialsApi.get({ privateRequest, code: row.materialCode! });
-          if (!cancelled) {
-            updateRow(row.key, {
-              materialTitle: material.title,
-              materialType: material.materialType,
-              unitOfMeasurement: material.unitOfMeasurement,
-              unitConversions: material.unitConversions,
-              unitOfMeasurementSelected: row.unitOfMeasurementSelected ?? material.unitOfMeasurement,
-              unitPrice: row.unitPrice === "" ? (material.unitPrice ?? "") : row.unitPrice,
-            });
-          }
-        } catch {
-          // Leave the row as-is; user can re-select the material.
-        }
-      }),
-    );
-
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows.map((row) => `${row.key}:${row.materialCode}:${row.materialType}`).join("|")]);
-
-  function addRow() {
-    setRows((prev) => [...prev, createEmptyRow()]);
-  }
-
   function removeRow(key: string) {
-    setRows((prev) => (prev.length <= 1 ? prev : prev.filter((row) => row.key !== key)));
+    setRows((prev) => prev.filter((row) => row.key !== key));
+    if (linkRowKey === key) setLinkRowKey(null);
   }
 
   function removeAllocation(rowKey: string, requisitionItemId: string) {
     setRows((prev) =>
-      prev.map((row) =>
-        row.key === rowKey
-          ? {
-              ...row,
-              allocations: row.allocations.filter(
-                (allocation) => allocation.materialPurchaseRequisitionItemId !== requisitionItemId,
-              ),
-            }
-          : row,
-      ),
+      prev.flatMap((row) => {
+        if (row.key !== rowKey) return [row];
+        const allocations = row.allocations.filter(
+          (allocation) => allocation.materialPurchaseRequisitionItemId !== requisitionItemId,
+        );
+        if (allocations.length === 0) return [];
+        const quantity = Number(allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0).toFixed(6));
+        return [{ ...row, allocations, quantity }];
+      }),
     );
+  }
+
+  function handleAddFromRequisitions(lines: AddedMaterialLine[]) {
+    setValidationError("");
+    setRows((prev) => {
+      const next = [...prev];
+      for (const line of lines) {
+        const existingIndex = next.findIndex((row) => row.materialCode === line.materialCode);
+        if (existingIndex >= 0) {
+          const existing = next[existingIndex];
+          const convertedIncoming = line.allocations.map((allocation) => ({
+            ...allocation,
+            quantityAllocated: convertEnteredQuantityBetweenUnits(
+              allocation.quantityAllocated,
+              line.unitOfMeasurementSelected,
+              existing.unitOfMeasurementSelected!,
+              existing.unitOfMeasurement!,
+              existing.unitConversions,
+            ),
+          }));
+          const allocations = mergeAllocations(existing.allocations, convertedIncoming);
+          const quantity = Number(
+            allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0).toFixed(6),
+          );
+          next[existingIndex] = { ...existing, allocations, quantity };
+        } else {
+          next.push({
+            key: createRowKey(),
+            materialCode: line.materialCode,
+            materialTitle: line.materialTitle,
+            materialType: line.materialType,
+            unitOfMeasurement: line.unitOfMeasurement,
+            unitConversions: line.unitConversions,
+            unitOfMeasurementSelected: line.unitOfMeasurementSelected,
+            quantity: line.quantity,
+            unitPrice: "",
+            notes: "",
+            allocations: line.allocations,
+          });
+        }
+      }
+      return next;
+    });
+  }
+
+  function handleLinkSave(allocations: AllocationDraft[], nextQuantityOrdered: number) {
+    if (!linkRowKey) return;
+    if (allocations.length === 0) {
+      removeRow(linkRowKey);
+      return;
+    }
+    updateRow(linkRowKey, {
+      allocations,
+      quantity: nextQuantityOrdered,
+    });
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -559,20 +519,31 @@ export default function Page() {
       return setValidationError(translate("Please select a supplier.", "يرجى اختيار مورد."));
     }
 
-    const filledRows = rows.filter((row) => !isEmptyRow(row));
-    if (filledRows.length === 0) {
-      return setValidationError(translate("Please add at least one item.", "يرجى إضافة بند واحد على الأقل."));
+    if (rows.length === 0) {
+      return setValidationError(
+        translate(
+          "Please add at least one item from open purchase requisitions.",
+          "يرجى إضافة بند واحد على الأقل من طلبات الشراء المفتوحة.",
+        ),
+      );
     }
 
     for (let index = 0; index < rows.length; index++) {
       const row = rows[index];
-      if (isEmptyRow(row)) continue;
-
       const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
       const materialName = row.materialTitle || row.materialCode;
 
       if (!row.materialCode) {
         return setValidationError(translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
+      }
+
+      if (row.allocations.length === 0) {
+        return setValidationError(
+          translate(
+            `${rowLabel}: material ${materialName} must be linked to open purchase requisition lines.`,
+            `${rowLabel}: يجب ربط المادة ${materialName} ببنود طلبات شراء مفتوحة.`,
+          ),
+        );
       }
 
       if (!row.unitOfMeasurementSelected || !row.unitOfMeasurement) {
@@ -587,8 +558,8 @@ export default function Page() {
       if (row.quantity === "") {
         return setValidationError(
           translate(
-            `${rowLabel}: please enter the quantity for material ${materialName}.`,
-            `${rowLabel}: يرجى إدخال الكمية للمادة ${materialName}.`,
+            `${rowLabel}: quantity for material ${materialName} is missing.`,
+            `${rowLabel}: كمية المادة ${materialName} غير موجودة.`,
           ),
         );
       }
@@ -622,12 +593,12 @@ export default function Page() {
         );
       }
 
-      const linkedTotal = row.allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0);
-      if (linkedTotal > qty + 1e-9) {
+      const linkedTotal = allocationLinkedTotal(row);
+      if (Math.abs(linkedTotal - qty) > 1e-9) {
         return setValidationError(
           translate(
-            `${rowLabel}: linked requisition quantity exceeds ordered quantity for material ${materialName}.`,
-            `${rowLabel}: كمية طلبات الشراء المربوطة تتجاوز الكمية المطلوبة للمادة ${materialName}.`,
+            `${rowLabel}: linked requisition quantity must equal ordered quantity for material ${materialName}.`,
+            `${rowLabel}: يجب أن تساوي كمية طلبات الشراء المربوطة الكمية المطلوبة للمادة ${materialName}.`,
           ),
         );
       }
@@ -690,8 +661,8 @@ export default function Page() {
         {seedRequisition && getRequisitionStatus(seedRequisition) === "approved" && (
           <div className="rounded-xl bg-teal-50/60 px-4 py-3 text-sm text-teal-800">
             {translate(
-              `Prefilling from requisition ${seedRequisition.code}. You can adjust quantities, prices, and links before creating the order.`,
-              `يتم التعبئة من طلب الشراء ${seedRequisition.code}. يمكنك تعديل الكميات والأسعار والربط قبل إنشاء الأمر.`,
+              `Prefilling from requisition ${seedRequisition.code}. You can adjust prices and links, or add more open requisition lines before creating the order.`,
+              `يتم التعبئة من طلب الشراء ${seedRequisition.code}. يمكنك تعديل الأسعار والربط أو إضافة المزيد من بنود طلبات الشراء المفتوحة قبل إنشاء الأمر.`,
             )}
           </div>
         )}
@@ -721,88 +692,95 @@ export default function Page() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
-
-          <div className="overflow-x-auto rounded-xl">
-            <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
-              <Table.Thead className="bg-gray-50">
-                <Table.Tr className="h-9">
-                  <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
-                  <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Material", "المادة")}
-                  </Table.Th>
-                  <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Quantity", "الكمية")}
-                  </Table.Th>
-                  <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Unit", "الوحدة")}
-                  </Table.Th>
-                  <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
-                  </Table.Th>
-                  <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Line Total", "إجمالي البند")} ({translation.currency})
-                  </Table.Th>
-                  <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Requisitions", "طلبات الشراء")}
-                  </Table.Th>
-                  <Table.Th className="w-[14.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Notes", "الملاحظات")}
-                  </Table.Th>
-                  <Table.Th className="w-[3%]" />
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {rows.map((row, index) => (
-                  <ItemRow
-                    key={row.key}
-                    row={row}
-                    index={index}
-                    locale={locale}
-                    currency={translation.currency}
-                    usedMaterialCodes={usedMaterialCodes}
-                    canRemove={rows.length > 1}
-                    onMaterialSelect={handleMaterialSelect}
-                    onUpdate={updateRow}
-                    onRemove={removeRow}
-                    onLinkRequisitions={setLinkRowKey}
-                    onRemoveAllocation={removeAllocation}
-                  />
-                ))}
-              </Table.Tbody>
-              <Table.Tfoot className="bg-gray-50">
-                <Table.Tr className="h-9">
-                  <Table.Td />
-                  <Table.Td>
-                    <Button
-                      type="button"
-                      variant="light"
-                      color="teal"
-                      radius="md"
-                      size="xs"
-                      leftSection={<Plus size={14} />}
-                      onClick={addRow}
-                    >
-                      {translate("Add Row", "إضافة صف")}
-                    </Button>
-                  </Table.Td>
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td>
-                    <Badge size="sm" variant="light" color="dark" radius="md">
-                      {translate("Total", "الإجمالي")}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td>
-                    <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
-                  </Table.Td>
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                </Table.Tr>
-              </Table.Tfoot>
-            </Table>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+            <Button
+              type="button"
+              variant="light"
+              color="teal"
+              radius="md"
+              size="sm"
+              leftSection={<Plus size={14} />}
+              onClick={openAdd}
+            >
+              {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+            </Button>
           </div>
+
+          {rows.length === 0 ? (
+            <EmptySection
+              message={translate(
+                "No items yet. Add lines from open purchase requisitions.",
+                "لا توجد بنود بعد. أضف بنوداً من طلبات الشراء المفتوحة.",
+              )}
+            />
+          ) : (
+            <div className="overflow-x-auto rounded-xl">
+              <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+                <Table.Thead className="bg-gray-50">
+                  <Table.Tr className="h-9">
+                    <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
+                    <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Material", "المادة")}
+                    </Table.Th>
+                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Quantity", "الكمية")}
+                    </Table.Th>
+                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Unit", "الوحدة")}
+                    </Table.Th>
+                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
+                    </Table.Th>
+                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Line Total", "إجمالي البند")} ({translation.currency})
+                    </Table.Th>
+                    <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Requisitions", "طلبات الشراء")}
+                    </Table.Th>
+                    <Table.Th className="w-[14.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Notes", "الملاحظات")}
+                    </Table.Th>
+                    <Table.Th className="w-[3%]" />
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {rows.map((row, index) => (
+                    <ItemRow
+                      key={row.key}
+                      row={row}
+                      index={index}
+                      locale={locale}
+                      currency={translation.currency}
+                      onUpdate={updateRow}
+                      onRemove={removeRow}
+                      onLinkRequisitions={setLinkRowKey}
+                      onRemoveAllocation={removeAllocation}
+                    />
+                  ))}
+                </Table.Tbody>
+                <Table.Tfoot className="bg-gray-50">
+                  <Table.Tr className="h-9">
+                    <Table.Td />
+                    <Table.Td />
+                    <Table.Td />
+                    <Table.Td />
+                    <Table.Td>
+                      <Badge size="sm" variant="light" color="dark" radius="md">
+                        {translate("Total", "الإجمالي")}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
+                    </Table.Td>
+                    <Table.Td />
+                    <Table.Td />
+                    <Table.Td />
+                  </Table.Tr>
+                </Table.Tfoot>
+              </Table>
+            </div>
+          )}
         </section>
 
         {error && !confirmOpened && <ErrorAlert error={error} />}
@@ -851,6 +829,13 @@ export default function Page() {
         </div>
       </Modal>
 
+      <AddFromRequisitionsModal
+        opened={addOpened}
+        onClose={closeAdd}
+        excludedRequisitionItemIds={excludedRequisitionItemIds}
+        onAdd={handleAddFromRequisitions}
+      />
+
       {linkRow && linkRow.materialCode && linkRow.unitOfMeasurementSelected && linkRow.unitOfMeasurement && (
         <LinkRequisitionsModal
           opened={!!linkRowKey}
@@ -860,14 +845,8 @@ export default function Page() {
           orderUnit={linkRow.unitOfMeasurementSelected}
           baseUnit={linkRow.unitOfMeasurement}
           unitConversions={linkRow.unitConversions}
-          quantityOrdered={linkRow.quantity}
           existingAllocations={linkRow.allocations}
-          onSave={(allocations, nextQuantityOrdered) =>
-            updateRow(linkRow.key, {
-              allocations,
-              ...(nextQuantityOrdered != null ? { quantity: nextQuantityOrdered } : {}),
-            })
-          }
+          onSave={handleLinkSave}
         />
       )}
     </LayoutBox>

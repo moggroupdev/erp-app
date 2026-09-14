@@ -89,6 +89,10 @@ export type MaterialPurchaseRequisitionOpenItem = {
   requisitionCode: string;
   productionSubDepartment: ProductionSubDepartment;
   materialCode: string;
+  materialTitle: string;
+  materialType: MaterialType;
+  unitOfMeasurement: MaterialUnit;
+  unitConversions: MaterialUnitConversionSummary[];
   unitOfMeasurementSelected: MaterialUnit;
   quantityRequested: number;
   quantityAllocated: number;

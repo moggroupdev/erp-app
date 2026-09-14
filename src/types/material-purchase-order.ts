@@ -116,7 +116,7 @@ export type CreateMaterialPurchaseOrderItemDto = {
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
-  requisitionAllocations?: CreateMaterialPurchaseOrderItemRequisitionAllocationDto[];
+  requisitionAllocations: CreateMaterialPurchaseOrderItemRequisitionAllocationDto[];
 };
 
 export type CreateMaterialPurchaseOrderDto = {
