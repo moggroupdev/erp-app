@@ -488,7 +488,6 @@ export default function AddFromRequisitionsModal({
             onClick={handleAdd}
             fullWidth
             disabled={isFetching}
-            className="bg-teal-800! hover:bg-teal-900! data-disabled:bg-teal-800/45!"
           >
             {translate("Add to order", "إضافة إلى الأمر")}
           </Button>

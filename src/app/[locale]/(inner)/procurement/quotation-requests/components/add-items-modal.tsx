@@ -335,7 +335,6 @@ export default function AddQuotationItemsModal({
             onClick={handleAdd}
             fullWidth
             disabled={isFetching}
-            className="bg-teal-800! hover:bg-teal-900! data-disabled:bg-teal-800/45!"
           >
             {translate("Add to quotation", "إضافة إلى طلب عرض السعر")}
           </Button>

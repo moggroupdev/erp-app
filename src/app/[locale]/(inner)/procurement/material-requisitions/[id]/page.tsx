@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button } from "@mantine/core";
-import { Pencil, Plus, Printer, ShoppingCart } from "lucide-react";
+import { Pencil, Plus, Printer } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -119,7 +119,6 @@ export default function Page() {
                   variant="filled"
                   color="teal"
                   radius="md"
-                  leftSection={<ShoppingCart size={15} />}
                 >
                   {translate("Create purchase order", "إنشاء أمر توريد")}
                 </Button>

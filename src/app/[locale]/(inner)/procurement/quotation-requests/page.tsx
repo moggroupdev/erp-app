@@ -580,7 +580,6 @@ export default function Page() {
                         size="xs"
                         leftSection={<ListPlus size={14} />}
                         onClick={openAddItems}
-                        className="bg-teal-800/12! text-teal-900! hover:bg-teal-800/18! [&_svg]:text-teal-800!"
                       >
                         {translate("Add from requisitions", "إضافة من طلبات الشراء")}
                       </Button>
@@ -653,7 +652,7 @@ export default function Page() {
                 disabled={disabled}
                 leftSection={icon}
                 radius="md"
-                className="bg-teal-700! text-white! hover:bg-teal-800! disabled:bg-teal-700/60!"
+                color="teal"
               >
                 {label}
               </Button>

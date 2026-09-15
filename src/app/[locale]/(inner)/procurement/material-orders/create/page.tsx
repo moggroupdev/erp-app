@@ -40,10 +40,6 @@ import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
 
-const DARK_TEAL_FILLED_BTN = "bg-teal-800! hover:bg-teal-900! data-disabled:bg-teal-800/45! data-loading:bg-teal-800!";
-const DARK_TEAL_LIGHT_BTN = "bg-teal-800/12! text-teal-900! hover:bg-teal-800/18! [&_svg]:text-teal-800!";
-const DARK_TEAL_SUBTLE_BTN = "text-teal-800! hover:bg-teal-800/10!";
-
 type ItemDraftRow = {
   key: string;
   materialCode: string | null;
@@ -198,7 +194,6 @@ function ItemRow({
               color={fullyLinked ? "teal" : "orange"}
               radius="md"
               leftSection={<Link2 size={10} />}
-              className={fullyLinked ? "bg-teal-800/15! text-teal-900! [&_svg]:text-teal-800!" : undefined}
             >
               {quantity !== null ? `${formatQuantity(linkedTotal)} ${unitLabel}`.trim() : formatQuantity(linkedTotal)}
             </Badge>
@@ -212,7 +207,6 @@ function ItemRow({
               leftSection={<Link2 size={12} />}
               disabled={!row.materialCode || !row.unitOfMeasurementSelected}
               onClick={() => onLinkRequisitions(row.key)}
-              className={DARK_TEAL_SUBTLE_BTN}
             >
               {translate("Edit", "تعديل")}
             </Button>
@@ -711,7 +705,6 @@ export default function Page() {
               size="sm"
               leftSection={<Plus size={14} />}
               onClick={openAdd}
-              className={DARK_TEAL_LIGHT_BTN}
             >
               {translate("Add from requisitions", "إضافة من طلبات الشراء")}
             </Button>
@@ -738,7 +731,6 @@ export default function Page() {
                 size="sm"
                 leftSection={<Plus size={15} />}
                 onClick={openAdd}
-                className={DARK_TEAL_FILLED_BTN}
               >
                 {translate("Add from requisitions", "إضافة من طلبات الشراء")}
               </Button>
@@ -826,7 +818,7 @@ export default function Page() {
           >
             {translation.cancel}
           </Button>
-          <Button type="submit" radius="md" color="teal" disabled={mutation.isPending} className={DARK_TEAL_FILLED_BTN}>
+          <Button type="submit" radius="md" color="teal" disabled={mutation.isPending}>
             {translate("Create", "إنشاء")}
           </Button>
         </div>
@@ -856,7 +848,6 @@ export default function Page() {
               loading={mutation.isPending}
               onClick={handleConfirmCreate}
               fullWidth
-              className={DARK_TEAL_FILLED_BTN}
             >
               {translate("Confirm & Create", "تأكيد وإنشاء")}
             </Button>
