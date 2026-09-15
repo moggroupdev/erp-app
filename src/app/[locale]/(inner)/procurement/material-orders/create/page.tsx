@@ -630,7 +630,7 @@ export default function Page() {
       <LayoutBox
         header={{
           title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-          backLink: getLocalizedHref("/procurement/material-orders"),
+          backLink: true,
         }}
       >
         <LoadingSection message={translate("Loading requisition", "جاري تحميل طلب الشراء")} />
@@ -643,7 +643,7 @@ export default function Page() {
       <LayoutBox
         header={{
           title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-          backLink: getLocalizedHref("/procurement/material-orders"),
+          backLink: true,
         }}
       >
         <ErrorSection
@@ -662,7 +662,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/procurement/material-orders"),
+        backLink: true,
         confirmNavigate: confirmNavigation,
       }}
     >
@@ -718,7 +718,7 @@ export default function Page() {
           </div>
 
           {rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-teal-800/10 bg-teal-800/2.5 to-white px-6 py-12 text-center">
+            <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-teal-800/2.5 to-white px-6 py-12 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-800/15 text-teal-900">
                 <ClipboardList size={26} strokeWidth={1.75} />
               </div>

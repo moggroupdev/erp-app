@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Badge, Table } from "@mantine/core";
+import { Button, Table } from "@mantine/core";
 import { Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -19,7 +19,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -29,6 +29,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import OrderDetails from "./components/order-details";
+import ItemRequisitionAllocationsModal from "./components/item-requisition-allocations-modal";
 import OrderInvoicesSection from "@/components/global/sections/order-invoices";
 
 const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خامات" };
@@ -107,7 +108,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/procurement/material-orders"),
+        backLink: true,
         sideElements: <RefetchButton isFetching={isFetching} onRefetch={refetch} />,
       }}
     >
@@ -149,6 +150,7 @@ export default function Page() {
                         <Table.Th>
                           {translate(`Subtotal (${translation.currency})`, `المجموع الفرعي (${translation.currency})`)}
                         </Table.Th>
+                        <Table.Th>{translate("Requisitions", "طلبات الشراء")}</Table.Th>
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -212,33 +214,13 @@ export default function Page() {
                                   </Table.Td>
                                   <Table.Td>{formatMoney(toDisplayUnitPrice(baseUnitPrice, factor))}</Table.Td>
                                   <Table.Td className="font-semibold text-gray-800">{formatMoney(subtotal)}</Table.Td>
+                                  <Table.Td>
+                                    <ItemRequisitionAllocationsModal
+                                      materialTitle={item.material.title}
+                                      allocations={item.requisitionAllocations ?? []}
+                                    />
+                                  </Table.Td>
                                 </Table.Tr>
-                                {(item.requisitionAllocations?.length ?? 0) > 0 && (
-                                  <Table.Tr className="bg-gray-50/80">
-                                    <Table.Td />
-                                    <Table.Td colSpan={7}>
-                                      <div className="flex flex-wrap items-center gap-2 py-1">
-                                        <span className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                          {translate("Requisitions", "طلبات الشراء")}
-                                        </span>
-                                        {item.requisitionAllocations!.map((allocation) => (
-                                          <Link
-                                            key={allocation.id}
-                                            href={getLocalizedHref(
-                                              `/procurement/material-requisitions/${allocation.requisition.id}`,
-                                            )}
-                                            className="inline-flex"
-                                          >
-                                            <Badge size="sm" variant="light" color="teal" radius="md" className="hover:underline">
-                                              {allocation.requisition.code} · {formatQuantity(allocation.quantityAllocated)}{" "}
-                                              {getMaterialUnitLabel(allocation.unitOfMeasurementSelected, locale)}
-                                            </Badge>
-                                          </Link>
-                                        ))}
-                                      </div>
-                                    </Table.Td>
-                                  </Table.Tr>
-                                )}
                               </>
                             )}
                           </UnitToggle>
@@ -247,7 +229,7 @@ export default function Page() {
                     </Table.Tbody>
                     <Table.Tfoot className="bg-gray-50">
                       <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
-                        <Table.Th colSpan={7}>{translate("Total", "الإجمالي")}</Table.Th>
+                        <Table.Th colSpan={8}>{translate("Total", "الإجمالي")}</Table.Th>
                         <Table.Th>{formatMoney(order.totalAmount)}</Table.Th>
                       </Table.Tr>
                     </Table.Tfoot>

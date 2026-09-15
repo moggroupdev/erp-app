@@ -95,7 +95,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/warehouse/transactions"),
+        backLink: true,
         sideElements: <RefetchButton isFetching={isFetching} onRefetch={refetch} />,
       }}
     >

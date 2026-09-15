@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button } from "@mantine/core";
 import { Pencil, Plus } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
@@ -33,7 +33,6 @@ export default function Page() {
   const { locale, translate } = useI18n();
   const { id } = useParams<{ id: string }>();
   const privateRequest = usePrivateRequest();
-  const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
 
   const [headerModalOpened, { open: openHeaderModal, close: closeHeaderModal }] = useDisclosure(false);
@@ -78,7 +77,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/warehouse/legacy-issue-permits"),
+        backLink: true,
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />

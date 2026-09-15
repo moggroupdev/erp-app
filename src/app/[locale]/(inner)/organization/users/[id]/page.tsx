@@ -78,7 +78,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/organization/users"),
+        backLink: true,
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={loading} onRefetch={() => userQuery.refetch()} />

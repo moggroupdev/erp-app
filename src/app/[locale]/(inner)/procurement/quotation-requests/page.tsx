@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
 import { Button, NumberInput, SegmentedControl, Table, Textarea, TextInput } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
-import { Building2, ClipboardList, FilePenLine, NotebookPen, Plus, Printer, Trash2, Truck } from "lucide-react";
+import { Building2, ClipboardList, FilePenLine, ListPlus, NotebookPen, Plus, Printer, Trash2, Truck } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
@@ -18,9 +19,11 @@ import useUser from "@/contexts/user/hook";
 import materialsApi from "@/lib/api/materials";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
+import { convertEnteredQuantityBetweenUnits } from "../material-orders/helpers";
+import AddQuotationItemsModal, { type QuotationItemLine } from "./components/add-items-modal";
 
 const PAGE_TITLE = { en: "Quotation Request", ar: "طلب عرض سعر" };
 
@@ -209,7 +212,6 @@ function ItemRow({
 
 export default function Page() {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
   const { user } = useUser();
 
@@ -221,6 +223,7 @@ export default function Page() {
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
+  const [addItemsOpened, { open: openAddItems, close: closeAddItems }] = useDisclosure(false);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -287,6 +290,49 @@ export default function Page() {
 
   function addRow() {
     setRows((prev) => [...prev, createEmptyRow()]);
+  }
+
+  function handleAddItems(lines: QuotationItemLine[]) {
+    setValidationError("");
+    setRows((prev) => {
+      let next = prev.filter((row) => !isEmptyRow(row));
+
+      for (const line of lines) {
+        const existingIndex = next.findIndex((row) => row.materialCode === line.materialCode);
+        if (existingIndex >= 0) {
+          const existing = next[existingIndex];
+          const existingQty = typeof existing.quantity === "number" ? existing.quantity : 0;
+          const addedQty =
+            existing.unitOfMeasurementSelected && existing.unitOfMeasurement
+              ? convertEnteredQuantityBetweenUnits(
+                  line.quantity,
+                  line.unitOfMeasurementSelected,
+                  existing.unitOfMeasurementSelected,
+                  existing.unitOfMeasurement,
+                  existing.unitConversions,
+                )
+              : line.quantity;
+          next[existingIndex] = {
+            ...existing,
+            quantity: Number((existingQty + addedQty).toFixed(6)),
+          };
+        } else {
+          next.push({
+            key: createRowKey(),
+            materialCode: line.materialCode,
+            materialTitle: line.materialTitle,
+            materialType: line.materialType,
+            unitOfMeasurement: line.unitOfMeasurement,
+            unitConversions: line.unitConversions,
+            unitOfMeasurementSelected: line.unitOfMeasurementSelected,
+            quantity: line.quantity,
+            specifications: "",
+          });
+        }
+      }
+
+      return next.length > 0 ? next : [createEmptyRow()];
+    });
   }
 
   function removeRow(key: string) {
@@ -377,7 +423,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref("/procurement"),
+        backLink: true,
         confirmNavigate: confirmNavigation,
       }}
     >
@@ -525,11 +571,23 @@ export default function Page() {
                 <Table.Tr className="h-9">
                   <Table.Td />
                   <Table.Td>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button
                         type="button"
                         variant="light"
                         color="teal"
+                        radius="md"
+                        size="xs"
+                        leftSection={<ListPlus size={14} />}
+                        onClick={openAddItems}
+                        className="bg-teal-800/12! text-teal-900! hover:bg-teal-800/18! [&_svg]:text-teal-800!"
+                      >
+                        {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="light"
+                        color="gray"
                         radius="md"
                         size="xs"
                         leftSection={<Plus size={14} />}
@@ -613,6 +671,8 @@ export default function Page() {
           </PrintDocument>
         </div>
       </div>
+
+      <AddQuotationItemsModal opened={addItemsOpened} onClose={closeAddItems} onAdd={handleAddItems} />
     </LayoutBox>
   );
 }

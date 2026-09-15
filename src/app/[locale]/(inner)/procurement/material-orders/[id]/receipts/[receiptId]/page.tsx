@@ -75,7 +75,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: getLocalizedHref(`/procurement/material-orders/${orderId}`),
+        backLink: true,
         sideElements: (
           <div className="flex items-center gap-2">
             {canCreateIvt && (
