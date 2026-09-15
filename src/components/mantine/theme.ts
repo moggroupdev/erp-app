@@ -1,17 +1,20 @@
 import { alpha, createTheme, type CSSVariablesResolver, type MantineColorsTuple } from "@mantine/core";
 
-/** Tailwind teal-50 … teal-900 so Mantine `teal.8` matches `teal-800`. */
+const TEAL_800 = "#115e59";
+const TEAL_900 = "#134e4a";
+
+/** Light shades are teal-800 washes; default shade 6 is teal-800. */
 const teal: MantineColorsTuple = [
-  "#f0fdfa",
-  "#ccfbf1",
-  "#99f6e4",
+  "#e2eceb",
+  "#d4e2e1",
+  "#bcd2d1",
   "#5eead4",
   "#2dd4bf",
   "#14b8a6",
-  "#0d9488",
-  "#0f766e",
-  "#115e59",
-  "#134e4a",
+  TEAL_800,
+  TEAL_900,
+  TEAL_800,
+  TEAL_900,
 ];
 
 export const theme = createTheme({

@@ -2,6 +2,13 @@
 
 @theme {
   --animate-fade-in: fade-in 0.35s ease-out;
+
+  /* Light teal surfaces + mid teal text use teal-800 so chips, badges, and icons match Mantine. */
+  --color-teal-50: #e2eceb;
+  --color-teal-100: #d4e2e1;
+  --color-teal-200: #bcd2d1;
+  --color-teal-600: #115e59;
+  --color-teal-700: #115e59;
 }
 
 @layer utilities {
