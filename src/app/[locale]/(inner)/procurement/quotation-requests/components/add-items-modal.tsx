@@ -219,19 +219,13 @@ export default function AddQuotationItemsModal({
       if (Number.isNaN(qty) || qty <= 0) {
         setErrorItemId(row.openItem.requisitionItemId);
         return setLocalError(
-          translate(
-            `Quantity for ${itemLabel} must be greater than zero.`,
-            `يجب أن تكون كمية ${itemLabel} أكبر من صفر.`,
-          ),
+          translate(`Quantity for ${itemLabel} must be greater than zero.`, `يجب أن تكون كمية ${itemLabel} أكبر من صفر.`),
         );
       }
       if (qty > row.openItem.quantityRemaining + 1e-9) {
         setErrorItemId(row.openItem.requisitionItemId);
         return setLocalError(
-          translate(
-            `Quantity for ${itemLabel} exceeds remaining quantity.`,
-            `كمية ${itemLabel} تتجاوز الكمية المتبقية.`,
-          ),
+          translate(`Quantity for ${itemLabel} exceeds remaining quantity.`, `كمية ${itemLabel} تتجاوز الكمية المتبقية.`),
         );
       }
     }
@@ -282,7 +276,7 @@ export default function AddQuotationItemsModal({
                   <Table.Th>{translate("Requisitions", "طلبات الشراء")}</Table.Th>
                   <Table.Th>{translate("Department", "القسم")}</Table.Th>
                   <Table.Th>{translate("Unit", "الوحدة")}</Table.Th>
-                  <Table.Th>{translate("Remaining", "المتبقي")}</Table.Th>
+                  <Table.Th>{translate("QTY Requested", "الكمية المطلوبة")}</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -304,8 +298,8 @@ export default function AddQuotationItemsModal({
                       <Table.Td>
                         <div className="flex flex-wrap gap-1">
                           {group.requisitionCodes.map((code) => (
-                            <Badge key={code} size="xs" variant="light" color="gray" radius="sm" className="font-mono">
-                              {code}
+                            <Badge key={code} size="xs" variant="light" color="gray" radius="xs">
+                              <span className="font-mono! text-[10px]!">{code}</span>
                             </Badge>
                           ))}
                         </div>
@@ -329,13 +323,7 @@ export default function AddQuotationItemsModal({
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>
             {translation.cancel}
           </Button>
-          <Button
-            radius="md"
-            color="teal"
-            onClick={handleAdd}
-            fullWidth
-            disabled={isFetching}
-          >
+          <Button radius="md" color="teal" onClick={handleAdd} fullWidth disabled={isFetching}>
             {translate("Add to quotation", "إضافة إلى طلب عرض السعر")}
           </Button>
         </div>
