@@ -718,7 +718,7 @@ export default function Page() {
           </div>
 
           {rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-teal-800/10 bg-teal-800/2.5 to-white px-6 py-12 text-center">
+            <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-teal-800/2.5 to-white px-6 py-12 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-800/15 text-teal-900">
                 <ClipboardList size={26} strokeWidth={1.75} />
               </div>
