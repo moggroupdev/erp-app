@@ -23,6 +23,14 @@ const ICONS: Record<ProductionSubDepartment, React.ReactNode> = {
       <rect x="36" y="14" width="10" height="36" rx="3" fill="#F06EAA" transform="rotate(-35 41 32)" />
     </>
   ),
+  punch: (
+    <>
+      <rect x="10" y="42" width="44" height="10" rx="2" fill="#714B67" />
+      <rect x="24" y="8" width="16" height="22" rx="3" fill="#017E84" />
+      <rect x="28" y="30" width="8" height="12" rx="1" fill="#F06A26" />
+      <circle cx="32" cy="46" r="5" fill="#F3CC45" />
+    </>
+  ),
   bending: (
     <>
       <path d="M12 46 L12 20 L36 20" stroke="#017E84" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round" />
@@ -53,14 +61,8 @@ const ICONS: Record<ProductionSubDepartment, React.ReactNode> = {
   gas: (
     <>
       <ellipse cx="32" cy="40" rx="16" ry="12" fill="#F06A26" opacity="0.35" />
-      <path
-        d="M32 12 C40 24 48 30 48 40 C48 50 40 54 32 54 C24 54 16 50 16 40 C16 30 24 24 32 12 Z"
-        fill="#F06A26"
-      />
-      <path
-        d="M32 26 C36 32 40 35 40 40 C40 45 36 48 32 48 C28 48 24 45 24 40 C24 35 28 32 32 26 Z"
-        fill="#F3CC45"
-      />
+      <path d="M32 12 C40 24 48 30 48 40 C48 50 40 54 32 54 C24 54 16 50 16 40 C16 30 24 24 32 12 Z" fill="#F06A26" />
+      <path d="M32 26 C36 32 40 35 40 40 C40 45 36 48 32 48 C28 48 24 45 24 40 C24 35 28 32 32 26 Z" fill="#F3CC45" />
     </>
   ),
   injection: (
@@ -106,20 +108,29 @@ const ICONS: Record<ProductionSubDepartment, React.ReactNode> = {
       />
     </>
   ),
-  blacksmithing: (
-    <>
-      <rect x="14" y="38" width="36" height="10" rx="2" fill="#714B67" />
-      <rect x="22" y="28" width="20" height="12" rx="2" fill="#017E84" />
-      <rect x="18" y="14" width="8" height="22" rx="2" fill="#F3CC45" transform="rotate(-20 22 25)" />
-      <rect x="38" y="12" width="8" height="18" rx="2" fill="#F06A26" />
-    </>
-  ),
   kitchens: (
     <>
       <rect x="12" y="36" width="10" height="16" rx="2" fill="#017E84" />
       <rect x="27" y="26" width="10" height="26" rx="2" fill="#F3CC45" />
       <rect x="42" y="16" width="10" height="36" rx="2" fill="#F06A26" />
       <circle cx="17" cy="28" r="4" fill="#714B67" opacity="0.7" />
+    </>
+  ),
+
+  paints: (
+    <>
+      <rect x="18" y="22" width="20" height="28" rx="3" fill="#017E84" />
+      <ellipse cx="28" cy="22" rx="10" ry="5" fill="#714B67" />
+      <rect x="40" y="14" width="8" height="32" rx="2" fill="#F06A26" transform="rotate(25 44 30)" />
+      <circle cx="48" cy="18" r="6" fill="#F3CC45" />
+    </>
+  ),
+  blacksmithing: (
+    <>
+      <rect x="14" y="38" width="36" height="10" rx="2" fill="#714B67" />
+      <rect x="22" y="28" width="20" height="12" rx="2" fill="#017E84" />
+      <rect x="18" y="14" width="8" height="22" rx="2" fill="#F3CC45" transform="rotate(-20 22 25)" />
+      <rect x="38" y="12" width="8" height="18" rx="2" fill="#F06A26" />
     </>
   ),
 };

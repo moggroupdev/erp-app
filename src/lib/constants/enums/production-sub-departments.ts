@@ -3,6 +3,7 @@ import { translate } from "@/lib/i18n/utils";
 
 export const PRODUCTION_SUB_DEPARTMENT_VALUES = [
   "cutting",
+  "punch",
   "bending",
   "refrigeration",
   "electricity",
@@ -11,8 +12,9 @@ export const PRODUCTION_SUB_DEPARTMENT_VALUES = [
   "sheet_metal_neutral",
   "sheet_metal_cold",
   "sheet_metal_hot",
-  "blacksmithing",
   "kitchens",
+  "paints",
+  "blacksmithing",
 ] as const;
 
 export type ProductionSubDepartment = (typeof PRODUCTION_SUB_DEPARTMENT_VALUES)[number];
@@ -31,6 +33,13 @@ export const PRODUCTION_SUB_DEPARTMENT_LABELS: LocalizedEntity<ProductionSubDepa
     label: {
       en: "Cutting Dep.",
       ar: "قسم القص",
+    },
+  },
+  punch: {
+    value: "punch",
+    label: {
+      en: "Punch Dep.",
+      ar: "قسم البنش",
     },
   },
   bending: {
@@ -89,18 +98,25 @@ export const PRODUCTION_SUB_DEPARTMENT_LABELS: LocalizedEntity<ProductionSubDepa
       ar: "قسم سمكرة الساخن",
     },
   },
-  blacksmithing: {
-    value: "blacksmithing",
-    label: {
-      en: "Blacksmithing Dep.",
-      ar: "قسم الحدادة",
-    },
-  },
   kitchens: {
     value: "kitchens",
     label: {
       en: "Kitchens Dep.",
       ar: "قسم المطابخ",
+    },
+  },
+  paints: {
+    value: "paints",
+    label: {
+      en: "Paints Dep.",
+      ar: "قسم الدهانات",
+    },
+  },
+  blacksmithing: {
+    value: "blacksmithing",
+    label: {
+      en: "Blacksmithing Dep.",
+      ar: "قسم الحدادة",
     },
   },
 };
