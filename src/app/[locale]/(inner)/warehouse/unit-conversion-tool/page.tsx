@@ -460,128 +460,106 @@ export default function Page() {
       }}
     >
       <div className="flex flex-col gap-8 not-italic">
-        <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                <Layers size={16} />
-              </div>
-              <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto rounded-xl">
-            <Table withColumnBorders className="w-full min-w-max text-nowrap" horizontalSpacing="xs" verticalSpacing="xs">
-              <Table.Thead className="bg-gray-50">
-                <Table.Tr className="h-10">
-                  <Table.Th className={`${TABLE_COLUMN_CLASS.index} text-center! text-gray-500`}>#</Table.Th>
-                  <Table.Th
-                    className={`${TABLE_COLUMN_CLASS.material} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+        <section className="overflow-x-auto rounded-xl">
+          <Table withColumnBorders className="w-full min-w-max text-nowrap" horizontalSpacing="xs" verticalSpacing="xs">
+            <Table.Thead className="bg-gray-50">
+              <Table.Tr className="h-10">
+                <Table.Th className={`${TABLE_COLUMN_CLASS.index} text-center! text-gray-500`}>#</Table.Th>
+                <Table.Th
+                  className={`${TABLE_COLUMN_CLASS.material} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                >
+                  {translate("Material", "المادة")}
+                </Table.Th>
+                <Table.Th
+                  className={`${TABLE_COLUMN_CLASS.quantity} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                >
+                  {translate("Quantity", "الكمية")}
+                </Table.Th>
+                <Table.Th className={`${TABLE_COLUMN_CLASS.unit} text-xs font-medium tracking-wide text-gray-500 uppercase`}>
+                  {translate("Unit", "الوحدة")}
+                </Table.Th>
+                <Table.Th
+                  className={`${TABLE_COLUMN_CLASS.unitPrice} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                >
+                  {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+                </Table.Th>
+                <Table.Th
+                  className={`${TABLE_COLUMN_CLASS.otherUnits} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                >
+                  {translate("Other Units", "الوحدات الأخرى")}
+                </Table.Th>
+                <Table.Th
+                  className={`${TABLE_COLUMN_CLASS.lineValue} text-xs font-medium tracking-wide text-gray-500 uppercase`}
+                >
+                  {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
+                </Table.Th>
+                <Table.Th className={TABLE_COLUMN_CLASS.actions} />
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {rows.map((row, index) => (
+                <ItemRow
+                  key={row.key}
+                  row={row}
+                  index={index}
+                  locale={locale}
+                  computation={computations.get(row.key) ?? null}
+                  canRemove={rows.length > 1}
+                  onMaterialSelect={handleMaterialSelect}
+                  onUpdate={updateRow}
+                  onRemove={removeRow}
+                />
+              ))}
+            </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10">
+                <Table.Td className={TABLE_COLUMN_CLASS.index} />
+                <Table.Td className={TABLE_COLUMN_CLASS.material}>
+                  <Button
+                    type="button"
+                    variant="light"
+                    color="teal"
+                    radius="md"
+                    size="xs"
+                    leftSection={<Plus size={14} />}
+                    onClick={addRow}
                   >
-                    {translate("Material", "المادة")}
-                  </Table.Th>
-                  <Table.Th
-                    className={`${TABLE_COLUMN_CLASS.quantity} text-xs font-medium tracking-wide text-gray-500 uppercase`}
-                  >
-                    {translate("Quantity", "الكمية")}
-                  </Table.Th>
-                  <Table.Th
-                    className={`${TABLE_COLUMN_CLASS.unit} text-xs font-medium tracking-wide text-gray-500 uppercase`}
-                  >
-                    {translate("Unit", "الوحدة")}
-                  </Table.Th>
-                  <Table.Th
-                    className={`${TABLE_COLUMN_CLASS.unitPrice} text-xs font-medium tracking-wide text-gray-500 uppercase`}
-                  >
-                    {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
-                  </Table.Th>
-                  <Table.Th
-                    className={`${TABLE_COLUMN_CLASS.otherUnits} text-xs font-medium tracking-wide text-gray-500 uppercase`}
-                  >
-                    {translate("Other Units", "الوحدات الأخرى")}
-                  </Table.Th>
-                  <Table.Th
-                    className={`${TABLE_COLUMN_CLASS.lineValue} text-xs font-medium tracking-wide text-gray-500 uppercase`}
-                  >
-                    {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
-                  </Table.Th>
-                  <Table.Th className={TABLE_COLUMN_CLASS.actions} />
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {rows.map((row, index) => (
-                  <ItemRow
-                    key={row.key}
-                    row={row}
-                    index={index}
-                    locale={locale}
-                    computation={computations.get(row.key) ?? null}
-                    canRemove={rows.length > 1}
-                    onMaterialSelect={handleMaterialSelect}
-                    onUpdate={updateRow}
-                    onRemove={removeRow}
-                  />
-                ))}
-              </Table.Tbody>
-              <Table.Tfoot className="bg-gray-50">
-                <Table.Tr className="h-10">
-                  <Table.Td className={TABLE_COLUMN_CLASS.index} />
-                  <Table.Td className={TABLE_COLUMN_CLASS.material}>
-                    <Button
-                      type="button"
-                      variant="light"
-                      color="teal"
-                      radius="md"
-                      size="xs"
-                      leftSection={<Plus size={14} />}
-                      onClick={addRow}
-                    >
-                      {translate("Add Row", "إضافة صف")}
-                    </Button>
-                  </Table.Td>
-                  <Table.Td className={TABLE_COLUMN_CLASS.quantity} />
-                  <Table.Td className={TABLE_COLUMN_CLASS.unit} />
-                  <Table.Td className={TABLE_COLUMN_CLASS.unitPrice} />
-                  <Table.Td className={TABLE_COLUMN_CLASS.otherUnits} />
-                  <Table.Td className={TABLE_COLUMN_CLASS.lineValue} />
-                  <Table.Td className={TABLE_COLUMN_CLASS.actions} />
-                </Table.Tr>
-              </Table.Tfoot>
-            </Table>
-          </div>
+                    {translate("Add Row", "إضافة صف")}
+                  </Button>
+                </Table.Td>
+                <Table.Td className={TABLE_COLUMN_CLASS.quantity} />
+                <Table.Td className={TABLE_COLUMN_CLASS.unit} />
+                <Table.Td className={TABLE_COLUMN_CLASS.unitPrice} />
+                <Table.Td className={TABLE_COLUMN_CLASS.otherUnits} />
+                <Table.Td className={TABLE_COLUMN_CLASS.lineValue} />
+                <Table.Td className={TABLE_COLUMN_CLASS.actions} />
+              </Table.Tr>
+            </Table.Tfoot>
+          </Table>
         </section>
 
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
-              <Calculator size={16} />
+        <section className="overflow-hidden border-y border-gray-200/75 bg-linear-to-br from-slate-50 via-white to-teal-50/25">
+          <div className="flex flex-col gap-4 p-5 md:p-6">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
+                <Wallet size={15} />
+              </div>
+              <h5 className="text-sm font-semibold text-gray-800">{translate("Value summary", "ملخص القيمة")}</h5>
             </div>
-            <h4 className="text-lg font-semibold text-gray-900">{translate("Totals", "الإجماليات")}</h4>
-          </div>
 
-          <div className="overflow-hidden rounded-3xl border border-gray-200/75 bg-linear-to-br from-slate-50 via-white to-teal-50/40">
-            <div className="flex flex-col gap-4 p-5 md:p-6">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
-                  <Wallet size={15} />
-                </div>
-                <h5 className="text-sm font-semibold text-gray-800">{translate("Value summary", "ملخص القيمة")}</h5>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Grand total", "الإجمالي الكلي")}
-                </p>
-                <p className="text-3xl font-semibold tracking-tight text-teal-700">
-                  {formatMoney(totals.totalValue, translation.currency)}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {translate(
-                    "Sum of quantity × entered unit price for all filled rows",
-                    "مجموع الكمية × سعر الوحدة المدخل لكل البنود المكتملة",
-                  )}
-                </p>
-              </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Grand total", "الإجمالي الكلي")}
+              </p>
+              <p className="text-3xl font-semibold tracking-tight text-teal-700">
+                {formatMoney(totals.totalValue, translation.currency)}
+              </p>
+              <p className="text-xs text-gray-500">
+                {translate(
+                  "Sum of quantity × entered unit price for all filled rows",
+                  "مجموع الكمية × سعر الوحدة المدخل لكل البنود المكتملة",
+                )}
+              </p>
             </div>
           </div>
         </section>
