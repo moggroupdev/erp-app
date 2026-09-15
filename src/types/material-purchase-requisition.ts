@@ -63,11 +63,8 @@ export type MaterialPurchaseRequisitionItemDetailed = MaterialPurchaseRequisitio
   lastPurchasePrice: number | null;
   lastPurchaseDate: Date | null;
   lastPurchaseVendor: string | null;
-  /** Sum of MPO allocations in this line's selected unit. */
-  quantityAllocated: number;
-  /** Remaining = requested − allocated (line unit). */
+  /** Remaining = requested − allocated to MPOs (line unit). Used for create-order gating/prefill. */
   quantityRemaining: number;
-  orders: { id: string; code: string; quantityAllocated: number }[];
 };
 
 export type MaterialPurchaseRequisitionDetailed = Omit<
