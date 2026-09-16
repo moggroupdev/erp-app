@@ -56,19 +56,12 @@ export default function PurchasingMaterialsRequisitionFollowUpPrintDocument({
       </header>
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-4">
-        <PrintDetail
-          label={translate("Production department", "قسم الإنتاج")}
-          value={productionSubDepartmentLabel}
-        />
-        <PrintDetail label={translate("Lines", "عدد البنود")} value={String(items.length)} />
+        <PrintDetail label={translate("Requesting Party", "جهة الطلب")} value={productionSubDepartmentLabel} />
         <PrintDetail
           label={translate("Start Date", "تاريخ البداية")}
           value={startDate ? formatDate(startDate, locale) : "-"}
         />
-        <PrintDetail
-          label={translate("End Date", "تاريخ النهاية")}
-          value={endDate ? formatDate(endDate, locale) : "-"}
-        />
+        <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={endDate ? formatDate(endDate, locale) : "-"} />
       </section>
 
       <hr className="border-gray-300" />

@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -34,6 +36,13 @@ const PAGE_SUBTITLE = {
   en: "Track approved purchase requisition lines by production department: requested, ordered on POs, and received quantities with values.",
   ar: "متابعة بنود طلبات الشراء المعتمدة حسب قسم الإنتاج: الكميات المطلوبة والمطلوبة في أوامر التوريد والمستلمة مع القيم.",
 };
+
+function getCurrentMonthDateRange() {
+  return {
+    from: dayjs().startOf("month").format("YYYY-MM-DD"),
+    to: dayjs().endOf("month").format("YYYY-MM-DD"),
+  };
+}
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -72,6 +81,18 @@ export default function Page() {
     const query = params.toString();
     router.replace(query ? `?${query}` : "?", { scroll: false });
   }
+
+  // Default to the current calendar month when a department is selected and no dates are in the URL.
+  useEffect(() => {
+    if (!productionSubDepartment) return;
+    if (searchParams.has("from") || searchParams.has("to")) return;
+
+    const range = getCurrentMonthDateRange();
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("from", range.from);
+    params.set("to", range.to);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [productionSubDepartment, searchParams, router]);
 
   const filters = {
     from: from || undefined,
@@ -156,7 +177,20 @@ export default function Page() {
 
       <DepartmentPicker
         value={productionSubDepartment}
-        onChange={(value) => updateQuery({ productionSubDepartment: value })}
+        onChange={(value) => {
+          if (!value) {
+            updateQuery({ productionSubDepartment: null });
+            return;
+          }
+
+          const range = getCurrentMonthDateRange();
+          updateQuery({
+            productionSubDepartment: value,
+            ...(!searchParams.has("from") && !searchParams.has("to")
+              ? { from: range.from, to: range.to }
+              : {}),
+          });
+        }}
       />
 
       {productionSubDepartment ? (
