@@ -226,3 +226,35 @@ export type PurchasingMaterialsTotalAmountMismatches = {
   orders: PurchasingMaterialsTotalAmountMismatchOrder[];
   completedWithoutInvoiceTotal: PurchasingMaterialsCompletedWithoutInvoiceTotalOrder[];
 };
+
+// ================ Requisition Follow-up ================
+
+export type PurchasingMaterialsRequisitionFollowUpItem = {
+  requisitionItemId: string;
+  requisitionId: string;
+  requisitionCode: string;
+  materialCode: string;
+  materialTitle: string;
+  unitOfMeasurementSelected: MaterialUnit;
+  quantityRequested: number;
+  quantityOrdered: number;
+  quantityReceived: number;
+  lastPurchasePrice: number | null;
+  requestedValue: number | null;
+  orderedValue: number | null;
+  receivedValue: number | null;
+  notes: string | null;
+};
+
+export type PurchasingMaterialsRequisitionFollowUpTotals = {
+  requestedValue: number;
+  orderedValue: number;
+  receivedValue: number;
+};
+
+export type PurchasingMaterialsRequisitionFollowUp = {
+  productionSubDepartment: string;
+  items: PurchasingMaterialsRequisitionFollowUpItem[];
+  totals: PurchasingMaterialsRequisitionFollowUpTotals;
+  missingPriceCount: number;
+};

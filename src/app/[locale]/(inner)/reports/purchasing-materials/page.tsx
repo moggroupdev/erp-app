@@ -96,6 +96,16 @@ export default function Page() {
               href: "/reports/purchasing-materials/total-amount-mismatches",
             }}
           />
+          <ReportLinkCard
+            report={{
+              label: { en: "Purchase Requisition Follow-up", ar: "متابعة طلبات الشراء" },
+              description: {
+                en: "Track approved requisition lines by production department: requested, ordered, and received quantities with values.",
+                ar: "متابعة بنود طلبات الشراء المعتمدة حسب قسم الإنتاج: الكميات المطلوبة والمطلوبة في أوامر التوريد والمستلمة مع القيم.",
+              },
+              href: "/reports/purchasing-materials/requisition-follow-up",
+            }}
+          />
         </div>
       </main>
     </div>
