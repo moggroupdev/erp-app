@@ -18,7 +18,7 @@ export default function HomeContent() {
 
   return (
     <div className="root-flex-1 flex flex-col">
-      <section className="flex flex-1 flex-col items-center justify-center bg-linear-to-b from-gray-50 to-white px-4 py-16 text-center">
+      <section className="flex flex-1 flex-col items-center justify-center bg-gray-50 px-4 py-16 text-center">
         <Image
           src={"/images/logo.png"}
           alt="logo"

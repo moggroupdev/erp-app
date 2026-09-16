@@ -153,9 +153,21 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "supplier-stats", supplierId, filters] as const,
       totalAmountMismatches: (filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "total-amount-mismatches", filters] as const,
+      requisitionFollowUp: (
+        productionSubDepartment: string,
+        filters?: { from?: string; to?: string },
+      ) =>
+        [...queryKeys.reports.purchasingMaterials.all, "requisition-follow-up", productionSubDepartment, filters] as const,
     },
   },
   profile: {
     all: ["profile"] as const,
+  },
+  auditLogs: {
+    all: ["audit-logs"] as const,
+    lists: () => [...queryKeys.auditLogs.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.auditLogs.lists(), filters] as const,
+    details: () => [...queryKeys.auditLogs.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.auditLogs.details(), id] as const,
   },
 };

@@ -13,7 +13,7 @@ export default function PermissionGuard({
   isForPage,
   children,
 }: {
-  permission: Permission;
+  permission: Permission | readonly Permission[];
   isForPage?: boolean;
   children: React.ReactNode;
 }) {
@@ -25,7 +25,9 @@ export default function PermissionGuard({
 
   if (user.isAdmin) return children; // Admins have all permissions
 
-  if (!user.role.permissions.includes(permission)) return prevent({ isForPage });
+  const required = Array.isArray(permission) ? permission : [permission];
+  const hasPermission = required.some((p) => user.role.permissions.includes(p));
+  if (!hasPermission) return prevent({ isForPage });
 
   return children;
 }

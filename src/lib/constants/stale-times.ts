@@ -15,6 +15,7 @@ export const staleTimes = {
   materialPurchaseOrders: 5 * MINUTE,
   supplierInvoices: 5 * MINUTE,
   materialPurchaseRequisitions: 5 * MINUTE,
+  auditLogs: 0,
   reports: {
     materialsInventorySummary: 5 * MINUTE,
     materialsCategoryStats: 5 * MINUTE,
@@ -24,6 +25,7 @@ export const staleTimes = {
     purchasingMaterialsSubCategoryStats: 5 * MINUTE,
     purchasingMaterialsSupplierStats: 5 * MINUTE,
     purchasingMaterialsTotalAmountMismatches: 5 * MINUTE,
+    purchasingMaterialsRequisitionFollowUp: 5 * MINUTE,
   },
   locations: Infinity,
   departments: Infinity,

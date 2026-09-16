@@ -66,7 +66,7 @@ export default function ProductProductionRoutesSection({
       {productionRoutes.length === 0 ? (
         <EmptySection message={translate("No production routes set", "لا توجد مسارات إنتاج مسجلة")} />
       ) : (
-        <div className="overflow-hidden rounded-2xl border-gray-200 bg-linear-to-br from-white via-gray-50/80 to-blue-50/50 p-4 sm:p-6">
+        <div className="overflow-hidden rounded-2xl border-gray-200 bg-white p-4 sm:p-6">
           <div className="overflow-x-auto pb-1">
             <div className="flex min-w-max items-stretch gap-0">
               {productionRoutes.map((route, index) => {

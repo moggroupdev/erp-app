@@ -85,7 +85,7 @@ export default function EntityDetails({
       <Divider variant="dashed" />
 
       <header
-        className={`relative overflow-hidden border border-gray-200/80 bg-linear-to-br from-slate-50 via-white to-teal-50/30 p-5 sm:p-6 ${translate("rounded-r-3xl", "rounded-l-3xl")}`}
+        className={`relative overflow-hidden border border-gray-200/80 bg-white p-5 sm:p-6 ${translate("rounded-r-3xl", "rounded-l-3xl")}`}
       >
         <div className={`pointer-events-none absolute inset-y-0 start-0 w-1 ${isDeleted ? "bg-red-500" : "bg-teal-500"}`} />
 

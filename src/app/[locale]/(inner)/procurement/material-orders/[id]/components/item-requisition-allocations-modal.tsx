@@ -39,7 +39,6 @@ export default function ItemRequisitionAllocationsModal({
         radius="md"
         leftSection={<ClipboardList size={13} />}
         onClick={open}
-        className="bg-teal-800/12! text-teal-900! hover:bg-teal-800/18! [&_svg]:text-teal-800!"
       >
         {translate("Requisitions", "طلبات الشراء")} ({allocations.length})
       </Button>

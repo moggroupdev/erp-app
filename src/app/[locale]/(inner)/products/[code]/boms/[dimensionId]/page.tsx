@@ -118,7 +118,7 @@ export default function Page() {
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
-  const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.AVERAGE_PRICE);
+  const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.LAST_PURCHASE_PRICE);
   const [printVariant, setPrintVariant] = useState<BomPrintVariant>("full");
   const printHandlerRef = useRef<(() => void) | null>(null);
 
@@ -354,40 +354,123 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: (
-          <div className="flex items-center gap-3">
-            {bom && hasBom && (
-              <>
-                <Menu offset={12} withinPortal withArrow>
-                  <Menu.Target>
-                    <button
-                      title={translate("Print", "طباعة")}
-                      className="rounded-md text-xs text-gray-800 hover:text-gray-800/75"
-                    >
-                      <Printer size={15} />
-                    </button>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item
-                      leftSection={<Printer size={14} />}
-                      onClick={() => {
-                        void triggerPrint("full");
-                      }}
-                    >
-                      {translate("Print BOM", "طباعة قائمة المواد")}
-                    </Menu.Item>
-                    {zeroPriceItemCount > 0 && (
-                      <Menu.Item
-                        leftSection={<Printer size={14} />}
-                        onClick={() => {
-                          void triggerPrint("zero-price");
-                        }}
-                      >
-                        {translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
-                      </Menu.Item>
-                    )}
-                  </Menu.Dropdown>
-                </Menu>
+        sideElements: <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} />,
+      }}
+    >
+      {loading ? (
+        <LoadingSection message={translate("Loading BOM data", "جاري تحميل قائمة المواد")} />
+      ) : errorMessage ? (
+        <ErrorSection
+          errorTitle={translate("An error occurred while loading the BOM", "حدث خطأ أثناء تحميل قائمة المواد")}
+          errorMessage={errorMessage}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => bomQuery.refetch() }}
+        />
+      ) : (
+        bom && (
+          <>
+            <EntityDetails title={bom.product.title} icon={Layers} rows={detailRows} />
+
+            {!hasBom ? (
+              <EmptySection
+                message={translate("No BOM defined for this dimension yet.", "لا توجد قائمة مواد لهذا المقاس بعد.")}
+              >
+                <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
+                  <Button
+                    component={Link}
+                    href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
+                    variant="light"
+                    color="teal"
+                    radius="md"
+                    leftSection={<Plus size={15} />}
+                  >
+                    {translate("Create BOM", "إنشاء قائمة مواد")}
+                  </Button>
+                </PermissionGuard>
+              </EmptySection>
+            ) : (
+              <section className="flex flex-col gap-4">
+                <Divider variant="dashed" />
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-dashed border-gray-200 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                      <Layers size={16} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-lg font-semibold text-gray-900">{translate("BOM Items", "بنود قائمة المواد")}</h4>
+                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                        {materialRows.length}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-gray-500">{translate("Costing", "أساس التكلفة")}</span>
+                      <SegmentedControl
+                        radius="md"
+                        color="teal"
+                        variant="light"
+                        value={costingMethod}
+                        onChange={handleCostingMethodChange}
+                        data={COSTING_METHOD_LABELS_LIST.map((method) => ({
+                          value: method.value,
+                          label: translate(method.label.en, method.label.ar),
+                        }))}
+                      />
+                    </div>
+
+                    <Menu offset={8} withinPortal withArrow>
+                      <Menu.Target>
+                        <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
+                          {translate("Actions", "الإجراءات")}
+                        </Button>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item
+                          leftSection={<Printer size={14} />}
+                          onClick={() => {
+                            void triggerPrint("full");
+                          }}
+                        >
+                          {translate("Print BOM", "طباعة قائمة المواد")}
+                        </Menu.Item>
+                        {zeroPriceItemCount > 0 && (
+                          <Menu.Item
+                            leftSection={<Printer size={14} />}
+                            onClick={() => {
+                              void triggerPrint("zero-price");
+                            }}
+                          >
+                            {translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
+                          </Menu.Item>
+                        )}
+                        {canManageBom && <Menu.Divider />}
+                        {canAddBom && (
+                          <>
+                            <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
+                              {translate("Add Item", "إضافة بند")}
+                            </Menu.Item>
+                            <Menu.Item
+                              component={Link}
+                              href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
+                              leftSection={<Plus size={14} />}
+                            >
+                              {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
+                            </Menu.Item>
+                          </>
+                        )}
+                        {canAddBom && canUpdateBom && <Menu.Divider />}
+                        {canUpdateBom && (
+                          <Menu.Item leftSection={<Trash2 size={14} />} color="red" onClick={handleOpenDeleteAll}>
+                            {translate("Delete All BOM", "حذف كل قائمة المواد")}
+                          </Menu.Item>
+                        )}
+                      </Menu.Dropdown>
+                    </Menu>
+                  </div>
+                </div>
+
                 <PrintDocument
                   title={
                     printVariant === "zero-price"
@@ -425,114 +508,26 @@ export default function Page() {
                     />
                   )}
                 </PrintDocument>
-              </>
-            )}
-            <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} />
-          </div>
-        ),
-      }}
-    >
-      {loading ? (
-        <LoadingSection message={translate("Loading BOM data", "جاري تحميل قائمة المواد")} />
-      ) : errorMessage ? (
-        <ErrorSection
-          errorTitle={translate("An error occurred while loading the BOM", "حدث خطأ أثناء تحميل قائمة المواد")}
-          errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => bomQuery.refetch() }}
-        />
-      ) : (
-        bom && (
-          <>
-            <EntityDetails title={bom.product.title} icon={Layers} rows={detailRows} />
-
-            {!hasBom ? (
-              <EmptySection
-                message={translate("No BOM defined for this dimension yet.", "لا توجد قائمة مواد لهذا المقاس بعد.")}
-              >
-                <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
-                  <Button
-                    component={Link}
-                    href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
-                    variant="light"
-                    color="teal"
-                    radius="md"
-                    leftSection={<Plus size={15} />}
-                  >
-                    {translate("Create BOM", "إنشاء قائمة مواد")}
-                  </Button>
-                </PermissionGuard>
-              </EmptySection>
-            ) : (
-              <section className="flex flex-col gap-4">
-                <Divider variant="dashed" />
-
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
-                      <Layers size={16} />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-lg font-semibold text-gray-900">{translate("BOM Items", "بنود قائمة المواد")}</h4>
-                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                        {materialRows.length}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-500">{translate("Costing", "أساس التكلفة")}</span>
-                      <SegmentedControl
-                        radius="md"
-                        color="teal"
-                        variant="light"
-                        value={costingMethod}
-                        onChange={handleCostingMethodChange}
-                        data={COSTING_METHOD_LABELS_LIST.map((method) => ({
-                          value: method.value,
-                          label: translate(method.label.en, method.label.ar),
-                        }))}
-                      />
-                    </div>
-
-                    {canManageBom && (
-                      <Menu offset={8} withinPortal withArrow>
-                        <Menu.Target>
-                          <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
-                            {translate("Actions", "الإجراءات")}
-                          </Button>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                          {canAddBom && (
-                            <>
-                              <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
-                                {translate("Add Item", "إضافة بند")}
-                              </Menu.Item>
-                              <Menu.Item
-                                component={Link}
-                                href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
-                                leftSection={<Plus size={14} />}
-                              >
-                                {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
-                              </Menu.Item>
-                            </>
-                          )}
-                          {canAddBom && canUpdateBom && <Menu.Divider />}
-                          {canUpdateBom && (
-                            <Menu.Item leftSection={<Trash2 size={14} />} color="red" onClick={handleOpenDeleteAll}>
-                              {translate("Delete All BOM", "حذف كل قائمة المواد")}
-                            </Menu.Item>
-                          )}
-                        </Menu.Dropdown>
-                      </Menu>
-                    )}
-                  </div>
-                </div>
 
                 <div className="flex flex-col gap-8">
                   {departmentBreakdown.map((group) => (
                     <div key={group.departmentId} className="flex flex-col gap-3">
-                      <h5 className="px-0.5 text-sm font-semibold text-gray-800">{group.title}</h5>
+                      <div className="flex items-center justify-between gap-2 px-0.5">
+                        <h5 className="text-sm font-semibold text-gray-800">{group.title}</h5>
+                        {canUpdateBom && group.departmentId !== UNCATEGORIZED_ID && (
+                          <Button
+                            component={Link}
+                            href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/edit/${group.departmentId}`)}
+                            variant="light"
+                            color="teal"
+                            radius="md"
+                            size="xs"
+                            leftSection={<Pencil size={14} />}
+                          >
+                            {translate("Edit", "تعديل")}
+                          </Button>
+                        )}
+                      </div>
 
                       <div className="overflow-x-auto rounded-xl border border-gray-200">
                         <Table className="w-full table-fixed text-nowrap" highlightOnHover verticalSpacing="xs">
@@ -862,7 +857,7 @@ function CalculationCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-white to-teal-50/40 p-4 sm:p-5">
+    <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
       <div className="flex h-10 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">{icon}</div>
       <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
       <p className="text-xl font-semibold text-gray-900">{value}</p>

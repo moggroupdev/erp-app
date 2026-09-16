@@ -300,7 +300,6 @@ export default function LinkRequisitionsModal({
             onClick={handleSave}
             fullWidth
             disabled={isFetching}
-            className="bg-teal-800! hover:bg-teal-900! data-disabled:bg-teal-800/45!"
           >
             {translate("Apply links", "تطبيق الربط")}
           </Button>

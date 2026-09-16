@@ -53,5 +53,6 @@ export type CreateMmBomItemDto = {
 };
 
 export type UpdateMmBomItemDto = Partial<Pick<CreateMmBomItemDto, "quantityRequired" | "notes">> & {
+  materialCode: string;
   unitOfMeasurementSelected: MaterialUnit;
 };

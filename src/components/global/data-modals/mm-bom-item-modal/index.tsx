@@ -13,7 +13,7 @@ import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MmBomItemWithMaterial } from "@/types/mm-bom";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Badge, Button, NumberInput, Textarea } from "@mantine/core";
+import { Button, NumberInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
@@ -47,9 +47,10 @@ export default function MmBomItemModal({
   const [notes, setNotes] = useState("");
 
   const isUpdate = !!itemToUpdate;
-  const baseUnit = itemToUpdate?.material.unitOfMeasurement || selectedMaterial?.unitOfMeasurement || null;
-  const unitConversions = itemToUpdate?.material.unitConversions ?? selectedMaterial?.unitConversions ?? [];
-  const materialType = itemToUpdate?.material.materialType || selectedMaterial?.materialType || null;
+  const activeMaterial = selectedMaterial ?? itemToUpdate?.material;
+  const baseUnit = activeMaterial?.unitOfMeasurement ?? null;
+  const unitConversions = activeMaterial?.unitConversions ?? [];
+  const materialType = activeMaterial?.materialType ?? null;
   const showUnitSelect = !!materialType && isRawMaterial(materialType);
 
   const allExcludeCodes = useMemo(
@@ -74,6 +75,7 @@ export default function MmBomItemModal({
     if (!itemToUpdate) return null;
 
     return {
+      materialCode: itemToUpdate.materialCode,
       unit: itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement,
       quantityRequired: itemToUpdate.quantityRequired,
       notes: itemToUpdate.notes,
@@ -83,6 +85,8 @@ export default function MmBomItemModal({
   useEffect(() => {
     if (initialEditValues) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMaterialCode(initialEditValues.materialCode);
+      setSelectedMaterial(null);
       setQuantityRequired(initialEditValues.quantityRequired);
       setNotes(initialEditValues.notes || "");
       setUnit(initialEditValues.unit);
@@ -101,6 +105,7 @@ export default function MmBomItemModal({
           privateRequest,
           itemId: itemToUpdate.id,
           dto: {
+            materialCode: materialCode!,
             quantityRequired: Number(quantityRequired),
             unitOfMeasurementSelected: unit as MaterialUnit,
             notes: notes.trim() || null,
@@ -136,7 +141,7 @@ export default function MmBomItemModal({
     e.preventDefault();
     setValidationError("");
 
-    if (!isUpdate && !materialCode) {
+    if (!materialCode) {
       return setValidationError(translate("Please select a material.", "يرجى اختيار مادة."));
     }
 
@@ -167,43 +172,31 @@ export default function MmBomItemModal({
     : translate("Add BOM Item", "إضافة بند لقائمة المواد");
 
   const isDataChanged = initialEditValues
-    ? formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
+    ? materialCode !== initialEditValues.materialCode ||
+      formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
       unit !== initialEditValues.unit ||
       (notes.trim() || null) !== initialEditValues.notes
     : true;
 
   const isReadyToSubmit =
-    quantityRequired !== "" &&
-    Number(quantityRequired) > 0 &&
-    !!unit &&
-    isDataChanged &&
-    (isUpdate || !!materialCode);
+    !!materialCode && quantityRequired !== "" && Number(quantityRequired) > 0 && !!unit && isDataChanged;
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="lg">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {isUpdate && itemToUpdate ? (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-3">
-            <p className="truncate text-sm font-medium text-gray-800">{itemToUpdate.material.title}</p>
-            <Badge size="sm" variant="light" color="gray" radius="md" className="font-mono">
-              {itemToUpdate.material.code}
-            </Badge>
-          </div>
-        ) : (
-          <SelectMaterial
-            value={materialCode}
-            setValue={setMaterialCode}
-            onMaterialSelect={(material) => {
-              setSelectedMaterial(material);
-              setUnit(material?.unitOfMeasurement ?? null);
-            }}
-            excludeCodes={allExcludeCodes}
-            label={translate("Material", "المادة")}
-            placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
-            required
-            withBrowseModal
-          />
-        )}
+        <SelectMaterial
+          value={materialCode}
+          setValue={setMaterialCode}
+          onMaterialSelect={(material) => {
+            setSelectedMaterial(material);
+            setUnit(material?.unitOfMeasurement ?? null);
+          }}
+          excludeCodes={allExcludeCodes}
+          label={translate("Material", "المادة")}
+          placeholder={translate("Search material by name or code", "ابحث عن مادة بالاسم أو الكود")}
+          required
+          withBrowseModal
+        />
 
         <div className={showUnitSelect ? "grid gap-3 sm:grid-cols-2" : undefined}>
           <NumberInput

@@ -5,6 +5,8 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import ReportPageHeader from "@/components/ui/report-page-header";
 import { Boxes } from "lucide-react";
 import ReportLinkCard from "../components/report-link-card";
+import PermissionGuard from "@/components/guards/permission";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 
 const PAGE_TITLE = {
   en: "Inventory Reports",
@@ -36,26 +38,30 @@ export default function Page() {
 
       <main>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <ReportLinkCard
-            report={{
-              label: { en: "Inventory Summary", ar: "ملخص المخزون" },
-              description: {
-                en: "Full warehouse overview with total inventory value, breakdown by type and category, and items requiring replenishment.",
-                ar: "نظرة شاملة على المستودع تشمل إجمالي قيمة المخزون والتوزيع حسب النوع والفئة والمواد التي تحتاج إعادة تزويد.",
-              },
-              href: "/reports/materials/inventory-summary",
-            }}
-          />
-          <ReportLinkCard
-            report={{
-              label: { en: "Category Stats", ar: "إحصائيات الفئة" },
-              description: {
-                en: "Analysis within one main category, covering subcategory comparison, low-stock items, and highest-value materials.",
-                ar: "تحليل ضمن فئة رئيسية واحدة يشمل مقارنة الفئات الفرعية ومواد منخفضة المخزون وأعلى المواد قيمة.",
-              },
-              href: "/reports/materials/category-stats",
-            }}
-          />
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Inventory Summary", ar: "ملخص المخزون" },
+                description: {
+                  en: "Full warehouse overview with total inventory value, breakdown by type and category, and items requiring replenishment.",
+                  ar: "نظرة شاملة على المستودع تشمل إجمالي قيمة المخزون والتوزيع حسب النوع والفئة والمواد التي تحتاج إعادة تزويد.",
+                },
+                href: "/reports/materials/inventory-summary",
+              }}
+            />
+          </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_CATEGORY_STATS_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Category Stats", ar: "إحصائيات الفئة" },
+                description: {
+                  en: "Analysis within one main category, covering subcategory comparison, low-stock items, and highest-value materials.",
+                  ar: "تحليل ضمن فئة رئيسية واحدة يشمل مقارنة الفئات الفرعية ومواد منخفضة المخزون وأعلى المواد قيمة.",
+                },
+                href: "/reports/materials/category-stats",
+              }}
+            />
+          </PermissionGuard>
         </div>
       </main>
     </div>

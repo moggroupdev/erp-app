@@ -355,7 +355,7 @@ export default function ProductProductionRoutesModal({
               ? "border-green-200 bg-green-50/50"
               : roundedTotal > 100
                 ? "border-rose-200 bg-rose-50/40"
-                : "border-gray-200 bg-linear-to-br from-gray-50 via-white to-blue-50/30"
+                : "border-gray-200 bg-gray-50"
           }`}
         >
           <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -391,10 +391,10 @@ export default function ProductProductionRoutesModal({
             <div
               className={`h-full rounded-full transition-all duration-300 ${
                 isComplete
-                  ? "bg-linear-to-r from-green-400 to-green-500"
+                  ? "bg-green-500"
                   : roundedTotal > 100
-                    ? "bg-linear-to-r from-rose-400 to-rose-500"
-                    : "bg-linear-to-r from-amber-300 to-amber-400"
+                    ? "bg-rose-500"
+                    : "bg-amber-400"
               }`}
               style={{ width: `${progressWidth}%` }}
             />

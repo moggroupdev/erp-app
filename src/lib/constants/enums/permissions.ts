@@ -77,8 +77,16 @@ export const PERMISSION_VALUES = [
   "read_service_agreements",
   "read_maintenance_orders",
   "show_analytics",
-  "read_material_reports",
-  "read_material_purchasing_reports",
+  "read_material_inventory_summary_report",
+  "read_material_category_stats_report",
+  "read_material_purchasing_spending_summary_report",
+  "read_material_purchasing_price_history_report",
+  "read_material_purchasing_category_stats_report",
+  "read_material_purchasing_subcategory_stats_report",
+  "read_material_purchasing_supplier_stats_report",
+  "read_material_purchasing_total_amount_mismatches_report",
+  "read_material_purchasing_requisition_follow_up_report",
+  "read_audit_logs",
 ] as const;
 
 export type Permission = (typeof PERMISSION_VALUES)[number];
@@ -88,6 +96,29 @@ export const PERMISSIONS = Object.fromEntries(
 ) as {
   [K in Uppercase<Permission>]: Lowercase<K>;
 };
+
+/** Inventory report permissions — hub/sidebar visible if user has any. */
+export const MATERIAL_REPORT_PERMISSIONS = [
+  PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT,
+  PERMISSIONS.READ_MATERIAL_CATEGORY_STATS_REPORT,
+] as const;
+
+/** Purchasing report permissions — hub/sidebar visible if user has any. */
+export const MATERIAL_PURCHASING_REPORT_PERMISSIONS = [
+  PERMISSIONS.READ_MATERIAL_PURCHASING_SPENDING_SUMMARY_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_HISTORY_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_CATEGORY_STATS_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_SUBCATEGORY_STATS_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_SUPPLIER_STATS_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_TOTAL_AMOUNT_MISMATCHES_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_FOLLOW_UP_REPORT,
+] as const;
+
+/** All report permissions — /reports index visible if user has any. */
+export const ALL_REPORT_PERMISSIONS = [
+  ...MATERIAL_REPORT_PERMISSIONS,
+  ...MATERIAL_PURCHASING_REPORT_PERMISSIONS,
+] as const;
 
 // ================ Labels ================
 
@@ -597,18 +628,74 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض أوامر الصيانة",
     },
   },
-  read_material_reports: {
-    value: "read_material_reports",
+  read_material_inventory_summary_report: {
+    value: "read_material_inventory_summary_report",
     label: {
-      en: "Read Inventory Reports",
-      ar: "عرض تقارير المخزون",
+      en: "Read Inventory Summary Report",
+      ar: "عرض تقرير ملخص المخزون",
     },
   },
-  read_material_purchasing_reports: {
-    value: "read_material_purchasing_reports",
+  read_material_category_stats_report: {
+    value: "read_material_category_stats_report",
     label: {
-      en: "Read Purchases Reports",
-      ar: "عرض تقارير المشتريات",
+      en: "Read Inventory Category Stats Report",
+      ar: "عرض تقرير إحصائيات فئة المخزون",
+    },
+  },
+  read_material_purchasing_spending_summary_report: {
+    value: "read_material_purchasing_spending_summary_report",
+    label: {
+      en: "Read Purchases Summary Report",
+      ar: "عرض تقرير ملخص المشتريات",
+    },
+  },
+  read_material_purchasing_price_history_report: {
+    value: "read_material_purchasing_price_history_report",
+    label: {
+      en: "Read Price History Report",
+      ar: "عرض تقرير تاريخ الأسعار",
+    },
+  },
+  read_material_purchasing_category_stats_report: {
+    value: "read_material_purchasing_category_stats_report",
+    label: {
+      en: "Read Purchasing by Category Report",
+      ar: "عرض تقرير المشتريات حسب الفئة",
+    },
+  },
+  read_material_purchasing_subcategory_stats_report: {
+    value: "read_material_purchasing_subcategory_stats_report",
+    label: {
+      en: "Read Purchasing by Subcategory Report",
+      ar: "عرض تقرير المشتريات حسب الفئة الفرعية",
+    },
+  },
+  read_material_purchasing_supplier_stats_report: {
+    value: "read_material_purchasing_supplier_stats_report",
+    label: {
+      en: "Read Purchasing by Supplier Report",
+      ar: "عرض تقرير المشتريات حسب المورد",
+    },
+  },
+  read_material_purchasing_total_amount_mismatches_report: {
+    value: "read_material_purchasing_total_amount_mismatches_report",
+    label: {
+      en: "Read Invoice Total Variance Report",
+      ar: "عرض تقرير انحراف إجمالي الفاتورة",
+    },
+  },
+  read_material_purchasing_requisition_follow_up_report: {
+    value: "read_material_purchasing_requisition_follow_up_report",
+    label: {
+      en: "Read Purchase Requisition Follow-up Report",
+      ar: "عرض تقرير متابعة طلبات الشراء",
+    },
+  },
+  read_audit_logs: {
+    value: "read_audit_logs",
+    label: {
+      en: "Read Audit Logs",
+      ar: "عرض سجلات التدقيق",
     },
   },
 };
@@ -666,6 +753,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_department",
       "read_departments",
       "update_department",
+      "read_audit_logs",
     ],
   },
   {
@@ -765,7 +853,17 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "reports",
     label: { en: "Reports", ar: "التقارير" },
-    permissions: ["read_material_reports", "read_material_purchasing_reports"],
+    permissions: [
+      "read_material_inventory_summary_report",
+      "read_material_category_stats_report",
+      "read_material_purchasing_spending_summary_report",
+      "read_material_purchasing_price_history_report",
+      "read_material_purchasing_category_stats_report",
+      "read_material_purchasing_subcategory_stats_report",
+      "read_material_purchasing_supplier_stats_report",
+      "read_material_purchasing_total_amount_mismatches_report",
+      "read_material_purchasing_requisition_follow_up_report",
+    ],
   },
   {
     domain: "analytics",

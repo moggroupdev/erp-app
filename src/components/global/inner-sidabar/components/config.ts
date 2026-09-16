@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { UserState } from "@/types/user";
-import { PERMISSIONS, type Permission } from "@/lib/constants/enums/permissions";
+import { PERMISSIONS, MATERIAL_REPORT_PERMISSIONS, MATERIAL_PURCHASING_REPORT_PERMISSIONS, type Permission } from "@/lib/constants/enums/permissions";
 import {
   BadgeDollarSign,
   Boxes,
@@ -31,14 +31,14 @@ export type SidebarLeafConfig = {
   label: { en: string; ar: string };
   href: string;
   icon: LucideIcon;
-  requiredPermission?: Permission;
+  requiredPermission?: Permission | readonly Permission[];
 };
 
 export type SidebarGroupConfig = {
   label: { en: string; ar: string };
   href?: string;
   icon: LucideIcon;
-  requiredPermission?: Permission;
+  requiredPermission?: Permission | readonly Permission[];
   items: SidebarLeafConfig[];
 };
 
@@ -63,13 +63,13 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         label: { en: "Inventory", ar: "المخزون" },
         href: "/reports/materials",
         icon: Boxes,
-        requiredPermission: PERMISSIONS.READ_MATERIAL_REPORTS,
+        requiredPermission: MATERIAL_REPORT_PERMISSIONS,
       },
       {
         label: { en: "Purchases", ar: "المشتريات" },
         href: "/reports/purchasing-materials",
         icon: ShoppingCart,
-        requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASING_REPORTS,
+        requiredPermission: MATERIAL_PURCHASING_REPORT_PERMISSIONS,
       },
     ],
   },
@@ -271,6 +271,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         icon: Building2,
         requiredPermission: PERMISSIONS.READ_DEPARTMENTS,
       },
+      {
+        label: { en: "Audit Logs", ar: "السجلات" },
+        href: "/organization/audit-logs",
+        icon: History,
+        requiredPermission: PERMISSIONS.READ_AUDIT_LOGS,
+      },
     ],
   },
 ];
@@ -295,7 +301,12 @@ export function canAccessEntry(entry: SidebarEntryConfig, user: UserState): bool
     return entry.items.some((item) => canAccessEntry(item, user));
   }
 
-  if (entry.requiredPermission) return user.role.permissions.includes(entry.requiredPermission);
+  if (entry.requiredPermission) {
+    const required = Array.isArray(entry.requiredPermission)
+      ? entry.requiredPermission
+      : [entry.requiredPermission];
+    return required.some((p) => user.role.permissions.includes(p));
+  }
   return true;
 }
 

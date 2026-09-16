@@ -88,7 +88,17 @@ export type CreateBomItemDto = {
 
 export type CreateBomDto = { items: CreateBomItemDto[] };
 
+export type ReplaceDepartmentBomItemDto = {
+  materialCode: string;
+  quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit;
+  notes: string | null;
+};
+
+export type ReplaceDepartmentBomDto = { items: ReplaceDepartmentBomItemDto[] };
+
 export type UpdateBomItemDto = Partial<Pick<CreateBomItemDto, "quantityRequired" | "notes">> & {
+  materialCode: string;
   unitOfMeasurementSelected: MaterialUnit;
   productionSubDepartment: ProductionSubDepartment;
 };
