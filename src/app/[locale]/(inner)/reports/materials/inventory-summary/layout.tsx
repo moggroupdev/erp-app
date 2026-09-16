@@ -1,9 +1,9 @@
 import PermissionGuard from "@/components/guards/permission";
-import { MATERIAL_REPORT_PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <PermissionGuard permission={MATERIAL_REPORT_PERMISSIONS} isForPage>
+    <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT} isForPage>
       {children}
     </PermissionGuard>
   );

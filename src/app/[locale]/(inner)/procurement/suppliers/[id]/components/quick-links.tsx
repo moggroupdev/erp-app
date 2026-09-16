@@ -9,9 +9,9 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 export default function SupplierQuickLinks({ supplierId }: { supplierId: string }) {
   const { translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const canReadPurchasingReports = useHasPermission(PERMISSIONS.READ_MATERIAL_PURCHASING_REPORTS);
+  const canReadSupplierStats = useHasPermission(PERMISSIONS.READ_MATERIAL_PURCHASING_SUPPLIER_STATS_REPORT);
 
-  if (!canReadPurchasingReports) return null;
+  if (!canReadSupplierStats) return null;
 
   return (
     <section className="mt-4 flex flex-col gap-3">

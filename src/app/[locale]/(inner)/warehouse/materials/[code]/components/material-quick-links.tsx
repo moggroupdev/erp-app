@@ -9,9 +9,9 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 export default function MaterialQuickLinks({ materialCode }: { materialCode: string }) {
   const { translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
-  const canReadPurchasingReports = useHasPermission(PERMISSIONS.READ_MATERIAL_PURCHASING_REPORTS);
+  const canReadPriceHistory = useHasPermission(PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_HISTORY_REPORT);
 
-  if (!canReadPurchasingReports) return null;
+  if (!canReadPriceHistory) return null;
 
   return (
     <section className="mt-4 flex flex-col gap-3">
