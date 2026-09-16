@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import useDocumentTitle from "@/hooks/use-document-title";
+import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import usePrivateRequest from "@/hooks/use-private-request";
 import bomsApi from "@/lib/api/boms";
 import materialsApi from "@/lib/api/materials";
@@ -25,6 +27,7 @@ import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import ErrorAlert from "@/components/ui/error-alert";
+import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
@@ -90,6 +93,10 @@ export default function Page() {
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [validationError, setValidationError] = useState("");
   const [duplicateCodes, setDuplicateCodes] = useState<Set<string>>(new Set());
+  const [submitted, setSubmitted] = useState(false);
+  const [pendingFocus, setPendingFocus] = useState<{ rowKey: string; field: "material" | "qty" } | null>(null);
+  const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   useDocumentTitle(`${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("BOM", "قائمة المواد")}`);
 
@@ -124,6 +131,7 @@ export default function Page() {
       });
     },
     onSuccess: async () => {
+      setSubmitted(true);
       await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionId) });
       router.push(getLocalizedHref(`/products/${code}/boms/${dimensionId}`));
     },
@@ -131,6 +139,16 @@ export default function Page() {
 
   const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
   const currency = translation.currency;
+
+  const isDirty = useMemo(
+    () =>
+      productionSubDepartment !== null ||
+      rows.length > 1 ||
+      rows.some((row) => !!row.materialCode || row.quantityRequired !== "" || row.notes.trim() !== ""),
+    [productionSubDepartment, rows],
+  );
+
+  const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
   const usedMaterialCodes = useMemo(
     () => rows.map((row) => row.materialCode).filter((code): code is string => !!code),
@@ -172,6 +190,7 @@ export default function Page() {
     });
     setDuplicateCodes(new Set());
     setValidationError("");
+    if (material) setPendingFocus({ rowKey: key, field: "qty" });
   }
 
   // If a material code is set without metadata (e.g. setValue-only path), resolve it from the API.
@@ -199,7 +218,9 @@ export default function Page() {
   }, [rows.map((row) => `${row.key}:${row.materialCode}:${row.materialType}`).join("|")]);
 
   function addRow() {
-    setRows((prev) => [...prev, createEmptyRow()]);
+    const newRow = createEmptyRow();
+    setRows((prev) => [...prev, newRow]);
+    setPendingFocus({ rowKey: newRow.key, field: "material" });
   }
 
   function removeRow(key: string) {
@@ -207,8 +228,38 @@ export default function Page() {
     setDuplicateCodes(new Set());
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    if (!pendingFocus) return;
+
+    const selector =
+      pendingFocus.field === "material"
+        ? `[data-bom-row-key="${pendingFocus.rowKey}"] input`
+        : `[data-bom-qty-key="${pendingFocus.rowKey}"] input`;
+
+    const input = tableRef.current?.querySelector<HTMLInputElement>(selector);
+    input?.focus();
+    input?.select?.();
+    setPendingFocus(null);
+  }, [pendingFocus, rows]);
+
+  function isOpenListboxTarget(target: EventTarget | null) {
+    if (!(target instanceof Element)) return false;
+    return target.closest('[aria-expanded="true"]') !== null;
+  }
+
+  function handleTableKeyDown(e: React.KeyboardEvent) {
+    if (e.key !== "Enter" || e.nativeEvent.isComposing) return;
+    if ((e.target as HTMLElement).closest("button")) return;
+    // Let open select/combobox dropdowns handle Enter for option selection.
+    if (isOpenListboxTarget(e.target)) return;
+
     e.preventDefault();
+    e.stopPropagation();
+    addRow();
+  }
+
+  function handleSubmit(e?: React.FormEvent | React.MouseEvent) {
+    e?.preventDefault();
     setValidationError("");
     setDuplicateCodes(new Set());
 
@@ -270,7 +321,16 @@ export default function Page() {
       );
     }
 
+    handleOpenConfirm();
+  }
+
+  function handleConfirmCreate() {
     mutation.mutate();
+  }
+
+  function handleOpenConfirm() {
+    mutation.reset();
+    openConfirm();
   }
 
   if (bomQuery.isFetching) {
@@ -301,6 +361,7 @@ export default function Page() {
           ? `${bom.product.title} · ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
           : undefined,
         backLink: true,
+        confirmNavigate: confirmNavigation,
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -313,7 +374,7 @@ export default function Page() {
           required
         />
 
-        <div className="overflow-x-auto rounded-xl">
+        <div ref={tableRef} className="overflow-x-auto rounded-xl" onKeyDownCapture={handleTableKeyDown}>
           <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="h-9">
@@ -347,7 +408,7 @@ export default function Page() {
 
                 return (
                   <Table.Tr key={row.key} className={isDuplicate ? "bg-red-50/70" : undefined}>
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+                    <Table.Td data-bom-row-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <SelectMaterial
                         value={row.materialCode}
                         setValue={(next) => {
@@ -364,7 +425,7 @@ export default function Page() {
                         withBrowseModal
                       />
                     </Table.Td>
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+                    <Table.Td data-bom-qty-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <NumberInput
                         value={row.quantityRequired}
                         onChange={(value) => updateRow(row.key, { quantityRequired: value === "" ? "" : Number(value) })}
@@ -469,7 +530,7 @@ export default function Page() {
           </Table>
         </div>
 
-        {error && <ErrorAlert error={error} />}
+        {error && !confirmOpened && <ErrorAlert error={error} />}
 
         <MmComponentsSection mmRows={mmRows} />
 
@@ -486,16 +547,51 @@ export default function Page() {
               variant="light"
               color="dark"
               radius="md"
-              onClick={() => router.push(getLocalizedHref(`/products/${code}/boms/${dimensionId}`))}
+              onClick={() => {
+                if (confirmNavigation()) router.push(getLocalizedHref(`/products/${code}/boms/${dimensionId}`));
+              }}
             >
               {translation.cancel}
             </Button>
-            <Button type="submit" loading={mutation.isPending} radius="md" color="teal">
+            <Button type="button" radius="md" color="teal" disabled={mutation.isPending} onClick={handleSubmit}>
               {translate("Create BOM", "إنشاء قائمة المواد")}
             </Button>
           </div>
         </div>
       </form>
+
+      <Modal
+        opened={confirmOpened}
+        onClose={() => {
+          if (!mutation.isPending) closeConfirm();
+        }}
+        title={translate("Confirm create BOM", "تأكيد إنشاء قائمة المواد")}
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-gray-600">
+            {translate(
+              "Are you sure you want to create this BOM?",
+              "هل أنت متأكد من إنشاء قائمة المواد هذه؟",
+            )}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="light"
+              color="dark"
+              radius="md"
+              onClick={closeConfirm}
+              disabled={mutation.isPending}
+              fullWidth
+            >
+              {translation.cancel}
+            </Button>
+            <Button radius="md" color="teal" loading={mutation.isPending} onClick={handleConfirmCreate} fullWidth>
+              {translate("Confirm & Create", "تأكيد وإنشاء")}
+            </Button>
+          </div>
+          {error && <ErrorAlert error={error} />}
+        </div>
+      </Modal>
     </LayoutBox>
   );
 }
