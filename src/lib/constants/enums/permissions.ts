@@ -79,6 +79,7 @@ export const PERMISSION_VALUES = [
   "show_analytics",
   "read_material_reports",
   "read_material_purchasing_reports",
+  "read_audit_logs",
 ] as const;
 
 export type Permission = (typeof PERMISSION_VALUES)[number];
@@ -611,6 +612,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض تقارير المشتريات",
     },
   },
+  read_audit_logs: {
+    value: "read_audit_logs",
+    label: {
+      en: "Read Audit Logs",
+      ar: "عرض سجلات التدقيق",
+    },
+  },
 };
 
 export const PERMISSION_LABELS_LIST = Object.values(PERMISSION_LABELS);
@@ -666,6 +674,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_department",
       "read_departments",
       "update_department",
+      "read_audit_logs",
     ],
   },
   {

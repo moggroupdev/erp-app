@@ -158,4 +158,11 @@ export const queryKeys = {
   profile: {
     all: ["profile"] as const,
   },
+  auditLogs: {
+    all: ["audit-logs"] as const,
+    lists: () => [...queryKeys.auditLogs.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.auditLogs.lists(), filters] as const,
+    details: () => [...queryKeys.auditLogs.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.auditLogs.details(), id] as const,
+  },
 };

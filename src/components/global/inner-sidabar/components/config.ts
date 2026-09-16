@@ -271,6 +271,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         icon: Building2,
         requiredPermission: PERMISSIONS.READ_DEPARTMENTS,
       },
+      {
+        label: { en: "Audit Logs", ar: "السجلات" },
+        href: "/organization/audit-logs",
+        icon: History,
+        requiredPermission: PERMISSIONS.READ_AUDIT_LOGS,
+      },
     ],
   },
 ];
