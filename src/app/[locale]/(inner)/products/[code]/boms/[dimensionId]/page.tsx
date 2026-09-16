@@ -532,7 +532,24 @@ export default function Page() {
                 <div className="flex flex-col gap-8">
                   {departmentBreakdown.map((group) => (
                     <div key={group.departmentId} className="flex flex-col gap-3">
-                      <h5 className="px-0.5 text-sm font-semibold text-gray-800">{group.title}</h5>
+                      <div className="flex items-center justify-between gap-2 px-0.5">
+                        <h5 className="text-sm font-semibold text-gray-800">{group.title}</h5>
+                        {canUpdateBom && group.departmentId !== UNCATEGORIZED_ID && (
+                          <Button
+                            component={Link}
+                            href={getLocalizedHref(
+                              `/products/${code}/boms/${dimensionId}/edit/${group.departmentId}`,
+                            )}
+                            variant="light"
+                            color="teal"
+                            radius="md"
+                            size="xs"
+                            leftSection={<Pencil size={14} />}
+                          >
+                            {translate("Edit", "تعديل")}
+                          </Button>
+                        )}
+                      </div>
 
                       <div className="overflow-x-auto rounded-xl border border-gray-200">
                         <Table className="w-full table-fixed text-nowrap" highlightOnHover verticalSpacing="xs">

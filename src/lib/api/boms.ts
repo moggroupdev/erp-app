@@ -1,5 +1,13 @@
 import type { PrivateRequest } from "@/types/api";
-import type { BomItem, Bom, CreateBomDto, CreateBomItemDto, UpdateBomItemDto } from "@/types/bom";
+import type {
+  BomItem,
+  Bom,
+  CreateBomDto,
+  CreateBomItemDto,
+  UpdateBomItemDto,
+  ReplaceDepartmentBomDto,
+} from "@/types/bom";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 
 const bomsApi = {
   async create({
@@ -36,6 +44,24 @@ const bomsApi = {
     dto: CreateBomItemDto;
   }) {
     return await privateRequest<BomItem>({ method: "POST", url: `boms/${dimensionId}/append`, data: dto });
+  },
+
+  async replaceDepartment({
+    privateRequest,
+    dimensionId,
+    productionSubDepartment,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    dimensionId: string;
+    productionSubDepartment: ProductionSubDepartment;
+    dto: ReplaceDepartmentBomDto;
+  }) {
+    return await privateRequest<BomItem[]>({
+      method: "PUT",
+      url: `boms/${dimensionId}/department/${productionSubDepartment}`,
+      data: dto,
+    });
   },
 
   async updateItem({
