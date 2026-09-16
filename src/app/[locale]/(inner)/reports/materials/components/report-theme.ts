@@ -1,5 +1,4 @@
 export const reportTheme = {
-  hero: "from-slate-800 via-slate-800 to-teal-900",
   surface: "bg-stone-50/80",
   card: "bg-white border border-stone-200/80 shadow-sm",
   accent: "#0d9488",

@@ -862,7 +862,7 @@ function CalculationCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-white to-teal-50/40 p-4 sm:p-5">
+    <div className="flex flex-col gap-1.5 overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
       <div className="flex h-10 w-9 items-center justify-center rounded-xl bg-teal-50 text-teal-600">{icon}</div>
       <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
       <p className="text-xl font-semibold text-gray-900">{value}</p>

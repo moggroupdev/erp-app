@@ -538,7 +538,7 @@ export default function Page() {
           </Table>
         </section>
 
-        <section className="overflow-hidden border-y border-gray-200/75 bg-linear-to-br from-slate-50 via-white to-teal-50/25">
+        <section className="overflow-hidden border-y border-gray-200/75 bg-white">
           <div className="flex flex-col gap-4 p-5 md:p-6">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
