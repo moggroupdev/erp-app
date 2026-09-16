@@ -14,9 +14,8 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
-import { Button } from "@mantine/core";
-import { Pencil, Tag } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
+import { Button, Menu } from "@mantine/core";
+import { ChevronDown, Pencil, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -35,6 +34,9 @@ export default function Page() {
   const { code } = useParams<{ code: string }>();
   const privateRequest = usePrivateRequest();
   const canReadBom = useHasPermission(PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS);
+  const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
+  const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
+  const canManageMaterial = canUpdateMaterial || canSetMarketPrice;
 
   const materialQuery = useQuery({
     queryKey: queryKeys.materials.detail(code),
@@ -74,21 +76,28 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
-            {material && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
-                <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-                  {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
-            )}
-            {material && (
-              <PermissionGuard permission={PERMISSIONS.SET_MATERIAL_MARKET_PRICE}>
-                <Button onClick={openMarketPriceModal} variant="light" color="teal" radius="md" leftSection={<Tag size={15} />}>
-                  {translate("Set Market Price", "تعيين سعر السوق")}
-                </Button>
-              </PermissionGuard>
+            {material && canManageMaterial && (
+              <Menu offset={8} withinPortal withArrow>
+                <Menu.Target>
+                  <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
+                    {translate("Actions", "الإجراءات")}
+                  </Button>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  {canUpdateMaterial && (
+                    <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
+                      {translate("Edit", "تعديل")}
+                    </Menu.Item>
+                  )}
+                  {canSetMarketPrice && (
+                    <Menu.Item leftSection={<Tag size={14} />} onClick={openMarketPriceModal}>
+                      {translate("Set Market Price", "تعيين سعر السوق")}
+                    </Menu.Item>
+                  )}
+                </Menu.Dropdown>
+              </Menu>
             )}
           </div>
         ),
