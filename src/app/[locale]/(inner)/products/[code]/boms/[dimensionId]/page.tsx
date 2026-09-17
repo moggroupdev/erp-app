@@ -54,6 +54,7 @@ import {
   Pencil,
   Plus,
   Printer,
+  Replace,
   Trash2,
   Wallet,
 } from "lucide-react";
@@ -74,6 +75,7 @@ import BomZeroPricePrintDocument from "@/components/documents/bom-zero-price-pri
 import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
 import BomItemUnitPrice from "./components/bom-item-unit-price";
+import BulkZeroCostingModal from "./components/bulk-zero-costing-modal";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 const DELETE_ALL_CONFIRM_PHRASE = "DELETE";
@@ -121,6 +123,7 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [deleteAllOpened, { open: openDeleteAll, close: closeDeleteAll }] = useDisclosure(false);
+  const [bulkZeroCostingOpened, { open: openBulkZeroCosting, close: closeBulkZeroCosting }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
@@ -259,6 +262,56 @@ export default function Page() {
     () => zeroPriceDepartmentBreakdown.reduce((sum, group) => sum + group.itemCount, 0),
     [zeroPriceDepartmentBreakdown],
   );
+
+  const zeroEffectivePriceItems = useMemo(() => {
+    return materialRows.filter((item) => {
+      const effectiveMethod = getRowCostingMethod(item.id, costingMethod, itemCostingOverrides);
+      return getMaterialCostPrice(item.material, effectiveMethod) === 0;
+    });
+  }, [materialRows, costingMethod, itemCostingOverrides]);
+
+  function handleBulkZeroCostingApply(method: ItemCostingMethod) {
+    const nextOverrides = { ...itemCostingOverrides };
+    let updatedCount = 0;
+    let skippedCount = 0;
+
+    for (const item of zeroEffectivePriceItems) {
+      const methodPrice = getMaterialCostPrice(item.material, method);
+      if (methodPrice === 0) {
+        skippedCount += 1;
+        continue;
+      }
+
+      if (method === costingMethod) {
+        delete nextOverrides[item.id];
+      } else {
+        nextOverrides[item.id] = method;
+      }
+      updatedCount += 1;
+    }
+
+    setItemCostingOverrides(nextOverrides);
+
+    if (updatedCount > 0 && skippedCount > 0) {
+      toast.success(
+        translate(
+          `Updated costing for ${updatedCount} items. Skipped ${skippedCount} with no price for the selected method.`,
+          `تم تحديث أساس التكلفة لـ ${updatedCount} بند. تم تخطي ${skippedCount} لعدم وجود سعر للأساس المحدد.`,
+        ),
+      );
+    } else if (updatedCount > 0) {
+      toast.success(
+        translate(
+          `Updated costing for ${updatedCount} zero-price items.`,
+          `تم تحديث أساس التكلفة لـ ${updatedCount} بند بدون سعر.`,
+        ),
+      );
+    } else {
+      toast.message(
+        translate("No items were updated for the selected costing method.", "لم يتم تحديث أي بنود لأساس التكلفة المحدد."),
+      );
+    }
+  }
 
   const departmentBreakdown = useMemo((): DepartmentBreakdown[] => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
@@ -461,6 +514,15 @@ export default function Page() {
                           >
                             {translate("Print Zero Price Items", "طباعة البنود التي بدون سعر")}
                           </Menu.Item>
+                        )}
+
+                        {zeroEffectivePriceItems.length > 0 && (
+                          <>
+                            <Menu.Divider />
+                            <Menu.Item leftSection={<Replace size={14} />} onClick={openBulkZeroCosting}>
+                              {translate("Update Zero Prices", "تحديث الأسعار الصفرية")}
+                            </Menu.Item>
+                          </>
                         )}
                         {canManageBom && <Menu.Divider />}
                         {canAddBom && (
@@ -795,6 +857,14 @@ export default function Page() {
                   itemToUpdate={itemToUpdate}
                   setItemToUpdate={setItemToUpdate}
                   existingItems={bomItems}
+                />
+
+                <BulkZeroCostingModal
+                  opened={bulkZeroCostingOpened}
+                  onClose={closeBulkZeroCosting}
+                  items={zeroEffectivePriceItems}
+                  bomCostingMethod={costingMethod}
+                  onApply={handleBulkZeroCostingApply}
                 />
 
                 <DeleteModal
