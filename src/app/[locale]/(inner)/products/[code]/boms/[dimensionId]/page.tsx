@@ -44,7 +44,18 @@ import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/f
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
-import { Calculator, ChevronDown, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
+import {
+  Calculator,
+  ChevronDown,
+  EllipsisVertical,
+  Factory,
+  Layers,
+  Pencil,
+  Plus,
+  Printer,
+  Trash2,
+  Wallet,
+} from "lucide-react";
 import { useUser } from "@/contexts/user/hook";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
@@ -219,8 +230,7 @@ export default function Page() {
       ...group,
       items: [...group.items].sort(
         (a, b) =>
-          a.material.title.localeCompare(b.material.title, locale) ||
-          a.material.code.localeCompare(b.material.code, locale),
+          a.material.title.localeCompare(b.material.title, locale) || a.material.code.localeCompare(b.material.code, locale),
       ),
     }));
 
@@ -265,8 +275,7 @@ export default function Page() {
       ...group,
       items: [...group.items].sort(
         (a, b) =>
-          a.material.title.localeCompare(b.material.title, locale) ||
-          a.material.code.localeCompare(b.material.code, locale),
+          a.material.title.localeCompare(b.material.title, locale) || a.material.code.localeCompare(b.material.code, locale),
       ),
       sharePercent: totalCost > 0 ? (group.totalCost / totalCost) * 100 : 0,
     }));
@@ -848,13 +857,19 @@ function ManufacturingCostsSection({
 
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex items-center gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-          <Wallet size={16} />
+      <div className="flex items-start gap-2.5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <Factory size={16} />
         </div>
-        <div className="flex items-center gap-2">
-          <h4 className="text-lg font-semibold text-gray-900">{translate("Outsourcing Costs", "تكاليف التصنيع خارجيًا")}</h4>
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">{rows.length}</span>
+        <div className="flex flex-col gap-1">
+          <h4 className="text-lg font-semibold text-gray-900">{translate("Manufactured Materials", "المواد المصنعة")}</h4>
+
+          <p className="text-xs text-gray-500">
+            {translate(
+              "These items may be produced in-house or by an external party.",
+              "قد تُصنع هذه البنود داخل المصنع أو لدى جهة خارجية.",
+            )}
+          </p>
         </div>
       </div>
 

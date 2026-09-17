@@ -160,7 +160,15 @@ export default function BomPrintDocument({
 
       {manufacturingRows.length > 0 && (
         <section className="mt-6 flex flex-col gap-2.5 border-y border-dashed border-gray-300 py-6">
-          <h2 className="text-base font-semibold">{translate("Outsourcing Items", "المواد المصنعة خارجيًا")}</h2>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-base font-semibold">{translate("Manufactured Materials", "المواد المصنعة")}</h2>
+            <p className="text-[10px] text-gray-500">
+              {translate(
+                "These items may be produced in-house or by an external party.",
+                "قد تُصنع هذه البنود داخل المصنع أو لدى جهة خارجية.",
+              )}
+            </p>
+          </div>
           <table className="w-full border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
             <thead>
               <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
