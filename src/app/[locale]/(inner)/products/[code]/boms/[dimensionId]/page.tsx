@@ -28,6 +28,7 @@ import {
   getFlattenedRowLineCost,
   getManufacturingCostRows,
   getMaterialCostPrice,
+  getRowCostingMethod,
   type FlattenedBomRow,
   type ManufacturingCostRow,
   UNCATEGORIZED_ID,
@@ -38,10 +39,10 @@ import {
   getCostingMethodLabel,
   isValidCostingMethod,
   type CostingMethod,
+  type ItemCostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
-import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
 import {
@@ -72,6 +73,7 @@ import BomNoCostPrintDocument from "@/components/documents/bom-no-cost-print-doc
 import BomZeroPricePrintDocument from "@/components/documents/bom-zero-price-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
+import BomItemUnitPrice from "./components/bom-item-unit-price";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 const DELETE_ALL_CONFIRM_PHRASE = "DELETE";
@@ -123,6 +125,7 @@ export default function Page() {
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.LAST_PURCHASE_PRICE);
+  const [itemCostingOverrides, setItemCostingOverrides] = useState<Record<string, ItemCostingMethod>>({});
   const [printVariant, setPrintVariant] = useState<BomPrintVariant>("full");
   const printHandlerRef = useRef<(() => void) | null>(null);
 
@@ -170,6 +173,18 @@ export default function Page() {
     if (isValidCostingMethod(value)) setCostingMethod(value);
   }
 
+  function handleItemCostingMethodChange(rowId: string, method: ItemCostingMethod) {
+    setItemCostingOverrides((prev) => {
+      if (method === costingMethod) {
+        if (!(rowId in prev)) return prev;
+        const next = { ...prev };
+        delete next[rowId];
+        return next;
+      }
+      return { ...prev, [rowId]: method };
+    });
+  }
+
   function handleOpenAppendModal() {
     setItemToUpdate(null);
     openModal();
@@ -199,8 +214,9 @@ export default function Page() {
       manufacturingRows,
       pricingFactor: bom?.product.pricingFactor,
       costingMethod,
+      itemCostingOverrides,
     });
-  }, [materialRows, manufacturingRows, bom?.product.pricingFactor, costingMethod]);
+  }, [materialRows, manufacturingRows, bom?.product.pricingFactor, costingMethod, itemCostingOverrides]);
 
   const zeroPriceDepartmentBreakdown = useMemo((): Omit<DepartmentBreakdown, "totalCost" | "sharePercent">[] => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
@@ -252,7 +268,8 @@ export default function Page() {
       const department = item.productionSubDepartment;
       const departmentId = department ?? UNCATEGORIZED_ID;
       const title = department ? getProductionSubDepartmentLabel(department, locale) : uncategorizedTitle;
-      const lineCost = getFlattenedRowLineCost(item, costingMethod);
+      const rowMethod = getRowCostingMethod(item.id, costingMethod, itemCostingOverrides);
+      const lineCost = getFlattenedRowLineCost(item, rowMethod);
 
       const existing = groups.get(departmentId);
       if (existing) {
@@ -283,7 +300,7 @@ export default function Page() {
 
     rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
-  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod]);
+  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod, itemCostingOverrides]);
 
   const currency = translation.currency;
 
@@ -497,6 +514,7 @@ export default function Page() {
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
                       costingMethod={costingMethod}
+                      itemCostingOverrides={itemCostingOverrides}
                     />
                   ) : printVariant === "no-cost" ? (
                     <BomNoCostPrintDocument
@@ -562,10 +580,12 @@ export default function Page() {
                           </Table.Thead>
                           <Table.Tbody>
                             {group.items.map((item) => {
-                              const unitCost = getMaterialCostPrice(item.material, costingMethod);
-                              const lineCost = getFlattenedRowLineCost(item, costingMethod);
+                              const effectiveMethod = getRowCostingMethod(item.id, costingMethod, itemCostingOverrides);
+                              const bomMethodUnitCost = getMaterialCostPrice(item.material, costingMethod);
+                              const lineCost = getFlattenedRowLineCost(item, effectiveMethod);
                               const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
                               const zeroValueClass = "text-orange-500";
+                              const canPickAlternative = bomMethodUnitCost === 0 || item.id in itemCostingOverrides;
 
                               return (
                                 <UnitToggle
@@ -611,8 +631,15 @@ export default function Page() {
                                           item.material,
                                         )}
                                       </Table.Td>
-                                      <Table.Td className={unitCost === 0 ? zeroValueClass : undefined}>
-                                        {formatMoney(toDisplayUnitPrice(unitCost, factor))}
+                                      <Table.Td>
+                                        <BomItemUnitPrice
+                                          material={item.material}
+                                          bomCostingMethod={costingMethod}
+                                          effectiveMethod={effectiveMethod}
+                                          displayFactor={factor}
+                                          canPickAlternative={canPickAlternative}
+                                          onSelectMethod={(method) => handleItemCostingMethodChange(item.id, method)}
+                                        />
                                       </Table.Td>
                                       <Table.Td
                                         className={`font-medium ${lineCost === 0 ? zeroValueClass : "text-gray-800"}`}

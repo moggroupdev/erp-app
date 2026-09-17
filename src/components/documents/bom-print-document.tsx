@@ -1,10 +1,16 @@
 import type { Bom } from "@/types/bom";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import { getCostingMethodLabel, type CostingMethod } from "@/lib/constants/enums/derived/costing-methods";
+import {
+  getCostingMethodLabel,
+  getItemCostingMethodShortLabel,
+  type CostingMethod,
+  type ItemCostingMethod,
+} from "@/lib/constants/enums/derived/costing-methods";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import {
   getFlattenedRowLineCost,
   getMaterialCostPrice,
+  getRowCostingMethod,
   type FlattenedBomRow,
   type ManufacturingCostRow,
 } from "@/lib/helpers/bom-display";
@@ -41,6 +47,7 @@ type BomPrintDocumentProps = {
   };
   mainCategoryTitle: string | null;
   costingMethod: CostingMethod;
+  itemCostingOverrides?: Record<string, ItemCostingMethod>;
 };
 
 export default function BomPrintDocument({
@@ -50,6 +57,7 @@ export default function BomPrintDocument({
   totals,
   mainCategoryTitle,
   costingMethod,
+  itemCostingOverrides,
 }: BomPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
 
@@ -118,14 +126,16 @@ export default function BomPrintDocument({
               </thead>
               <tbody>
                 {group.items.map((item) => {
-                  const unitCost = getMaterialCostPrice(item.material, costingMethod);
-                  const lineCost = getFlattenedRowLineCost(item, costingMethod);
+                  const effectiveMethod = getRowCostingMethod(item.id, costingMethod, itemCostingOverrides);
+                  const unitCost = getMaterialCostPrice(item.material, effectiveMethod);
+                  const lineCost = getFlattenedRowLineCost(item, effectiveMethod);
                   const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
                   const { factor } = resolveDisplayUnit(
                     enteredUnit,
                     item.material.unitOfMeasurement,
                     item.material.unitConversions,
                   );
+                  const hasOverride = effectiveMethod !== costingMethod;
 
                   return (
                     <tr key={item.id} className="border-b border-gray-200">
@@ -134,7 +144,14 @@ export default function BomPrintDocument({
                       <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
                       <td>{formatQuantity(item.quantityRequired)}</td>
                       <td className={unitCost === 0 ? ZERO_VALUE_CLASS : undefined}>
-                        {formatMoney(toDisplayUnitPrice(unitCost, factor))}
+                        <span className="inline-flex items-center gap-1">
+                          <span>{formatMoney(toDisplayUnitPrice(unitCost, factor))}</span>
+                          {hasOverride && (
+                            <span className="rounded-full bg-teal-100 px-1 py-px text-[5px] font-semibold tracking-wide text-teal-700 uppercase">
+                              {getItemCostingMethodShortLabel(effectiveMethod, locale)}
+                            </span>
+                          )}
+                        </span>
                       </td>
                       <td className={lineCost === 0 ? `font-medium ${ZERO_VALUE_CLASS}` : "font-medium"}>
                         {formatMoney(lineCost)}
@@ -250,9 +267,7 @@ export default function BomPrintDocument({
                 {translate("Production Department", "قسم الانتاج")}
               </th>
               <th className="text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
-              <th className="text-start whitespace-nowrap">
-                {translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}
-              </th>
+              <th className="text-start whitespace-nowrap">{translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}</th>
               <th className="text-start whitespace-nowrap">{translate("Share", "الحصة")}</th>
             </tr>
           </thead>
