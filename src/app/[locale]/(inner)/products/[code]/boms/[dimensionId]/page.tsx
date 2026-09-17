@@ -19,7 +19,10 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
+import {
+  compareProductionSubDepartments,
+  getProductionSubDepartmentLabel,
+} from "@/lib/constants/enums/production-sub-departments";
 import {
   getBomDisplayTotals,
   getFlattenedMaterialRows,
@@ -239,7 +242,7 @@ export default function Page() {
       }),
     }));
 
-    rows.sort((a, b) => b.itemCount - a.itemCount || a.title.localeCompare(b.title, locale));
+    rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
   }, [materialRows, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
 
@@ -289,7 +292,7 @@ export default function Page() {
       sharePercent: totalCost > 0 ? (group.totalCost / totalCost) * 100 : 0,
     }));
 
-    rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
+    rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
   }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
 

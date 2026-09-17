@@ -123,6 +123,32 @@ export const PRODUCTION_SUB_DEPARTMENT_LABELS: LocalizedEntity<ProductionSubDepa
 
 export const PRODUCTION_SUB_DEPARTMENT_LABELS_LIST = Object.values(PRODUCTION_SUB_DEPARTMENT_LABELS);
 
+/** Lower rank is shown first. Same rank keeps the key order in this map. */
+export const PRODUCTION_SUB_DEPARTMENT_SORT_RANKS: Record<ProductionSubDepartment, number> = {
+  cutting: 1,
+  punch: 1,
+  bending: 1,
+  sheet_metal_neutral: 2,
+  sheet_metal_cold: 2,
+  sheet_metal_hot: 2,
+  kitchens: 2,
+  electricity: 3,
+  gas: 3,
+  injection: 4,
+  refrigeration: 5,
+  paints: 6,
+  blacksmithing: 6,
+};
+
+const PRODUCTION_SUB_DEPARTMENT_SORT_INDEX: Record<ProductionSubDepartment, number> = Object.fromEntries(
+  (Object.keys(PRODUCTION_SUB_DEPARTMENT_SORT_RANKS) as ProductionSubDepartment[]).map((department, index) => [
+    department,
+    index,
+  ]),
+) as Record<ProductionSubDepartment, number>;
+
+const UNRANKED_PRODUCTION_SUB_DEPARTMENT_SORT_VALUE = Number.POSITIVE_INFINITY;
+
 // ================ Helpers ================
 
 export function getProductionSubDepartmentLabel(productionSubDepartment: ProductionSubDepartment, locale: Locale) {
@@ -141,4 +167,30 @@ export function isValidProductionSubDepartment(
   productionSubDepartment: string,
 ): productionSubDepartment is ProductionSubDepartment {
   return PRODUCTION_SUB_DEPARTMENT_VALUES.includes(productionSubDepartment as ProductionSubDepartment);
+}
+
+export function getProductionSubDepartmentSortRank(productionSubDepartment: string | null | undefined) {
+  if (!productionSubDepartment || !isValidProductionSubDepartment(productionSubDepartment)) {
+    return UNRANKED_PRODUCTION_SUB_DEPARTMENT_SORT_VALUE;
+  }
+  return PRODUCTION_SUB_DEPARTMENT_SORT_RANKS[productionSubDepartment];
+}
+
+export function compareProductionSubDepartments(
+  a: string | null | undefined,
+  b: string | null | undefined,
+) {
+  const rankDiff = getProductionSubDepartmentSortRank(a) - getProductionSubDepartmentSortRank(b);
+  if (rankDiff !== 0) return rankDiff;
+
+  const indexA =
+    a && isValidProductionSubDepartment(a)
+      ? PRODUCTION_SUB_DEPARTMENT_SORT_INDEX[a]
+      : UNRANKED_PRODUCTION_SUB_DEPARTMENT_SORT_VALUE;
+  const indexB =
+    b && isValidProductionSubDepartment(b)
+      ? PRODUCTION_SUB_DEPARTMENT_SORT_INDEX[b]
+      : UNRANKED_PRODUCTION_SUB_DEPARTMENT_SORT_VALUE;
+
+  return indexA - indexB;
 }
