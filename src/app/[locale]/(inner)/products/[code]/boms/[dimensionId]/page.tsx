@@ -10,7 +10,6 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useProductCategories from "@/hooks/reference/use-product-categories";
-import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -84,7 +83,6 @@ export default function Page() {
   const queryClient = useQueryClient();
   const { user } = useUser();
   const { helpers: productCategoryHelpers } = useProductCategories();
-  const { helpers: materialCategoryHelpers } = useMaterialCategories();
 
   const canAddBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.ADD_PRODUCT_BOM));
   const canUpdateBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.UPDATE_PRODUCT_BOM));
@@ -94,15 +92,6 @@ export default function Page() {
     (user.isAdmin ||
       user.role.permissions.includes(PERMISSIONS.READ_PRODUCT_PRICING_FACTOR) ||
       user.role.permissions.includes(PERMISSIONS.SET_PRODUCT_PRICING_FACTOR));
-
-  const getMaterialMainCategoryTitle = useCallback(
-    (subCategoryId: string) => {
-      const sub = materialCategoryHelpers.getMaterialCategorySubById(subCategoryId);
-      const main = sub ? materialCategoryHelpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
-      return main?.title ?? "";
-    },
-    [materialCategoryHelpers],
-  );
 
   const bomQuery = useQuery({
     queryKey: queryKeys.boms.detail(dimensionId),
@@ -186,15 +175,11 @@ export default function Page() {
   const manufacturingRows = useMemo(() => {
     const rows = getManufacturingCostRows(bomItems);
 
-    return [...rows].sort((a, b) => {
-      const categoryCompare = getMaterialMainCategoryTitle(a.sourceBomItem.material.subCategoryId).localeCompare(
-        getMaterialMainCategoryTitle(b.sourceBomItem.material.subCategoryId),
-        locale,
-      );
-
-      return categoryCompare || a.materialTitle.localeCompare(b.materialTitle, locale);
-    });
-  }, [bomItems, getMaterialMainCategoryTitle, locale]);
+    return [...rows].sort(
+      (a, b) =>
+        a.materialTitle.localeCompare(b.materialTitle, locale) || a.materialCode.localeCompare(b.materialCode, locale),
+    );
+  }, [bomItems, locale]);
 
   const totals = useMemo(() => {
     return getBomDisplayTotals({
@@ -232,19 +217,16 @@ export default function Page() {
 
     const rows = Array.from(groups.values()).map((group) => ({
       ...group,
-      items: [...group.items].sort((a, b) => {
-        const categoryCompare = getMaterialMainCategoryTitle(a.material.subCategoryId).localeCompare(
-          getMaterialMainCategoryTitle(b.material.subCategoryId),
-          locale,
-        );
-
-        return categoryCompare || a.material.title.localeCompare(b.material.title, locale);
-      }),
+      items: [...group.items].sort(
+        (a, b) =>
+          a.material.title.localeCompare(b.material.title, locale) ||
+          a.material.code.localeCompare(b.material.code, locale),
+      ),
     }));
 
     rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
-  }, [materialRows, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
+  }, [materialRows, translate, locale, costingMethod]);
 
   const zeroPriceItemCount = useMemo(
     () => zeroPriceDepartmentBreakdown.reduce((sum, group) => sum + group.itemCount, 0),
@@ -281,20 +263,17 @@ export default function Page() {
     const totalCost = totals.totalMaterialCost;
     const rows = Array.from(groups.values()).map((group) => ({
       ...group,
-      items: [...group.items].sort((a, b) => {
-        const categoryCompare = getMaterialMainCategoryTitle(a.material.subCategoryId).localeCompare(
-          getMaterialMainCategoryTitle(b.material.subCategoryId),
-          locale,
-        );
-
-        return categoryCompare || a.material.title.localeCompare(b.material.title, locale);
-      }),
+      items: [...group.items].sort(
+        (a, b) =>
+          a.material.title.localeCompare(b.material.title, locale) ||
+          a.material.code.localeCompare(b.material.code, locale),
+      ),
       sharePercent: totalCost > 0 ? (group.totalCost / totalCost) * 100 : 0,
     }));
 
     rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
-  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
+  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod]);
 
   const currency = translation.currency;
 
