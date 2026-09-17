@@ -68,6 +68,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom-print-document";
+import BomNoCostPrintDocument from "@/components/documents/bom-no-cost-print-document";
 import BomZeroPricePrintDocument from "@/components/documents/bom-zero-price-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
@@ -84,7 +85,7 @@ type DepartmentBreakdown = {
   items: FlattenedBomRow[];
 };
 
-type BomPrintVariant = "full" | "zero-price";
+type BomPrintVariant = "full" | "no-cost" | "zero-price";
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -426,6 +427,14 @@ export default function Page() {
                         >
                           {translate("Print BOM", "طباعة قائمة المواد")}
                         </Menu.Item>
+                        <Menu.Item
+                          leftSection={<Printer size={14} />}
+                          onClick={() => {
+                            void triggerPrint("no-cost");
+                          }}
+                        >
+                          {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
+                        </Menu.Item>
                         {zeroPriceItemCount > 0 && (
                           <Menu.Item
                             leftSection={<Printer size={14} />}
@@ -433,7 +442,7 @@ export default function Page() {
                               void triggerPrint("zero-price");
                             }}
                           >
-                            {translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
+                            {translate("Print Zero Price Items", "طباعة البنود التي بدون سعر")}
                           </Menu.Item>
                         )}
                         {canManageBom && <Menu.Divider />}
@@ -466,7 +475,9 @@ export default function Page() {
                   title={
                     printVariant === "zero-price"
                       ? `${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
-                      : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                      : printVariant === "no-cost"
+                        ? `${translate("BOM without Costs", "قائمة المواد بدون تكاليف")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                        : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                   }
                   renderTrigger={({ onClick }) => {
                     printHandlerRef.current = onClick;
@@ -486,6 +497,14 @@ export default function Page() {
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
                       costingMethod={costingMethod}
+                    />
+                  ) : printVariant === "no-cost" ? (
+                    <BomNoCostPrintDocument
+                      bom={bom}
+                      departmentBreakdown={departmentBreakdown}
+                      manufacturingRows={manufacturingRows}
+                      mainCategoryTitle={productMainCategory?.title || null}
+                      totalItemCount={totals.itemCount}
                     />
                   ) : (
                     <BomZeroPricePrintDocument
