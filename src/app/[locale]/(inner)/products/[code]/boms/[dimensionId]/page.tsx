@@ -10,7 +10,6 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useProductCategories from "@/hooks/reference/use-product-categories";
-import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -19,7 +18,10 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
+import {
+  compareProductionSubDepartments,
+  getProductionSubDepartmentLabel,
+} from "@/lib/constants/enums/production-sub-departments";
 import {
   getBomDisplayTotals,
   getFlattenedMaterialRows,
@@ -42,7 +44,18 @@ import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/f
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { BomItemWithMaterial } from "@/types/bom";
 import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
-import { Calculator, ChevronDown, EllipsisVertical, Layers, Pencil, Plus, Printer, Trash2, Wallet } from "lucide-react";
+import {
+  Calculator,
+  ChevronDown,
+  EllipsisVertical,
+  Factory,
+  Layers,
+  Pencil,
+  Plus,
+  Printer,
+  Trash2,
+  Wallet,
+} from "lucide-react";
 import { useUser } from "@/contexts/user/hook";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
@@ -55,6 +68,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom-print-document";
+import BomNoCostPrintDocument from "@/components/documents/bom-no-cost-print-document";
 import BomZeroPricePrintDocument from "@/components/documents/bom-zero-price-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
@@ -71,7 +85,7 @@ type DepartmentBreakdown = {
   items: FlattenedBomRow[];
 };
 
-type BomPrintVariant = "full" | "zero-price";
+type BomPrintVariant = "full" | "no-cost" | "zero-price";
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -81,7 +95,6 @@ export default function Page() {
   const queryClient = useQueryClient();
   const { user } = useUser();
   const { helpers: productCategoryHelpers } = useProductCategories();
-  const { helpers: materialCategoryHelpers } = useMaterialCategories();
 
   const canAddBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.ADD_PRODUCT_BOM));
   const canUpdateBom = !!user && (user.isAdmin || user.role.permissions.includes(PERMISSIONS.UPDATE_PRODUCT_BOM));
@@ -91,15 +104,6 @@ export default function Page() {
     (user.isAdmin ||
       user.role.permissions.includes(PERMISSIONS.READ_PRODUCT_PRICING_FACTOR) ||
       user.role.permissions.includes(PERMISSIONS.SET_PRODUCT_PRICING_FACTOR));
-
-  const getMaterialMainCategoryTitle = useCallback(
-    (subCategoryId: string) => {
-      const sub = materialCategoryHelpers.getMaterialCategorySubById(subCategoryId);
-      const main = sub ? materialCategoryHelpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
-      return main?.title ?? "";
-    },
-    [materialCategoryHelpers],
-  );
 
   const bomQuery = useQuery({
     queryKey: queryKeys.boms.detail(dimensionId),
@@ -183,15 +187,11 @@ export default function Page() {
   const manufacturingRows = useMemo(() => {
     const rows = getManufacturingCostRows(bomItems);
 
-    return [...rows].sort((a, b) => {
-      const categoryCompare = getMaterialMainCategoryTitle(a.sourceBomItem.material.subCategoryId).localeCompare(
-        getMaterialMainCategoryTitle(b.sourceBomItem.material.subCategoryId),
-        locale,
-      );
-
-      return categoryCompare || a.materialTitle.localeCompare(b.materialTitle, locale);
-    });
-  }, [bomItems, getMaterialMainCategoryTitle, locale]);
+    return [...rows].sort(
+      (a, b) =>
+        a.materialTitle.localeCompare(b.materialTitle, locale) || a.materialCode.localeCompare(b.materialCode, locale),
+    );
+  }, [bomItems, locale]);
 
   const totals = useMemo(() => {
     return getBomDisplayTotals({
@@ -229,19 +229,15 @@ export default function Page() {
 
     const rows = Array.from(groups.values()).map((group) => ({
       ...group,
-      items: [...group.items].sort((a, b) => {
-        const categoryCompare = getMaterialMainCategoryTitle(a.material.subCategoryId).localeCompare(
-          getMaterialMainCategoryTitle(b.material.subCategoryId),
-          locale,
-        );
-
-        return categoryCompare || a.material.title.localeCompare(b.material.title, locale);
-      }),
+      items: [...group.items].sort(
+        (a, b) =>
+          a.material.title.localeCompare(b.material.title, locale) || a.material.code.localeCompare(b.material.code, locale),
+      ),
     }));
 
-    rows.sort((a, b) => b.itemCount - a.itemCount || a.title.localeCompare(b.title, locale));
+    rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
-  }, [materialRows, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
+  }, [materialRows, translate, locale, costingMethod]);
 
   const zeroPriceItemCount = useMemo(
     () => zeroPriceDepartmentBreakdown.reduce((sum, group) => sum + group.itemCount, 0),
@@ -278,20 +274,16 @@ export default function Page() {
     const totalCost = totals.totalMaterialCost;
     const rows = Array.from(groups.values()).map((group) => ({
       ...group,
-      items: [...group.items].sort((a, b) => {
-        const categoryCompare = getMaterialMainCategoryTitle(a.material.subCategoryId).localeCompare(
-          getMaterialMainCategoryTitle(b.material.subCategoryId),
-          locale,
-        );
-
-        return categoryCompare || a.material.title.localeCompare(b.material.title, locale);
-      }),
+      items: [...group.items].sort(
+        (a, b) =>
+          a.material.title.localeCompare(b.material.title, locale) || a.material.code.localeCompare(b.material.code, locale),
+      ),
       sharePercent: totalCost > 0 ? (group.totalCost / totalCost) * 100 : 0,
     }));
 
-    rows.sort((a, b) => b.totalCost - a.totalCost || a.title.localeCompare(b.title, locale));
+    rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
-  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod, getMaterialMainCategoryTitle]);
+  }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod]);
 
   const currency = translation.currency;
 
@@ -435,6 +427,14 @@ export default function Page() {
                         >
                           {translate("Print BOM", "طباعة قائمة المواد")}
                         </Menu.Item>
+                        <Menu.Item
+                          leftSection={<Printer size={14} />}
+                          onClick={() => {
+                            void triggerPrint("no-cost");
+                          }}
+                        >
+                          {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
+                        </Menu.Item>
                         {zeroPriceItemCount > 0 && (
                           <Menu.Item
                             leftSection={<Printer size={14} />}
@@ -442,7 +442,7 @@ export default function Page() {
                               void triggerPrint("zero-price");
                             }}
                           >
-                            {translate("Print Zero Price Items", "طباعة البنود بدون سعر")}
+                            {translate("Print Zero Price Items", "طباعة البنود التي بدون سعر")}
                           </Menu.Item>
                         )}
                         {canManageBom && <Menu.Divider />}
@@ -475,7 +475,9 @@ export default function Page() {
                   title={
                     printVariant === "zero-price"
                       ? `${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
-                      : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                      : printVariant === "no-cost"
+                        ? `${translate("BOM without Costs", "قائمة المواد بدون تكاليف")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                        : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                   }
                   renderTrigger={({ onClick }) => {
                     printHandlerRef.current = onClick;
@@ -494,15 +496,21 @@ export default function Page() {
                       departmentBreakdown={departmentBreakdown}
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
-                      getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
                       costingMethod={costingMethod}
+                    />
+                  ) : printVariant === "no-cost" ? (
+                    <BomNoCostPrintDocument
+                      bom={bom}
+                      departmentBreakdown={departmentBreakdown}
+                      manufacturingRows={manufacturingRows}
+                      mainCategoryTitle={productMainCategory?.title || null}
+                      totalItemCount={totals.itemCount}
                     />
                   ) : (
                     <BomZeroPricePrintDocument
                       bom={bom}
                       departmentBreakdown={zeroPriceDepartmentBreakdown}
                       mainCategoryTitle={productMainCategory?.title || null}
-                      getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
                       costingMethod={costingMethod}
                       totalItemCount={zeroPriceItemCount}
                     />
@@ -536,25 +544,22 @@ export default function Page() {
                               <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Code", "كود")}
                               </Table.Th>
-                              <Table.Th w="22%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="26%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Name", "الصنف")}
-                              </Table.Th>
-                              <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                {translate("Category", "الفئة")}
                               </Table.Th>
                               <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit", "الوحدة")}
                               </Table.Th>
-                              <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="9%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Quantity", "الكمية")}
                               </Table.Th>
-                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
                               </Table.Th>
-                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Total (EGP)", "الإجمالي (ج.م)")}
                               </Table.Th>
-                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="15%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Notes", "الملاحظات")}
                               </Table.Th>
                               <Table.Th w="5%" />
@@ -566,12 +571,6 @@ export default function Page() {
                               const lineCost = getFlattenedRowLineCost(item, costingMethod);
                               const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
                               const zeroValueClass = "text-orange-500";
-                              const subCategory = materialCategoryHelpers.getMaterialCategorySubById(
-                                item.material.subCategoryId,
-                              );
-                              const mainCategory = subCategory
-                                ? materialCategoryHelpers.getMaterialCategoryMainById(subCategory.mainCategoryId)
-                                : null;
 
                               return (
                                 <UnitToggle
@@ -600,11 +599,6 @@ export default function Page() {
                                         >
                                           {item.material.title}
                                         </Link>
-                                      </Table.Td>
-                                      <Table.Td>
-                                        <span className="text-sm text-gray-600">
-                                          {mainCategory?.title || <EmptyValue />}
-                                        </span>
                                       </Table.Td>
                                       <Table.Td>
                                         <div className="flex items-center gap-1">
@@ -690,7 +684,7 @@ export default function Page() {
                           <Table.Tfoot className="bg-gray-50">
                             <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
                               <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
-                              <Table.Td colSpan={5} className="text-gray-500">
+                              <Table.Td colSpan={4} className="text-gray-500">
                                 {group.itemCount} {translate("Items", "بند")}
                               </Table.Td>
                               <Table.Td className={group.totalCost === 0 ? "text-orange-500" : undefined}>
@@ -882,13 +876,19 @@ function ManufacturingCostsSection({
 
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex items-center gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-          <Wallet size={16} />
+      <div className="flex items-start gap-2.5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <Factory size={16} />
         </div>
-        <div className="flex items-center gap-2">
-          <h4 className="text-lg font-semibold text-gray-900">{translate("Outsourcing Costs", "تكاليف التصنيع خارجيًا")}</h4>
-          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">{rows.length}</span>
+        <div className="flex flex-col gap-1">
+          <h4 className="text-lg font-semibold text-gray-900">{translate("Manufactured Materials", "المواد المصنعة")}</h4>
+
+          <p className="text-xs text-gray-500">
+            {translate(
+              "These items may be produced in-house or by an external party.",
+              "قد تُصنع هذه البنود داخل المصنع أو لدى جهة خارجية.",
+            )}
+          </p>
         </div>
       </div>
 

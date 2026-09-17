@@ -18,7 +18,6 @@ type BomZeroPricePrintDocumentProps = {
   bom: Bom;
   departmentBreakdown: BomZeroPriceDepartmentGroup[];
   mainCategoryTitle: string | null;
-  getMaterialMainCategoryTitle: (subCategoryId: string) => string;
   costingMethod: CostingMethod;
   totalItemCount: number;
 };
@@ -27,7 +26,6 @@ export default function BomZeroPricePrintDocument({
   bom,
   departmentBreakdown,
   mainCategoryTitle,
-  getMaterialMainCategoryTitle,
   costingMethod,
   totalItemCount,
 }: BomZeroPricePrintDocumentProps) {
@@ -81,10 +79,9 @@ export default function BomZeroPricePrintDocument({
               <table className="w-full table-fixed border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
                 <thead>
                   <tr className="border-b border-gray-300 bg-gray-50 text-[7px] font-medium tracking-wide text-gray-500 uppercase">
-                    <th className="w-[18%] text-start whitespace-nowrap">{translate("Material Code", "كود")}</th>
-                    <th className="w-[42%] text-start whitespace-nowrap">{translate("Material Name", "الصنف")}</th>
-                    <th className="w-[24%] text-start whitespace-nowrap">{translate("Category", "الفئة")}</th>
-                    <th className="w-[16%] text-start whitespace-nowrap">{translate("Unit", "الوحدة")}</th>
+                    <th className="w-[22%] text-start whitespace-nowrap">{translate("Material Code", "كود")}</th>
+                    <th className="w-[58%] text-start whitespace-nowrap">{translate("Material Name", "الصنف")}</th>
+                    <th className="w-[20%] text-start whitespace-nowrap">{translate("Unit", "الوحدة")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -95,16 +92,13 @@ export default function BomZeroPricePrintDocument({
                       <tr key={item.id} className="border-b border-gray-200">
                         <td className="font-mono text-gray-600">{item.material.code}</td>
                         <td className="font-medium wrap-break-word text-gray-800">{item.material.title}</td>
-                        <td className="text-gray-600">
-                          {getMaterialMainCategoryTitle(item.material.subCategoryId) || "-"}
-                        </td>
                         <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
                       </tr>
                     );
                   })}
                   <tr className="border-t border-gray-300 bg-gray-50 font-medium">
                     <td>{translate("Total", "الإجمالي")}</td>
-                    <td colSpan={3} className="text-gray-600">
+                    <td colSpan={2} className="text-gray-600">
                       {group.itemCount} {translate("Items", "بند")}
                     </td>
                   </tr>
