@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -12,6 +12,12 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import {
+  compareProductionSubDepartments,
+  getProductionSubDepartmentKind,
+  getProductionSubDepartmentKindLabel,
+  PRODUCTION_SUB_DEPARTMENT_KIND_VALUES,
+} from "@/lib/constants/enums/production-sub-departments";
 import { type ProductionDepartmentManagerAssignment } from "@/types/production-department-managers";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -42,6 +48,18 @@ export default function Page() {
   });
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
+
+  const groupedAssignments = useMemo(() => {
+    if (!assignments) return [];
+
+    return PRODUCTION_SUB_DEPARTMENT_KIND_VALUES.map((kind) => ({
+      kind,
+      label: getProductionSubDepartmentKindLabel(kind, locale),
+      assignments: assignments
+        .filter((assignment) => getProductionSubDepartmentKind(assignment.department) === kind)
+        .sort((a, b) => compareProductionSubDepartments(a.department, b.department)),
+    })).filter((group) => group.assignments.length > 0);
+  }, [assignments, locale]);
 
   // ========================= MODALS =========================
 
@@ -86,13 +104,26 @@ export default function Page() {
           className="rounded-2xl bg-white shadow-sm"
         />
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
-          {assignments.map((assignment) => (
-            <ProductionDepartmentManagerCard
-              key={assignment.department}
-              assignment={assignment}
-              openUpdateModal={canUpdate ? () => handleOpenUpdateModal(assignment) : null}
-            />
+        <div className="flex flex-col gap-8">
+          {groupedAssignments.map((group) => (
+            <section key={group.kind} className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-gray-800">{group.label}</h2>
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                  {group.assignments.length}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
+                {group.assignments.map((assignment) => (
+                  <ProductionDepartmentManagerCard
+                    key={assignment.department}
+                    assignment={assignment}
+                    openUpdateModal={canUpdate ? () => handleOpenUpdateModal(assignment) : null}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}
