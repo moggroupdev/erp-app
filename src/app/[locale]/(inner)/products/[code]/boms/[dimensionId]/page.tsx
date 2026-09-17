@@ -494,7 +494,6 @@ export default function Page() {
                       departmentBreakdown={departmentBreakdown}
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
-                      getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
                       costingMethod={costingMethod}
                     />
                   ) : (
@@ -502,7 +501,6 @@ export default function Page() {
                       bom={bom}
                       departmentBreakdown={zeroPriceDepartmentBreakdown}
                       mainCategoryTitle={productMainCategory?.title || null}
-                      getMaterialMainCategoryTitle={getMaterialMainCategoryTitle}
                       costingMethod={costingMethod}
                       totalItemCount={zeroPriceItemCount}
                     />
@@ -536,25 +534,22 @@ export default function Page() {
                               <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Code", "كود")}
                               </Table.Th>
-                              <Table.Th w="22%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="26%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Material Name", "الصنف")}
-                              </Table.Th>
-                              <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                {translate("Category", "الفئة")}
                               </Table.Th>
                               <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit", "الوحدة")}
                               </Table.Th>
-                              <Table.Th w="8%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="9%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Quantity", "الكمية")}
                               </Table.Th>
-                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="12%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Unit Price (EGP)", "سعر الوحدة (ج.م)")}
                               </Table.Th>
-                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="13%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Total (EGP)", "الإجمالي (ج.م)")}
                               </Table.Th>
-                              <Table.Th w="11%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                              <Table.Th w="15%" className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                                 {translate("Notes", "الملاحظات")}
                               </Table.Th>
                               <Table.Th w="5%" />
@@ -566,12 +561,6 @@ export default function Page() {
                               const lineCost = getFlattenedRowLineCost(item, costingMethod);
                               const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
                               const zeroValueClass = "text-orange-500";
-                              const subCategory = materialCategoryHelpers.getMaterialCategorySubById(
-                                item.material.subCategoryId,
-                              );
-                              const mainCategory = subCategory
-                                ? materialCategoryHelpers.getMaterialCategoryMainById(subCategory.mainCategoryId)
-                                : null;
 
                               return (
                                 <UnitToggle
@@ -600,11 +589,6 @@ export default function Page() {
                                         >
                                           {item.material.title}
                                         </Link>
-                                      </Table.Td>
-                                      <Table.Td>
-                                        <span className="text-sm text-gray-600">
-                                          {mainCategory?.title || <EmptyValue />}
-                                        </span>
                                       </Table.Td>
                                       <Table.Td>
                                         <div className="flex items-center gap-1">
@@ -690,7 +674,7 @@ export default function Page() {
                           <Table.Tfoot className="bg-gray-50">
                             <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
                               <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
-                              <Table.Td colSpan={5} className="text-gray-500">
+                              <Table.Td colSpan={4} className="text-gray-500">
                                 {group.itemCount} {translate("Items", "بند")}
                               </Table.Td>
                               <Table.Td className={group.totalCost === 0 ? "text-orange-500" : undefined}>

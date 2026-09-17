@@ -38,7 +38,6 @@ type BomPrintDocumentProps = {
     manufacturingItemCount: number;
   };
   mainCategoryTitle: string | null;
-  getMaterialMainCategoryTitle: (subCategoryId: string) => string;
   costingMethod: CostingMethod;
 };
 
@@ -48,7 +47,6 @@ export default function BomPrintDocument({
   manufacturingRows,
   totals,
   mainCategoryTitle,
-  getMaterialMainCategoryTitle,
   costingMethod,
 }: BomPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
@@ -99,18 +97,17 @@ export default function BomPrintDocument({
             <table className="w-full table-fixed border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
               <thead>
                 <tr className="border-b border-gray-300 bg-gray-50 text-[7px] font-medium tracking-wide text-gray-500 uppercase">
-                  <th className="w-[10%] text-start whitespace-nowrap">{translate("Material Code", "كود")}</th>
-                  <th className="w-[26%] text-start whitespace-nowrap">{translate("Material Name", "الصنف")}</th>
-                  <th className="w-[14%] text-start whitespace-nowrap">{translate("Category", "الفئة")}</th>
-                  <th className="w-[7%] text-start whitespace-nowrap">{translate("Unit", "الوحدة")}</th>
-                  <th className="w-[7%] text-start whitespace-nowrap">{translate("Quantity", "الكمية")}</th>
-                  <th className="w-[9%] text-start whitespace-nowrap">
+                  <th className="w-[12%] text-start whitespace-nowrap">{translate("Material Code", "كود")}</th>
+                  <th className="w-[28%] text-start whitespace-nowrap">{translate("Material Name", "الصنف")}</th>
+                  <th className="w-[8%] text-start whitespace-nowrap">{translate("Unit", "الوحدة")}</th>
+                  <th className="w-[8%] text-start whitespace-nowrap">{translate("Quantity", "الكمية")}</th>
+                  <th className="w-[11%] text-start whitespace-nowrap">
                     {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                   </th>
-                  <th className="w-[9%] text-start whitespace-nowrap">
+                  <th className="w-[11%] text-start whitespace-nowrap">
                     {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
                   </th>
-                  <th className="w-[18%] text-start whitespace-nowrap">{translate("Notes", "الملاحظات")}</th>
+                  <th className="w-[22%] text-start whitespace-nowrap">{translate("Notes", "الملاحظات")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -128,9 +125,6 @@ export default function BomPrintDocument({
                     <tr key={item.id} className="border-b border-gray-200">
                       <td className="font-mono text-gray-600">{item.material.code}</td>
                       <td className="font-medium wrap-break-word text-gray-800">{item.material.title}</td>
-                      <td className="text-gray-600">
-                        {getMaterialMainCategoryTitle(item.material.subCategoryId) || "-"}
-                      </td>
                       <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
                       <td>{formatQuantity(item.quantityRequired)}</td>
                       <td>{formatMoney(toDisplayUnitPrice(unitCost, factor))}</td>
@@ -152,7 +146,7 @@ export default function BomPrintDocument({
                 })}
                 <tr className="border-t border-gray-300 bg-gray-50 font-medium">
                   <td>{translate("Total", "الإجمالي")}</td>
-                  <td colSpan={5} className="text-gray-600">
+                  <td colSpan={4} className="text-gray-600">
                     {group.itemCount} {translate("Items", "بند")}
                   </td>
                   <td>{formatMoney(group.totalCost)}</td>
