@@ -34,7 +34,7 @@ import AuditLogRow from "./components/audit-log-row";
 
 const PAGE_TITLE = { en: "Audit Logs", ar: "سجلات التدقيق" };
 
-const LOGS_PER_PAGE = 25;
+const LOGS_PER_PAGE = 50;
 
 function hasActiveFilters(filters: Record<string, string | null>) {
   return Object.entries(filters).some(([key, value]) => key !== "page" && !!value);

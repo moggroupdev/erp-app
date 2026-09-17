@@ -1,13 +1,24 @@
 import { getEnteredQuantityInBaseUnit } from "@/lib/helpers/unit-conversion";
 import { TEMP_GLOBAL_MANUFACTURING_COST } from "@/lib/constants/global";
 import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
-import { COSTING_METHODS, type CostingMethod } from "@/lib/constants/enums/derived/costing-methods";
+import {
+  COSTING_METHODS,
+  ITEM_COSTING_METHODS,
+  type CostingMethod,
+  type ItemCostingMethod,
+} from "@/lib/constants/enums/derived/costing-methods";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial, BomMmComponent } from "@/types/bom";
 import type { MmBom } from "@/types/mm-bom";
 
 export const UNCATEGORIZED_ID = "__uncategorized__";
+
+export type MaterialCostPriceFields = {
+  unitPrice: number;
+  lastPurchasePrice: number | null;
+  marketUnitPrice?: number | null;
+};
 
 export type FlattenedBomRow = {
   id: string;
@@ -56,12 +67,21 @@ export type AggregatedComponentRequirement = {
   quantityRequired: number;
 };
 
+export function getRowCostingMethod(
+  rowId: string,
+  bomCostingMethod: CostingMethod,
+  overrides: Record<string, ItemCostingMethod> | undefined,
+): ItemCostingMethod {
+  return overrides?.[rowId] ?? bomCostingMethod;
+}
+
 // Materials that were never purchased have no last purchase price, so they cost nothing under that method.
 export function getMaterialCostPrice(
-  material: { unitPrice: number; lastPurchasePrice: number | null },
-  costingMethod: CostingMethod,
+  material: MaterialCostPriceFields,
+  costingMethod: ItemCostingMethod,
 ): number {
   if (costingMethod === COSTING_METHODS.LAST_PURCHASE_PRICE) return material.lastPurchasePrice ?? 0;
+  if (costingMethod === ITEM_COSTING_METHODS.MARKET_PRICE) return material.marketUnitPrice ?? 0;
   return material.unitPrice;
 }
 
@@ -73,8 +93,8 @@ type UnitConvertibleMaterial = {
 export function getMaterialLineCost(
   quantity: number,
   unitOfMeasurementSelected: MaterialUnit | null | undefined,
-  material: UnitConvertibleMaterial & { unitPrice: number; lastPurchasePrice: number | null },
-  costingMethod: CostingMethod,
+  material: UnitConvertibleMaterial & MaterialCostPriceFields,
+  costingMethod: ItemCostingMethod,
 ): number {
   const baseQuantity = getEnteredQuantityInBaseUnit(quantity, unitOfMeasurementSelected, material);
   return baseQuantity * getMaterialCostPrice(material, costingMethod);
@@ -143,7 +163,7 @@ export function getManufacturingCostRows(items: BomItemWithMaterial[]): Manufact
     }));
 }
 
-export function getFlattenedRowLineCost(row: FlattenedBomRow, costingMethod: CostingMethod): number {
+export function getFlattenedRowLineCost(row: FlattenedBomRow, costingMethod: ItemCostingMethod): number {
   if (row.manufacturedComponentContext) {
     const ctx = row.manufacturedComponentContext;
     const parentBaseQuantity = getEnteredQuantityInBaseUnit(ctx.parentQuantity, ctx.parentUnit, ctx.parentMaterial);
@@ -164,11 +184,12 @@ export function getBomDisplayTotals(args: {
   manufacturingRows: ManufacturingCostRow[];
   pricingFactor: number | null | undefined;
   costingMethod: CostingMethod;
+  itemCostingOverrides?: Record<string, ItemCostingMethod>;
 }): BomDisplayTotals {
-  const totalMaterialCost = args.materialRows.reduce(
-    (sum, row) => sum + getFlattenedRowLineCost(row, args.costingMethod),
-    0,
-  );
+  const totalMaterialCost = args.materialRows.reduce((sum, row) => {
+    const method = getRowCostingMethod(row.id, args.costingMethod, args.itemCostingOverrides);
+    return sum + getFlattenedRowLineCost(row, method);
+  }, 0);
   const totalManufacturingCost = args.manufacturingRows.reduce((sum, row) => sum + row.totalManufacturingCost, 0);
   const grandTotalCost = totalMaterialCost + totalManufacturingCost;
   const pricingFactor = args.pricingFactor != null ? Number(args.pricingFactor) : null;

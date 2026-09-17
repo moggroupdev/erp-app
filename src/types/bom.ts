@@ -30,6 +30,9 @@ export type BomMmComponent = {
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
     lastPurchasePrice: number | null;
+    lastPurchaseDate: Date | null;
+    marketUnitPrice: number | null;
+    marketUnitPriceSetAt: Date | null;
     unitConversions: MaterialUnitConversionSummary[];
   };
 };
@@ -50,6 +53,9 @@ export type BomItemWithMaterial = {
     unitOfMeasurement: MaterialUnit;
     unitPrice: number;
     lastPurchasePrice: number | null;
+    lastPurchaseDate: Date | null;
+    marketUnitPrice: number | null;
+    marketUnitPriceSetAt: Date | null;
     unitConversions: MaterialUnitConversionSummary[];
     // For manufactured materials, we need to get the components of the material
     manufacturedMaterialBoms: BomMmComponent[];
