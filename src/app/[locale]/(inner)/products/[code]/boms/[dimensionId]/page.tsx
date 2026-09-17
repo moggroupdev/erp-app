@@ -520,20 +520,15 @@ export default function Page() {
                 <div className="flex flex-col gap-8">
                   {departmentBreakdown.map((group) => (
                     <div key={group.departmentId} className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between gap-2 px-0.5">
+                      <div className="flex items-end justify-between gap-2 px-0.5">
                         <h5 className="text-sm font-semibold text-gray-800">{group.title}</h5>
                         {canUpdateBom && group.departmentId !== UNCATEGORIZED_ID && (
-                          <Button
-                            component={Link}
+                          <Link
                             href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/edit/${group.departmentId}`)}
-                            variant="light"
-                            color="teal"
-                            radius="md"
-                            size="xs"
-                            leftSection={<Pencil size={14} />}
+                            className="text-xs text-gray-500 hover:underline"
                           >
-                            {translate("Edit", "تعديل")}
-                          </Button>
+                            {translate("Edit Department BOM", "تعديل قائمة مواد القسم")}
+                          </Link>
                         )}
                       </div>
 

@@ -16,6 +16,8 @@ import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conve
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading } from "./components";
 
+const ZERO_VALUE_CLASS = "text-orange-500";
+
 export type BomPrintDepartmentGroup = {
   departmentId: string;
   title: string;
@@ -79,7 +81,11 @@ export default function BomPrintDocument({
         />
         <PrintDetail
           label={translate("Grand Total Cost", "إجمالي التكلفة الكلية")}
-          value={formatMoney(totals.grandTotalCost, translation.currency)}
+          value={
+            <span className={totals.grandTotalCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+              {formatMoney(totals.grandTotalCost, translation.currency)}
+            </span>
+          }
         />
         <PrintDetail
           label={translate("Costing Basis", "أساس التكلفة")}
@@ -127,8 +133,12 @@ export default function BomPrintDocument({
                       <td className="font-medium wrap-break-word text-gray-800">{item.material.title}</td>
                       <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
                       <td>{formatQuantity(item.quantityRequired)}</td>
-                      <td>{formatMoney(toDisplayUnitPrice(unitCost, factor))}</td>
-                      <td className="font-medium">{formatMoney(lineCost)}</td>
+                      <td className={unitCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                        {formatMoney(toDisplayUnitPrice(unitCost, factor))}
+                      </td>
+                      <td className={lineCost === 0 ? `font-medium ${ZERO_VALUE_CLASS}` : "font-medium"}>
+                        {formatMoney(lineCost)}
+                      </td>
                       <td className="wrap-break-word text-gray-600">
                         <div className="flex flex-col gap-0.5 leading-relaxed">
                           {item.notes ? <span>{item.notes}</span> : null}
@@ -149,7 +159,9 @@ export default function BomPrintDocument({
                   <td colSpan={4} className="text-gray-600">
                     {group.itemCount} {translate("Items", "بند")}
                   </td>
-                  <td>{formatMoney(group.totalCost)}</td>
+                  <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                    {formatMoney(group.totalCost)}
+                  </td>
                   <td className="text-gray-600">{group.sharePercent.toFixed(1)}%</td>
                 </tr>
               </tbody>
@@ -203,8 +215,16 @@ export default function BomPrintDocument({
                       : "-"}
                   </td>
                   <td>{formatQuantity(row.quantityRequired)}</td>
-                  <td>{formatMoney(row.unitManufacturingCost)}</td>
-                  <td className="font-medium">{formatMoney(row.totalManufacturingCost)}</td>
+                  <td className={row.unitManufacturingCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                    {formatMoney(row.unitManufacturingCost)}
+                  </td>
+                  <td
+                    className={
+                      row.totalManufacturingCost === 0 ? `font-medium ${ZERO_VALUE_CLASS}` : "font-medium"
+                    }
+                  >
+                    {formatMoney(row.totalManufacturingCost)}
+                  </td>
                 </tr>
               ))}
               <tr className="border-t border-gray-300 bg-gray-50 font-medium">
@@ -212,7 +232,9 @@ export default function BomPrintDocument({
                 <td colSpan={4} className="text-gray-600">
                   {totals.manufacturingItemCount} {translate("Items", "بند")}
                 </td>
-                <td>{formatMoney(totals.totalManufacturingCost)}</td>
+                <td className={totals.totalManufacturingCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                  {formatMoney(totals.totalManufacturingCost)}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -239,7 +261,9 @@ export default function BomPrintDocument({
               <tr key={group.departmentId} className="border-b border-gray-200">
                 <td className="font-medium">{group.title}</td>
                 <td>{group.itemCount}</td>
-                <td>{formatMoney(group.totalCost)}</td>
+                <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                  {formatMoney(group.totalCost)}
+                </td>
                 <ShareCell value={group.sharePercent} />
               </tr>
             ))}
@@ -248,7 +272,9 @@ export default function BomPrintDocument({
               <td className="text-gray-600">
                 {totals.itemCount} {translate("Items", "بند")}
               </td>
-              <td>{formatMoney(totals.totalMaterialCost)}</td>
+              <td className={totals.totalMaterialCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                {formatMoney(totals.totalMaterialCost)}
+              </td>
               <ShareCell value={100} className="text-gray-800" />
             </tr>
           </tbody>
@@ -258,15 +284,27 @@ export default function BomPrintDocument({
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 border-y border-dashed border-gray-300 py-6 text-xs sm:grid-cols-3">
         <PrintDetail
           label={translate("Total Material Cost", "إجمالي تكلفة المواد")}
-          value={formatMoney(totals.totalMaterialCost, translation.currency)}
+          value={
+            <span className={totals.totalMaterialCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+              {formatMoney(totals.totalMaterialCost, translation.currency)}
+            </span>
+          }
         />
         <PrintDetail
           label={translate("Total Outsourcing Cost", "إجمالي تكلفة التصنيع خارجيًا")}
-          value={formatMoney(totals.totalManufacturingCost, translation.currency)}
+          value={
+            <span className={totals.totalManufacturingCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+              {formatMoney(totals.totalManufacturingCost, translation.currency)}
+            </span>
+          }
         />
         <PrintDetail
           label={translate("Grand Total Cost", "إجمالي التكلفة الكلية")}
-          value={formatMoney(totals.grandTotalCost, translation.currency)}
+          value={
+            <span className={totals.grandTotalCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+              {formatMoney(totals.grandTotalCost, translation.currency)}
+            </span>
+          }
         />
       </section>
 
