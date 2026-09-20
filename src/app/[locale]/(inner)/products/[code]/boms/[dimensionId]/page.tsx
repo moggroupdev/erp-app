@@ -19,6 +19,11 @@ import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-
 import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import {
+  getMmSourcingTypeLabel,
+  isInternallyManufacturedMmSourcing,
+  isPurchasedMmSourcing,
+} from "@/lib/constants/enums/mm-sourcing-types";
+import {
   compareProductionSubDepartments,
   getProductionSubDepartmentLabel,
 } from "@/lib/constants/enums/production-sub-departments";
@@ -207,7 +212,9 @@ export default function Page() {
 
     return [...rows].sort(
       (a, b) =>
-        a.materialTitle.localeCompare(b.materialTitle, locale) || a.materialCode.localeCompare(b.materialCode, locale),
+        compareProductionSubDepartments(a.productionSubDepartment, b.productionSubDepartment) ||
+        a.materialTitle.localeCompare(b.materialTitle, locale) ||
+        a.materialCode.localeCompare(b.materialCode, locale),
     );
   }, [bomItems, locale]);
 
@@ -670,12 +677,20 @@ export default function Page() {
                                         </div>
                                       </Table.Td>
                                       <Table.Td>
-                                        <Link
-                                          href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                          className="block truncate font-medium text-gray-800 hover:underline"
-                                        >
-                                          {item.material.title}
-                                        </Link>
+                                        <div className="flex min-w-0 flex-col gap-0.5">
+                                          <Link
+                                            href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                            className="block truncate font-medium text-gray-800 hover:underline"
+                                          >
+                                            {item.material.title}
+                                          </Link>
+                                          {item.sourceBomItem?.mmSourcingType &&
+                                            isPurchasedMmSourcing(item.sourceBomItem.mmSourcingType) && (
+                                              <Badge size="xs" variant="light" color="gray" radius="sm" className="w-fit">
+                                                {getMmSourcingTypeLabel(item.sourceBomItem.mmSourcingType, locale)}
+                                              </Badge>
+                                            )}
+                                        </div>
                                       </Table.Td>
                                       <Table.Td>
                                         <div className="flex items-center gap-1">
@@ -818,11 +833,11 @@ export default function Page() {
                     icon={<Wallet size={18} />}
                   />
                   <CalculationCard
-                    label={translate("Total Outsourcing Cost", "إجمالي تكلفة التصنيع خارجيًا")}
+                    label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
                     value={formatMoney(totals.totalManufacturingCost, currency)}
                     hint={translate(
-                      "Sum of quantity × unit price for all outsourcing rows",
-                      "مجموع الكمية × سعر الوحدة لكل صفوف التصنيع الخارجي",
+                      "Sum of quantity × last outsourcing manufacturing cost for externally manufactured materials (internal = 0)",
+                      "مجموع الكمية × آخر تكلفة تصنيع من أوامر التعهيد للمواد المصنعة خارجياً (الداخلي = 0)",
                     )}
                     icon={<Wallet size={18} />}
                   />
@@ -973,12 +988,14 @@ function ManufacturingCostsSection({
           <Factory size={16} />
         </div>
         <div className="flex flex-col gap-1">
-          <h4 className="text-lg font-semibold text-gray-900">{translate("Manufactured Materials", "المواد المصنعة")}</h4>
+          <h4 className="text-lg font-semibold text-gray-900">
+            {translate("Manufactured Materials", "المواد المصنعة")}
+          </h4>
 
           <p className="text-xs text-gray-500">
             {translate(
-              "These items may be produced in-house or by an external party.",
-              "قد تُصنع هذه البنود داخل المصنع أو لدى جهة خارجية.",
+              "Internally manufactured materials have no manufacturing cost. Externally manufactured materials use the last outsourcing manufacturing cost.",
+              "المواد المصنعة داخلياً بلا تكلفة تصنيع. المواد المصنعة خارجياً تستخدم آخر تكلفة تصنيع من أوامر التعهيد.",
             )}
           </p>
         </div>
@@ -993,6 +1010,9 @@ function ManufacturingCostsSection({
               </Table.Th>
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {translate("Manufactured Material", "المادة المصنعة")}
+              </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Manufacturing Source", "مصدر التصنيع")}
               </Table.Th>
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {translate("Production Department", "قسم الانتاج")}
@@ -1041,6 +1061,15 @@ function ManufacturingCostsSection({
                   </Link>
                 </Table.Td>
                 <Table.Td>
+                  {row.sourceBomItem.mmSourcingType ? (
+                    <Badge size="xs" variant="light" color="gray" radius="sm">
+                      {getMmSourcingTypeLabel(row.sourceBomItem.mmSourcingType, locale)}
+                    </Badge>
+                  ) : (
+                    "-"
+                  )}
+                </Table.Td>
+                <Table.Td>
                   <span className="text-sm text-gray-600">
                     {row.productionSubDepartment
                       ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
@@ -1048,8 +1077,16 @@ function ManufacturingCostsSection({
                   </span>
                 </Table.Td>
                 <Table.Td className="font-medium text-gray-800">{formatQuantity(row.quantityRequired)}</Table.Td>
-                <Table.Td>{formatMoney(row.unitManufacturingCost)}</Table.Td>
-                <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalManufacturingCost)}</Table.Td>
+                <Table.Td>
+                  {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
+                    ? "-"
+                    : formatMoney(row.unitManufacturingCost)}
+                </Table.Td>
+                <Table.Td className="font-medium text-gray-800">
+                  {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
+                    ? "-"
+                    : formatMoney(row.totalManufacturingCost)}
+                </Table.Td>
                 <Table.Td className="text-gray-500">
                   {row.notes ? <span className="truncate">{row.notes}</span> : "-"}
                 </Table.Td>
@@ -1088,7 +1125,7 @@ function ManufacturingCostsSection({
           <Table.Tfoot className="bg-gray-50">
             <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
               <Table.Td>{translate("Total", "الإجمالي")}</Table.Td>
-              <Table.Td colSpan={4} className="text-gray-500">
+              <Table.Td colSpan={5} className="text-gray-500">
                 {rows.length} {translate("Items", "بند")}
               </Table.Td>
               <Table.Td>{formatMoney(totalManufacturingCost)}</Table.Td>

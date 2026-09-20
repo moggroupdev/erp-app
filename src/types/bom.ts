@@ -1,6 +1,7 @@
 import type { ProductSourceType } from "@/lib/constants/enums/product-source-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
+import type { MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 
@@ -11,6 +12,7 @@ export type BomItem = {
   quantityRequired: number;
   unitOfMeasurementSelected: MaterialUnit | null;
   productionSubDepartment: ProductionSubDepartment | null;
+  mmSourcingType: MmSourcingType | null;
   notes: string | null;
   createdAt: Date;
   createdBy: string;
@@ -44,6 +46,7 @@ export type BomItemWithMaterial = {
   quantityRequired: number;
   unitOfMeasurementSelected: MaterialUnit | null;
   productionSubDepartment: ProductionSubDepartment | null;
+  mmSourcingType: MmSourcingType | null;
   notes: string | null;
   material: {
     code: string;
@@ -54,6 +57,8 @@ export type BomItemWithMaterial = {
     unitPrice: number;
     lastPurchasePrice: number | null;
     lastPurchaseDate: Date | null;
+    lastOutsourcingCost: number | null;
+    lastOutsourcingDate: Date | null;
     marketUnitPrice: number | null;
     marketUnitPriceSetAt: Date | null;
     unitConversions: MaterialUnitConversionSummary[];
@@ -89,6 +94,7 @@ export type CreateBomItemDto = {
   quantityRequired: number;
   unitOfMeasurementSelected: MaterialUnit;
   productionSubDepartment: ProductionSubDepartment;
+  mmSourcingType: MmSourcingType | null;
   notes: string | null;
 };
 
@@ -98,6 +104,7 @@ export type ReplaceDepartmentBomItemDto = {
   materialCode: string;
   quantityRequired: number;
   unitOfMeasurementSelected: MaterialUnit;
+  mmSourcingType: MmSourcingType | null;
   notes: string | null;
 };
 
@@ -107,4 +114,5 @@ export type UpdateBomItemDto = Partial<Pick<CreateBomItemDto, "quantityRequired"
   materialCode: string;
   unitOfMeasurementSelected: MaterialUnit;
   productionSubDepartment: ProductionSubDepartment;
+  mmSourcingType: MmSourcingType | null;
 };

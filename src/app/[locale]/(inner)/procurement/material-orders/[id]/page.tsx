@@ -28,6 +28,8 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
+import PrintDocument from "@/components/ui/print-document";
+import MaterialPurchaseOrderPrintDocument from "@/components/documents/material-purchase-order-print-document";
 import OrderDetails from "./components/order-details";
 import ItemRequisitionAllocationsModal from "./components/item-requisition-allocations-modal";
 import OrderInvoicesSection from "@/components/global/sections/order-invoices";
@@ -37,6 +39,7 @@ const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خا
 const RECEIPTS_LIMIT = 100;
 const INVOICES_LIMIT = 100;
 const REMAINING_EPSILON = 1e-9;
+const VAT_RATE = 0.14;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -104,12 +107,36 @@ export default function Page() {
     `${order?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
   );
 
+  const subtotal = order ? Number(order.totalAmount) : 0;
+  const vat = subtotal * VAT_RATE;
+  const grandTotal = subtotal + vat;
+
   return (
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={refetch} />,
+        sideElements: (
+          <div className="flex gap-2">
+            {order && (
+              <div className="mx-2 flex items-center">
+                <PrintDocument
+                  title={`${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} - ${order.code}`}
+                  buttonLabel={translate("Print", "طباعة")}
+                  buttonType="icon"
+                  paperWidth={210}
+                  paperHeight={297}
+                  paperMarginX={12}
+                  paperMarginTop={12}
+                  paperMarginBottom={14}
+                >
+                  <MaterialPurchaseOrderPrintDocument order={order} />
+                </PrintDocument>
+              </div>
+            )}
+            <RefetchButton isFetching={isFetching} onRefetch={refetch} />
+          </div>
+        ),
       }}
     >
       {isOrderFetching ? (
@@ -228,9 +255,29 @@ export default function Page() {
                       })}
                     </Table.Tbody>
                     <Table.Tfoot className="bg-gray-50">
-                      <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
-                        <Table.Th colSpan={8}>{translate("Total", "الإجمالي")}</Table.Th>
-                        <Table.Th>{formatMoney(order.totalAmount)}</Table.Th>
+                      <Table.Tr className="border-t border-gray-200 font-medium text-gray-800">
+                        <Table.Th colSpan={7} className="text-end">
+                          {translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}
+                        </Table.Th>
+                        <Table.Th>{formatMoney(subtotal)}</Table.Th>
+                        <Table.Th />
+                      </Table.Tr>
+                      <Table.Tr className="font-medium text-gray-800">
+                        <Table.Th colSpan={7} className="text-end">
+                          {translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}
+                        </Table.Th>
+                        <Table.Th>{formatMoney(vat)}</Table.Th>
+                        <Table.Th />
+                      </Table.Tr>
+                      <Table.Tr className="font-semibold text-gray-900">
+                        <Table.Th colSpan={7} className="text-end">
+                          {translate(
+                            `Grand Total (${translation.currency})`,
+                            `الإجمالي الكلي (${translation.currency})`,
+                          )}
+                        </Table.Th>
+                        <Table.Th>{formatMoney(grandTotal)}</Table.Th>
+                        <Table.Th />
                       </Table.Tr>
                     </Table.Tfoot>
                   </Table>

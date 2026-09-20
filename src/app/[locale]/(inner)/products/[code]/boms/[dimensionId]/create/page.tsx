@@ -12,6 +12,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -52,6 +53,7 @@ export default function Page() {
         materialCode: string;
         quantityRequired: number;
         unitOfMeasurementSelected: MaterialUnit;
+        mmSourcingType: MmSourcingType | null;
         notes: string | null;
       }[];
     }) => {

@@ -1,6 +1,9 @@
 import { getEnteredQuantityInBaseUnit } from "@/lib/helpers/unit-conversion";
-import { TEMP_GLOBAL_MANUFACTURING_COST } from "@/lib/constants/global";
 import { isManufacturedMaterial } from "@/lib/constants/enums/material-types";
+import {
+  isExternallyManufacturedMmSourcing,
+  usesMmRecipe,
+} from "@/lib/constants/enums/mm-sourcing-types";
 import {
   COSTING_METHODS,
   ITEM_COSTING_METHODS,
@@ -104,7 +107,10 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
   const rows: FlattenedBomRow[] = [];
 
   for (const item of items) {
-    if (isManufacturedMaterial(item.material.materialType)) {
+    const expandRecipe =
+      isManufacturedMaterial(item.material.materialType) && usesMmRecipe(item.mmSourcingType);
+
+    if (expandRecipe) {
       for (const component of item.material.manufacturedMaterialBoms ?? []) {
         const componentUnit = component.unitOfMeasurementSelected ?? component.material.unitOfMeasurement;
 
@@ -131,6 +137,7 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
       continue;
     }
 
+    // Raw/spare, purchased MM, or legacy null-sourcing MM: price as a normal material row.
     rows.push({
       id: item.id,
       materialCode: item.materialCode,
@@ -149,18 +156,32 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
 
 export function getManufacturingCostRows(items: BomItemWithMaterial[]): ManufacturingCostRow[] {
   return items
-    .filter((item) => isManufacturedMaterial(item.material.materialType))
-    .map((item) => ({
-      id: item.id,
-      materialCode: item.material.code,
-      materialTitle: item.material.title,
-      quantityRequired: item.quantityRequired,
-      unitManufacturingCost: TEMP_GLOBAL_MANUFACTURING_COST,
-      totalManufacturingCost: item.quantityRequired * TEMP_GLOBAL_MANUFACTURING_COST,
-      productionSubDepartment: item.productionSubDepartment,
-      notes: item.notes,
-      sourceBomItem: item,
-    }));
+    .filter(
+      (item) =>
+        isManufacturedMaterial(item.material.materialType) && usesMmRecipe(item.mmSourcingType),
+    )
+    .map((item) => {
+      const unitManufacturingCost = isExternallyManufacturedMmSourcing(item.mmSourcingType)
+        ? (item.material.lastOutsourcingCost ?? 0)
+        : 0;
+      const baseQuantity = getEnteredQuantityInBaseUnit(
+        item.quantityRequired,
+        item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
+        item.material,
+      );
+
+      return {
+        id: item.id,
+        materialCode: item.material.code,
+        materialTitle: item.material.title,
+        quantityRequired: item.quantityRequired,
+        unitManufacturingCost,
+        totalManufacturingCost: baseQuantity * unitManufacturingCost,
+        productionSubDepartment: item.productionSubDepartment,
+        notes: item.notes,
+        sourceBomItem: item,
+      };
+    });
 }
 
 export function getFlattenedRowLineCost(row: FlattenedBomRow, costingMethod: ItemCostingMethod): number {

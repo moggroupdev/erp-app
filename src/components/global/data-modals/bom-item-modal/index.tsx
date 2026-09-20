@@ -9,7 +9,8 @@ import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
+import type { MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
@@ -20,6 +21,7 @@ import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
+import SelectMmSourcingType from "@/components/global/selections/enum-based/select-mm-sourcing-type";
 
 export default function BomItemModal({
   opened,
@@ -47,6 +49,7 @@ export default function BomItemModal({
   const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
+  const [mmSourcingType, setMmSourcingType] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
   const isUpdate = !!itemToUpdate;
@@ -55,6 +58,7 @@ export default function BomItemModal({
   const unitConversions = activeMaterial?.unitConversions ?? [];
   const materialType = activeMaterial?.materialType ?? null;
   const showUnitSelect = !!materialType && isRawMaterial(materialType);
+  const isMmMaterial = !!materialType && isManufacturedMaterial(materialType);
 
   const departmentMaterialCodes = useMemo(() => {
     if (!productionSubDepartment) return [];
@@ -74,6 +78,7 @@ export default function BomItemModal({
     setUnit(null);
     setQuantityRequired("");
     setProductionSubDepartment(null);
+    setMmSourcingType(null);
     setNotes("");
   }
 
@@ -85,6 +90,7 @@ export default function BomItemModal({
       unit: itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement,
       quantityRequired: itemToUpdate.quantityRequired,
       productionSubDepartment: itemToUpdate.productionSubDepartment,
+      mmSourcingType: itemToUpdate.mmSourcingType,
       notes: itemToUpdate.notes,
     };
   }, [itemToUpdate]);
@@ -96,6 +102,7 @@ export default function BomItemModal({
       setSelectedMaterial(null);
       setQuantityRequired(initialEditValues.quantityRequired);
       setProductionSubDepartment(initialEditValues.productionSubDepartment);
+      setMmSourcingType(initialEditValues.mmSourcingType);
       setNotes(initialEditValues.notes || "");
       setUnit(initialEditValues.unit);
     } else reset();
@@ -106,32 +113,31 @@ export default function BomItemModal({
     setUnit((current) => current || baseUnit);
   }, [baseUnit]);
 
+  const resolvedMmSourcingType = isMmMaterial ? (mmSourcingType as MmSourcingType | null) : null;
+
   const mutation = useMutation({
     mutationFn: async () => {
+      const dto = {
+        materialCode: materialCode!,
+        quantityRequired: Number(quantityRequired),
+        unitOfMeasurementSelected: unit as MaterialUnit,
+        productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
+        mmSourcingType: resolvedMmSourcingType,
+        notes: notes.trim() || null,
+      };
+
       if (itemToUpdate) {
         return await bomsApi.updateItem({
           privateRequest,
           itemId: itemToUpdate.id,
-          dto: {
-            materialCode: materialCode!,
-            quantityRequired: Number(quantityRequired),
-            unitOfMeasurementSelected: unit as MaterialUnit,
-            productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
-            notes: notes.trim() || null,
-          },
+          dto,
         });
       }
 
       return await bomsApi.appendItem({
         privateRequest,
         dimensionId,
-        dto: {
-          materialCode: materialCode!,
-          quantityRequired: Number(quantityRequired),
-          unitOfMeasurementSelected: unit as MaterialUnit,
-          productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
-          notes: notes.trim() || null,
-        },
+        dto,
       });
     },
     onSuccess: async () => {
@@ -165,6 +171,12 @@ export default function BomItemModal({
       return setValidationError(translate("Please select a unit.", "يرجى اختيار وحدة قياس."));
     }
 
+    if (isMmMaterial && !mmSourcingType) {
+      return setValidationError(
+        translate("Please select a manufacturing source.", "يرجى اختيار مصدر التصنيع."),
+      );
+    }
+
     const normalizedQuantity = Number(quantityRequired);
     if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
       return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
@@ -192,6 +204,7 @@ export default function BomItemModal({
       formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
       productionSubDepartment !== initialEditValues.productionSubDepartment ||
       unit !== initialEditValues.unit ||
+      (mmSourcingType ?? null) !== (initialEditValues.mmSourcingType ?? null) ||
       (notes.trim() || null) !== initialEditValues.notes
     : true;
 
@@ -201,6 +214,7 @@ export default function BomItemModal({
     Number(quantityRequired) > 0 &&
     !!productionSubDepartment &&
     !!unit &&
+    (!isMmMaterial || !!mmSourcingType) &&
     isDataChanged;
 
   return (
@@ -212,6 +226,7 @@ export default function BomItemModal({
           onMaterialSelect={(material) => {
             setSelectedMaterial(material);
             setUnit(material?.unitOfMeasurement ?? null);
+            setMmSourcingType(null);
           }}
           excludeCodes={departmentMaterialCodes}
           label={translate("Material", "المادة")}
@@ -219,6 +234,17 @@ export default function BomItemModal({
           required
           withBrowseModal
         />
+
+        {isMmMaterial && (
+          <SelectMmSourcingType
+            value={mmSourcingType}
+            setValue={setMmSourcingType}
+            label={translate("Manufacturing Source", "مصدر التصنيع")}
+            placeholder={translate("Select source", "اختر المصدر")}
+            required
+            clearable={false}
+          />
+        )}
 
         <SelectProductionSubDepartment
           value={productionSubDepartment}
