@@ -1,6 +1,7 @@
 import type { Bom } from "@/types/bom";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
+import { getMmSourcingTypeLabel } from "@/lib/constants/enums/mm-sourcing-types";
 import { type FlattenedBomRow, type ManufacturingCostRow } from "@/lib/helpers/bom-display";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
@@ -123,8 +124,8 @@ export default function BomNoCostPrintDocument({
             <h2 className="text-base font-semibold">{translate("Manufactured Materials", "المواد المصنعة")}</h2>
             <p className="text-[10px] text-gray-500">
               {translate(
-                "These items may be produced in-house or by an external party.",
-                "قد تُصنع هذه البنود داخل المصنع أو لدى جهة خارجية.",
+                "Internally and externally manufactured materials.",
+                "المواد المصنعة داخلياً وخارجياً.",
               )}
             </p>
           </div>
@@ -133,6 +134,7 @@ export default function BomNoCostPrintDocument({
               <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
                 <th className="text-start whitespace-nowrap">{translate("Material Code", "كود المادة")}</th>
                 <th className="text-start whitespace-nowrap">{translate("Material Name", "اسم المادة")}</th>
+                <th className="text-start whitespace-nowrap">{translate("Manufacturing Source", "مصدر التصنيع")}</th>
                 <th className="text-start whitespace-nowrap">
                   {translate("Production Department", "قسم الانتاج")}
                 </th>
@@ -145,6 +147,11 @@ export default function BomNoCostPrintDocument({
                   <td className="font-mono text-gray-600">{row.materialCode}</td>
                   <td className="font-medium whitespace-nowrap">{row.materialTitle}</td>
                   <td className="text-gray-600">
+                    {row.sourceBomItem.mmSourcingType
+                      ? getMmSourcingTypeLabel(row.sourceBomItem.mmSourcingType, locale)
+                      : "-"}
+                  </td>
+                  <td className="text-gray-600">
                     {row.productionSubDepartment
                       ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
                       : "-"}
@@ -154,7 +161,7 @@ export default function BomNoCostPrintDocument({
               ))}
               <tr className="border-t border-gray-300 bg-gray-50 font-medium">
                 <td>{translate("Total", "الإجمالي")}</td>
-                <td colSpan={3} className="text-gray-600">
+                <td colSpan={4} className="text-gray-600">
                   {manufacturingRows.length} {translate("Items", "بند")}
                 </td>
               </tr>

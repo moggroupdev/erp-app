@@ -85,8 +85,8 @@ export default function MmComponentsSection({
           </div>
           <p className="mt-1 text-xs text-gray-500">
             {translate(
-              "The manufactured materials listed require component materials. These components will be appended to this bill of materials automatically upon creation; they need not be entered manually.",
-              "المواد المصنعة المدرجة تتطلب مواداً خاماً مكونة لها. ستُضاف هذه المكونات تلقائياً إلى قائمة المواد هذه عند الإنشاء، ولا يلزم إدخالها يدوياً.",
+              "Manufactured materials sourced internally or externally require component materials. These components will be appended to this bill of materials automatically upon creation; they need not be entered manually. Purchased manufactured materials are excluded.",
+              "المواد المصنعة الموردة داخلياً أو خارجياً تتطلب مواداً خاماً مكونة لها. ستُضاف هذه المكونات تلقائياً إلى قائمة المواد هذه عند الإنشاء، ولا يلزم إدخالها يدوياً. تُستبعد المواد المصنعة المشتراة جاهزة.",
             )}
           </p>
         </div>

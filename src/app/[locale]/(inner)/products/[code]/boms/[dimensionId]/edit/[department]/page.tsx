@@ -17,6 +17,7 @@ import {
   type ProductionSubDepartment,
 } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -67,6 +68,7 @@ export default function Page() {
         materialCode: string;
         quantityRequired: number;
         unitOfMeasurementSelected: MaterialUnit;
+        mmSourcingType: MmSourcingType | null;
         notes: string | null;
       }[];
     }) => {

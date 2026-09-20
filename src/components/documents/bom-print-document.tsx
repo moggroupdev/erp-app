@@ -8,6 +8,10 @@ import {
 } from "@/lib/constants/enums/derived/costing-methods";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import {
+  getMmSourcingTypeLabel,
+  isInternallyManufacturedMmSourcing,
+} from "@/lib/constants/enums/mm-sourcing-types";
+import {
   getFlattenedRowLineCost,
   getMaterialCostPrice,
   getRowCostingMethod,
@@ -193,8 +197,8 @@ export default function BomPrintDocument({
             <h2 className="text-base font-semibold">{translate("Manufactured Materials", "المواد المصنعة")}</h2>
             <p className="text-[10px] text-gray-500">
               {translate(
-                "These items may be produced in-house or by an external party.",
-                "قد تُصنع هذه البنود داخل المصنع أو لدى جهة خارجية.",
+                "Internally manufactured materials have no manufacturing cost. Externally manufactured materials use the last outsourcing manufacturing cost.",
+                "المواد المصنعة داخلياً بلا تكلفة تصنيع. المواد المصنعة خارجياً تستخدم آخر تكلفة تصنيع من أوامر التعهيد.",
               )}
             </p>
           </div>
@@ -203,6 +207,7 @@ export default function BomPrintDocument({
               <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
                 <th className="text-start whitespace-nowrap">{translate("Material Code", "كود المادة")}</th>
                 <th className="text-start whitespace-nowrap">{translate("Material Name", "اسم المادة")}</th>
+                <th className="text-start whitespace-nowrap">{translate("Manufacturing Source", "مصدر التصنيع")}</th>
                 <th className="text-start whitespace-nowrap">
                   {translate("Production Department", "قسم الانتاج")}
                 </th>
@@ -227,26 +232,47 @@ export default function BomPrintDocument({
                   <td className="font-mono text-gray-600">{row.materialCode}</td>
                   <td className="font-medium whitespace-nowrap">{row.materialTitle}</td>
                   <td className="text-gray-600">
+                    {row.sourceBomItem.mmSourcingType
+                      ? getMmSourcingTypeLabel(row.sourceBomItem.mmSourcingType, locale)
+                      : "-"}
+                  </td>
+                  <td className="text-gray-600">
                     {row.productionSubDepartment
                       ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
                       : "-"}
                   </td>
                   <td>{formatQuantity(row.quantityRequired)}</td>
-                  <td className={row.unitManufacturingCost === 0 ? ZERO_VALUE_CLASS : undefined}>
-                    {formatMoney(row.unitManufacturingCost)}
+                  <td
+                    className={
+                      isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
+                        ? undefined
+                        : row.unitManufacturingCost === 0
+                          ? ZERO_VALUE_CLASS
+                          : undefined
+                    }
+                  >
+                    {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
+                      ? "-"
+                      : formatMoney(row.unitManufacturingCost)}
                   </td>
                   <td
                     className={
-                      row.totalManufacturingCost === 0 ? `font-medium ${ZERO_VALUE_CLASS}` : "font-medium"
+                      isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
+                        ? "font-medium"
+                        : row.totalManufacturingCost === 0
+                          ? `font-medium ${ZERO_VALUE_CLASS}`
+                          : "font-medium"
                     }
                   >
-                    {formatMoney(row.totalManufacturingCost)}
+                    {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
+                      ? "-"
+                      : formatMoney(row.totalManufacturingCost)}
                   </td>
                 </tr>
               ))}
               <tr className="border-t border-gray-300 bg-gray-50 font-medium">
                 <td>{translate("Total", "الإجمالي")}</td>
-                <td colSpan={4} className="text-gray-600">
+                <td colSpan={5} className="text-gray-600">
                   {totals.manufacturingItemCount} {translate("Items", "بند")}
                 </td>
                 <td className={totals.totalManufacturingCost === 0 ? ZERO_VALUE_CLASS : undefined}>

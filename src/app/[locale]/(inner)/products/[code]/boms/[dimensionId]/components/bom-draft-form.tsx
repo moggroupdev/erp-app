@@ -12,6 +12,10 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { isManufacturedMaterial, isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import {
+  usesMmRecipe,
+  type MmSourcingType,
+} from "@/lib/constants/enums/mm-sourcing-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
@@ -24,6 +28,7 @@ import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
+import SelectMmSourcingType from "@/components/global/selections/enum-based/select-mm-sourcing-type";
 import MmComponentsSection from "./mm-components-section";
 
 export type BomDraftRow = {
@@ -36,6 +41,7 @@ export type BomDraftRow = {
   unit: MaterialUnit | null;
   unitPrice: number;
   quantityRequired: number | "";
+  mmSourcingType: MmSourcingType | null;
   notes: string;
 };
 
@@ -43,6 +49,7 @@ export type BomDraftSubmitItem = {
   materialCode: string;
   quantityRequired: number;
   unitOfMeasurementSelected: MaterialUnit;
+  mmSourcingType: MmSourcingType | null;
   notes: string | null;
 };
 
@@ -61,6 +68,7 @@ export function createEmptyRow(): BomDraftRow {
     unit: null,
     unitPrice: 0,
     quantityRequired: "",
+    mmSourcingType: null,
     notes: "",
   };
 }
@@ -76,6 +84,7 @@ export function mapBomItemToDraftRow(item: BomItemWithMaterial): BomDraftRow {
     unit: item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
     unitPrice: item.material.unitPrice,
     quantityRequired: item.quantityRequired,
+    mmSourcingType: item.mmSourcingType,
     notes: item.notes || "",
   };
 }
@@ -99,6 +108,7 @@ function serializeRowsSnapshot(rows: BomDraftRow[]) {
       materialCode: row.materialCode,
       unit: row.unit,
       quantityRequired: row.quantityRequired === "" ? "" : Number(row.quantityRequired),
+      mmSourcingType: row.mmSourcingType,
       notes: row.notes.trim(),
     })),
   );
@@ -183,7 +193,10 @@ export default function BomDraftForm({
     () =>
       rows.filter(
         (row): row is BomDraftRow & { materialCode: string; materialType: MaterialType } =>
-          !!row.materialCode && row.materialType !== null && isManufacturedMaterial(row.materialType),
+          !!row.materialCode &&
+          row.materialType !== null &&
+          isManufacturedMaterial(row.materialType) &&
+          usesMmRecipe(row.mmSourcingType),
       ),
     [rows],
   );
@@ -210,6 +223,7 @@ export default function BomDraftForm({
       unitConversions: material?.unitConversions ?? [],
       unit: material?.unitOfMeasurement ?? null,
       unitPrice: material?.unitPrice ?? 0,
+      mmSourcingType: null,
     });
     setDuplicateCodes(new Set());
     setValidationError("");
@@ -324,6 +338,15 @@ export default function BomDraftForm({
         return setValidationError(
           translate(`${rowLabel}: quantity must be greater than zero.`, `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`),
         );
+
+      if (row.materialType && isManufacturedMaterial(row.materialType) && !row.mmSourcingType) {
+        return setValidationError(
+          translate(
+            `${rowLabel}: please select a manufacturing source.`,
+            `${rowLabel}: يرجى اختيار مصدر التصنيع.`,
+          ),
+        );
+      }
     }
 
     const seen = new Set<string>();
@@ -352,6 +375,8 @@ export default function BomDraftForm({
           materialCode: row.materialCode!,
           quantityRequired: Number(row.quantityRequired),
           unitOfMeasurementSelected: row.unit as MaterialUnit,
+          mmSourcingType:
+            row.materialType && isManufacturedMaterial(row.materialType) ? row.mmSourcingType : null,
           notes: row.notes.trim() || null,
         })),
       });
@@ -405,13 +430,16 @@ export default function BomDraftForm({
           <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="h-9">
-                <Table.Th className="w-[34%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[28%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Material", "المادة")}
                 </Table.Th>
-                <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  {translate("Manufacturing Source", "مصدر التصنيع")}
+                </Table.Th>
+                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Quantity", "الكمية")}
                 </Table.Th>
-                <Table.Th className="w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Unit", "الوحدة")}
                 </Table.Th>
                 <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -420,7 +448,7 @@ export default function BomDraftForm({
                 <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Line Total", "إجمالي البند")} ({currency})
                 </Table.Th>
-                <Table.Th className="w-[20%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Notes", "الملاحظات")}
                 </Table.Th>
                 <Table.Th className="w-[6%]" />
@@ -432,6 +460,7 @@ export default function BomDraftForm({
                 const displayUnitPrice = toDisplayUnitPrice(row.unitPrice, getRowFactor(row));
                 const lineTotal = quantity !== null ? quantity * displayUnitPrice : null;
                 const isDuplicate = !!row.materialCode && duplicateCodes.has(row.materialCode);
+                const isMmRow = !!row.materialType && isManufacturedMaterial(row.materialType);
 
                 return (
                   <Table.Tr key={row.key} className={isDuplicate ? "bg-red-50/70" : undefined}>
@@ -451,6 +480,24 @@ export default function BomDraftForm({
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                         withBrowseModal
                       />
+                    </Table.Td>
+                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+                      {isMmRow ? (
+                        <SelectMmSourcingType
+                          value={row.mmSourcingType}
+                          setValue={(next) => {
+                            const resolved = typeof next === "function" ? next(row.mmSourcingType) : next;
+                            updateRow(row.key, { mmSourcingType: (resolved as MmSourcingType | null) ?? null });
+                          }}
+                          placeholder={translate("Select source", "اختر المصدر")}
+                          variant="unstyled"
+                          radius={0}
+                          clearable={false}
+                          styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
                     </Table.Td>
                     <Table.Td data-bom-qty-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <NumberInput
@@ -540,6 +587,7 @@ export default function BomDraftForm({
                     {translate("Add Row", "إضافة صف")}
                   </Button>
                 </Table.Td>
+                <Table.Td />
                 <Table.Td />
                 <Table.Td />
                 <Table.Td>
