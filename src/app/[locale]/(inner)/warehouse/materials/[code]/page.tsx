@@ -15,13 +15,14 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
 import { Button, Menu } from "@mantine/core";
-import { ChevronDown, Pencil, Tag } from "lucide-react";
+import { ChevronDown, Pencil, Repeat, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialMarketPriceModal from "./components/material-market-price-modal";
+import MaterialTypeModal from "./components/material-type-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
 import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
@@ -36,7 +37,8 @@ export default function Page() {
   const canReadBom = useHasPermission(PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS);
   const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
-  const canManageMaterial = canUpdateMaterial || canSetMarketPrice;
+  const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
+  const canManageMaterial = canUpdateMaterial || canSetMarketPrice || canSetMaterialType;
 
   const materialQuery = useQuery({
     queryKey: queryKeys.materials.detail(code),
@@ -69,6 +71,7 @@ export default function Page() {
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [marketPriceModalOpened, { open: openMarketPriceModal, close: closeMarketPriceModal }] = useDisclosure(false);
+  const [typeModalOpened, { open: openTypeModal, close: closeTypeModal }] = useDisclosure(false);
 
   return (
     <LayoutBox
@@ -89,6 +92,11 @@ export default function Page() {
                   {canUpdateMaterial && (
                     <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
                       {translate("Edit", "تعديل")}
+                    </Menu.Item>
+                  )}
+                  {canSetMaterialType && (
+                    <Menu.Item leftSection={<Repeat size={14} />} onClick={openTypeModal}>
+                      {translate("Change Material Type", "تغيير نوع المادة")}
                     </Menu.Item>
                   )}
                   {canSetMarketPrice && (
@@ -128,6 +136,8 @@ export default function Page() {
               materialCode={code}
               currentValue={material.marketUnitPrice}
             />
+
+            <MaterialTypeModal opened={typeModalOpened} close={closeTypeModal} material={material} />
 
             <MaterialDetails material={material} />
 

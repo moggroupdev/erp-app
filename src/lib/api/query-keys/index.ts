@@ -75,6 +75,8 @@ export const queryKeys = {
     list: (filters: ListFilters) => [...queryKeys.materials.lists(), filters] as const,
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
+    typeChangeImpact: (code: string, targetType: string | null) =>
+      [...queryKeys.materials.detail(code), "type-change-impact", targetType] as const,
   },
   mmBoms: {
     all: ["mm-boms"] as const,

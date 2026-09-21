@@ -9,7 +9,10 @@ import type {
   UpdateMaterialDto,
   CreateMaterialUnitConversionDto,
   SetMaterialMarketPriceDto,
+  SetMaterialTypeDto,
+  MaterialTypeChangeImpact,
 } from "@/types/material";
+import type { MaterialType } from "@/lib/constants/enums/material-types";
 
 const materialsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateMaterialDto }) {
@@ -68,6 +71,36 @@ const materialsApi = {
     dto: SetMaterialMarketPriceDto;
   }) {
     return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/market-price`, data: dto });
+  },
+
+  async previewTypeChange({
+    privateRequest,
+    code,
+    targetType,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    targetType: MaterialType;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialTypeChangeImpact>({
+      url: `materials/${code}/material-type/impact`,
+      params: { targetType },
+      signal,
+    });
+  },
+
+  async setType({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: SetMaterialTypeDto;
+  }) {
+    return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/material-type`, data: dto });
   },
 
   // ==================== UNITS ====================

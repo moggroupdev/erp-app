@@ -41,6 +41,7 @@ export const PERMISSION_VALUES = [
   "add_material",
   "update_material",
   "set_material_market_price",
+  "set_material_type",
   "print_materials_list",
   "use_unit_conversion_tool",
   "add_manufactured_material_bom",
@@ -431,6 +432,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تعيين سعر السوق للمادة",
     },
   },
+  set_material_type: {
+    value: "set_material_type",
+    label: {
+      en: "Set Material Type",
+      ar: "تعيين نوع المادة",
+    },
+  },
   print_materials_list: {
     value: "print_materials_list",
     label: {
@@ -804,6 +812,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_material",
       "update_material",
       "set_material_market_price",
+      "set_material_type",
       "print_materials_list",
       "use_unit_conversion_tool",
       "add_manufactured_material_bom",
