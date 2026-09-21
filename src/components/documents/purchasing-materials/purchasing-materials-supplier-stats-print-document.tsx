@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading, PrintTable } from "./components";
+import { PrintDetail, PrintSectionHeading, PrintTable } from "../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatBaseQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
@@ -9,41 +9,83 @@ import {
   sumDisplayQuantitiesWhenUnitsMatch,
 } from "@/lib/helpers/unit-conversion";
 import type {
+  PurchasingMaterialsByMainCategory,
   PurchasingMaterialsByMaterial,
-  PurchasingMaterialsBySubCategory,
-  PurchasingMaterialsBySupplier,
-  PurchasingMaterialsCategoryOrder,
+  PurchasingMaterialsByPeriod,
   PurchasingMaterialsCategoryStatsOverview,
+  PurchasingMaterialsSupplierBySubCategory,
+  PurchasingMaterialsSupplierOrder,
 } from "@/types/reports";
+import {
+  buildSupplierCategoryGroups,
+  type SupplierCategoriesSort,
+} from "@/app/[locale]/(inner)/reports/purchasing-materials/supplier-stats/components/sort";
 
-export default function PurchasingMaterialsCategoryStatsPrintDocument({
+type GroupBy = "month" | "quarter" | "year";
+
+const ARABIC_QUARTER_LABELS: Record<1 | 2 | 3 | 4, string> = {
+  1: "الربع الأول",
+  2: "الربع الثاني",
+  3: "الربع الثالث",
+  4: "الربع الرابع",
+};
+
+function parsePeriodParts(period: string): { year: number; month: number } | null {
+  const match = period.match(/^(\d{4})-(\d{2})/);
+  if (!match) return null;
+  return { year: Number(match[1]), month: Number(match[2]) };
+}
+
+function formatPeriodLabel(period: string, locale: string, groupBy: GroupBy): string {
+  const parts = parsePeriodParts(period);
+  if (!parts) return period;
+
+  const { year, month } = parts;
+  const localeTag = locale === "ar" ? "ar-EG" : "en-US";
+
+  if (groupBy === "year") return String(year);
+
+  if (groupBy === "quarter") {
+    const quarter = Math.ceil(month / 3) as 1 | 2 | 3 | 4;
+    return locale === "ar" ? `${ARABIC_QUARTER_LABELS[quarter]} لعام ${year}` : `Q${quarter} ${year}`;
+  }
+
+  const date = new Date(Date.UTC(year, month - 1, 1));
+  return date.toLocaleDateString(localeTag, { year: "numeric", month: "short", timeZone: "UTC" });
+}
+
+export default function PurchasingMaterialsSupplierStatsPrintDocument({
   title,
-  categoryTitle,
+  supplierName,
   startDate,
   endDate,
+  groupBy = "month",
   overview,
+  byPeriod,
+  categories,
   subCategories,
-  suppliers,
   orders,
   materials,
   materialsDisplayUnit,
-  subCategoriesSortLabel,
-  suppliersSortLabel,
+  categoriesSort = "spend-desc",
+  categoriesSortLabel,
   ordersSortLabel,
   materialsSortLabel,
 }: {
   title: string;
-  categoryTitle: string;
+  supplierName: string;
   startDate?: string | null;
   endDate?: string | null;
+  groupBy?: GroupBy;
   overview: PurchasingMaterialsCategoryStatsOverview;
-  subCategories: PurchasingMaterialsBySubCategory[];
-  suppliers: PurchasingMaterialsBySupplier[];
-  orders: PurchasingMaterialsCategoryOrder[];
+  byPeriod: PurchasingMaterialsByPeriod[];
+  categories: PurchasingMaterialsByMainCategory[];
+  subCategories: PurchasingMaterialsSupplierBySubCategory[];
+  orders: PurchasingMaterialsSupplierOrder[];
   materials: PurchasingMaterialsByMaterial[];
   materialsDisplayUnit?: MaterialUnit | null;
-  subCategoriesSortLabel: string;
-  suppliersSortLabel: string;
+  categoriesSort?: SupplierCategoriesSort;
+  categoriesSortLabel: string;
   ordersSortLabel: string;
   materialsSortLabel: string;
 }) {
@@ -56,11 +98,14 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
     maximumFractionDigits: 2,
   });
 
-  const totalSubCategoryMaterials = subCategories.reduce((sum, row) => sum + row.materialCount, 0);
-  const totalSubCategorySpend = subCategories.reduce((sum, row) => sum + row.totalSpend, 0);
-  const totalSupplierOrders = suppliers.reduce((sum, row) => sum + row.orderCount, 0);
-  const totalSupplierSpend = suppliers.reduce((sum, row) => sum + row.totalSpend, 0);
-  const avgSupplierOrderValue = totalSupplierOrders === 0 ? 0 : totalSupplierSpend / totalSupplierOrders;
+  const totalPeriodSpend = byPeriod.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalPeriodOrders = byPeriod.reduce((sum, row) => sum + row.orderCount, 0);
+  const avgPeriodOrderValue = totalPeriodOrders === 0 ? 0 : totalPeriodSpend / totalPeriodOrders;
+
+  const totalCategorySpend = categories.reduce((sum, row) => sum + row.totalSpend, 0);
+
+  const categoryGroups = buildSupplierCategoryGroups(categories, subCategories, categoriesSort);
+
   const totalOrderAmount = orders.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
   const materialDisplayRows = mapBaseQuantityMaterialRowsForDisplay(materials, materialsDisplayUnit);
   const totalMaterialQuantity = sumDisplayQuantitiesWhenUnitsMatch(materialDisplayRows);
@@ -82,11 +127,11 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
       </header>
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
-        <PrintDetail label={translate("Main Category", "الفئة الرئيسية")} value={categoryTitle} />
+        <PrintDetail label={translate("Supplier", "المورد")} value={supplierName} />
         <PrintDetail label={translate("Total Value", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
         <PrintDetail label={translate("Total Invoices Count", "إجمالي عدد الفواتير")} value={String(overview.totalOrders)} />
         <PrintDetail
-          label={translate("Average Order Value", "متوسط قيمة الطلب")}
+          label={translate("Average Invoice Value", "متوسط قيمة الفاتورة")}
           value={formatMoney(overview.avgOrderValue, currency)}
         />
         <PrintDetail
@@ -100,69 +145,78 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Value by Subcategory", "القيمة حسب الفئة الفرعية")}
-          subtitle={translate(`Sorted by: ${subCategoriesSortLabel}`, `مرتّب حسب: ${subCategoriesSortLabel}`)}
+          title={translate("Value by Period", "القيمة حسب الفترة")}
+          subtitle={translate(
+            "Total value, invoice count, and average invoice value per period.",
+            "إجمالي القيمة وعدد الفواتير ومتوسط قيمة الفاتورة لكل فترة.",
+          )}
         />
         <PrintTable
           headers={[
-            "#",
-            translate("Subcategory", "الفئة الفرعية"),
-            translate("Materials Count", "عدد الأصناف"),
+            translate("Period", "الفترة"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Percentage", "النسبة"),
+            translate("Invoices Count", "عدد الفواتير"),
+            translate(`Avg Invoice (${currency})`, `متوسط الفاتورة (${currency})`),
           ]}
-          columnWidths={["8%", "42%", "15%", "20%", "15%"]}
-          rows={subCategories.map((row, index) => [
-            String(index + 1),
-            row.subCategoryTitle,
-            String(row.materialCount),
+          rows={byPeriod.map((row) => [
+            formatPeriodLabel(row.period, locale, groupBy),
             formatMoney(row.totalSpend),
-            `${percentageFormatter.format(totalSubCategorySpend === 0 ? 0 : (row.totalSpend / totalSubCategorySpend) * 100)}%`,
+            String(row.orderCount),
+            formatMoney(row.avgOrderValue),
           ])}
           footerRow={[
-            "",
             translate("Total", "الإجمالي"),
-            String(totalSubCategoryMaterials),
-            formatMoney(totalSubCategorySpend),
-            `${percentageFormatter.format(subCategories.length === 0 ? 0 : 100)}%`,
+            formatMoney(totalPeriodSpend),
+            String(totalPeriodOrders),
+            formatMoney(avgPeriodOrderValue),
           ]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>
 
-      <section className="flex flex-col gap-2.5">
+      <section className="flex flex-col gap-4">
         <PrintSectionHeading
-          title={translate("Suppliers", "الموردون")}
-          subtitle={translate(`Sorted by: ${suppliersSortLabel}`, `مرتّب حسب: ${suppliersSortLabel}`)}
+          title={translate("Value by Category", "القيمة حسب الفئة")}
+          subtitle={translate(`Sorted by: ${categoriesSortLabel}`, `مرتّب حسب: ${categoriesSortLabel}`)}
         />
-        <PrintTable
-          headers={[
-            "#",
-            translate("Supplier", "المورد"),
-            translate("Code", "الكود"),
-            translate("Invoices Count", "عدد الفواتير"),
-            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate(`Avg Invoice (${currency})`, `متوسط الفاتورة (${currency})`),
-          ]}
-          rows={suppliers.map((row, index) => [
-            String(index + 1),
-            row.supplierName,
-            row.supplierCode,
-            String(row.orderCount),
-            formatMoney(row.totalSpend),
-            formatMoney(row.avgOrderValue),
-          ])}
-          footerRow={[
-            "",
-            translate("Total", "الإجمالي"),
-            "",
-            String(totalSupplierOrders),
-            formatMoney(totalSupplierSpend),
-            formatMoney(avgSupplierOrderValue),
-          ]}
-          monoColumnIndexes={[2]}
-          emptyLabel={translate("No data available", "لا توجد بيانات")}
-        />
+
+        {categoryGroups.length === 0 ? (
+          <p className="text-xs text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>
+        ) : (
+          categoryGroups.map(({ main, subs }) => (
+            <div key={main.mainCategoryId} className="flex flex-col gap-1.5">
+              <p className="text-[10px] font-semibold text-gray-700">{main.mainCategoryTitle}</p>
+              <PrintTable
+                headers={[
+                  "#",
+                  translate("Subcategory", "الفئة الفرعية"),
+                  translate("Materials Count", "عدد الأصناف"),
+                  translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+                  translate("% of category", "النسبة من الفئة"),
+                  translate("% of supplier", "النسبة من المورد"),
+                ]}
+                columnWidths={["6%", "34%", "12%", "18%", "15%", "15%"]}
+                rows={subs.map((sub, index) => [
+                  String(index + 1),
+                  sub.subCategoryTitle,
+                  String(sub.materialCount),
+                  formatMoney(sub.totalSpend),
+                  `${percentageFormatter.format(main.totalSpend === 0 ? 0 : (sub.totalSpend / main.totalSpend) * 100)}%`,
+                  `${percentageFormatter.format(totalCategorySpend === 0 ? 0 : (sub.totalSpend / totalCategorySpend) * 100)}%`,
+                ])}
+                footerRow={[
+                  "",
+                  `${translate("Total", "الإجمالي")} (${main.mainCategoryTitle})`,
+                  String(main.materialCount),
+                  formatMoney(main.totalSpend),
+                  `${percentageFormatter.format(100)}%`,
+                  `${percentageFormatter.format(totalCategorySpend === 0 ? 0 : (main.totalSpend / totalCategorySpend) * 100)}%`,
+                ]}
+                emptyLabel={translate("No subcategories", "لا توجد فئات فرعية")}
+              />
+            </div>
+          ))
+        )}
       </section>
 
       <section className="flex flex-col gap-2.5">
@@ -177,7 +231,6 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             translate("Invoice Number", "رقم الفاتورة"),
             translate("Invoice Date", "تاريخ الفاتورة"),
             translate("Addition Permit Numbers", "أرقام إذن الإضافة"),
-            translate("Supplier", "المورد"),
             translate("Status", "الحالة"),
             translate(`Amount (${currency})`, `المبلغ (${currency})`),
           ]}
@@ -187,23 +240,13 @@ export default function PurchasingMaterialsCategoryStatsPrintDocument({
             row.invoiceNumbers.join(", ") || "-",
             row.invoiceIssuedAt ? formatDate(row.invoiceIssuedAt, locale) : "-",
             row.inventoryTransactionLegacyNumbers.length > 0 ? row.inventoryTransactionLegacyNumbers.join(", ") : "-",
-            row.supplierName,
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
             formatMoney(row.invoiceTotalPurchases),
           ])}
-          footerRow={["", translate("Total", "الإجمالي"), "", "", "", "", "", formatMoney(totalOrderAmount)]}
+          footerRow={["", translate("Total", "الإجمالي"), "", "", "", "", formatMoney(totalOrderAmount)]}
           monoColumnIndexes={[1, 2, 4]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
-        <div className="flex gap-2 rounded-lg bg-amber-50 px-3 py-2">
-          <p className="text-[10px] font-semibold">{translate("Important", "هام")}:</p>
-          <p className="text-[10px] text-amber-800">
-            {translate(
-              "The total of these invoices may differ from the report total because these invoices may include other line items that do not belong to the selected category.",
-              "إجمالي هذه الفواتير قد يختلف عن إجمالي التقرير لأن هذه الفواتير قد تتضمن بنوداً أخرى لا تنتمي للفئة المختارة.",
-            )}
-          </p>
-        </div>
       </section>
 
       <section className="flex flex-col gap-2.5">

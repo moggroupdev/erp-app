@@ -30,7 +30,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
-import SuppliersListPrintDocument from "@/components/documents/suppliers-list-print-document";
+import SuppliersListPrintDocument from "@/components/documents/procurement/suppliers-list-print-document";
 import SupplierModal from "@/components/global/data-modals/supplier-modal";
 import SelectSupplierClassification from "@/components/global/selections/enum-based/select-supplier-classification";
 import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";

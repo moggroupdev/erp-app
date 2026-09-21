@@ -29,7 +29,7 @@ import RequisitionUpdateModal from "./components/requisition-update-modal";
 import RequisitionItemModal from "./components/requisition-item-modal";
 import RequisitionItemsTable from "./components/requisition-items-table";
 import PrintDocument from "@/components/ui/print-document";
-import MaterialPurchaseRequisitionPrintDocument from "@/components/documents/material-purchase-requisition-print-document";
+import MaterialPurchaseRequisitionPrintDocument from "@/components/documents/procurement/material-purchase-requisition-print-document";
 import { getRequisitionStatus, isRequisitionEditable } from "../helpers";
 
 const PAGE_TITLE = { en: "Requisition Details", ar: "تفاصيل طلب الشراء" };

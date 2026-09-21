@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintTable } from "./components";
+import { PrintTable } from "../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import type { Supplier } from "@/types/supplier";
 import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";

@@ -5,7 +5,7 @@ import { type FlattenedBomRow } from "@/lib/helpers/bom-display";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail } from "./components";
+import { PrintDetail } from "../components";
 
 export type BomZeroPriceDepartmentGroup = {
   departmentId: string;

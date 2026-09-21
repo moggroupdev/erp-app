@@ -35,7 +35,7 @@ import {
   type SupplierMaterialsSort,
   type SupplierOrdersSort,
 } from "./components/sort";
-import PurchasingMaterialsSupplierStatsPrintDocument from "@/components/documents/purchasing-materials-supplier-stats-print-document";
+import PurchasingMaterialsSupplierStatsPrintDocument from "@/components/documents/purchasing-materials/purchasing-materials-supplier-stats-print-document";
 
 const PAGE_TITLE = { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" };
 

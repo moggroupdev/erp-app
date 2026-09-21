@@ -24,7 +24,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading } from "./components";
+import { PrintDetail, PrintSectionHeading } from "../components";
 
 const ZERO_VALUE_CLASS = "text-orange-500";
 

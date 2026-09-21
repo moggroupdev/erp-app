@@ -29,7 +29,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import PrintDocument from "@/components/ui/print-document";
-import MaterialPurchaseOrderPrintDocument from "@/components/documents/material-purchase-order-print-document";
+import MaterialPurchaseOrderPrintDocument from "@/components/documents/procurement/material-purchase-order-print-document";
 import OrderDetails from "./components/order-details";
 import ItemRequisitionAllocationsModal from "./components/item-requisition-allocations-modal";
 import OrderInvoicesSection from "@/components/global/sections/order-invoices";

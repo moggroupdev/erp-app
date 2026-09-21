@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/helpers/date-formaters";
 import { Button, Checkbox, SegmentedControl } from "@mantine/core";
 import Modal from "@/components/ui/modal";
 import PrintDocument from "@/components/ui/print-document";
-import MaterialsListPrintDocument from "@/components/documents/materials-list-print-document";
+import MaterialsListPrintDocument from "@/components/documents/materials/materials-list-print-document";
 import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
 
 type PrintScope = "all" | "category";
