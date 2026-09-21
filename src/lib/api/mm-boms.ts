@@ -41,6 +41,10 @@ const mmBomsApi = {
   }) {
     return await privateRequest<MmBomItem>({ method: "PATCH", url: `mm-boms/${itemId}`, data: dto });
   },
+
+  async deleteItem({ privateRequest, itemId }: { privateRequest: PrivateRequest; itemId: string }) {
+    return await privateRequest<MmBomItem>({ method: "DELETE", url: `mm-boms/${itemId}` });
+  },
 };
 
 export default mmBomsApi;

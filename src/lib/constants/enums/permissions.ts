@@ -47,6 +47,7 @@ export const PERMISSION_VALUES = [
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
   "update_manufactured_material_bom",
+  "delete_manufactured_material_bom",
   "read_inquiries",
   "read_previews",
   "read_offers",
@@ -474,6 +475,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث قائمة مواد مادة مصنعة",
     },
   },
+  delete_manufactured_material_bom: {
+    value: "delete_manufactured_material_bom",
+    label: {
+      en: "Delete Manufactured Material BOM",
+      ar: "حذف بند قائمة مواد مادة مصنعة",
+    },
+  },
 
   read_inventory_transactions: {
     value: "read_inventory_transactions",
@@ -818,6 +826,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",
       "update_manufactured_material_bom",
+      "delete_manufactured_material_bom",
       "read_inventory_transactions",
       "add_inventory_transaction",
       "add_legacy_issue_permit",
