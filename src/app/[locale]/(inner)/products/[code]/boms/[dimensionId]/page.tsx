@@ -49,7 +49,7 @@ import {
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
+import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
 import {
   Calculator,
   ChevronDown,
@@ -701,18 +701,37 @@ export default function Page() {
                                         </div>
                                       </Table.Td>
                                       <Table.Td>
-                                        <div className="flex min-w-0 flex-col gap-0.5">
+                                        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                                           <Link
                                             href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                            className="block truncate font-medium text-gray-800 hover:underline"
+                                            className="truncate font-medium text-gray-800 hover:underline"
                                           >
                                             {item.material.title}
                                           </Link>
                                           {item.sourceBomItem?.mmSourcingType &&
                                             isPurchasedMmSourcing(item.sourceBomItem.mmSourcingType) && (
-                                              <Badge size="xs" variant="light" color="gray" radius="sm" className="w-fit">
-                                                {getMmSourcingTypeLabel(item.sourceBomItem.mmSourcingType, locale)}
-                                              </Badge>
+                                              <Tooltip
+                                                withArrow
+                                                multiline
+                                                maw={280}
+                                                label={translate(
+                                                  "Raw material costs for this item are not included in this BOM; only this material’s price is counted, like any other material.",
+                                                  "لا تُحتسب تكاليف المواد الأولية لهذا الصنف في هذه القائمة؛ يُحتسب سعر هذه المادة فقط كأي مادة أخرى.",
+                                                )}
+                                              >
+                                                <Badge
+                                                  size="xs"
+                                                  variant="light"
+                                                  color="gray"
+                                                  radius="sm"
+                                                  className="shrink-0 cursor-help"
+                                                >
+                                                  {translate(
+                                                    "Purchased Manufactured Material",
+                                                    "مادة مصنّعة مشتراة",
+                                                  )}
+                                                </Badge>
+                                              </Tooltip>
                                             )}
                                         </div>
                                       </Table.Td>
