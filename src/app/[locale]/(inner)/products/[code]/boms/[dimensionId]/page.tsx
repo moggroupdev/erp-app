@@ -77,6 +77,7 @@ import BomItemModal from "@/components/global/data-modals/bom-item-modal";
 import BomPrintDocument from "@/components/documents/bom/bom-print-document";
 import BomNoCostPrintDocument from "@/components/documents/bom/bom-no-cost-print-document";
 import BomZeroPricePrintDocument from "@/components/documents/bom/bom-zero-price-print-document";
+import BomAllCostingPrintDocument from "@/components/documents/bom/bom-all-costing-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
 import BomItemUnitPrice from "./components/bom-item-unit-price";
@@ -94,7 +95,7 @@ type DepartmentBreakdown = {
   items: FlattenedBomRow[];
 };
 
-type BomPrintVariant = "full" | "no-cost" | "zero-price";
+type BomPrintVariant = "full" | "no-cost" | "zero-price" | "all-costing";
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -512,6 +513,17 @@ export default function Page() {
                         >
                           {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
                         </Menu.Item>
+                        <Menu.Item
+                          leftSection={<Printer size={14} />}
+                          onClick={() => {
+                            void triggerPrint("all-costing");
+                          }}
+                        >
+                          {translate(
+                            "Print BOM with All Costing Methods",
+                            "طباعة قائمة المواد بكل أسس التكلفة",
+                          )}
+                        </Menu.Item>
                         {zeroPriceItemCount > 0 && (
                           <Menu.Item
                             leftSection={<Printer size={14} />}
@@ -563,7 +575,9 @@ export default function Page() {
                       ? `${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                       : printVariant === "no-cost"
                         ? `${translate("BOM without Costs", "قائمة المواد بدون تكاليف")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
-                        : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                        : printVariant === "all-costing"
+                          ? `${translate("BOM All Costing Methods", "قائمة المواد بكل أسس التكلفة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                          : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                   }
                   renderTrigger={({ onClick }) => {
                     printHandlerRef.current = onClick;
@@ -572,8 +586,8 @@ export default function Page() {
                   onBeforePrint={async () => {
                     await new Promise((resolve) => setTimeout(resolve, 0));
                   }}
-                  paperWidth={210}
-                  paperHeight={297}
+                  paperWidth={printVariant === "all-costing" ? 297 : 210}
+                  paperHeight={printVariant === "all-costing" ? 210 : 297}
                 >
                   {printVariant === "full" ? (
                     <BomPrintDocument
@@ -592,6 +606,16 @@ export default function Page() {
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
                       totalItemCount={totals.itemCount}
+                    />
+                  ) : printVariant === "all-costing" ? (
+                    <BomAllCostingPrintDocument
+                      bom={bom}
+                      departmentBreakdown={departmentBreakdown}
+                      manufacturingRows={manufacturingRows}
+                      mainCategoryTitle={productMainCategory?.title || null}
+                      totalManufacturingCost={totals.totalManufacturingCost}
+                      manufacturingItemCount={totals.manufacturingItemCount}
+                      itemCount={totals.itemCount}
                     />
                   ) : (
                     <BomZeroPricePrintDocument
