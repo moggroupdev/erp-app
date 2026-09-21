@@ -2,7 +2,7 @@ import { Mail, Phone } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { PrintSectionHeading, PrintTable } from "../components";
+import { PrintSectionHeading, PrintTable } from "../../components";
 
 export type SupplierQuotationRequestItem = {
   materialTitle: string;

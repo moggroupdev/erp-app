@@ -20,7 +20,7 @@ import { ClipboardList, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import PurchasingMaterialsRequisitionFollowUpPrintDocument from "@/components/documents/purchasing-materials/purchasing-materials-requisition-follow-up-print-document";
+import PurchasingMaterialsRequisitionFollowUpPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-requisition-follow-up-print-document";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
 import DepartmentPicker from "./components/department-picker";

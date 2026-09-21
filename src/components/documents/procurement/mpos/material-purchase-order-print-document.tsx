@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintTable } from "../components";
+import { PrintDetail, PrintTable } from "../../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -14,7 +14,7 @@ const GENERAL_TERMS = [
     en: "Inspection and receipt shall be carried out as set out in this order, and items shall be accepted by the inspection committee. Receipt constitutes acceptance of delivery; however, final acceptance is subject to the technical inspection report.",
   },
   {
-    ar: "يحق للشركة زيادة الكميات أو خفضها في حدود ٢٠٪ بنفس الشروط.",
+    ar: "يحق للشركة زيادة الكميات أو خفضها في حدود 20٪ بنفس الشروط.",
     en: "The company reserves the right to increase or decrease the quantities by up to 20% under the same terms.",
   },
   {
@@ -74,15 +74,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
   const itemFooterRows = [
     [translate(`Total (${currency})`, `الإجمالي (${currency})`), "", "", "", "", formatMoney(subtotal), ""],
     [translate("VAT (14%)", "ضريبة القيمة المضافة (14%)"), "", "", "", "", formatMoney(vat), ""],
-    [
-      translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`),
-      "",
-      "",
-      "",
-      "",
-      formatMoney(grandTotal),
-      "",
-    ],
+    [translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`), "", "", "", "", formatMoney(grandTotal), ""],
   ];
 
   const isArabic = locale === "ar";
@@ -105,10 +97,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
 
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
         <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
-        <PrintDetail
-          label={translate("PO Date", "تاريخ أمر التوريد")}
-          value={formatDateAndTime(order.createdAt, locale)}
-        />
+        <PrintDetail label={translate("PO Date", "تاريخ أمر التوريد")} value={formatDateAndTime(order.createdAt, locale)} />
         <PrintDetail label={translate("Supplier", "المورد")} value={order.supplier.name} />
         {order.notes ? <PrintDetail label={translate("Notes", "الملاحظات")} value={order.notes} /> : null}
       </section>
@@ -128,12 +117,10 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
       </section>
 
       <section
-        className="break-inside-avoid flex flex-col gap-2 border-t border-gray-300 pt-3"
+        className="flex break-inside-avoid flex-col gap-2 border-t border-gray-300 pt-3"
         dir={isArabic ? "rtl" : "ltr"}
       >
-        <h2 className="text-sm font-semibold text-gray-900">
-          {translate("General Terms:", "القواعد العامة:")}
-        </h2>
+        <h2 className="text-sm font-semibold text-gray-900">{translate("General Terms:", "القواعد العامة:")}</h2>
         <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-[11px] leading-relaxed text-gray-800">
           {generalTerms.map((term, index) => (
             <li key={term} className="flex gap-2">

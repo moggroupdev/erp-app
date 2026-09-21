@@ -35,7 +35,7 @@ import {
   type SubCategoryOrdersSort,
   type SubCategorySuppliersSort,
 } from "./components/sort";
-import PurchasingMaterialsSubCategoryStatsPrintDocument from "@/components/documents/purchasing-materials/purchasing-materials-subcategory-stats-print-document";
+import PurchasingMaterialsSubCategoryStatsPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-subcategory-stats-print-document";
 
 const PAGE_TITLE = { en: "Purchasing by Subcategory", ar: "المشتريات حسب الفئة الفرعية" };
 

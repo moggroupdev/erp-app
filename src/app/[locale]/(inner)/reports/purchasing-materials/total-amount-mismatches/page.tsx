@@ -13,7 +13,7 @@ import { FileDiff, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import PurchasingMaterialsTotalAmountMismatchesPrintDocument from "@/components/documents/purchasing-materials/purchasing-materials-total-amount-mismatches-print-document";
+import PurchasingMaterialsTotalAmountMismatchesPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-total-amount-mismatches-print-document";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";

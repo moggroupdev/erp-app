@@ -39,7 +39,7 @@ import {
   type CategorySubCategoriesSort,
   type CategorySuppliersSort,
 } from "./components/sort";
-import PurchasingMaterialsCategoryStatsPrintDocument from "@/components/documents/purchasing-materials/purchasing-materials-category-stats-print-document";
+import PurchasingMaterialsCategoryStatsPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-category-stats-print-document";
 
 const PAGE_TITLE = { en: "Purchasing by Category", ar: "المشتريات حسب الفئة" };
 

@@ -11,7 +11,7 @@ import DataSelect from "@/components/ui/data-select";
 import PrintDocument from "@/components/ui/print-document";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
-import SupplierQuotationRequestPrintDocument from "@/components/documents/procurement/supplier-quotation-request-print-document";
+import SupplierQuotationRequestPrintDocument from "@/components/documents/procurement/quotations/supplier-quotation-request-print-document";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
