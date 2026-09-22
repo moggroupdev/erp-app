@@ -519,10 +519,7 @@ export default function Page() {
                             void triggerPrint("all-costing");
                           }}
                         >
-                          {translate(
-                            "Print BOM with All Costing Methods",
-                            "طباعة قائمة المواد بكل أسس التكلفة",
-                          )}
+                          {translate("Print BOM with All Costing Methods", "طباعة قائمة المواد بكل أسس التكلفة")}
                         </Menu.Item>
                         {zeroPriceItemCount > 0 && (
                           <Menu.Item
@@ -726,10 +723,7 @@ export default function Page() {
                                                   radius="sm"
                                                   className="shrink-0 cursor-help"
                                                 >
-                                                  {translate(
-                                                    "Purchased Manufactured Material",
-                                                    "مادة مصنّعة مشتراة",
-                                                  )}
+                                                  {translate("Purchased Manufactured Material", "مادة مصنّعة مشتراة")}
                                                 </Badge>
                                               </Tooltip>
                                             )}
@@ -879,8 +873,8 @@ export default function Page() {
                     label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
                     value={formatMoney(totals.totalManufacturingCost, currency)}
                     hint={translate(
-                      "Sum of quantity × last outsourcing manufacturing cost for externally manufactured materials (internal = 0)",
-                      "مجموع الكمية × آخر تكلفة تصنيع من أوامر التعهيد للمواد المصنعة خارجياً (الداخلي = 0)",
+                      "Sum of quantity × last outsourcing manufacturing cost for externally manufactured materials",
+                      "مجموع الكمية × آخر تكلفة تصنيع للمواد المصنعة خارجيًا",
                     )}
                     icon={<Wallet size={18} />}
                   />
@@ -1031,14 +1025,12 @@ function ManufacturingCostsSection({
           <Factory size={16} />
         </div>
         <div className="flex flex-col gap-1">
-          <h4 className="text-lg font-semibold text-gray-900">
-            {translate("Manufactured Materials", "المواد المصنعة")}
-          </h4>
+          <h4 className="text-lg font-semibold text-gray-900">{translate("Manufactured Materials", "المواد المصنعة")}</h4>
 
           <p className="text-xs text-gray-500">
             {translate(
-              "Internally manufactured materials have no manufacturing cost. Externally manufactured materials use the last outsourcing manufacturing cost.",
-              "المواد المصنعة داخلياً بلا تكلفة تصنيع. المواد المصنعة خارجياً تستخدم آخر تكلفة تصنيع من أوامر التعهيد.",
+              "Materials manufactured from other raw materials, either in-house or by an external manufacturer",
+              "المواد التي يتم تصنيعها من مواد أولية أخرى، سواء داخل الشركة أو لدى مُصنّع خارجي",
             )}
           </p>
         </div>

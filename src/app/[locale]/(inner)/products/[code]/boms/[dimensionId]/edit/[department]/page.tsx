@@ -91,10 +91,7 @@ export default function Page() {
       <LayoutBox header={{ title: pageTitle, backLink: true }}>
         <ErrorSection
           errorTitle={translate("Invalid production department", "قسم الانتاج غير صالح")}
-          errorMessage={translate(
-            "The selected production department is not valid.",
-            "قسم الانتاج المحدد غير صالح.",
-          )}
+          errorMessage={translate("The selected production department is not valid.", "قسم الانتاج المحدد غير صالح.")}
           button={{
             text: translate("Back to BOM", "العودة إلى قائمة المواد"),
             onClick: () => router.push(getLocalizedHref(cancelHref)),
@@ -133,12 +130,7 @@ export default function Page() {
             "لا توجد بنود قائمة مواد لقسم الانتاج هذا.",
           )}
         >
-          <Button
-            variant="light"
-            color="teal"
-            radius="md"
-            onClick={() => router.push(getLocalizedHref(cancelHref))}
-          >
+          <Button variant="light" color="teal" radius="md" onClick={() => router.push(getLocalizedHref(cancelHref))}>
             {translate("Back to BOM", "العودة إلى قائمة المواد")}
           </Button>
         </EmptySection>
