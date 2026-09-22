@@ -10,12 +10,13 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
 import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
-import type { MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
+import { isPurchasedMmSourcing, type MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Button, NumberInput, Textarea } from "@mantine/core";
+import { Alert, Button, NumberInput, Textarea } from "@mantine/core";
+import { Info } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
@@ -236,14 +237,27 @@ export default function BomItemModal({
         />
 
         {isMmMaterial && (
-          <SelectMmSourcingType
-            value={mmSourcingType}
-            setValue={setMmSourcingType}
-            label={translate("Manufacturing Source", "مصدر التصنيع")}
-            placeholder={translate("Select source", "اختر المصدر")}
-            required
-            clearable={false}
-          />
+          <>
+            <SelectMmSourcingType
+              value={mmSourcingType}
+              setValue={setMmSourcingType}
+              label={translate("Manufacturing Source", "مصدر التصنيع")}
+              placeholder={translate("Select source", "اختر المصدر")}
+              required
+              clearable={false}
+            />
+
+            {isPurchasedMmSourcing(mmSourcingType as MmSourcingType | null) && (
+              <Alert color="blue" variant="light" radius="md" icon={<Info size={16} />}>
+                <p className="text-sm leading-relaxed">
+                  {translate(
+                    "This manufactured material will be treated like a normal material in this BOM. Its recipe components will not be expanded, and raw-material costs from its bill of materials will not be included — only this material’s own unit price is counted.",
+                    "ستُعامل هذه المادة المصنّعة كأي مادة عادية في قائمة المواد هذه. لن يتم تفكيك مكوّنات وصفتها، ولن تُحتسب تكاليف المواد الأولية من قائمة موادها؛ يُحتسب سعر وحدتها فقط.",
+                  )}
+                </p>
+              </Alert>
+            )}
+          </>
         )}
 
         <SelectProductionSubDepartment
