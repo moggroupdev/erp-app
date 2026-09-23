@@ -117,10 +117,7 @@ export const MATERIAL_PURCHASING_REPORT_PERMISSIONS = [
 ] as const;
 
 /** All report permissions — /reports index visible if user has any. */
-export const ALL_REPORT_PERMISSIONS = [
-  ...MATERIAL_REPORT_PERMISSIONS,
-  ...MATERIAL_PURCHASING_REPORT_PERMISSIONS,
-] as const;
+export const ALL_REPORT_PERMISSIONS = [...MATERIAL_REPORT_PERMISSIONS, ...MATERIAL_PURCHASING_REPORT_PERMISSIONS] as const;
 
 // ================ Labels ================
 
@@ -734,7 +731,7 @@ export function isValidPermission(permission: string): permission is Permission 
 // ================ Domains ================
 
 export type PermissionDomain =
-  | "organization"
+  | "general"
   | "sales"
   | "engineering"
   | "production"
@@ -754,8 +751,8 @@ export type PermissionDomainGroup = {
 /** Permission groups aligned with sidebar domains. */
 export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
-    domain: "organization",
-    label: { en: "Organization", ar: "المؤسسة" },
+    domain: "general",
+    label: { en: "General", ar: "عام" },
     permissions: [
       "add_user",
       "read_users",
@@ -806,11 +803,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "production",
     label: { en: "Production", ar: "الإنتاج" },
-    permissions: [
-      "read_production_plans",
-      "read_production_department_managers",
-      "update_production_department_managers",
-    ],
+    permissions: ["read_production_plans", "read_production_department_managers", "update_production_department_managers"],
   },
   {
     domain: "warehouse",
