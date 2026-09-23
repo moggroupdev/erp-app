@@ -73,6 +73,11 @@ export function toDisplayUnitPrice(baseUnitPrice: number, factor: number): numbe
   return Number(baseUnitPrice) * factor;
 }
 
+/** Convert a price entered in an alternate unit back to the material's base-unit price. */
+export function toBaseUnitPrice(enteredUnitPrice: number, factor: number): number {
+  return factor === 0 ? Number(enteredUnitPrice) : Number(enteredUnitPrice) / factor;
+}
+
 /**
  * Resolve which unit/factor to show for a material given a preferred table-level unit.
  * Falls back to the material's base unit when the preferred unit cannot be converted.

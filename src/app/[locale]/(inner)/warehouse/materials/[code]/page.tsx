@@ -141,6 +141,8 @@ export default function Page() {
               close={closeMarketPriceModal}
               materialCode={code}
               currentValue={material.marketUnitPrice}
+              baseUnit={material.unitOfMeasurement}
+              unitConversions={material.unitConversions}
             />
 
             <MaterialTypeModal opened={typeModalOpened} close={closeTypeModal} material={material} />
