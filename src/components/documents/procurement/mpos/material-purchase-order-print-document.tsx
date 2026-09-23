@@ -10,16 +10,36 @@ const VAT_RATE = 0.14;
 
 const GENERAL_TERMS = [
   {
-    ar: "يتم الفحص والاستلام كما هو موضح بهذا الأمر، على أن يتم قبول الأصناف من لجنة الفحص. يُعتبر الاستلام قبولاً بالتوريد، غير أن القبول النهائي يتم طبقاً لمحضر الفحص الفني.",
-    en: "Inspection and receipt shall be carried out as set out in this order, and items shall be accepted by the inspection committee. Receipt constitutes acceptance of delivery; however, final acceptance is subject to the technical inspection report.",
+    ar: "شروط الدفع: كالسابق.",
+    en: "Payment terms: as previously agreed.",
   },
   {
-    ar: "يحق للشركة زيادة الكميات أو خفضها في حدود 20٪ بنفس الشروط.",
-    en: "The company reserves the right to increase or decrease the quantities by up to 20% under the same terms.",
+    ar: "مكان التسليم: مصانعنا بالعاشر من رمضان.",
+    en: "Delivery location: our factories in 10th of Ramadan.",
   },
   {
-    ar: "قبول الأصناف الموضحة بأمر التوريد عند ورودها لا يُعفي المورد من مسؤولية التوريدات غير المطابقة.",
-    en: "Acceptance of the items listed in this purchase order upon arrival does not relieve the supplier of liability for non-conforming deliveries.",
+    ar: "التوريد يخضع لقواعد وأحكام قانون الضريبة على الأرباح التجارية والصناعية وضريبة القيمة المضافة.",
+    en: "Supply is subject to the rules and provisions of the tax on commercial and industrial profits and value-added tax.",
+  },
+  {
+    ar: "يتم تقديم فاتورة موضح بها أرقام أمر التوريد والبيانات الضريبية.",
+    en: "An invoice must be submitted showing the purchase order numbers and the tax details.",
+  },
+  {
+    ar: "يتم توقيع غرامات تأخير بواقع 1% عن كل يوم تأخير بحد أقصى 10%.",
+    en: "Delay penalties of 1% per day of delay shall apply, up to a maximum of 10%.",
+  },
+  {
+    ar: "للشركة الحق في رفض الأصناف المخالفة للمواصفات وشروط التوريد.",
+    en: "The company reserves the right to reject items that do not conform to the specifications and supply terms.",
+  },
+  {
+    ar: "لا يتم إجراء أي تعديل على أمر التوريد إلا بناء على خطاب معتمد.",
+    en: "No amendment to the purchase order shall be made except pursuant to an approved letter.",
+  },
+  {
+    ar: "الشروط الخاصة الأخرى طبقاً للمرفق الذي يعتبر جزءاً من أمر التوريد.",
+    en: "Other special terms shall be in accordance with the attachment, which forms part of the purchase order.",
   },
 ] as const;
 
