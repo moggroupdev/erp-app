@@ -87,6 +87,7 @@ export const queryKeys = {
     all: ["boms"] as const,
     details: () => [...queryKeys.boms.all, "detail"] as const,
     detail: (dimensionId: string) => [...queryKeys.boms.details(), dimensionId] as const,
+    usages: (materialCode: string) => [...queryKeys.boms.all, "usages", materialCode] as const,
   },
   inventoryTransactions: {
     all: ["inventory-transactions"] as const,

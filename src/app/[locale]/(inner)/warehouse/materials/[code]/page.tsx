@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -25,6 +25,7 @@ import MaterialMarketPriceModal from "./components/material-market-price-modal";
 import MaterialTypeModal from "./components/material-type-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
+import MaterialBomUsagesSection from "./components/material-bom-usages-section";
 import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
 import MaterialQuickLinks from "./components/material-quick-links";
 
@@ -34,7 +35,9 @@ export default function Page() {
   const { locale, translate } = useI18n();
   const { code } = useParams<{ code: string }>();
   const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
   const canReadBom = useHasPermission(PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS);
+  const canReadProductBoms = useHasPermission(PERMISSIONS.READ_PRODUCT_BOMS);
   const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
   const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
@@ -59,12 +62,15 @@ export default function Page() {
   const loading = materialQuery.isFetching || (shouldLoadBom && bomQuery.isFetching);
   const queryError = materialQuery.error || (shouldLoadBom ? bomQuery.error : null);
   const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
+  // Keep existing content mounted during refetch so nested usage queries are not unmounted mid-invalidate (which would refetch twice).
+  const showPageLoader = loading && !material;
 
   useDocumentTitle(`${material?.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Materials", "المواد")}`);
 
   function handleRetry() {
     materialQuery.refetch();
     if (shouldLoadBom) bomQuery.refetch();
+    if (canReadProductBoms) queryClient.invalidateQueries({ queryKey: queryKeys.boms.usages(code) });
   }
 
   // ========================= MODALS =========================
@@ -111,7 +117,7 @@ export default function Page() {
         ),
       }}
     >
-      {loading ? (
+      {showPageLoader ? (
         <LoadingSection message={translate("Loading material data", "جاري تحميل ملف المادة")} />
       ) : errorMessage ? (
         <ErrorSection
@@ -146,6 +152,8 @@ export default function Page() {
             {isManufacturedMaterial(material.materialType) && (
               <MaterialBomSection material={material} bom={bomQuery.data || null} />
             )}
+
+            <MaterialBomUsagesSection material={material} />
 
             <MaterialQuickLinks materialCode={code} />
           </>

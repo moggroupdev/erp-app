@@ -87,6 +87,26 @@ export type Bom = {
   standardBoms: BomItemWithMaterial[];
 };
 
+/** Product BOM line where this material is used as a component. */
+export type BomMaterialUsage = {
+  id: string;
+  quantityRequired: number;
+  unitOfMeasurementSelected: MaterialUnit | null;
+  productionSubDepartment: ProductionSubDepartment | null;
+  notes: string | null;
+  dimension: {
+    id: string;
+    length: number | null;
+    depth: number | null;
+    diameter: number | null;
+    height: number;
+  };
+  product: {
+    code: string;
+    title: string;
+  };
+};
+
 // ==================== DTOs ====================
 
 export type CreateBomItemDto = {
