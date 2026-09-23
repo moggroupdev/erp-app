@@ -104,21 +104,25 @@ export default function MaterialTypeModal({
       return setValidationError(translate("Please select a material type.", "يرجى اختيار نوع المادة."));
     }
     if (targetType === material.materialType) {
-      return setValidationError(
-        translate("Please select a different material type.", "يرجى اختيار نوع مادة مختلف."),
-      );
+      return setValidationError(translate("Please select a different material type.", "يرجى اختيار نوع مادة مختلف."));
     }
     if (impact?.blocked) {
       return setValidationError(impact.blockReason || translate("This change is not allowed.", "هذا التغيير غير مسموح."));
     }
     if (enteringManufactured && !defaultMmSourcingType) {
       return setValidationError(
-        translate("Please select the default manufacturing source for BOMs.", "يرجى اختيار مصدر التصنيع الافتراضي لقوائم المواد."),
+        translate(
+          "Please select the default manufacturing source for BOMs.",
+          "يرجى اختيار مصدر التصنيع الافتراضي لقوائم المواد.",
+        ),
       );
     }
     if (needsConfirmation && !confirmed) {
       return setValidationError(
-        translate("Please confirm that you understand the impact on product BOMs.", "يرجى تأكيد فهمك لتأثير التغيير على قوائم مواد المنتجات."),
+        translate(
+          "Please confirm that you understand the impact on product BOMs.",
+          "يرجى تأكيد فهمك لتأثير التغيير على قوائم مواد المنتجات.",
+        ),
       );
     }
 
@@ -186,7 +190,7 @@ export default function MaterialTypeModal({
               <Alert color="blue" icon={<Info size={16} />} radius="md">
                 {translate(
                   `Applies to ${impact.affectedBomLines.length} existing product BOM line(s).`,
-                  `ينطبق على ${impact.affectedBomLines.length} بند(بنود) قائمة مواد منتجات موجودة.`,
+                  `ينطبق على ${impact.affectedBomLines.length} بند قائمة مواد منتجات موجودة.`,
                 )}
               </Alert>
             )}
