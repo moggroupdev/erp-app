@@ -33,7 +33,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
 
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-haze-50 text-haze-600">
             <Ruler size={16} />
           </div>
           <div className="flex flex-col gap-1">
@@ -49,7 +49,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
 
         {units.length > 0 && (
           <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
-            <Button onClick={openModal} variant="light" color="indigo" radius="md" leftSection={<Plus size={15} />}>
+            <Button onClick={openModal} variant="light" color="haze" radius="md" leftSection={<Plus size={15} />}>
               {translate("Add Unit", "إضافة وحدة")}
             </Button>
           </PermissionGuard>
@@ -59,7 +59,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
       {units.length === 0 ? (
         <EmptySection message={translate("No alternate units defined yet.", "لا توجد وحدات قياس بديلة بعد.")}>
           <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
-            <Button onClick={openModal} variant="light" color="indigo" radius="md" leftSection={<Plus size={15} />}>
+            <Button onClick={openModal} variant="light" color="haze" radius="md" leftSection={<Plus size={15} />}>
               {translate("Add Unit", "إضافة وحدة")}
             </Button>
           </PermissionGuard>
@@ -92,7 +92,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
                 return (
                   <Table.Tr key={row.id} className="text-gray-600">
                     <Table.Td>
-                      <Badge size="sm" variant="light" color="indigo" radius="md">
+                      <Badge size="sm" variant="light" color="haze" radius="md">
                         {altLabel}
                       </Badge>
                     </Table.Td>
