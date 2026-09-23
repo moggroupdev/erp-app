@@ -108,7 +108,7 @@ export default function Page() {
                 component={Link}
                 href={getLocalizedHref("/organization/roles/new")}
                 variant="light"
-                color="teal"
+                color="haze"
                 radius="md"
                 leftSection={<Plus size={15} />}
               >

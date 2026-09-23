@@ -57,8 +57,8 @@ export default function Page() {
                   component={Link}
                   href={getLocalizedHref(`/organization/roles/${id}/edit`)}
                   variant="light"
+                  color="haze"
                   radius="md"
-                  leftSection={<Pencil size={15} />}
                 >
                   {translate("Edit", "تعديل")}
                 </Button>

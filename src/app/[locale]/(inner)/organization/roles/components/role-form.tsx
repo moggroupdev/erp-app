@@ -191,7 +191,7 @@ export default function RoleForm({
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <section className="flex flex-col gap-4 rounded-3xl bg-white p-5 md:p-6">
               <header className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-white text-blue-600">
+                <div className="border-haze-100 text-haze-600 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border bg-white">
                   <Shield size={20} />
                 </div>
                 <div>
@@ -280,7 +280,7 @@ export default function RoleForm({
               />
 
               {isSalesDepartment && (
-                <div className="rounded-xl border border-teal-100 bg-teal-50/50 p-4">
+                <div className="rounded-xl bg-teal-50/50 p-4">
                   <NumberInput
                     value={maxDiscountPct}
                     onChange={setMaxDiscountPct}
@@ -313,7 +313,7 @@ export default function RoleForm({
           <section className="flex flex-col gap-4 rounded-3xl bg-white p-5 md:p-6">
             <header className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-white text-indigo-600">
+                <div className="border-haze-100 text-haze-600 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border bg-white">
                   <KeyRound size={20} />
                 </div>
                 <div>
@@ -351,7 +351,7 @@ export default function RoleForm({
                           <span
                             className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
                               allDomainSelected
-                                ? "bg-indigo-100 text-indigo-700"
+                                ? "bg-haze-100 text-haze-700"
                                 : selectedInDomain > 0
                                   ? "bg-amber-100 text-amber-800"
                                   : "bg-gray-100 text-gray-500"
@@ -364,7 +364,7 @@ export default function RoleForm({
                         <Button
                           type="button"
                           variant="light"
-                          color={allDomainSelected ? "red" : "indigo"}
+                          color={allDomainSelected ? "red" : "haze"}
                           radius="xl"
                           size="xs"
                           leftSection={allDomainSelected ? <X size={13} /> : <Check size={13} />}
@@ -423,6 +423,7 @@ export default function RoleForm({
             </Button>
             <Button
               type="submit"
+              color="haze"
               loading={!isEdit && mutation.isPending}
               disabled={isEdit && (!name.trim() || !departmentId || !homeUrl.trim() || !isDirty)}
               radius="md"
@@ -435,9 +436,9 @@ export default function RoleForm({
 
       <Modal opened={confirmOpened} onClose={closeConfirm} title={translate("Confirm role update", "تأكيد تحديث الدور")}>
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50 p-3 text-amber-900">
+          <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-4 text-amber-900">
             <TriangleAlert size={18} className="mt-0.5 shrink-0" />
-            <p className="text-sm">
+            <p className="text-sm leading-relaxed">
               {translate(
                 "All users assigned to this role will be affected immediately by these changes. Continue?",
                 "سيتأثر جميع المستخدمين المعيّنين لهذا الدور فورًا بهذه التغييرات. هل تريد المتابعة؟",
@@ -449,7 +450,7 @@ export default function RoleForm({
             <Button variant="light" color="dark" radius="md" onClick={closeConfirm} disabled={mutation.isPending} fullWidth>
               {translation.cancel}
             </Button>
-            <Button radius="md" loading={mutation.isPending} onClick={handleConfirmSave} fullWidth>
+            <Button color="haze" radius="md" loading={mutation.isPending} onClick={handleConfirmSave} fullWidth>
               {translate("Confirm & Save", "تأكيد وحفظ")}
             </Button>
           </div>

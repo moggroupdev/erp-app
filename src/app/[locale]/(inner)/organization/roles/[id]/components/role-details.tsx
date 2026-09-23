@@ -74,7 +74,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
       key: translate("Home Page", "الصفحة الرئيسية"),
       value: role.homeUrl ? (
         <span className="inline-flex items-center gap-1.5 font-mono">
-          <Home size={14} className="text-blue-600" />
+          <Home size={14} className="text-haze-600" />
           {role.homeUrl}
         </span>
       ) : (
@@ -97,7 +97,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
 
       <header className="flex flex-col gap-4 rounded-2xl bg-slate-50 p-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-white text-blue-600">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-haze-100 bg-white text-haze-600">
             <Shield size={28} />
           </div>
           <div className="flex flex-col gap-1">
@@ -106,7 +106,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
           </div>
         </div>
 
-        <Badge size="lg" variant="light" color="blue" radius="md" leftSection={<KeyRound size={14} />}>
+        <Badge size="lg" variant="light" color="haze" radius="md" leftSection={<KeyRound size={14} />}>
           {translate(`${permissions.length} Permissions`, `${permissions.length} صلاحيات`)}
         </Badge>
       </header>
@@ -118,7 +118,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
       <section className="mt-4 flex flex-col gap-4">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-white text-indigo-600">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-haze-100 bg-white text-haze-600">
               <KeyRound size={20} />
             </div>
             <div>
@@ -132,7 +132,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
             </div>
           </div>
 
-          <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
+          <span className="rounded-full bg-haze-50 px-2.5 py-1 text-xs font-medium text-haze-700">
             {translate(`${permissions.length} selected`, `${permissions.length} محددة`)}
           </span>
         </header>
@@ -155,14 +155,14 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
               <div key={group.domain} className="flex flex-col gap-3 rounded-2xl bg-slate-50/75 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-gray-200 pb-2">
                   <h5 className="text-sm font-semibold text-gray-800">{translate(group.label.en, group.label.ar)}</h5>
-                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                  <span className="rounded-full bg-haze-100 px-2 py-0.5 text-[11px] font-medium text-haze-700">
                     {group.permissions.length}
                   </span>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
                   {group.permissions.map((permission) => (
-                    <Badge key={permission} variant="light" color="indigo" radius="md" className="normal-case">
+                    <Badge key={permission} variant="light" color="haze" radius="md" className="normal-case">
                       {getPermissionLabel(permission, locale)}
                     </Badge>
                   ))}
