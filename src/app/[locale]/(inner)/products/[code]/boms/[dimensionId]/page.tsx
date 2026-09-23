@@ -49,7 +49,7 @@ import {
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput } from "@mantine/core";
+import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
 import {
   Calculator,
   ChevronDown,
@@ -74,9 +74,10 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import EntityDetails, { EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 import BomItemModal from "@/components/global/data-modals/bom-item-modal";
-import BomPrintDocument from "@/components/documents/bom-print-document";
-import BomNoCostPrintDocument from "@/components/documents/bom-no-cost-print-document";
-import BomZeroPricePrintDocument from "@/components/documents/bom-zero-price-print-document";
+import BomPrintDocument from "@/components/documents/bom/bom-print-document";
+import BomNoCostPrintDocument from "@/components/documents/bom/bom-no-cost-print-document";
+import BomZeroPricePrintDocument from "@/components/documents/bom/bom-zero-price-print-document";
+import BomAllCostingPrintDocument from "@/components/documents/bom/bom-all-costing-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import CopyButton from "@/components/ui/copy-button";
 import BomItemUnitPrice from "./components/bom-item-unit-price";
@@ -94,7 +95,7 @@ type DepartmentBreakdown = {
   items: FlattenedBomRow[];
 };
 
-type BomPrintVariant = "full" | "no-cost" | "zero-price";
+type BomPrintVariant = "full" | "no-cost" | "zero-price" | "all-costing";
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -512,6 +513,14 @@ export default function Page() {
                         >
                           {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
                         </Menu.Item>
+                        <Menu.Item
+                          leftSection={<Printer size={14} />}
+                          onClick={() => {
+                            void triggerPrint("all-costing");
+                          }}
+                        >
+                          {translate("Print BOM with All Costing Methods", "طباعة قائمة المواد بكل أسس التكلفة")}
+                        </Menu.Item>
                         {zeroPriceItemCount > 0 && (
                           <Menu.Item
                             leftSection={<Printer size={14} />}
@@ -563,7 +572,9 @@ export default function Page() {
                       ? `${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                       : printVariant === "no-cost"
                         ? `${translate("BOM without Costs", "قائمة المواد بدون تكاليف")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
-                        : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                        : printVariant === "all-costing"
+                          ? `${translate("BOM All Costing Methods", "قائمة المواد بكل أسس التكلفة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                          : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                   }
                   renderTrigger={({ onClick }) => {
                     printHandlerRef.current = onClick;
@@ -572,8 +583,8 @@ export default function Page() {
                   onBeforePrint={async () => {
                     await new Promise((resolve) => setTimeout(resolve, 0));
                   }}
-                  paperWidth={210}
-                  paperHeight={297}
+                  paperWidth={printVariant === "all-costing" ? 297 : 210}
+                  paperHeight={printVariant === "all-costing" ? 210 : 297}
                 >
                   {printVariant === "full" ? (
                     <BomPrintDocument
@@ -592,6 +603,16 @@ export default function Page() {
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
                       totalItemCount={totals.itemCount}
+                    />
+                  ) : printVariant === "all-costing" ? (
+                    <BomAllCostingPrintDocument
+                      bom={bom}
+                      departmentBreakdown={departmentBreakdown}
+                      manufacturingRows={manufacturingRows}
+                      mainCategoryTitle={productMainCategory?.title || null}
+                      totalManufacturingCost={totals.totalManufacturingCost}
+                      manufacturingItemCount={totals.manufacturingItemCount}
+                      itemCount={totals.itemCount}
                     />
                   ) : (
                     <BomZeroPricePrintDocument
@@ -677,18 +698,34 @@ export default function Page() {
                                         </div>
                                       </Table.Td>
                                       <Table.Td>
-                                        <div className="flex min-w-0 flex-col gap-0.5">
+                                        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                                           <Link
                                             href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
-                                            className="block truncate font-medium text-gray-800 hover:underline"
+                                            className="truncate font-medium text-gray-800 hover:underline"
                                           >
                                             {item.material.title}
                                           </Link>
                                           {item.sourceBomItem?.mmSourcingType &&
                                             isPurchasedMmSourcing(item.sourceBomItem.mmSourcingType) && (
-                                              <Badge size="xs" variant="light" color="gray" radius="sm" className="w-fit">
-                                                {getMmSourcingTypeLabel(item.sourceBomItem.mmSourcingType, locale)}
-                                              </Badge>
+                                              <Tooltip
+                                                withArrow
+                                                multiline
+                                                maw={280}
+                                                label={translate(
+                                                  "Raw material costs for this item are not included in this BOM; only this material’s price is counted, like any other material.",
+                                                  "لا تُحتسب تكاليف المواد الأولية لهذا الصنف في هذه القائمة؛ يُحتسب سعر هذه المادة فقط كأي مادة أخرى.",
+                                                )}
+                                              >
+                                                <Badge
+                                                  size="xs"
+                                                  variant="light"
+                                                  color="gray"
+                                                  radius="sm"
+                                                  className="shrink-0 cursor-help"
+                                                >
+                                                  {translate("Purchased Manufactured Material", "مادة مصنّعة مشتراة")}
+                                                </Badge>
+                                              </Tooltip>
                                             )}
                                         </div>
                                       </Table.Td>
@@ -836,8 +873,8 @@ export default function Page() {
                     label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
                     value={formatMoney(totals.totalManufacturingCost, currency)}
                     hint={translate(
-                      "Sum of quantity × last outsourcing manufacturing cost for externally manufactured materials (internal = 0)",
-                      "مجموع الكمية × آخر تكلفة تصنيع من أوامر التعهيد للمواد المصنعة خارجياً (الداخلي = 0)",
+                      "Sum of quantity × last outsourcing manufacturing cost for externally manufactured materials",
+                      "مجموع الكمية × آخر تكلفة تصنيع للمواد المصنعة خارجيًا",
                     )}
                     icon={<Wallet size={18} />}
                   />
@@ -988,14 +1025,12 @@ function ManufacturingCostsSection({
           <Factory size={16} />
         </div>
         <div className="flex flex-col gap-1">
-          <h4 className="text-lg font-semibold text-gray-900">
-            {translate("Manufactured Materials", "المواد المصنعة")}
-          </h4>
+          <h4 className="text-lg font-semibold text-gray-900">{translate("Manufactured Materials", "المواد المصنعة")}</h4>
 
           <p className="text-xs text-gray-500">
             {translate(
-              "Internally manufactured materials have no manufacturing cost. Externally manufactured materials use the last outsourcing manufacturing cost.",
-              "المواد المصنعة داخلياً بلا تكلفة تصنيع. المواد المصنعة خارجياً تستخدم آخر تكلفة تصنيع من أوامر التعهيد.",
+              "Materials manufactured from other raw materials, either in-house or by an external manufacturer",
+              "المواد التي يتم تصنيعها من مواد أولية أخرى، سواء داخل الشركة أو لدى مُصنّع خارجي",
             )}
           </p>
         </div>

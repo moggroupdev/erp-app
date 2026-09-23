@@ -63,7 +63,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
       key: translate("Department", "القسم"),
       value: departmentName ? (
         <span className="inline-flex items-center gap-1.5">
-          <Building2 size={14} className="text-violet-600" />
+          <Building2 size={14} className="text-haze-600" />
           {departmentName}
         </span>
       ) : (
@@ -74,7 +74,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
       key: translate("Home Page", "الصفحة الرئيسية"),
       value: role.homeUrl ? (
         <span className="inline-flex items-center gap-1.5 font-mono">
-          <Home size={14} className="text-blue-600" />
+          <Home size={14} className="text-haze-600" />
           {role.homeUrl}
         </span>
       ) : (
@@ -97,7 +97,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
 
       <header className="flex flex-col gap-4 rounded-2xl bg-slate-50 p-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-white text-blue-600">
+          <div className="border-haze-100 text-haze-600 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-white">
             <Shield size={28} />
           </div>
           <div className="flex flex-col gap-1">
@@ -106,7 +106,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
           </div>
         </div>
 
-        <Badge size="lg" variant="light" color="blue" radius="md" leftSection={<KeyRound size={14} />}>
+        <Badge size="lg" variant="light" color="haze" radius="md" leftSection={<KeyRound size={14} />}>
           {translate(`${permissions.length} Permissions`, `${permissions.length} صلاحيات`)}
         </Badge>
       </header>
@@ -115,54 +115,44 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
 
       <DetailsTable rows={rows} />
 
-      <section className="mt-4 flex flex-col gap-4">
-        <header className="flex flex-wrap items-start justify-between gap-3">
+      <section className="mt-4 flex flex-col gap-4 bg-white">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-white text-indigo-600">
-              <KeyRound size={20} />
+            <div className="border-haze-100 bg-haze-50 text-haze-600 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
+              <KeyRound size={18} />
             </div>
             <div>
               <h4 className="text-base font-semibold text-gray-900">{translate("Permissions", "الصلاحيات")}</h4>
               <p className="mt-0.5 text-sm text-gray-500">
-                {translate(
-                  "Access rights granted to users with this role, grouped by domain.",
-                  "صلاحيات الوصول الممنوحة للمستخدمين بهذا الدور، مجمّعة حسب المجال.",
-                )}
+                {translate("Access rights for this role, grouped by domain.", "صلاحيات هذا الدور، مجمّعة حسب المجال.")}
               </p>
             </div>
           </div>
-
-          <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
+          <span className="bg-haze-50 text-haze-700 rounded-full px-2.5 py-1 text-xs font-medium">
             {translate(`${permissions.length} selected`, `${permissions.length} محددة`)}
           </span>
-        </header>
+        </div>
 
         {permissionGroups.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-slate-50/75 px-4 py-10 text-center">
-            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-400">
-              <KeyRound size={18} />
-            </div>
-            <p className="text-sm font-medium text-gray-700">
-              {translate("No permissions assigned", "لا توجد صلاحيات معيّنة")}
-            </p>
-            <p className="mt-1 text-sm text-gray-500">
-              {translate("This role currently has no access rights.", "هذا الدور لا يملك أي صلاحيات وصول حاليًا.")}
-            </p>
+          <div className="rounded-xl border border-dashed border-gray-200 bg-slate-50/50 px-4 py-8 text-center">
+            <p className="text-sm text-gray-500">{translate("No permissions assigned", "لا توجد صلاحيات معيّنة")}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             {permissionGroups.map((group) => (
-              <div key={group.domain} className="flex flex-col gap-3 rounded-2xl bg-slate-50/75 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-gray-200 pb-2">
-                  <h5 className="text-sm font-semibold text-gray-800">{translate(group.label.en, group.label.ar)}</h5>
-                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+              <div key={group.domain} className="flex flex-col gap-2.5 rounded-xl border border-gray-100 bg-slate-50/60 p-4">
+                <div className="flex items-center justify-between gap-2 border-b border-dashed border-gray-200 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-haze-600 h-4 w-1 rounded-full" aria-hidden />
+                    <h5 className="text-sm font-semibold text-gray-800">{translate(group.label.en, group.label.ar)}</h5>
+                  </div>
+                  <span className="bg-haze-100 text-haze-700 rounded-full px-2 py-0.5 text-[11px] font-medium">
                     {group.permissions.length}
                   </span>
                 </div>
-
                 <div className="flex flex-wrap gap-2">
                   {group.permissions.map((permission) => (
-                    <Badge key={permission} variant="light" color="indigo" radius="md" className="normal-case">
+                    <Badge key={permission} variant="light" color="haze" radius="md" className="normal-case">
                       {getPermissionLabel(permission, locale)}
                     </Badge>
                   ))}

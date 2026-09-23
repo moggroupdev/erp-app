@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintSectionHeading, PrintTable } from "./components";
+import { PrintSectionHeading, PrintTable } from "../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";

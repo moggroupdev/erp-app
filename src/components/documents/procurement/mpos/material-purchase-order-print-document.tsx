@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintTable } from "./components";
+import { PrintDetail, PrintTable } from "../../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -10,16 +10,36 @@ const VAT_RATE = 0.14;
 
 const GENERAL_TERMS = [
   {
-    ar: "يتم الفحص والاستلام كما هو موضح بهذا الأمر، على أن يتم قبول الأصناف من لجنة الفحص. يُعتبر الاستلام قبولاً بالتوريد، غير أن القبول النهائي يتم طبقاً لمحضر الفحص الفني.",
-    en: "Inspection and receipt shall be carried out as set out in this order, and items shall be accepted by the inspection committee. Receipt constitutes acceptance of delivery; however, final acceptance is subject to the technical inspection report.",
+    ar: "شروط الدفع: كالسابق.",
+    en: "Payment terms: as previously agreed.",
   },
   {
-    ar: "يحق للشركة زيادة الكميات أو خفضها في حدود ٢٠٪ بنفس الشروط.",
-    en: "The company reserves the right to increase or decrease the quantities by up to 20% under the same terms.",
+    ar: "مكان التسليم: مصانعنا بالعاشر من رمضان.",
+    en: "Delivery location: our factories in 10th of Ramadan.",
   },
   {
-    ar: "قبول الأصناف الموضحة بأمر التوريد عند ورودها لا يُعفي المورد من مسؤولية التوريدات غير المطابقة.",
-    en: "Acceptance of the items listed in this purchase order upon arrival does not relieve the supplier of liability for non-conforming deliveries.",
+    ar: "التوريد يخضع لقواعد وأحكام قانون الضريبة على الأرباح التجارية والصناعية وضريبة القيمة المضافة.",
+    en: "Supply is subject to the rules and provisions of the tax on commercial and industrial profits and value-added tax.",
+  },
+  {
+    ar: "يتم تقديم فاتورة موضح بها أرقام أمر التوريد والبيانات الضريبية.",
+    en: "An invoice must be submitted showing the purchase order numbers and the tax details.",
+  },
+  {
+    ar: "يتم توقيع غرامات تأخير بواقع 1% عن كل يوم تأخير بحد أقصى 10%.",
+    en: "Delay penalties of 1% per day of delay shall apply, up to a maximum of 10%.",
+  },
+  {
+    ar: "للشركة الحق في رفض الأصناف المخالفة للمواصفات وشروط التوريد.",
+    en: "The company reserves the right to reject items that do not conform to the specifications and supply terms.",
+  },
+  {
+    ar: "لا يتم إجراء أي تعديل على أمر التوريد إلا بناء على خطاب معتمد.",
+    en: "No amendment to the purchase order shall be made except pursuant to an approved letter.",
+  },
+  {
+    ar: "الشروط الخاصة الأخرى طبقاً للمرفق الذي يعتبر جزءاً من أمر التوريد.",
+    en: "Other special terms shall be in accordance with the attachment, which forms part of the purchase order.",
   },
 ] as const;
 
@@ -74,15 +94,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
   const itemFooterRows = [
     [translate(`Total (${currency})`, `الإجمالي (${currency})`), "", "", "", "", formatMoney(subtotal), ""],
     [translate("VAT (14%)", "ضريبة القيمة المضافة (14%)"), "", "", "", "", formatMoney(vat), ""],
-    [
-      translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`),
-      "",
-      "",
-      "",
-      "",
-      formatMoney(grandTotal),
-      "",
-    ],
+    [translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`), "", "", "", "", formatMoney(grandTotal), ""],
   ];
 
   const isArabic = locale === "ar";
@@ -105,10 +117,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
 
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
         <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
-        <PrintDetail
-          label={translate("PO Date", "تاريخ أمر التوريد")}
-          value={formatDateAndTime(order.createdAt, locale)}
-        />
+        <PrintDetail label={translate("PO Date", "تاريخ أمر التوريد")} value={formatDateAndTime(order.createdAt, locale)} />
         <PrintDetail label={translate("Supplier", "المورد")} value={order.supplier.name} />
         {order.notes ? <PrintDetail label={translate("Notes", "الملاحظات")} value={order.notes} /> : null}
       </section>
@@ -128,12 +137,10 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
       </section>
 
       <section
-        className="break-inside-avoid flex flex-col gap-2 border-t border-gray-300 pt-3"
+        className="flex break-inside-avoid flex-col gap-2 border-t border-gray-300 pt-3"
         dir={isArabic ? "rtl" : "ltr"}
       >
-        <h2 className="text-sm font-semibold text-gray-900">
-          {translate("General Terms:", "القواعد العامة:")}
-        </h2>
+        <h2 className="text-sm font-semibold text-gray-900">{translate("General Terms:", "القواعد العامة:")}</h2>
         <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-[11px] leading-relaxed text-gray-800">
           {generalTerms.map((term, index) => (
             <li key={term} className="flex gap-2">

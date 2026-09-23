@@ -165,7 +165,7 @@ export default function MaterialUnitConversionModal({
         )}
 
         {knownFactor != null && selectedUnitLabel && (
-          <Alert color="indigo" variant="light" radius="md" icon={<Info size={16} />}>
+          <Alert color="haze" variant="light" radius="md" icon={<Info size={16} />}>
             <div className="flex flex-col gap-2">
               <p className="text-sm">
                 {translate(
@@ -173,7 +173,7 @@ export default function MaterialUnitConversionModal({
                   `تحويل معروف: ${formatConversionLabel(knownFactor, selectedUnitLabel, baseUnitLabel)}`,
                 )}
               </p>
-              <Button type="button" size="xs" color="indigo" variant="light" radius="md" onClick={applyKnownFactor}>
+              <Button type="button" size="xs" color="haze" variant="light" radius="md" onClick={applyKnownFactor}>
                 {translate("Use this factor", "استخدام هذا المعامل")}
               </Button>
             </div>
@@ -200,7 +200,7 @@ export default function MaterialUnitConversionModal({
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
+          <Button type="submit" color="haze" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
             {translate("Add Unit", "إضافة الوحدة")}
           </Button>
         </div>

@@ -2,8 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
+import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
+import mmBomsApi from "@/lib/api/mm-boms";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { queryKeys } from "@/lib/api/query-keys";
 import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { getMaterialLineCost } from "@/lib/helpers/bom-display";
 import { COSTING_METHODS } from "@/lib/constants/enums/derived/costing-methods";
@@ -13,12 +19,13 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialWithCreator } from "@/types/material";
 import type { MmBom, MmBomItemWithMaterial } from "@/types/mm-bom";
-import { Badge, Button, Table } from "@mantine/core";
-import { Layers, Pencil, Plus } from "lucide-react";
+import { ActionIcon, Badge, Button, Menu, Table } from "@mantine/core";
+import { EllipsisVertical, Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
 import UnitToggle from "@/components/ui/unit-toggle";
 import { EmptyValue } from "@/components/ui/entity-details";
+import DeleteModal from "@/components/ui/delete-modal";
 import MmBomItemModal from "@/components/global/data-modals/mm-bom-item-modal";
 
 export default function MaterialBomSection({
@@ -30,9 +37,12 @@ export default function MaterialBomSection({
 }) {
   const { locale, translate } = useI18n();
   const { helpers: materialCategoryHelpers } = useMaterialCategories();
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<MmBomItemWithMaterial | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<MmBomItemWithMaterial | null>(null);
 
   function handleOpenAppendModal() {
     setItemToUpdate(null);
@@ -43,6 +53,17 @@ export default function MaterialBomSection({
     setItemToUpdate(item);
     openModal();
   }
+
+  const deleteMutation = useMutation({
+    mutationFn: (itemId: string) => mmBomsApi.deleteItem({ privateRequest, itemId }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.mmBoms.detail(material.code) });
+      toast.success(translate("BOM item deleted successfully.", "تم حذف بند قائمة المواد بنجاح."));
+      setItemToDelete(null);
+    },
+  });
+
+  const deleteError = deleteMutation.error ? getErrorMessage(locale, deleteMutation.error) : "";
 
   const items = bom?.manufacturedMaterialBoms ?? [];
   const hasBom = items.length > 0;
@@ -177,44 +198,74 @@ export default function MaterialBomSection({
                       defaultUnit={item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement}
                     >
                       {({ unit, factor, toggleButton }) => (
-                    <Table.Tr className="text-gray-600">
-                      <Table.Td>
-                        <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
-                      </Table.Td>
-                      <Table.Td>
-                        <span className="font-medium text-gray-800">{item.material.title}</span>
-                      </Table.Td>
-                      <Table.Td>{mainCategory?.title || <EmptyValue />}</Table.Td>
-                      <Table.Td>{subCategory?.title || <EmptyValue />}</Table.Td>
-                      <Table.Td>
-                        <div className="flex items-center gap-1">
-                          <Badge size="sm" variant="light" color="gray" radius="md">
-                            {getMaterialUnitLabel(unit, locale)}
-                          </Badge>
-                          {toggleButton}
-                        </div>
-                      </Table.Td>
-                      <Table.Td className="font-medium text-gray-800">
-                        {formatEnteredQuantityForDisplay(item.quantityRequired, enteredUnit, unit, item.material)}
-                      </Table.Td>
-                      <Table.Td>{formatMoney(toDisplayUnitPrice(item.material.unitPrice, factor))}</Table.Td>
-                      <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
-                      <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
-                      <Table.Td w={0}>
-                        <PermissionGuard permission={PERMISSIONS.UPDATE_MANUFACTURED_MATERIAL_BOM}>
-                          <Button
-                            onClick={() => handleOpenUpdateModal(item)}
-                            variant="light"
-                            color="gray"
-                            size="xs"
-                            radius="md"
-                            p={6}
-                          >
-                            <Pencil size={12} />
-                          </Button>
-                        </PermissionGuard>
-                      </Table.Td>
-                    </Table.Tr>
+                        <Table.Tr className="text-gray-600">
+                          <Table.Td>
+                            <span className="font-mono text-xs text-gray-500">{item.material.code}</span>
+                          </Table.Td>
+                          <Table.Td>
+                            <span className="font-medium text-gray-800">{item.material.title}</span>
+                          </Table.Td>
+                          <Table.Td>{mainCategory?.title || <EmptyValue />}</Table.Td>
+                          <Table.Td>{subCategory?.title || <EmptyValue />}</Table.Td>
+                          <Table.Td>
+                            <div className="flex items-center gap-1">
+                              <Badge size="sm" variant="light" color="gray" radius="md">
+                                {getMaterialUnitLabel(unit, locale)}
+                              </Badge>
+                              {toggleButton}
+                            </div>
+                          </Table.Td>
+                          <Table.Td className="font-medium text-gray-800">
+                            {formatEnteredQuantityForDisplay(item.quantityRequired, enteredUnit, unit, item.material)}
+                          </Table.Td>
+                          <Table.Td>{formatMoney(toDisplayUnitPrice(item.material.unitPrice, factor))}</Table.Td>
+                          <Table.Td className="font-medium text-gray-800">{formatMoney(lineCost)}</Table.Td>
+                          <Table.Td className="max-w-48 truncate text-gray-500">{item.notes}</Table.Td>
+                          <Table.Td w={0}>
+                            <PermissionGuard
+                              permission={[
+                                PERMISSIONS.UPDATE_MANUFACTURED_MATERIAL_BOM,
+                                PERMISSIONS.DELETE_MANUFACTURED_MATERIAL_BOM,
+                              ]}
+                            >
+                              <Menu position="bottom-end" withinPortal>
+                                <Menu.Target>
+                                  <ActionIcon
+                                    variant="subtle"
+                                    color="gray"
+                                    size="sm"
+                                    radius="md"
+                                    aria-label={translate("Item actions", "إجراءات البند")}
+                                  >
+                                    <EllipsisVertical size={14} />
+                                  </ActionIcon>
+                                </Menu.Target>
+                                <Menu.Dropdown>
+                                  <PermissionGuard permission={PERMISSIONS.UPDATE_MANUFACTURED_MATERIAL_BOM}>
+                                    <Menu.Item
+                                      leftSection={<Pencil size={14} />}
+                                      onClick={() => handleOpenUpdateModal(item)}
+                                    >
+                                      {translate("Edit", "تعديل")}
+                                    </Menu.Item>
+                                  </PermissionGuard>
+                                  <PermissionGuard permission={PERMISSIONS.DELETE_MANUFACTURED_MATERIAL_BOM}>
+                                    <Menu.Item
+                                      leftSection={<Trash2 size={14} />}
+                                      color="red"
+                                      onClick={() => {
+                                        deleteMutation.reset();
+                                        setItemToDelete(item);
+                                      }}
+                                    >
+                                      {translate("Delete", "حذف")}
+                                    </Menu.Item>
+                                  </PermissionGuard>
+                                </Menu.Dropdown>
+                              </Menu>
+                            </PermissionGuard>
+                          </Table.Td>
+                        </Table.Tr>
                       )}
                     </UnitToggle>
                   );
@@ -242,6 +293,29 @@ export default function MaterialBomSection({
           itemToUpdate={itemToUpdate}
           setItemToUpdate={setItemToUpdate}
           excludeMaterialCodes={excludeMaterialCodes}
+        />
+
+        <DeleteModal
+          opened={!!itemToDelete}
+          onClose={() => {
+            setItemToDelete(null);
+            deleteMutation.reset();
+          }}
+          title={translate("Delete BOM item?", "حذف بند قائمة المواد؟")}
+          subTitle={
+            itemToDelete
+              ? translate(
+                  `You're about to delete "${itemToDelete.material.title}" from this BOM.`,
+                  `أنت على وشك حذف "${itemToDelete.material.title}" من قائمة المواد.`,
+                )
+              : ""
+          }
+          warning={translate("This action cannot be undone.", "هذا الإجراء لا يمكن التراجع عنه.")}
+          action={() => {
+            if (itemToDelete) deleteMutation.mutate(itemToDelete.id);
+          }}
+          loading={deleteMutation.isPending}
+          error={deleteError}
         />
       </section>
     </PermissionGuard>

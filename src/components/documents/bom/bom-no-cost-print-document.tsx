@@ -7,7 +7,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading } from "./components";
+import { PrintDetail, PrintSectionHeading } from "../components";
 
 export type BomNoCostDepartmentGroup = {
   departmentId: string;

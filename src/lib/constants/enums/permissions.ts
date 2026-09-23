@@ -41,11 +41,13 @@ export const PERMISSION_VALUES = [
   "add_material",
   "update_material",
   "set_material_market_price",
+  "set_material_type",
   "print_materials_list",
   "use_unit_conversion_tool",
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
   "update_manufactured_material_bom",
+  "delete_manufactured_material_bom",
   "read_inquiries",
   "read_previews",
   "read_offers",
@@ -115,10 +117,7 @@ export const MATERIAL_PURCHASING_REPORT_PERMISSIONS = [
 ] as const;
 
 /** All report permissions — /reports index visible if user has any. */
-export const ALL_REPORT_PERMISSIONS = [
-  ...MATERIAL_REPORT_PERMISSIONS,
-  ...MATERIAL_PURCHASING_REPORT_PERMISSIONS,
-] as const;
+export const ALL_REPORT_PERMISSIONS = [...MATERIAL_REPORT_PERMISSIONS, ...MATERIAL_PURCHASING_REPORT_PERMISSIONS] as const;
 
 // ================ Labels ================
 
@@ -431,6 +430,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تعيين سعر السوق للمادة",
     },
   },
+  set_material_type: {
+    value: "set_material_type",
+    label: {
+      en: "Set Material Type",
+      ar: "تعيين نوع المادة",
+    },
+  },
   print_materials_list: {
     value: "print_materials_list",
     label: {
@@ -464,6 +470,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Manufactured Material BOM",
       ar: "تحديث قائمة مواد مادة مصنعة",
+    },
+  },
+  delete_manufactured_material_bom: {
+    value: "delete_manufactured_material_bom",
+    label: {
+      en: "Delete Manufactured Material BOM",
+      ar: "حذف بند قائمة مواد مادة مصنعة",
     },
   },
 
@@ -718,7 +731,7 @@ export function isValidPermission(permission: string): permission is Permission 
 // ================ Domains ================
 
 export type PermissionDomain =
-  | "organization"
+  | "general"
   | "sales"
   | "engineering"
   | "production"
@@ -738,8 +751,8 @@ export type PermissionDomainGroup = {
 /** Permission groups aligned with sidebar domains. */
 export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
-    domain: "organization",
-    label: { en: "Organization", ar: "المؤسسة" },
+    domain: "general",
+    label: { en: "General", ar: "عام" },
     permissions: [
       "add_user",
       "read_users",
@@ -790,11 +803,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "production",
     label: { en: "Production", ar: "الإنتاج" },
-    permissions: [
-      "read_production_plans",
-      "read_production_department_managers",
-      "update_production_department_managers",
-    ],
+    permissions: ["read_production_plans", "read_production_department_managers", "update_production_department_managers"],
   },
   {
     domain: "warehouse",
@@ -804,11 +813,13 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_material",
       "update_material",
       "set_material_market_price",
+      "set_material_type",
       "print_materials_list",
       "use_unit_conversion_tool",
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",
       "update_manufactured_material_bom",
+      "delete_manufactured_material_bom",
       "read_inventory_transactions",
       "add_inventory_transaction",
       "add_legacy_issue_permit",

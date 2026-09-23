@@ -33,7 +33,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
-import ProductsListPrintDocument from "@/components/documents/products-list-print-document";
+import ProductsListPrintDocument from "@/components/documents/products/products-list-print-document";
 import ProductModal from "@/components/global/data-modals/product-modal";
 import SelectProductSourceType from "@/components/global/selections/enum-based/select-product-source-type";
 import SelectProductMain from "@/components/global/selections/reference-based/select-product-main";

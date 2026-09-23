@@ -2,6 +2,7 @@ import type { PrivateRequest } from "@/types/api";
 import type {
   BomItem,
   Bom,
+  BomMaterialUsage,
   CreateBomDto,
   CreateBomItemDto,
   UpdateBomItemDto,
@@ -32,6 +33,18 @@ const bomsApi = {
     signal?: AbortSignal;
   }) {
     return await privateRequest<Bom>({ url: `boms/${dimensionId}`, signal });
+  },
+
+  async listByMaterial({
+    privateRequest,
+    materialCode,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    materialCode: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<BomMaterialUsage[]>({ url: `boms/by-material/${materialCode}`, signal });
   },
 
   async appendItem({

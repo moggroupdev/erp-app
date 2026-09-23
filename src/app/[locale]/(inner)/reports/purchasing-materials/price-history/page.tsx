@@ -18,7 +18,7 @@ import { History, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import PurchasingMaterialsPriceHistoryPrintDocument from "@/components/documents/purchasing-materials-price-history-print-document";
+import PurchasingMaterialsPriceHistoryPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-price-history-print-document";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
 import MaterialPicker from "./components/material-picker";

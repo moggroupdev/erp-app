@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -19,6 +20,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import RoleDetails from "./components/role-details";
+import RoleUsersSection from "./components/role-users-section";
 
 const PAGE_TITLE = { en: "Role Details", ar: "تفاصيل الدور" };
 
@@ -27,6 +29,8 @@ export default function Page() {
   const { id } = useParams<{ id: string }>();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
+  const canReadUsers = useHasPermission(PERMISSIONS.READ_USERS);
 
   const {
     data: role,
@@ -40,8 +44,14 @@ export default function Page() {
   });
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
+  const showPageLoader = isFetching && !role;
 
   useDocumentTitle(`${role?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Roles", "الأدوار")}`);
+
+  function handleRetry() {
+    refetch();
+    if (canReadUsers) queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+  }
 
   return (
     <LayoutBox
@@ -50,15 +60,15 @@ export default function Page() {
         backLink: true,
         sideElements: (
           <div className="flex items-center gap-2">
-            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <RefetchButton isFetching={isFetching} onRefetch={handleRetry} />
             {role && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_ROLE}>
                 <Button
                   component={Link}
                   href={getLocalizedHref(`/organization/roles/${id}/edit`)}
                   variant="light"
+                  color="haze"
                   radius="md"
-                  leftSection={<Pencil size={15} />}
                 >
                   {translate("Edit", "تعديل")}
                 </Button>
@@ -68,16 +78,21 @@ export default function Page() {
         ),
       }}
     >
-      {isFetching ? (
+      {showPageLoader ? (
         <LoadingSection message={translate("Loading role details...", "جاري تحميل تفاصيل الدور...")} />
       ) : errorMessage ? (
         <ErrorSection
           errorTitle={translate("Error loading role", "خطأ في تحميل الدور")}
           errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleRetry }}
         />
       ) : (
-        role && <RoleDetails role={role} />
+        role && (
+          <>
+            <RoleDetails role={role} />
+            <RoleUsersSection roleId={role.id} />
+          </>
+        )
       )}
     </LayoutBox>
   );

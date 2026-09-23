@@ -11,12 +11,16 @@ import DataSelect from "@/components/ui/data-select";
 import PrintDocument from "@/components/ui/print-document";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
-import SupplierQuotationRequestPrintDocument from "@/components/documents/supplier-quotation-request-print-document";
+import SupplierQuotationRequestPrintDocument, {
+  type SupplierQuotationRequestContact,
+} from "@/components/documents/procurement/quotations/supplier-quotation-request-print-document";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import useUser from "@/contexts/user/hook";
 import materialsApi from "@/lib/api/materials";
+import departmentsApi from "@/lib/api/departments";
+import { PURCHASING_DEPARTMENT_ID } from "@/lib/constants/global";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -224,6 +228,8 @@ export default function Page() {
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
   const [addItemsOpened, { open: openAddItems, close: closeAddItems }] = useDisclosure(false);
+  const [purchasingDepartmentManager, setPurchasingDepartmentManager] =
+    useState<SupplierQuotationRequestContact | null>(null);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -295,7 +301,7 @@ export default function Page() {
   function handleAddItems(lines: QuotationItemLine[]) {
     setValidationError("");
     setRows((prev) => {
-      let next = prev.filter((row) => !isEmptyRow(row));
+      const next = prev.filter((row) => !isEmptyRow(row));
 
       for (const line of lines) {
         const existingIndex = next.findIndex((row) => row.materialCode === line.materialCode);
@@ -408,6 +414,30 @@ export default function Page() {
     email: user?.email ?? null,
     phone: user?.phone ?? null,
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    departmentsApi
+      .get({ privateRequest, id: PURCHASING_DEPARTMENT_ID })
+      .then((department) => {
+        if (cancelled) return;
+        const manager = department.manager;
+        if (!manager) return;
+        setPurchasingDepartmentManager({
+          name: manager.name,
+          email: manager.email,
+          phone: manager.phone,
+        });
+      })
+      .catch(() => {
+        // Leave the signature block hidden if the purchasing department cannot be loaded.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [privateRequest]);
 
   function handlePrintClick(onClick: () => void) {
     const error = validateForm();
@@ -665,6 +695,7 @@ export default function Page() {
                 notes={notes.trim() || null}
                 items={printItems}
                 preparedBy={preparedBy}
+                purchasingDepartmentManager={purchasingDepartmentManager}
               />
             ) : null}
           </PrintDocument>

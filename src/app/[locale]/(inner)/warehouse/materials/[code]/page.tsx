@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -15,15 +15,17 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
 import { Button, Menu } from "@mantine/core";
-import { ChevronDown, Pencil, Tag } from "lucide-react";
+import { ChevronDown, Pencil, Repeat, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialMarketPriceModal from "./components/material-market-price-modal";
+import MaterialTypeModal from "./components/material-type-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
+import MaterialBomUsagesSection from "./components/material-bom-usages-section";
 import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
 import MaterialQuickLinks from "./components/material-quick-links";
 
@@ -33,10 +35,13 @@ export default function Page() {
   const { locale, translate } = useI18n();
   const { code } = useParams<{ code: string }>();
   const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
   const canReadBom = useHasPermission(PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS);
+  const canReadProductBoms = useHasPermission(PERMISSIONS.READ_PRODUCT_BOMS);
   const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
-  const canManageMaterial = canUpdateMaterial || canSetMarketPrice;
+  const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
+  const canManageMaterial = canUpdateMaterial || canSetMarketPrice || canSetMaterialType;
 
   const materialQuery = useQuery({
     queryKey: queryKeys.materials.detail(code),
@@ -57,18 +62,22 @@ export default function Page() {
   const loading = materialQuery.isFetching || (shouldLoadBom && bomQuery.isFetching);
   const queryError = materialQuery.error || (shouldLoadBom ? bomQuery.error : null);
   const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
+  // Keep existing content mounted during refetch so nested usage queries are not unmounted mid-invalidate (which would refetch twice).
+  const showPageLoader = loading && !material;
 
   useDocumentTitle(`${material?.title || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Materials", "المواد")}`);
 
   function handleRetry() {
     materialQuery.refetch();
     if (shouldLoadBom) bomQuery.refetch();
+    if (canReadProductBoms) queryClient.invalidateQueries({ queryKey: queryKeys.boms.usages(code) });
   }
 
   // ========================= MODALS =========================
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [marketPriceModalOpened, { open: openMarketPriceModal, close: closeMarketPriceModal }] = useDisclosure(false);
+  const [typeModalOpened, { open: openTypeModal, close: closeTypeModal }] = useDisclosure(false);
 
   return (
     <LayoutBox
@@ -91,6 +100,11 @@ export default function Page() {
                       {translate("Edit", "تعديل")}
                     </Menu.Item>
                   )}
+                  {canSetMaterialType && (
+                    <Menu.Item leftSection={<Repeat size={14} />} onClick={openTypeModal}>
+                      {translate("Change Material Type", "تغيير نوع المادة")}
+                    </Menu.Item>
+                  )}
                   {canSetMarketPrice && (
                     <Menu.Item leftSection={<Tag size={14} />} onClick={openMarketPriceModal}>
                       {translate("Set Market Price", "تعيين سعر السوق")}
@@ -103,7 +117,7 @@ export default function Page() {
         ),
       }}
     >
-      {loading ? (
+      {showPageLoader ? (
         <LoadingSection message={translate("Loading material data", "جاري تحميل ملف المادة")} />
       ) : errorMessage ? (
         <ErrorSection
@@ -127,7 +141,11 @@ export default function Page() {
               close={closeMarketPriceModal}
               materialCode={code}
               currentValue={material.marketUnitPrice}
+              baseUnit={material.unitOfMeasurement}
+              unitConversions={material.unitConversions}
             />
+
+            <MaterialTypeModal opened={typeModalOpened} close={closeTypeModal} material={material} />
 
             <MaterialDetails material={material} />
 
@@ -136,6 +154,8 @@ export default function Page() {
             {isManufacturedMaterial(material.materialType) && (
               <MaterialBomSection material={material} bom={bomQuery.data || null} />
             )}
+
+            <MaterialBomUsagesSection material={material} />
 
             <MaterialQuickLinks materialCode={code} />
           </>

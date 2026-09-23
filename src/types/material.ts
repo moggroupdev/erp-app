@@ -1,5 +1,6 @@
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 
 export type Material = {
   code: string;
@@ -59,7 +60,7 @@ export type CreateMaterialDto = {
   minimumStock: number | null;
 };
 
-export type UpdateMaterialDto = Partial<CreateMaterialDto>;
+export type UpdateMaterialDto = Omit<Partial<CreateMaterialDto>, "materialType">;
 
 export type CreateMaterialUnitConversionDto = {
   unit: MaterialUnit;
@@ -68,4 +69,23 @@ export type CreateMaterialUnitConversionDto = {
 
 export type SetMaterialMarketPriceDto = {
   marketUnitPrice: number;
+};
+
+export type SetMaterialTypeDto = {
+  materialType: MaterialType;
+  defaultMmSourcingType?: MmSourcingType;
+  confirmed?: boolean;
+};
+
+export type MaterialTypeChangeImpact = {
+  currentType: MaterialType;
+  targetType: MaterialType;
+  blocked: boolean;
+  blockReason: string | null;
+  affectedBomLines: {
+    id: string;
+    productDimensionId: string;
+    productCode: string;
+    productTitle: string;
+  }[];
 };

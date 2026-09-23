@@ -14,7 +14,7 @@ export default function RoleCard({ role, departmentName }: { role: Role; departm
       className="group flex h-full flex-col gap-4 rounded-3xl border border-gray-200 bg-white p-5 transition-colors hover:bg-gray-50"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-haze-100 bg-haze-50 text-haze-600">
           <Shield size={22} />
         </div>
 
@@ -24,7 +24,7 @@ export default function RoleCard({ role, departmentName }: { role: Role; departm
 
             {departmentName ? (
               <Tooltip withArrow label={translate("Department", "القسم")}>
-                <Badge variant="light" color="violet" radius="md" leftSection={<Building2 size={12} />}>
+                <Badge variant="light" color="haze" radius="md" leftSection={<Building2 size={12} />}>
                   {departmentName}
                 </Badge>
               </Tooltip>

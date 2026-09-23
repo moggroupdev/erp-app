@@ -14,7 +14,7 @@ import { BarChart3, Printer, RefreshCw } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
-import PurchasingMaterialsSpendingSummaryPrintDocument from "@/components/documents/purchasing-materials-spending-summary-print-document";
+import PurchasingMaterialsSpendingSummaryPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-spending-summary-print-document";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import DateRangeFilter, { type GroupBy } from "../components/date-range-filter";

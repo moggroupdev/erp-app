@@ -18,3 +18,4 @@ export const EGYPT_COUNTRY_ID = "f1dd27d6-ac02-5671-97b2-0679193340c4";
 
 export const PRODUCTION_DEPARTMENT_ID = "3f2a91bc-4d8e-4a1f-b563-7c94e21a0b01";
 export const SALES_DEPARTMENT_ID = "c8ef56bd-39a0-447f-26c8-f7ab5d9041bc";
+export const PURCHASING_DEPARTMENT_ID = "02c39af1-7de4-48b3-6a0c-3bf3913485f0";

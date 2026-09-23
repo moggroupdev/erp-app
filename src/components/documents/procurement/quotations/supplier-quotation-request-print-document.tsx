@@ -2,7 +2,7 @@ import { Mail, Phone } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { PrintSectionHeading, PrintTable } from "./components";
+import { PrintSectionHeading, PrintTable } from "../../components";
 
 export type SupplierQuotationRequestItem = {
   materialTitle: string;
@@ -18,12 +18,47 @@ export type SupplierQuotationRequestContact = {
   phone: string | null;
 };
 
+type SignatureBlockProps = {
+  contact: SupplierQuotationRequestContact;
+  title: string;
+  companyName: string;
+};
+
+function SignatureBlock({ contact, title, companyName }: SignatureBlockProps) {
+  const details = [
+    contact.email ? { icon: Mail, value: contact.email } : null,
+    contact.phone ? { icon: Phone, value: contact.phone } : null,
+  ].filter((row): row is { icon: typeof Mail; value: string } => !!row);
+
+  return (
+    <div className="flex min-w-48 flex-1 flex-col gap-1 border-s-2 border-teal-800 ps-3">
+      <p className="mb-1.5 text-sm font-semibold text-gray-900">{contact.name}</p>
+      <p className="text-[10px] text-gray-600">
+        {title}
+        <span className="mx-1.5 text-gray-300">·</span>
+        {companyName}
+      </p>
+      {details.length > 0 ? (
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+          {details.map(({ icon: Icon, value }) => (
+            <span key={value} className="inline-flex items-center gap-1.5 text-[10px] text-gray-700">
+              <Icon size={11} className="shrink-0 text-teal-800" aria-hidden />
+              <span className="break-all">{value}</span>
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export type SupplierQuotationRequestPrintDocumentProps = {
   supplierDisplayName: string;
   supplierContactName?: string | null;
   notes: string | null;
   items: SupplierQuotationRequestItem[];
   preparedBy: SupplierQuotationRequestContact;
+  purchasingDepartmentManager?: SupplierQuotationRequestContact | null;
 };
 
 export default function SupplierQuotationRequestPrintDocument({
@@ -32,6 +67,7 @@ export default function SupplierQuotationRequestPrintDocument({
   notes,
   items,
   preparedBy,
+  purchasingDepartmentManager,
 }: SupplierQuotationRequestPrintDocumentProps) {
   const { locale, translate } = useI18n();
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
@@ -56,11 +92,6 @@ export default function SupplierQuotationRequestPrintDocument({
     item.unitLabel,
     formatQuantity(item.quantity),
   ]);
-
-  const contactDetails = [
-    preparedBy.email ? { icon: Mail, value: preparedBy.email } : null,
-    preparedBy.phone ? { icon: Phone, value: preparedBy.phone } : null,
-  ].filter((row): row is { icon: typeof Mail; value: string } => !!row);
 
   return (
     <div className="flex flex-col gap-5 text-xs text-gray-900">
@@ -94,7 +125,7 @@ export default function SupplierQuotationRequestPrintDocument({
         <p className="leading-relaxed">
           {translate(
             "We kindly request that you provide us with a price quotation for the supply of the materials listed in the table below to our factories in 10th of Ramadan City, specifying payment terms and delivery lead time.",
-            "نرجو من سيادتكم التكرم بموافاتنا بعرض أسعار لتوريد الأصناف المبينة في الجدول أدناه إلى مصانعنا بمدينة العاشر من رمضان موضحًا شروط السداد ومدة التوريد.",
+            "نرجو من سيادتكم التكرم بموافاتنا بعرض أسعاركم لتوريد الأصناف المبينة في الجدول أدناه إلى مصانعنا بمدينة العاشر من رمضان موضحًا شروط السداد ومدة التوريد.",
           )}
         </p>
       </section>
@@ -127,22 +158,18 @@ export default function SupplierQuotationRequestPrintDocument({
           )}
         </p>
 
-        <div className="flex flex-col gap-1 border-s-2 border-teal-800 ps-3">
-          <p className="mb-1.5 text-sm font-semibold text-gray-900">{preparedBy.name}</p>
-          <p className="text-[10px] text-gray-600">
-            {translate("Purchasing Department", "إدارة المشتريات")}
-            <span className="mx-1.5 text-gray-300">·</span>
-            {companyName}
-          </p>
-          {contactDetails.length > 0 ? (
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
-              {contactDetails.map(({ icon: Icon, value }) => (
-                <span key={value} className="inline-flex items-center gap-1.5 text-[10px] text-gray-700">
-                  <Icon size={11} className="shrink-0 text-teal-800" aria-hidden />
-                  <span className="break-all">{value}</span>
-                </span>
-              ))}
-            </div>
+        <div className="flex flex-wrap items-start gap-6">
+          <SignatureBlock
+            contact={preparedBy}
+            title={translate("Purchasing Department", "إدارة المشتريات")}
+            companyName={companyName}
+          />
+          {purchasingDepartmentManager?.name ? (
+            <SignatureBlock
+              contact={purchasingDepartmentManager}
+              title={translate("Purchasing Department Manager", "مدير إدارة المشتريات")}
+              companyName={companyName}
+            />
           ) : null}
         </div>
       </footer>

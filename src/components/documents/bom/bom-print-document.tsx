@@ -7,10 +7,7 @@ import {
   type ItemCostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
-import {
-  getMmSourcingTypeLabel,
-  isInternallyManufacturedMmSourcing,
-} from "@/lib/constants/enums/mm-sourcing-types";
+import { getMmSourcingTypeLabel, isInternallyManufacturedMmSourcing } from "@/lib/constants/enums/mm-sourcing-types";
 import {
   getFlattenedRowLineCost,
   getMaterialCostPrice,
@@ -24,7 +21,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading } from "./components";
+import { PrintDetail, PrintSectionHeading } from "../components";
 
 const ZERO_VALUE_CLASS = "text-orange-500";
 
@@ -180,9 +177,7 @@ export default function BomPrintDocument({
                   <td colSpan={4} className="text-gray-600">
                     {group.itemCount} {translate("Items", "بند")}
                   </td>
-                  <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>
-                    {formatMoney(group.totalCost)}
-                  </td>
+                  <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>{formatMoney(group.totalCost)}</td>
                   <td className="text-gray-600">{group.sharePercent.toFixed(1)}%</td>
                 </tr>
               </tbody>
@@ -197,8 +192,8 @@ export default function BomPrintDocument({
             <h2 className="text-base font-semibold">{translate("Manufactured Materials", "المواد المصنعة")}</h2>
             <p className="text-[10px] text-gray-500">
               {translate(
-                "Internally manufactured materials have no manufacturing cost. Externally manufactured materials use the last outsourcing manufacturing cost.",
-                "المواد المصنعة داخلياً بلا تكلفة تصنيع. المواد المصنعة خارجياً تستخدم آخر تكلفة تصنيع من أوامر التعهيد.",
+                "Materials manufactured from other raw materials, either in-house or by an external manufacturer",
+                "المواد التي يتم تصنيعها من مواد أولية أخرى، سواء داخل الشركة أو لدى مُصنّع خارجي",
               )}
             </p>
           </div>
@@ -208,9 +203,7 @@ export default function BomPrintDocument({
                 <th className="text-start whitespace-nowrap">{translate("Material Code", "كود المادة")}</th>
                 <th className="text-start whitespace-nowrap">{translate("Material Name", "اسم المادة")}</th>
                 <th className="text-start whitespace-nowrap">{translate("Manufacturing Source", "مصدر التصنيع")}</th>
-                <th className="text-start whitespace-nowrap">
-                  {translate("Production Department", "قسم الانتاج")}
-                </th>
+                <th className="text-start whitespace-nowrap">{translate("Production Department", "قسم الانتاج")}</th>
                 <th className="text-start whitespace-nowrap">{translate("Quantity", "الكمية")}</th>
                 <th className="text-start whitespace-nowrap">
                   {translate(
@@ -289,11 +282,11 @@ export default function BomPrintDocument({
         <table className="w-full border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
           <thead>
             <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
-              <th className="text-start whitespace-nowrap">
-                {translate("Production Department", "قسم الانتاج")}
-              </th>
+              <th className="text-start whitespace-nowrap">{translate("Production Department", "قسم الانتاج")}</th>
               <th className="text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
-              <th className="text-start whitespace-nowrap">{translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}</th>
+              <th className="text-start whitespace-nowrap">
+                {translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}
+              </th>
               <th className="text-start whitespace-nowrap">{translate("Share", "الحصة")}</th>
             </tr>
           </thead>
@@ -302,9 +295,7 @@ export default function BomPrintDocument({
               <tr key={group.departmentId} className="border-b border-gray-200">
                 <td className="font-medium">{group.title}</td>
                 <td>{group.itemCount}</td>
-                <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>
-                  {formatMoney(group.totalCost)}
-                </td>
+                <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>{formatMoney(group.totalCost)}</td>
                 <ShareCell value={group.sharePercent} />
               </tr>
             ))}

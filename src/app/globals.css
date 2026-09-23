@@ -9,6 +9,13 @@
   --color-teal-200: #bcd2d1;
   --color-teal-600: #115e59;
   --color-teal-700: #115e59;
+
+  /* Soft blue (haze) — same wash/text pattern as teal. */
+  --color-haze-50: #daf1fc;
+  --color-haze-100: #bee5f9;
+  --color-haze-200: #93d3f4;
+  --color-haze-600: #2478b5;
+  --color-haze-700: #2478b5;
 }
 
 @layer utilities {
