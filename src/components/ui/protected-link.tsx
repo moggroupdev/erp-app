@@ -6,6 +6,17 @@ import useHasPermission from "@/hooks/use-has-permission";
 import type { Permission } from "@/lib/constants/enums/permissions";
 import { useLocaleHref } from "@/lib/i18n/hooks";
 
+function withoutHoverClasses(className?: string) {
+  if (!className) return undefined;
+
+  const kept = className
+    .split(/\s+/)
+    .filter((token) => token && token !== "group" && !token.includes("hover:"))
+    .join(" ");
+
+  return kept || undefined;
+}
+
 export default function ProtectedLink({
   permission,
   href,
@@ -24,7 +35,7 @@ export default function ProtectedLink({
 
   if (!hasPermission)
     return (
-      <span className={className} title={title}>
+      <span className={withoutHoverClasses(className)} title={title}>
         {children}
       </span>
     );
