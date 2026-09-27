@@ -1,5 +1,6 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -173,12 +174,13 @@ export default function Page() {
                     <Table.Tr key={transaction.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
                         <div className="flex items-center gap-1.5">
-                          <Link
-                            href={getLocalizedHref(`/warehouse/legacy-issue-permits/${transaction.id}`)}
+                          <ProtectedLink
+                            permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
+                            href={`/warehouse/legacy-issue-permits/${transaction.id}`}
                             className="font-mono hover:underline"
                           >
                             {transaction.issuePermitNumber}
-                          </Link>
+                          </ProtectedLink>
                           <CopyButton text={transaction.issuePermitNumber} />
 
                           {transaction.isCancelled && (

@@ -1,16 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Table } from "@mantine/core";
 import { FolderTree } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsByMainCategory } from "@/types/reports";
 import ReportCard from "./report-card";
 
 export default function SpendingByMainCategoryTable({ data }: { data: PurchasingMaterialsByMainCategory[] }) {
   const { translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
   const percentageFormatter = new Intl.NumberFormat(undefined, {
@@ -48,13 +48,14 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
                 <Table.Tr key={row.mainCategoryId} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td className="max-w-[300px] truncate font-medium text-gray-800">
-                    <Link
-                      href={getLocalizedHref(`/reports/materials/category-stats?mainCategoryId=${row.mainCategoryId}`)}
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_MATERIAL_CATEGORY_STATS_REPORT}
+                      href={`/reports/materials/category-stats?mainCategoryId=${row.mainCategoryId}`}
                       className="text-gray-800 hover:underline"
                       title={row.mainCategoryTitle}
                     >
                       {row.mainCategoryTitle}
-                    </Link>
+                    </ProtectedLink>
                   </Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
                   <Table.Td>

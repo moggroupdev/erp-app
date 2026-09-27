@@ -1,7 +1,7 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
@@ -26,7 +26,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { Badge, Button, Table } from "@mantine/core";
 import { GripVertical, Pencil } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import { useUser } from "@/contexts/user/hook";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
@@ -69,7 +69,6 @@ function ItemRowCells({
   dragHandleProps?: Record<string, unknown>;
 }) {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   return (
     <>
@@ -100,9 +99,9 @@ function ItemRowCells({
       </Table.Td>
       <Table.Td className="font-semibold text-gray-800">
         {item.material ? (
-          <Link href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)} className="hover:underline">
+          <ProtectedLink permission={PERMISSIONS.READ_MATERIALS} href={`/warehouse/materials/${item.material.code}`} className="hover:underline">
             {item.material.title}
-          </Link>
+          </ProtectedLink>
         ) : (
           <EmptyValue />
         )}

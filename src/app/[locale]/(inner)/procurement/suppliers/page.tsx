@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
@@ -28,6 +27,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
+import ProtectedLink from "@/components/ui/protected-link";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import SuppliersListPrintDocument from "@/components/documents/procurement/suppliers/suppliers-list-print-document";
@@ -47,7 +47,6 @@ export default function Page() {
 
   const router = useRouter();
   const urlSearchParams = useSearchParams();
-  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
@@ -225,9 +224,13 @@ export default function Page() {
                   {paginatedSuppliers.data.map((supplier) => (
                     <Table.Tr key={supplier.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
-                        <Link href={getLocalizedHref(`/procurement/suppliers/${supplier.id}`)} className="hover:underline">
+                        <ProtectedLink
+                          permission={PERMISSIONS.READ_SUPPLIERS}
+                          href={`/procurement/suppliers/${supplier.id}`}
+                          className="hover:underline"
+                        >
                           {supplier.name}
-                        </Link>
+                        </ProtectedLink>
                       </Table.Td>
                       <Table.Td>
                         <div className="flex items-center gap-1.5">

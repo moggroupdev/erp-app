@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Select, Table } from "@mantine/core";
 import { FileText, CheckCircle, Clock } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsSupplierOrder } from "@/types/reports";
 import ReportCard from "../../components/report-card";
@@ -20,7 +21,6 @@ export default function SupplierOrdersTable({
   onSortChange: (sort: SupplierOrdersSort) => void;
 }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   function formatDisplayDate(value: string | null) {
     if (!value) return "-";
@@ -103,12 +103,13 @@ export default function SupplierOrdersTable({
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td>
                     <div className="flex items-center gap-1.5">
-                      <Link
-                        href={getLocalizedHref(`/procurement/material-orders/${row.orderId}`)}
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+                        href={`/procurement/material-orders/${row.orderId}`}
                         className="font-mono font-medium text-gray-800 hover:underline"
                       >
                         {row.orderCode}
-                      </Link>
+                      </ProtectedLink>
                       <CopyButton text={row.orderCode} />
                     </div>
                   </Table.Td>

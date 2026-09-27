@@ -1,5 +1,6 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
@@ -688,23 +689,25 @@ export default function Page() {
                                     <Table.Tr className="text-gray-600">
                                       <Table.Td>
                                         <div className="flex items-center gap-1.5">
-                                          <Link
-                                            href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                          <ProtectedLink
+                                            permission={PERMISSIONS.READ_MATERIALS}
+                                            href={`/warehouse/materials/${item.material.code}`}
                                             className="font-mono text-xs text-gray-500 hover:underline"
                                           >
                                             {item.material.code}
-                                          </Link>
+                                          </ProtectedLink>
                                           <CopyButton text={item.material.code} />
                                         </div>
                                       </Table.Td>
                                       <Table.Td>
                                         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                                          <Link
-                                            href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                          <ProtectedLink
+                                            permission={PERMISSIONS.READ_MATERIALS}
+                                            href={`/warehouse/materials/${item.material.code}`}
                                             className="truncate font-medium text-gray-800 hover:underline"
                                           >
                                             {item.material.title}
-                                          </Link>
+                                          </ProtectedLink>
                                           {item.sourceBomItem?.mmSourcingType &&
                                             isPurchasedMmSourcing(item.sourceBomItem.mmSourcingType) && (
                                               <Tooltip
@@ -1016,7 +1019,6 @@ function ManufacturingCostsSection({
   onDeleteItem: (item: BomItemWithMaterial) => void;
 }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   return (
     <section className="flex flex-col gap-3">
@@ -1078,22 +1080,24 @@ function ManufacturingCostsSection({
               <Table.Tr key={row.id} className="text-gray-600">
                 <Table.Td>
                   <div className="flex items-center gap-1.5">
-                    <Link
-                      href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_MATERIALS}
+                      href={`/warehouse/materials/${row.materialCode}`}
                       className="font-mono text-xs text-gray-500 hover:underline"
                     >
                       {row.materialCode}
-                    </Link>
+                    </ProtectedLink>
                     <CopyButton text={row.materialCode} />
                   </div>
                 </Table.Td>
                 <Table.Td>
-                  <Link
-                    href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+                  <ProtectedLink
+                    permission={PERMISSIONS.READ_MATERIALS}
+                    href={`/warehouse/materials/${row.materialCode}`}
                     className="font-medium text-gray-800 hover:underline"
                   >
                     {row.materialTitle}
-                  </Link>
+                  </ProtectedLink>
                 </Table.Td>
                 <Table.Td>
                   {row.sourceBomItem.mmSourcingType ? (

@@ -1,12 +1,12 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ActionIcon, Badge, Menu, Table } from "@mantine/core";
 import { EllipsisVertical, Pencil, Trash2 } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -37,7 +37,6 @@ export default function RequisitionItemsTable({
   onEdit: (item: MaterialPurchaseRequisitionItemDetailed) => void;
 }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
   const [itemToDelete, setItemToDelete] = useState<MaterialPurchaseRequisitionItemDetailed | null>(null);
@@ -92,9 +91,9 @@ export default function RequisitionItemsTable({
               return (
                 <Table.Tr key={item.id} className="text-gray-600">
                   <Table.Td className="font-semibold text-gray-800">
-                    <Link href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)} className="hover:underline">
+                    <ProtectedLink permission={PERMISSIONS.READ_MATERIALS} href={`/warehouse/materials/${item.material.code}`} className="hover:underline">
                       {item.material.title}
-                    </Link>
+                    </ProtectedLink>
                   </Table.Td>
                   <Table.Td>
                     <div className="flex items-center gap-1.5">

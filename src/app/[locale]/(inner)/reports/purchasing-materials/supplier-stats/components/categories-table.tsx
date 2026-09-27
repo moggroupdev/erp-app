@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
 import { Select, Table } from "@mantine/core";
 import { FolderTree } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import ProtectedLink from "@/components/ui/protected-link";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsByMainCategory, PurchasingMaterialsSupplierBySubCategory } from "@/types/reports";
 import ReportCard from "../../components/report-card";
@@ -31,7 +32,6 @@ export default function SupplierCategoriesTable({
   onSortChange: (sort: SupplierCategoriesSort) => void;
 }) {
   const { translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   const groups = useMemo(
     () => buildSupplierCategoryGroups(categories, subCategories, sort),
@@ -91,15 +91,14 @@ export default function SupplierCategoriesTable({
           {groups.map(({ main, subs }) => (
             <section key={main.mainCategoryId} className="flex flex-col gap-2">
               <h4 className="text-sm font-semibold text-stone-800">
-                <Link
-                  href={getLocalizedHref(
-                    `/reports/purchasing-materials/category-stats?mainCategoryId=${main.mainCategoryId}`,
-                  )}
+                <ProtectedLink
+                  permission={PERMISSIONS.READ_MATERIAL_PURCHASING_CATEGORY_STATS_REPORT}
+                  href={`/reports/purchasing-materials/category-stats?mainCategoryId=${main.mainCategoryId}`}
                   className="text-stone-800 hover:underline"
                   title={main.mainCategoryTitle}
                 >
                   {main.mainCategoryTitle}
-                </Link>
+                </ProtectedLink>
               </h4>
 
               <div className="overflow-x-auto rounded-xl border border-stone-100">

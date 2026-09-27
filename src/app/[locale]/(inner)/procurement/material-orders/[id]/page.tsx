@@ -1,5 +1,6 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -203,12 +204,13 @@ export default function Page() {
                               <>
                                 <Table.Tr className="text-gray-600">
                                   <Table.Td className="font-semibold text-gray-800">
-                                    <Link
-                                      href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                    <ProtectedLink
+                                      permission={PERMISSIONS.READ_MATERIALS}
+                                      href={`/warehouse/materials/${item.material.code}`}
                                       className="hover:underline"
                                     >
                                       {item.material.title}
-                                    </Link>
+                                    </ProtectedLink>
                                   </Table.Td>
                                   <Table.Td>
                                     <div className="flex items-center gap-1.5">
@@ -331,12 +333,13 @@ export default function Page() {
                         <Table.Tr key={receipt.id} className="text-gray-600">
                           <Table.Td className="font-semibold text-gray-800">
                             <div className="flex items-center gap-1.5">
-                              <Link
-                                href={getLocalizedHref(`/procurement/material-orders/${id}/receipts/${receipt.id}`)}
+                              <ProtectedLink
+                                permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+                                href={`/procurement/material-orders/${id}/receipts/${receipt.id}`}
                                 className="font-mono hover:underline"
                               >
                                 {receipt.code}
-                              </Link>
+                              </ProtectedLink>
                               <CopyButton text={receipt.code} />
                             </div>
                           </Table.Td>

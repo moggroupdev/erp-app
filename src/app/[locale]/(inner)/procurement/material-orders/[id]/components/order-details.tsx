@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 import { FileText } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import ProtectedLink from "@/components/ui/protected-link";
 
 function getOrderStatusLabel(
   order: Pick<MaterialPurchaseOrderDetailed, "cancelledAt" | "completedAt">,
@@ -16,8 +16,7 @@ function getOrderStatusLabel(
 }
 
 export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDetailed }) {
-  const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
+  const { locale, translate } = useI18n();
   const status = getOrderStatusLabel(order, translate);
 
   const rows: DetailRow[] = [
@@ -25,9 +24,13 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
     {
       key: translate("Supplier", "المورد"),
       value: (
-        <Link href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)} className="hover:underline">
+        <ProtectedLink
+          permission={PERMISSIONS.READ_SUPPLIERS}
+          href={`/procurement/suppliers/${order.supplier.id}`}
+          className="hover:underline"
+        >
           {order.supplier.name}
-        </Link>
+        </ProtectedLink>
       ),
     },
     {

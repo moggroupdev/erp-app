@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
@@ -40,7 +41,6 @@ export default function Page() {
 
   const router = useRouter();
   const urlSearchParams = useSearchParams();
-  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
@@ -175,12 +175,13 @@ export default function Page() {
                     <Table.Tr key={transaction.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
                         <div className="flex items-center gap-1.5">
-                          <Link
-                            href={getLocalizedHref(`/warehouse/transactions/${transaction.id}`)}
+                          <ProtectedLink
+                            permission={PERMISSIONS.READ_INVENTORY_TRANSACTIONS}
+                            href={`/warehouse/transactions/${transaction.id}`}
                             className="font-mono hover:underline"
                           >
                             {transaction.code}
-                          </Link>
+                          </ProtectedLink>
                           <CopyButton text={transaction.code} />
                         </div>
                       </Table.Td>

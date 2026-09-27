@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Table } from "@mantine/core";
 import { ClipboardList } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -30,7 +31,6 @@ export default function RequisitionFollowUpTable({
   missingPriceCount: number;
 }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const currency = translation.currency;
 
   const vatAmount = totals.requestedValue * REQUISITION_VAT_RATE;
@@ -77,13 +77,14 @@ export default function RequisitionFollowUpTable({
                   <Table.Tr key={row.requisitionItemId} className="text-gray-600">
                     <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                     <Table.Td className="max-w-60 truncate font-medium text-gray-800">
-                      <Link
-                        href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_MATERIALS}
+                        href={`/warehouse/materials/${row.materialCode}`}
                         className="text-gray-800 hover:underline"
                         title={row.materialTitle}
                       >
                         {row.materialTitle}
-                      </Link>
+                      </ProtectedLink>
                     </Table.Td>
                     <Table.Td>{getMaterialUnitLabel(row.unitOfMeasurementSelected, locale)}</Table.Td>
                     <Table.Td>{formatQuantity(row.quantityRequested)}</Table.Td>
@@ -95,12 +96,13 @@ export default function RequisitionFollowUpTable({
                     </Table.Td>
                     <Table.Td>
                       <div className="flex items-center gap-1.5">
-                        <Link
-                          href={getLocalizedHref(`/procurement/material-requisitions/${row.requisitionId}`)}
+                        <ProtectedLink
+                          permission={PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS}
+                          href={`/procurement/material-requisitions/${row.requisitionId}`}
                           className="font-mono text-xs text-gray-800 hover:underline"
                         >
                           {row.requisitionCode}
-                        </Link>
+                        </ProtectedLink>
                         <CopyButton text={row.requisitionCode} />
                       </div>
                     </Table.Td>

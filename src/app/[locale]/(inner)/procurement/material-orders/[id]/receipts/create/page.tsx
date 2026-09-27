@@ -1,7 +1,7 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
@@ -120,7 +120,6 @@ function ReceiptItemRow({
   onUpdate: (orderItemId: string, patch: Partial<ReceiptDraftRow>) => void;
 }) {
   const { translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const remaining = remainingInUnit(row.remainingInOrderUnit, row.orderUnit, row.unitOfMeasurementSelected, row);
   const received = draftQuantity(row.quantityReceived);
   const accepted = draftQuantity(row.quantityAccepted);
@@ -139,12 +138,13 @@ function ReceiptItemRow({
       <Table.Td className="min-w-56 font-semibold text-gray-800">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href={getLocalizedHref(`/warehouse/materials/${row.materialCode}`)}
+            <ProtectedLink
+              permission={PERMISSIONS.READ_MATERIALS}
+              href={`/warehouse/materials/${row.materialCode}`}
               className={`hover:underline ${row.fullyReceived ? "text-gray-500" : "text-gray-800"}`}
             >
               {row.materialTitle}
-            </Link>
+            </ProtectedLink>
             {row.fullyReceived && (
               <Badge size="xs" variant="light" color="teal" leftSection={<CheckCircle2 size={11} />} className="normal-case">
                 {translate("Fully received", "مستلم بالكامل")}

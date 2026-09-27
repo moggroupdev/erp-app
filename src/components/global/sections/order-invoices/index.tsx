@@ -1,10 +1,11 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useRef, useState } from "react";
 import { Button, FileButton, Table } from "@mantine/core";
-import Link from "next/link";
 import { FileText, Upload } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -92,7 +93,6 @@ export default function OrderInvoicesSection({
   canAdd = false,
 }: OrderInvoicesSectionProps) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const resetFileRef = useRef<() => void>(null);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -198,12 +198,13 @@ export default function OrderInvoicesSection({
                 <Table.Tr key={invoice.id} className="text-gray-600">
                   <Table.Td className="font-semibold text-gray-800">
                     <div className="flex items-center gap-1.5">
-                      <Link
-                        href={getLocalizedHref(`/procurement/supplier-invoices/${invoice.id}`)}
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_SUPPLIER_INVOICES}
+                        href={`/procurement/supplier-invoices/${invoice.id}`}
                         className="font-mono hover:underline"
                       >
                         {invoice.invoiceNumber}
-                      </Link>
+                      </ProtectedLink>
                       <CopyButton text={invoice.invoiceNumber} />
                       {invoice.pdfFilename && (
                         <span title={translate("PDF attached", "ملف PDF مرفق")} className="text-teal-700">
