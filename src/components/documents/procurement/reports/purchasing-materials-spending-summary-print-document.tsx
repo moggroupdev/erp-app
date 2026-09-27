@@ -100,11 +100,11 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
         <PrintDetail label={translate("Total Value", "إجمالي القيمة")} value={formatMoney(overview.totalSpend, currency)} />
         <PrintDetail
-          label={translate("Total Purchase Orders", "إجمالي عدد أوامر التوريد")}
+          label={translate("Total Purchase Orders", "إجمالي عدد أوامر الشراء")}
           value={String(overview.totalOrders)}
         />
         <PrintDetail
-          label={translate("Average Purchase Order Value", "متوسط قيمة أمر التوريد")}
+          label={translate("Average Purchase Order Value", "متوسط قيمة أمر الشراء")}
           value={formatMoney(overview.avgOrderValue, currency)}
         />
         <PrintDetail
@@ -121,15 +121,15 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           title={translate("Value by Period", "القيمة حسب الفترة")}
           subtitle={translate(
             "Total value, order count, and average order value per period.",
-            "إجمالي القيمة وعدد الطلبات ومتوسط قيمة الطلب لكل فترة.",
+            "إجمالي القيمة وعدد أوامر الشراء ومتوسط قيمة أمر الشراء لكل فترة.",
           )}
         />
         <PrintTable
           headers={[
             translate("Period", "الفترة"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Orders", "الطلبات"),
-            translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
+            translate("Orders", "أوامر الشراء"),
+            translate(`Avg Order (${currency})`, `متوسط أمر الشراء (${currency})`),
           ]}
           rows={byPeriod.map((row) => [
             formatPeriodLabel(row.period, locale, groupBy),
@@ -146,7 +146,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           title={translate("Top Suppliers by Value", "أعلى الموردين قيمة")}
           subtitle={translate(
             "Suppliers ranked by total purchase order value.",
-            "الموردون مرتبون حسب إجمالي قيمة أوامر التوريد.",
+            "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
           )}
         />
         <PrintTable
@@ -154,9 +154,9 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             "#",
             translate("Supplier", "المورد"),
             translate("Code", "الكود"),
-            translate("Orders", "الطلبات"),
+            translate("Orders", "أوامر الشراء"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate(`Avg Order (${currency})`, `متوسط الطلب (${currency})`),
+            translate(`Avg Order (${currency})`, `متوسط أمر الشراء (${currency})`),
           ]}
           rows={bySupplier.map((row, index) => [
             String(index + 1),
@@ -173,10 +173,10 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Top Purchase Orders", "أعلى أوامر التوريد قيمة")}
+          title={translate("Top Purchase Orders", "أعلى أوامر الشراء قيمة")}
           subtitle={translate(
             "Largest purchase orders ranked by total amount.",
-            "أكبر أوامر التوريد مرتبة حسب إجمالي المبلغ.",
+            "أكبر أوامر الشراء مرتبة حسب إجمالي المبلغ.",
           )}
         />
         <PrintTable

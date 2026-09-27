@@ -44,7 +44,7 @@ export default function Page() {
                 label: { en: "Purchases Summary", ar: "ملخص المشتريات" },
                 description: {
                   en: "Overview by period, supplier, and material with order status breakdown.",
-                  ar: "نظرة شاملة حسب الفترة والمورد والمادة مع تفصيل حالات الطلبات.",
+                  ar: "نظرة شاملة حسب الفترة والمورد والمادة مع تفصيل حالات أوامر الشراء.",
                 },
                 href: "/reports/purchasing-materials/spending-summary",
               }}

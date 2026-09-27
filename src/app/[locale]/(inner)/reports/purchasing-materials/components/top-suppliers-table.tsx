@@ -18,7 +18,7 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
       title={translate("Top Suppliers by Value", "أعلى الموردين قيمة")}
       description={translate(
         "Suppliers ranked by total purchase order value.",
-        "الموردون مرتبون حسب إجمالي قيمة أوامر التوريد.",
+        "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
       )}
       icon={Truck}
       accent="amber"
@@ -33,12 +33,12 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Orders", "الطلبات")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Orders", "أوامر الشراء")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Avg Order (${translation.currency})`, `متوسط الطلب (${translation.currency})`)}
+                  {translate(`Avg Order (${translation.currency})`, `متوسط أمر الشراء (${translation.currency})`)}
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>
