@@ -1,9 +1,8 @@
 "use client";
 
-import { ActionIcon, Button, NumberInput } from "@mantine/core";
+import { ActionIcon, Button, NumberInput, Table } from "@mantine/core";
 import { Plus, Trash2, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
-import { VAT_PERCENT } from "@/lib/constants/global";
 import { formatMoney } from "@/lib/helpers/format-money";
 import {
   MPO_PAYMENT_VALUE_KIND_LABELS_LIST,
@@ -25,32 +24,32 @@ type PaymentTermsEditorProps = {
 
 const MONEY_SCALE = 1_000_000;
 
+/** Width classes for the payment-terms table. An empty string leaves that column flexible. */
+const PAYMENT_TERM_COLUMN_WIDTHS = {
+  index: "w-10",
+  when: "",
+  days: "w-28",
+  valueType: "w-[21%]",
+  amount: "w-60",
+  remove: "w-12",
+} as const;
+
+const borderlessField = {
+  variant: "unstyled" as const,
+  radius: 0,
+  size: "sm" as const,
+  classNames: { input: "border-0! bg-transparent! shadow-none" },
+  styles: {
+    input: {
+      minHeight: 32,
+      height: 32,
+      paddingInline: 0,
+    },
+  },
+};
+
 function toScaledAmount(amount: number) {
   return Math.round(amount * MONEY_SCALE);
-}
-
-function CoverageFigure({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "neutral" | "teal" | "amber" | "red";
-}) {
-  const toneClass = {
-    neutral: "border-gray-200 bg-white text-gray-950",
-    teal: "border-teal-200 bg-teal-50 text-teal-950",
-    amber: "border-amber-200 bg-amber-50 text-amber-950",
-    red: "border-red-200 bg-red-50 text-red-800",
-  }[tone];
-
-  return (
-    <div className={`min-w-38 flex-1 rounded-xl px-3 py-2.5 ${toneClass}`}>
-      <p className="text-xs font-medium text-gray-500">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold tabular-nums">{value}</p>
-    </div>
-  );
 }
 
 export default function PaymentTermsEditor({
@@ -70,16 +69,6 @@ export default function PaymentTermsEditor({
   const remainingAmount = gapScaled / MONEY_SCALE;
   const hasRemaining = gapScaled > 0;
   const hasExcess = gapScaled < 0;
-  const overAllocated = coverage.remainder == null && coveredScaled > totalScaled;
-  const remainderExhausted = coverage.remainder != null && toScaledAmount(coverage.remainder) <= 0;
-  const coverageProblem = overAllocated || remainderExhausted;
-  const coveragePercent = coverage.valid
-    ? 100
-    : totalAmount <= 0
-      ? 0
-      : Math.min((coverage.covered / totalAmount) * 100, 100);
-  const percentLabel = coverage.valid ? "100%" : `${Math.round(coveragePercent * 10) / 10}%`;
-  const statusTone = coverage.valid ? "text-teal-800" : coverageProblem ? "text-red-700" : "text-amber-800";
 
   function updateTerm(key: string, patch: Partial<PaymentTermDraft>) {
     onChange(terms.map((term) => (term.key === key ? { ...term, ...patch } : term)));
@@ -93,19 +82,6 @@ export default function PaymentTermsEditor({
     if (!scheduleReady) return;
     onChange([...terms, createPaymentTermDraft()]);
   }
-
-  const coverageStatus = coverage.valid
-    ? hasRemaining
-      ? translate("The remainder row takes the leftover amount.", "صف الباقي يأخذ المبلغ المتبقي.")
-      : translate("The schedule covers the grand total.", "الجدول يغطي الإجمالي الكلي.")
-    : hasExcess
-      ? translate("These payments are above the grand total.", "هذه الدفعات أعلى من الإجمالي الكلي.")
-      : hasRemaining
-        ? translate(
-            "Schedule the remaining amount to reach the grand total.",
-            "جدول المبلغ المتبقي للوصول إلى الإجمالي الكلي.",
-          )
-        : translate("Add rows until the schedule reaches the grand total.", "أضف صفوفاً حتى يصل الجدول إلى الإجمالي الكلي.");
 
   return (
     <section className="overflow-hidden rounded-2xl bg-white">
@@ -141,24 +117,35 @@ export default function PaymentTermsEditor({
             </p>
           </div>
         </div>
-      ) : terms.length === 0 ? (
-        <p className="px-5 py-8 text-center text-sm text-gray-500">
-          {translate("No payments yet. Add the first slice below.", "لا توجد دفعات بعد. أضف الدفعة الأولى بالأسفل.")}
-        </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] border-collapse">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 text-start text-xs font-medium text-gray-500">
-                <th className="w-10 px-3 py-2 text-start font-medium">#</th>
-                <th className="px-3 py-2 text-start font-medium">{translate("When", "الموعد")}</th>
-                <th className="w-28 px-3 py-2 text-start font-medium">{translate("Days", "الأيام")}</th>
-                <th className="w-52 px-3 py-2 text-start font-medium">{translate("Value type", "نوع القيمة")}</th>
-                <th className="w-44 px-3 py-2 text-start font-medium">{translate("Amount", "المبلغ")}</th>
-                <th className="w-12 px-2 py-2" />
-              </tr>
-            </thead>
-            <tbody>
+          <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+            <colgroup>
+              {Object.entries(PAYMENT_TERM_COLUMN_WIDTHS).map(([column, width]) => (
+                <col key={column} className={width || undefined} />
+              ))}
+            </colgroup>
+            <Table.Thead className="bg-gray-50 whitespace-nowrap">
+              <Table.Tr className="h-9">
+                <Table.Th className="text-center! text-xs font-medium text-gray-500">#</Table.Th>
+                <Table.Th className="text-xs font-medium text-gray-500">{translate("When", "الموعد")}</Table.Th>
+                <Table.Th className="text-xs font-medium text-gray-500">{translate("Days", "الأيام")}</Table.Th>
+                <Table.Th className="text-xs font-medium text-gray-500">{translate("Value type", "نوع القيمة")}</Table.Th>
+                <Table.Th className="text-xs font-medium text-gray-500">{translate("Amount", "المبلغ")}</Table.Th>
+                <Table.Th />
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {terms.length === 0 ? (
+                <Table.Tr>
+                  <Table.Td colSpan={6} className="py-8 text-center text-sm text-gray-500">
+                    {translate(
+                      "No payments yet. Add the first slice below.",
+                      "لا توجد دفعات بعد. أضف الدفعة الأولى بالأسفل.",
+                    )}
+                  </Table.Td>
+                </Table.Tr>
+              ) : null}
               {terms.map((term, index) => {
                 const showDays = paymentEventNeedsOffset(term.event);
                 const showValue =
@@ -173,12 +160,9 @@ export default function PaymentTermsEditor({
                 const invalid = invalidTermKeys.includes(term.key);
 
                 return (
-                  <tr
-                    key={term.key}
-                    className={`border-b border-gray-100 last:border-b-0 ${invalid ? "bg-red-50 [&>td]:bg-red-50" : ""}`}
-                  >
-                    <td className="px-3 py-2 text-sm text-gray-400 tabular-nums">{index + 1}</td>
-                    <td className="px-3 py-2">
+                  <Table.Tr key={term.key} className={invalid ? "bg-red-50 [&>td]:bg-red-50" : undefined}>
+                    <Table.Td className="text-center text-sm text-gray-400 tabular-nums">{index + 1}</Table.Td>
+                    <Table.Td>
                       <SelectMpoPaymentEvent
                         value={term.event}
                         setValue={(value) => {
@@ -190,16 +174,15 @@ export default function PaymentTermsEditor({
                         }}
                         placeholder={translate("Advance, on receipt, or after a delay", "مقدمة أو عند الاستلام أو بعد مدة")}
                         aria-label={translate(`When payment ${index + 1} is paid`, `موعد الدفعة ${index + 1}`)}
-                        size="sm"
-                        radius="md"
+                        {...borderlessField}
                       />
-                    </td>
-                    <td className="px-3 py-2">
+                    </Table.Td>
+                    <Table.Td>
                       {showDays ? (
                         <NumberInput
                           value={term.offsetDays}
                           onChange={(value) => updateTerm(term.key, { offsetDays: value === "" ? "" : Number(value) })}
-                          placeholder={translate("30", "٣٠")}
+                          placeholder={translate("Number of days", "عدد الأيام")}
                           aria-label={
                             term.event === MPO_PAYMENT_EVENTS.AFTER_RECEIPT
                               ? translate("Days from receipt", "أيام من الاستلام")
@@ -210,14 +193,13 @@ export default function PaymentTermsEditor({
                           allowNegative={false}
                           hideControls
                           required
-                          size="sm"
-                          radius="md"
+                          {...borderlessField}
                         />
                       ) : (
-                        <span className="px-1 text-sm text-gray-300">—</span>
+                        <span className="text-sm text-gray-300">—</span>
                       )}
-                    </td>
-                    <td className="px-3 py-2">
+                    </Table.Td>
+                    <Table.Td>
                       <SelectMpoPaymentValueKind
                         value={term.valueKind}
                         setValue={(value) => {
@@ -232,11 +214,10 @@ export default function PaymentTermsEditor({
                         labelsList={valueLabels}
                         placeholder={translate("Percentage, amount, or remainder", "نسبة أو مبلغ أو الباقي")}
                         aria-label={translate(`Value type for payment ${index + 1}`, `نوع قيمة الدفعة ${index + 1}`)}
-                        size="sm"
-                        radius="md"
+                        {...borderlessField}
                       />
-                    </td>
-                    <td className="px-3 py-2">
+                    </Table.Td>
+                    <Table.Td>
                       {showValue ? (
                         <div className="flex items-center gap-2">
                           <NumberInput
@@ -254,8 +235,7 @@ export default function PaymentTermsEditor({
                             decimalScale={6}
                             hideControls
                             required
-                            size="sm"
-                            radius="md"
+                            {...borderlessField}
                             className="min-w-0 flex-1"
                           />
                           <span className="shrink-0 text-xs font-medium text-gray-400">
@@ -267,78 +247,96 @@ export default function PaymentTermsEditor({
                           {formatMoney(coverage.remainder ?? 0, currency)}
                         </span>
                       ) : (
-                        <span className="px-1 text-sm text-gray-300">—</span>
+                        <span className="text-sm text-gray-300">—</span>
                       )}
-                    </td>
-                    <td className="px-2 py-2">
+                    </Table.Td>
+                    <Table.Td className="text-center">
                       <ActionIcon
                         type="button"
                         variant="subtle"
                         color="red"
+                        size="sm"
                         radius="md"
                         onClick={() => removeTerm(term.key)}
                         aria-label={translate("Remove payment", "حذف الدفعة")}
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={14} />
                       </ActionIcon>
-                    </td>
-                  </tr>
+                    </Table.Td>
+                  </Table.Tr>
                 );
               })}
-            </tbody>
-          </table>
+              <Table.Tr>
+                <Table.Td colSpan={6} className="border-t border-gray-200">
+                  <Button
+                    type="button"
+                    color="teal"
+                    radius="xl"
+                    size="sm"
+                    leftSection={<Plus size={14} />}
+                    onClick={addTerm}
+                  >
+                    {translate("Add payment", "إضافة دفعة")}
+                  </Button>
+                </Table.Td>
+              </Table.Tr>
+            </Table.Tbody>
+            <Table.Tfoot className="border-t border-gray-200 bg-gray-50">
+              <Table.Tr className="h-9">
+                <Table.Td />
+                <Table.Td colSpan={3} className="text-sm text-gray-600">
+                  {translate("Covered", "المغطى")}
+                </Table.Td>
+                <Table.Td>
+                  <span className={`text-sm font-medium tabular-nums ${coverage.valid ? "text-teal-800" : "text-gray-800"}`}>
+                    {formatMoney(coverage.covered, currency)}
+                  </span>
+                </Table.Td>
+                <Table.Td />
+              </Table.Tr>
+              {hasRemaining && (
+                <Table.Tr className="h-9">
+                  <Table.Td />
+                  <Table.Td colSpan={3} className="text-sm text-gray-600">
+                    {translate("Remaining", "المتبقي")}
+                  </Table.Td>
+                  <Table.Td>
+                    <span className="text-sm font-medium text-amber-800 tabular-nums">
+                      {formatMoney(remainingAmount, currency)}
+                    </span>
+                  </Table.Td>
+                  <Table.Td />
+                </Table.Tr>
+              )}
+              {hasExcess && (
+                <Table.Tr className="h-9">
+                  <Table.Td />
+                  <Table.Td colSpan={3} className="text-sm text-gray-600">
+                    {translate("Over by", "الزيادة")}
+                  </Table.Td>
+                  <Table.Td>
+                    <span className="text-sm font-medium text-red-700 tabular-nums">
+                      {formatMoney(Math.abs(remainingAmount), currency)}
+                    </span>
+                  </Table.Td>
+                  <Table.Td />
+                </Table.Tr>
+              )}
+              <Table.Tr className="h-9">
+                <Table.Td />
+                <Table.Td colSpan={3} className="text-sm font-semibold text-gray-950">
+                  {translate("Grand total", "الإجمالي الكلي")}
+                </Table.Td>
+                <Table.Td>
+                  <span className="text-sm font-semibold text-gray-950 tabular-nums">
+                    {formatMoney(totalAmount, currency)}
+                  </span>
+                </Table.Td>
+                <Table.Td />
+              </Table.Tr>
+            </Table.Tfoot>
+          </Table>
         </div>
-      )}
-
-      {scheduleReady && (
-        <>
-          <div className="border-t border-gray-200 px-4 py-3">
-            <Button type="button" color="teal" radius="xl" size="sm" leftSection={<Plus size={14} />} onClick={addTerm}>
-              {translate("Add payment", "إضافة دفعة")}
-            </Button>
-          </div>
-
-          <div className="border-t border-gray-200 bg-gray-50 px-4 py-4">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-stretch gap-2">
-                <CoverageFigure
-                  label={translate("Covered", "المغطى")}
-                  value={formatMoney(coverage.covered, currency)}
-                  tone={coverage.valid ? "teal" : "neutral"}
-                />
-                {hasRemaining && (
-                  <CoverageFigure
-                    label={translate("Remaining", "المتبقي")}
-                    value={formatMoney(remainingAmount, currency)}
-                    tone="neutral"
-                  />
-                )}
-                {hasExcess && (
-                  <CoverageFigure
-                    label={translate("Over by", "الزيادة")}
-                    value={formatMoney(Math.abs(remainingAmount), currency)}
-                    tone="red"
-                  />
-                )}
-                <CoverageFigure
-                  label={translate("Grand total", "الإجمالي الكلي")}
-                  value={formatMoney(totalAmount, currency)}
-                  tone="neutral"
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
-                  <div
-                    className={`h-full rounded-full ${coverage.valid ? "bg-teal-700" : coverageProblem ? "bg-red-500" : "bg-amber-500"}`}
-                    style={{ width: `${coveragePercent}%` }}
-                  />
-                </div>
-                <span className={`shrink-0 text-sm font-semibold tabular-nums ${statusTone}`}>{percentLabel}</span>
-              </div>
-              <p className={`text-sm ${statusTone}`}>{coverageStatus}</p>
-            </div>
-          </div>
-        </>
       )}
     </section>
   );

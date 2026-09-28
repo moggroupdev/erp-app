@@ -49,6 +49,19 @@ import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
 
+/** Width classes for the items table. An empty string leaves that column flexible. */
+const ITEM_COLUMN_WIDTHS = {
+  index: "w-10",
+  material: "",
+  quantity: "w-20",
+  unit: "w-24",
+  unitPrice: "w-28",
+  lineTotal: "w-28",
+  requisitions: "w-[26%]",
+  notes: "w-[18%]",
+  remove: "w-12",
+} as const;
+
 function CreateOrderHeading({ onBack }: { onBack: () => void }) {
   const { translate, translation } = useI18n();
 
@@ -151,7 +164,7 @@ function ItemRow({
 
   return (
     <Table.Tr className={invalid ? "bg-red-50 [&>td]:bg-red-50" : undefined}>
-      <Table.Td className="w-[2.5%] pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
+      <Table.Td className="pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
       <Table.Td className="align-top!">
         <div className="flex flex-col gap-1.5 py-0.5">
           <span className="text-sm font-medium text-gray-800">{row.materialTitle || row.materialCode}</span>
@@ -194,7 +207,7 @@ function ItemRow({
             radius={0}
             searchable
             placeholder={translate("Select unit", "اختر الوحدة")}
-            styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0, cursor: "pointer" } }}
           />
         ) : (
           <span className="text-sm text-gray-600">
@@ -213,7 +226,7 @@ function ItemRow({
           variant="unstyled"
           radius={0}
           placeholder={translate("Enter price", "أدخل السعر")}
-          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0 } }}
           aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
         />
       </Table.Td>
@@ -293,7 +306,7 @@ function ItemRow({
           styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
         />
       </Table.Td>
-      <Table.Td className="w-[2.5%] align-top!">
+      <Table.Td className="align-top!">
         <Button
           type="button"
           variant="subtle"
@@ -815,31 +828,36 @@ export default function Page() {
             ) : (
               <div className="overflow-x-auto">
                 <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
-                  <Table.Thead className="bg-gray-50">
+                  <colgroup>
+                    {Object.entries(ITEM_COLUMN_WIDTHS).map(([column, width]) => (
+                      <col key={column} className={width || undefined} />
+                    ))}
+                  </colgroup>
+                  <Table.Thead className="bg-gray-50 whitespace-nowrap">
                     <Table.Tr className="h-9">
-                      <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
-                      <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="text-center! text-gray-500">#</Table.Th>
+                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Material", "المادة")}
                       </Table.Th>
-                      <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Quantity", "الكمية")}
                       </Table.Th>
-                      <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Unit", "الوحدة")}
                       </Table.Th>
-                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
                       </Table.Th>
-                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Line Total", "إجمالي البند")} ({translation.currency})
                       </Table.Th>
-                      <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Requisitions", "طلبات الشراء")}
                       </Table.Th>
-                      <Table.Th className="w-[14.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                         {translate("Notes", "الملاحظات")}
                       </Table.Th>
-                      <Table.Th className="w-[3%]" />
+                      <Table.Th />
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
