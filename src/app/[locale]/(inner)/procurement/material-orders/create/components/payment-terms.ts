@@ -57,9 +57,22 @@ export function getPaymentCoverage(terms: PaymentTermDraft[], totalAmount: numbe
 
 type Translate = (en: string, ar: string) => string;
 
-export function validatePaymentTerms(terms: PaymentTermDraft[], totalAmount: number, translate: Translate) {
+export type PaymentTermsError = {
+  message: string;
+  termKeys: string[];
+};
+
+function paymentTermsError(message: string, termKeys: string[] = []): PaymentTermsError {
+  return { message, termKeys };
+}
+
+export function validatePaymentTerms(
+  terms: PaymentTermDraft[],
+  totalAmount: number,
+  translate: Translate,
+): PaymentTermsError | null {
   if (terms.length === 0) {
-    return translate("Add at least one payment term.", "أضف شرط سداد واحد على الأقل.");
+    return paymentTermsError(translate("Add at least one payment term.", "أضف شرط سداد واحد على الأقل."));
   }
 
   const seenDeferred = new Set<string>();
@@ -72,25 +85,49 @@ export function validatePaymentTerms(terms: PaymentTermDraft[], totalAmount: num
     const term = terms[index];
     const rowLabel = translate(`Payment ${index + 1}`, `الدفعة ${index + 1}`);
 
-    if (!term.event) return translate(`${rowLabel}: choose when this slice is paid.`, `${rowLabel}: اختر موعد السداد.`);
-    if (!term.valueKind) return translate(`${rowLabel}: choose how this slice is valued.`, `${rowLabel}: اختر نوع قيمة الدفعة.`);
+    if (!term.event) {
+      return paymentTermsError(
+        translate(`${rowLabel}: choose when this slice is paid.`, `${rowLabel}: اختر موعد السداد.`),
+        [term.key],
+      );
+    }
+    if (!term.valueKind) {
+      return paymentTermsError(
+        translate(`${rowLabel}: choose how this slice is valued.`, `${rowLabel}: اختر نوع قيمة الدفعة.`),
+        [term.key],
+      );
+    }
 
     if (term.event === MPO_PAYMENT_EVENTS.ADVANCE) advanceCount += 1;
     if (term.event === MPO_PAYMENT_EVENTS.ON_RECEIPT) onReceiptCount += 1;
-    if (advanceCount > 1) return translate("An order can have only one advance payment.", "لا يمكن أن يحتوي الأمر على أكثر من دفعة مقدمة.");
+    if (advanceCount > 1) {
+      return paymentTermsError(
+        translate("An order can have only one advance payment.", "لا يمكن أن يحتوي الأمر على أكثر من دفعة مقدمة."),
+        [term.key],
+      );
+    }
     if (onReceiptCount > 1) {
-      return translate("An order can have only one on-receipt payment.", "لا يمكن أن يحتوي الأمر على أكثر من دفعة عند الاستلام.");
+      return paymentTermsError(
+        translate("An order can have only one on-receipt payment.", "لا يمكن أن يحتوي الأمر على أكثر من دفعة عند الاستلام."),
+        [term.key],
+      );
     }
 
     if (paymentEventNeedsOffset(term.event)) {
       if (term.offsetDays === "" || !Number.isInteger(term.offsetDays) || term.offsetDays <= 0) {
-        return translate(`${rowLabel}: enter a positive number of days.`, `${rowLabel}: أدخل عدداً موجباً من الأيام.`);
+        return paymentTermsError(
+          translate(`${rowLabel}: enter a positive number of days.`, `${rowLabel}: أدخل عدداً موجباً من الأيام.`),
+          [term.key],
+        );
       }
       const key = `${term.event}:${term.offsetDays}`;
       if (seenDeferred.has(key)) {
-        return translate(
-          "Two payments cannot share the same event and day count.",
-          "لا يمكن أن تشترك دفعتان في نفس الحدث وعدد الأيام.",
+        return paymentTermsError(
+          translate(
+            "Two payments cannot share the same event and day count.",
+            "لا يمكن أن تشترك دفعتان في نفس الحدث وعدد الأيام.",
+          ),
+          [term.key],
         );
       }
       seenDeferred.add(key);
@@ -99,16 +136,25 @@ export function validatePaymentTerms(terms: PaymentTermDraft[], totalAmount: num
     if (term.valueKind === MPO_PAYMENT_VALUE_KINDS.REMAINDER) {
       remainderCount += 1;
       if (remainderCount > 1) {
-        return translate("An order can have only one remainder payment.", "لا يمكن أن يحتوي الأمر على أكثر من دفعة للباقي.");
+        return paymentTermsError(
+          translate("An order can have only one remainder payment.", "لا يمكن أن يحتوي الأمر على أكثر من دفعة للباقي."),
+          [term.key],
+        );
       }
       continue;
     }
 
     if (term.value === "" || term.value <= 0) {
-      return translate(`${rowLabel}: enter an amount greater than zero.`, `${rowLabel}: أدخل قيمة أكبر من صفر.`);
+      return paymentTermsError(
+        translate(`${rowLabel}: enter an amount greater than zero.`, `${rowLabel}: أدخل قيمة أكبر من صفر.`),
+        [term.key],
+      );
     }
     if (term.valueKind === MPO_PAYMENT_VALUE_KINDS.PERCENTAGE && term.value > 100) {
-      return translate(`${rowLabel}: a percentage cannot exceed 100.`, `${rowLabel}: النسبة لا يمكن أن تتجاوز 100.`);
+      return paymentTermsError(
+        translate(`${rowLabel}: a percentage cannot exceed 100.`, `${rowLabel}: النسبة لا يمكن أن تتجاوز 100.`),
+        [term.key],
+      );
     }
     pricedCount += 1;
   }
@@ -116,21 +162,31 @@ export function validatePaymentTerms(terms: PaymentTermDraft[], totalAmount: num
   const coverage = getPaymentCoverage(terms, totalAmount);
   if (coverage.valid) return null;
 
+  const remainderKey = terms.find((term) => term.valueKind === MPO_PAYMENT_VALUE_KINDS.REMAINDER)?.key;
   if (remainderCount === 1 && pricedCount === 0) {
-    return translate(
-      "A payment schedule cannot be only a remainder. Add the other slices first.",
-      "لا يمكن أن تكون شروط السداد باقياً فقط. أضف الدفعات الأخرى أولاً.",
+    return paymentTermsError(
+      translate(
+        "A payment schedule cannot be only a remainder. Add the other slices first.",
+        "لا يمكن أن تكون شروط السداد باقياً فقط. أضف الدفعات الأخرى أولاً.",
+      ),
+      remainderKey ? [remainderKey] : [],
     );
   }
   if (remainderCount === 1) {
-    return translate(
-      "The remainder must be a positive leftover. Fixed amounts and percentages already cover the grand total.",
-      "يجب أن يكون الباقي مبلغاً متبقياً موجباً. المبالغ الثابتة والنسب تغطي الإجمالي الكلي بالفعل.",
+    return paymentTermsError(
+      translate(
+        "The remainder must be a positive leftover. Fixed amounts and percentages already cover the grand total.",
+        "يجب أن يكون الباقي مبلغاً متبقياً موجباً. المبالغ الثابتة والنسب تغطي الإجمالي الكلي بالفعل.",
+      ),
+      remainderKey ? [remainderKey] : [],
     );
   }
-  return translate(
-    "Payment terms must cover 100% of the grand total, including VAT.",
-    "يجب أن تغطي شروط السداد 100٪ من الإجمالي الكلي شاملاً ضريبة القيمة المضافة.",
+  return paymentTermsError(
+    translate(
+      "Payment terms must cover 100% of the grand total, including VAT.",
+      "يجب أن تغطي شروط السداد 100٪ من الإجمالي الكلي شاملاً ضريبة القيمة المضافة.",
+    ),
+    terms.map((term) => term.key),
   );
 }
 

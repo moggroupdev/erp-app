@@ -20,6 +20,7 @@ type PaymentTermsEditorProps = {
   onChange: (terms: PaymentTermDraft[]) => void;
   totalAmount: number;
   currency: string;
+  invalidTermKeys: string[];
 };
 
 const MONEY_SCALE = 1_000_000;
@@ -52,7 +53,13 @@ function CoverageFigure({
   );
 }
 
-export default function PaymentTermsEditor({ terms, onChange, totalAmount, currency }: PaymentTermsEditorProps) {
+export default function PaymentTermsEditor({
+  terms,
+  onChange,
+  totalAmount,
+  currency,
+  invalidTermKeys,
+}: PaymentTermsEditorProps) {
   const { translate } = useI18n();
   const scheduleReady = totalAmount > 0;
   const coverage = getPaymentCoverage(terms, totalAmount);
@@ -163,8 +170,13 @@ export default function PaymentTermsEditor({ terms, onChange, totalAmount, curre
                     ? MPO_PAYMENT_VALUE_KIND_LABELS_LIST.filter((item) => item.value !== MPO_PAYMENT_VALUE_KINDS.REMAINDER)
                     : undefined;
 
+                const invalid = invalidTermKeys.includes(term.key);
+
                 return (
-                  <tr key={term.key} className="border-b border-gray-100 last:border-b-0">
+                  <tr
+                    key={term.key}
+                    className={`border-b border-gray-100 last:border-b-0 ${invalid ? "bg-red-50 [&>td]:bg-red-50" : ""}`}
+                  >
                     <td className="px-3 py-2 text-sm text-gray-400 tabular-nums">{index + 1}</td>
                     <td className="px-3 py-2">
                       <SelectMpoPaymentEvent

@@ -129,6 +129,7 @@ function ItemRow({
   onRemove,
   onLinkRequisitions,
   onRemoveAllocation,
+  invalid,
 }: {
   row: ItemDraftRow;
   index: number;
@@ -138,6 +139,7 @@ function ItemRow({
   onRemove: (key: string) => void;
   onLinkRequisitions: (key: string) => void;
   onRemoveAllocation: (rowKey: string, requisitionItemId: string) => void;
+  invalid: boolean;
 }) {
   const { translate } = useI18n();
   const quantity = typeof row.quantity === "number" ? row.quantity : null;
@@ -148,7 +150,7 @@ function ItemRow({
   const fullyLinked = quantity !== null && row.allocations.length > 0 && Math.abs(linkedTotal - quantity) <= 1e-9;
 
   return (
-    <Table.Tr>
+    <Table.Tr className={invalid ? "bg-red-50 [&>td]:bg-red-50" : undefined}>
       <Table.Td className="w-[2.5%] pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
       <Table.Td className="align-top!">
         <div className="flex flex-col gap-1.5 py-0.5">
@@ -326,6 +328,8 @@ export default function Page() {
   const [rows, setRows] = useState<ItemDraftRow[]>([]);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTermDraft[]>(() => [createPaymentTermDraft()]);
   const [validationError, setValidationError] = useState("");
+  const [invalidRowKey, setInvalidRowKey] = useState<string | null>(null);
+  const [invalidPaymentTermKeys, setInvalidPaymentTermKeys] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [prefillDone, setPrefillDone] = useState(!requisitionIdParam);
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
@@ -497,15 +501,18 @@ export default function Page() {
   const linkRow = linkRowKey ? rows.find((row) => row.key === linkRowKey) : null;
 
   function updateRow(key: string, patch: Partial<ItemDraftRow>) {
+    setInvalidRowKey((current) => (current === key ? null : current));
     setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
   }
 
   function removeRow(key: string) {
+    setInvalidRowKey((current) => (current === key ? null : current));
     setRows((prev) => prev.filter((row) => row.key !== key));
     if (linkRowKey === key) setLinkRowKey(null);
   }
 
   function removeAllocation(rowKey: string, requisitionItemId: string) {
+    setInvalidRowKey((current) => (current === rowKey ? null : current));
     setRows((prev) =>
       prev.flatMap((row) => {
         if (row.key !== rowKey) return [row];
@@ -572,9 +579,16 @@ export default function Page() {
     });
   }
 
+  function rejectRow(key: string, message: string) {
+    setInvalidRowKey(key);
+    setValidationError(message);
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidationError("");
+    setInvalidRowKey(null);
+    setInvalidPaymentTermKeys([]);
 
     if (!supplierId) {
       return setValidationError(translate("Please select a supplier.", "يرجى اختيار مورد."));
@@ -611,11 +625,12 @@ export default function Page() {
       const materialName = row.materialTitle || row.materialCode;
 
       if (!row.materialCode) {
-        return setValidationError(translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
+        return rejectRow(row.key, translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
       }
 
       if (row.allocations.length === 0) {
-        return setValidationError(
+        return rejectRow(
+          row.key,
           translate(
             `${rowLabel}: material ${materialName} must be linked to open purchase requisition lines.`,
             `${rowLabel}: يجب ربط المادة ${materialName} ببنود طلبات شراء مفتوحة.`,
@@ -624,7 +639,8 @@ export default function Page() {
       }
 
       if (!row.unitOfMeasurementSelected || !row.unitOfMeasurement) {
-        return setValidationError(
+        return rejectRow(
+          row.key,
           translate(
             `${rowLabel}: please select the unit for material ${materialName}.`,
             `${rowLabel}: يرجى اختيار الوحدة للمادة ${materialName}.`,
@@ -633,7 +649,8 @@ export default function Page() {
       }
 
       if (row.quantity === "") {
-        return setValidationError(
+        return rejectRow(
+          row.key,
           translate(
             `${rowLabel}: quantity for material ${materialName} is missing.`,
             `${rowLabel}: كمية المادة ${materialName} غير موجودة.`,
@@ -643,7 +660,8 @@ export default function Page() {
 
       const qty = Number(row.quantity);
       if (Number.isNaN(qty) || qty <= 0) {
-        return setValidationError(
+        return rejectRow(
+          row.key,
           translate(
             `${rowLabel}: quantity for material ${materialName} must be greater than zero.`,
             `${rowLabel}: يجب أن تكون كمية المادة ${materialName} أكبر من صفر.`,
@@ -652,7 +670,8 @@ export default function Page() {
       }
 
       if (row.unitPrice === "") {
-        return setValidationError(
+        return rejectRow(
+          row.key,
           translate(
             `${rowLabel}: please enter the unit price for material ${materialName}.`,
             `${rowLabel}: يرجى إدخال سعر الوحدة للمادة ${materialName}.`,
@@ -662,7 +681,8 @@ export default function Page() {
 
       const price = Number(row.unitPrice);
       if (Number.isNaN(price) || price <= 0) {
-        return setValidationError(
+        return rejectRow(
+          row.key,
           translate(
             `${rowLabel}: unit price for material ${materialName} must be greater than zero.`,
             `${rowLabel}: يجب أن يكون سعر الوحدة للمادة ${materialName} أكبر من صفر.`,
@@ -672,7 +692,8 @@ export default function Page() {
 
       const linkedTotal = allocationLinkedTotal(row);
       if (Math.abs(linkedTotal - qty) > 1e-9) {
-        return setValidationError(
+        return rejectRow(
+          row.key,
           translate(
             `${rowLabel}: linked requisition quantity must equal ordered quantity for material ${materialName}.`,
             `${rowLabel}: يجب أن تساوي كمية طلبات الشراء المربوطة الكمية المطلوبة للمادة ${materialName}.`,
@@ -682,7 +703,10 @@ export default function Page() {
     }
 
     const paymentError = validatePaymentTerms(paymentTerms, grandTotal, translate);
-    if (paymentError) return setValidationError(paymentError);
+    if (paymentError) {
+      setInvalidPaymentTermKeys(paymentError.termKeys);
+      return setValidationError(paymentError.message);
+    }
 
     handleOpenConfirm();
   }
@@ -752,7 +776,7 @@ export default function Page() {
           setNotes={setNotes}
         />
 
-        <section className="overflow-hidden bg-white">
+        <section className="overflow-hidden rounded-2xl bg-white">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
             <div className="flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-2xl bg-teal-800 text-white">
@@ -779,8 +803,8 @@ export default function Page() {
                   <h5 className="text-base font-semibold text-gray-900">{translate("No items yet", "لا توجد بنود بعد")}</h5>
                   <p className="text-sm leading-relaxed text-gray-500">
                     {translate(
-                      "Start by adding open purchase requisition lines. Materials and quantities will be filled from the selected requisitions.",
-                      "ابدأ بإضافة بنود من طلبات الشراء المفتوحة. ستُعبأ المواد والكميات من الطلبات المحددة.",
+                      "Start by adding open purchase requisition lines.",
+                      "ابدأ بإضافة بنود من طلبات الشراء المفتوحة.",
                     )}
                   </p>
                 </div>
@@ -830,6 +854,7 @@ export default function Page() {
                         onRemove={removeRow}
                         onLinkRequisitions={setLinkRowKey}
                         onRemoveAllocation={removeAllocation}
+                        invalid={row.key === invalidRowKey}
                       />
                     ))}
                   </Table.Tbody>
@@ -879,9 +904,27 @@ export default function Page() {
 
         <PaymentTermsEditor
           terms={paymentTerms}
-          onChange={setPaymentTerms}
+          onChange={(next) => {
+            setPaymentTerms(next);
+            setInvalidPaymentTermKeys((current) => {
+              if (current.length === 0) return current;
+              const previousByKey = new Map(paymentTerms.map((term) => [term.key, term]));
+              return current.filter((key) => {
+                const previous = previousByKey.get(key);
+                const updated = next.find((term) => term.key === key);
+                if (!previous || !updated) return false;
+                return (
+                  previous.event === updated.event &&
+                  previous.offsetDays === updated.offsetDays &&
+                  previous.valueKind === updated.valueKind &&
+                  previous.value === updated.value
+                );
+              });
+            });
+          }}
           totalAmount={grandTotal}
           currency={translation.currency}
+          invalidTermKeys={invalidPaymentTermKeys}
         />
 
         {error && !confirmOpened && <ErrorAlert error={error} />}
