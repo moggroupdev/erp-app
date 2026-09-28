@@ -1,6 +1,9 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { getMpoDeliveryLocationLabel } from "@/lib/constants/enums/mpo-delivery-locations";
+import { getMpoDeliveryTimingLabel, MPO_DELIVERY_TIMINGS } from "@/lib/constants/enums/mpo-delivery-timings";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatPaymentTermLine } from "@/lib/helpers/format-mpo-terms";
 import { type MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 import { FileText } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
@@ -18,6 +21,7 @@ function getOrderStatusLabel(
 export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDetailed }) {
   const { locale, translate } = useI18n();
   const status = getOrderStatusLabel(order, translate);
+  const paymentTerms = order.paymentTerms ?? [];
 
   const rows: DetailRow[] = [
     { key: translate("Purchase Order Code", "كود أمر التوريد"), value: order.code, mono: true, copyText: order.code },
@@ -60,6 +64,33 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
     {
       key: translate("Created By", "أنشئ بواسطة"),
       value: <CreatorLink creator={order.createdBy} />,
+    },
+    {
+      key: translate("Delivery location", "مكان التسليم"),
+      value: order.deliveryLocation ? getMpoDeliveryLocationLabel(order.deliveryLocation, locale) : <EmptyValue />,
+    },
+    {
+      key: translate("Delivery period", "مدة التوريد"),
+      value: order.deliveryTiming ? (
+        order.deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS
+          ? translate(`${order.deliveryPeriodDays} days`, `${order.deliveryPeriodDays} يوم`)
+          : getMpoDeliveryTimingLabel(order.deliveryTiming, locale)
+      ) : (
+        <EmptyValue />
+      ),
+    },
+    {
+      key: translate("Payment terms", "شروط السداد"),
+      value:
+        paymentTerms.length > 0 ? (
+          <ol className="m-0 flex list-none flex-col gap-1 p-0 font-normal">
+            {paymentTerms.map((term) => (
+              <li key={term.id}>{formatPaymentTermLine(term, translate)}</li>
+            ))}
+          </ol>
+        ) : (
+          <EmptyValue />
+        ),
     },
     {
       key: translate("Notes", "الملاحظات"),

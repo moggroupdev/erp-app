@@ -26,6 +26,12 @@ import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
+import SelectMpoDeliveryLocation from "@/components/global/selections/enum-based/select-mpo-delivery-location";
+import SelectMpoDeliveryTiming from "@/components/global/selections/enum-based/select-mpo-delivery-timing";
+import { MPO_DELIVERY_TIMINGS, type MpoDeliveryTiming } from "@/lib/constants/enums/mpo-delivery-timings";
+import type { MpoDeliveryLocation } from "@/lib/constants/enums/mpo-delivery-locations";
+import PaymentTermsEditor from "./components/payment-terms-editor";
+import { createPaymentTermDraft, toPaymentTermDtos, validatePaymentTerms, type PaymentTermDraft } from "./components/payment-terms";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import { convertEnteredQuantityBetweenUnits } from "../helpers";
@@ -286,8 +292,12 @@ export default function Page() {
   const queryClient = useQueryClient();
 
   const [supplierId, setSupplierId] = useState<string | null>(null);
+  const [deliveryLocation, setDeliveryLocation] = useState<MpoDeliveryLocation | null>(null);
+  const [deliveryTiming, setDeliveryTiming] = useState<MpoDeliveryTiming | null>(null);
+  const [deliveryPeriodDays, setDeliveryPeriodDays] = useState<number | "">("");
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([]);
+  const [paymentTerms, setPaymentTerms] = useState<PaymentTermDraft[]>(() => [createPaymentTermDraft()]);
   const [validationError, setValidationError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [prefillDone, setPrefillDone] = useState(!requisitionIdParam);
@@ -400,8 +410,12 @@ export default function Page() {
         privateRequest,
         dto: {
           supplierId: supplierId!,
+          deliveryLocation: deliveryLocation!,
+          deliveryTiming: deliveryTiming!,
+          deliveryPeriodDays: deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS ? Number(deliveryPeriodDays) : null,
           notes: notes.trim() || null,
           items,
+          paymentTerms: toPaymentTermDtos(paymentTerms),
         },
       });
     },
@@ -417,7 +431,20 @@ export default function Page() {
 
   const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
 
-  const isDirty = useMemo(() => supplierId !== null || notes.trim() !== "" || rows.length > 0, [supplierId, notes, rows]);
+  const isDirty = useMemo(() => {
+    const paymentDirty =
+      paymentTerms.length > 1 ||
+      paymentTerms.some((term) => term.event !== null || term.valueKind !== null || term.value !== "" || term.offsetDays !== "");
+    return (
+      supplierId !== null ||
+      deliveryLocation !== null ||
+      deliveryTiming !== null ||
+      deliveryPeriodDays !== "" ||
+      notes.trim() !== "" ||
+      rows.length > 0 ||
+      paymentDirty
+    );
+  }, [supplierId, deliveryLocation, deliveryTiming, deliveryPeriodDays, notes, rows, paymentTerms]);
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
 
@@ -522,6 +549,22 @@ export default function Page() {
       return setValidationError(translate("Please select a supplier.", "يرجى اختيار مورد."));
     }
 
+    if (!deliveryLocation) {
+      return setValidationError(translate("Please select a delivery location.", "يرجى اختيار مكان التسليم."));
+    }
+
+    if (!deliveryTiming) {
+      return setValidationError(translate("Please select a delivery period.", "يرجى اختيار مدة التوريد."));
+    }
+
+    if (deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS) {
+      if (deliveryPeriodDays === "" || !Number.isInteger(deliveryPeriodDays) || deliveryPeriodDays <= 0) {
+        return setValidationError(
+          translate("Enter a positive number of days for delivery.", "أدخل عدداً موجباً من الأيام للتوريد."),
+        );
+      }
+    }
+
     if (rows.length === 0) {
       return setValidationError(
         translate(
@@ -607,6 +650,9 @@ export default function Page() {
       }
     }
 
+    const paymentError = validatePaymentTerms(paymentTerms, grandTotal, translate);
+    if (paymentError) return setValidationError(paymentError);
+
     handleOpenConfirm();
   }
 
@@ -682,7 +728,39 @@ export default function Page() {
             required
             radius="md"
           />
-          <div>
+          <SelectMpoDeliveryLocation
+            value={deliveryLocation}
+            setValue={(value) => setDeliveryLocation((typeof value === "function" ? value(deliveryLocation) : value) as MpoDeliveryLocation | null)}
+            label={translate("Delivery location", "مكان التسليم")}
+            placeholder={translate("Select a location", "اختر المكان")}
+            required
+            radius="md"
+          />
+          <SelectMpoDeliveryTiming
+            value={deliveryTiming}
+            setValue={(value) => {
+              const next = (typeof value === "function" ? value(deliveryTiming) : value) as MpoDeliveryTiming | null;
+              setDeliveryTiming(next);
+              if (next !== MPO_DELIVERY_TIMINGS.WITHIN_DAYS) setDeliveryPeriodDays("");
+            }}
+            label={translate("Delivery period", "مدة التوريد")}
+            placeholder={translate("Immediately or within days", "فوراً أو خلال أيام")}
+            required
+            radius="md"
+          />
+          {deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS ? (
+            <NumberInput
+              value={deliveryPeriodDays}
+              onChange={(value) => setDeliveryPeriodDays(value === "" ? "" : Number(value))}
+              label={translate("Days", "الأيام")}
+              min={1}
+              allowDecimal={false}
+              allowNegative={false}
+              required
+              radius="md"
+            />
+          ) : null}
+          <div className={deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS ? "md:col-span-2" : ""}>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -803,6 +881,13 @@ export default function Page() {
             </div>
           )}
         </section>
+
+        <PaymentTermsEditor
+          terms={paymentTerms}
+          onChange={setPaymentTerms}
+          totalAmount={grandTotal}
+          currency={translation.currency}
+        />
 
         {error && !confirmOpened && <ErrorAlert error={error} />}
 

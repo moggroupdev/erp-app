@@ -3,6 +3,7 @@ import { PrintDetail, PrintTable } from "../../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
+import { formatDeliverySummary, formatPaymentTermsSummary } from "@/lib/helpers/format-mpo-terms";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 
@@ -98,7 +99,14 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
   ];
 
   const isArabic = locale === "ar";
-  const generalTerms = GENERAL_TERMS.map((term) => (isArabic ? term.ar : term.en));
+  const paymentTerms = order.paymentTerms ?? [];
+  const savedPayment = paymentTerms.length > 0 ? formatPaymentTermsSummary(paymentTerms, translate, currency) : null;
+  const savedDelivery = formatDeliverySummary(order.deliveryLocation, order.deliveryTiming, order.deliveryPeriodDays, locale, translate);
+  const generalTerms = GENERAL_TERMS.map((term, index) => {
+    if (index === 0 && savedPayment) return savedPayment;
+    if (index === 1 && savedDelivery) return savedDelivery;
+    return isArabic ? term.ar : term.en;
+  });
 
   return (
     <div className="flex flex-col gap-5 text-xs text-gray-900">
