@@ -64,7 +64,9 @@ export default function PaymentTermsEditor({
   const scheduleReady = totalAmount > 0;
   const coverage = getPaymentCoverage(terms, totalAmount);
   const remainderUsed = terms.some((term) => term.valueKind === MPO_PAYMENT_VALUE_KINDS.REMAINDER);
-  const coveredScaled = toScaledAmount(coverage.covered);
+  const remainderAmount = coverage.remainder ?? 0;
+  const coveredAmount = remainderAmount > 0 ? coverage.covered + remainderAmount : coverage.covered;
+  const coveredScaled = toScaledAmount(coveredAmount);
   const totalScaled = toScaledAmount(totalAmount);
   const gapScaled = totalScaled - coveredScaled;
   const remainingAmount = gapScaled / MONEY_SCALE;
@@ -319,7 +321,7 @@ export default function PaymentTermsEditor({
                 </Table.Td>
                 <Table.Td>
                   <span className={`text-sm font-medium tabular-nums ${coverage.valid ? "text-teal-800" : "text-gray-800"}`}>
-                    {formatMoney(coverage.covered, currency)}
+                    {formatMoney(coveredAmount, currency)}
                   </span>
                 </Table.Td>
                 <Table.Td />
