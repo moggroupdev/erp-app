@@ -6,6 +6,7 @@ import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { VAT_PERCENT } from "@/lib/constants/global";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { APPROVAL_DECISIONS, type ApprovalDecision } from "@/lib/constants/enums/approval-decisions";
 import type { MaterialPurchaseRequisitionDetailed } from "@/types/material-purchase-requisition";
@@ -129,7 +130,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
 
   const itemFooterRows = [
     [translate(`Total (${currency})`, `الإجمالي (${currency})`), "", "", "", "", "", formatMoney(subtotal), "", "", ""],
-    [translate("VAT (14%)", "ضريبة القيمة المضافة (14%)"), "", "", "", "", "", formatMoney(vat), "", "", ""],
+    [translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`), "", "", "", "", "", formatMoney(vat), "", "", ""],
     [
       translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`),
       "",

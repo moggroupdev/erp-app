@@ -4,7 +4,7 @@ import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import { REQUISITION_VAT_RATE } from "@/app/[locale]/(inner)/procurement/material-requisitions/helpers";
+import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
 import type {
   PurchasingMaterialsRequisitionFollowUpItem,
   PurchasingMaterialsRequisitionFollowUpTotals,
@@ -37,7 +37,7 @@ export default function PurchasingMaterialsRequisitionFollowUpPrintDocument({
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
 
-  const vatAmount = totals.requestedValue * REQUISITION_VAT_RATE;
+  const vatAmount = totals.requestedValue * VAT_RATE;
   const totalWithVat = totals.requestedValue + vatAmount;
 
   return (
@@ -115,7 +115,7 @@ export default function PurchasingMaterialsRequisitionFollowUpPrintDocument({
             ],
             [
               "",
-              translate("VAT (14%)", "ضريبة القيمة المضافة (14%)"),
+              translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`),
               "",
               "",
               "",

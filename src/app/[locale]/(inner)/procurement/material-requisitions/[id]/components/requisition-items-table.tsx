@@ -14,6 +14,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDate } from "@/lib/helpers/date-formaters";
+import { VAT_PERCENT } from "@/lib/constants/global";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
@@ -179,7 +180,7 @@ export default function RequisitionItemsTable({
             </Table.Tr>
             <Table.Tr className="font-medium text-gray-800">
               <Table.Th colSpan={colspanBeforeTotal} className="text-end">
-                {translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}
+                {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
               </Table.Th>
               <Table.Th>{formatMoney(vat)}</Table.Th>
               <Table.Th colSpan={colspanAfterTotal} />

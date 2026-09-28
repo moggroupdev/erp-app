@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { REQUISITION_VAT_RATE } from "@/app/[locale]/(inner)/procurement/material-requisitions/helpers";
+import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
 import type {
   PurchasingMaterialsRequisitionFollowUpItem,
   PurchasingMaterialsRequisitionFollowUpTotals,
@@ -33,7 +33,7 @@ export default function RequisitionFollowUpTable({
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
 
-  const vatAmount = totals.requestedValue * REQUISITION_VAT_RATE;
+  const vatAmount = totals.requestedValue * VAT_RATE;
   const totalWithVat = totals.requestedValue + vatAmount;
 
   return (
@@ -127,7 +127,7 @@ export default function RequisitionFollowUpTable({
                 </Table.Tr>
                 <Table.Tr className="h-10 border-b-0! border-gray-200 text-gray-700">
                   <Table.Th />
-                  <Table.Th>{translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}</Table.Th>
+                  <Table.Th>{translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}</Table.Th>
                   <Table.Th />
                   <Table.Th />
                   <Table.Th />

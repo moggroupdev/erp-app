@@ -15,6 +15,7 @@ import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import supplierInvoicesApi from "@/lib/api/supplier-invoices";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
+import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
@@ -40,7 +41,6 @@ const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خا
 const RECEIPTS_LIMIT = 100;
 const INVOICES_LIMIT = 100;
 const REMAINING_EPSILON = 1e-9;
-const VAT_RATE = 0.14;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -266,7 +266,7 @@ export default function Page() {
                       </Table.Tr>
                       <Table.Tr className="font-medium text-gray-800">
                         <Table.Th colSpan={7} className="text-end">
-                          {translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}
+                          {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
                         </Table.Th>
                         <Table.Th>{formatMoney(vat)}</Table.Th>
                         <Table.Th />

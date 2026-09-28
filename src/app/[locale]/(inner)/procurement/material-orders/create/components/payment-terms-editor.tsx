@@ -3,6 +3,7 @@
 import { ActionIcon, Button, NumberInput } from "@mantine/core";
 import { Plus, Trash2, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
+import { VAT_PERCENT } from "@/lib/constants/global";
 import { formatMoney } from "@/lib/helpers/format-money";
 import {
   MPO_PAYMENT_VALUE_KIND_LABELS_LIST,
@@ -127,8 +128,8 @@ export default function PaymentTermsEditor({ terms, onChange, totalAmount, curre
             </h5>
             <p className="text-sm leading-relaxed text-gray-500">
               {translate(
-                "Payment terms open once you add material items and enter their unit prices. Coverage uses the grand total, including 14% VAT.",
-                "تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة. التغطية على الإجمالي الكلي شاملاً ضريبة 14٪.",
+                `Payment terms open once you add material items and enter their unit prices. Coverage uses the grand total, including ${VAT_PERCENT}% VAT.`,
+                `تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة. التغطية على الإجمالي الكلي شاملاً ضريبة ${VAT_PERCENT}٪.`,
               )}
             </p>
           </div>

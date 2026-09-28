@@ -12,6 +12,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
 import getErrorMessage from "@/lib/helpers/get-error-message";
+import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -47,7 +48,6 @@ import AddFromRequisitionsModal, { type AddedMaterialLine } from "./components/a
 import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
-const VAT_RATE = 0.14;
 
 function CreateOrderHeading({ onBack }: { onBack: () => void }) {
   const { translate, translation } = useI18n();
@@ -845,7 +845,7 @@ export default function Page() {
                     </Table.Tr>
                     <Table.Tr className="h-9">
                       <Table.Td colSpan={5} className="text-sm text-gray-600">
-                        {translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}
+                        {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
                       </Table.Td>
                       <Table.Td>
                         <span className="text-sm font-medium text-gray-800">{formatMoney(vatAmount)}</span>

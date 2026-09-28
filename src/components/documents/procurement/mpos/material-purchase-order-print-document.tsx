@@ -5,9 +5,8 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { formatDeliverySummary, formatPaymentTermsSummary } from "@/lib/helpers/format-mpo-terms";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
 import type { MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
-
-const VAT_RATE = 0.14;
 
 const GENERAL_TERMS = [
   {
@@ -94,7 +93,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
 
   const itemFooterRows = [
     [translate(`Total (${currency})`, `الإجمالي (${currency})`), "", "", "", "", formatMoney(subtotal), ""],
-    [translate("VAT (14%)", "ضريبة القيمة المضافة (14%)"), "", "", "", "", formatMoney(vat), ""],
+    [translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`), "", "", "", "", formatMoney(vat), ""],
     [translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`), "", "", "", "", formatMoney(grandTotal), ""],
   ];
 
