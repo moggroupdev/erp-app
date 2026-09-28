@@ -3,24 +3,12 @@ import { PrintDetail, PrintTable } from "../../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
-import { formatDeliverySummary, formatPaymentTermsSummary } from "@/lib/helpers/format-mpo-terms";
+import { formatDeliveryLocationLine, formatDeliveryPeriodLine, formatPaymentTermLine } from "@/lib/helpers/format-mpo-terms";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
 import type { MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 
 const GENERAL_TERMS = [
-  {
-    ar: "شروط الدفع: كالسابق.",
-    en: "Payment terms: as previously agreed.",
-  },
-  {
-    ar: "مكان التسليم: مصانعنا بالعاشر من رمضان.",
-    en: "Delivery location: our factories in 10th of Ramadan.",
-  },
-  {
-    ar: "التوريد يخضع لقواعد وأحكام قانون الضريبة على الأرباح التجارية والصناعية وضريبة القيمة المضافة.",
-    en: "Supply is subject to the rules and provisions of the tax on commercial and industrial profits and value-added tax.",
-  },
   {
     ar: "يتم تقديم فاتورة موضح بها أرقام أمر التوريد والبيانات الضريبية.",
     en: "An invoice must be submitted showing the purchase order numbers and the tax details.",
@@ -30,8 +18,24 @@ const GENERAL_TERMS = [
     en: "Delay penalties of 1% per day of delay shall apply, up to a maximum of 10%.",
   },
   {
+    ar: "التوريد يخضع لقواعد وأحكام قانون الضريبة على الأرباح التجارية والصناعية وضريبة القيمة المضافة.",
+    en: "Supply is subject to the rules and provisions of the tax on commercial and industrial profits and value-added tax.",
+  },
+  {
     ar: "للشركة الحق في رفض الأصناف المخالفة للمواصفات وشروط التوريد.",
     en: "The company reserves the right to reject items that do not conform to the specifications and supply terms.",
+  },
+  {
+    ar: "يتم الفحص والاستلام وفق ما هو موضح في هذا الأمر، على أن تُقبل الأصناف من لجنة الفحص. ويُعد الاستلام قبولاً بالتوريد، غير أن القبول النهائي يتم طبقًا لمحضر الفحص الفني.",
+    en: "Inspection and receipt shall follow what is stated in this order, and the items shall be accepted by the inspection committee. Receipt constitutes acceptance of the supply; however, final acceptance shall be in accordance with the technical inspection report.",
+  },
+  {
+    ar: "قبول الأصناف الموضحة في أمر التوريد عند ورودها لا يعفي المورد من مسؤولية التوريدات غير المطابقة.",
+    en: "Acceptance of the items stated in the purchase order upon their arrival does not relieve the supplier of liability for non-conforming supplies.",
+  },
+  {
+    ar: "يحق للشركة زيادة الكميات أو تخفيضها في حدود 20% بنفس الشروط.",
+    en: "The company may increase or reduce the quantities by up to 20% on the same terms.",
   },
   {
     ar: "لا يتم إجراء أي تعديل على أمر التوريد إلا بناء على خطاب معتمد.",
@@ -99,13 +103,24 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
 
   const isArabic = locale === "ar";
   const paymentTerms = order.paymentTerms ?? [];
-  const savedPayment = paymentTerms.length > 0 ? formatPaymentTermsSummary(paymentTerms, translate, currency) : null;
-  const savedDelivery = formatDeliverySummary(order.deliveryLocation, order.deliveryTiming, order.deliveryPeriodDays, locale, translate);
-  const generalTerms = GENERAL_TERMS.map((term, index) => {
-    if (index === 0 && savedPayment) return savedPayment;
-    if (index === 1 && savedDelivery) return savedDelivery;
-    return isArabic ? term.ar : term.en;
-  });
+  const paymentBullets =
+    paymentTerms.length > 0 ? paymentTerms.map((term) => formatPaymentTermLine(term, translate, currency)) : null;
+
+  const generalTerms: { key: string; text: string; bullets?: string[] }[] = [
+    ...(order.deliveryTiming
+      ? [{ key: "period", text: formatDeliveryPeriodLine(order.deliveryTiming, order.deliveryPeriodDays, translate) }]
+      : []),
+    ...(order.deliveryLocation
+      ? [{ key: "location", text: formatDeliveryLocationLine(order.deliveryLocation, locale, translate) }]
+      : []),
+    ...(paymentBullets
+      ? [{ key: "payment", text: translate("Payment terms:", "شروط السداد:"), bullets: paymentBullets }]
+      : []),
+    ...GENERAL_TERMS.map((term, index) => ({
+      key: `general-${index}`,
+      text: isArabic ? term.ar : term.en,
+    })),
+  ];
 
   return (
     <div className="flex flex-col gap-5 text-xs text-gray-900">
@@ -122,7 +137,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
         <img src={logoSrc} alt="" width={100} height={100} className="h-24 w-24 shrink-0 rounded object-contain" />
       </header>
 
-      <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4 [&>div>span:last-child]:text-[11px]">
         <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
         <PrintDetail label={translate("PO Date", "تاريخ أمر التوريد")} value={formatDateAndTime(order.createdAt, locale)} />
         <PrintDetail label={translate("Supplier", "المورد")} value={order.supplier.name} />
@@ -150,9 +165,21 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
         <h2 className="text-sm font-semibold text-gray-900">{translate("General Terms:", "القواعد العامة:")}</h2>
         <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-[11px] leading-relaxed text-gray-800">
           {generalTerms.map((term, index) => (
-            <li key={term} className="flex gap-2">
+            <li key={term.key} className="flex gap-2">
               <span className="shrink-0 font-medium tabular-nums">{index + 1}.</span>
-              <span>{term}</span>
+              <div className="min-w-0">
+                <span>{term.text}</span>
+                {term.bullets ? (
+                  <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0">
+                    {term.bullets.map((bullet, bulletIndex) => (
+                      <li key={`${term.key}-${bulletIndex}`} className="flex gap-2">
+                        <span className="shrink-0">•</span>
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
             </li>
           ))}
         </ol>

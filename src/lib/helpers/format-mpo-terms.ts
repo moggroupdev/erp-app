@@ -14,19 +14,16 @@ type PaymentTermSlice = {
 
 type Translate = (en: string, ar: string) => string;
 
-export function formatDeliverySummary(
-  location: MpoDeliveryLocation | null,
-  timing: MpoDeliveryTiming | null,
-  days: number | null,
-  locale: Locale,
-  translate: Translate,
-) {
-  if (!location || !timing) return null;
+export function formatDeliveryLocationLine(location: MpoDeliveryLocation, locale: Locale, translate: Translate) {
   const place = getMpoDeliveryLocationLabel(location, locale);
+  return translate(`Delivery location: ${place}.`, `مكان التسليم: ${place}.`);
+}
+
+export function formatDeliveryPeriodLine(timing: MpoDeliveryTiming, days: number | null, translate: Translate) {
   if (timing === MPO_DELIVERY_TIMINGS.IMMEDIATE) {
-    return translate(`Delivery location: ${place}, immediately.`, `مكان التسليم: ${place}، فوراً.`);
+    return translate("Delivery period: immediately.", "مدة التوريد: فوراً.");
   }
-  return translate(`Delivery location: ${place}, within ${days ?? "—"} days.`, `مكان التسليم: ${place}، خلال ${days ?? "—"} يوم.`);
+  return translate(`Delivery period: within ${days ?? "—"} days.`, `مدة التوريد: خلال ${days ?? "—"} يوم.`);
 }
 
 export function formatPaymentTermLine(term: PaymentTermSlice, translate: Translate, currency?: string) {
@@ -51,7 +48,3 @@ export function formatPaymentTermLine(term: PaymentTermSlice, translate: Transla
   return share;
 }
 
-export function formatPaymentTermsSummary(terms: PaymentTermSlice[], translate: Translate, currency?: string) {
-  const summary = terms.map((term) => formatPaymentTermLine(term, translate, currency)).join(" + ");
-  return translate(`Payment terms: ${summary}.`, `شروط السداد: ${summary}.`);
-}
