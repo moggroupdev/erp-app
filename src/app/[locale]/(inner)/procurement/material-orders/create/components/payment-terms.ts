@@ -124,11 +124,14 @@ export function validatePaymentTerms(terms: PaymentTermDraft[], totalAmount: num
   }
   if (remainderCount === 1) {
     return translate(
-      "The remainder must be a positive leftover. Fixed amounts and percentages already cover the order.",
-      "يجب أن يكون الباقي مبلغاً متبقياً موجباً. المبالغ الثابتة والنسب تغطي الأمر بالفعل.",
+      "The remainder must be a positive leftover. Fixed amounts and percentages already cover the grand total.",
+      "يجب أن يكون الباقي مبلغاً متبقياً موجباً. المبالغ الثابتة والنسب تغطي الإجمالي الكلي بالفعل.",
     );
   }
-  return translate("Payment terms must cover 100% of the order total.", "يجب أن تغطي شروط السداد 100٪ من إجمالي الأمر.");
+  return translate(
+    "Payment terms must cover 100% of the grand total, including VAT.",
+    "يجب أن تغطي شروط السداد 100٪ من الإجمالي الكلي شاملاً ضريبة القيمة المضافة.",
+  );
 }
 
 export function toPaymentTermDtos(terms: PaymentTermDraft[]): CreateMaterialPurchaseOrderPaymentTermDto[] {

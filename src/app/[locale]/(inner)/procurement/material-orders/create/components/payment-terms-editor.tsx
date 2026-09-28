@@ -89,15 +89,15 @@ export default function PaymentTermsEditor({ terms, onChange, totalAmount, curre
   const coverageStatus = coverage.valid
     ? hasRemaining
       ? translate("The remainder row takes the leftover amount.", "صف الباقي يأخذ المبلغ المتبقي.")
-      : translate("The schedule covers the full order.", "الجدول يغطي الأمر بالكامل.")
+      : translate("The schedule covers the grand total.", "الجدول يغطي الإجمالي الكلي.")
     : hasExcess
-      ? translate("These payments are above the order total.", "هذه الدفعات أعلى من إجمالي الأمر.")
+      ? translate("These payments are above the grand total.", "هذه الدفعات أعلى من الإجمالي الكلي.")
       : hasRemaining
         ? translate(
-            "Schedule the remaining amount to reach the order total.",
-            "جدول المبلغ المتبقي للوصول إلى إجمالي الأمر.",
+            "Schedule the remaining amount to reach the grand total.",
+            "جدول المبلغ المتبقي للوصول إلى الإجمالي الكلي.",
           )
-        : translate("Add rows until the schedule reaches the order total.", "أضف صفوفاً حتى يصل الجدول إلى إجمالي الأمر.");
+        : translate("Add rows until the schedule reaches the grand total.", "أضف صفوفاً حتى يصل الجدول إلى الإجمالي الكلي.");
 
   return (
     <section className="overflow-hidden rounded-2xl bg-white">
@@ -109,8 +109,8 @@ export default function PaymentTermsEditor({ terms, onChange, totalAmount, curre
           <h4 className="text-base font-semibold text-gray-950">{translate("Payment terms", "شروط السداد")}</h4>
           <p className="text-sm text-gray-500">
             {translate(
-              "One row per slice. The rows together must cover the order.",
-              "صف لكل دفعة. مجموع الصفوف يجب أن يغطي الأمر.",
+              "One row per slice. The rows together must cover the grand total, including VAT.",
+              "صف لكل دفعة. مجموع الصفوف يجب أن يغطي الإجمالي الكلي شاملاً الضريبة.",
             )}
           </p>
         </div>
@@ -123,12 +123,12 @@ export default function PaymentTermsEditor({ terms, onChange, totalAmount, curre
           </div>
           <div className="flex max-w-md flex-col gap-1.5">
             <h5 className="text-base font-semibold text-gray-900">
-              {translate("Waiting for the order total", "بانتظار إجمالي الأمر")}
+              {translate("Waiting for the grand total", "بانتظار الإجمالي الكلي")}
             </h5>
             <p className="text-sm leading-relaxed text-gray-500">
               {translate(
-                "Payment terms open once you add material items and enter their unit prices.",
-                "تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة.",
+                "Payment terms open once you add material items and enter their unit prices. Coverage uses the grand total, including 14% VAT.",
+                "تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة. التغطية على الإجمالي الكلي شاملاً ضريبة 14٪.",
               )}
             </p>
           </div>
@@ -308,7 +308,7 @@ export default function PaymentTermsEditor({ terms, onChange, totalAmount, curre
                   />
                 )}
                 <CoverageFigure
-                  label={translate("Order total", "إجمالي الأمر")}
+                  label={translate("Grand total", "الإجمالي الكلي")}
                   value={formatMoney(totalAmount, currency)}
                   tone="neutral"
                 />

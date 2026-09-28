@@ -47,6 +47,7 @@ import AddFromRequisitionsModal, { type AddedMaterialLine } from "./components/a
 import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
+const VAT_RATE = 0.14;
 
 function CreateOrderHeading({ onBack }: { onBack: () => void }) {
   const { translate, translation } = useI18n();
@@ -481,7 +482,7 @@ export default function Page() {
     [rows],
   );
 
-  const grandTotal = useMemo(
+  const subtotal = useMemo(
     () =>
       rows.reduce((sum, row) => {
         const qty = typeof row.quantity === "number" ? row.quantity : 0;
@@ -490,6 +491,8 @@ export default function Page() {
       }, 0),
     [rows],
   );
+  const vatAmount = subtotal * VAT_RATE;
+  const grandTotal = subtotal + vatAmount;
 
   const linkRow = linkRowKey ? rows.find((row) => row.key === linkRowKey) : null;
 
@@ -749,7 +752,7 @@ export default function Page() {
           setNotes={setNotes}
         />
 
-        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+        <section className="overflow-hidden rounded-2xl bg-white">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
             <div className="flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-2xl bg-teal-800 text-white">
@@ -832,21 +835,31 @@ export default function Page() {
                   </Table.Tbody>
                   <Table.Tfoot className="bg-gray-50">
                     <Table.Tr className="h-9">
-                      <Table.Td />
-                      <Table.Td />
-                      <Table.Td />
-                      <Table.Td />
-                      <Table.Td>
-                        <Badge size="sm" variant="light" color="dark" radius="md">
-                          {translate("Total", "الإجمالي")}
-                        </Badge>
+                      <Table.Td colSpan={5} className="text-sm text-gray-600">
+                        {translate("Total", "الإجمالي")}
                       </Table.Td>
                       <Table.Td>
-                        <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
+                        <span className="text-sm font-medium text-gray-800">{formatMoney(subtotal)}</span>
                       </Table.Td>
-                      <Table.Td />
-                      <Table.Td />
-                      <Table.Td />
+                      <Table.Td colSpan={3} />
+                    </Table.Tr>
+                    <Table.Tr className="h-9">
+                      <Table.Td colSpan={5} className="text-sm text-gray-600">
+                        {translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}
+                      </Table.Td>
+                      <Table.Td>
+                        <span className="text-sm font-medium text-gray-800">{formatMoney(vatAmount)}</span>
+                      </Table.Td>
+                      <Table.Td colSpan={3} />
+                    </Table.Tr>
+                    <Table.Tr className="h-9">
+                      <Table.Td colSpan={5} className="text-sm font-semibold text-gray-950">
+                        {translate("Grand total", "الإجمالي الكلي")}
+                      </Table.Td>
+                      <Table.Td>
+                        <span className="text-sm font-semibold text-gray-950">{formatMoney(grandTotal)}</span>
+                      </Table.Td>
+                      <Table.Td colSpan={3} />
                     </Table.Tr>
                   </Table.Tfoot>
                 </Table>
