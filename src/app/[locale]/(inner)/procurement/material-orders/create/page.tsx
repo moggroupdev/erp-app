@@ -49,17 +49,17 @@ import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
 
-/** Width classes for the items table. An empty string leaves that column flexible. */
+/** Preferred and minimum widths for the items table. Columns stay at least `minWidth` wide and the table scrolls on small screens. */
 const ITEM_COLUMN_WIDTHS = {
-  index: "w-10",
-  material: "",
-  quantity: "w-20",
-  unit: "w-24",
-  unitPrice: "w-28",
-  lineTotal: "w-28",
-  requisitions: "w-[26%]",
-  notes: "w-[18%]",
-  remove: "w-12",
+  index: { width: "3rem", minWidth: undefined },
+  material: { width: undefined, minWidth: undefined },
+  quantity: { width: "5.5rem", minWidth: undefined },
+  unit: { width: "6.5rem", minWidth: undefined },
+  unitPrice: { width: "8.5rem", minWidth: undefined },
+  lineTotal: { width: "9rem", minWidth: undefined },
+  requisitions: { width: "18rem", minWidth: undefined },
+  notes: { width: "12rem", minWidth: undefined },
+  remove: { width: "3rem", minWidth: undefined },
 } as const;
 
 function CreateOrderHeading({ onBack }: { onBack: () => void }) {
@@ -827,37 +827,63 @@ export default function Page() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+                <Table withColumnBorders className="w-full min-w-max" horizontalSpacing="xs" verticalSpacing="xs">
                   <colgroup>
-                    {Object.entries(ITEM_COLUMN_WIDTHS).map(([column, width]) => (
-                      <col key={column} className={width || undefined} />
+                    {Object.entries(ITEM_COLUMN_WIDTHS).map(([column, size]) => (
+                      <col key={column} style={{ width: size.width, minWidth: size.minWidth }} />
                     ))}
                   </colgroup>
                   <Table.Thead className="bg-gray-50 whitespace-nowrap">
                     <Table.Tr className="h-9">
-                      <Table.Th className="text-center! text-gray-500">#</Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th
+                        className="text-center! text-gray-500"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.index.minWidth }}
+                      >
+                        #
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.material.minWidth }}
+                      >
                         {translate("Material", "المادة")}
                       </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.quantity.minWidth }}
+                      >
                         {translate("Quantity", "الكمية")}
                       </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.unit.minWidth }}
+                      >
                         {translate("Unit", "الوحدة")}
                       </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.unitPrice.minWidth }}
+                      >
                         {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
                       </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.lineTotal.minWidth }}
+                      >
                         {translate("Line Total", "إجمالي البند")} ({translation.currency})
                       </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.requisitions.minWidth }}
+                      >
                         {translate("Requisitions", "طلبات الشراء")}
                       </Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.notes.minWidth }}
+                      >
                         {translate("Notes", "الملاحظات")}
                       </Table.Th>
-                      <Table.Th />
+                      <Table.Th style={{ minWidth: ITEM_COLUMN_WIDTHS.remove.minWidth }} />
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>

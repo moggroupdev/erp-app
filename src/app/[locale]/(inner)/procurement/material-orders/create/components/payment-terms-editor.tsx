@@ -24,14 +24,14 @@ type PaymentTermsEditorProps = {
 
 const MONEY_SCALE = 1_000_000;
 
-/** Width classes for the payment-terms table. An empty string leaves that column flexible. */
+/** Preferred and minimum widths for the payment-terms table. Columns stay at least `minWidth` wide and the table scrolls on small screens. */
 const PAYMENT_TERM_COLUMN_WIDTHS = {
-  index: "w-10",
-  when: "",
-  days: "w-28",
-  valueType: "w-[21%]",
-  amount: "w-60",
-  remove: "w-12",
+  index: { width: "3rem", minWidth: undefined },
+  when: { width: undefined, minWidth: undefined },
+  days: { width: "12rem", minWidth: undefined },
+  valueType: { width: "12rem", minWidth: undefined },
+  amount: { width: "12rem", minWidth: undefined },
+  remove: { width: "3rem", minWidth: undefined },
 } as const;
 
 const borderlessField = {
@@ -43,6 +43,7 @@ const borderlessField = {
     input: {
       minHeight: 32,
       height: 32,
+      minWidth: 0,
       paddingInline: 0,
     },
   },
@@ -119,20 +120,45 @@ export default function PaymentTermsEditor({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+          <Table withColumnBorders className="w-full min-w-max" horizontalSpacing="xs" verticalSpacing="xs">
             <colgroup>
-              {Object.entries(PAYMENT_TERM_COLUMN_WIDTHS).map(([column, width]) => (
-                <col key={column} className={width || undefined} />
+              {Object.entries(PAYMENT_TERM_COLUMN_WIDTHS).map(([column, size]) => (
+                <col key={column} style={{ width: size.width, minWidth: size.minWidth }} />
               ))}
             </colgroup>
             <Table.Thead className="bg-gray-50 whitespace-nowrap">
               <Table.Tr className="h-9">
-                <Table.Th className="text-center! text-xs font-medium text-gray-500">#</Table.Th>
-                <Table.Th className="text-xs font-medium text-gray-500">{translate("When", "الموعد")}</Table.Th>
-                <Table.Th className="text-xs font-medium text-gray-500">{translate("Days", "الأيام")}</Table.Th>
-                <Table.Th className="text-xs font-medium text-gray-500">{translate("Value type", "نوع القيمة")}</Table.Th>
-                <Table.Th className="text-xs font-medium text-gray-500">{translate("Amount", "المبلغ")}</Table.Th>
-                <Table.Th />
+                <Table.Th
+                  className="text-center! text-xs font-medium text-gray-500"
+                  style={{ minWidth: PAYMENT_TERM_COLUMN_WIDTHS.index.minWidth }}
+                >
+                  #
+                </Table.Th>
+                <Table.Th
+                  className="text-xs font-medium text-gray-500"
+                  style={{ minWidth: PAYMENT_TERM_COLUMN_WIDTHS.when.minWidth }}
+                >
+                  {translate("When", "الموعد")}
+                </Table.Th>
+                <Table.Th
+                  className="text-xs font-medium text-gray-500"
+                  style={{ minWidth: PAYMENT_TERM_COLUMN_WIDTHS.days.minWidth }}
+                >
+                  {translate("Days", "الأيام")}
+                </Table.Th>
+                <Table.Th
+                  className="text-xs font-medium text-gray-500"
+                  style={{ minWidth: PAYMENT_TERM_COLUMN_WIDTHS.valueType.minWidth }}
+                >
+                  {translate("Value type", "نوع القيمة")}
+                </Table.Th>
+                <Table.Th
+                  className="text-xs font-medium text-gray-500"
+                  style={{ minWidth: PAYMENT_TERM_COLUMN_WIDTHS.amount.minWidth }}
+                >
+                  {translate("Amount", "المبلغ")}
+                </Table.Th>
+                <Table.Th style={{ minWidth: PAYMENT_TERM_COLUMN_WIDTHS.remove.minWidth }} />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -255,7 +281,6 @@ export default function PaymentTermsEditor({
                         type="button"
                         variant="subtle"
                         color="red"
-                        size="sm"
                         radius="md"
                         onClick={() => removeTerm(term.key)}
                         aria-label={translate("Remove payment", "حذف الدفعة")}
@@ -267,7 +292,8 @@ export default function PaymentTermsEditor({
                 );
               })}
               <Table.Tr>
-                <Table.Td colSpan={6} className="border-t border-gray-200">
+                <Table.Td />
+                <Table.Td className="border-t border-gray-200">
                   <Button
                     type="button"
                     color="teal"
@@ -279,6 +305,10 @@ export default function PaymentTermsEditor({
                     {translate("Add payment", "إضافة دفعة")}
                   </Button>
                 </Table.Td>
+                <Table.Td />
+                <Table.Td />
+                <Table.Td />
+                <Table.Td />
               </Table.Tr>
             </Table.Tbody>
             <Table.Tfoot className="border-t border-gray-200 bg-gray-50">
