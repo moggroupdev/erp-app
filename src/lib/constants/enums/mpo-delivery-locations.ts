@@ -18,7 +18,7 @@ export const MPO_DELIVERY_LOCATION_LABELS: LocalizedEntity<MpoDeliveryLocation> 
   },
   supplier_warehouses: {
     value: "supplier_warehouses",
-    label: { en: "Your warehouses (supplier)", ar: "مخازنكم (المورد)" },
+    label: { en: "Supplier's warehouses", ar: "مخازن المورد" },
   },
 };
 

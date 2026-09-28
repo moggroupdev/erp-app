@@ -22,11 +22,11 @@ export const MPO_PAYMENT_EVENT_LABELS: LocalizedEntity<MpoPaymentEvent> = {
   },
   after_receipt: {
     value: "after_receipt",
-    label: { en: "After receipt", ar: "بعد الاستلام" },
+    label: { en: "Deferred after receipt", ar: "آجل بعد الاستلام" },
   },
   after_invoice: {
     value: "after_invoice",
-    label: { en: "After the invoice date", ar: "بعد تاريخ الفاتورة" },
+    label: { en: "Deferred after invoice", ar: "آجل بعد الفاتورة" },
   },
 };
 

@@ -19,19 +19,21 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialUnitConversionSummary } from "@/types/material";
-import { Badge, Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
-import { ClipboardList, Link2, Plus, Trash2, X } from "lucide-react";
-import LayoutBox from "@/components/ui/layout-box";
+import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
+import { ArrowLeft, ClipboardList, Link2, Package, Plus, Trash2, X } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
-import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
-import SelectMpoDeliveryLocation from "@/components/global/selections/enum-based/select-mpo-delivery-location";
-import SelectMpoDeliveryTiming from "@/components/global/selections/enum-based/select-mpo-delivery-timing";
 import { MPO_DELIVERY_TIMINGS, type MpoDeliveryTiming } from "@/lib/constants/enums/mpo-delivery-timings";
 import type { MpoDeliveryLocation } from "@/lib/constants/enums/mpo-delivery-locations";
+import OrderDetailsFields from "./components/order-details-fields";
 import PaymentTermsEditor from "./components/payment-terms-editor";
-import { createPaymentTermDraft, toPaymentTermDtos, validatePaymentTerms, type PaymentTermDraft } from "./components/payment-terms";
+import {
+  createPaymentTermDraft,
+  toPaymentTermDtos,
+  validatePaymentTerms,
+  type PaymentTermDraft,
+} from "./components/payment-terms";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import { convertEnteredQuantityBetweenUnits } from "../helpers";
@@ -45,6 +47,30 @@ import AddFromRequisitionsModal, { type AddedMaterialLine } from "./components/a
 import { getRequisitionStatus } from "../../material-requisitions/helpers";
 
 const PAGE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
+
+function CreateOrderHeading({ onBack }: { onBack: () => void }) {
+  const { translate, translation } = useI18n();
+
+  return (
+    <header className="flex items-center gap-3">
+      <Button
+        type="button"
+        onClick={onBack}
+        title={translation.back}
+        aria-label={translation.back}
+        variant="light"
+        color="dark"
+        radius={20}
+        p={0}
+        h={40}
+        w={40}
+      >
+        <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0deg", "180deg")})` }} />
+      </Button>
+      <h1>{translate(PAGE_TITLE.en, PAGE_TITLE.ar)}</h1>
+    </header>
+  );
+}
 
 type ItemDraftRow = {
   key: string;
@@ -434,7 +460,9 @@ export default function Page() {
   const isDirty = useMemo(() => {
     const paymentDirty =
       paymentTerms.length > 1 ||
-      paymentTerms.some((term) => term.event !== null || term.valueKind !== null || term.value !== "" || term.offsetDays !== "");
+      paymentTerms.some(
+        (term) => term.event !== null || term.valueKind !== null || term.value !== "" || term.offsetDays !== "",
+      );
     return (
       supplierId !== null ||
       deliveryLocation !== null ||
@@ -667,25 +695,17 @@ export default function Page() {
 
   if (requisitionIdParam && isSeedFetching && !prefillDone) {
     return (
-      <LayoutBox
-        header={{
-          title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-          backLink: true,
-        }}
-      >
+      <div className="flex min-h-full flex-col gap-5">
+        <CreateOrderHeading onBack={() => router.back()} />
         <LoadingSection message={translate("Loading requisition", "جاري تحميل طلب الشراء")} />
-      </LayoutBox>
+      </div>
     );
   }
 
   if (requisitionIdParam && seedError && !prefillDone) {
     return (
-      <LayoutBox
-        header={{
-          title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-          backLink: true,
-        }}
-      >
+      <div className="flex min-h-full flex-col gap-5">
+        <CreateOrderHeading onBack={() => router.back()} />
         <ErrorSection
           errorTitle={translate("Failed to load requisition", "تعذر تحميل طلب الشراء")}
           errorMessage={getErrorMessage(locale, seedError)}
@@ -694,18 +714,17 @@ export default function Page() {
             onClick: () => router.push(getLocalizedHref("/procurement/material-orders")),
           }}
         />
-      </LayoutBox>
+      </div>
     );
   }
 
   return (
-    <LayoutBox
-      header={{
-        title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        backLink: true,
-        confirmNavigate: confirmNavigation,
-      }}
-    >
+    <div className="flex min-h-full flex-col gap-5">
+      <CreateOrderHeading
+        onBack={() => {
+          if (confirmNavigation()) router.back();
+        }}
+      />
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         {seedRequisition && getRequisitionStatus(seedRequisition) === "approved" && (
           <div className="rounded-xl bg-teal-800/[0.07] px-4 py-3 text-sm text-teal-900">
@@ -716,170 +735,124 @@ export default function Page() {
           </div>
         )}
 
-        <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <SelectSupplier
-            value={supplierId}
-            setValue={setSupplierId}
-            onSupplierSelect={() => setValidationError("")}
-            label={translate("Supplier", "المورد")}
-            placeholder={translate("Search or select a supplier...", "ابحث أو اختر مورداً...")}
-            searchable
-            clearable
-            required
-            radius="md"
-          />
-          <SelectMpoDeliveryLocation
-            value={deliveryLocation}
-            setValue={(value) => setDeliveryLocation((typeof value === "function" ? value(deliveryLocation) : value) as MpoDeliveryLocation | null)}
-            label={translate("Delivery location", "مكان التسليم")}
-            placeholder={translate("Select a location", "اختر المكان")}
-            required
-            radius="md"
-          />
-          <SelectMpoDeliveryTiming
-            value={deliveryTiming}
-            setValue={(value) => {
-              const next = (typeof value === "function" ? value(deliveryTiming) : value) as MpoDeliveryTiming | null;
-              setDeliveryTiming(next);
-              if (next !== MPO_DELIVERY_TIMINGS.WITHIN_DAYS) setDeliveryPeriodDays("");
-            }}
-            label={translate("Delivery period", "مدة التوريد")}
-            placeholder={translate("Immediately or within days", "فوراً أو خلال أيام")}
-            required
-            radius="md"
-          />
-          {deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS ? (
-            <NumberInput
-              value={deliveryPeriodDays}
-              onChange={(value) => setDeliveryPeriodDays(value === "" ? "" : Number(value))}
-              label={translate("Days", "الأيام")}
-              min={1}
-              allowDecimal={false}
-              allowNegative={false}
-              required
-              radius="md"
-            />
-          ) : null}
-          <div className={deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS ? "md:col-span-2" : ""}>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              label={translate("Notes", "الملاحظات")}
-              placeholder={translate("Optional", "اختياري")}
-              radius="md"
-              autosize
-            />
-          </div>
-        </section>
+        <OrderDetailsFields
+          supplierId={supplierId}
+          setSupplierId={setSupplierId}
+          onSupplierSelect={() => setValidationError("")}
+          deliveryLocation={deliveryLocation}
+          setDeliveryLocation={setDeliveryLocation}
+          deliveryTiming={deliveryTiming}
+          setDeliveryTiming={setDeliveryTiming}
+          deliveryPeriodDays={deliveryPeriodDays}
+          setDeliveryPeriodDays={setDeliveryPeriodDays}
+          notes={notes}
+          setNotes={setNotes}
+        />
 
-        <section className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
-            <Button
-              type="button"
-              variant="light"
-              color="teal"
-              radius="md"
-              size="sm"
-              leftSection={<Plus size={14} />}
-              onClick={openAdd}
-            >
+        <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-2xl bg-teal-800 text-white">
+                <Package size={18} />
+              </span>
+              <div>
+                <h4 className="text-base font-semibold text-gray-950">{translate("Items", "البنود")}</h4>
+                <p className="text-sm text-gray-500">
+                  {translate("Lines taken from open purchase requisitions.", "بنود مأخوذة من طلبات الشراء المفتوحة.")}
+                </p>
+              </div>
+            </div>
+            <Button type="button" color="teal" radius="xl" size="sm" leftSection={<Plus size={14} />} onClick={openAdd}>
               {translate("Add from requisitions", "إضافة من طلبات الشراء")}
             </Button>
           </div>
-
-          {rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-teal-800/2.5 px-6 py-12 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-800/15 text-teal-900">
-                <ClipboardList size={26} strokeWidth={1.75} />
+          <div className="px-5 py-5">
+            {rows.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-teal-800/2.5 px-6 py-12 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-800/15 text-teal-900">
+                  <ClipboardList size={26} strokeWidth={1.75} />
+                </div>
+                <div className="flex max-w-md flex-col gap-1.5">
+                  <h5 className="text-base font-semibold text-gray-900">{translate("No items yet", "لا توجد بنود بعد")}</h5>
+                  <p className="text-sm leading-relaxed text-gray-500">
+                    {translate(
+                      "Start by adding open purchase requisition lines. Materials and quantities will be filled from the selected requisitions.",
+                      "ابدأ بإضافة بنود من طلبات الشراء المفتوحة. ستُعبأ المواد والكميات من الطلبات المحددة.",
+                    )}
+                  </p>
+                </div>
+                <Button type="button" color="teal" radius="md" size="sm" leftSection={<Plus size={15} />} onClick={openAdd}>
+                  {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+                </Button>
               </div>
-              <div className="flex max-w-md flex-col gap-1.5">
-                <h5 className="text-base font-semibold text-gray-900">{translate("No items yet", "لا توجد بنود بعد")}</h5>
-                <p className="text-sm leading-relaxed text-gray-500">
-                  {translate(
-                    "Start by adding open purchase requisition lines. Materials and quantities will be filled from the selected requisitions.",
-                    "ابدأ بإضافة بنود من طلبات الشراء المفتوحة. ستُعبأ المواد والكميات من الطلبات المحددة.",
-                  )}
-                </p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl">
+                <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+                  <Table.Thead className="bg-gray-50">
+                    <Table.Tr className="h-9">
+                      <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
+                      <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Material", "المادة")}
+                      </Table.Th>
+                      <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Quantity", "الكمية")}
+                      </Table.Th>
+                      <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Unit", "الوحدة")}
+                      </Table.Th>
+                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
+                      </Table.Th>
+                      <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Line Total", "إجمالي البند")} ({translation.currency})
+                      </Table.Th>
+                      <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Requisitions", "طلبات الشراء")}
+                      </Table.Th>
+                      <Table.Th className="w-[14.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                        {translate("Notes", "الملاحظات")}
+                      </Table.Th>
+                      <Table.Th className="w-[3%]" />
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {rows.map((row, index) => (
+                      <ItemRow
+                        key={row.key}
+                        row={row}
+                        index={index}
+                        locale={locale}
+                        currency={translation.currency}
+                        onUpdate={updateRow}
+                        onRemove={removeRow}
+                        onLinkRequisitions={setLinkRowKey}
+                        onRemoveAllocation={removeAllocation}
+                      />
+                    ))}
+                  </Table.Tbody>
+                  <Table.Tfoot className="bg-gray-50">
+                    <Table.Tr className="h-9">
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td>
+                        <Badge size="sm" variant="light" color="dark" radius="md">
+                          {translate("Total", "الإجمالي")}
+                        </Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
+                      </Table.Td>
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                    </Table.Tr>
+                  </Table.Tfoot>
+                </Table>
               </div>
-              <Button
-                type="button"
-                color="teal"
-                radius="md"
-                size="sm"
-                leftSection={<Plus size={15} />}
-                onClick={openAdd}
-              >
-                {translate("Add from requisitions", "إضافة من طلبات الشراء")}
-              </Button>
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl">
-              <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
-                <Table.Thead className="bg-gray-50">
-                  <Table.Tr className="h-9">
-                    <Table.Th className="w-[2.5%] text-center! text-gray-500">#</Table.Th>
-                    <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Material", "المادة")}
-                    </Table.Th>
-                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Quantity", "الكمية")}
-                    </Table.Th>
-                    <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Unit", "الوحدة")}
-                    </Table.Th>
-                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
-                    </Table.Th>
-                    <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Line Total", "إجمالي البند")} ({translation.currency})
-                    </Table.Th>
-                    <Table.Th className="w-[22%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Requisitions", "طلبات الشراء")}
-                    </Table.Th>
-                    <Table.Th className="w-[14.5%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Notes", "الملاحظات")}
-                    </Table.Th>
-                    <Table.Th className="w-[3%]" />
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {rows.map((row, index) => (
-                    <ItemRow
-                      key={row.key}
-                      row={row}
-                      index={index}
-                      locale={locale}
-                      currency={translation.currency}
-                      onUpdate={updateRow}
-                      onRemove={removeRow}
-                      onLinkRequisitions={setLinkRowKey}
-                      onRemoveAllocation={removeAllocation}
-                    />
-                  ))}
-                </Table.Tbody>
-                <Table.Tfoot className="bg-gray-50">
-                  <Table.Tr className="h-9">
-                    <Table.Td />
-                    <Table.Td />
-                    <Table.Td />
-                    <Table.Td />
-                    <Table.Td>
-                      <Badge size="sm" variant="light" color="dark" radius="md">
-                        {translate("Total", "الإجمالي")}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <span className="text-sm font-semibold text-gray-800">{formatMoney(grandTotal)}</span>
-                    </Table.Td>
-                    <Table.Td />
-                    <Table.Td />
-                    <Table.Td />
-                  </Table.Tr>
-                </Table.Tfoot>
-              </Table>
-            </div>
-          )}
+            )}
+          </div>
         </section>
 
         <PaymentTermsEditor
@@ -927,13 +900,7 @@ export default function Page() {
             <Button variant="light" color="dark" radius="md" onClick={closeConfirm} disabled={mutation.isPending} fullWidth>
               {translation.cancel}
             </Button>
-            <Button
-              radius="md"
-              color="teal"
-              loading={mutation.isPending}
-              onClick={handleConfirmCreate}
-              fullWidth
-            >
+            <Button radius="md" color="teal" loading={mutation.isPending} onClick={handleConfirmCreate} fullWidth>
               {translate("Confirm & Create", "تأكيد وإنشاء")}
             </Button>
           </div>
@@ -961,6 +928,6 @@ export default function Page() {
           onSave={handleLinkSave}
         />
       )}
-    </LayoutBox>
+    </div>
   );
 }
