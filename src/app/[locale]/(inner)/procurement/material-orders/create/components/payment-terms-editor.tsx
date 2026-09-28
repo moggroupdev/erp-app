@@ -128,8 +128,8 @@ export default function PaymentTermsEditor({ terms, onChange, totalAmount, curre
             </h5>
             <p className="text-sm leading-relaxed text-gray-500">
               {translate(
-                `Payment terms open once you add material items and enter their unit prices. Coverage uses the grand total, including ${VAT_PERCENT}% VAT.`,
-                `تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة. التغطية على الإجمالي الكلي شاملاً ضريبة ${VAT_PERCENT}٪.`,
+                `Payment terms open once you add material items and enter their unit prices.`,
+                `تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة.`,
               )}
             </p>
           </div>

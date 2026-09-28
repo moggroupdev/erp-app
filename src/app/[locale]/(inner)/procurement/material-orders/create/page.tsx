@@ -752,7 +752,7 @@ export default function Page() {
           setNotes={setNotes}
         />
 
-        <section className="overflow-hidden rounded-2xl bg-white">
+        <section className="overflow-hidden bg-white">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
             <div className="flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-2xl bg-teal-800 text-white">
@@ -789,7 +789,7 @@ export default function Page() {
                 </Button>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl">
+              <div className="overflow-x-auto">
                 <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
                   <Table.Thead className="bg-gray-50">
                     <Table.Tr className="h-9">
@@ -833,33 +833,42 @@ export default function Page() {
                       />
                     ))}
                   </Table.Tbody>
-                  <Table.Tfoot className="bg-gray-50">
+                  <Table.Tfoot className="border-t border-gray-200 bg-gray-50">
                     <Table.Tr className="h-9">
-                      <Table.Td colSpan={5} className="text-sm text-gray-600">
+                      <Table.Td />
+                      <Table.Td colSpan={4} className="text-sm text-gray-600">
                         {translate("Total", "الإجمالي")}
                       </Table.Td>
                       <Table.Td>
                         <span className="text-sm font-medium text-gray-800">{formatMoney(subtotal)}</span>
                       </Table.Td>
-                      <Table.Td colSpan={3} />
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
                     </Table.Tr>
                     <Table.Tr className="h-9">
-                      <Table.Td colSpan={5} className="text-sm text-gray-600">
+                      <Table.Td />
+                      <Table.Td colSpan={4} className="text-sm text-gray-600">
                         {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
                       </Table.Td>
                       <Table.Td>
                         <span className="text-sm font-medium text-gray-800">{formatMoney(vatAmount)}</span>
                       </Table.Td>
-                      <Table.Td colSpan={3} />
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
                     </Table.Tr>
                     <Table.Tr className="h-9">
-                      <Table.Td colSpan={5} className="text-sm font-semibold text-gray-950">
+                      <Table.Td />
+                      <Table.Td colSpan={4} className="text-sm font-semibold text-gray-950">
                         {translate("Grand total", "الإجمالي الكلي")}
                       </Table.Td>
                       <Table.Td>
                         <span className="text-sm font-semibold text-gray-950">{formatMoney(grandTotal)}</span>
                       </Table.Td>
-                      <Table.Td colSpan={3} />
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
                     </Table.Tr>
                   </Table.Tfoot>
                 </Table>
