@@ -1,11 +1,12 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useMemo } from "react";
-import Link from "next/link";
 import { Table } from "@mantine/core";
 import { Table2 } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -20,7 +21,6 @@ export default function PriceEntriesTable({
   unitOfMeasurement: MaterialUnit;
 }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const unitLabel = getMaterialUnitLabel(unitOfMeasurement, locale);
 
   const rows = useMemo(
@@ -60,12 +60,13 @@ export default function PriceEntriesTable({
                 <Table.Tr key={`${row.orderId}-${row.orderDate}`} className="text-gray-600">
                   <Table.Td>
                     <div className="flex items-center gap-1.5">
-                      <Link
-                        href={getLocalizedHref(`/procurement/material-orders/${row.orderId}`)}
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+                        href={`/procurement/material-orders/${row.orderId}`}
                         className="font-mono font-medium text-gray-800 hover:underline"
                       >
                         {row.orderCode}
-                      </Link>
+                      </ProtectedLink>
                       <CopyButton text={row.orderCode} />
                     </div>
                   </Table.Td>
@@ -77,12 +78,13 @@ export default function PriceEntriesTable({
                     })}
                   </Table.Td>
                   <Table.Td>
-                    <Link
-                      href={getLocalizedHref(`/procurement/suppliers/${row.supplierId}`)}
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_SUPPLIERS}
+                      href={`/procurement/suppliers/${row.supplierId}`}
                       className="text-gray-800 hover:underline"
                     >
                       {row.supplierName}
-                    </Link>
+                    </ProtectedLink>
                   </Table.Td>
                   <Table.Td>{unitLabel}</Table.Td>
                   <Table.Td>{formatQuantity(row.quantityOrdered)}</Table.Td>

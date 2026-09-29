@@ -20,6 +20,7 @@ import { type MaterialPurchaseOrderWithSupplier } from "@/types/material-purchas
 import { Button, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
+import ProtectedLink from "@/components/ui/protected-link";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -207,22 +208,24 @@ export default function Page() {
                       <Table.Tr key={order.id} className="text-gray-600">
                         <Table.Td className="font-semibold text-gray-800">
                           <div className="flex items-center gap-1.5">
-                            <Link
-                              href={getLocalizedHref(`/procurement/material-orders/${order.id}`)}
+                            <ProtectedLink
+                              permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+                              href={`/procurement/material-orders/${order.id}`}
                               className="font-mono hover:underline"
                             >
                               {order.code}
-                            </Link>
+                            </ProtectedLink>
                             <CopyButton text={order.code} />
                           </div>
                         </Table.Td>
                         <Table.Td>
-                          <Link
-                            href={getLocalizedHref(`/procurement/suppliers/${order.supplier.id}`)}
+                          <ProtectedLink
+                            permission={PERMISSIONS.READ_SUPPLIERS}
+                            href={`/procurement/suppliers/${order.supplier.id}`}
                             className="hover:underline"
                           >
                             {order.supplier.name}
-                          </Link>
+                          </ProtectedLink>
                         </Table.Td>
                         <Table.Td>
                           {invoices.length > 0 ? (

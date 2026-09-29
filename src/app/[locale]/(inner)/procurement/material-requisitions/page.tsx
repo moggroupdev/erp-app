@@ -21,6 +21,7 @@ import { type MaterialPurchaseRequisitionListItem } from "@/types/material-purch
 import { Button, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
+import ProtectedLink from "@/components/ui/protected-link";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -181,12 +182,13 @@ export default function Page() {
                       <Table.Tr key={requisition.id} className="text-gray-600">
                         <Table.Td className="font-semibold text-gray-800">
                           <div className="flex items-center gap-1.5">
-                            <Link
-                              href={getLocalizedHref(`/procurement/material-requisitions/${requisition.id}`)}
+                            <ProtectedLink
+                              permission={PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS}
+                              href={`/procurement/material-requisitions/${requisition.id}`}
                               className="font-mono hover:underline"
                             >
                               {requisition.code}
-                            </Link>
+                            </ProtectedLink>
                             <CopyButton text={requisition.code} />
                           </div>
                         </Table.Td>
@@ -196,12 +198,13 @@ export default function Page() {
                         </Table.Td>
 
                         <Table.Td>
-                          <Link
-                            href={getLocalizedHref(`/organization/users/${requisition.createdBy.id}`)}
+                          <ProtectedLink
+                            permission={PERMISSIONS.READ_USERS}
+                            href={`/organization/users/${requisition.createdBy.id}`}
                             className="hover:underline"
                           >
                             {requisition.createdBy.name}
-                          </Link>
+                          </ProtectedLink>
                         </Table.Td>
                         <Table.Td className="max-w-xs truncate" title={requisition.notes || undefined}>
                           {requisition.notes || <EmptyValue />}

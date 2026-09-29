@@ -1,5 +1,9 @@
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MpoDeliveryLocation } from "@/lib/constants/enums/mpo-delivery-locations";
+import type { MpoDeliveryTiming } from "@/lib/constants/enums/mpo-delivery-timings";
+import type { MpoPaymentEvent } from "@/lib/constants/enums/mpo-payment-events";
+import type { MpoPaymentValueKind } from "@/lib/constants/enums/mpo-payment-value-kinds";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 
 type PurchaseMaterial = {
@@ -58,6 +62,9 @@ export type MaterialPurchaseOrder = {
   code: string;
   supplierId: string;
   totalAmount: number;
+  deliveryLocation: MpoDeliveryLocation | null;
+  deliveryTiming: MpoDeliveryTiming | null;
+  deliveryPeriodDays: number | null;
   completedAt: Date | null;
   cancelledAt: Date | null;
   notes: string | null;
@@ -98,10 +105,21 @@ export type MaterialPurchaseOrderItem = {
   requisitionAllocations?: MaterialPurchaseOrderItemRequisitionAllocation[];
 };
 
+export type MaterialPurchaseOrderPaymentTerm = {
+  id: string;
+  materialPurchaseOrderId: string;
+  sequenceOrder: number;
+  event: MpoPaymentEvent;
+  offsetDays: number | null;
+  valueKind: MpoPaymentValueKind;
+  value: number | null;
+};
+
 export type MaterialPurchaseOrderDetailed = Omit<MaterialPurchaseOrder, "createdBy"> & {
   supplier: { id: string; name: string };
   createdBy: { id: string; name: string };
   items: MaterialPurchaseOrderItem[];
+  paymentTerms: MaterialPurchaseOrderPaymentTerm[];
 };
 
 export type CreateMaterialPurchaseOrderItemRequisitionAllocationDto = {
@@ -119,10 +137,21 @@ export type CreateMaterialPurchaseOrderItemDto = {
   requisitionAllocations: CreateMaterialPurchaseOrderItemRequisitionAllocationDto[];
 };
 
+export type CreateMaterialPurchaseOrderPaymentTermDto = {
+  event: MpoPaymentEvent;
+  offsetDays?: number | null;
+  valueKind: MpoPaymentValueKind;
+  value?: number | null;
+};
+
 export type CreateMaterialPurchaseOrderDto = {
   supplierId: string;
+  deliveryLocation: MpoDeliveryLocation;
+  deliveryTiming: MpoDeliveryTiming;
+  deliveryPeriodDays?: number | null;
   notes: string | null;
   items: CreateMaterialPurchaseOrderItemDto[];
+  paymentTerms: CreateMaterialPurchaseOrderPaymentTermDto[];
 };
 
 // =============== Material Purchase Receipts ===============

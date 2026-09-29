@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
 import bomsApi from "@/lib/api/boms";
@@ -24,13 +23,12 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import UnitToggle from "@/components/ui/unit-toggle";
 import { EmptyValue } from "@/components/ui/entity-details";
+import ProtectedLink from "@/components/ui/protected-link";
 
 export default function MaterialBomUsagesSection({ material }: { material: MaterialWithCreatorAndUnitConversions }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
   const canReadProductBoms = useHasPermission(PERMISSIONS.READ_PRODUCT_BOMS);
-  const canReadProducts = useHasPermission(PERMISSIONS.READ_PRODUCTS);
 
   const productUsagesQuery = useQuery({
     queryKey: queryKeys.boms.usages(material.code),
@@ -86,8 +84,6 @@ export default function MaterialBomUsagesSection({ material }: { material: Mater
         <ProductBomUsagesTable
           material={material}
           usages={usages}
-          canLinkProduct={canReadProducts}
-          getLocalizedHref={getLocalizedHref}
           locale={locale}
           translate={translate}
           productDimensionUnit={translation.productDimensionUnit}
@@ -100,21 +96,16 @@ export default function MaterialBomUsagesSection({ material }: { material: Mater
 // ==================== Table ====================
 
 type TranslateFn = (en: string, ar: string) => string;
-type LocaleHrefFn = (path: string) => string;
 
 function ProductBomUsagesTable({
   material,
   usages,
-  canLinkProduct,
-  getLocalizedHref,
   locale,
   translate,
   productDimensionUnit,
 }: {
   material: MaterialWithCreatorAndUnitConversions;
   usages: BomMaterialUsage[];
-  canLinkProduct: boolean;
-  getLocalizedHref: LocaleHrefFn;
   locale: Locale;
   translate: TranslateFn;
   productDimensionUnit: string;
@@ -150,7 +141,7 @@ function ProductBomUsagesTable({
         <Table.Tbody>
           {usages.map((usage) => {
             const enteredUnit = usage.unitOfMeasurementSelected ?? material.unitOfMeasurement;
-            const bomHref = getLocalizedHref(`/products/${usage.product.code}/boms/${usage.dimension.id}`);
+            const bomHref = `/products/${usage.product.code}/boms/${usage.dimension.id}`;
 
             return (
               <UnitToggle
@@ -162,25 +153,22 @@ function ProductBomUsagesTable({
                 {({ unit, toggleButton }) => (
                   <Table.Tr className="text-gray-600">
                     <Table.Td>
-                      {canLinkProduct ? (
-                        <Link
-                          href={bomHref}
-                          className="font-mono text-xs text-gray-500 hover:text-teal-700 hover:underline"
-                        >
-                          {usage.product.code}
-                        </Link>
-                      ) : (
-                        <span className="font-mono text-xs text-gray-500">{usage.product.code}</span>
-                      )}
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_PRODUCTS}
+                        href={bomHref}
+                        className="font-mono text-xs text-gray-500 hover:text-teal-700 hover:underline"
+                      >
+                        {usage.product.code}
+                      </ProtectedLink>
                     </Table.Td>
                     <Table.Td>
-                      {canLinkProduct ? (
-                        <Link href={bomHref} className="font-medium text-gray-800 hover:text-teal-700 hover:underline">
-                          {usage.product.title}
-                        </Link>
-                      ) : (
-                        <span className="font-medium text-gray-800">{usage.product.title}</span>
-                      )}
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_PRODUCTS}
+                        href={bomHref}
+                        className="font-medium text-gray-800 hover:text-teal-700 hover:underline"
+                      >
+                        {usage.product.title}
+                      </ProtectedLink>
                     </Table.Td>
                     <Table.Td>{formatDimensionLabel(usage.dimension, productDimensionUnit)}</Table.Td>
                     <Table.Td>

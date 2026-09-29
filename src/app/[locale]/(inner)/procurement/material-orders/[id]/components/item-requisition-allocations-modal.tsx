@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useDisclosure } from "@mantine/hooks";
 import { Button, Table } from "@mantine/core";
 import { ClipboardList } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import {
@@ -22,7 +23,6 @@ export default function ItemRequisitionAllocationsModal({
   allocations: MaterialPurchaseOrderItemRequisitionAllocation[];
 }) {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const [opened, { open, close }] = useDisclosure(false);
 
   if (allocations.length === 0) {
@@ -67,12 +67,13 @@ export default function ItemRequisitionAllocationsModal({
                 {allocations.map((allocation) => (
                   <Table.Tr key={allocation.id} className="text-gray-600">
                     <Table.Td>
-                      <Link
-                        href={getLocalizedHref(`/procurement/material-requisitions/${allocation.requisition.id}`)}
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS}
+                        href={`/procurement/material-requisitions/${allocation.requisition.id}`}
                         className="font-mono font-medium text-teal-800 hover:underline"
                       >
                         {allocation.requisition.code}
-                      </Link>
+                      </ProtectedLink>
                     </Table.Td>
                     <Table.Td>
                       {getProductionSubDepartmentLabel(

@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "@mantine/core";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
@@ -37,7 +37,6 @@ export default function Page() {
   const { locale, translate, translation } = useI18n();
   const { id } = useParams<{ id: string }>();
   const privateRequest = usePrivateRequest();
-  const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
   const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
 
@@ -147,12 +146,13 @@ export default function Page() {
                             {({ unit, factor, toggleButton }) => (
                               <Table.Tr className="text-gray-600">
                                 <Table.Td className="font-semibold text-gray-800">
-                                  <Link
-                                    href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                  <ProtectedLink
+                                    permission={PERMISSIONS.READ_MATERIALS}
+                                    href={`/warehouse/materials/${item.material.code}`}
                                     className="hover:underline"
                                   >
                                     {item.material.title}
-                                  </Link>
+                                  </ProtectedLink>
                                 </Table.Td>
                                 <Table.Td>
                                   <div className="flex items-center gap-1.5">

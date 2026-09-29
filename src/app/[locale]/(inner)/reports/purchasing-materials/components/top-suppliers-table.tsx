@@ -1,24 +1,24 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Table } from "@mantine/core";
 import { Truck } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsBySupplier } from "@/types/reports";
 import ReportCard from "./report-card";
 
 export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsBySupplier[] }) {
   const { translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   return (
     <ReportCard
       title={translate("Top Suppliers by Value", "أعلى الموردين قيمة")}
       description={translate(
         "Suppliers ranked by total purchase order value.",
-        "الموردون مرتبون حسب إجمالي قيمة أوامر التوريد.",
+        "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
       )}
       icon={Truck}
       accent="amber"
@@ -33,12 +33,12 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Orders", "الطلبات")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Orders", "أوامر الشراء")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Avg Order (${translation.currency})`, `متوسط الطلب (${translation.currency})`)}
+                  {translate(`Avg Order (${translation.currency})`, `متوسط أمر الشراء (${translation.currency})`)}
                 </Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -47,12 +47,13 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
                 <Table.Tr key={row.supplierId} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td className="max-w-60 truncate font-medium text-gray-800">
-                    <Link
-                      href={getLocalizedHref(`/procurement/suppliers/${row.supplierId}`)}
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_SUPPLIERS}
+                      href={`/procurement/suppliers/${row.supplierId}`}
                       className="text-gray-800 hover:underline"
                     >
                       {row.supplierName}
-                    </Link>
+                    </ProtectedLink>
                   </Table.Td>
                   <Table.Td>
                     <div className="flex items-center gap-1.5">

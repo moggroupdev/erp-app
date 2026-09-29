@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Table } from "@mantine/core";
 import { Trophy } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialsInventoryTopMaterial } from "@/types/reports";
 import ReportCard from "./report-card";
@@ -17,7 +18,6 @@ type TopMaterialsTableProps = {
 
 export default function TopMaterialsTable({ data, rankBy = "value" }: TopMaterialsTableProps) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const byQuantity = rankBy === "quantity";
 
   return (
@@ -66,13 +66,14 @@ export default function TopMaterialsTable({ data, rankBy = "value" }: TopMateria
                 <Table.Tr key={material.code} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
                   <Table.Td className="max-w-60 truncate font-medium text-gray-800">
-                    <Link
-                      href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_MATERIALS}
+                      href={`/warehouse/materials/${material.code}`}
                       className="text-gray-800 hover:underline"
                       title={material.title}
                     >
                       {material.title}
-                    </Link>
+                    </ProtectedLink>
                   </Table.Td>
                   <Table.Td className="font-mono text-xs text-gray-500">{material.code}</Table.Td>
                   <Table.Td>{getMaterialUnitLabel(material.unitOfMeasurement, locale)}</Table.Td>

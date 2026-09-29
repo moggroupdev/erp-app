@@ -1,16 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Alert, Table } from "@mantine/core";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import type { MaterialsInventoryLowStockMaterial } from "@/types/reports";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import ReportCard from "./report-card";
 
 export default function LowStockMaterialsTable({ data }: { data: MaterialsInventoryLowStockMaterial[] }) {
   const { translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   return (
     <ReportCard
@@ -51,13 +51,14 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
               {data.map((material) => (
                 <Table.Tr key={material.code} className="text-stone-600">
                   <Table.Td className="max-w-60 truncate font-medium text-stone-800">
-                    <Link
-                      href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_MATERIALS}
+                      href={`/warehouse/materials/${material.code}`}
                       className="text-gray-800 hover:underline"
                       title={material.title}
                     >
                       {material.title}
-                    </Link>
+                    </ProtectedLink>
                   </Table.Td>
                   <Table.Td className="font-mono text-xs text-stone-500">{material.code}</Table.Td>
                   <Table.Td>{formatQuantity(material.quantity)}</Table.Td>

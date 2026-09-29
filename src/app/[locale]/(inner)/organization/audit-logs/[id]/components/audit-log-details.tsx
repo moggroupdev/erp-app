@@ -13,6 +13,7 @@ import { getAuditedTableLabel } from "@/lib/constants/audit-tables";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { AuditLogDetailed } from "@/types/audit-log";
 import { DetailsTable, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import ProtectedLink from "@/components/ui/protected-link";
 import CopyButton from "@/components/ui/copy-button";
 import AuditActionLabel from "../../components/audit-action-label";
 import AuditLogHeader from "./audit-log-header";
@@ -81,16 +82,18 @@ export default function AuditLogDetails({ log }: AuditLogDetailsProps) {
         })}`
       : null;
 
-  const actorUserHref = canReadUsers && log.actorUserId ? getLocalizedHref(`/organization/users/${log.actorUserId}`) : null;
-
   const department = log.actorDepartmentId ? departmentHelpers.getDepartmentById(log.actorDepartmentId) : null;
   const role = log.actorRoleId ? roleHelpers.getRoleById(log.actorRoleId) : null;
 
   const actorName = log.actorName ? (
-    actorUserHref ? (
-      <Link href={actorUserHref} className="hover:underline">
+    canReadUsers && log.actorUserId ? (
+      <ProtectedLink
+        permission={PERMISSIONS.READ_USERS}
+        href={`/organization/users/${log.actorUserId}`}
+        className="hover:underline"
+      >
         {log.actorName}
-      </Link>
+      </ProtectedLink>
     ) : actorFilterHref ? (
       <FilterLink href={actorFilterHref}>{log.actorName}</FilterLink>
     ) : (

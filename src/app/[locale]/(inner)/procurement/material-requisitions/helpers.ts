@@ -1,8 +1,7 @@
 import { APPROVAL_DECISIONS, type ApprovalDecision } from "@/lib/constants/enums/approval-decisions";
+import { VAT_RATE } from "@/lib/constants/global";
 import { toDisplayUnitPrice, resolveDisplayUnit } from "@/lib/helpers/unit-conversion";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
-
-export const REQUISITION_VAT_RATE = 0.14;
 
 export type RequisitionLockFields = {
   planningDecision: ApprovalDecision;
@@ -88,7 +87,7 @@ export function computeRequisitionLastPurchaseTotals(items: MaterialPurchaseRequ
     subtotal += lineTotal;
   }
 
-  const vat = subtotal * REQUISITION_VAT_RATE;
+  const vat = subtotal * VAT_RATE;
   const grandTotal = subtotal + vat;
 
   return { subtotal, vat, grandTotal, missingPriceCount };

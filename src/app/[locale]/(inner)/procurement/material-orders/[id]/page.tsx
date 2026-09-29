@@ -1,5 +1,6 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +15,7 @@ import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import supplierInvoicesApi from "@/lib/api/supplier-invoices";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
+import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
@@ -39,7 +41,6 @@ const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خا
 const RECEIPTS_LIMIT = 100;
 const INVOICES_LIMIT = 100;
 const REMAINING_EPSILON = 1e-9;
-const VAT_RATE = 0.14;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -203,12 +204,13 @@ export default function Page() {
                               <>
                                 <Table.Tr className="text-gray-600">
                                   <Table.Td className="font-semibold text-gray-800">
-                                    <Link
-                                      href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)}
+                                    <ProtectedLink
+                                      permission={PERMISSIONS.READ_MATERIALS}
+                                      href={`/warehouse/materials/${item.material.code}`}
                                       className="hover:underline"
                                     >
                                       {item.material.title}
-                                    </Link>
+                                    </ProtectedLink>
                                   </Table.Td>
                                   <Table.Td>
                                     <div className="flex items-center gap-1.5">
@@ -264,7 +266,7 @@ export default function Page() {
                       </Table.Tr>
                       <Table.Tr className="font-medium text-gray-800">
                         <Table.Th colSpan={7} className="text-end">
-                          {translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}
+                          {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
                         </Table.Th>
                         <Table.Th>{formatMoney(vat)}</Table.Th>
                         <Table.Th />
@@ -331,12 +333,13 @@ export default function Page() {
                         <Table.Tr key={receipt.id} className="text-gray-600">
                           <Table.Td className="font-semibold text-gray-800">
                             <div className="flex items-center gap-1.5">
-                              <Link
-                                href={getLocalizedHref(`/procurement/material-orders/${id}/receipts/${receipt.id}`)}
+                              <ProtectedLink
+                                permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+                                href={`/procurement/material-orders/${id}/receipts/${receipt.id}`}
                                 className="font-mono hover:underline"
                               >
                                 {receipt.code}
-                              </Link>
+                              </ProtectedLink>
                               <CopyButton text={receipt.code} />
                             </div>
                           </Table.Td>

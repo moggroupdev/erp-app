@@ -323,7 +323,7 @@ export default function Page() {
                 </Table.Thead>
                 <Table.Tbody>
                   {paginatedLogs.data.map((log) => (
-                    <AuditLogRow key={log.id} log={log} canLinkActor={canReadUsers} />
+                    <AuditLogRow key={log.id} log={log} />
                   ))}
                 </Table.Tbody>
               </Table>

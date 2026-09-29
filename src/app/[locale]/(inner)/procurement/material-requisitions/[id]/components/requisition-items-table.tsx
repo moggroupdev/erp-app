@@ -1,12 +1,12 @@
 "use client";
 
+import ProtectedLink from "@/components/ui/protected-link";
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ActionIcon, Badge, Menu, Table } from "@mantine/core";
 import { EllipsisVertical, Pencil, Trash2 } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -14,6 +14,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDate } from "@/lib/helpers/date-formaters";
+import { VAT_PERCENT } from "@/lib/constants/global";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
@@ -37,7 +38,6 @@ export default function RequisitionItemsTable({
   onEdit: (item: MaterialPurchaseRequisitionItemDetailed) => void;
 }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
   const [itemToDelete, setItemToDelete] = useState<MaterialPurchaseRequisitionItemDetailed | null>(null);
@@ -92,9 +92,9 @@ export default function RequisitionItemsTable({
               return (
                 <Table.Tr key={item.id} className="text-gray-600">
                   <Table.Td className="font-semibold text-gray-800">
-                    <Link href={getLocalizedHref(`/warehouse/materials/${item.material.code}`)} className="hover:underline">
+                    <ProtectedLink permission={PERMISSIONS.READ_MATERIALS} href={`/warehouse/materials/${item.material.code}`} className="hover:underline">
                       {item.material.title}
-                    </Link>
+                    </ProtectedLink>
                   </Table.Td>
                   <Table.Td>
                     <div className="flex items-center gap-1.5">
@@ -180,7 +180,7 @@ export default function RequisitionItemsTable({
             </Table.Tr>
             <Table.Tr className="font-medium text-gray-800">
               <Table.Th colSpan={colspanBeforeTotal} className="text-end">
-                {translate("VAT (14%)", "ضريبة القيمة المضافة (14%)")}
+                {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
               </Table.Th>
               <Table.Th>{formatMoney(vat)}</Table.Th>
               <Table.Th colSpan={colspanAfterTotal} />

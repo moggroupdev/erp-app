@@ -1,27 +1,26 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Table } from "@mantine/core";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getAuditedTableLabel } from "@/lib/constants/audit-tables";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { AuditLog } from "@/types/audit-log";
 import CopyButton from "@/components/ui/copy-button";
+import ProtectedLink from "@/components/ui/protected-link";
 import AuditActionLabel from "./audit-action-label";
 
 type AuditLogRowProps = {
   log: AuditLog;
-  canLinkActor: boolean;
 };
 
-export default function AuditLogRow({ log, canLinkActor }: AuditLogRowProps) {
+export default function AuditLogRow({ log }: AuditLogRowProps) {
   const { locale } = useI18n();
   const router = useRouter();
   const getLocalizedHref = useLocaleHref();
 
   const detailHref = getLocalizedHref(`/organization/audit-logs/${log.id}`);
-  const actorHref = canLinkActor && log.actorUserId ? getLocalizedHref(`/organization/users/${log.actorUserId}`) : null;
 
   return (
     <Table.Tr
@@ -34,10 +33,14 @@ export default function AuditLogRow({ log, canLinkActor }: AuditLogRowProps) {
       <Table.Td>{formatDateAndTime(log.createdAt, locale)}</Table.Td>
       <Table.Td>
         {log.actorName ? (
-          actorHref ? (
-            <Link href={actorHref} className="hover:underline">
+          log.actorUserId ? (
+            <ProtectedLink
+              permission={PERMISSIONS.READ_USERS}
+              href={`/organization/users/${log.actorUserId}`}
+              className="hover:underline"
+            >
               {log.actorName}
-            </Link>
+            </ProtectedLink>
           ) : (
             log.actorName
           )

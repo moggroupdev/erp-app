@@ -1,16 +1,17 @@
-import Link from "next/link";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { useI18n } from "@/lib/i18n/hooks";
 import { type Role } from "@/types/roles";
 import { Badge, Tooltip } from "@mantine/core";
 import { Building2, Shield } from "lucide-react";
 
 export default function RoleCard({ role, departmentName }: { role: Role; departmentName?: string | null }) {
   const { translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   return (
-    <Link
-      href={getLocalizedHref(`/organization/roles/${role.id}`)}
+    <ProtectedLink
+      permission={PERMISSIONS.READ_ROLES}
+      href={`/organization/roles/${role.id}`}
       className="group flex h-full flex-col gap-4 rounded-3xl border border-gray-200 bg-white p-5 transition-colors hover:bg-gray-50"
     >
       <div className="flex items-start gap-3">
@@ -42,6 +43,6 @@ export default function RoleCard({ role, departmentName }: { role: Role; departm
           )}
         </div>
       </div>
-    </Link>
+    </ProtectedLink>
   );
 }

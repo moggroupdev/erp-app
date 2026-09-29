@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
@@ -16,6 +15,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type SupplierInvoiceWithLinks } from "@/types/material-purchase-order";
 import { Table, TextInput } from "@mantine/core";
 import { Search, X, FileText } from "lucide-react";
@@ -26,6 +26,7 @@ import EmptySection from "@/components/ui/sections/empty";
 import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
+import ProtectedLink from "@/components/ui/protected-link";
 import RefetchButton from "@/components/ui/refetch-button";
 
 const PAGE_TITLE = { en: "Supplier Invoices", ar: "فواتير الموردين" };
@@ -33,16 +34,15 @@ const PAGE_TITLE = { en: "Supplier Invoices", ar: "فواتير الموردين
 const INVOICES_PER_PAGE = 25;
 
 function OrderCell({ invoice }: { invoice: SupplierInvoiceWithLinks }) {
-  const getLocalizedHref = useLocaleHref();
-
   if (invoice.materialPurchaseOrder) {
     return (
-      <Link
-        href={getLocalizedHref(`/procurement/material-orders/${invoice.materialPurchaseOrder.id}`)}
+      <ProtectedLink
+        permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+        href={`/procurement/material-orders/${invoice.materialPurchaseOrder.id}`}
         className="font-mono hover:underline"
       >
         {invoice.materialPurchaseOrder.code}
-      </Link>
+      </ProtectedLink>
     );
   }
 
@@ -64,7 +64,6 @@ export default function Page() {
 
   const router = useRouter();
   const urlSearchParams = useSearchParams();
-  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
@@ -185,12 +184,13 @@ export default function Page() {
                     <Table.Tr key={invoice.id} className="text-gray-600">
                       <Table.Td className="font-semibold text-gray-800">
                         <div className="flex items-center gap-1.5">
-                          <Link
-                            href={getLocalizedHref(`/procurement/supplier-invoices/${invoice.id}`)}
+                          <ProtectedLink
+                            permission={PERMISSIONS.READ_SUPPLIER_INVOICES}
+                            href={`/procurement/supplier-invoices/${invoice.id}`}
                             className="font-mono hover:underline"
                           >
                             {invoice.invoiceNumber}
-                          </Link>
+                          </ProtectedLink>
                           <CopyButton text={invoice.invoiceNumber} />
                           {invoice.pdfFilename && (
                             <span title={translate("PDF attached", "ملف PDF مرفق")} className="text-teal-700">
@@ -200,12 +200,13 @@ export default function Page() {
                         </div>
                       </Table.Td>
                       <Table.Td>
-                        <Link
-                          href={getLocalizedHref(`/procurement/suppliers/${invoice.supplier.id}`)}
+                        <ProtectedLink
+                          permission={PERMISSIONS.READ_SUPPLIERS}
+                          href={`/procurement/suppliers/${invoice.supplier.id}`}
                           className="hover:underline"
                         >
                           {invoice.supplier.name}
-                        </Link>
+                        </ProtectedLink>
                       </Table.Td>
                       <Table.Td>
                         <OrderCell invoice={invoice} />

@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button } from "@mantine/core";
 import { ClipboardCheck, PackagePlus } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type MaterialPurchaseReceiptDetailed } from "@/types/material-purchase-order";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
@@ -18,7 +19,6 @@ export default function ReceiptDetails({
   onCreateInventoryTransaction?: () => void;
 }) {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const { inventoryTransactions } = receipt;
   const { id: orderId, code: orderCode } = receipt.materialPurchaseOrder;
   const hasAcceptedQty = receipt.items.some((item) => Number(item.quantityReceived) > 0);
@@ -33,9 +33,9 @@ export default function ReceiptDetails({
     {
       key: translate("Purchase Order Code", "كود أمر التوريد"),
       value: (
-        <Link href={getLocalizedHref(`/procurement/material-orders/${orderId}`)} className="font-mono hover:underline">
+        <ProtectedLink permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS} href={`/procurement/material-orders/${orderId}`} className="font-mono hover:underline">
           {orderCode}
-        </Link>
+        </ProtectedLink>
       ),
       copyText: orderCode,
     },
@@ -73,9 +73,9 @@ export default function ReceiptDetails({
     rows.push({
       key: translate("Transaction Number", "رقم إذن الإضافة"),
       value: (
-        <Link href={getLocalizedHref(`/warehouse/transactions/${transaction.id}`)} className="font-mono hover:underline">
+        <ProtectedLink permission={PERMISSIONS.READ_INVENTORY_TRANSACTIONS} href={`/warehouse/transactions/${transaction.id}`} className="font-mono hover:underline">
           {transactionLabel}
-        </Link>
+        </ProtectedLink>
       ),
       copyText: transactionLabel,
     });
@@ -85,13 +85,14 @@ export default function ReceiptDetails({
       value: (
         <div className="flex flex-col gap-1">
           {inventoryTransactions.map((transaction) => (
-            <Link
+            <ProtectedLink
               key={transaction.id}
-              href={getLocalizedHref(`/warehouse/transactions/${transaction.id}`)}
+              permission={PERMISSIONS.READ_INVENTORY_TRANSACTIONS}
+              href={`/warehouse/transactions/${transaction.id}`}
               className="font-mono hover:underline"
             >
               {transaction.legacyNumber || transaction.id}
-            </Link>
+            </ProtectedLink>
           ))}
         </div>
       ),

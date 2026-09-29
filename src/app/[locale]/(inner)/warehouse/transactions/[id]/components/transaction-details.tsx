@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/config";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
@@ -11,7 +12,6 @@ import InventoryTransactionTypeLabel from "@/components/ui/inventory-transaction
 function getSourceRows(
   transaction: InventoryTransactionDetailed,
   translate: (en: string, ar: string) => string,
-  getLocalizedHref: (path: string) => string,
   locale: Locale,
 ): DetailRow[] {
   if (transaction.materialPurchaseReceipt) {
@@ -21,21 +21,22 @@ function getSourceRows(
       {
         key: translate("Materials Receipt Number", "رقم سند استلام الخامات"),
         value: (
-          <Link
-            href={getLocalizedHref(`/procurement/material-orders/${order.id}/receipts/${receipt.id}`)}
+          <ProtectedLink
+            permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+            href={`/procurement/material-orders/${order.id}/receipts/${receipt.id}`}
             className="font-mono hover:underline"
           >
             {receipt.code}
-          </Link>
+          </ProtectedLink>
         ),
         copyText: receipt.code,
       },
       {
         key: translate("Purchase Order Number", "رقم أمر التوريد"),
         value: (
-          <Link href={getLocalizedHref(`/procurement/material-orders/${order.id}`)} className="font-mono hover:underline">
+          <ProtectedLink permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS} href={`/procurement/material-orders/${order.id}`} className="font-mono hover:underline">
             {order.code}
-          </Link>
+          </ProtectedLink>
         ),
         copyText: order.code,
       },
@@ -65,9 +66,9 @@ function getSourceRows(
       {
         key: translate("Customer", "العميل"),
         value: (
-          <Link href={getLocalizedHref(`/sales/customers/${contract.customer.id}`)} className="hover:underline">
+          <ProtectedLink permission={PERMISSIONS.READ_CUSTOMERS} href={`/sales/customers/${contract.customer.id}`} className="hover:underline">
             {contract.customer.name}
-          </Link>
+          </ProtectedLink>
         ),
       },
       {
@@ -114,7 +115,6 @@ function getSourceRows(
 
 export default function TransactionDetails({ transaction }: { transaction: InventoryTransactionDetailed }) {
   const { locale, translate } = useI18n();
-  const getLocalizedHref = useLocaleHref();
 
   const rows: DetailRow[] = [
     { key: translate("Code", "الكود"), value: transaction.code, mono: true, copyText: transaction.code },
@@ -127,7 +127,7 @@ export default function TransactionDetails({ transaction }: { transaction: Inven
       key: translate("Transaction Type", "نوع الإذن"),
       value: <InventoryTransactionTypeLabel type={transaction.transactionType} />,
     },
-    ...getSourceRows(transaction, translate, getLocalizedHref, locale),
+    ...getSourceRows(transaction, translate, locale),
     {
       key: translate("Notes", "الملاحظات"),
       value: transaction.notes ? (

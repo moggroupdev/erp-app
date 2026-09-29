@@ -30,7 +30,7 @@ const PAGE_TITLE = { en: "Purchases Summary", ar: "ملخص المشتريات" 
 
 const PAGE_SUBTITLE = {
   en: "Overview of purchases by period, supplier, material, and category with order status breakdown.",
-  ar: "نظرة شاملة على المشتريات حسب الفترة والمورد والمادة والفئة مع تفصيل حالات الطلبات.",
+  ar: "نظرة شاملة على المشتريات حسب الفترة والمورد والمادة والفئة مع تفصيل حالات أوامر الشراء.",
 };
 
 function parseGroupBy(value: string | null): GroupBy {

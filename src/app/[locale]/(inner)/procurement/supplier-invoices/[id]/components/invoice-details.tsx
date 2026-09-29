@@ -2,11 +2,10 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button, FileButton, Loader } from "@mantine/core";
 import { Building2, CalendarDays, Download, FileText, Link2, Upload } from "lucide-react";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useHasPermission from "@/hooks/use-has-permission";
 import usePrivateRequest from "@/hooks/use-private-request";
 import supplierInvoicesApi from "@/lib/api/supplier-invoices";
@@ -18,6 +17,7 @@ import parseSupplierInvoicePdf, { type ParsedSupplierInvoice } from "@/lib/helpe
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type SupplierInvoiceDetailed } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
+import ProtectedLink from "@/components/ui/protected-link";
 import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
 import UploadInvoiceConfirmModal from "@/components/global/sections/order-invoices/upload-invoice-confirm-modal";
@@ -117,16 +117,15 @@ function orderMeta(invoice: SupplierInvoiceDetailed, translate: (en: string, ar:
 }
 
 function LinkedOrder({ invoice }: { invoice: SupplierInvoiceDetailed }) {
-  const getLocalizedHref = useLocaleHref();
-
   if (invoice.materialPurchaseOrder) {
     return (
-      <Link
-        href={getLocalizedHref(`/procurement/material-orders/${invoice.materialPurchaseOrder.id}`)}
+      <ProtectedLink
+        permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+        href={`/procurement/material-orders/${invoice.materialPurchaseOrder.id}`}
         className="font-mono hover:underline"
       >
         {invoice.materialPurchaseOrder.code}
-      </Link>
+      </ProtectedLink>
     );
   }
 
@@ -316,7 +315,6 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
 
 export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDetailed }) {
   const { locale, translate, translation } = useI18n();
-  const getLocalizedHref = useLocaleHref();
   const currency = translation.currency;
   const linked = orderMeta(invoice, translate);
 
@@ -378,9 +376,13 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
 
           <div className="flex flex-col gap-5">
             <InfoRow icon={Building2} label={translate("Supplier", "المورد")}>
-              <Link href={getLocalizedHref(`/procurement/suppliers/${invoice.supplier.id}`)} className="hover:underline">
+              <ProtectedLink
+                permission={PERMISSIONS.READ_SUPPLIERS}
+                href={`/procurement/suppliers/${invoice.supplier.id}`}
+                className="hover:underline"
+              >
                 {invoice.supplier.name}
-              </Link>
+              </ProtectedLink>
             </InfoRow>
 
             <InfoRow icon={Link2} label={translate("Linked Order", "الأمر المرتبط")}>

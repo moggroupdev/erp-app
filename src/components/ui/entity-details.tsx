@@ -1,12 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { Ban, type LucideIcon } from "lucide-react";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
+import ProtectedLink from "@/components/ui/protected-link";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 
 export type DetailRow = {
   key: string;
@@ -20,14 +21,12 @@ export function EmptyValue() {
 }
 
 export function CreatorLink({ creator }: { creator: { id: string; name: string } | null | undefined }) {
-  const getLocalizedHref = useLocaleHref();
-
   if (!creator) return <EmptyValue />;
 
   return (
-    <Link href={getLocalizedHref(`/organization/users/${creator.id}`)} className="hover:underline">
+    <ProtectedLink permission={PERMISSIONS.READ_USERS} href={`/organization/users/${creator.id}`} className="hover:underline">
       {creator.name}
-    </Link>
+    </ProtectedLink>
   );
 }
 

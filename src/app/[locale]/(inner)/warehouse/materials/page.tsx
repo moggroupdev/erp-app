@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import ProtectedLink from "@/components/ui/protected-link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
@@ -52,7 +52,6 @@ export default function Page() {
 
   const router = useRouter();
   const urlSearchParams = useSearchParams();
-  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
   const { helpers } = useMaterialCategories();
 
@@ -276,12 +275,13 @@ export default function Page() {
                         {({ unit, factor, toggleButton }) => (
                           <Table.Tr className="text-gray-600">
                             <Table.Td className="font-semibold text-gray-800">
-                              <Link
-                                href={getLocalizedHref(`/warehouse/materials/${material.code}`)}
+                              <ProtectedLink
+                                permission={PERMISSIONS.READ_MATERIALS}
+                                href={`/warehouse/materials/${material.code}`}
                                 className="hover:underline"
                               >
                                 {material.title}
-                              </Link>
+                              </ProtectedLink>
                             </Table.Td>
                             <Table.Td>
                               <div className="flex items-center gap-1.5">
