@@ -93,7 +93,7 @@ function ConfirmInvoiceNumberModal({
       title={translate("Confirm invoice number change", "تأكيد تغيير رقم الفاتورة")}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
+        <Alert color="ochre" radius="md" icon={<AlertCircle size={15} />}>
           {translate(
             `The invoice number will change from ${existingInvoiceNumber} to ${newInvoiceNumber}.`,
             `سيتغير رقم الفاتورة من ${existingInvoiceNumber} إلى ${newInvoiceNumber}.`,
@@ -268,7 +268,7 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
     <>
       <Modal opened={opened && !numberConfirmOpened} onClose={handleClose} title={title} size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <p className="text-sm leading-relaxed text-gray-600">{description}</p>
+          <p className="text-sm leading-[1.75] text-gray-600">{description}</p>
 
           {!parsed ? (
             <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
@@ -278,14 +278,14 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
           ) : (
             <>
               {parsed.missingFields.length > 0 && (
-                <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
+                <Alert color="ochre" radius="md" icon={<AlertCircle size={15} />}>
                   {translate("Some fields could not be read:", "تعذر قراءة بعض الحقول:")}{" "}
                   {parsed.missingFields.map((key) => missingLabels[key] || key).join(locale === "ar" ? "، " : ", ")}
                 </Alert>
               )}
 
               {invoiceNumberChanged && (
-                <Alert color="orange" radius="md" icon={<AlertCircle size={15} />}>
+                <Alert color="ochre" radius="md" icon={<AlertCircle size={15} />}>
                   {translate(
                     `The invoice number in the PDF (${parsed.invoiceNumber}) differs from the current number (${existingInvoiceNumber}). Saving will require confirming the new number.`,
                     `رقم الفاتورة في الملف (${parsed.invoiceNumber}) يختلف عن الرقم الحالي (${existingInvoiceNumber}). سيتطلب الحفظ تأكيد الرقم الجديد.`,
@@ -324,7 +324,7 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
               </div>
 
               {pdfObjectUrl && (
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
                   <iframe
                     title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
                     src={pdfObjectUrl}

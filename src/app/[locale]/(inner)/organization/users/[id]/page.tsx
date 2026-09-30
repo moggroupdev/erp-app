@@ -7,16 +7,18 @@ import { useDisclosure } from "@mantine/hooks";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import usersApi from "@/lib/api/users";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { Button } from "@mantine/core";
+import { Button, Menu } from "@mantine/core";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import DeleteModal from "@/components/ui/delete-modal";
@@ -34,6 +36,7 @@ export default function Page() {
 
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
+  const canUpdateUser = useHasPermission(PERMISSIONS.UPDATE_USER);
 
   const userQuery = useQuery({
     queryKey: queryKeys.users.detail(id),
@@ -80,15 +83,15 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={loading} onRefetch={() => userQuery.refetch()} />
-            {user && !user.isAdmin && !user.deletedAt && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_USER}>
-                <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-                  {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
-            )}
+            <ActionsMenu>
+              {user && !user.isAdmin && !user.deletedAt && canUpdateUser && (
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
+                  {translate("Edit user", "تعديل المستخدم")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}
@@ -121,17 +124,17 @@ export default function Page() {
                   </button>
 
                   {dangerZoneOpen && (
-                    <div className="mt-2.5 rounded-xl border border-red-50 bg-red-50/40 p-4">
-                      <h4 className="text-sm font-semibold text-red-700">{translate("Delete user", "حذف المستخدم")}</h4>
-                      <p className="mt-1.5 text-sm text-red-600/80">
+                    <div className="mt-2.5 rounded-xl border border-clay-50 bg-clay-50/40 p-4">
+                      <h4 className="text-sm font-semibold text-clay-700">{translate("Delete user", "حذف المستخدم")}</h4>
+                      <p className="mt-1.5 text-sm text-clay-600/80">
                         {translate(
-                          "Soft-delete this account. The user will no longer appear in active lists.",
-                          "حذف هذا الحساب مؤقتًا. لن يظهر المستخدم بعد ذلك في القوائم النشطة.",
+                          "Delete this account. The user will no longer appear in active lists.",
+                          "حذف هذا الحساب. لن يظهر المستخدم بعد ذلك في القوائم النشطة.",
                         )}
                       </p>
                       <Button
                         mt="md"
-                        color="red"
+                        color="clay"
                         variant="light"
                         radius="md"
                         leftSection={<Trash2 size={15} />}

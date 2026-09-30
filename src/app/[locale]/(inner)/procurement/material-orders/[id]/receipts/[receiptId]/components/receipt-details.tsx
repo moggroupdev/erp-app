@@ -47,7 +47,7 @@ export default function ReceiptDetails({
       value:
         canCreateInventoryTransaction && hasAcceptedQty && onCreateInventoryTransaction ? (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold text-red-600">
+            <span className="font-semibold text-clay-600">
               {translate("Inventory transaction was not created yet", "لم يُنشأ إذن المخزون بعد")}
             </span>
             <Button
@@ -62,7 +62,7 @@ export default function ReceiptDetails({
             </Button>
           </div>
         ) : (
-          <span className="font-semibold text-red-600">
+          <span className="font-semibold text-clay-600">
             {translate("Inventory transaction was not created yet", "لم يُنشأ إذن المخزون بعد")}
           </span>
         ),

@@ -96,7 +96,7 @@ export default function BulkZeroCostingModal({
                 }`}
               >
                 <Radio value={method.value} disabled={method.disabled} color="teal" label={method.label} />
-                <span className={`shrink-0 text-xs tabular-nums ${method.disabled ? "text-orange-500" : "text-gray-500"}`}>
+                <span className={`shrink-0 text-xs tabular-nums ${method.disabled ? "text-ochre-600" : "text-gray-500"}`}>
                   {`${method.updatableCount}/${items.length}`}
                 </span>
               </div>

@@ -1,8 +1,9 @@
 "use client";
 
-import { ActionIcon, Button, NumberInput, Table } from "@mantine/core";
+import { ActionIcon, Menu, NumberInput, Table } from "@mantine/core";
 import { Plus, Trash2, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
+import ActionsMenu from "@/components/ui/actions-menu";
 import { formatMoney } from "@/lib/helpers/format-money";
 import {
   MPO_PAYMENT_VALUE_KIND_LABELS_LIST,
@@ -88,19 +89,28 @@ export default function PaymentTermsEditor({
 
   return (
     <section className="overflow-hidden rounded-2xl bg-white">
-      <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-        <span className="flex size-10 items-center justify-center rounded-2xl bg-teal-800 text-white">
-          <Wallet size={18} />
-        </span>
-        <div>
-          <h4 className="text-base font-semibold text-gray-950">{translate("Payment terms", "شروط السداد")}</h4>
-          <p className="text-sm text-gray-500">
-            {translate(
-              "One row per slice. The rows together must cover the grand total, including VAT.",
-              "صف لكل دفعة. مجموع الصفوف يجب أن يغطي الإجمالي الكلي شاملاً الضريبة.",
-            )}
-          </p>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-teal-800 text-white">
+            <Wallet size={18} />
+          </span>
+          <div>
+            <h4 className="text-base font-semibold text-gray-950">{translate("Payment terms", "شروط السداد")}</h4>
+            <p className="text-sm text-gray-500">
+              {translate(
+                "One row per slice. The rows together must cover the grand total, including VAT.",
+                "صف لكل دفعة. مجموع الصفوف يجب أن يغطي الإجمالي الكلي شاملاً الضريبة.",
+              )}
+            </p>
+          </div>
         </div>
+        <ActionsMenu>
+          {scheduleReady && (
+            <Menu.Item leftSection={<Plus size={14} />} onClick={addTerm}>
+              {translate("Add payment", "إضافة دفعة")}
+            </Menu.Item>
+          )}
+        </ActionsMenu>
       </div>
 
       {!scheduleReady ? (
@@ -112,7 +122,7 @@ export default function PaymentTermsEditor({
             <h5 className="text-base font-semibold text-gray-900">
               {translate("Waiting for the grand total", "بانتظار الإجمالي الكلي")}
             </h5>
-            <p className="text-sm leading-relaxed text-gray-500">
+            <p className="text-sm leading-[1.75] text-gray-500">
               {translate(
                 `Payment terms open once you add material items and enter their unit prices.`,
                 `تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة.`,
@@ -188,7 +198,7 @@ export default function PaymentTermsEditor({
                 const invalid = invalidTermKeys.includes(term.key);
 
                 return (
-                  <Table.Tr key={term.key} className={invalid ? "bg-red-50 [&>td]:bg-red-50" : undefined}>
+                  <Table.Tr key={term.key} className={invalid ? "bg-clay-50 [&>td]:bg-clay-50" : undefined}>
                     <Table.Td className="text-center text-sm text-gray-400 tabular-nums">{index + 1}</Table.Td>
                     <Table.Td>
                       <SelectMpoPaymentEvent
@@ -282,7 +292,7 @@ export default function PaymentTermsEditor({
                       <ActionIcon
                         type="button"
                         variant="subtle"
-                        color="red"
+                        color="clay"
                         radius="md"
                         onClick={() => removeTerm(term.key)}
                         aria-label={translate("Remove payment", "حذف الدفعة")}
@@ -293,25 +303,6 @@ export default function PaymentTermsEditor({
                   </Table.Tr>
                 );
               })}
-              <Table.Tr>
-                <Table.Td />
-                <Table.Td className="border-t border-gray-200">
-                  <Button
-                    type="button"
-                    color="teal"
-                    radius="xl"
-                    size="sm"
-                    leftSection={<Plus size={14} />}
-                    onClick={addTerm}
-                  >
-                    {translate("Add payment", "إضافة دفعة")}
-                  </Button>
-                </Table.Td>
-                <Table.Td />
-                <Table.Td />
-                <Table.Td />
-                <Table.Td />
-              </Table.Tr>
             </Table.Tbody>
             <Table.Tfoot className="border-t border-gray-200 bg-gray-50">
               <Table.Tr className="h-9">
@@ -333,7 +324,7 @@ export default function PaymentTermsEditor({
                     {translate("Remaining", "المتبقي")}
                   </Table.Td>
                   <Table.Td>
-                    <span className="text-sm font-medium text-amber-800 tabular-nums">
+                    <span className="text-sm font-medium text-ochre-800 tabular-nums">
                       {formatMoney(remainingAmount, currency)}
                     </span>
                   </Table.Td>
@@ -347,7 +338,7 @@ export default function PaymentTermsEditor({
                     {translate("Over by", "الزيادة")}
                   </Table.Td>
                   <Table.Td>
-                    <span className="text-sm font-medium text-red-700 tabular-nums">
+                    <span className="text-sm font-medium text-clay-700 tabular-nums">
                       {formatMoney(Math.abs(remainingAmount), currency)}
                     </span>
                   </Table.Td>

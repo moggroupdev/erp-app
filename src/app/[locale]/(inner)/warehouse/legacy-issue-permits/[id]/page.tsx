@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { Button } from "@mantine/core";
+import { Menu } from "@mantine/core";
 import { Pencil, Plus } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -16,9 +17,9 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { LegacyIssuePermitItemDetailed } from "@/types/legacy-issue-permit";
-import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -31,6 +32,7 @@ const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل إذن 
 
 export default function Page() {
   const { locale, translate } = useI18n();
+  const canUpdatePermit = useHasPermission(PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT);
   const { id } = useParams<{ id: string }>();
   const privateRequest = usePrivateRequest();
   const { helpers } = useMaterialCategories();
@@ -79,15 +81,15 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            {transaction && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
-                <Button onClick={openHeaderModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-                  {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
-            )}
+            <ActionsMenu>
+              {transaction && canUpdatePermit && (
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={openHeaderModal}>
+                  {translate("Edit issue permit", "تعديل إذن الصرف")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}
@@ -109,11 +111,13 @@ export default function Page() {
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
 
-                <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
-                  <Button onClick={handleAddItem} variant="light" radius="md" leftSection={<Plus size={15} />}>
-                    {translate("Add Item", "إضافة بند")}
-                  </Button>
-                </PermissionGuard>
+                <ActionsMenu>
+                  {canUpdatePermit && (
+                    <Menu.Item leftSection={<Plus size={14} />} onClick={handleAddItem}>
+                      {translate("Add permit item", "إضافة بند لإذن الصرف")}
+                    </Menu.Item>
+                  )}
+                </ActionsMenu>
               </div>
 
               {transaction.items.length === 0 ? (

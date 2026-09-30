@@ -10,6 +10,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -23,7 +24,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { type Material, type MaterialWithUnitConversions } from "@/types/material";
-import { Button, Table, TextInput } from "@mantine/core";
+import { Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -34,6 +35,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import UnitToggle from "@/components/ui/unit-toggle";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import SelectMaterialType from "@/components/global/selections/enum-based/select-material-type";
@@ -47,6 +49,8 @@ const MATERIALS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translation, translate } = useI18n();
+  const canPrintMaterialsList = useHasPermission(PERMISSIONS.PRINT_MATERIALS_LIST);
+  const canAddMaterial = useHasPermission(PERMISSIONS.ADD_MATERIAL);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -158,23 +162,21 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex items-center gap-2">
-            <PermissionGuard permission={PERMISSIONS.PRINT_MATERIALS_LIST}>
-              <button
-                type="button"
-                title={translate("Print Materials List", "طباعة قائمة المواد")}
-                onClick={openPrintModal}
-                className="rounded-md px-1 text-xs text-gray-800 hover:text-gray-800/75"
-              >
-                <Printer size={15} />
-              </button>
-            </PermissionGuard>
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL}>
-              <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
-                {translate("Add New Material", "إضافة مادة جديدة")}
-              </Button>
-            </PermissionGuard>
+            <ActionsMenu>
+              {canPrintMaterialsList && (
+                <Menu.Item leftSection={<Printer size={14} />} onClick={openPrintModal}>
+                  {translate("Print Materials List", "طباعة قائمة المواد")}
+                </Menu.Item>
+              )}
+              {canPrintMaterialsList && canAddMaterial && <Menu.Divider />}
+              {canAddMaterial && (
+                <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
+                  {translate("Add New Material", "إضافة مادة جديدة")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

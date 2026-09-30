@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { Button, NumberInput, SegmentedControl, Table, Textarea, TextInput } from "@mantine/core";
+import { Button, Menu, NumberInput, SegmentedControl, Table, Textarea, TextInput } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
 import { Building2, ClipboardList, FilePenLine, ListPlus, NotebookPen, Plus, Printer, Trash2, Truck } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
 import PrintDocument from "@/components/ui/print-document";
@@ -89,15 +90,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-stone-50/60 p-4 sm:p-5">
+    <section className="flex flex-col gap-4 rounded-xl bg-teal-50/15 p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-stone-200">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-gray-200">
             <Icon size={18} />
           </div>
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-stone-900">{title}</h2>
-            {description ? <p className="mt-1 max-w-2xl text-xs leading-relaxed text-stone-500">{description}</p> : null}
+            <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+            {description ? <p className="mt-1 max-w-2xl text-xs leading-[1.75] text-gray-500">{description}</p> : null}
           </div>
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
@@ -199,7 +200,7 @@ function ItemRow({
         <Button
           type="button"
           variant="subtle"
-          color="red"
+          color="clay"
           size="xs"
           radius="md"
           p={6}
@@ -228,8 +229,9 @@ export default function Page() {
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
   const [addItemsOpened, { open: openAddItems, close: closeAddItems }] = useDisclosure(false);
-  const [purchasingDepartmentManager, setPurchasingDepartmentManager] =
-    useState<SupplierQuotationRequestContact | null>(null);
+  const [purchasingDepartmentManager, setPurchasingDepartmentManager] = useState<SupplierQuotationRequestContact | null>(
+    null,
+  );
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -455,6 +457,34 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         confirmNavigate: confirmNavigation,
+        sideElements: (
+          <ActionsMenu>
+            <PrintDocument
+              buttonType="menu"
+              buttonLabel={translate("Print quotation request", "طباعة طلب عرض السعر")}
+              title={printTitle}
+              paperWidth={210}
+              paperHeight={297}
+              icon={<Printer size={14} />}
+              renderTrigger={({ onClick, disabled, label, icon }) => (
+                <Menu.Item onClick={() => handlePrintClick(onClick)} disabled={disabled} leftSection={icon}>
+                  {label}
+                </Menu.Item>
+              )}
+            >
+              {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
+                <SupplierQuotationRequestPrintDocument
+                  supplierDisplayName={supplierDisplayName}
+                  supplierContactName={supplierContactName.trim() || null}
+                  notes={notes.trim() || null}
+                  items={printItems}
+                  preparedBy={preparedBy}
+                  purchasingDepartmentManager={purchasingDepartmentManager}
+                />
+              ) : null}
+            </PrintDocument>
+          </ActionsMenu>
+        ),
       }}
     >
       <div className="flex flex-col gap-5">
@@ -514,9 +544,9 @@ export default function Page() {
                   radius="md"
                 />
                 {supplierDisplayName ? (
-                  <p className="mt-2 text-xs text-stone-500">
+                  <p className="mt-2 text-xs text-gray-500">
                     {translate("Name on letter", "الاسم في الخطاب")}:{" "}
-                    <span className="font-medium text-stone-700">{supplierDisplayName}</span>
+                    <span className="font-medium text-gray-700">{supplierDisplayName}</span>
                   </p>
                 ) : null}
               </div>
@@ -552,7 +582,7 @@ export default function Page() {
           </div>
         </Section>
 
-        <hr className="border-stone-200/35" />
+        <hr className="border-gray-200/35" />
 
         <Section
           icon={ClipboardList}
@@ -561,10 +591,21 @@ export default function Page() {
             "Add the materials to request prices for. You can include specifications, quantity, and unit per row.",
             "أضف المواد المطلوب تسعيرها. يمكنك إضافة المواصفات والكمية والوحدة لكل صف.",
           )}
+          action={
+            <ActionsMenu>
+              <Menu.Item leftSection={<ListPlus size={14} />} onClick={openAddItems}>
+                {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item leftSection={<Plus size={14} />} onClick={addRow}>
+                {translate("Add quotation row", "إضافة صف لطلب العرض")}
+              </Menu.Item>
+            </ActionsMenu>
+          }
         >
-          <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
             <Table withColumnBorders className="w-full min-w-160" horizontalSpacing="xs" verticalSpacing="xs">
-              <Table.Thead className="bg-stone-50">
+              <Table.Thead className="bg-gray-50">
                 <Table.Tr className="h-9">
                   <Table.Th className="w-8 min-w-8 text-center! text-gray-500">#</Table.Th>
                   <Table.Th className="min-w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -601,33 +642,9 @@ export default function Page() {
                 <Table.Tr className="h-9">
                   <Table.Td />
                   <Table.Td>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="light"
-                        color="teal"
-                        radius="md"
-                        size="xs"
-                        leftSection={<ListPlus size={14} />}
-                        onClick={openAddItems}
-                      >
-                        {translate("Add from requisitions", "إضافة من طلبات الشراء")}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="light"
-                        color="gray"
-                        radius="md"
-                        size="xs"
-                        leftSection={<Plus size={14} />}
-                        onClick={addRow}
-                      >
-                        {translate("Add Row", "إضافة صف")}
-                      </Button>
-                      <span className="text-xs font-medium text-gray-500">
-                        {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
-                      </span>
-                    </div>
+                    <span className="text-xs font-medium text-gray-500">
+                      {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
+                    </span>
                   </Table.Td>
                   <Table.Td />
                   <Table.Td />
@@ -639,7 +656,7 @@ export default function Page() {
           </div>
         </Section>
 
-        <hr className="border-stone-200/35" />
+        <hr className="border-gray-200/35" />
 
         <Section
           icon={NotebookPen}
@@ -664,42 +681,6 @@ export default function Page() {
         </Section>
 
         {validationError ? <ErrorAlert error={validationError} /> : null}
-
-        <hr className="border-stone-200/35" />
-
-        <div className="flex justify-end">
-          <PrintDocument
-            buttonType="button"
-            buttonLabel={translate("Print", "طباعة")}
-            title={printTitle}
-            paperWidth={210}
-            paperHeight={297}
-            icon={<Printer size={15} />}
-            renderTrigger={({ onClick, loading, disabled, label, icon }) => (
-              <Button
-                onClick={() => handlePrintClick(onClick)}
-                loading={loading}
-                disabled={disabled}
-                leftSection={icon}
-                radius="md"
-                color="teal"
-              >
-                {label}
-              </Button>
-            )}
-          >
-            {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
-              <SupplierQuotationRequestPrintDocument
-                supplierDisplayName={supplierDisplayName}
-                supplierContactName={supplierContactName.trim() || null}
-                notes={notes.trim() || null}
-                items={printItems}
-                preparedBy={preparedBy}
-                purchasingDepartmentManager={purchasingDepartmentManager}
-              />
-            ) : null}
-          </PrintDocument>
-        </div>
       </div>
 
       <AddQuotationItemsModal opened={addItemsOpened} onClose={closeAddItems} onAdd={handleAddItems} />

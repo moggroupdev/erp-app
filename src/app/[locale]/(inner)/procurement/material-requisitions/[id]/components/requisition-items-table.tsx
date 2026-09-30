@@ -144,7 +144,7 @@ export default function RequisitionItemsTable({
                             </Menu.Item>
                             <Menu.Item
                               leftSection={<Trash2 size={14} />}
-                              color="red"
+                              color="clay"
                               disabled={!canDelete}
                               title={
                                 canDelete
@@ -197,7 +197,7 @@ export default function RequisitionItemsTable({
       </div>
 
       {missingPriceCount > 0 ? (
-        <p className="text-xs leading-relaxed text-amber-700">
+        <p className="text-xs leading-[1.75] text-ochre-700">
           {translate(
             `${missingPriceCount} item(s) without a last purchase price were excluded from this estimate.`,
             `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير.`,

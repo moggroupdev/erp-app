@@ -2,13 +2,14 @@
 
 import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
+import useHasPermission from "@/hooks/use-has-permission";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { ProductProductionRoute } from "@/types/product";
-import { Button } from "@mantine/core";
-import { ArrowRight, Plus, Route } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
+import { Menu } from "@mantine/core";
+import { ArrowRight, Pencil, Plus, Route } from "lucide-react";
 import EmptySection from "@/components/ui/sections/empty";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ProductProductionRoutesModal from "@/components/global/data-modals/product-production-routes-modal";
 
 export default function ProductProductionRoutesSection({
@@ -19,6 +20,7 @@ export default function ProductProductionRoutesSection({
   productionRoutes: ProductProductionRoute[];
 }) {
   const { locale, translate } = useI18n();
+  const canUpdateProduct = useHasPermission(PERMISSIONS.UPDATE_PRODUCT);
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
   return (
@@ -32,13 +34,11 @@ export default function ProductProductionRoutesSection({
 
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+          <div className="bg-haze-50 text-haze-600 flex h-10 w-10 items-center justify-center rounded-xl">
             <Route size={16} />
           </div>
           <div className="flex flex-col gap-1">
-            <h4 className="text-lg font-semibold text-gray-900">
-              {translate("Production Routes", "مسارات الإنتاج")}
-            </h4>
+            <h4 className="text-lg font-semibold text-gray-900">{translate("Production Routes", "مسارات الإنتاج")}</h4>
             <p className="text-xs text-gray-600">
               {translate(
                 "Production path from first step to finished product",
@@ -48,19 +48,18 @@ export default function ProductProductionRoutesSection({
           </div>
         </div>
 
-        <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
-          <Button
-            onClick={openModal}
-            variant="light"
-            color="blue"
-            radius="md"
-            leftSection={productionRoutes.length > 0 ? null : <Plus size={15} />}
-          >
-            {productionRoutes.length > 0
-              ? translate("Edit Routes", "تعديل المسارات")
-              : translate("Set Routes", "تعيين المسارات")}
-          </Button>
-        </PermissionGuard>
+        <ActionsMenu>
+          {canUpdateProduct && (
+            <Menu.Item
+              onClick={openModal}
+              leftSection={productionRoutes.length > 0 ? <Pencil size={14} /> : <Plus size={14} />}
+            >
+              {productionRoutes.length > 0
+                ? translate("Edit Routes", "تعديل المسارات")
+                : translate("Set Routes", "تعيين المسارات")}
+            </Menu.Item>
+          )}
+        </ActionsMenu>
       </div>
 
       {productionRoutes.length === 0 ? (
@@ -78,19 +77,19 @@ export default function ProductProductionRoutesSection({
                     <div className="relative flex w-44 flex-col items-center gap-3 sm:w-48">
                       <div className="relative flex h-20 w-20 items-center justify-center">
                         <svg className="absolute inset-0 -rotate-90" viewBox="0 0 80 80" aria-hidden>
-                          <circle cx="40" cy="40" r="35" fill="none" stroke="#e2e8f0" strokeWidth="5" />
+                          <circle className="stroke-gray-100" cx="40" cy="40" r="35" fill="none" strokeWidth="5" />
                           <circle
+                            className="stroke-haze-600"
                             cx="40"
                             cy="40"
                             r="35"
                             fill="none"
-                            stroke="#2b7fff"
                             strokeWidth="5"
                             strokeLinecap="round"
                             strokeDasharray={`${(percentage / 100) * 219.9} 219.9`}
                           />
                         </svg>
-                        <div className="z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-blue-500 text-white shadow-sm">
+                        <div className="bg-haze-600 z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full text-white shadow-sm">
                           <span className="text-[10px] leading-none font-medium opacity-80">
                             {translate("Step", "خطوة")}
                           </span>
@@ -102,18 +101,15 @@ export default function ProductProductionRoutesSection({
                         <p className="line-clamp-2 text-sm font-semibold text-gray-800">
                           {getProductionSubDepartmentLabel(route.productionSubDepartment, locale)}
                         </p>
-                        <p className="mt-1 text-xs font-medium text-blue-500 tabular-nums">
+                        <p className="text-haze-600 mt-1 text-xs font-medium tabular-nums">
                           {percentage}% {translate("of path", "من المسار")}
                         </p>
                       </div>
                     </div>
 
                     {!isLast && (
-                      <div
-                        className="mx-1 mb-16 flex w-8 shrink-0 items-center justify-center sm:mx-2 sm:w-10"
-                        aria-hidden
-                      >
-                        <ArrowRight size={18} className="text-blue-500 rtl:rotate-180" />
+                      <div className="mx-1 mb-16 flex w-8 shrink-0 items-center justify-center sm:mx-2 sm:w-10" aria-hidden>
+                        <ArrowRight size={18} className="text-haze-600 rtl:rotate-180" />
                       </div>
                     )}
                   </div>

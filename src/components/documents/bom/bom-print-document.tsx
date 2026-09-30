@@ -23,7 +23,7 @@ import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conve
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading } from "../components";
 
-const ZERO_VALUE_CLASS = "text-orange-500";
+const ZERO_VALUE_CLASS = "text-ochre-600";
 
 export type BomPrintDepartmentGroup = {
   departmentId: string;

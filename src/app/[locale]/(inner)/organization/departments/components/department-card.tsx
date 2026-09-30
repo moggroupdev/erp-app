@@ -51,10 +51,10 @@ export default function DepartmentCard({
         {openUpdateModal && (
           <button
             onClick={openUpdateModal}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-blue-100 bg-blue-50 text-blue-500 transition-colors hover:bg-blue-100"
+            className="bg-haze-50 text-haze-600 hover:bg-haze-100 flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-xl transition-colors"
             title={translate("Edit", "تعديل")}
           >
-            <Pencil size={14} />
+            <Pencil size={12} />
           </button>
         )}
       </div>

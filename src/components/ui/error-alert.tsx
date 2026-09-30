@@ -11,7 +11,7 @@ export default function ErrorAlert({
   radius?: "xs" | "sm" | "md" | "lg" | "xl";
 }) {
   return (
-    <Alert color="red" icon={<CircleAlert />} className={fade ? "animate-fade-in" : ""} radius={radius}>
+    <Alert color="clay" icon={<CircleAlert />} className={fade ? "animate-fade-in" : ""} radius={radius}>
       {error}
     </Alert>
   );

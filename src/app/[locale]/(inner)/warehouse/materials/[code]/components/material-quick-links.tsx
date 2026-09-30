@@ -20,14 +20,14 @@ export default function MaterialQuickLinks({ materialCode }: { materialCode: str
       <div className="grid gap-3 sm:grid-cols-2">
         <Link
           href={getLocalizedHref(`/reports/purchasing-materials/price-history?materialCode=${materialCode}`)}
-          className="group flex items-center justify-between gap-3 rounded-xl border border-gray-200/80 bg-white px-4 py-3 transition-colors hover:border-blue-200"
+          className="group flex items-center justify-between gap-3 rounded-xl border border-gray-200/80 bg-white px-4 py-3 transition-colors hover:border-haze-200"
         >
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
               <ChartNoAxesCombined size={18} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-semibold text-gray-900 group-hover:text-blue-800">
+              <span className="text-sm font-semibold text-gray-900 group-hover:text-haze-800">
                 {translate("Price History", "تاريخ الأسعار")}
               </span>
               <span className="text-xs text-gray-500">
@@ -38,7 +38,7 @@ export default function MaterialQuickLinks({ materialCode }: { materialCode: str
 
           <ChevronRight
             size={16}
-            className={`shrink-0 text-gray-400 group-hover:text-blue-600 ${translate("", "rotate-180")}`}
+            className={`shrink-0 text-gray-400 group-hover:text-haze-600 ${translate("", "rotate-180")}`}
           />
         </Link>
       </div>

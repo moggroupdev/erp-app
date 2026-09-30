@@ -48,13 +48,13 @@ export default function InspectionReportModal({ opened, onClose, items }: Inspec
             </div>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
               <p className="text-sm text-gray-500">{translate("Items with rejections", "بنود بها رفض")}</p>
-              <p className={`text-lg font-semibold ${summary.itemsWithRejections > 0 ? "text-red-600" : "text-gray-900"}`}>
+              <p className={`text-lg font-semibold ${summary.itemsWithRejections > 0 ? "text-clay-600" : "text-gray-900"}`}>
                 {summary.itemsWithRejections}
               </p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
               <p className="text-sm text-gray-500">{translate("Total rejected quantity", "إجمالي الكمية المرفوضة")}</p>
-              <p className={`text-lg font-semibold ${summary.totalRejected > 0 ? "text-red-600" : "text-gray-900"}`}>
+              <p className={`text-lg font-semibold ${summary.totalRejected > 0 ? "text-clay-600" : "text-gray-900"}`}>
                 {summary.totalRejected}
               </p>
             </div>
@@ -75,7 +75,7 @@ export default function InspectionReportModal({ opened, onClose, items }: Inspec
               <div
                 key={item.id}
                 className={`rounded-xl border p-3.5 ${
-                  hasRejection ? "border-red-200 bg-red-50/50" : "border-gray-200 bg-white"
+                  hasRejection ? "border-clay-200 bg-clay-50/50" : "border-gray-200 bg-white"
                 }`}
               >
                 <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
@@ -85,7 +85,7 @@ export default function InspectionReportModal({ opened, onClose, items }: Inspec
                   </div>
 
                   {hasRejection ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-100 px-2.5 py-1 text-sm font-semibold text-red-700">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-clay-100 px-2.5 py-1 text-sm font-semibold text-clay-700">
                       <XCircle size={14} />
                       {translate("Partially rejected", "مرفوض جزئياً")}
                     </span>
@@ -106,7 +106,7 @@ export default function InspectionReportModal({ opened, onClose, items }: Inspec
                   </div>
                   <div className="rounded-lg bg-white/80 px-2.5 py-2 ring-1 ring-gray-200">
                     <p className="text-xs text-gray-500">{translate("Quantity Rejected", "الكمية المرفوضة")}</p>
-                    <p className={`font-semibold ${hasRejection ? "text-red-600" : "text-gray-900"}`}>
+                    <p className={`font-semibold ${hasRejection ? "text-clay-600" : "text-gray-900"}`}>
                       {formatQuantity(quantityRejected)} {unitLabel}
                     </p>
                   </div>
@@ -120,13 +120,13 @@ export default function InspectionReportModal({ opened, onClose, items }: Inspec
 
                 <div className="rounded-lg bg-white/80 px-2.5 py-2 ring-1 ring-gray-200">
                   <div className="mb-1 flex items-center gap-1.5">
-                    {hasRejection && !item.inspectionNotes ? <AlertTriangle size={14} className="text-amber-600" /> : null}
+                    {hasRejection && !item.inspectionNotes ? <AlertTriangle size={14} className="text-ochre-600" /> : null}
                     <p className="text-sm text-gray-500">{translate("Inspection Notes", "ملاحظات الفحص")}</p>
                   </div>
                   {item.inspectionNotes ? (
                     <p className="whitespace-pre-wrap text-gray-900">{item.inspectionNotes}</p>
                   ) : hasRejection ? (
-                    <p className="text-sm text-amber-700">
+                    <p className="text-sm text-ochre-700">
                       {translate("No inspection notes recorded", "لا توجد ملاحظات فحص مسجلة")}
                     </p>
                   ) : (

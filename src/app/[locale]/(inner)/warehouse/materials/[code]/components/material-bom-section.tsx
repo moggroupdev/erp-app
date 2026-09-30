@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import mmBomsApi from "@/lib/api/mm-boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -19,10 +20,11 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { MaterialWithCreator } from "@/types/material";
 import type { MmBom, MmBomItemWithMaterial } from "@/types/mm-bom";
-import { ActionIcon, Badge, Button, Menu, Table } from "@mantine/core";
+import { ActionIcon, Badge, Menu, Table } from "@mantine/core";
 import { EllipsisVertical, Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
+import ActionsMenu from "@/components/ui/actions-menu";
 import UnitToggle from "@/components/ui/unit-toggle";
 import { EmptyValue } from "@/components/ui/entity-details";
 import DeleteModal from "@/components/ui/delete-modal";
@@ -39,6 +41,7 @@ export default function MaterialBomSection({
   const { helpers: materialCategoryHelpers } = useMaterialCategories();
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
+  const canAddBom = useHasPermission(PERMISSIONS.ADD_MANUFACTURED_MATERIAL_BOM);
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [itemToUpdate, setItemToUpdate] = useState<MmBomItemWithMaterial | null>(null);
@@ -107,19 +110,13 @@ export default function MaterialBomSection({
             </div>
           </div>
 
-          {hasBom && (
-            <PermissionGuard permission={PERMISSIONS.ADD_MANUFACTURED_MATERIAL_BOM}>
-              <Button
-                onClick={handleOpenAppendModal}
-                variant="light"
-                color="teal"
-                radius="md"
-                leftSection={<Plus size={15} />}
-              >
-                {translate("Add Item", "إضافة بند")}
-              </Button>
-            </PermissionGuard>
-          )}
+          <ActionsMenu>
+            {canAddBom && (
+              <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
+                {hasBom ? translate("Add BOM item", "إضافة بند لقائمة المواد") : translate("Create BOM", "إنشاء قائمة مواد")}
+              </Menu.Item>
+            )}
+          </ActionsMenu>
         </div>
 
         {!hasBom ? (
@@ -128,19 +125,7 @@ export default function MaterialBomSection({
               "No BOM defined for this manufactured material yet.",
               "لا توجد قائمة مواد لهذه المادة المصنعة بعد.",
             )}
-          >
-            <PermissionGuard permission={PERMISSIONS.ADD_MANUFACTURED_MATERIAL_BOM}>
-              <Button
-                onClick={handleOpenAppendModal}
-                variant="light"
-                color="teal"
-                radius="md"
-                leftSection={<Plus size={15} />}
-              >
-                {translate("Create BOM", "إنشاء قائمة مواد")}
-              </Button>
-            </PermissionGuard>
-          </EmptySection>
+          />
         ) : (
           <div className="overflow-x-auto rounded-xl border border-gray-200">
             <Table className="text-nowrap" highlightOnHover>
@@ -252,7 +237,7 @@ export default function MaterialBomSection({
                                   <PermissionGuard permission={PERMISSIONS.DELETE_MANUFACTURED_MATERIAL_BOM}>
                                     <Menu.Item
                                       leftSection={<Trash2 size={14} />}
-                                      color="red"
+                                      color="clay"
                                       onClick={() => {
                                         deleteMutation.reset();
                                         setItemToDelete(item);

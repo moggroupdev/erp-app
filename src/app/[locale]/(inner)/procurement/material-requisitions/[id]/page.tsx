@@ -5,11 +5,12 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { Button } from "@mantine/core";
-import { Pencil, Plus, Printer } from "lucide-react";
+import { Menu } from "@mantine/core";
+import { Pencil, Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -17,9 +18,9 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
-import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -40,6 +41,8 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const getLocalizedHref = useLocaleHref();
   const { helpers } = useMaterialCategories();
+  const canAddOrder = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_ORDER);
+  const canUpdateRequisition = useHasPermission(PERMISSIONS.UPDATE_MATERIAL_PURCHASE_REQUISITION);
 
   const [headerModalOpened, { open: openHeaderModal, close: closeHeaderModal }] = useDisclosure(false);
   const [itemModalOpened, { open: openItemModal, close: closeItemModal }] = useDisclosure(false);
@@ -90,13 +93,14 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
-            {requisition && (
-              <div className="mx-2 flex items-center">
+          <div className="flex items-center gap-3">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <ActionsMenu>
+              {requisition && (
                 <PrintDocument
                   title={`${translate("Material Purchase Requisition", "طلب شراء خامات")} - ${requisition.code}`}
-                  buttonLabel={translate("Print", "طباعة")}
-                  buttonType="icon"
+                  buttonLabel={translate("Print requisition", "طباعة طلب الشراء")}
+                  buttonType="menu"
                   paperWidth={297}
                   paperHeight={210}
                   paperMarginX={14}
@@ -108,29 +112,25 @@ export default function Page() {
                     getMainCategoryTitle={getMainCategoryTitle}
                   />
                 </PrintDocument>
-              </div>
-            )}
-            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            {canCreateOrder && (
-              <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL_PURCHASE_ORDER}>
-                <Button
+              )}
+              {(canCreateOrder && canAddOrder) || (requisition && editable && canUpdateRequisition) ? (
+                <Menu.Divider />
+              ) : null}
+              {canCreateOrder && canAddOrder && (
+                <Menu.Item
                   component={Link}
                   href={getLocalizedHref(`/procurement/material-orders/create?requisitionId=${requisition!.id}`)}
-                  variant="filled"
-                  color="teal"
-                  radius="md"
+                  leftSection={<Plus size={14} />}
                 >
                   {translate("Create purchase order", "إنشاء أمر توريد")}
-                </Button>
-              </PermissionGuard>
-            )}
-            {requisition && editable && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL_PURCHASE_REQUISITION}>
-                <Button onClick={openHeaderModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
-                  {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
-            )}
+                </Menu.Item>
+              )}
+              {requisition && editable && canUpdateRequisition && (
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={openHeaderModal}>
+                  {translate("Edit requisition", "تعديل طلب الشراء")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}
@@ -152,13 +152,13 @@ export default function Page() {
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
 
-                {editable && (
-                  <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL_PURCHASE_REQUISITION}>
-                    <Button onClick={handleAddItem} variant="light" radius="md" leftSection={<Plus size={15} />}>
-                      {translate("Add Item", "إضافة بند")}
-                    </Button>
-                  </PermissionGuard>
-                )}
+                <ActionsMenu>
+                  {editable && canUpdateRequisition && (
+                    <Menu.Item leftSection={<Plus size={14} />} onClick={handleAddItem}>
+                      {translate("Add requisition item", "إضافة بند لطلب الشراء")}
+                    </Menu.Item>
+                  )}
+                </ActionsMenu>
               </div>
 
               {requisition.items.length === 0 ? (

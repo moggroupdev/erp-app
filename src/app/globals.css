@@ -3,19 +3,46 @@
 @theme {
   --animate-fade-in: fade-in 0.35s ease-out;
 
-  /* Light teal surfaces + mid teal text use teal-800 so chips, badges, and icons match Mantine. */
+  /* @theme-palette-start — generated from color-palette.json (npm run generate:theme) */
+  --color-navy: #052565;
+  --color-navy-wash: #d2d8e2;
+  --color-haze-50: #e4f5fd;
+  --color-haze-100: #bee5f9;
+  --color-haze-200: #93d3f4;
+  --color-haze-600: #2478b5;
+  --color-haze-700: #1c6296;
+  --color-haze-800: #2478b5;
+  --color-haze-900: #1c6296;
   --color-teal-50: #e2eceb;
   --color-teal-100: #d4e2e1;
   --color-teal-200: #bcd2d1;
   --color-teal-600: #115e59;
-  --color-teal-700: #115e59;
-
-  /* Soft blue (haze) — same wash/text pattern as teal. */
-  --color-haze-50: #daf1fc;
-  --color-haze-100: #bee5f9;
-  --color-haze-200: #93d3f4;
-  --color-haze-600: #2478b5;
-  --color-haze-700: #2478b5;
+  --color-teal-700: #134e4a;
+  --color-teal-800: #115e59;
+  --color-teal-900: #134e4a;
+  --color-ochre-50: #f7efe1;
+  --color-ochre-100: #f1dfc1;
+  --color-ochre-200: #e5c68f;
+  --color-ochre-600: #966516;
+  --color-ochre-700: #755015;
+  --color-ochre-800: #966516;
+  --color-ochre-900: #755015;
+  --color-clay-50: #f7e9e7;
+  --color-clay-100: #f0d7d3;
+  --color-clay-200: #e5bcb6;
+  --color-clay-600: #ad5250;
+  --color-clay-700: #863f3d;
+  --color-clay-800: #ad5250;
+  --color-clay-900: #863f3d;
+  --color-plum-50: #f0ebf2;
+  --color-plum-100: #e2d8e6;
+  --color-plum-200: #ccbcd3;
+  --color-plum-600: #765c80;
+  --color-plum-700: #5c4664;
+  --color-plum-800: #765c80;
+  --color-plum-900: #5c4664;
+  --color-clay-500: #ad5250;
+  /* @theme-palette-end */
 }
 
 @layer utilities {
@@ -32,6 +59,13 @@
 }
 
 @layer base {
+  ::selection {
+    background-color: var(--color-navy-wash);
+    color: var(--color-navy);
+  }
+  html {
+    caret-color: var(--color-navy);
+  }
   * {
     font-family: var(--font-alexandria);
   }
@@ -41,19 +75,19 @@
   h4,
   h5,
   h6 {
-    @apply font-bold text-gray-800;
+    @apply font-bold leading-relaxed text-gray-800 sm:leading-normal;
   }
   h1 {
-    @apply text-2xl sm:text-3xl;
+    @apply text-lg sm:text-3xl;
   }
   h2 {
-    @apply text-xl sm:text-2xl;
+    @apply text-base sm:text-2xl;
   }
   h3 {
-    @apply text-lg sm:text-xl;
+    @apply text-sm sm:text-xl;
   }
   p {
-    @apply text-xs text-gray-600 sm:text-sm lg:text-base;
+    @apply text-xs leading-[1.75] text-gray-600 sm:text-sm lg:text-base;
   }
   button {
     @apply cursor-pointer;
@@ -68,5 +102,141 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/* One size smaller than the desktop scale, below Tailwind's sm breakpoint. */
+@media (max-width: 639px) {
+  .mantine-Button-root {
+    --button-height-xs: 26px;
+    --button-height-sm: 30px;
+    --button-height-md: 36px;
+    --button-height-lg: 42px;
+    --button-height-xl: 50px;
+
+    --button-height-compact-xs: 20px;
+    --button-height-compact-sm: 22px;
+    --button-height-compact-md: 26px;
+    --button-height-compact-lg: 30px;
+    --button-height-compact-xl: 34px;
+
+    --button-padding-x-xs: 10px;
+    --button-padding-x-sm: 14px;
+    --button-padding-x-md: 18px;
+    --button-padding-x-lg: 22px;
+    --button-padding-x-xl: 26px;
+
+    --button-padding-x-compact-xs: 6px;
+    --button-padding-x-compact-sm: 7px;
+    --button-padding-x-compact-md: 8px;
+    --button-padding-x-compact-lg: 10px;
+    --button-padding-x-compact-xl: 12px;
+
+    /* Default size is sm. Label steps down one notch; line-height stays at 1. */
+    font-size: var(--mantine-font-size-xs);
+  }
+
+  .mantine-Button-root[data-size="xs"],
+  .mantine-Button-root[data-size="compact-xs"] {
+    font-size: calc(0.6875rem * var(--mantine-scale));
+  }
+
+  .mantine-Button-root[data-size="md"],
+  .mantine-Button-root[data-size="compact-md"] {
+    font-size: var(--mantine-font-size-sm);
+  }
+
+  .mantine-Button-root[data-size="lg"],
+  .mantine-Button-root[data-size="compact-lg"] {
+    font-size: var(--mantine-font-size-md);
+  }
+
+  .mantine-Button-root[data-size="xl"],
+  .mantine-Button-root[data-size="compact-xl"] {
+    font-size: var(--mantine-font-size-lg);
+  }
+
+  /* Default size is sm. Each size token steps down one notch. */
+  .mantine-SegmentedControl-root {
+    --sc-padding-xs: 1px 4px;
+    --sc-padding-sm: 2px 6px;
+    --sc-padding-md: 3px 10px;
+    --sc-padding-lg: 4px 14px;
+    --sc-padding-xl: 7px 16px;
+    --mantine-font-size-xs: calc(0.6875rem * var(--mantine-scale));
+    --mantine-font-size-sm: calc(0.75rem * var(--mantine-scale));
+    --mantine-font-size-md: calc(0.875rem * var(--mantine-scale));
+    --mantine-font-size-lg: calc(1rem * var(--mantine-scale));
+    --mantine-font-size-xl: calc(1.125rem * var(--mantine-scale));
+    padding: 3px;
+  }
+
+  .mantine-Menu-dropdown {
+    --mantine-font-size-xs: calc(0.6875rem * var(--mantine-scale));
+    --mantine-font-size-sm: calc(0.75rem * var(--mantine-scale));
+    --mantine-spacing-xs: calc(0.5rem * var(--mantine-scale));
+    --mantine-spacing-sm: calc(0.625rem * var(--mantine-scale));
+    padding: 2px;
+  }
+
+  .mantine-Select-dropdown,
+  .mantine-Select-options,
+  .mantine-MultiSelect-dropdown,
+  .mantine-MultiSelect-options,
+  .mantine-Combobox-dropdown,
+  .mantine-Combobox-options {
+    --combobox-option-padding-xs: 3px 6px;
+    --combobox-option-padding-sm: 4px 8px;
+    --combobox-option-padding-md: 6px 10px;
+    --combobox-option-padding-lg: 8px 12px;
+    --combobox-option-padding-xl: 10px 16px;
+    --mantine-font-size-xs: calc(0.6875rem * var(--mantine-scale));
+    --mantine-font-size-sm: calc(0.75rem * var(--mantine-scale));
+    --mantine-font-size-md: calc(0.875rem * var(--mantine-scale));
+    --mantine-font-size-lg: calc(1rem * var(--mantine-scale));
+    --mantine-font-size-xl: calc(1.125rem * var(--mantine-scale));
+  }
+
+  .mantine-Select-dropdown,
+  .mantine-MultiSelect-dropdown,
+  .mantine-Combobox-dropdown {
+    --combobox-padding: 2px;
+  }
+
+  /* Tables stay at desktop type and row padding unless scaled here.
+     Spacing is reduced from each table's own value. A fixed 0.65rem only
+     shortens tables that were looser than that (reports use sm / 0.75rem).
+     List pages already use xs / 0.625rem, so they need their own reduction. */
+  .mantine-Table-table {
+    font-size: var(--mantine-font-size-xs);
+    line-height: var(--mantine-line-height-xs);
+  }
+
+  .mantine-Table-table .text-sm {
+    font-size: var(--mantine-font-size-xs);
+    line-height: var(--mantine-line-height-xs);
+  }
+
+  .mantine-Table-th,
+  .mantine-Table-td {
+    padding-block: calc(var(--table-vertical-spacing) - 0.1rem);
+  }
+
+  .mantine-Table-td button.bg-gray-100 {
+    padding: 0.25rem;
+  }
+
+  .mantine-Table-td button.bg-gray-100 svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .mantine-Table-td .mantine-ActionIcon-root {
+    --ai-size-sm: 18px;
+  }
+
+  .mantine-Table-tr.h-9,
+  .mantine-Table-tr.h-10 {
+    height: auto;
   }
 }

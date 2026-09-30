@@ -30,7 +30,7 @@ export default function ReportSkeleton() {
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           {Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="flex flex-1 items-center justify-between gap-3 rounded-xl bg-stone-50 px-4 py-3">
+            <div key={index} className="flex flex-1 items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3">
               <Skeleton height={18} width={120} radius="md" />
               <Skeleton height={22} width={40} radius="md" />
             </div>
@@ -40,7 +40,7 @@ export default function ReportSkeleton() {
 
       {/* Chart */}
       <article className="overflow-hidden rounded-3xl bg-white">
-        <header className="border-b border-dashed border-stone-200 px-5 py-5 sm:px-6">
+        <header className="border-b border-dashed border-gray-200 px-5 py-5 sm:px-6">
           <div className="flex items-start gap-3">
             <Skeleton height={36} width={36} radius="lg" />
             <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -57,7 +57,7 @@ export default function ReportSkeleton() {
       {/* Tables */}
       {Array.from({ length: 2 }).map((_, index) => (
         <article key={index} className="overflow-hidden rounded-3xl bg-white">
-          <header className="border-b border-dashed border-stone-200 px-5 py-5 sm:px-6">
+          <header className="border-b border-dashed border-gray-200 px-5 py-5 sm:px-6">
             <div className="flex items-start gap-3">
               <Skeleton height={36} width={36} radius="lg" />
               <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -67,7 +67,7 @@ export default function ReportSkeleton() {
             </div>
           </header>
           <div className="px-5 py-5 sm:px-6">
-            <div className="rounded-xl border border-stone-100 p-3">
+            <div className="rounded-xl border border-gray-100 p-3">
               <div className="flex flex-col gap-3">
                 {Array.from({ length: 5 }).map((_, row) => (
                   <div key={row} className="flex items-center gap-3">

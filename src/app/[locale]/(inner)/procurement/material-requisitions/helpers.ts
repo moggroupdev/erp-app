@@ -1,4 +1,5 @@
 import { APPROVAL_DECISIONS, type ApprovalDecision } from "@/lib/constants/enums/approval-decisions";
+import { getSemanticStatusColors } from "@/lib/constants/status-colors";
 import { VAT_RATE } from "@/lib/constants/global";
 import { toDisplayUnitPrice, resolveDisplayUnit } from "@/lib/helpers/unit-conversion";
 import type { MaterialPurchaseRequisitionItemDetailed } from "@/types/material-purchase-requisition";
@@ -41,16 +42,30 @@ export function getRequisitionStatus(r: RequisitionLockFields): RequisitionStatu
 
 export function getRequisitionStatusLabel(status: RequisitionStatus, translate: (en: string, ar: string) => string) {
   switch (status) {
-    case "rejected":
-      return { label: translate("Rejected", "مرفوض"), className: "text-red-600 font-medium", color: "red" as const };
-    case "approved":
-      return { label: translate("Approved", "معتمد"), className: "text-teal-600 font-medium", color: "teal" as const };
-    default:
+    case "rejected": {
+      const tokens = getSemanticStatusColors("danger");
+      return {
+        label: translate("Rejected", "مرفوض"),
+        className: `${tokens.textClass} font-medium`,
+        color: tokens.mantineColor,
+      };
+    }
+    case "approved": {
+      const tokens = getSemanticStatusColors("success");
+      return {
+        label: translate("Approved", "معتمد"),
+        className: `${tokens.textClass} font-medium`,
+        color: tokens.mantineColor,
+      };
+    }
+    default: {
+      const tokens = getSemanticStatusColors("warning");
       return {
         label: translate("Pending", "قيد الانتظار"),
-        className: "text-orange-600 font-medium",
-        color: "orange" as const,
+        className: `${tokens.textClass} font-medium`,
+        color: tokens.mantineColor,
       };
+    }
   }
 }
 

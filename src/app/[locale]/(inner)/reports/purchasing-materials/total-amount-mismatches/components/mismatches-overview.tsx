@@ -20,7 +20,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
           "أوامر يكون فيها الفرق النسبي 1% على الأقل.",
         )}
         icon={<AlertTriangle size={20} />}
-        valueClassName={overview.mismatchCount > 0 ? "text-orange-700" : reportTheme.kpi.neutral}
+        valueClassName={overview.mismatchCount > 0 ? "text-ochre-700" : reportTheme.kpi.neutral}
       />
 
       <KpiCard
@@ -44,7 +44,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
           "مجموع القيم المطلقة لفروقات الأوامر ذات الفروقات.",
         )}
         icon={<FileDiff size={20} />}
-        valueClassName={overview.totalDifference > 0 ? "text-orange-700" : reportTheme.kpi.neutral}
+        valueClassName={overview.totalDifference > 0 ? "text-ochre-700" : reportTheme.kpi.neutral}
       />
     </div>
   );
@@ -67,11 +67,11 @@ function KpiCard({
     <div className="relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6">
       <div className="absolute -end-3 -top-3 opacity-[0.07]">{icon}</div>
       <div className="relative flex flex-col gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-600">{icon}</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600">{icon}</div>
         <div>
-          <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">{label}</p>
+          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
           <p className={`mt-1 text-2xl font-semibold ${valueClassName}`}>{value}</p>
-          {hint && <p className="mt-1.5 text-xs leading-relaxed text-stone-500">{hint}</p>}
+          {hint && <p className="mt-1.5 text-xs leading-[1.75] text-gray-500">{hint}</p>}
         </div>
       </div>
     </div>

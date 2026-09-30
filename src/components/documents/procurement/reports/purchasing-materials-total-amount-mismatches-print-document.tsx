@@ -102,11 +102,11 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
             row.invoiceNumbers.join(", ") || "-",
             row.supplierName,
             <span className="text-gray-500">{formatDate(row.createdAt, locale)}</span>,
-            <span className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</span>,
+            <span className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</span>,
             <span className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</span>,
             <span
               className={`font-semibold ${
-                row.difference > 0 ? "text-emerald-700" : row.difference < 0 ? "text-rose-700" : "text-gray-800"
+                row.difference > 0 ? "text-teal-700" : row.difference < 0 ? "text-clay-700" : "text-gray-800"
               }`}
             >
               {formatMoney(row.difference)}
@@ -118,11 +118,11 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
               translate("Total", "الإجمالي"),
               "",
               "",
-              <span className="font-semibold text-orange-600">{formatMoney(overview.totalCalculatedAmount)}</span>,
+              <span className="font-semibold text-ochre-600">{formatMoney(overview.totalCalculatedAmount)}</span>,
               <span className="font-semibold text-gray-800">{formatMoney(overview.totalInvoicePurchases)}</span>,
               <span
                 className={`font-semibold ${
-                  totalNetDifference > 0 ? "text-emerald-700" : totalNetDifference < 0 ? "text-rose-700" : "text-gray-800"
+                  totalNetDifference > 0 ? "text-teal-700" : totalNetDifference < 0 ? "text-clay-700" : "text-gray-800"
                 }`}
               >
                 {formatMoney(totalNetDifference)}
@@ -135,7 +135,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
               "",
               "",
               "",
-              <span className="font-semibold text-orange-600">{formatMoney(overview.totalDifference)}</span>,
+              <span className="font-semibold text-ochre-600">{formatMoney(overview.totalDifference)}</span>,
             ],
           ]}
           monoColumnIndexes={[1]}
@@ -164,14 +164,14 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
             row.orderCode,
             row.invoiceNumbers.join(", ") || "-",
             row.supplierName,
-            <span className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</span>,
+            <span className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</span>,
           ])}
           footerRow={[
             "",
             translate("Total", "الإجمالي"),
             "",
             "",
-            <span className="font-semibold text-orange-600">
+            <span className="font-semibold text-ochre-600">
               {formatMoney(overview.missingInvoiceTotalCalculatedAmount)}
             </span>,
           ]}

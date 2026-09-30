@@ -140,7 +140,7 @@ export default function PurchasingMaterialsRequisitionFollowUpPrintDocument({
           ]}
         />
         {missingPriceCount > 0 ? (
-          <p className="text-[10px] leading-relaxed text-amber-700">
+          <p className="text-[10px] leading-relaxed text-ochre-700">
             {translate(
               `${missingPriceCount} item(s) without a last purchase price were excluded from this estimate.`,
               `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير.`,

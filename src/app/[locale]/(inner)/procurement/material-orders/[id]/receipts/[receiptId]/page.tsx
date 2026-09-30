@@ -4,7 +4,7 @@ import ProtectedLink from "@/components/ui/protected-link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { Button, Table } from "@mantine/core";
+import { Menu, Table } from "@mantine/core";
 import { ClipboardCheck, PackagePlus } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -22,6 +22,7 @@ import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -76,30 +77,21 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
-            {canCreateIvt && (
-              <Button
-                variant="light"
-                color="teal"
-                radius="md"
-                leftSection={<PackagePlus size={15} />}
-                onClick={openIvtModal}
-              >
-                {translate("Create اذن إضافة", "إنشاء إذن إضافة")}
-              </Button>
-            )}
-            {receipt && receipt.items.length > 0 && (
-              <Button
-                variant="light"
-                color="cyan"
-                radius="md"
-                leftSection={<ClipboardCheck size={15} />}
-                onClick={openInspectionModal}
-              >
-                {translate("Inspection Report", "محضر الفحص")}
-              </Button>
-            )}
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <ActionsMenu>
+              {canCreateIvt && (
+                <Menu.Item leftSection={<PackagePlus size={14} />} onClick={openIvtModal}>
+                  {translate("Create inventory receipt", "إنشاء إذن إضافة")}
+                </Menu.Item>
+              )}
+              {canCreateIvt && receipt && receipt.items.length > 0 && <Menu.Divider />}
+              {receipt && receipt.items.length > 0 && (
+                <Menu.Item leftSection={<ClipboardCheck size={14} />} onClick={openInspectionModal}>
+                  {translate("Inspection Report", "محضر الفحص")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

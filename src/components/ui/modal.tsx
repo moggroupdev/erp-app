@@ -33,7 +33,13 @@ export default function Modal({
       size={size}
     >
       <div className="p-2.5">
-        {title && <h3 className={`mb-2.5 ${centerTitle ? "text-center" : ""}`}>{title}</h3>}
+        {title && (
+          <h3
+            className={`mb-2.5 text-base leading-relaxed font-semibold sm:text-lg sm:leading-snug ${centerTitle ? "text-center" : ""}`}
+          >
+            {title}
+          </h3>
+        )}
         {children}
       </div>
     </M>

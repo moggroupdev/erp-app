@@ -9,8 +9,8 @@ const ACTION_CONFIG: Record<
   { className: string; icon: LucideIcon; size?: number; fill?: string }
 > = {
   insert: { className: "text-teal-600", icon: Plus },
-  update: { className: "text-yellow-600", icon: Circle, size: 8, fill: "currentColor" },
-  delete: { className: "text-red-600", icon: Minus },
+  update: { className: "text-ochre-600", icon: Circle, size: 8, fill: "currentColor" },
+  delete: { className: "text-clay-600", icon: Minus },
 };
 
 type AuditActionLabelProps = {

@@ -49,7 +49,7 @@ src/
 │   └── reference/               # Cached reference data hooks
 ├── lib/
 │   ├── api/                     # Domain API modules + query-keys/
-│   ├── constants/               # Enums (incl. derived/), stale times, global flags
+│   ├── constants/               # Enums (incl. derived/), stale times, color palette, global flags
 │   ├── helpers/                 # api-request, get-error-message, metadata, …
 │   └── i18n/                    # Locales, hooks, utils, dictionaries
 ├── middlewares/                 # Localization (used from proxy.ts)
@@ -246,6 +246,50 @@ Domain enums live under `src/lib/constants/enums/`. Most mirror DB-backed values
 5. Enum-backed selects belong under `components/global/selections/enum-based/`. Reference-hook selects → `reference-based/`. Large entity typeahead selects (users, materials, …) → `remote-based/`.
 
 Permissions are part of this rule: always `PERMISSIONS.READ_SUPPLIERS`, never `"read_suppliers"` inline.
+
+---
+
+## Color theme
+
+Semantic UI colors are **muted** and role-based. Do not introduce random Mantine defaults (`red`, `orange`, `blue`, …) or duplicate hex values outside the palette file.
+
+### Single source of hex values
+
+| File | Role |
+| ---- | ---- |
+| `src/lib/constants/color-palette.json` | **Only place to edit theme hex** (brand navy, semantic shades 50/100/200/600/700, Mantine mid-ramp, chart neutral stone) |
+| `src/lib/constants/color-palette.ts` | Typed imports from JSON; `semanticTw()`, `sidebarNavTheme`, chart helpers |
+| `src/lib/constants/color-theme.ts` | Color lab copy (labels, usage, examples); shades reference `semanticPalette` |
+| `src/lib/constants/color-theme-mantine.ts` | Mantine 10-step tuples → `src/components/mantine/theme.ts` |
+| `src/lib/constants/status-colors.ts` | Status → Mantine color + Tailwind classes (`getSemanticStatusColors`) |
+| `src/lib/constants/global.ts` | `NAVY` / `NAVY_WASH` re-exported from `brandColors` (viewport, not status UI) |
+
+After changing **`color-palette.json`**, run:
+
+```bash
+npm run generate:theme
+```
+
+That script patches the marked block in `src/app/globals.css` (`@theme-palette-start` … `@theme-palette-end`) and syncs `public/manifest.webmanifest` `theme_color`. `dev` and `build` run it automatically. Do **not** add a separate CSS import for generated theme files (Turbopack cannot resolve them).
+
+### Semantic roles
+
+| Token | Mantine / Tailwind name | Use for |
+| ----- | ------------------------ | ------- |
+| Haze | `haze` | Primary actions, create/save, links, guidance; **sidebar** nav (filled parent + light child via `sidebarNavTheme`). Mantine `primaryColor` |
+| Teal | `teal` | Success: approved, confirmed, in stock |
+| Ochre | `ochre` | Warning, pending, low stock |
+| Clay | `clay` | Danger, delete, rejected, errors |
+| Plum | `plum` | Categories, chart series accents (not success/error) |
+| Navy | `navy` / `navy-wash` | Brand only: selection, caret, PWA theme (not status badges) |
+
+Use **`color="haze"`** for primary actions and **`color="teal"`** (etc.) for other semantic roles on Mantine components, and **`text-haze-600`**, **`bg-teal-50`**, … in Tailwind. Prefer `getSemanticStatusColors()` or `semanticTw()` over hand-written class strings when mapping status.
+
+**Do not** mix unrelated semantic families on one control (e.g. haze + teal on the same nav row). Gray/dark stays for neutral metadata and secondary buttons.
+
+### Color lab (development only)
+
+`src/app/[locale]/(inner)/development/color-theme/` — previews palette and Mantine specimens; gated with `notFound()` outside `NODE_ENV === "development"`.
 
 ---
 

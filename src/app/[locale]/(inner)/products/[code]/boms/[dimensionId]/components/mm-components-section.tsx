@@ -66,15 +66,15 @@ export default function MmComponentsSection({
   if (mmRows.length === 0) return null;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-sky-100 bg-sky-50/50 p-4">
-      <div className="mb-2.5 flex items-start gap-2 border-b border-sky-100 pb-3.5">
-        <Info size={14} className="mt-0.5 shrink-0 text-sky-600" />
+    <section className="overflow-hidden rounded-xl border border-haze-100 bg-haze-50/50 p-4">
+      <div className="mb-2.5 flex items-start gap-2 border-b border-haze-100 pb-3.5">
+        <Info size={14} className="mt-0.5 shrink-0 text-haze-600" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <h3 className="text-sm font-semibold text-gray-900">
               {translate("Manufactured Material Components", "مكونات المواد المصنعة")}
             </h3>
-            <Badge size="xs" variant="light" color="blue">
+            <Badge size="xs" variant="light" color="haze">
               {mmRows.length} {translate("Manufactured Materials", "مواد مصنعة")}
             </Badge>
             {!isMmBomsFetching && totalComponents > 0 && (
@@ -98,7 +98,7 @@ export default function MmComponentsSection({
 
           return (
             <div key={group.key} className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-              <div className="flex items-center justify-between gap-2 border-b border-gray-200 bg-amber-50/50 px-2.5 py-2.5">
+              <div className="flex items-center justify-between gap-2 border-b border-gray-200 bg-ochre-50/50 px-2.5 py-2.5">
                 <div className="flex gap-1.5">
                   <p className="truncate text-xs font-semibold text-gray-900">{group.materialTitle}</p>
                   <p className="truncate text-xs text-gray-500">{group.materialCode}</p>

@@ -24,7 +24,11 @@ export function CreatorLink({ creator }: { creator: { id: string; name: string }
   if (!creator) return <EmptyValue />;
 
   return (
-    <ProtectedLink permission={PERMISSIONS.READ_USERS} href={`/organization/users/${creator.id}`} className="hover:underline">
+    <ProtectedLink
+      permission={PERMISSIONS.READ_USERS}
+      href={`/organization/users/${creator.id}`}
+      className="hover:underline"
+    >
       {creator.name}
     </ProtectedLink>
   );
@@ -37,7 +41,7 @@ export function DetailsTable({ rows }: { rows: DetailRow[] }) {
         <Table.Tbody>
           {rows.map((row) => (
             <Table.Tr key={row.key}>
-              <Table.Th w="30%" className="text-gray-600">
+              <Table.Th w="30%" className="text-xs whitespace-nowrap text-gray-600 sm:text-sm">
                 {row.key}
               </Table.Th>
               <Table.Td className="font-medium text-gray-900">
@@ -86,14 +90,14 @@ export default function EntityDetails({
       <header
         className={`relative overflow-hidden border border-gray-200/80 bg-white p-5 sm:p-6 ${translate("rounded-r-3xl", "rounded-l-3xl")}`}
       >
-        <div className={`pointer-events-none absolute inset-y-0 start-0 w-1 ${isDeleted ? "bg-red-500" : "bg-teal-500"}`} />
+        <div className={`pointer-events-none absolute inset-y-0 start-0 w-1 ${isDeleted ? "bg-clay-500" : "bg-haze-600"}`} />
 
         <div className="flex flex-col gap-4 ps-2 sm:flex-row sm:items-center sm:justify-between sm:ps-3">
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             {Icon && (
               <div
                 className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:h-14 sm:w-14 ${
-                  isDeleted ? "bg-red-50 text-red-500 ring-1 ring-red-100" : "bg-teal-100 text-teal-600 ring-1 ring-teal-100"
+                  isDeleted ? "bg-clay-50 text-clay-600" : "bg-haze-50 text-haze-600"
                 }`}
               >
                 {isDeleted ? <Ban size={21} /> : <Icon size={24} strokeWidth={1.75} />}
@@ -103,7 +107,7 @@ export default function EntityDetails({
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-3">
                 {titleText ? (
-                  <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">{titleText}</h2>
+                  <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-4xl">{titleText}</h2>
                 ) : (
                   title
                 )}
@@ -112,10 +116,10 @@ export default function EntityDetails({
 
               {isDeleted && (
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-600 ring-1 ring-red-100 ring-inset">
+                  <span className="bg-clay-50 text-clay-600 ring-clay-100 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset">
                     {inactiveLabel ?? translate("Deleted", "محذوف")}
                   </span>
-                  <span className="text-sm text-red-500/80">{formatDateAndTime(deletedAt, locale)}</span>
+                  <span className="text-clay-600/80 text-xs sm:text-sm">{formatDateAndTime(deletedAt, locale)}</span>
                 </div>
               )}
             </div>

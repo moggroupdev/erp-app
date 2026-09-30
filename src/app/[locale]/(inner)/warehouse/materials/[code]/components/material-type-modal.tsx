@@ -172,7 +172,7 @@ export default function MaterialTypeModal({
         )}
 
         {impact?.blocked && impact.blockReason && (
-          <Alert color="red" icon={<CircleAlert size={16} />} radius="md">
+          <Alert color="clay" icon={<CircleAlert size={16} />} radius="md">
             {impact.blockReason}
           </Alert>
         )}
@@ -187,7 +187,7 @@ export default function MaterialTypeModal({
               required
             />
             {impact.affectedBomLines.length > 0 && (
-              <Alert color="blue" icon={<Info size={16} />} radius="md">
+              <Alert color="haze" icon={<Info size={16} />} radius="md">
                 {translate(
                   `Applies to ${impact.affectedBomLines.length} existing product BOM line(s).`,
                   `ينطبق على ${impact.affectedBomLines.length} بند قائمة مواد منتجات موجودة.`,
@@ -199,7 +199,7 @@ export default function MaterialTypeModal({
 
         {impact && !impact.blocked && needsConfirmation && (
           <div className="flex flex-col gap-2">
-            <Alert color="yellow" icon={<Info size={16} />} radius="md">
+            <Alert color="ochre" icon={<Info size={16} />} radius="md">
               {translate(
                 "This material is used in the following product BOMs. Manufacturing source will be cleared on those lines.",
                 "هذه المادة مستخدمة في قوائم مواد المنتجات التالية. سيتم مسح مصدر التصنيع من تلك البنود.",

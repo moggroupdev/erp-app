@@ -9,6 +9,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useDepartments from "@/hooks/reference/use-departments";
 import useRoles from "@/hooks/reference/use-roles";
 import usersApi from "@/lib/api/users";
@@ -20,7 +21,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { type User } from "@/types/user";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { Badge, Button, Skeleton, Table, TextInput } from "@mantine/core";
+import { Badge, Menu, Skeleton, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -32,6 +33,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import SelectDepartment from "@/components/global/selections/reference-based/select-department";
 import SelectRole from "@/components/global/selections/reference-based/select-role";
 import UserModal from "@/components/global/data-modals/user-modal";
@@ -48,6 +50,7 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
+  const canAddUser = useHasPermission(PERMISSIONS.ADD_USER);
 
   const { helpers: departmentHelpers, loading: departmentsLoading } = useDepartments();
   const { helpers: roleHelpers, loading: rolesLoading } = useRoles();
@@ -151,13 +154,15 @@ export default function Page() {
           "إدارة مستخدمي المؤسسة وأدوارهم وتعييناتهم للأقسام.",
         ),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_USER}>
-              <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
-                {translate("Add User", "إضافة مستخدم")}
-              </Button>
-            </PermissionGuard>
+            <ActionsMenu>
+              {canAddUser && (
+                <Menu.Item onClick={openModal} leftSection={<Plus size={14} />}>
+                  {translate("Add User", "إضافة مستخدم")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

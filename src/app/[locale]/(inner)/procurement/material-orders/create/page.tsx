@@ -20,9 +20,10 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialUnitConversionSummary } from "@/types/material";
-import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
+import { Badge, Button, Menu, NumberInput, Table, TextInput } from "@mantine/core";
 import { ArrowLeft, ClipboardList, Link2, Package, Plus, Trash2, X } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
+import ActionsMenu from "@/components/ui/actions-menu";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import { MPO_DELIVERY_TIMINGS, type MpoDeliveryTiming } from "@/lib/constants/enums/mpo-delivery-timings";
@@ -163,7 +164,7 @@ function ItemRow({
   const fullyLinked = quantity !== null && row.allocations.length > 0 && Math.abs(linkedTotal - quantity) <= 1e-9;
 
   return (
-    <Table.Tr className={invalid ? "bg-red-50 [&>td]:bg-red-50" : undefined}>
+    <Table.Tr className={invalid ? "bg-clay-50 [&>td]:bg-clay-50" : undefined}>
       <Table.Td className="pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
       <Table.Td className="align-top!">
         <div className="flex flex-col gap-1.5 py-0.5">
@@ -310,7 +311,7 @@ function ItemRow({
         <Button
           type="button"
           variant="subtle"
-          color="red"
+          color="clay"
           size="xs"
           radius="md"
           p={6}
@@ -802,9 +803,11 @@ export default function Page() {
                 </p>
               </div>
             </div>
-            <Button type="button" color="teal" radius="xl" size="sm" leftSection={<Plus size={14} />} onClick={openAdd}>
-              {translate("Add from requisitions", "إضافة من طلبات الشراء")}
-            </Button>
+            <ActionsMenu>
+              <Menu.Item leftSection={<Plus size={14} />} onClick={openAdd}>
+                {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+              </Menu.Item>
+            </ActionsMenu>
           </div>
           <div className="px-5 py-5">
             {rows.length === 0 ? (
@@ -814,16 +817,13 @@ export default function Page() {
                 </div>
                 <div className="flex max-w-md flex-col gap-1.5">
                   <h5 className="text-base font-semibold text-gray-900">{translate("No items yet", "لا توجد بنود بعد")}</h5>
-                  <p className="text-sm leading-relaxed text-gray-500">
+                  <p className="text-sm leading-[1.75] text-gray-500">
                     {translate(
                       "Start by adding open purchase requisition lines.",
                       "ابدأ بإضافة بنود من طلبات الشراء المفتوحة.",
                     )}
                   </p>
                 </div>
-                <Button type="button" color="teal" radius="md" size="sm" leftSection={<Plus size={15} />} onClick={openAdd}>
-                  {translate("Add from requisitions", "إضافة من طلبات الشراء")}
-                </Button>
               </div>
             ) : (
               <div className="overflow-x-auto">

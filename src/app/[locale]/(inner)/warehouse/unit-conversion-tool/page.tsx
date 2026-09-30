@@ -17,9 +17,10 @@ import {
   toDisplayUnitPrice,
 } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Button, NumberInput, Table } from "@mantine/core";
-import { Calculator, Layers, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
+import { Button, Menu, NumberInput, Table } from "@mantine/core";
+import { Eraser, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
+import ActionsMenu from "@/components/ui/actions-menu";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
@@ -171,15 +172,15 @@ function ConversionUnitCard({
     <div className="relative min-w-36 overflow-hidden rounded-xl border border-gray-200 bg-white">
       <div className="flex flex-col gap-2 px-3 py-2.5 ps-3.5">
         <div className="flex items-center gap-1.5">
-          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-plum-50 text-plum-600">
             <Ruler size={11} strokeWidth={2.25} />
           </div>
-          <span className="text-xs font-semibold tracking-wide text-indigo-700 uppercase">{unitLabel}</span>
+          <span className="text-xs font-semibold tracking-wide text-plum-700 uppercase">{unitLabel}</span>
         </div>
 
         <div className="flex flex-col gap-1.5">
           {quantity != null ? (
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-2 py-1.5">
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 px-2 py-1.5">
               <div className="flex items-center gap-1.5 text-gray-500">
                 <Scale size={12} strokeWidth={2} />
                 <span className="text-[11px] font-medium">{translate("Qty", "الكمية")}</span>
@@ -345,7 +346,7 @@ function ItemRow({
         <Button
           type="button"
           variant="subtle"
-          color="red"
+          color="clay"
           size="xs"
           radius="md"
           p={6}
@@ -453,9 +454,11 @@ export default function Page() {
         backLink: true,
         confirmNavigate: confirmNavigation,
         sideElements: (
-          <Button variant="light" color="gray" radius="md" size="sm" onClick={clearAll} disabled={!isDirty}>
-            {translate("Clear", "مسح")}
-          </Button>
+          <ActionsMenu>
+            <Menu.Item leftSection={<Eraser size={14} />} onClick={clearAll} disabled={!isDirty}>
+              {translate("Clear calculator", "مسح الحاسبة")}
+            </Menu.Item>
+          </ActionsMenu>
         ),
       }}
     >

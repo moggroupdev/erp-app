@@ -19,26 +19,18 @@ export default function HomeContent() {
   return (
     <div className="root-flex-1 flex flex-col">
       <section className="flex flex-1 flex-col items-center justify-center bg-gray-50 px-4 py-16 text-center">
-        <Image
-          src={"/images/logo.png"}
-          alt="logo"
-          {...getLogoSize(150)}
-          className="rounded"
-          style={{ height: "auto" }}
-        />
+        <Image src={"/images/logo.png"} alt="logo" {...getLogoSize(150)} className="rounded" style={{ height: "auto" }} />
 
         <h1 className="mt-8 max-w-2xl text-balance">
           {translate("Complete Business Management Platform", "منصة متكاملة لإدارة الأعمال")}
         </h1>
 
-        <p className="mt-4 max-w-5xl leading-relaxed text-balance">{translation.appDescription}</p>
+        <p className="mt-4 max-w-5xl leading-[1.75] text-balance">{translation.appDescription}</p>
 
-        <div className="mt-8">
+        <div className="mt-6">
           {isInitializing ? null : (
             <Link href={ctaHref}>
-              <Button size="lg" radius="md">
-                {ctaLabel}
-              </Button>
+              <Button size="md">{ctaLabel}</Button>
             </Link>
           )}
         </div>

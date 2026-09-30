@@ -1,15 +1,21 @@
+import { chartNeutralColors, semanticColorOrder, semanticPalette } from "@/lib/constants/color-palette";
+
+const { haze } = semanticPalette;
+
+const chartPalette = [...semanticColorOrder.map((name) => semanticPalette[name][600]), ...chartNeutralColors];
+
 export const reportTheme = {
   chart: {
-    period: "#0d9488",
-    periodHover: "#0f766e",
-    supplierColors: ["#0d9488", "#14b8a6", "#2dd4bf", "#5eead4", "#78716c", "#a8a29e", "#d6d3d1", "#059669", "#047857", "#6ee7b7"],
-    materialColors: ["#0d9488", "#14b8a6", "#2dd4bf", "#5eead4", "#78716c", "#a8a29e", "#d6d3d1", "#059669", "#047857", "#6ee7b7"],
-    priceLine: "#0d9488",
+    period: haze[600],
+    periodHover: haze[700],
+    supplierColors: chartPalette,
+    materialColors: chartPalette,
+    priceLine: haze[600],
   },
   kpi: {
-    value: "text-teal-800",
-    neutral: "text-stone-700",
-    positive: "text-emerald-700",
-    negative: "text-rose-700",
+    value: "text-haze-800",
+    neutral: "text-gray-700",
+    positive: "text-teal-700",
+    negative: "text-clay-700",
   },
 } as const;

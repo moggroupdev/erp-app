@@ -10,6 +10,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useProductCategories from "@/hooks/reference/use-product-categories";
 import productsApi from "@/lib/api/products";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -21,7 +22,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { type Product, type ProductWithDimensions } from "@/types/product";
-import { Button, Checkbox, Table, TextInput } from "@mantine/core";
+import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -32,6 +33,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import PrintDocument from "@/components/ui/print-document";
 import ProductsListPrintDocument from "@/components/documents/products/products-list-print-document";
 import ProductModal from "@/components/global/data-modals/product-modal";
@@ -46,6 +48,8 @@ const PRODUCTS_PER_PAGE = 25;
 export default function Page() {
   const { locale, translate, translation } = useI18n();
   const printDate = formatDate(new Date(), locale);
+  const canPrintProductsList = useHasPermission(PERMISSIONS.PRINT_PRODUCTS_LIST);
+  const canAddProduct = useHasPermission(PERMISSIONS.ADD_PRODUCT);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -164,11 +168,12 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex items-center gap-2">
-            <PermissionGuard permission={PERMISSIONS.PRINT_PRODUCTS_LIST}>
-              <div className="flex-center px-1">
+          <div className="flex items-center gap-3">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <ActionsMenu>
+              {canPrintProductsList && (
                 <PrintDocument
-                  buttonType="icon"
+                  buttonType="menu"
                   title={translate(`Products List - ${printDate}`, `قائمة المنتجات - ${printDate}`)}
                   onBeforePrint={async () => {
                     if (!allProducts) await fetchAllProducts();
@@ -182,14 +187,14 @@ export default function Page() {
                     />
                   )}
                 </PrintDocument>
-              </div>
-            </PermissionGuard>
-            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT}>
-              <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
-                {translate("Add New Product", "إضافة منتج جديد")}
-              </Button>
-            </PermissionGuard>
+              )}
+              {canPrintProductsList && canAddProduct && <Menu.Divider />}
+              {canAddProduct && (
+                <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
+                  {translate("Add New Product", "إضافة منتج جديد")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

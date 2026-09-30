@@ -134,7 +134,7 @@ export default function MaterialsReportPrintDocument({
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
         {overview.noMinimumStockCount > 0 && (
-          <p className="rounded-lg bg-amber-50 px-2.5 py-2 text-[10px] text-amber-800">
+          <p className="rounded-lg bg-ochre-50 px-2.5 py-2 text-[10px] text-ochre-800">
             {translate(
               `${overview.noMinimumStockCount} material(s) have no minimum stock level set.`,
               `هناك عدد ${overview.noMinimumStockCount} من المواد لم يتم تعيين حد أدنى طلب لها.`,

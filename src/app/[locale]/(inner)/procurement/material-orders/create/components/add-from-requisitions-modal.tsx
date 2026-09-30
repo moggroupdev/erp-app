@@ -310,7 +310,7 @@ export default function AddFromRequisitionsModal({
   return (
     <Modal opened={opened} onClose={onClose} title={translate("Add from requisitions", "إضافة من طلبات الشراء")} size="60%">
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-gray-600">
+        <p className="text-xs leading-[1.75] text-gray-600">
           {groupByMaterial
             ? translate(
                 "Materials are combined across requisitions. Selecting a material takes its full remaining quantity and links all related requisition lines.",
@@ -369,7 +369,7 @@ export default function AddFromRequisitionsModal({
                   const selected = isMaterialGroupSelected(group);
                   const hasError = group.items.some((item) => errorItemId === item.requisitionItemId);
                   return (
-                    <Table.Tr key={group.materialCode} className={`text-gray-600 ${hasError ? "bg-red-50" : ""}`}>
+                    <Table.Tr key={group.materialCode} className={`text-gray-600 ${hasError ? "bg-clay-50" : ""}`}>
                       <Table.Td>
                         <Checkbox
                           checked={selected}
@@ -436,7 +436,7 @@ export default function AddFromRequisitionsModal({
                       <Table.Td>{formatQuantity(item.quantityRequested)}</Table.Td>
                       <Table.Td
                         className={`transition-colors ${
-                          hasError ? "bg-red-50 focus-within:bg-red-50" : "focus-within:bg-teal-50/60"
+                          hasError ? "bg-clay-50 focus-within:bg-clay-50" : "focus-within:bg-teal-50/60"
                         }`}
                       >
                         {selected ? (
@@ -460,7 +460,7 @@ export default function AddFromRequisitionsModal({
                                 lineHeight: 1.25,
                                 padding: 0,
                                 fontSize: "0.8125rem",
-                                color: hasError ? "var(--mantine-color-red-7)" : undefined,
+                                color: hasError ? "var(--mantine-color-clay-7)" : undefined,
                               },
                             }}
                           />
@@ -476,7 +476,7 @@ export default function AddFromRequisitionsModal({
           </div>
         )}
 
-        {localError && <p className="text-sm text-red-600">{localError}</p>}
+        {localError && <p className="text-xs leading-[1.75] text-clay-600">{localError}</p>}
 
         <div className="flex gap-2">
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, FileButton, Loader } from "@mantine/core";
+import { FileButton, Loader, Menu } from "@mantine/core";
 import { Building2, CalendarDays, Download, FileText, Link2, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import useHasPermission from "@/hooks/use-has-permission";
@@ -17,6 +17,7 @@ import parseSupplierInvoicePdf, { type ParsedSupplierInvoice } from "@/lib/helpe
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type SupplierInvoiceDetailed } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ProtectedLink from "@/components/ui/protected-link";
 import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
@@ -36,7 +37,7 @@ function MoneyCell({ value, signed = false, tone = "base" }: { value: number | n
     tone === "total"
       ? "text-xl font-bold text-teal-950 sm:text-2xl"
       : tone === "deduction"
-        ? "font-medium text-rose-700/80"
+        ? "font-medium text-clay-700/80"
         : tone === "tax"
           ? "font-semibold text-gray-900"
           : "font-medium text-gray-900";
@@ -238,37 +239,27 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {hasPdf && (
-            <Button
-              variant="light"
-              color="teal"
-              size="sm"
-              radius="md"
-              leftSection={<Download size={15} />}
-              loading={downloadMutation.isPending}
-              onClick={() => downloadMutation.mutate()}
-            >
-              {translate("Download PDF", "تنزيل PDF")}
-            </Button>
-          )}
-
-          {canUpdate && (
-            <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
-              {(props) => (
-                <Button
-                  {...props}
-                  variant={hasPdf ? "default" : "filled"}
-                  color="teal"
-                  size="sm"
-                  radius="md"
-                  leftSection={<Upload size={15} />}
-                  loading={isParsing}
-                >
-                  {hasPdf ? translate("Replace PDF", "استبدال PDF") : translate("Upload PDF", "رفع PDF")}
-                </Button>
-              )}
-            </FileButton>
-          )}
+          <ActionsMenu>
+            {hasPdf && (
+              <Menu.Item
+                leftSection={<Download size={14} />}
+                disabled={downloadMutation.isPending}
+                onClick={() => downloadMutation.mutate()}
+              >
+                {translate("Download PDF", "تنزيل PDF")}
+              </Menu.Item>
+            )}
+            {hasPdf && canUpdate && <Menu.Divider />}
+            {canUpdate && (
+              <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+                {(props) => (
+                  <Menu.Item {...props} leftSection={<Upload size={14} />} disabled={isParsing}>
+                    {hasPdf ? translate("Replace PDF", "استبدال PDF") : translate("Upload PDF", "رفع PDF")}
+                  </Menu.Item>
+                )}
+              </FileButton>
+            )}
+          </ActionsMenu>
         </div>
       </div>
 
@@ -279,7 +270,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
       )}
 
       {hasPdf && (
-        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
           {isPdfLoading && (
             <div className="flex h-[min(70vh,720px)] items-center justify-center gap-2 text-sm text-gray-500">
               <Loader size="sm" color="teal" />
@@ -325,7 +316,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
       {/* Masthead */}
       <header className="relative border-b border-gray-200 px-5 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-6">
         <div className="pointer-events-none absolute -end-10 -top-16 h-48 w-48 rounded-full bg-teal-50/80" />
-        <div className="pointer-events-none absolute end-16 -top-8 h-28 w-28 rounded-full bg-slate-100/90" />
+        <div className="pointer-events-none absolute end-16 -top-8 h-28 w-28 rounded-full bg-gray-100/90" />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 flex-col gap-4">
@@ -393,7 +384,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
             </InfoRow>
           </div>
 
-          <div className="mt-auto rounded-lg bg-slate-50/80 p-4 text-gray-500">
+          <div className="mt-auto rounded-lg bg-gray-50/80 p-4 text-gray-500">
             <p className="text-xs">
               {translate("Entered by", "أدخل بواسطة")}{" "}
               <span className="font-medium text-gray-700">
@@ -416,7 +407,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
           </div>
 
           <div className="overflow-hidden rounded-xl border border-gray-200">
-            <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-4 border-b border-gray-200 bg-slate-50 px-4 py-2 text-[10px] font-semibold tracking-wide text-gray-400 uppercase sm:grid">
+            <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-4 border-b border-gray-200 bg-gray-50 px-4 py-2 text-[10px] font-semibold tracking-wide text-gray-400 uppercase sm:grid">
               <span>{translate("Description", "البيان")}</span>
               <span className="min-w-28 text-end sm:min-w-36">{translate("Amount", "المبلغ")}</span>
             </div>

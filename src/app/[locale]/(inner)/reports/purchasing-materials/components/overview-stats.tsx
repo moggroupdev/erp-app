@@ -52,11 +52,11 @@ function KpiCard({
     <div className="relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6">
       <div className="absolute -end-3 -top-3 opacity-[0.07]">{icon}</div>
       <div className="relative flex flex-col gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-600">{icon}</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600">{icon}</div>
         <div>
-          <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">{label}</p>
+          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
           <p className={`mt-1 text-2xl font-semibold ${valueClassName}`}>{value}</p>
-          {hint && <p className="mt-1.5 text-xs text-stone-500">{hint}</p>}
+          {hint && <p className="mt-1.5 text-xs text-gray-500">{hint}</p>}
         </div>
       </div>
     </div>
@@ -77,9 +77,9 @@ function StatusPill({
   tone: "success" | "warning" | "neutral";
 }) {
   const tones = {
-    success: "bg-emerald-50 text-emerald-800",
-    warning: "bg-amber-50 text-amber-800",
-    neutral: "bg-stone-50 text-stone-700",
+    success: "bg-teal-50 text-teal-800",
+    warning: "bg-ochre-50 text-ochre-800",
+    neutral: "bg-gray-50 text-gray-700",
   };
 
   return (

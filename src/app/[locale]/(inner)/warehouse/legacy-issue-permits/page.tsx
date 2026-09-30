@@ -10,6 +10,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -18,9 +19,8 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type LegacyIssuePermit } from "@/types/legacy-issue-permit";
-import { Badge, Button, Table, TextInput } from "@mantine/core";
+import { Badge, Menu, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -29,6 +29,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 
 const PAGE_TITLE = { en: "Legacy Issue Permits", ar: "أذونات الصرف المرحلية" };
 
@@ -36,6 +37,7 @@ const TRANSACTIONS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translate } = useI18n();
+  const canCreatePermit = useHasPermission(PERMISSIONS.ADD_LEGACY_ISSUE_PERMIT);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -104,19 +106,19 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_LEGACY_ISSUE_PERMIT}>
-              <Button
-                radius="md"
-                variant="light"
-                component={Link}
-                href={getLocalizedHref("/warehouse/legacy-issue-permits/create")}
-                leftSection={<Plus size={15} />}
-              >
-                {translate("Create", "إنشاء")}
-              </Button>
-            </PermissionGuard>
+            <ActionsMenu>
+              {canCreatePermit && (
+                <Menu.Item
+                  component={Link}
+                  href={getLocalizedHref("/warehouse/legacy-issue-permits/create")}
+                  leftSection={<Plus size={14} />}
+                >
+                  {translate("Create issue permit", "إنشاء إذن صرف")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}
@@ -184,7 +186,7 @@ export default function Page() {
                           <CopyButton text={transaction.issuePermitNumber} />
 
                           {transaction.isCancelled && (
-                            <Badge size="sm" variant="light" color="red" radius="md">
+                            <Badge size="sm" variant="light" color="clay" radius="md">
                               {translate("Cancelled", "ملغي")}
                             </Badge>
                           )}

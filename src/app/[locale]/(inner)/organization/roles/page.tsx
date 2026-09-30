@@ -8,6 +8,7 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import useDepartments from "@/hooks/reference/use-departments";
 import rolesApi from "@/lib/api/roles";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -15,15 +16,15 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import { Button, TextInput } from "@mantine/core";
+import { Menu, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import RoleCard from "./components/role-card";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import SelectDepartment from "@/components/global/selections/reference-based/select-department";
@@ -39,6 +40,7 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
+  const canAddRole = useHasPermission(PERMISSIONS.ADD_ROLE);
   const { data: departments } = useDepartments();
 
   const {
@@ -101,20 +103,19 @@ export default function Page() {
           "عرض الأدوار وصلاحيات الوصول عبر المؤسسة.",
         ),
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_ROLE}>
-              <Button
-                component={Link}
-                href={getLocalizedHref("/organization/roles/new")}
-                variant="light"
-                color="haze"
-                radius="md"
-                leftSection={<Plus size={15} />}
-              >
-                {translate("Add Role", "إضافة دور")}
-              </Button>
-            </PermissionGuard>
+            <ActionsMenu>
+              {canAddRole && (
+                <Menu.Item
+                  component={Link}
+                  href={getLocalizedHref("/organization/roles/new")}
+                  leftSection={<Plus size={14} />}
+                >
+                  {translate("Add Role", "إضافة دور")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

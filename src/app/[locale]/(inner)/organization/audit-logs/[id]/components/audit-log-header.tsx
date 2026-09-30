@@ -28,16 +28,16 @@ const ACTION_HEADER: Record<
   update: {
     icon: Circle,
     verb: { en: "Updating", ar: "تحديث" },
-    bar: "bg-yellow-500",
-    iconWrap: "bg-yellow-50 text-yellow-600 ring-yellow-100",
-    verbClass: "text-yellow-700",
+    bar: "bg-ochre-600",
+    iconWrap: "bg-ochre-50 text-ochre-600 ring-ochre-100",
+    verbClass: "text-ochre-700",
   },
   delete: {
     icon: Minus,
     verb: { en: "Deleting", ar: "حذف" },
-    bar: "bg-red-500",
-    iconWrap: "bg-red-50 text-red-600 ring-red-100",
-    verbClass: "text-red-700",
+    bar: "bg-clay-500",
+    iconWrap: "bg-clay-50 text-clay-600 ring-clay-100",
+    verbClass: "text-clay-700",
   },
 };
 

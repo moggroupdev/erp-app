@@ -9,11 +9,12 @@ import useHasPermission from "@/hooks/use-has-permission";
 import useDepartments from "@/hooks/reference/use-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type DepartmentWithManager } from "@/types/departments";
-import { Button } from "@mantine/core";
-import PermissionGuard from "@/components/guards/permission";
+import { Menu } from "@mantine/core";
+import { Factory, Plus } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import DepartmentModal from "@/components/global/data-modals/department-modal";
 import DepartmentCard from "./components/department-card";
 import DepartmentsLoadingSkeleton from "./components/departments-loading-skeleton";
@@ -29,6 +30,8 @@ export default function Page() {
   const { loading, error, data: departments, reload } = useDepartments();
 
   const canUpdateDepartments = useHasPermission(PERMISSIONS.UPDATE_DEPARTMENT);
+  const canReadProductionDepartmentManagers = useHasPermission(PERMISSIONS.READ_PRODUCTION_DEPARTMENT_MANAGERS);
+  const canAddDepartment = useHasPermission(PERMISSIONS.ADD_DEPARTMENT);
 
   // ========================= MODALS =========================
 
@@ -51,24 +54,25 @@ export default function Page() {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
           <RefetchButton isFetching={loading} onRefetch={reload} />
-          <PermissionGuard permission={PERMISSIONS.READ_PRODUCTION_DEPARTMENT_MANAGERS}>
-            <Button
-              component={Link}
-              href={getLocalizedHref("/organization/departments/production-department-managers")}
-              variant="light"
-              color="dark"
-              radius="md"
-            >
-              {translate("Production Departments", "أقسام الإنتاج")}
-            </Button>
-          </PermissionGuard>
-          <PermissionGuard permission={PERMISSIONS.ADD_DEPARTMENT}>
-            <Button color="blue" variant="light" radius="md" onClick={openModal}>
-              {translate("Add New Department", "إضافة قسم جديد")}
-            </Button>
-          </PermissionGuard>
+          <ActionsMenu>
+            {canAddDepartment && (
+              <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
+                {translate("Add new department", "إضافة قسم جديد")}
+              </Menu.Item>
+            )}
+            {canAddDepartment && canReadProductionDepartmentManagers && <Menu.Divider />}
+            {canReadProductionDepartmentManagers && (
+              <Menu.Item
+                component={Link}
+                href={getLocalizedHref("/organization/departments/production-department-managers")}
+                leftSection={<Factory size={14} />}
+              >
+                {translate("Show production departments", "عرض أقسام الإنتاج")}
+              </Menu.Item>
+            )}
+          </ActionsMenu>
         </div>
       </header>
 
@@ -79,7 +83,7 @@ export default function Page() {
           errorTitle={translate("Error loading departments", "خطأ في تحميل الأقسام")}
           errorMessage={error}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: reload }}
-          className="rounded-lg border border-red-100"
+          className="rounded-lg border border-clay-100"
         />
       ) : departments.length === 0 ? (
         <EmptySection

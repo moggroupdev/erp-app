@@ -42,7 +42,7 @@ export default function DeleteModal({
         {children}
 
         {warning && (
-          <Alert color="red" radius="md" icon={<AlertCircle size={15} />}>
+          <Alert color="clay" radius="md" icon={<AlertCircle size={15} />}>
             {warning}
           </Alert>
         )}
@@ -51,7 +51,7 @@ export default function DeleteModal({
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>
             {translation.cancel}
           </Button>
-          <Button type="submit" color="red" loading={loading} disabled={disabled} radius="md" fullWidth>
+          <Button type="submit" color="clay" loading={loading} disabled={disabled} radius="md" fullWidth>
             {translation.confirm}
           </Button>
         </div>

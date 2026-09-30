@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Badge, Button } from "@mantine/core";
+import { Badge, Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { BriefcaseBusiness, Building2, CalendarDays, Factory, KeyRound, Mail, Phone, Shield, UserRound } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -13,6 +13,7 @@ import { PRODUCTION_DEPARTMENT_ID } from "@/lib/constants/global";
 import { getGenderLabel } from "@/lib/constants/enums/genders";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import LayoutBox from "@/components/ui/layout-box";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import CopyButton from "@/components/ui/copy-button";
 import { EmptyValue } from "@/components/ui/entity-details";
@@ -71,7 +72,7 @@ export default function ProfileContent() {
 
               <header className="relative border-b border-gray-200 px-5 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-6">
                 <div className="pointer-events-none absolute -end-10 -top-16 h-48 w-48 rounded-full bg-teal-50/80" />
-                <div className="pointer-events-none absolute end-16 -top-8 h-28 w-28 rounded-full bg-slate-100/90" />
+                <div className="pointer-events-none absolute end-16 -top-8 h-28 w-28 rounded-full bg-gray-100/90" />
 
                 <div className="relative flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex min-w-0 items-start gap-4">
@@ -100,7 +101,7 @@ export default function ProfileContent() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-xs font-semibold text-gray-700 ring-1 ring-gray-200">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-gray-50 px-2.5 py-1 font-mono text-xs font-semibold text-gray-700 ring-1 ring-gray-200">
                           {user.code}
                           <CopyButton text={user.code} />
                         </span>
@@ -182,7 +183,7 @@ export default function ProfileContent() {
                 </section>
               </div>
 
-              <footer className="flex flex-col gap-4 border-t border-gray-200 bg-slate-50/80 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              <footer className="flex flex-col gap-4 border-t border-gray-200 bg-gray-50/80 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-teal-800 ring-1 ring-gray-200">
                     <KeyRound size={16} strokeWidth={1.75} />
@@ -200,17 +201,13 @@ export default function ProfileContent() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={openPasswordModal}
-                  variant="light"
-                  color="blue"
-                  size="xs"
-                  radius="md"
-                  leftSection={<KeyRound size={15} />}
-                  className="self-start sm:self-auto"
-                >
-                  {translate("Update password", "تحديث كلمة المرور")}
-                </Button>
+                <div className="self-start sm:self-auto">
+                  <ActionsMenu>
+                    <Menu.Item onClick={openPasswordModal} leftSection={<KeyRound size={14} />}>
+                      {translate("Update password", "تحديث كلمة المرور")}
+                    </Menu.Item>
+                  </ActionsMenu>
+                </div>
               </footer>
             </article>
           </>

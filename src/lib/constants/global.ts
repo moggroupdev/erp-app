@@ -1,4 +1,12 @@
+import { brandColors } from "@/lib/constants/color-palette";
+
 export const APP_NAME = "MOG ERP";
+
+/** Logo navy. Selected text and the text caret. Source: color-palette.json */
+export const NAVY = brandColors.navy;
+
+/** Light wash of the logo navy. Selection background and app theme color. Source: color-palette.json */
+export const NAVY_WASH = brandColors.navyWash;
 
 export const BASE_URL = "https://app.moggroup.net";
 

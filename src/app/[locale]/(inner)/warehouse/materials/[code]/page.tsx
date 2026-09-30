@@ -14,10 +14,11 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
-import { Button, Menu } from "@mantine/core";
-import { ChevronDown, Pencil, Repeat, Tag } from "lucide-react";
+import { Menu } from "@mantine/core";
+import { Pencil, Repeat, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import MaterialModal from "@/components/global/data-modals/material-modal";
@@ -41,7 +42,6 @@ export default function Page() {
   const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
   const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
-  const canManageMaterial = canUpdateMaterial || canSetMarketPrice || canSetMaterialType;
 
   const materialQuery = useQuery({
     queryKey: queryKeys.materials.detail(code),
@@ -85,33 +85,27 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
-            {material && canManageMaterial && (
-              <Menu offset={8} withinPortal withArrow>
-                <Menu.Target>
-                  <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
-                    {translate("Actions", "الإجراءات")}
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  {canUpdateMaterial && (
-                    <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
-                      {translate("Edit", "تعديل")}
-                    </Menu.Item>
-                  )}
-                  {canSetMaterialType && (
-                    <Menu.Item leftSection={<Repeat size={14} />} onClick={openTypeModal}>
-                      {translate("Change Material Type", "تغيير نوع المادة")}
-                    </Menu.Item>
-                  )}
-                  {canSetMarketPrice && (
-                    <Menu.Item leftSection={<Tag size={14} />} onClick={openMarketPriceModal}>
-                      {translate("Set Market Price", "تعيين سعر السوق")}
-                    </Menu.Item>
-                  )}
-                </Menu.Dropdown>
-              </Menu>
+            {material && (
+              <ActionsMenu>
+                {canUpdateMaterial && (
+                  <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
+                    {translate("Edit material", "تعديل المادة")}
+                  </Menu.Item>
+                )}
+                {canUpdateMaterial && (canSetMaterialType || canSetMarketPrice) && <Menu.Divider />}
+                {canSetMaterialType && (
+                  <Menu.Item leftSection={<Repeat size={14} />} onClick={openTypeModal}>
+                    {translate("Change Material Type", "تغيير نوع المادة")}
+                  </Menu.Item>
+                )}
+                {canSetMarketPrice && (
+                  <Menu.Item leftSection={<Tag size={14} />} onClick={openMarketPriceModal}>
+                    {translate("Set Market Price", "تعيين سعر السوق")}
+                  </Menu.Item>
+                )}
+              </ActionsMenu>
             )}
           </div>
         ),

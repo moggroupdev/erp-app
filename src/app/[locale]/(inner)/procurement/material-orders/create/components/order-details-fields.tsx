@@ -115,7 +115,7 @@ export default function OrderDetailsFields({
         <div className="flex flex-col gap-2">
           <p className="text-sm font-medium text-gray-900">
             {translate("Delivery location", "مكان التسليم")}
-            <span className="text-red-500"> *</span>
+            <span className="text-clay-600"> *</span>
           </p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <ChoiceCard
@@ -139,7 +139,7 @@ export default function OrderDetailsFields({
           <div>
             <p className="text-sm font-medium text-gray-900">
               {translate("Delivery period", "مدة التوريد")}
-              <span className="text-red-500"> *</span>
+              <span className="text-clay-600"> *</span>
             </p>
             <p className="mt-0.5 text-xs text-gray-500">
               {withinDays

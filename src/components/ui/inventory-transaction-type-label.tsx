@@ -9,8 +9,8 @@ import {
 
 const TYPE_CONFIG: Record<InventoryTransactionType, { className: string; icon: LucideIcon }> = {
   receipt: { className: "text-teal-600", icon: Plus },
-  issue: { className: "text-orange-500", icon: Minus },
-  return: { className: "text-indigo-500", icon: Undo2 },
+  issue: { className: "text-ochre-600", icon: Minus },
+  return: { className: "text-plum-600", icon: Undo2 },
 };
 
 type InventoryTransactionTypeLabelProps = {

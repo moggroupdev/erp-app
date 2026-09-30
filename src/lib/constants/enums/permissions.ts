@@ -72,7 +72,6 @@ export const PERMISSION_VALUES = [
   "approve_material_purchase_requisition_planning",
   "approve_material_purchase_requisition_inventory_control",
   "approve_material_purchase_requisition_manager",
-  "read_product_purchase_orders",
   "read_trips",
   "read_deliveries",
   "read_installations",
@@ -599,13 +598,6 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "اعتماد/رفض طلب شراء مواد (المدير)",
     },
   },
-  read_product_purchase_orders: {
-    value: "read_product_purchase_orders",
-    label: {
-      en: "Read Product Purchase Orders",
-      ar: "عرض أوامر توريد المنتجات",
-    },
-  },
   read_trips: {
     value: "read_trips",
     label: {
@@ -848,7 +840,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_supplier_invoices",
       "add_supplier_invoice",
       "update_supplier_invoice",
-      "read_product_purchase_orders",
     ],
   },
   {
