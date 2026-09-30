@@ -1,4 +1,4 @@
-import type { ColorThemeName } from "@/lib/constants/color-theme";
+import { semanticTw, type ColorThemeName, type SemanticShadeKey } from "@/lib/constants/color-palette";
 
 export type SemanticStatus = "success" | "info" | "warning" | "danger" | "accent";
 
@@ -9,37 +9,21 @@ type StatusColorTokens = {
   borderClass: string;
 };
 
+function tokens(name: ColorThemeName, textShade: SemanticShadeKey = 600, surfaceShade: SemanticShadeKey = 50, borderShade: SemanticShadeKey = 200): StatusColorTokens {
+  return {
+    mantineColor: name,
+    textClass: semanticTw("text", name, textShade),
+    surfaceClass: semanticTw("bg", name, surfaceShade),
+    borderClass: semanticTw("border", name, borderShade),
+  };
+}
+
 const STATUS_COLORS: Record<SemanticStatus, StatusColorTokens> = {
-  success: {
-    mantineColor: "teal",
-    textClass: "text-teal-600",
-    surfaceClass: "bg-teal-50",
-    borderClass: "border-teal-200",
-  },
-  info: {
-    mantineColor: "haze",
-    textClass: "text-haze-600",
-    surfaceClass: "bg-haze-50",
-    borderClass: "border-haze-200",
-  },
-  warning: {
-    mantineColor: "ochre",
-    textClass: "text-ochre-600",
-    surfaceClass: "bg-ochre-50",
-    borderClass: "border-ochre-200",
-  },
-  danger: {
-    mantineColor: "clay",
-    textClass: "text-clay-600",
-    surfaceClass: "bg-clay-50",
-    borderClass: "border-clay-200",
-  },
-  accent: {
-    mantineColor: "plum",
-    textClass: "text-plum-600",
-    surfaceClass: "bg-plum-50",
-    borderClass: "border-plum-200",
-  },
+  success: tokens("teal"),
+  info: tokens("haze"),
+  warning: tokens("ochre"),
+  danger: tokens("clay"),
+  accent: tokens("plum"),
 };
 
 export function getSemanticStatusColors(status: SemanticStatus): StatusColorTokens {

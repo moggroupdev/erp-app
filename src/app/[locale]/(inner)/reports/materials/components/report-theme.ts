@@ -1,21 +1,21 @@
-import { colorTheme } from "@/lib/constants/color-theme";
+import { semanticColorOrder, semanticPalette } from "@/lib/constants/color-palette";
 
-const { teal, haze, ochre, clay, plum } = colorTheme;
+const { teal, haze, ochre, clay, plum } = semanticPalette;
 
 export const reportTheme = {
   surface: "bg-stone-50/80",
   card: "bg-white border border-stone-200/80 shadow-sm",
-  accent: teal.shades[600],
-  accentMuted: teal.shades[200],
+  accent: teal[600],
+  accentMuted: teal[200],
   chart: {
-    materialTypes: [teal.shades[600], plum.shades[600]],
+    materialTypes: [teal[600], plum[600]],
     stockStatus: {
-      out_of_stock: clay.shades[600],
-      low_stock: ochre.shades[600],
-      in_stock: teal.shades[600],
+      out_of_stock: clay[600],
+      low_stock: ochre[600],
+      in_stock: teal[600],
     },
-    categoryBar: teal.shades[700],
-    categoryBarHover: teal.shades[600],
+    categoryBar: teal[700],
+    categoryBarHover: teal[600],
   },
   kpi: {
     value: "text-teal-800",
@@ -27,10 +27,4 @@ export const reportTheme = {
   },
 } as const;
 
-export const reportChartSeries = [
-  teal.shades[600],
-  haze.shades[600],
-  ochre.shades[600],
-  clay.shades[600],
-  plum.shades[600],
-] as const;
+export const reportChartSeries = semanticColorOrder.map((name) => semanticPalette[name][600]);

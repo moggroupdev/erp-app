@@ -2,9 +2,10 @@
   "name": "erp-app",
   "version": "0.1.0",
   "scripts": {
-    "build": "next build",
+    "generate:theme": "node scripts/generate-theme-css.mjs",
+    "dev": "npm run generate:theme && node scripts/run.mjs dev",
+    "build": "npm run generate:theme && next build",
     "start": "node scripts/run.mjs start",
-    "dev": "node scripts/run.mjs dev",
     "lint": "eslint"
   },
   "dependencies": {

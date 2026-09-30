@@ -1,21 +1,16 @@
-import { colorTheme, colorThemeOrder } from "@/lib/constants/color-theme";
+import { chartNeutralColors, semanticColorOrder, semanticPalette } from "@/lib/constants/color-palette";
 
-const { teal } = colorTheme;
+const { teal } = semanticPalette;
 
-const chartPalette = [
-  ...colorThemeOrder.map((name) => colorTheme[name].shades[600]),
-  "#78716c",
-  "#a8a29e",
-  "#d6d3d1",
-];
+const chartPalette = [...semanticColorOrder.map((name) => semanticPalette[name][600]), ...chartNeutralColors];
 
 export const reportTheme = {
   chart: {
-    period: teal.shades[600],
-    periodHover: teal.shades[700],
+    period: teal[600],
+    periodHover: teal[700],
     supplierColors: chartPalette,
     materialColors: chartPalette,
-    priceLine: teal.shades[600],
+    priceLine: teal[600],
   },
   kpi: {
     value: "text-teal-800",

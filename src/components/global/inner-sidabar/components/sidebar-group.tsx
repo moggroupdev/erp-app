@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import { sidebarNavTheme } from "@/lib/constants/color-palette";
 import type { SidebarGroupConfig } from "./config";
 import SidebarItem from "./sidebar-item";
 
@@ -34,7 +35,7 @@ export default function SidebarGroup({
   const className = [
     "group flex w-full items-center rounded-lg px-2.5 py-2 text-sm! font-semibold! transition-colors",
     collapsed ? "justify-center px-2" : "gap-2.5",
-    isActive ? "bg-haze-800 text-white" : "text-gray-600 hover:bg-gray-100",
+    isActive ? sidebarNavTheme.parentActive : "text-gray-600 hover:bg-gray-100",
   ].join(" ");
 
   const content = (

@@ -1,5 +1,5 @@
 import { alpha, createTheme, type CSSVariablesResolver, type MantineTheme } from "@mantine/core";
-import { colorThemeOrder, type ColorThemeName } from "@/lib/constants/color-theme";
+import { semanticColorOrder, type ColorThemeName } from "@/lib/constants/color-palette";
 import { mantineThemeColors } from "@/lib/constants/color-theme-mantine";
 
 function semanticColorVars(mantineTheme: MantineTheme, name: ColorThemeName) {
@@ -52,11 +52,11 @@ export const theme = createTheme({
 });
 
 export const cssVariablesResolver: CSSVariablesResolver = (mantineTheme) => {
-  const light = colorThemeOrder.reduce(
+  const light = semanticColorOrder.reduce(
     (acc, name) => ({ ...acc, ...semanticColorVars(mantineTheme, name) }),
     {} as Record<string, string>,
   );
-  const dark = colorThemeOrder.reduce(
+  const dark = semanticColorOrder.reduce(
     (acc, name) => ({ ...acc, ...semanticColorVarsDark(mantineTheme, name) }),
     {} as Record<string, string>,
   );

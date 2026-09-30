@@ -1,4 +1,4 @@
-import type { ColorThemeName } from "@/lib/constants/color-theme";
+import type { ColorThemeName } from "@/lib/constants/color-palette";
 
 type ExtendedColors = Record<ColorThemeName, readonly string[]>;
 

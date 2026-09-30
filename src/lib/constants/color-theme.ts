@@ -1,14 +1,16 @@
-export type ColorThemeName = "teal" | "haze" | "ochre" | "clay" | "plum";
+import { semanticColorOrder, semanticPalette, type ColorThemeName } from "@/lib/constants/color-palette";
+
+export type { ColorThemeName };
 
 type ThemeColor = {
   label: { en: string; ar: string };
   role: { en: string; ar: string };
   usage: { en: string; ar: string };
   examples: { en: string; ar: string }[];
-  shades: Record<50 | 100 | 200 | 600 | 700, string>;
+  shades: (typeof semanticPalette)[ColorThemeName];
 };
 
-/** Canonical semantic palette for Mantine, Tailwind, and the development color lab. */
+/** Semantic labels and usage; hex shades come from {@link semanticPalette}. */
 export const colorTheme: Record<ColorThemeName, ThemeColor> = {
   teal: {
     label: { en: "Teal", ar: "أخضر مزرق" },
@@ -24,7 +26,7 @@ export const colorTheme: Record<ColorThemeName, ThemeColor> = {
       { en: "Confirm receipt", ar: "تأكيد الاستلام" },
       { en: "Current pagination page", ar: "الصفحة الحالية في الترقيم" },
     ],
-    shades: { 50: "#e2eceb", 100: "#d4e2e1", 200: "#bcd2d1", 600: "#115e59", 700: "#134e4a" },
+    shades: semanticPalette.teal,
   },
   haze: {
     label: { en: "Haze", ar: "أزرق ضبابي" },
@@ -40,7 +42,7 @@ export const colorTheme: Record<ColorThemeName, ThemeColor> = {
       { en: "View linked requisition", ar: "عرض طلب الشراء المرتبط" },
       { en: "Helpful form guidance", ar: "إرشاد مساعد في النموذج" },
     ],
-    shades: { 50: "#daf1fc", 100: "#bee5f9", 200: "#93d3f4", 600: "#2478b5", 700: "#1c6296" },
+    shades: semanticPalette.haze,
   },
   ochre: {
     label: { en: "Ochre", ar: "مغرة" },
@@ -56,7 +58,7 @@ export const colorTheme: Record<ColorThemeName, ThemeColor> = {
       { en: "Budget variance needs review", ar: "فرق الميزانية يحتاج مراجعة" },
       { en: "Unassigned requisition item", ar: "بند طلب شراء غير مخصص" },
     ],
-    shades: { 50: "#f7efe1", 100: "#f1dfc1", 200: "#e5c68f", 600: "#966516", 700: "#755015" },
+    shades: semanticPalette.ochre,
   },
   clay: {
     label: { en: "Clay", ar: "طيني" },
@@ -72,7 +74,7 @@ export const colorTheme: Record<ColorThemeName, ThemeColor> = {
       { en: "No permission to approve", ar: "لا توجد صلاحية للاعتماد" },
       { en: "Purchase order canceled", ar: "تم إلغاء أمر التوريد" },
     ],
-    shades: { 50: "#f7e9e7", 100: "#f0d7d3", 200: "#e5bcb6", 600: "#ad5250", 700: "#863f3d" },
+    shades: semanticPalette.clay,
   },
   plum: {
     label: { en: "Plum", ar: "برقوقي" },
@@ -88,8 +90,8 @@ export const colorTheme: Record<ColorThemeName, ThemeColor> = {
       { en: "Secondary report series", ar: "سلسلة تقرير ثانوية" },
       { en: "Production route label", ar: "وسم مسار الإنتاج" },
     ],
-    shades: { 50: "#f0ebf2", 100: "#e2d8e6", 200: "#ccbcd3", 600: "#765c80", 700: "#5c4664" },
+    shades: semanticPalette.plum,
   },
 };
 
-export const colorThemeOrder: ColorThemeName[] = ["teal", "haze", "ochre", "clay", "plum"];
+export const colorThemeOrder = semanticColorOrder;
