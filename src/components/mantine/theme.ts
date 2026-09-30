@@ -40,6 +40,7 @@ export const theme = createTheme({
   fontFamily: "var(--font-alexandria)",
   headings: { fontFamily: "var(--font-alexandria)" },
   defaultRadius: "md",
+  primaryColor: "haze",
   colors: mantineThemeColors,
   components: {
     Badge: {

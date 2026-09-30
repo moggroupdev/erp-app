@@ -6,13 +6,6 @@
   /* @theme-palette-start — generated from color-palette.json (npm run generate:theme) */
   --color-navy: #052565;
   --color-navy-wash: #d2d8e2;
-  --color-teal-50: #e2eceb;
-  --color-teal-100: #d4e2e1;
-  --color-teal-200: #bcd2d1;
-  --color-teal-600: #115e59;
-  --color-teal-700: #134e4a;
-  --color-teal-800: #115e59;
-  --color-teal-900: #134e4a;
   --color-haze-50: #daf1fc;
   --color-haze-100: #bee5f9;
   --color-haze-200: #93d3f4;
@@ -20,6 +13,13 @@
   --color-haze-700: #1c6296;
   --color-haze-800: #2478b5;
   --color-haze-900: #1c6296;
+  --color-teal-50: #e2eceb;
+  --color-teal-100: #d4e2e1;
+  --color-teal-200: #bcd2d1;
+  --color-teal-600: #115e59;
+  --color-teal-700: #134e4a;
+  --color-teal-800: #115e59;
+  --color-teal-900: #134e4a;
   --color-ochre-50: #f7efe1;
   --color-ochre-100: #f1dfc1;
   --color-ochre-200: #e5c68f;

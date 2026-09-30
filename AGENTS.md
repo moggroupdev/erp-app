@@ -276,14 +276,14 @@ That script patches the marked block in `src/app/globals.css` (`@theme-palette-s
 
 | Token | Mantine / Tailwind name | Use for |
 | ----- | ------------------------ | ------- |
-| Teal | `teal` | Primary actions, success, create/save |
-| Haze | `haze` | Information, links, guidance; **sidebar** nav (filled parent + light child via `sidebarNavTheme`) |
+| Haze | `haze` | Primary actions, create/save, links, guidance; **sidebar** nav (filled parent + light child via `sidebarNavTheme`). Mantine `primaryColor` |
+| Teal | `teal` | Success: approved, confirmed, in stock |
 | Ochre | `ochre` | Warning, pending, low stock |
 | Clay | `clay` | Danger, delete, rejected, errors |
 | Plum | `plum` | Categories, chart series accents (not success/error) |
 | Navy | `navy` / `navy-wash` | Brand only: selection, caret, PWA theme (not status badges) |
 
-Use **`color="teal"`** (etc.) on Mantine components and **`text-teal-600`**, **`bg-haze-50`**, … in Tailwind. Prefer `getSemanticStatusColors()` or `semanticTw()` over hand-written class strings when mapping status.
+Use **`color="haze"`** for primary actions and **`color="teal"`** (etc.) for other semantic roles on Mantine components, and **`text-haze-600`**, **`bg-teal-50`**, … in Tailwind. Prefer `getSemanticStatusColors()` or `semanticTw()` over hand-written class strings when mapping status.
 
 **Do not** mix unrelated semantic families on one control (e.g. haze + teal on the same nav row). Gray/dark stays for neutral metadata and secondary buttons.
 

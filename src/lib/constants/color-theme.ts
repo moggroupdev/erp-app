@@ -12,10 +12,13 @@ type ThemeColor = {
 
 /** Semantic labels and usage; hex shades come from {@link semanticPalette}. */
 export const colorTheme: Record<ColorThemeName, ThemeColor> = {
-  teal: {
-    label: { en: "Teal", ar: "أخضر مزرق" },
+  haze: {
+    label: { en: "Haze", ar: "أزرق ضبابي" },
     role: { en: "Primary actions", ar: "الإجراءات الرئيسية" },
-    usage: { en: "Create, save, selected controls, and the main application accent.", ar: "للإنشاء والحفظ والعناصر المحددة واللون الرئيسي للتطبيق." },
+    usage: {
+      en: "Create, save, selected controls, links, guidance, and the main application accent.",
+      ar: "للإنشاء والحفظ والعناصر المحددة والروابط والإرشادات واللون الرئيسي للتطبيق.",
+    },
     examples: [
       { en: "Create purchase order", ar: "إنشاء أمر توريد" },
       { en: "Save changes", ar: "حفظ التعديلات" },
@@ -23,26 +26,24 @@ export const colorTheme: Record<ColorThemeName, ThemeColor> = {
       { en: "Active sidebar item", ar: "عنصر نشط في القائمة الجانبية" },
       { en: "Focused form field", ar: "حقل نموذج قيد التركيز" },
       { en: "Primary report series", ar: "سلسلة التقرير الرئيسية" },
-      { en: "Confirm receipt", ar: "تأكيد الاستلام" },
       { en: "Current pagination page", ar: "الصفحة الحالية في الترقيم" },
-    ],
-    shades: semanticPalette.teal,
-  },
-  haze: {
-    label: { en: "Haze", ar: "أزرق ضبابي" },
-    role: { en: "Information", ar: "المعلومات" },
-    usage: { en: "Informational states, links, guidance, and secondary context.", ar: "للحالات المعلوماتية والروابط والإرشادات والسياق الثانوي." },
-    examples: [
-      { en: "Invoice PDF attached", ar: "تم إرفاق ملف PDF للفاتورة" },
       { en: "View audit history", ar: "عرض سجل التدقيق" },
-      { en: "Information notice", ar: "تنبيه معلوماتي" },
-      { en: "Open material details", ar: "فتح تفاصيل المادة" },
-      { en: "Read-only system note", ar: "ملاحظة نظام للقراءة فقط" },
-      { en: "Imported from spreadsheet", ar: "تم الاستيراد من جدول بيانات" },
-      { en: "View linked requisition", ar: "عرض طلب الشراء المرتبط" },
-      { en: "Helpful form guidance", ar: "إرشاد مساعد في النموذج" },
     ],
     shades: semanticPalette.haze,
+  },
+  teal: {
+    label: { en: "Teal", ar: "أخضر مزرق" },
+    role: { en: "Success", ar: "نجاح" },
+    usage: { en: "Approved, completed, and confirmed outcomes.", ar: "للحالات المعتمدة والمكتملة والمؤكدة." },
+    examples: [
+      { en: "Confirm receipt", ar: "تأكيد الاستلام" },
+      { en: "Requisition approved", ar: "طلب شراء معتمد" },
+      { en: "In stock", ar: "متوفر" },
+      { en: "Order completed", ar: "أمر مكتمل" },
+      { en: "Invoice posted", ar: "تم ترحيل الفاتورة" },
+      { en: "Changes saved", ar: "تم حفظ التعديلات" },
+    ],
+    shades: semanticPalette.teal,
   },
   ochre: {
     label: { en: "Ochre", ar: "مغرة" },

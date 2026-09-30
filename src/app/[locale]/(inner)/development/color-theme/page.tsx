@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Progress, Tabs, TabsList, TabsTab, TextInput, ThemeIcon } from "@mantine/core";
-import { CircleAlert, FileText, Info, PackageSearch, Trash2 } from "lucide-react";
+import { CheckCircle, CircleAlert, PackageSearch, Trash2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import LayoutBox from "@/components/ui/layout-box";
 import { colorTheme, colorThemeOrder, type ColorThemeName } from "@/lib/constants/color-theme";
@@ -7,7 +7,6 @@ import ColorThemePrintDocument from "./color-theme-print-document";
 import type { LocalePageProps } from "@/lib/i18n/types";
 import { getI18nFromParams } from "@/lib/i18n/utils";
 
-const semanticExamples: ColorThemeName[] = ["teal", "haze", "ochre", "clay", "plum"];
 const shadeOrder = [50, 100, 200, 600, 700] as const;
 
 function PaletteCard({
@@ -79,13 +78,13 @@ function ComponentSpecimen({
 }) {
   const color = colorTheme[colorName];
 
-  if (colorName === "teal") {
+  if (colorName === "haze") {
     return (
       <article className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
         <SpecimenHeader colorName={colorName} translate={translate} />
-        <Button color="teal">{translate(color.examples[0].en, color.examples[0].ar)}</Button>
-        <TextInput label={translate("Requisition code", "كود طلب الشراء")} value="MPR-2026-0042" readOnly color="teal" />
-        <Tabs defaultValue="all" variant="outline" color="teal">
+        <Button color="haze">{translate(color.examples[0].en, color.examples[0].ar)}</Button>
+        <TextInput label={translate("Requisition code", "كود طلب الشراء")} value="MPR-2026-0042" readOnly color="haze" />
+        <Tabs defaultValue="all" variant="outline" color="haze">
           <TabsList>
             <TabsTab value="all">{translate("All", "الكل")}</TabsTab>
             <TabsTab value="active">{translate("Active", "نشط")}</TabsTab>
@@ -95,22 +94,19 @@ function ComponentSpecimen({
     );
   }
 
-  if (colorName === "haze") {
+  if (colorName === "teal") {
     return (
       <article className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
         <SpecimenHeader colorName={colorName} translate={translate} />
-        <Alert color="haze" icon={<Info size={16} />} title={translate("Invoice PDF attached", "تم إرفاق ملف PDF للفاتورة")}>
-          {translate("The source document is available to view or download.", "المستند المصدر متاح للعرض أو التنزيل.")}
+        <Alert color="teal" icon={<CheckCircle size={16} />} title={translate(color.examples[0].en, color.examples[0].ar)}>
+          {translate("The receipt was confirmed and posted.", "تم تأكيد الاستلام وترحيله.")}
         </Alert>
-        <Button variant="light" color="haze" leftSection={<FileText size={15} />}>
-          {translate("View audit history", "عرض سجل التدقيق")}
-        </Button>
-        <TextInput
-          label={translate("System note", "ملاحظة النظام")}
-          value={translate("Imported from spreadsheet", "تم الاستيراد من جدول بيانات")}
-          readOnly
-          color="haze"
-        />
+        <div className="flex items-center justify-between gap-3 rounded-lg bg-teal-50 p-3 text-teal-700">
+          <span className="text-xs font-medium">{translate(color.examples[2].en, color.examples[2].ar)}</span>
+          <Badge color="teal" radius="md">
+            {translate("Approved", "معتمد")}
+          </Badge>
+        </div>
       </article>
     );
   }
@@ -219,14 +215,14 @@ export default async function Page({ params }: LocalePageProps) {
       }}
     >
       <main className="flex flex-col gap-8">
-        <section className="rounded-xl bg-teal-50 p-4 sm:p-5">
-          <p className="text-sm font-semibold text-teal-800">
+        <section className="rounded-xl bg-haze-50 p-4 sm:p-5">
+          <p className="text-sm font-semibold text-haze-800">
             {translate(
               "All five semantic colors are registered in the shared theme.",
               "الألوان الدلالية الخمسة مسجلة في الثيم المشترك.",
             )}
           </p>
-          <p className="mt-1 text-xs text-teal-700">
+          <p className="mt-1 text-xs text-haze-700">
             {translate(
               "Use this page to verify Mantine variants and Tailwind tokens before rolling changes into feature screens.",
               "استخدم هذه الصفحة للتحقق من متغيرات Mantine ورموز Tailwind قبل تطبيق التغييرات على شاشات النظام.",
@@ -265,7 +261,7 @@ export default async function Page({ params }: LocalePageProps) {
           </div>
 
           <div className="grid gap-4 xl:grid-cols-2">
-            {semanticExamples.map((colorName) => (
+            {colorThemeOrder.map((colorName) => (
               <ComponentSpecimen key={colorName} colorName={colorName} translate={translate} />
             ))}
           </div>
