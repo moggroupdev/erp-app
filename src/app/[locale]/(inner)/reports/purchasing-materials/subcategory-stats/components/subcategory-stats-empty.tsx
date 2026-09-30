@@ -41,7 +41,7 @@ export default function SubCategoryStatsEmpty() {
           <h2 className="text-lg font-semibold tracking-tight text-stone-800 sm:text-xl">
             {translate("No subcategory selected yet", "لم يتم اختيار فئة فرعية بعد")}
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-stone-500">
+          <p className="mt-2 text-xs leading-[1.75] text-stone-500">
             {translate(
               "Pick a main category, then a subcategory in the fields above. The report will load purchasing stats for that subcategory only.",
               "اختر فئة رئيسية ثم فئة فرعية من الحقول أعلاه. سيُحمَّل التقرير بإحصائيات المشتريات لهذه الفئة الفرعية فقط.",
@@ -56,7 +56,7 @@ export default function SubCategoryStatsEmpty() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-stone-800">{label}</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-stone-500">{detail}</span>
+                  <span className="mt-0.5 block text-xs leading-[1.75] text-stone-500">{detail}</span>
                 </span>
               </li>
             ))}

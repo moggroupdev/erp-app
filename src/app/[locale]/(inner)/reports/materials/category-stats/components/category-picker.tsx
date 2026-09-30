@@ -23,7 +23,7 @@ export default function CategoryPicker({
           <label htmlFor="category-stats-main" className="text-sm font-semibold text-stone-800">
             {translate("Main category", "الفئة الرئيسية")}
           </label>
-          <p className="mt-1 text-xs leading-relaxed text-stone-500">
+          <p className="mt-1 text-xs leading-[1.75] text-stone-500">
             {translate("Required filter for this report", "فلتر مطلوب لهذا التقرير")}
           </p>
         </div>

@@ -110,7 +110,7 @@ export default function AddressCard({
             </span>
 
             {address.addressLine ? (
-              <p className="text-sm leading-relaxed whitespace-pre-wrap text-gray-900">{address.addressLine}</p>
+              <p className="text-sm leading-[1.75] whitespace-pre-wrap text-gray-900">{address.addressLine}</p>
             ) : (
               <p className="text-sm text-gray-400">{translate("No details added", "لم تتم إضافة تفاصيل")}</p>
             )}

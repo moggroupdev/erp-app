@@ -50,7 +50,7 @@ export default function RequisitionFollowUpEmpty() {
           <h2 className="text-lg font-semibold tracking-tight text-stone-800 sm:text-xl">
             {translate("No production department selected yet", "لم يتم اختيار قسم إنتاج بعد")}
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-stone-500">
+          <p className="mt-2 text-xs leading-[1.75] text-stone-500">
             {translate(
               "Pick a production department in the field above. The report will load approved purchase requisition lines for that department.",
               "اختر قسم إنتاج من الحقل أعلاه. سيُحمَّل التقرير ببنود طلبات الشراء المعتمدة لهذا القسم.",
@@ -65,7 +65,7 @@ export default function RequisitionFollowUpEmpty() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-stone-800">{label}</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-stone-500">{detail}</span>
+                  <span className="mt-0.5 block text-xs leading-[1.75] text-stone-500">{detail}</span>
                 </span>
               </li>
             ))}

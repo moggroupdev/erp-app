@@ -97,7 +97,7 @@ function Section({
           </div>
           <div className="min-w-0">
             <h2 className="text-base font-semibold text-stone-900">{title}</h2>
-            {description ? <p className="mt-1 max-w-2xl text-xs leading-relaxed text-stone-500">{description}</p> : null}
+            {description ? <p className="mt-1 max-w-2xl text-xs leading-[1.75] text-stone-500">{description}</p> : null}
           </div>
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}

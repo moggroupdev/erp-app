@@ -71,7 +71,7 @@ function KpiCard({
         <div>
           <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">{label}</p>
           <p className={`mt-1 text-2xl font-semibold ${valueClassName}`}>{value}</p>
-          {hint && <p className="mt-1.5 text-xs leading-relaxed text-stone-500">{hint}</p>}
+          {hint && <p className="mt-1.5 text-xs leading-[1.75] text-stone-500">{hint}</p>}
         </div>
       </div>
     </div>

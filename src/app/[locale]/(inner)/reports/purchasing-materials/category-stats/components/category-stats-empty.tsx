@@ -46,7 +46,7 @@ export default function CategoryStatsEmpty() {
           <h2 className="text-lg font-semibold tracking-tight text-stone-800 sm:text-xl">
             {translate("No category selected yet", "لم يتم اختيار فئة بعد")}
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-stone-500">
+          <p className="mt-2 text-xs leading-[1.75] text-stone-500">
             {translate(
               "Pick a main category in the field above. The report will load purchasing stats for that group only.",
               "اختر فئة رئيسية من الحقل أعلاه. سيُحمَّل التقرير بإحصائيات المشتريات لهذه المجموعة فقط.",
@@ -61,7 +61,7 @@ export default function CategoryStatsEmpty() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-stone-800">{label}</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-stone-500">{detail}</span>
+                  <span className="mt-0.5 block text-xs leading-[1.75] text-stone-500">{detail}</span>
                 </span>
               </li>
             ))}

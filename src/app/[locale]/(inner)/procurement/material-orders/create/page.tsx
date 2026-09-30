@@ -814,7 +814,7 @@ export default function Page() {
                 </div>
                 <div className="flex max-w-md flex-col gap-1.5">
                   <h5 className="text-base font-semibold text-gray-900">{translate("No items yet", "لا توجد بنود بعد")}</h5>
-                  <p className="text-sm leading-relaxed text-gray-500">
+                  <p className="text-sm leading-[1.75] text-gray-500">
                     {translate(
                       "Start by adding open purchase requisition lines.",
                       "ابدأ بإضافة بنود من طلبات الشراء المفتوحة.",

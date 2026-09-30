@@ -32,8 +32,8 @@ export default function ReportCard({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-stone-800">{title}</h3>
-            {description && <p className="mt-1 text-xs leading-relaxed text-stone-500">{description}</p>}
+            <h3 className="text-xs font-semibold text-stone-800 sm:text-sm">{title}</h3>
+            {description && <p className="mt-1 text-xs leading-[1.75] text-stone-500">{description}</p>}
           </div>
         </div>
       </header>

@@ -18,7 +18,7 @@ export default function ReportLinkCard({
       className="group flex items-start gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm transition-colors hover:border-blue-200"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <span className="text-sm font-semibold text-stone-800 group-hover:text-blue-800">
+        <span className="text-xs font-semibold text-stone-800 group-hover:text-blue-800 sm:text-sm">
           {translate(report.label.en, report.label.ar)}
         </span>
         <span className="text-xs leading-[1.75] text-stone-500">

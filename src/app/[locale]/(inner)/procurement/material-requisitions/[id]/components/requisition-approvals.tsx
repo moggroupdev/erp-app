@@ -69,7 +69,7 @@ function SupersededGateContent() {
       <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400">
         <Lock size={18} />
       </div>
-      <p className="max-w-[220px] text-xs leading-relaxed text-gray-400">
+      <p className="max-w-[220px] text-xs leading-[1.75] text-gray-400">
         {translate(
           "This stage was not reached because the requisition was rejected at a previous approval stage.",
           "لم تُستكمل هذه المرحلة لأن الطلب رُفض في مرحلة اعتماد سابقة.",

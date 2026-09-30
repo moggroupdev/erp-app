@@ -36,7 +36,7 @@ function Breadcrumbs({ items, sideElement }: { items: BreadcrumbItem[]; sideElem
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-gray-300 pb-4">
-      <nav className="flex flex-wrap items-center gap-2 text-sm">
+      <nav className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
         {items.map((item, index) => {
           const label = translate(item.label.en, item.label.ar);
           const isLast = index === items.length - 1;
@@ -69,8 +69,8 @@ function TitleBlock({ icon: Icon, title, subtitle }: { icon: LucideIcon; title: 
         <Icon size={20} />
       </div>
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-800 sm:text-3xl">{title}</h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-gray-800/75 sm:text-[15px]">{subtitle}</p>
+        <h1 className="text-xl font-semibold tracking-tight text-gray-800 sm:text-3xl">{title}</h1>
+        <p className="mt-1.5 text-xs leading-[1.75] text-gray-800/75 sm:text-[15px]">{subtitle}</p>
       </div>
     </div>
   );

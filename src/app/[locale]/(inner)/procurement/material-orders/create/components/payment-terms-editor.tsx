@@ -112,7 +112,7 @@ export default function PaymentTermsEditor({
             <h5 className="text-base font-semibold text-gray-900">
               {translate("Waiting for the grand total", "بانتظار الإجمالي الكلي")}
             </h5>
-            <p className="text-sm leading-relaxed text-gray-500">
+            <p className="text-sm leading-[1.75] text-gray-500">
               {translate(
                 `Payment terms open once you add material items and enter their unit prices.`,
                 `تُفتح شروط السداد بعد إضافة البنود وإدخال أسعار الوحدة.`,

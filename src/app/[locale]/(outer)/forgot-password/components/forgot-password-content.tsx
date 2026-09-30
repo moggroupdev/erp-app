@@ -47,7 +47,7 @@ export default function ForgotPasswordContent() {
             {translate("Contact your system administrator", "تواصل مع مسؤول النظام")}
           </h1>
 
-          <p className="mt-4 max-w-md leading-relaxed text-pretty text-gray-600">
+          <p className="mt-4 max-w-md leading-[1.75] text-pretty text-gray-600">
             {translate(
               "Password resets are handled by administrators to keep accounts secure. Reach out to your system administrator and they will restore your access.",
               "إعادة تعيين كلمات المرور تتم عبر المسؤولين لحماية الحسابات. تواصل مع مسؤول النظام وسيقوم باستعادة وصولك.",

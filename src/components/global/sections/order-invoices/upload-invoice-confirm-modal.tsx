@@ -268,7 +268,7 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
     <>
       <Modal opened={opened && !numberConfirmOpened} onClose={handleClose} title={title} size="lg">
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <p className="text-sm leading-relaxed text-gray-600">{description}</p>
+          <p className="text-sm leading-[1.75] text-gray-600">{description}</p>
 
           {!parsed ? (
             <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">

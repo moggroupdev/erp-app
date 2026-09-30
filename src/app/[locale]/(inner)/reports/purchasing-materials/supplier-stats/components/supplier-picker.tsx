@@ -23,7 +23,7 @@ export default function SupplierPicker({
           <label htmlFor="purchasing-supplier-stats-supplier" className="text-sm font-semibold text-stone-800">
             {translate("Supplier", "المورد")}
           </label>
-          <p className="mt-1 text-xs leading-relaxed text-stone-500">
+          <p className="mt-1 text-xs leading-[1.75] text-stone-500">
             {translate("Required filter for this report", "فلتر مطلوب لهذا التقرير")}
           </p>
         </div>

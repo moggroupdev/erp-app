@@ -36,7 +36,7 @@ export default function PriceHistoryEmpty() {
           <h2 className="text-lg font-semibold tracking-tight text-stone-800 sm:text-xl">
             {translate("No material selected yet", "لم يتم اختيار مادة بعد")}
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-stone-500">
+          <p className="mt-2 text-xs leading-[1.75] text-stone-500">
             {translate(
               "Pick a material in the field above. The report will load its price history across all purchase orders.",
               "اختر مادة من الحقل أعلاه. سيُحمَّل تاريخ أسعارها عبر جميع أوامر التوريد.",
@@ -51,7 +51,7 @@ export default function PriceHistoryEmpty() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-stone-800">{label}</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-stone-500">{detail}</span>
+                  <span className="mt-0.5 block text-xs leading-[1.75] text-stone-500">{detail}</span>
                 </span>
               </li>
             ))}

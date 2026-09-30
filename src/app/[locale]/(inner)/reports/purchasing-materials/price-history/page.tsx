@@ -210,7 +210,7 @@ export default function Page() {
                       {displayData.material.title}
                       <span className="ms-2 font-mono text-xs font-normal text-stone-500">{displayData.material.code}</span>
                     </p>
-                    <p className="mt-1 text-xs leading-relaxed text-stone-500">
+                    <p className="mt-1 text-xs leading-[1.75] text-stone-500">
                       {translate(
                         `Base unit: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. Prices and quantities use the selected display unit.`,
                         `الوحدة الأساسية: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. الأسعار والكميات حسب وحدة العرض المحددة.`,

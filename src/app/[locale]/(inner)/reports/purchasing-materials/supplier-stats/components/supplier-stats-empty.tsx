@@ -46,7 +46,7 @@ export default function SupplierStatsEmpty() {
           <h2 className="text-lg font-semibold tracking-tight text-stone-800 sm:text-xl">
             {translate("No supplier selected yet", "لم يتم اختيار مورد بعد")}
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-stone-500">
+          <p className="mt-2 text-xs leading-[1.75] text-stone-500">
             {translate(
               "Pick a supplier in the field above. The report will load purchasing stats for that supplier only.",
               "اختر مورداً من الحقل أعلاه. سيُحمَّل التقرير بإحصائيات المشتريات لهذا المورد فقط.",
@@ -61,7 +61,7 @@ export default function SupplierStatsEmpty() {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-medium text-stone-800">{label}</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-stone-500">{detail}</span>
+                  <span className="mt-0.5 block text-xs leading-[1.75] text-stone-500">{detail}</span>
                 </span>
               </li>
             ))}

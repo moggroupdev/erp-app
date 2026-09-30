@@ -55,7 +55,7 @@ export default function SubCategoryPicker({
           <label htmlFor="purchasing-subcategory-stats-main" className="text-sm font-semibold text-stone-800">
             {translate("Main category", "الفئة الرئيسية")}
           </label>
-          <p className="mt-1 text-xs leading-relaxed text-stone-500">
+          <p className="mt-1 text-xs leading-[1.75] text-stone-500">
             {translate("First pick a main category", "اختر أولاً فئة رئيسية")}
           </p>
           <div className="mt-2">
@@ -75,7 +75,7 @@ export default function SubCategoryPicker({
           <label htmlFor="purchasing-subcategory-stats-sub" className="text-sm font-semibold text-stone-800">
             {translate("Subcategory", "الفئة الفرعية")}
           </label>
-          <p className="mt-1 text-xs leading-relaxed text-stone-500">
+          <p className="mt-1 text-xs leading-[1.75] text-stone-500">
             {translate("Required filter for this report", "فلتر مطلوب لهذا التقرير")}
           </p>
           <div className="mt-2">

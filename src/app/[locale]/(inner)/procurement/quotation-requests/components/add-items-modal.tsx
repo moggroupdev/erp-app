@@ -239,7 +239,7 @@ export default function AddQuotationItemsModal({
   return (
     <Modal opened={opened} onClose={onClose} title={translate("Add from requisitions", "إضافة من طلبات الشراء")} size="60%">
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-gray-600">
+        <p className="text-xs leading-[1.75] text-gray-600">
           {translate(
             "Materials are combined across requisitions. Selecting a material takes its full remaining quantity.",
             "تُجمَّع المواد عبر طلبات الشراء. اختيار المادة يأخذ كامل الكمية المتبقية.",
@@ -317,7 +317,7 @@ export default function AddQuotationItemsModal({
           </div>
         )}
 
-        {localError && <p className="text-sm text-red-600">{localError}</p>}
+        {localError && <p className="text-xs leading-[1.75] text-red-600">{localError}</p>}
 
         <div className="flex gap-2">
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>

@@ -31,7 +31,7 @@ export default function HomeContent() {
           {translate("Complete Business Management Platform", "منصة متكاملة لإدارة الأعمال")}
         </h1>
 
-        <p className="mt-4 max-w-5xl leading-relaxed text-balance">{translation.appDescription}</p>
+        <p className="mt-4 max-w-5xl leading-[1.75] text-balance">{translation.appDescription}</p>
 
         <div className="mt-8">
           {isInitializing ? null : (

@@ -438,7 +438,7 @@ export default function RoleForm({
         <div className="flex flex-col gap-4">
           <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-4 text-amber-900">
             <TriangleAlert size={18} className="mt-0.5 shrink-0" />
-            <p className="text-sm leading-relaxed">
+            <p className="text-sm leading-[1.75]">
               {translate(
                 "All users assigned to this role will be affected immediately by these changes. Continue?",
                 "سيتأثر جميع المستخدمين المعيّنين لهذا الدور فورًا بهذه التغييرات. هل تريد المتابعة؟",

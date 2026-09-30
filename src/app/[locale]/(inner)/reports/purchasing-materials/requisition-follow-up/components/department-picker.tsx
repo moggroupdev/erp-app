@@ -23,7 +23,7 @@ export default function DepartmentPicker({
           <label htmlFor="purchasing-requisition-follow-up-dept" className="text-sm font-semibold text-stone-800">
             {translate("Production department", "قسم الإنتاج")}
           </label>
-          <p className="mt-1 text-xs leading-relaxed text-stone-500">
+          <p className="mt-1 text-xs leading-[1.75] text-stone-500">
             {translate("Required filter for this report", "فلتر مطلوب لهذا التقرير")}
           </p>
         </div>
