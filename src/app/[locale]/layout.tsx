@@ -28,9 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#052565",
-};
+export const viewport: Viewport = { themeColor: "#D2D8E2" };
 
 const alexandria = Alexandria({
   subsets: ["arabic", "latin"],
