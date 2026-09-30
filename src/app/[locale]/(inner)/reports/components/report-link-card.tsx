@@ -21,7 +21,7 @@ export default function ReportLinkCard({
         <span className="text-sm font-semibold text-stone-800 group-hover:text-blue-800">
           {translate(report.label.en, report.label.ar)}
         </span>
-        <span className="text-xs leading-relaxed text-stone-500">
+        <span className="text-xs leading-[1.75] text-stone-500">
           {translate(report.description.en, report.description.ar)}
         </span>
       </div>
