@@ -9,6 +9,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -18,9 +19,8 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type MaterialPurchaseRequisitionListItem } from "@/types/material-purchase-requisition";
-import { Button, Table, TextInput } from "@mantine/core";
+import { Menu, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
 import ProtectedLink from "@/components/ui/protected-link";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -30,6 +30,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import { EmptyValue } from "@/components/ui/entity-details";
 import { getRequisitionStatus, getRequisitionStatusLabel } from "./helpers";
 
@@ -46,6 +47,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
+  const canAddRequisition = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_REQUISITION);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
@@ -105,19 +107,19 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL_PURCHASE_REQUISITION}>
-              <Button
-                radius="md"
-                variant="light"
-                component={Link}
-                href={getLocalizedHref("/procurement/material-requisitions/create")}
-                leftSection={<Plus size={15} />}
-              >
-                {translate("Create", "إنشاء")}
-              </Button>
-            </PermissionGuard>
+            <ActionsMenu>
+              {canAddRequisition && (
+                <Menu.Item
+                  component={Link}
+                  href={getLocalizedHref("/procurement/material-requisitions/create")}
+                  leftSection={<Plus size={14} />}
+                >
+                  {translate("Create", "إنشاء")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

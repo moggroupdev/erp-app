@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Button, FileButton, Loader } from "@mantine/core";
+import { FileButton, Loader, Menu } from "@mantine/core";
 import { Building2, CalendarDays, Download, FileText, Link2, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import useHasPermission from "@/hooks/use-has-permission";
@@ -17,6 +17,7 @@ import parseSupplierInvoicePdf, { type ParsedSupplierInvoice } from "@/lib/helpe
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type SupplierInvoiceDetailed } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ProtectedLink from "@/components/ui/protected-link";
 import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
@@ -238,37 +239,27 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {hasPdf && (
-            <Button
-              variant="light"
-              color="teal"
-              size="sm"
-              radius="md"
-              leftSection={<Download size={15} />}
-              loading={downloadMutation.isPending}
-              onClick={() => downloadMutation.mutate()}
-            >
-              {translate("Download PDF", "تنزيل PDF")}
-            </Button>
-          )}
+          <ActionsMenu>
+            {hasPdf && (
+              <Menu.Item
+                leftSection={<Download size={14} />}
+                disabled={downloadMutation.isPending}
+                onClick={() => downloadMutation.mutate()}
+              >
+                {translate("Download PDF", "تنزيل PDF")}
+              </Menu.Item>
+            )}
 
-          {canUpdate && (
-            <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
-              {(props) => (
-                <Button
-                  {...props}
-                  variant={hasPdf ? "default" : "filled"}
-                  color="teal"
-                  size="sm"
-                  radius="md"
-                  leftSection={<Upload size={15} />}
-                  loading={isParsing}
-                >
-                  {hasPdf ? translate("Replace PDF", "استبدال PDF") : translate("Upload PDF", "رفع PDF")}
-                </Button>
-              )}
-            </FileButton>
-          )}
+            {canUpdate && (
+              <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+                {(props) => (
+                  <Menu.Item {...props} leftSection={<Upload size={14} />} disabled={isParsing}>
+                    {hasPdf ? translate("Replace PDF", "استبدال PDF") : translate("Upload PDF", "رفع PDF")}
+                  </Menu.Item>
+                )}
+              </FileButton>
+            )}
+          </ActionsMenu>
         </div>
       </div>
 

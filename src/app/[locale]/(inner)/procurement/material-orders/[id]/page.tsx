@@ -4,7 +4,7 @@ import ProtectedLink from "@/components/ui/protected-link";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Table } from "@mantine/core";
+import { Menu, Table } from "@mantine/core";
 import { Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -26,6 +26,7 @@ import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conve
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -118,13 +119,14 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
-            {order && (
-              <div className="mx-2 flex items-center">
+          <div className="flex items-center gap-2">
+            <RefetchButton isFetching={isFetching} onRefetch={refetch} />
+            <ActionsMenu>
+              {order && (
                 <PrintDocument
                   title={`${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} - ${order.code}`}
                   buttonLabel={translate("Print", "طباعة")}
-                  buttonType="icon"
+                  buttonType="menu"
                   paperWidth={210}
                   paperHeight={297}
                   paperMarginX={12}
@@ -133,9 +135,8 @@ export default function Page() {
                 >
                   <MaterialPurchaseOrderPrintDocument order={order} />
                 </PrintDocument>
-              </div>
-            )}
-            <RefetchButton isFetching={isFetching} onRefetch={refetch} />
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}
@@ -291,21 +292,19 @@ export default function Page() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Receipts", "سندات الاستلام")}</h4>
 
-                {canAddReceipt &&
-                  !order.cancelledAt &&
-                  order.items.some((item) => (item.quantityRemaining ?? item.quantityOrdered) > REMAINING_EPSILON) && (
-                    <Button
-                      component={Link}
-                      href={getLocalizedHref(`/procurement/material-orders/${id}/receipts/create`)}
-                      variant="filled"
-                      color="teal"
-                      size="sm"
-                      radius="md"
-                      leftSection={<Plus size={15} />}
-                    >
-                      {translate("Add receipt", "إضافة سند استلام")}
-                    </Button>
-                  )}
+                <ActionsMenu>
+                  {canAddReceipt &&
+                    !order.cancelledAt &&
+                    order.items.some((item) => (item.quantityRemaining ?? item.quantityOrdered) > REMAINING_EPSILON) && (
+                      <Menu.Item
+                        component={Link}
+                        href={getLocalizedHref(`/procurement/material-orders/${id}/receipts/create`)}
+                        leftSection={<Plus size={14} />}
+                      >
+                        {translate("Add receipt", "إضافة سند استلام")}
+                      </Menu.Item>
+                    )}
+                </ActionsMenu>
               </div>
 
               {isReceiptsFetching ? (

@@ -7,16 +7,18 @@ import { useDisclosure } from "@mantine/hooks";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import usersApi from "@/lib/api/users";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { Button } from "@mantine/core";
+import { Button, Menu } from "@mantine/core";
 import { ChevronDown, Trash2 } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import DeleteModal from "@/components/ui/delete-modal";
@@ -34,6 +36,7 @@ export default function Page() {
 
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
+  const canUpdateUser = useHasPermission(PERMISSIONS.UPDATE_USER);
 
   const userQuery = useQuery({
     queryKey: queryKeys.users.detail(id),
@@ -80,15 +83,13 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <RefetchButton isFetching={loading} onRefetch={() => userQuery.refetch()} />
-            {user && !user.isAdmin && !user.deletedAt && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_USER}>
-                <Button onClick={openUpdateModal} variant="light" radius="md">
-                  {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
-            )}
+            <ActionsMenu>
+              {user && !user.isAdmin && !user.deletedAt && canUpdateUser && (
+                <Menu.Item onClick={openUpdateModal}>{translate("Edit", "تعديل")}</Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

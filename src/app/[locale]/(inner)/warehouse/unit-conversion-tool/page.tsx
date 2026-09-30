@@ -17,9 +17,10 @@ import {
   toDisplayUnitPrice,
 } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Button, NumberInput, Table } from "@mantine/core";
+import { Button, Menu, NumberInput, Table } from "@mantine/core";
 import { Calculator, Layers, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
+import ActionsMenu from "@/components/ui/actions-menu";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 
@@ -453,9 +454,11 @@ export default function Page() {
         backLink: true,
         confirmNavigate: confirmNavigation,
         sideElements: (
-          <Button variant="light" color="gray" radius="md" size="sm" onClick={clearAll} disabled={!isDirty}>
-            {translate("Clear", "مسح")}
-          </Button>
+          <ActionsMenu>
+            <Menu.Item onClick={clearAll} disabled={!isDirty}>
+              {translate("Clear", "مسح")}
+            </Menu.Item>
+          </ActionsMenu>
         ),
       }}
     >

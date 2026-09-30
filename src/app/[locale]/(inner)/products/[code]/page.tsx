@@ -13,10 +13,11 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufactured } from "@/lib/constants/enums/product-source-types";
-import { Button, Menu } from "@mantine/core";
-import { Menu as MenuIcon, Pencil, Tag } from "lucide-react";
+import { Menu } from "@mantine/core";
+import { Pencil, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import ProductModal from "@/components/global/data-modals/product-modal";
@@ -33,7 +34,6 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const canUpdateProduct = useHasPermission(PERMISSIONS.UPDATE_PRODUCT);
   const canSetPricingFactor = useHasPermission(PERMISSIONS.SET_PRODUCT_PRICING_FACTOR);
-  const canShowActions = canUpdateProduct || canSetPricingFactor;
 
   const productQuery = useQuery({
     queryKey: queryKeys.products.detail(code),
@@ -82,31 +82,19 @@ export default function Page() {
         sideElements: (
           <div className="flex gap-2">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
-            {product && canShowActions && (
-              <Menu offset={8} withinPortal withArrow>
-                <Menu.Target>
-                  <Button
-                    variant="light"
-                    radius="md"
-                    px="sm"
-                    aria-label={translate("Actions", "الإجراءات")}
-                  >
-                    <MenuIcon size={15} />
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  {canUpdateProduct && (
-                    <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
-                      {translate("Edit Basic Information", "تعديل المعلومات الأساسية")}
-                    </Menu.Item>
-                  )}
-                  {canSetPricingFactor && (
-                    <Menu.Item leftSection={<Tag size={14} />} onClick={openPricingFactorModal}>
-                      {translate("Set Pricing Factor", "تعيين معامل التسعير")}
-                    </Menu.Item>
-                  )}
-                </Menu.Dropdown>
-              </Menu>
+            {product && (
+              <ActionsMenu>
+                {canUpdateProduct && (
+                  <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
+                    {translate("Edit Basic Information", "تعديل المعلومات الأساسية")}
+                  </Menu.Item>
+                )}
+                {canSetPricingFactor && (
+                  <Menu.Item leftSection={<Tag size={14} />} onClick={openPricingFactorModal}>
+                    {translate("Set Pricing Factor", "تعيين معامل التسعير")}
+                  </Menu.Item>
+                )}
+              </ActionsMenu>
             )}
           </div>
         ),

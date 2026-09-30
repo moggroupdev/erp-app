@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { Button, NumberInput, SegmentedControl, Table, Textarea, TextInput } from "@mantine/core";
+import { Button, Menu, NumberInput, SegmentedControl, Table, Textarea, TextInput } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
 import { Building2, ClipboardList, FilePenLine, ListPlus, NotebookPen, Plus, Printer, Trash2, Truck } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
 import PrintDocument from "@/components/ui/print-document";
@@ -455,6 +456,34 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         confirmNavigate: confirmNavigation,
+        sideElements: (
+          <ActionsMenu>
+            <PrintDocument
+              buttonType="menu"
+              buttonLabel={translate("Print", "طباعة")}
+              title={printTitle}
+              paperWidth={210}
+              paperHeight={297}
+              icon={<Printer size={14} />}
+              renderTrigger={({ onClick, disabled, label, icon }) => (
+                <Menu.Item onClick={() => handlePrintClick(onClick)} disabled={disabled} leftSection={icon}>
+                  {label}
+                </Menu.Item>
+              )}
+            >
+              {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
+                <SupplierQuotationRequestPrintDocument
+                  supplierDisplayName={supplierDisplayName}
+                  supplierContactName={supplierContactName.trim() || null}
+                  notes={notes.trim() || null}
+                  items={printItems}
+                  preparedBy={preparedBy}
+                  purchasingDepartmentManager={purchasingDepartmentManager}
+                />
+              ) : null}
+            </PrintDocument>
+          </ActionsMenu>
+        ),
       }}
     >
       <div className="flex flex-col gap-5">
@@ -561,6 +590,16 @@ export default function Page() {
             "Add the materials to request prices for. You can include specifications, quantity, and unit per row.",
             "أضف المواد المطلوب تسعيرها. يمكنك إضافة المواصفات والكمية والوحدة لكل صف.",
           )}
+          action={
+            <ActionsMenu>
+              <Menu.Item leftSection={<ListPlus size={14} />} onClick={openAddItems}>
+                {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+              </Menu.Item>
+              <Menu.Item leftSection={<Plus size={14} />} onClick={addRow}>
+                {translate("Add Row", "إضافة صف")}
+              </Menu.Item>
+            </ActionsMenu>
+          }
         >
           <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
             <Table withColumnBorders className="w-full min-w-160" horizontalSpacing="xs" verticalSpacing="xs">
@@ -601,33 +640,9 @@ export default function Page() {
                 <Table.Tr className="h-9">
                   <Table.Td />
                   <Table.Td>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="light"
-                        color="teal"
-                        radius="md"
-                        size="xs"
-                        leftSection={<ListPlus size={14} />}
-                        onClick={openAddItems}
-                      >
-                        {translate("Add from requisitions", "إضافة من طلبات الشراء")}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="light"
-                        color="gray"
-                        radius="md"
-                        size="xs"
-                        leftSection={<Plus size={14} />}
-                        onClick={addRow}
-                      >
-                        {translate("Add Row", "إضافة صف")}
-                      </Button>
-                      <span className="text-xs font-medium text-gray-500">
-                        {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
-                      </span>
-                    </div>
+                    <span className="text-xs font-medium text-gray-500">
+                      {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
+                    </span>
                   </Table.Td>
                   <Table.Td />
                   <Table.Td />
@@ -664,42 +679,6 @@ export default function Page() {
         </Section>
 
         {validationError ? <ErrorAlert error={validationError} /> : null}
-
-        <hr className="border-stone-200/35" />
-
-        <div className="flex justify-end">
-          <PrintDocument
-            buttonType="button"
-            buttonLabel={translate("Print", "طباعة")}
-            title={printTitle}
-            paperWidth={210}
-            paperHeight={297}
-            icon={<Printer size={15} />}
-            renderTrigger={({ onClick, loading, disabled, label, icon }) => (
-              <Button
-                onClick={() => handlePrintClick(onClick)}
-                loading={loading}
-                disabled={disabled}
-                leftSection={icon}
-                radius="md"
-                color="teal"
-              >
-                {label}
-              </Button>
-            )}
-          >
-            {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
-              <SupplierQuotationRequestPrintDocument
-                supplierDisplayName={supplierDisplayName}
-                supplierContactName={supplierContactName.trim() || null}
-                notes={notes.trim() || null}
-                items={printItems}
-                preparedBy={preparedBy}
-                purchasingDepartmentManager={purchasingDepartmentManager}
-              />
-            ) : null}
-          </PrintDocument>
-        </div>
       </div>
 
       <AddQuotationItemsModal opened={addItemsOpened} onClose={closeAddItems} onAdd={handleAddItems} />

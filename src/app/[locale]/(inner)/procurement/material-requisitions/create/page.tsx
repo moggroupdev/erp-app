@@ -17,9 +17,10 @@ import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
+import { Button, Menu, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
@@ -379,7 +380,14 @@ export default function Page() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+          <div className="flex items-center justify-between gap-3">
+            <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+            <ActionsMenu>
+              <Menu.Item leftSection={<Plus size={14} />} onClick={addRow}>
+                {translate("Add Row", "إضافة صف")}
+              </Menu.Item>
+            </ActionsMenu>
+          </div>
 
           <div className="overflow-x-auto rounded-xl">
             <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
@@ -416,28 +424,6 @@ export default function Page() {
                   />
                 ))}
               </Table.Tbody>
-              <Table.Tfoot className="bg-gray-50">
-                <Table.Tr className="h-9">
-                  <Table.Td />
-                  <Table.Td>
-                    <Button
-                      type="button"
-                      variant="light"
-                      color="teal"
-                      radius="md"
-                      size="xs"
-                      leftSection={<Plus size={14} />}
-                      onClick={addRow}
-                    >
-                      {translate("Add Row", "إضافة صف")}
-                    </Button>
-                  </Table.Td>
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                </Table.Tr>
-              </Table.Tfoot>
             </Table>
           </div>
         </section>

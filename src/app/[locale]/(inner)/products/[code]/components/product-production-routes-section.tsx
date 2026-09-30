@@ -2,13 +2,14 @@
 
 import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
+import useHasPermission from "@/hooks/use-has-permission";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { ProductProductionRoute } from "@/types/product";
-import { Button } from "@mantine/core";
+import { Menu } from "@mantine/core";
 import { ArrowRight, Plus, Route } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ProductProductionRoutesModal from "@/components/global/data-modals/product-production-routes-modal";
 
 export default function ProductProductionRoutesSection({
@@ -19,6 +20,7 @@ export default function ProductProductionRoutesSection({
   productionRoutes: ProductProductionRoute[];
 }) {
   const { locale, translate } = useI18n();
+  const canUpdateProduct = useHasPermission(PERMISSIONS.UPDATE_PRODUCT);
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
   return (
@@ -48,19 +50,18 @@ export default function ProductProductionRoutesSection({
           </div>
         </div>
 
-        <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
-          <Button
-            onClick={openModal}
-            variant="light"
-            color="blue"
-            radius="md"
-            leftSection={productionRoutes.length > 0 ? null : <Plus size={15} />}
-          >
-            {productionRoutes.length > 0
-              ? translate("Edit Routes", "تعديل المسارات")
-              : translate("Set Routes", "تعيين المسارات")}
-          </Button>
-        </PermissionGuard>
+        <ActionsMenu>
+          {canUpdateProduct && (
+            <Menu.Item
+              onClick={openModal}
+              leftSection={productionRoutes.length > 0 ? null : <Plus size={14} />}
+            >
+              {productionRoutes.length > 0
+                ? translate("Edit Routes", "تعديل المسارات")
+                : translate("Set Routes", "تعيين المسارات")}
+            </Menu.Item>
+          )}
+        </ActionsMenu>
       </div>
 
       {productionRoutes.length === 0 ? (

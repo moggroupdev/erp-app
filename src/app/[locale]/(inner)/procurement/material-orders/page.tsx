@@ -9,6 +9,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -17,9 +18,8 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { type MaterialPurchaseOrderWithSupplier } from "@/types/material-purchase-order";
-import { Button, Table, TextInput } from "@mantine/core";
+import { Menu, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
 import ProtectedLink from "@/components/ui/protected-link";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import LayoutBox from "@/components/ui/layout-box";
@@ -30,6 +30,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 
 const PAGE_TITLE = { en: "Material Purchase Orders", ar: "أوامر توريد الخامات" };
 
@@ -53,6 +54,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
+  const canAddOrder = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_ORDER);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
@@ -112,19 +114,19 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_MATERIAL_PURCHASE_ORDER}>
-              <Button
-                radius="md"
-                variant="light"
-                component={Link}
-                href={getLocalizedHref("/procurement/material-orders/create")}
-                leftSection={<Plus size={15} />}
-              >
-                {translate("Create", "إنشاء")}
-              </Button>
-            </PermissionGuard>
+            <ActionsMenu>
+              {canAddOrder && (
+                <Menu.Item
+                  component={Link}
+                  href={getLocalizedHref("/procurement/material-orders/create")}
+                  leftSection={<Plus size={14} />}
+                >
+                  {translate("Create", "إنشاء")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

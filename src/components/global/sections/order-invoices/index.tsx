@@ -3,7 +3,7 @@
 import ProtectedLink from "@/components/ui/protected-link";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useRef, useState } from "react";
-import { Button, FileButton, Table } from "@mantine/core";
+import { FileButton, Menu, Table } from "@mantine/core";
 import { FileText, Upload } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDate } from "@/lib/helpers/date-formaters";
@@ -12,6 +12,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import parseSupplierInvoicePdf, { type ParsedSupplierInvoice } from "@/lib/helpers/parse-supplier-invoice-pdf";
 import { type SupplierInvoice } from "@/types/material-purchase-order";
 import CopyButton from "@/components/ui/copy-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -140,23 +141,17 @@ export default function OrderInvoicesSection({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h4 className="text-lg font-semibold text-gray-900">{translate("Invoices", "الفواتير")}</h4>
 
-        {showUpload && (
-          <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
-            {(props) => (
-              <Button
-                {...props}
-                variant="filled"
-                color="teal"
-                size="sm"
-                radius="md"
-                leftSection={<Upload size={15} />}
-                loading={isParsing}
-              >
-                {translate("Upload invoice", "رفع فاتورة")}
-              </Button>
-            )}
-          </FileButton>
-        )}
+        <ActionsMenu>
+          {showUpload && (
+            <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+              {(props) => (
+                <Menu.Item {...props} leftSection={<Upload size={14} />} disabled={isParsing}>
+                  {translate("Upload invoice", "رفع فاتورة")}
+                </Menu.Item>
+              )}
+            </FileButton>
+          )}
+        </ActionsMenu>
       </div>
 
       {parseError && <ErrorAlert error={parseError} fade />}

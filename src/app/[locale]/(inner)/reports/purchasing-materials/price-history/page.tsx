@@ -14,8 +14,10 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { resolveDisplayUnit, toDisplayQuantity, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { formatDate } from "@/lib/helpers/date-formaters";
-import { History, Printer, RefreshCw } from "lucide-react";
+import { History } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
+import ActionsMenu from "@/components/ui/actions-menu";
+import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
 import PurchasingMaterialsPriceHistoryPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-price-history-print-document";
@@ -146,15 +148,11 @@ export default function Page() {
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
           materialCode ? (
-            <div className="flex items-center gap-4">
-              {displayData && !isFetching && !errorMessage && (
-                <PrintDocument
-                  title={printTitle}
-                  buttonType="icon"
-                  paperWidth={210}
-                  paperHeight={297}
-                  icon={<Printer size={14} />}
-                >
+            <div className="flex items-center gap-2">
+              <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+              <ActionsMenu>
+                {displayData && !isFetching && !errorMessage && (
+                  <PrintDocument title={printTitle} buttonType="menu" paperWidth={210} paperHeight={297}>
                   <PurchasingMaterialsPriceHistoryPrintDocument
                     title={reportTitle}
                     startDate={from}
@@ -165,15 +163,9 @@ export default function Page() {
                     summary={displayData.summary}
                     entries={displayData.entries}
                   />
-                </PrintDocument>
-              )}
-              <button
-                disabled={isFetching}
-                onClick={() => refetch()}
-                className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
-              >
-                <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
-              </button>
+                  </PrintDocument>
+                )}
+              </ActionsMenu>
             </div>
           ) : undefined
         }

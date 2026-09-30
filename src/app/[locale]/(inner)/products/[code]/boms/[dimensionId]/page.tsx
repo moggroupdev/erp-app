@@ -50,13 +50,12 @@ import {
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
+import { ActionIcon, Badge, Divider, Menu, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
 import {
   Calculator,
   EllipsisVertical,
   Factory,
   Layers,
-  Menu as MenuIcon,
   Pencil,
   Plus,
   Printer,
@@ -69,6 +68,7 @@ import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import PrintDocument from "@/components/ui/print-document";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -442,22 +442,25 @@ export default function Page() {
             <EntityDetails title={bom.product.title} icon={Layers} rows={detailRows} />
 
             {!hasBom ? (
-              <EmptySection
-                message={translate("No BOM defined for this dimension yet.", "لا توجد قائمة مواد لهذا المقاس بعد.")}
-              >
-                <PermissionGuard permission={PERMISSIONS.ADD_PRODUCT_BOM}>
-                  <Button
-                    component={Link}
-                    href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
-                    variant="light"
-                    color="teal"
-                    radius="md"
-                    leftSection={<Plus size={15} />}
-                  >
-                    {translate("Create BOM", "إنشاء قائمة مواد")}
-                  </Button>
-                </PermissionGuard>
-              </EmptySection>
+              <section className="flex flex-col gap-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h4 className="text-lg font-semibold text-gray-900">{translate("BOM Items", "بنود قائمة المواد")}</h4>
+                  <ActionsMenu>
+                    {canAddBom && (
+                      <Menu.Item
+                        component={Link}
+                        href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
+                        leftSection={<Plus size={14} />}
+                      >
+                        {translate("Create BOM", "إنشاء قائمة مواد")}
+                      </Menu.Item>
+                    )}
+                  </ActionsMenu>
+                </div>
+                <EmptySection
+                  message={translate("No BOM defined for this dimension yet.", "لا توجد قائمة مواد لهذا المقاس بعد.")}
+                />
+              </section>
             ) : (
               <section className="flex flex-col gap-4">
                 <Divider variant="dashed" />
@@ -491,85 +494,72 @@ export default function Page() {
                       />
                     </div>
 
-                    <Menu offset={8} withinPortal withArrow>
-                      <Menu.Target>
-                        <Button
-                          variant="light"
-                          color="teal"
-                          radius="md"
-                          px="sm"
-                          aria-label={translate("Actions", "الإجراءات")}
-                        >
-                          <MenuIcon size={15} />
-                        </Button>
-                      </Menu.Target>
-                      <Menu.Dropdown>
+                    <ActionsMenu>
+                      <Menu.Item
+                        leftSection={<Printer size={14} />}
+                        onClick={() => {
+                          void triggerPrint("full");
+                        }}
+                      >
+                        {translate("Print BOM", "طباعة قائمة المواد")}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<Printer size={14} />}
+                        onClick={() => {
+                          void triggerPrint("no-cost");
+                        }}
+                      >
+                        {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<Printer size={14} />}
+                        onClick={() => {
+                          void triggerPrint("all-costing");
+                        }}
+                      >
+                        {translate("Print BOM with All Costing Methods", "طباعة قائمة المواد بكل أسس التكلفة")}
+                      </Menu.Item>
+                      {zeroPriceItemCount > 0 && (
                         <Menu.Item
                           leftSection={<Printer size={14} />}
                           onClick={() => {
-                            void triggerPrint("full");
+                            void triggerPrint("zero-price");
                           }}
                         >
-                          {translate("Print BOM", "طباعة قائمة المواد")}
+                          {translate("Print Zero Price Items", "طباعة البنود التي بدون سعر")}
                         </Menu.Item>
-                        <Menu.Item
-                          leftSection={<Printer size={14} />}
-                          onClick={() => {
-                            void triggerPrint("no-cost");
-                          }}
-                        >
-                          {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
-                        </Menu.Item>
-                        <Menu.Item
-                          leftSection={<Printer size={14} />}
-                          onClick={() => {
-                            void triggerPrint("all-costing");
-                          }}
-                        >
-                          {translate("Print BOM with All Costing Methods", "طباعة قائمة المواد بكل أسس التكلفة")}
-                        </Menu.Item>
-                        {zeroPriceItemCount > 0 && (
-                          <Menu.Item
-                            leftSection={<Printer size={14} />}
-                            onClick={() => {
-                              void triggerPrint("zero-price");
-                            }}
-                          >
-                            {translate("Print Zero Price Items", "طباعة البنود التي بدون سعر")}
-                          </Menu.Item>
-                        )}
+                      )}
 
-                        {zeroEffectivePriceItems.length > 0 && (
-                          <>
-                            <Menu.Divider />
-                            <Menu.Item leftSection={<Replace size={14} />} onClick={openBulkZeroCosting}>
-                              {translate("Update Zero Prices", "تحديث الأسعار الصفرية")}
-                            </Menu.Item>
-                          </>
-                        )}
-                        {canManageBom && <Menu.Divider />}
-                        {canAddBom && (
-                          <>
-                            <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
-                              {translate("Add Item", "إضافة بند")}
-                            </Menu.Item>
-                            <Menu.Item
-                              component={Link}
-                              href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
-                              leftSection={<Plus size={14} />}
-                            >
-                              {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
-                            </Menu.Item>
-                          </>
-                        )}
-                        {canAddBom && canUpdateBom && <Menu.Divider />}
-                        {canUpdateBom && (
-                          <Menu.Item leftSection={<Trash2 size={14} />} color="red" onClick={handleOpenDeleteAll}>
-                            {translate("Delete All BOM", "حذف كل قائمة المواد")}
+                      {zeroEffectivePriceItems.length > 0 && (
+                        <>
+                          <Menu.Divider />
+                          <Menu.Item leftSection={<Replace size={14} />} onClick={openBulkZeroCosting}>
+                            {translate("Update Zero Prices", "تحديث الأسعار الصفرية")}
                           </Menu.Item>
-                        )}
-                      </Menu.Dropdown>
-                    </Menu>
+                        </>
+                      )}
+                      {canManageBom && <Menu.Divider />}
+                      {canAddBom && (
+                        <>
+                          <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
+                            {translate("Add Item", "إضافة بند")}
+                          </Menu.Item>
+                          <Menu.Item
+                            component={Link}
+                            href={getLocalizedHref(`/products/${code}/boms/${dimensionId}/create`)}
+                            leftSection={<Plus size={14} />}
+                          >
+                            {translate("Create Department BOM", "إنشاء قائمة مواد لقسم")}
+                          </Menu.Item>
+                        </>
+                      )}
+                      {canAddBom && canUpdateBom && <Menu.Divider />}
+                      {canUpdateBom && (
+                        <Menu.Item leftSection={<Trash2 size={14} />} color="red" onClick={handleOpenDeleteAll}>
+                          {translate("Delete All BOM", "حذف كل قائمة المواد")}
+                        </Menu.Item>
+                      )}
+                    </ActionsMenu>
                   </div>
                 </div>
 

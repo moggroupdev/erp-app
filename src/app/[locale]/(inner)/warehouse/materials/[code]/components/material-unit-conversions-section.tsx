@@ -2,20 +2,22 @@
 
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
+import useHasPermission from "@/hooks/use-has-permission";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { formatConversionLabel, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithCreatorAndUnitConversions } from "@/types/material";
-import { Badge, Button, Table } from "@mantine/core";
+import { Badge, Menu, Table } from "@mantine/core";
 import { Plus, Ruler } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
+import ActionsMenu from "@/components/ui/actions-menu";
 import MaterialUnitConversionModal from "./material-unit-conversion-modal";
 
 export default function MaterialUnitConversionsSection({ material }: { material: MaterialWithCreatorAndUnitConversions }) {
   const { locale, translate, translation } = useI18n();
+  const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
@@ -47,23 +49,17 @@ export default function MaterialUnitConversionsSection({ material }: { material:
           </div>
         </div>
 
-        {units.length > 0 && (
-          <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
-            <Button onClick={openModal} variant="light" color="haze" radius="md" leftSection={<Plus size={15} />}>
+        <ActionsMenu>
+          {canUpdateMaterial && (
+            <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
               {translate("Add Unit", "إضافة وحدة")}
-            </Button>
-          </PermissionGuard>
-        )}
+            </Menu.Item>
+          )}
+        </ActionsMenu>
       </div>
 
       {units.length === 0 ? (
-        <EmptySection message={translate("No alternate units defined yet.", "لا توجد وحدات قياس بديلة بعد.")}>
-          <PermissionGuard permission={PERMISSIONS.UPDATE_MATERIAL}>
-            <Button onClick={openModal} variant="light" color="haze" radius="md" leftSection={<Plus size={15} />}>
-              {translate("Add Unit", "إضافة وحدة")}
-            </Button>
-          </PermissionGuard>
-        </EmptySection>
+        <EmptySection message={translate("No alternate units defined yet.", "لا توجد وحدات قياس بديلة بعد.")} />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-200">
           <Table className="text-nowrap" highlightOnHover verticalSpacing="sm">

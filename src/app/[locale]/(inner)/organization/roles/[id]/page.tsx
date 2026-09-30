@@ -12,11 +12,10 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { Button } from "@mantine/core";
-import { Pencil } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
+import { Menu } from "@mantine/core";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import RoleDetails from "./components/role-details";
@@ -31,6 +30,7 @@ export default function Page() {
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
   const canReadUsers = useHasPermission(PERMISSIONS.READ_USERS);
+  const canUpdateRole = useHasPermission(PERMISSIONS.UPDATE_ROLE);
 
   const {
     data: role,
@@ -61,19 +61,13 @@ export default function Page() {
         sideElements: (
           <div className="flex items-center gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={handleRetry} />
-            {role && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_ROLE}>
-                <Button
-                  component={Link}
-                  href={getLocalizedHref(`/organization/roles/${id}/edit`)}
-                  variant="light"
-                  color="haze"
-                  radius="md"
-                >
+            <ActionsMenu>
+              {role && canUpdateRole && (
+                <Menu.Item component={Link} href={getLocalizedHref(`/organization/roles/${id}/edit`)}>
                   {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
-            )}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

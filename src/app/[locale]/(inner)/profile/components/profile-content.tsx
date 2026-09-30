@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Badge, Button } from "@mantine/core";
+import { Badge, Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { BriefcaseBusiness, Building2, CalendarDays, Factory, KeyRound, Mail, Phone, Shield, UserRound } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -13,6 +13,7 @@ import { PRODUCTION_DEPARTMENT_ID } from "@/lib/constants/global";
 import { getGenderLabel } from "@/lib/constants/enums/genders";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import LayoutBox from "@/components/ui/layout-box";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import CopyButton from "@/components/ui/copy-button";
 import { EmptyValue } from "@/components/ui/entity-details";
@@ -200,17 +201,13 @@ export default function ProfileContent() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={openPasswordModal}
-                  variant="light"
-                  color="blue"
-                  size="xs"
-                  radius="md"
-                  leftSection={<KeyRound size={15} />}
-                  className="self-start sm:self-auto"
-                >
-                  {translate("Update password", "تحديث كلمة المرور")}
-                </Button>
+                <div className="self-start sm:self-auto">
+                  <ActionsMenu>
+                    <Menu.Item onClick={openPasswordModal} leftSection={<KeyRound size={14} />}>
+                      {translate("Update password", "تحديث كلمة المرور")}
+                    </Menu.Item>
+                  </ActionsMenu>
+                </div>
               </footer>
             </article>
           </>

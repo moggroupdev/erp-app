@@ -14,10 +14,10 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufactured } from "@/lib/constants/enums/product-source-types";
 import type { ProductDimension, ProductWithCreator } from "@/types/product";
-import { ActionIcon, Badge, Button, FloatingPosition, Table, Tooltip } from "@mantine/core";
+import { ActionIcon, Badge, Button, FloatingPosition, Menu, Table, Tooltip } from "@mantine/core";
 import { Box, Pencil, Plus, Star } from "lucide-react";
-import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
+import ActionsMenu from "@/components/ui/actions-menu";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
 import { EmptyValue } from "@/components/ui/entity-details";
@@ -116,17 +116,13 @@ export default function ProductDimensionsSection({
           </div>
         </div>
 
-        <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT}>
-          <Button
-            onClick={handleOpenCreateModal}
-            variant="light"
-            color="blue"
-            radius="md"
-            leftSection={<Plus size={15} />}
-          >
-            {translate("Add New Dimension", "إضافة مقاس جديد")}
-          </Button>
-        </PermissionGuard>
+        <ActionsMenu>
+          {canUpdateProduct && (
+            <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenCreateModal}>
+              {translate("Add New Dimension", "إضافة مقاس جديد")}
+            </Menu.Item>
+          )}
+        </ActionsMenu>
       </div>
 
       {dimensions.length === 0 ? (

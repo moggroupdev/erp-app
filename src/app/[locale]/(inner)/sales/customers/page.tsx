@@ -10,6 +10,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import customersApi from "@/lib/api/customers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -18,7 +19,7 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Customer } from "@/types/customer";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { Button, Table, TextInput } from "@mantine/core";
+import { Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -29,6 +30,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import CustomerModal from "@/components/global/data-modals/customer-modal";
 import SelectCustomerClassification from "@/components/global/selections/enum-based/select-customer-classification";
 import { getCustomerClassificationLabel } from "@/lib/constants/enums/customer-classifications";
@@ -45,6 +47,7 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
+  const canAddCustomer = useHasPermission(PERMISSIONS.ADD_CUSTOMER);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
@@ -124,13 +127,15 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_CUSTOMER}>
-              <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
-                {translate("Add New Customer", "إضافة عميل جديد")}
-              </Button>
-            </PermissionGuard>
+            <ActionsMenu>
+              {canAddCustomer && (
+                <Menu.Item onClick={openModal} leftSection={<Plus size={14} />}>
+                  {translate("Add New Customer", "إضافة عميل جديد")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

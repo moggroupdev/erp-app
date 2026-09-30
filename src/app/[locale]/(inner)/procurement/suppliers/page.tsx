@@ -9,6 +9,7 @@ import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import suppliersApi from "@/lib/api/suppliers";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -17,7 +18,7 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Supplier } from "@/types/supplier";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { Button, Table, TextInput } from "@mantine/core";
+import { Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -29,6 +30,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import PrintDocument from "@/components/ui/print-document";
 import SuppliersListPrintDocument from "@/components/documents/procurement/suppliers/suppliers-list-print-document";
 import SupplierModal from "@/components/global/data-modals/supplier-modal";
@@ -48,6 +50,8 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
+  const canPrintSuppliersList = useHasPermission(PERMISSIONS.PRINT_SUPPLIERS_LIST);
+  const canAddSupplier = useHasPermission(PERMISSIONS.ADD_SUPPLIER);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
@@ -136,10 +140,11 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <div className="flex items-center gap-2">
-            <PermissionGuard permission={PERMISSIONS.PRINT_SUPPLIERS_LIST}>
-              <div className="flex-center px-1">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <ActionsMenu>
+              {canPrintSuppliersList && (
                 <PrintDocument
-                  buttonType="icon"
+                  buttonType="menu"
                   title={translate(`Suppliers List - ${printDate}`, `قائمة الموردين - ${printDate}`)}
                   onBeforePrint={async () => {
                     if (!allSuppliers) await fetchAllSuppliers();
@@ -147,14 +152,13 @@ export default function Page() {
                 >
                   {allSuppliers && <SuppliersListPrintDocument suppliers={allSuppliers} />}
                 </PrintDocument>
-              </div>
-            </PermissionGuard>
-            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <PermissionGuard permission={PERMISSIONS.ADD_SUPPLIER}>
-              <Button onClick={openModal} variant="light" color="teal" radius="md" leftSection={<Plus size={15} />}>
-                {translate("Add New Supplier", "إضافة مورد جديد")}
-              </Button>
-            </PermissionGuard>
+              )}
+              {canAddSupplier && (
+                <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
+                  {translate("Add New Supplier", "إضافة مورد جديد")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}

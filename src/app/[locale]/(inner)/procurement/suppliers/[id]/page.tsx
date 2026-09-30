@@ -12,10 +12,10 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { Button } from "@mantine/core";
-import PermissionGuard from "@/components/guards/permission";
+import { Menu } from "@mantine/core";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -77,15 +77,13 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
-            {supplier && (
-              <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
-                <Button onClick={openUpdateModal} variant="light" radius="md">
-                  {translate("Edit", "تعديل")}
-                </Button>
-              </PermissionGuard>
-            )}
+            <ActionsMenu>
+              {supplier && canUpdateSupplier && (
+                <Menu.Item onClick={openUpdateModal}>{translate("Edit", "تعديل")}</Menu.Item>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}
@@ -123,11 +121,11 @@ export default function Page() {
               <div className="flex items-center justify-between gap-3">
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Addresses", "العناوين")}</h4>
 
-                <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
-                  <Button onClick={openAddressModal} variant="light" color="teal" radius="md">
-                    {translate("Add New Address", "إضافة عنوان جديد")}
-                  </Button>
-                </PermissionGuard>
+                <ActionsMenu>
+                  {canUpdateSupplier && (
+                    <Menu.Item onClick={openAddressModal}>{translate("Add New Address", "إضافة عنوان جديد")}</Menu.Item>
+                  )}
+                </ActionsMenu>
               </div>
 
               {addresses.length === 0 ? (
