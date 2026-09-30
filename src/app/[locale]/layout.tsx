@@ -10,7 +10,7 @@ import MantineDatesProvider from "@/components/mantine/dates-provider";
 import MantineThemeProvider from "@/components/mantine/provider";
 import { getI18nFromParams } from "@/lib/i18n/utils";
 import { locales } from "@/lib/i18n/config";
-import { APP_NAME } from "@/lib/constants/global";
+import { APP_NAME, NAVY_WASH } from "@/lib/constants/global";
 import { Alexandria } from "next/font/google";
 import { Toaster } from "sonner";
 import QueryProvider from "@/providers/query";
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: "#D2D8E2" };
+export const viewport: Viewport = { themeColor: NAVY_WASH };
 
 const alexandria = Alexandria({
   subsets: ["arabic", "latin"],

@@ -1,5 +1,11 @@
 export const APP_NAME = "MOG ERP";
 
+/** Logo navy. Selected text and the text caret. */
+export const NAVY = "#052565";
+
+/** Light wash of the logo navy. Selection background and app theme color. */
+export const NAVY_WASH = "#D2D8E2";
+
 export const BASE_URL = "https://app.moggroup.net";
 
 export const LOGGED_IN_FLAG = "logged_in";

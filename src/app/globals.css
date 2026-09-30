@@ -16,6 +16,10 @@
   --color-haze-200: #93d3f4;
   --color-haze-600: #2478b5;
   --color-haze-700: #2478b5;
+
+  /* Logo navy and its light wash. */
+  --color-navy: #052565;
+  --color-navy-wash: #d2d8e2;
 }
 
 @layer utilities {
@@ -33,11 +37,11 @@
 
 @layer base {
   ::selection {
-    background-color: #D2D8E2;
-    color: #052565;
+    background-color: var(--color-navy-wash);
+    color: var(--color-navy);
   }
   html {
-    caret-color: #052565;
+    caret-color: var(--color-navy);
   }
   * {
     font-family: var(--font-alexandria);
