@@ -202,4 +202,41 @@
   .mantine-Combobox-dropdown {
     --combobox-padding: 2px;
   }
+
+  /* Tables stay at desktop type and row padding unless scaled here.
+     Spacing is reduced from each table's own value. A fixed 0.65rem only
+     shortens tables that were looser than that (reports use sm / 0.75rem).
+     List pages already use xs / 0.625rem, so they need their own reduction. */
+  .mantine-Table-table {
+    font-size: var(--mantine-font-size-xs);
+    line-height: var(--mantine-line-height-xs);
+  }
+
+  .mantine-Table-table .text-sm {
+    font-size: var(--mantine-font-size-xs);
+    line-height: var(--mantine-line-height-xs);
+  }
+
+  .mantine-Table-th,
+  .mantine-Table-td {
+    padding-block: calc(var(--table-vertical-spacing) - 0.1rem);
+  }
+
+  .mantine-Table-td button.bg-gray-100 {
+    padding: 0.25rem;
+  }
+
+  .mantine-Table-td button.bg-gray-100 svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .mantine-Table-td .mantine-ActionIcon-root {
+    --ai-size-sm: 18px;
+  }
+
+  .mantine-Table-tr.h-9,
+  .mantine-Table-tr.h-10 {
+    height: auto;
+  }
 }
