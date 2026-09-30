@@ -15,10 +15,10 @@ export default function ReportLinkCard({
   return (
     <Link
       href={getLocalizedHref(report.href)}
-      className="group flex items-start gap-4 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm transition-colors hover:border-haze-200"
+      className="group flex items-start gap-4 rounded-2xl bg-white p-5 transition-colors"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <span className="text-xs font-semibold text-stone-800 group-hover:text-haze-800 sm:text-sm">
+        <span className="group-hover:text-haze-800 text-xs font-semibold text-stone-800 sm:text-sm">
           {translate(report.label.en, report.label.ar)}
         </span>
         <span className="text-xs leading-[1.75] text-stone-500">
@@ -28,7 +28,7 @@ export default function ReportLinkCard({
 
       <ChevronRight
         size={18}
-        className={`mt-0.5 shrink-0 text-stone-400 transition-colors group-hover:text-haze-600 ${translate("", "rotate-180")}`}
+        className={`group-hover:text-haze-600 mt-0.5 shrink-0 text-stone-400 transition-colors ${translate("", "rotate-180")}`}
       />
     </Link>
   );

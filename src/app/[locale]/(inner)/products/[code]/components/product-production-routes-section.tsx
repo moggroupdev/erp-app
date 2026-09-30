@@ -91,7 +91,7 @@ export default function ProductProductionRoutesSection({
                             strokeDasharray={`${(percentage / 100) * 219.9} 219.9`}
                           />
                         </svg>
-                        <div className="z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-haze-500 text-white shadow-sm">
+                        <div className="z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-haze-600 text-white shadow-sm">
                           <span className="text-[10px] leading-none font-medium opacity-80">
                             {translate("Step", "خطوة")}
                           </span>
