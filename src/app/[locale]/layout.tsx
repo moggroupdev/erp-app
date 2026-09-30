@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#00225D",
+  themeColor: "#052565",
 };
 
 const alexandria = Alexandria({

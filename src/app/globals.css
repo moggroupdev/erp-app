@@ -36,6 +36,9 @@
     background-color: #052565;
     color: #fff;
   }
+  html {
+    caret-color: #052565;
+  }
   * {
     font-family: var(--font-alexandria);
   }
