@@ -9,7 +9,7 @@ import SidebarGroup from "./sidebar-group";
 import SidebarItem from "./sidebar-item";
 import SidebarUserMenu from "./sidebar-user-menu";
 
-export default function SidebarBody({ collapsed }: { collapsed: boolean }) {
+export default function SidebarBody({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const pathname = getPathnameWithoutLocale(usePathname());
   const { user, isInitializing } = useUser();
 
@@ -51,6 +51,7 @@ export default function SidebarBody({ collapsed }: { collapsed: boolean }) {
                   icon={entry.icon}
                   collapsed={collapsed}
                   isActive={isPathActive(pathname, entry.href)}
+                  onClick={onNavigate}
                 />
               );
             }
@@ -73,13 +74,14 @@ export default function SidebarBody({ collapsed }: { collapsed: boolean }) {
                 onToggle={() =>
                   setExpandedGroups((current) => ({ ...current, [entryKey]: !(current[entryKey] ?? isActive) }))
                 }
+                onLeafClick={onNavigate}
               />
             );
           })}
         </div>
       </nav>
 
-      <SidebarUserMenu collapsed={collapsed} />
+      <SidebarUserMenu collapsed={collapsed} onNavigate={onNavigate} />
     </div>
   );
 }

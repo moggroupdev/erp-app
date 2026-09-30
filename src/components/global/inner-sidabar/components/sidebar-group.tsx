@@ -54,6 +54,7 @@ export default function SidebarGroup({
 
   const handleParentClick = () => {
     if (hasChildren) onToggle();
+    if (group.href) onLeafClick?.();
   };
 
   return (

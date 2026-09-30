@@ -9,7 +9,7 @@ import useLogout from "@/hooks/use-logout";
 import { useI18n, useLocaleHref, useLocaleSwitch } from "@/lib/i18n/hooks";
 import { ChevronDown, Globe, LogOut, UserCircle2 } from "lucide-react";
 
-export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
+export default function SidebarUserMenu({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const { translate } = useI18n();
   const { nextLocale, switchLocale } = useLocaleSwitch();
   const getLocalizedHref = useLocaleHref();
@@ -22,7 +22,7 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
   if (!user) return null;
 
   return (
-    <div className="z-50 shrink-0 border-t border-gray-200 px-3 pt-2 pb-3">
+    <div className="z-50 mt-auto shrink-0 border-t border-gray-200 px-3 pt-2 pb-3">
       {collapsed ? (
         <Menu withArrow shadow="md" radius="lg" width={200} offset={14}>
           <Menu.Target>
@@ -51,6 +51,7 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
               color="dark"
               href={getLocalizedHref("/profile")}
               leftSection={<UserCircle2 size={15} />}
+              onClick={() => onNavigate?.()}
             >
               {translate("Profile", "الملف الشخصي")}
             </Menu.Item>
@@ -100,7 +101,13 @@ export default function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
                 {translate("Switch Language", "تغيير اللغة")}
               </Button>
 
-              <Link href={getLocalizedHref("/profile")} onClick={() => setIsOpen(false)}>
+              <Link
+                href={getLocalizedHref("/profile")}
+                onClick={() => {
+                  setIsOpen(false);
+                  onNavigate?.();
+                }}
+              >
                 <Button
                   type="button"
                   variant="subtle"
