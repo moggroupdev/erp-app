@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button } from "@mantine/core";
-import { Pencil, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -83,7 +83,7 @@ export default function Page() {
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             {transaction && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
-                <Button onClick={openHeaderModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
+                <Button onClick={openHeaderModal} variant="light" radius="md">
                   {translate("Edit", "تعديل")}
                 </Button>
               </PermissionGuard>

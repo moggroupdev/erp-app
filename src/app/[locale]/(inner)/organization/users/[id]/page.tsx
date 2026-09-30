@@ -13,7 +13,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button } from "@mantine/core";
-import { ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -84,7 +84,7 @@ export default function Page() {
             <RefetchButton isFetching={loading} onRefetch={() => userQuery.refetch()} />
             {user && !user.isAdmin && !user.deletedAt && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_USER}>
-                <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
+                <Button onClick={openUpdateModal} variant="light" radius="md">
                   {translate("Edit", "تعديل")}
                 </Button>
               </PermissionGuard>
@@ -125,8 +125,8 @@ export default function Page() {
                       <h4 className="text-sm font-semibold text-red-700">{translate("Delete user", "حذف المستخدم")}</h4>
                       <p className="mt-1.5 text-sm text-red-600/80">
                         {translate(
-                          "Soft-delete this account. The user will no longer appear in active lists.",
-                          "حذف هذا الحساب مؤقتًا. لن يظهر المستخدم بعد ذلك في القوائم النشطة.",
+                          "Delete this account. The user will no longer appear in active lists.",
+                          "حذف هذا الحساب. لن يظهر المستخدم بعد ذلك في القوائم النشطة.",
                         )}
                       </p>
                       <Button

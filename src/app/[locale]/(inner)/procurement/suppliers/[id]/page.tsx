@@ -13,7 +13,6 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button } from "@mantine/core";
-import { Pencil } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -82,7 +81,7 @@ export default function Page() {
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
             {supplier && (
               <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
-                <Button onClick={openUpdateModal} variant="light" radius="md" leftSection={<Pencil size={15} />}>
+                <Button onClick={openUpdateModal} variant="light" radius="md">
                   {translate("Edit", "تعديل")}
                 </Button>
               </PermissionGuard>
