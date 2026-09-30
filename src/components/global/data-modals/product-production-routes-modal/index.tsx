@@ -76,11 +76,22 @@ function SortableStepCard({
 
   const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 20 : undefined };
 
+  const removeButton = (
+    <button
+      type="button"
+      onClick={() => onRemove(row.key)}
+      disabled={!canRemove}
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-30"
+    >
+      <Trash2 size={15} />
+    </button>
+  );
+
   return (
-    <div ref={setNodeRef} style={style} className="relative flex items-center gap-3">
-      <div className="relative flex flex-col items-center">
+    <div ref={setNodeRef} style={style} className="relative flex items-start gap-2 sm:items-center sm:gap-3">
+      <div className="mt-2.5 shrink-0 sm:mt-0">
         <div
-          className={`flex-center z-10 h-12 w-12 shrink-0 rounded-full text-sm font-bold ring-4 ring-white ${
+          className={`flex-center z-10 h-9 w-9 rounded-full text-xs font-bold ring-4 ring-white sm:h-12 sm:w-12 sm:text-sm ${
             isDragging
               ? "bg-blue-100 text-blue-700 ring-blue-50"
               : row.productionSubDepartment
@@ -92,56 +103,54 @@ function SortableStepCard({
         </div>
       </div>
 
-      <div
-        className={`flex flex-1 items-center gap-2 rounded-xl bg-gray-50 p-3.5 transition-colors ${isDragging ? "" : ""}`}
-      >
-        <button
-          type="button"
-          className="flex h-8 w-8 cursor-grab items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical size={18} />
-        </button>
+      <div className="flex min-w-0 flex-1 flex-col gap-2 rounded-xl bg-gray-50 p-2.5 sm:flex-row sm:items-center sm:p-3.5">
+        <div className="flex min-w-0 items-center gap-2 sm:contents">
+          <button
+            type="button"
+            className="flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 active:cursor-grabbing"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical size={18} />
+          </button>
 
-        <SelectProductionSubDepartment
-          value={row.productionSubDepartment}
-          setValue={(value) =>
-            onUpdate(row.key, {
-              productionSubDepartment: typeof value === "function" ? value(row.productionSubDepartment) : value,
-            })
-          }
-          placeholder={translate("Select department", "اختر القسم")}
-          excludeValues={excludeValues}
-          required
-          searchable
-          flex={1}
-        />
+          <SelectProductionSubDepartment
+            value={row.productionSubDepartment}
+            setValue={(value) =>
+              onUpdate(row.key, {
+                productionSubDepartment: typeof value === "function" ? value(row.productionSubDepartment) : value,
+              })
+            }
+            placeholder={translate("Select department", "اختر القسم")}
+            excludeValues={excludeValues}
+            required
+            searchable
+            className="min-w-0 flex-1 sm:w-auto"
+          />
 
-        <NumberInput
-          value={row.completionPercentage}
-          onChange={(value) =>
-            onUpdate(row.key, {
-              completionPercentage: value === "" || value === undefined ? "" : Number(value),
-            })
-          }
-          placeholder={translate("Share %", "الحصة %")}
-          min={0.01}
-          max={100}
-          decimalScale={2}
-          allowNegative={false}
-          required
-          radius="md"
-        />
+          <span className="sm:hidden">{removeButton}</span>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => onRemove(row.key)}
-          disabled={!canRemove}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          <Trash2 size={15} />
-        </button>
+        <div className="ps-10 sm:contents">
+          <NumberInput
+            value={row.completionPercentage}
+            onChange={(value) =>
+              onUpdate(row.key, {
+                completionPercentage: value === "" || value === undefined ? "" : Number(value),
+              })
+            }
+            placeholder={translate("Share %", "الحصة %")}
+            min={0.01}
+            max={100}
+            decimalScale={2}
+            allowNegative={false}
+            required
+            radius="md"
+            className="w-full sm:w-32 sm:shrink-0"
+          />
+        </div>
+
+        <span className="hidden sm:contents">{removeButton}</span>
       </div>
     </div>
   );
@@ -274,10 +283,7 @@ export default function ProductProductionRoutesModal({
       const subDepartment = row.productionSubDepartment!;
       if (seen.has(subDepartment)) {
         return setValidationError(
-          translate(
-            "Each production department can only appear once.",
-            "لا يمكن تكرار قسم الانتاج أكثر من مرة.",
-          ),
+          translate("Each production department can only appear once.", "لا يمكن تكرار قسم الانتاج أكثر من مرة."),
         );
       }
       seen.add(subDepartment);
@@ -312,7 +318,7 @@ export default function ProductProductionRoutesModal({
 
   return (
     <Modal opened={opened} onClose={handleClose} title={title} size="xl">
-      <p className="text-sm text-gray-600">
+      <p className="text-xs text-gray-600">
         {translate("Production path from first step to finished product", "مسار الإنتاج من أول خطوة حتى المنتج النهائي")}
       </p>
 
@@ -358,8 +364,8 @@ export default function ProductProductionRoutesModal({
                 : "border-gray-200 bg-gray-50"
           }`}
         >
-          <div className="mb-1.5 flex items-center justify-between gap-2">
-            <p className="mt-0.5 text-[11px] leading-snug text-gray-500">
+          <div className="mb-1.5 flex items-start justify-between gap-3">
+            <p className="min-w-0 flex-1 text-[11px] leading-snug text-gray-500">
               {translate("Path completion:", "اكتمال المسار:")}{" "}
               {isComplete
                 ? translate("Ready to save. Total is exactly 100%.", "جاهز للحفظ. المجموع يساوي 100% تماماً.")
@@ -390,18 +396,14 @@ export default function ProductProductionRoutesModal({
           <div className="relative h-1.5 overflow-hidden rounded-full bg-white/80 ring-1 ring-gray-200/80">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
-                isComplete
-                  ? "bg-green-500"
-                  : roundedTotal > 100
-                    ? "bg-rose-500"
-                    : "bg-amber-400"
+                isComplete ? "bg-green-500" : roundedTotal > 100 ? "bg-rose-500" : "bg-amber-400"
               }`}
               style={{ width: `${progressWidth}%` }}
             />
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row">
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>
             {translation.cancel}
           </Button>
