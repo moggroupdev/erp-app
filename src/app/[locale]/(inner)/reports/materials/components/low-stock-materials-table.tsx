@@ -36,21 +36,21 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
           )}
         </Alert>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-stone-100">
+        <div className="overflow-x-auto rounded-xl border border-gray-100">
           <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
-            <Table.Thead className="bg-stone-50">
+            <Table.Thead className="bg-gray-50">
               <Table.Tr>
-                <Table.Th className="text-stone-600">{translate("Title", "العنوان")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Code", "الكود")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Qty", "الكمية")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Minimum", "حد الطلب")}</Table.Th>
-                <Table.Th className="text-stone-600">{translate("Deficit", "العجز")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Title", "العنوان")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Qty", "الكمية")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Minimum", "حد الطلب")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Deficit", "العجز")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {data.map((material) => (
-                <Table.Tr key={material.code} className="text-stone-600">
-                  <Table.Td className="max-w-60 truncate font-medium text-stone-800">
+                <Table.Tr key={material.code} className="text-gray-600">
+                  <Table.Td className="max-w-60 truncate font-medium text-gray-800">
                     <ProtectedLink
                       permission={PERMISSIONS.READ_MATERIALS}
                       href={`/warehouse/materials/${material.code}`}
@@ -60,7 +60,7 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
                       {material.title}
                     </ProtectedLink>
                   </Table.Td>
-                  <Table.Td className="font-mono text-xs text-stone-500">{material.code}</Table.Td>
+                  <Table.Td className="font-mono text-xs text-gray-500">{material.code}</Table.Td>
                   <Table.Td>{formatQuantity(material.quantity)}</Table.Td>
                   <Table.Td>{formatQuantity(material.minimumStock)}</Table.Td>
                   <Table.Td className="font-semibold text-ochre-700">{formatQuantity(material.deficit)}</Table.Td>

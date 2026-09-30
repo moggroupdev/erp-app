@@ -180,7 +180,7 @@ function ConversionUnitCard({
 
         <div className="flex flex-col gap-1.5">
           {quantity != null ? (
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-2 py-1.5">
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-gray-50 px-2 py-1.5">
               <div className="flex items-center gap-1.5 text-gray-500">
                 <Scale size={12} strokeWidth={2} />
                 <span className="text-[11px] font-medium">{translate("Qty", "الكمية")}</span>

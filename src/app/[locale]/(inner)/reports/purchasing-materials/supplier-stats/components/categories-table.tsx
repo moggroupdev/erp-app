@@ -90,18 +90,18 @@ export default function SupplierCategoriesTable({
         <div className="flex flex-col gap-6">
           {groups.map(({ main, subs }) => (
             <section key={main.mainCategoryId} className="flex flex-col gap-2">
-              <h4 className="text-sm font-semibold text-stone-800">
+              <h4 className="text-sm font-semibold text-gray-800">
                 <ProtectedLink
                   permission={PERMISSIONS.READ_MATERIAL_PURCHASING_CATEGORY_STATS_REPORT}
                   href={`/reports/purchasing-materials/category-stats?mainCategoryId=${main.mainCategoryId}`}
-                  className="text-stone-800 hover:underline"
+                  className="text-gray-800 hover:underline"
                   title={main.mainCategoryTitle}
                 >
                   {main.mainCategoryTitle}
                 </ProtectedLink>
               </h4>
 
-              <div className="overflow-x-auto rounded-xl border border-stone-100">
+              <div className="overflow-x-auto rounded-xl border border-gray-100">
                 <Table className="w-full table-fixed text-nowrap" verticalSpacing="sm" highlightOnHover>
                   <Table.Thead className="bg-gray-50">
                     <Table.Tr>
@@ -156,7 +156,7 @@ export default function SupplierCategoriesTable({
                       <Table.Th className={COL.index} />
                       <Table.Th className={COL.name}>
                         {translate("Total", "الإجمالي")}
-                        <span className="ms-1 font-normal text-stone-500">({main.mainCategoryTitle})</span>
+                        <span className="ms-1 font-normal text-gray-500">({main.mainCategoryTitle})</span>
                       </Table.Th>
                       <Table.Th className={COL.materials}>{main.materialCount}</Table.Th>
                       <Table.Th className={COL.value}>{formatMoney(main.totalSpend)}</Table.Th>

@@ -95,7 +95,7 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
     <section className="flex flex-col gap-4">
       <Divider variant="dashed" />
 
-      <header className="flex flex-col gap-4 rounded-2xl bg-slate-50 p-5 sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="border-haze-100 text-haze-600 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-white">
             <Shield size={28} />
@@ -134,13 +134,13 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
         </div>
 
         {permissionGroups.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-gray-200 bg-slate-50/50 px-4 py-8 text-center">
+          <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-8 text-center">
             <p className="text-sm text-gray-500">{translate("No permissions assigned", "لا توجد صلاحيات معيّنة")}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             {permissionGroups.map((group) => (
-              <div key={group.domain} className="flex flex-col gap-2.5 rounded-xl border border-gray-100 bg-slate-50/60 p-4">
+              <div key={group.domain} className="flex flex-col gap-2.5 rounded-xl border border-gray-100 bg-gray-50/60 p-4">
                 <div className="flex items-center justify-between gap-2 border-b border-dashed border-gray-200 pb-2">
                   <div className="flex items-center gap-2">
                     <span className="bg-haze-600 h-4 w-1 rounded-full" aria-hidden />

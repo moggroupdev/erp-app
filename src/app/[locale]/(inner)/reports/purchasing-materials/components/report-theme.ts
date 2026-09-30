@@ -14,7 +14,7 @@ export const reportTheme = {
   },
   kpi: {
     value: "text-haze-800",
-    neutral: "text-stone-700",
+    neutral: "text-gray-700",
     positive: "text-teal-700",
     negative: "text-clay-700",
   },

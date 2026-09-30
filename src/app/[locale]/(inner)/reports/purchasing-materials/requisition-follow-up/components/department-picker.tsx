@@ -20,10 +20,10 @@ export default function DepartmentPicker({
     <section className="rounded-3xl bg-white px-5 py-4 sm:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
         <div className="min-w-0 sm:max-w-xs">
-          <label htmlFor="purchasing-requisition-follow-up-dept" className="text-sm font-semibold text-stone-800">
+          <label htmlFor="purchasing-requisition-follow-up-dept" className="text-sm font-semibold text-gray-800">
             {translate("Production department", "قسم الإنتاج")}
           </label>
-          <p className="mt-1 text-xs leading-[1.75] text-stone-500">
+          <p className="mt-1 text-xs leading-[1.75] text-gray-500">
             {translate("Required filter for this report", "فلتر مطلوب لهذا التقرير")}
           </p>
         </div>

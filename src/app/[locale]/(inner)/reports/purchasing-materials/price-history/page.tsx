@@ -198,11 +198,11 @@ export default function Page() {
               <section className="rounded-3xl bg-white px-5 py-4 sm:px-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-stone-800">
+                    <p className="text-sm font-semibold text-gray-800">
                       {displayData.material.title}
-                      <span className="ms-2 font-mono text-xs font-normal text-stone-500">{displayData.material.code}</span>
+                      <span className="ms-2 font-mono text-xs font-normal text-gray-500">{displayData.material.code}</span>
                     </p>
-                    <p className="mt-1 text-xs leading-[1.75] text-stone-500">
+                    <p className="mt-1 text-xs leading-[1.75] text-gray-500">
                       {translate(
                         `Base unit: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. Prices and quantities use the selected display unit.`,
                         `الوحدة الأساسية: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. الأسعار والكميات حسب وحدة العرض المحددة.`,

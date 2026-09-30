@@ -3,8 +3,8 @@ import { semanticColorOrder, semanticPalette } from "@/lib/constants/color-palet
 const { haze, teal, ochre, clay, plum } = semanticPalette;
 
 export const reportTheme = {
-  surface: "bg-stone-50/80",
-  card: "bg-white border border-stone-200/80 shadow-sm",
+  surface: "bg-gray-50/80",
+  card: "bg-white border border-gray-200/80 shadow-sm",
   accent: haze[600],
   accentMuted: haze[200],
   chart: {
@@ -19,7 +19,7 @@ export const reportTheme = {
   },
   kpi: {
     value: "text-haze-800",
-    neutral: "text-stone-700",
+    neutral: "text-gray-700",
     positive: "text-teal-700",
     negative: "text-clay-700",
     warning: "text-ochre-700",

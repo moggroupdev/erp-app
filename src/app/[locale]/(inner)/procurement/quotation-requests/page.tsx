@@ -90,15 +90,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-stone-50/60 p-4 sm:p-5">
+    <section className="flex flex-col gap-4 rounded-xl bg-teal-50/15 p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-stone-200">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-gray-200">
             <Icon size={18} />
           </div>
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-stone-900">{title}</h2>
-            {description ? <p className="mt-1 max-w-2xl text-xs leading-[1.75] text-stone-500">{description}</p> : null}
+            <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+            {description ? <p className="mt-1 max-w-2xl text-xs leading-[1.75] text-gray-500">{description}</p> : null}
           </div>
         </div>
         {action ? <div className="shrink-0">{action}</div> : null}
@@ -229,8 +229,9 @@ export default function Page() {
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
   const [validationError, setValidationError] = useState("");
   const [addItemsOpened, { open: openAddItems, close: closeAddItems }] = useDisclosure(false);
-  const [purchasingDepartmentManager, setPurchasingDepartmentManager] =
-    useState<SupplierQuotationRequestContact | null>(null);
+  const [purchasingDepartmentManager, setPurchasingDepartmentManager] = useState<SupplierQuotationRequestContact | null>(
+    null,
+  );
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -543,9 +544,9 @@ export default function Page() {
                   radius="md"
                 />
                 {supplierDisplayName ? (
-                  <p className="mt-2 text-xs text-stone-500">
+                  <p className="mt-2 text-xs text-gray-500">
                     {translate("Name on letter", "الاسم في الخطاب")}:{" "}
-                    <span className="font-medium text-stone-700">{supplierDisplayName}</span>
+                    <span className="font-medium text-gray-700">{supplierDisplayName}</span>
                   </p>
                 ) : null}
               </div>
@@ -581,7 +582,7 @@ export default function Page() {
           </div>
         </Section>
 
-        <hr className="border-stone-200/35" />
+        <hr className="border-gray-200/35" />
 
         <Section
           icon={ClipboardList}
@@ -602,9 +603,9 @@ export default function Page() {
             </ActionsMenu>
           }
         >
-          <div className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
             <Table withColumnBorders className="w-full min-w-160" horizontalSpacing="xs" verticalSpacing="xs">
-              <Table.Thead className="bg-stone-50">
+              <Table.Thead className="bg-gray-50">
                 <Table.Tr className="h-9">
                   <Table.Th className="w-8 min-w-8 text-center! text-gray-500">#</Table.Th>
                   <Table.Th className="min-w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -655,7 +656,7 @@ export default function Page() {
           </div>
         </Section>
 
-        <hr className="border-stone-200/35" />
+        <hr className="border-gray-200/35" />
 
         <Section
           icon={NotebookPen}

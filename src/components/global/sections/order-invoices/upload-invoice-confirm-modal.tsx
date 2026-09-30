@@ -324,7 +324,7 @@ export default function UploadInvoiceConfirmModal(props: UploadInvoiceConfirmMod
               </div>
 
               {pdfObjectUrl && (
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
                   <iframe
                     title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
                     src={pdfObjectUrl}

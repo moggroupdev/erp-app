@@ -270,7 +270,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
       )}
 
       {hasPdf && (
-        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-slate-50">
+        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
           {isPdfLoading && (
             <div className="flex h-[min(70vh,720px)] items-center justify-center gap-2 text-sm text-gray-500">
               <Loader size="sm" color="teal" />
@@ -316,7 +316,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
       {/* Masthead */}
       <header className="relative border-b border-gray-200 px-5 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-6">
         <div className="pointer-events-none absolute -end-10 -top-16 h-48 w-48 rounded-full bg-teal-50/80" />
-        <div className="pointer-events-none absolute end-16 -top-8 h-28 w-28 rounded-full bg-slate-100/90" />
+        <div className="pointer-events-none absolute end-16 -top-8 h-28 w-28 rounded-full bg-gray-100/90" />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 flex-col gap-4">
@@ -384,7 +384,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
             </InfoRow>
           </div>
 
-          <div className="mt-auto rounded-lg bg-slate-50/80 p-4 text-gray-500">
+          <div className="mt-auto rounded-lg bg-gray-50/80 p-4 text-gray-500">
             <p className="text-xs">
               {translate("Entered by", "أدخل بواسطة")}{" "}
               <span className="font-medium text-gray-700">
@@ -407,7 +407,7 @@ export default function InvoiceDetails({ invoice }: { invoice: SupplierInvoiceDe
           </div>
 
           <div className="overflow-hidden rounded-xl border border-gray-200">
-            <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-4 border-b border-gray-200 bg-slate-50 px-4 py-2 text-[10px] font-semibold tracking-wide text-gray-400 uppercase sm:grid">
+            <div className="hidden grid-cols-[minmax(0,1fr)_auto] gap-x-4 border-b border-gray-200 bg-gray-50 px-4 py-2 text-[10px] font-semibold tracking-wide text-gray-400 uppercase sm:grid">
               <span>{translate("Description", "البيان")}</span>
               <span className="min-w-28 text-end sm:min-w-36">{translate("Amount", "المبلغ")}</span>
             </div>

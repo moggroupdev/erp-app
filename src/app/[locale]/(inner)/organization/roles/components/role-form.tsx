@@ -255,7 +255,7 @@ export default function RoleForm({
 
             <section className="flex flex-col gap-4 rounded-3xl bg-white p-5 md:p-6">
               <header className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-100 bg-white text-violet-600">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-haze-100 bg-white text-haze-600">
                   <Info size={20} />
                 </div>
                 <div>
@@ -342,7 +342,7 @@ export default function RoleForm({
                   const allDomainSelected = selectedInDomain === group.permissions.length;
 
                   return (
-                    <div key={group.domain} className="flex flex-col gap-2 rounded-2xl bg-slate-50/75 p-4">
+                    <div key={group.domain} className="flex flex-col gap-2 rounded-2xl bg-gray-50/75 p-4">
                       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-gray-200 pb-2">
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-semibold text-gray-800">

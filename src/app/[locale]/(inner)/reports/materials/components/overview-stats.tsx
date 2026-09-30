@@ -53,10 +53,10 @@ export default function OverviewStats({ overview }: { overview: MaterialsInvento
         <div className="mb-4 flex items-center gap-3">
           <AlertTriangle size={18} className="text-ochre-600" />
           <div className="flex flex-col gap-1">
-            <h3 className="text-sm font-semibold text-stone-800">
+            <h3 className="text-sm font-semibold text-gray-800">
               {translate("Stock Health Snapshot", "لمحة عن صحة المخزون")}
             </h3>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-gray-500">
               {translate(
                 "Quick counts of materials that may need attention.",
                 "أعداد سريعة للمواد التي قد تحتاج إلى متابعة.",
@@ -102,11 +102,11 @@ function KpiCard({
     <div className="relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6">
       <div className="absolute -end-3 -top-3 opacity-[0.07]">{icon}</div>
       <div className="relative flex flex-col gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-600">{icon}</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600">{icon}</div>
         <div>
-          <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">{label}</p>
+          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
           <p className={`mt-1 text-2xl font-semibold ${valueClassName}`}>{value}</p>
-          {hint && <p className="mt-1.5 text-xs text-stone-500">{hint}</p>}
+          {hint && <p className="mt-1.5 text-xs text-gray-500">{hint}</p>}
         </div>
       </div>
     </div>
@@ -115,7 +115,7 @@ function KpiCard({
 
 function AlertPill({ label, count, tone }: { label: string; count: number; tone: "neutral" | "warning" | "info" }) {
   const tones = {
-    neutral: " bg-stone-50 text-stone-700",
+    neutral: " bg-gray-50 text-gray-700",
     warning: " bg-ochre-50 text-ochre-800",
     info: " bg-haze-50 text-haze-800",
   };

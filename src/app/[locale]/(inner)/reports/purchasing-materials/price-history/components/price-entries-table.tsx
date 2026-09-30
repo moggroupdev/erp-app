@@ -36,7 +36,7 @@ export default function PriceEntriesTable({
         "بنود أوامر التوريد الفردية لهذه المادة (الأحدث أولاً).",
       )}
       icon={Table2}
-      accent="slate"
+      accent="gray"
     >
       {rows.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">{translate("No data available", "لا توجد بيانات")}</p>

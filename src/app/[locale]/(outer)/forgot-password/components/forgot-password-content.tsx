@@ -20,7 +20,7 @@ export default function ForgotPasswordContent() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-10 bottom-8 h-40 w-40 rounded-full bg-slate-100 blur-3xl"
+        className="pointer-events-none absolute -right-10 bottom-8 h-40 w-40 rounded-full bg-gray-100 blur-3xl"
       />
       <div
         aria-hidden
@@ -30,7 +30,7 @@ export default function ForgotPasswordContent() {
       <div className="relative overflow-hidden rounded-[28px] border border-gray-200/80 bg-white/90 px-6 py-10 shadow-[0_20px_50px_-28px_rgba(17,94,89,0.35)] backdrop-blur-sm sm:px-10 sm:py-12">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-teal-800" />
         <div className="pointer-events-none absolute -end-16 -top-20 h-44 w-44 rounded-full bg-teal-50/90" />
-        <div className="pointer-events-none absolute -start-10 -bottom-24 h-48 w-48 rounded-full bg-slate-50" />
+        <div className="pointer-events-none absolute -start-10 -bottom-24 h-48 w-48 rounded-full bg-gray-50" />
 
         <div className="relative flex flex-col items-center text-center">
           <Image src="/images/logo.png" alt={APP_NAME} {...getLogoSize(72)} className="rounded" style={{ height: "auto" }} />

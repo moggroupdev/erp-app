@@ -3,7 +3,7 @@ import type { LucideIcon } from "lucide-react";
 const iconStyles = {
   teal: "bg-teal-100 text-teal-700",
   amber: "bg-ochre-100 text-ochre-700",
-  slate: "bg-stone-100 text-stone-600",
+  gray: "bg-gray-100 text-gray-600",
   sky: "bg-haze-100 text-haze-700",
 };
 
@@ -13,18 +13,18 @@ export default function ReportCard({
   icon: Icon,
   children,
   className = "",
-  accent = "slate",
+  accent = "gray",
 }: {
   title: string;
   description?: string;
   icon?: LucideIcon;
   children: React.ReactNode;
   className?: string;
-  accent?: "teal" | "amber" | "slate" | "sky";
+  accent?: "teal" | "amber" | "gray" | "sky";
 }) {
   return (
     <article className={`overflow-hidden rounded-3xl bg-white ${className}`}>
-      <header className="border-b border-dashed border-stone-200 px-5 py-5 sm:px-6">
+      <header className="border-b border-dashed border-gray-200 px-5 py-5 sm:px-6">
         <div className="flex items-start gap-3">
           {Icon && (
             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconStyles[accent]}`}>
@@ -32,8 +32,8 @@ export default function ReportCard({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="text-xs font-semibold text-stone-800 sm:text-sm">{title}</h3>
-            {description && <p className="mt-1 text-xs leading-[1.75] text-stone-500">{description}</p>}
+            <h3 className="text-xs font-semibold text-gray-800 sm:text-sm">{title}</h3>
+            {description && <p className="mt-1 text-xs leading-[1.75] text-gray-500">{description}</p>}
           </div>
         </div>
       </header>

@@ -68,7 +68,7 @@ function SupersededGateContent() {
   const { translate } = useI18n();
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-slate-50/80 px-4 py-6 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-gray-200 bg-gray-50/80 px-4 py-6 text-center">
       <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400">
         <Lock size={18} />
       </div>
@@ -336,10 +336,10 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
 
   return (
     <>
-      <section className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-slate-50/50">
+      <section className="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50/50">
         <header className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 bg-white px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-700">
               <ShieldCheck size={20} />
             </div>
             <div>
