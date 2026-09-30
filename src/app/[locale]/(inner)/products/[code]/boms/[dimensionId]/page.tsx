@@ -53,10 +53,10 @@ import type { BomItemWithMaterial } from "@/types/bom";
 import { ActionIcon, Badge, Button, Divider, Menu, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
 import {
   Calculator,
-  ChevronDown,
   EllipsisVertical,
   Factory,
   Layers,
+  Menu as MenuIcon,
   Pencil,
   Plus,
   Printer,
@@ -493,8 +493,14 @@ export default function Page() {
 
                     <Menu offset={8} withinPortal withArrow>
                       <Menu.Target>
-                        <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
-                          {translate("Actions", "الإجراءات")}
+                        <Button
+                          variant="light"
+                          color="teal"
+                          radius="md"
+                          px="sm"
+                          aria-label={translate("Actions", "الإجراءات")}
+                        >
+                          <MenuIcon size={15} />
                         </Button>
                       </Menu.Target>
                       <Menu.Dropdown>

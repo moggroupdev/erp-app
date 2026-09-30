@@ -14,7 +14,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufactured } from "@/lib/constants/enums/product-source-types";
 import { Button, Menu } from "@mantine/core";
-import { ChevronDown, Pencil, Tag } from "lucide-react";
+import { Menu as MenuIcon, Pencil, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -85,8 +85,13 @@ export default function Page() {
             {product && canShowActions && (
               <Menu offset={8} withinPortal withArrow>
                 <Menu.Target>
-                  <Button variant="light" radius="md" rightSection={<ChevronDown size={14} />}>
-                    {translate("Actions", "الإجراءات")}
+                  <Button
+                    variant="light"
+                    radius="md"
+                    px="sm"
+                    aria-label={translate("Actions", "الإجراءات")}
+                  >
+                    <MenuIcon size={15} />
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>

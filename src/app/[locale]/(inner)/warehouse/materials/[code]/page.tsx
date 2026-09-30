@@ -15,7 +15,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
 import { Button, Menu } from "@mantine/core";
-import { ChevronDown, Pencil, Repeat, Tag } from "lucide-react";
+import { Menu as MenuIcon, Pencil, Repeat, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -90,8 +90,14 @@ export default function Page() {
             {material && canManageMaterial && (
               <Menu offset={8} withinPortal withArrow>
                 <Menu.Target>
-                  <Button variant="light" color="teal" radius="md" rightSection={<ChevronDown size={14} />}>
-                    {translate("Actions", "الإجراءات")}
+                  <Button
+                    variant="light"
+                    color="teal"
+                    radius="md"
+                    px="sm"
+                    aria-label={translate("Actions", "الإجراءات")}
+                  >
+                    <MenuIcon size={15} />
                   </Button>
                 </Menu.Target>
                 <Menu.Dropdown>
