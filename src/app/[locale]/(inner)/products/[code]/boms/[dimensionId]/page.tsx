@@ -555,7 +555,7 @@ export default function Page() {
                       )}
                       {canAddBom && canUpdateBom && <Menu.Divider />}
                       {canUpdateBom && (
-                        <Menu.Item leftSection={<Trash2 size={14} />} color="red" onClick={handleOpenDeleteAll}>
+                        <Menu.Item leftSection={<Trash2 size={14} />} color="clay" onClick={handleOpenDeleteAll}>
                           {translate("Delete All BOM", "حذف كل قائمة المواد")}
                         </Menu.Item>
                       )}
@@ -671,7 +671,7 @@ export default function Page() {
                               const bomMethodUnitCost = getMaterialCostPrice(item.material, costingMethod);
                               const lineCost = getFlattenedRowLineCost(item, effectiveMethod);
                               const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
-                              const zeroValueClass = "text-orange-500";
+                              const zeroValueClass = "text-ochre-600";
                               const canPickAlternative = bomMethodUnitCost === 0 || item.id in itemCostingOverrides;
 
                               return (
@@ -797,7 +797,7 @@ export default function Page() {
                                                 </Menu.Item>
                                                 <Menu.Item
                                                   leftSection={<Trash2 size={14} />}
-                                                  color="red"
+                                                  color="clay"
                                                   onClick={() => {
                                                     deleteMutation.reset();
                                                     setItemToDelete(item.sourceBomItem);
@@ -822,7 +822,7 @@ export default function Page() {
                               <Table.Td colSpan={4} className="text-gray-500">
                                 {group.itemCount} {translate("Items", "بند")}
                               </Table.Td>
-                              <Table.Td className={group.totalCost === 0 ? "text-orange-500" : undefined}>
+                              <Table.Td className={group.totalCost === 0 ? "text-ochre-600" : undefined}>
                                 {formatMoney(group.totalCost)}
                               </Table.Td>
                               <Table.Td
@@ -1019,7 +1019,7 @@ function ManufacturingCostsSection({
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-start gap-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ochre-50 text-ochre-600">
           <Factory size={16} />
         </div>
         <div className="flex flex-col gap-1">
@@ -1145,7 +1145,7 @@ function ManufacturingCostsSection({
                         </Menu.Item>
                         <Menu.Item
                           leftSection={<Trash2 size={14} />}
-                          color="red"
+                          color="clay"
                           onClick={() => onDeleteItem(row.sourceBomItem)}
                         >
                           {translate("Delete", "حذف")}

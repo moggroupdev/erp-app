@@ -85,7 +85,7 @@ export default function CompletedWithoutInvoiceTotalTable({
                       {row.supplierName}
                     </ProtectedLink>
                   </Table.Td>
-                  <Table.Td className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
+                  <Table.Td className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -95,7 +95,7 @@ export default function CompletedWithoutInvoiceTotalTable({
                 <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
                 <Table.Th />
                 <Table.Th />
-                <Table.Th className="font-semibold text-orange-600">{formatMoney(totalCalculatedAmount)}</Table.Th>
+                <Table.Th className="font-semibold text-ochre-600">{formatMoney(totalCalculatedAmount)}</Table.Th>
               </Table.Tr>
             </Table.Tfoot>
           </Table>

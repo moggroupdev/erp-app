@@ -37,7 +37,7 @@ function MoneyCell({ value, signed = false, tone = "base" }: { value: number | n
     tone === "total"
       ? "text-xl font-bold text-teal-950 sm:text-2xl"
       : tone === "deduction"
-        ? "font-medium text-rose-700/80"
+        ? "font-medium text-clay-700/80"
         : tone === "tax"
           ? "font-semibold text-gray-900"
           : "font-medium text-gray-900";

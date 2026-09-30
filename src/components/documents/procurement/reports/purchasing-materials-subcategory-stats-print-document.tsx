@@ -157,9 +157,9 @@ export default function PurchasingMaterialsSubCategoryStatsPrintDocument({
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
 
-        <div className="flex gap-2 rounded-lg bg-amber-50 px-3 py-2">
+        <div className="flex gap-2 rounded-lg bg-ochre-50 px-3 py-2">
           <p className="text-[10px] font-semibold">{translate("Important", "هام")}:</p>
-          <p className="text-[10px] text-amber-800">
+          <p className="text-[10px] text-ochre-800">
             {translate(
               "The total of these invoices may differ from the report total because these invoices may include other line items that do not belong to the selected subcategory.",
               "إجمالي هذه الفواتير قد يختلف عن إجمالي التقرير لأن هذه الفواتير قد تتضمن بنوداً أخرى لا تنتمي للفئة الفرعية المختارة.",

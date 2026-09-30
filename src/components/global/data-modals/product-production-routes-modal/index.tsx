@@ -81,7 +81,7 @@ function SortableStepCard({
       type="button"
       onClick={() => onRemove(row.key)}
       disabled={!canRemove}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-30"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-clay-50 hover:text-clay-600 disabled:cursor-not-allowed disabled:opacity-30"
     >
       <Trash2 size={15} />
     </button>
@@ -93,9 +93,9 @@ function SortableStepCard({
         <div
           className={`flex-center z-10 h-9 w-9 rounded-full text-xs font-bold ring-4 ring-white sm:h-12 sm:w-12 sm:text-sm ${
             isDragging
-              ? "bg-blue-100 text-blue-700 ring-blue-50"
+              ? "bg-haze-100 text-haze-700 ring-haze-50"
               : row.productionSubDepartment
-                ? "bg-blue-50 text-blue-600"
+                ? "bg-haze-50 text-haze-600"
                 : "bg-gray-100 text-gray-400 ring-gray-50"
           }`}
         >
@@ -346,9 +346,9 @@ export default function ProductProductionRoutesModal({
         <button
           type="button"
           onClick={addRow}
-          className="group flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50/70 px-4 py-3 text-sm! font-medium text-gray-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+          className="group flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50/70 px-4 py-3 text-sm! font-medium text-gray-600 transition-colors hover:border-haze-300 hover:bg-haze-50 hover:text-haze-600"
         >
-          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-gray-500 transition-colors group-hover:text-blue-600">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-gray-500 transition-colors group-hover:text-haze-600">
             <Plus size={12} />
           </span>
           {translate("Add next step", "إضافة الخطوة التالية")}
@@ -358,9 +358,9 @@ export default function ProductProductionRoutesModal({
         <div
           className={`overflow-hidden rounded-xl border px-4 py-3 transition-colors ${
             isComplete
-              ? "border-green-200 bg-green-50/50"
+              ? "border-teal-200 bg-teal-50/50"
               : roundedTotal > 100
-                ? "border-rose-200 bg-rose-50/40"
+                ? "border-clay-200 bg-clay-50/40"
                 : "border-gray-200 bg-gray-50"
           }`}
         >
@@ -383,10 +383,10 @@ export default function ProductProductionRoutesModal({
             <div
               className={`shrink-0 rounded-full px-2 py-0.5 text-xs! font-semibold tabular-nums ${
                 isComplete
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-teal-100 text-teal-700"
                   : roundedTotal > 100
-                    ? "bg-rose-100 text-rose-700"
-                    : "bg-amber-50 text-amber-700 ring-1 ring-amber-100"
+                    ? "bg-clay-100 text-clay-700"
+                    : "bg-ochre-50 text-ochre-700 ring-1 ring-ochre-100"
               }`}
             >
               {roundedTotal}%
@@ -396,7 +396,7 @@ export default function ProductProductionRoutesModal({
           <div className="relative h-1.5 overflow-hidden rounded-full bg-white/80 ring-1 ring-gray-200/80">
             <div
               className={`h-full rounded-full transition-all duration-300 ${
-                isComplete ? "bg-green-500" : roundedTotal > 100 ? "bg-rose-500" : "bg-amber-400"
+                isComplete ? "bg-teal-600" : roundedTotal > 100 ? "bg-clay-500" : "bg-ochre-600"
               }`}
               style={{ width: `${progressWidth}%` }}
             />

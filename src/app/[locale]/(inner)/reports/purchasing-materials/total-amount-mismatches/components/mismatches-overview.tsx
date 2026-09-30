@@ -20,7 +20,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
           "أوامر يكون فيها الفرق النسبي 1% على الأقل.",
         )}
         icon={<AlertTriangle size={20} />}
-        valueClassName={overview.mismatchCount > 0 ? "text-orange-700" : reportTheme.kpi.neutral}
+        valueClassName={overview.mismatchCount > 0 ? "text-ochre-700" : reportTheme.kpi.neutral}
       />
 
       <KpiCard
@@ -44,7 +44,7 @@ export default function MismatchesOverview({ overview }: { overview: PurchasingM
           "مجموع القيم المطلقة لفروقات الأوامر ذات الفروقات.",
         )}
         icon={<FileDiff size={20} />}
-        valueClassName={overview.totalDifference > 0 ? "text-orange-700" : reportTheme.kpi.neutral}
+        valueClassName={overview.totalDifference > 0 ? "text-ochre-700" : reportTheme.kpi.neutral}
       />
     </div>
   );

@@ -198,7 +198,7 @@ export default function PaymentTermsEditor({
                 const invalid = invalidTermKeys.includes(term.key);
 
                 return (
-                  <Table.Tr key={term.key} className={invalid ? "bg-red-50 [&>td]:bg-red-50" : undefined}>
+                  <Table.Tr key={term.key} className={invalid ? "bg-clay-50 [&>td]:bg-clay-50" : undefined}>
                     <Table.Td className="text-center text-sm text-gray-400 tabular-nums">{index + 1}</Table.Td>
                     <Table.Td>
                       <SelectMpoPaymentEvent
@@ -292,7 +292,7 @@ export default function PaymentTermsEditor({
                       <ActionIcon
                         type="button"
                         variant="subtle"
-                        color="red"
+                        color="clay"
                         radius="md"
                         onClick={() => removeTerm(term.key)}
                         aria-label={translate("Remove payment", "حذف الدفعة")}
@@ -324,7 +324,7 @@ export default function PaymentTermsEditor({
                     {translate("Remaining", "المتبقي")}
                   </Table.Td>
                   <Table.Td>
-                    <span className="text-sm font-medium text-amber-800 tabular-nums">
+                    <span className="text-sm font-medium text-ochre-800 tabular-nums">
                       {formatMoney(remainingAmount, currency)}
                     </span>
                   </Table.Td>
@@ -338,7 +338,7 @@ export default function PaymentTermsEditor({
                     {translate("Over by", "الزيادة")}
                   </Table.Td>
                   <Table.Td>
-                    <span className="text-sm font-medium text-red-700 tabular-nums">
+                    <span className="text-sm font-medium text-clay-700 tabular-nums">
                       {formatMoney(Math.abs(remainingAmount), currency)}
                     </span>
                   </Table.Td>

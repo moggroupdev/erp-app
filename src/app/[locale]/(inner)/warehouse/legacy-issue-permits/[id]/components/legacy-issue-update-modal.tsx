@@ -282,7 +282,7 @@ export default function LegacyIssuePermitUpdateModal({
             checked={isCancelled}
             onChange={(e) => setIsCancelled(e.currentTarget.checked)}
             label={translate("Set as cancelled", "تعيين كإذن ملغي")}
-            color="red"
+            color="clay"
           />
         </div>
 

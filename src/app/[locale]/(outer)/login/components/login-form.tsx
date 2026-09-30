@@ -87,7 +87,7 @@ export default function LoginForm() {
         size="lg"
       />
 
-      <Link href={getLocalizedHref("/forgot-password")} className="text-blue-500 hover:text-blue-600">
+      <Link href={getLocalizedHref("/forgot-password")} className="text-haze-600 hover:text-haze-600">
         {translate("Forgot password?", "نسيت كلمة المرور؟")}
       </Link>
 
@@ -106,7 +106,7 @@ export default function LoginForm() {
         <button
           type="button"
           style={{ fontWeight: 500 }}
-          className="text-blue-500 hover:text-blue-600"
+          className="text-haze-600 hover:text-haze-600"
           onClick={() => setMethod(method === "email" ? "phone" : "email")}
         >
           {method === "email"

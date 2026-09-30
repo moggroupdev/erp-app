@@ -18,6 +18,7 @@ import { type MaterialPurchaseRequisitionDetailed } from "@/types/material-purch
 import { CreatorLink } from "@/components/ui/entity-details";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
+import { getSemanticStatusColors } from "@/lib/constants/status-colors";
 import { getRequisitionStatus, getRequisitionStatusLabel, isRequisitionTerminal } from "../../helpers";
 
 type Gate = "planning" | "inventoryControl" | "manager";
@@ -35,19 +36,21 @@ function getDecisionMeta(decision: ApprovalDecision, translate: (en: string, ar:
     };
   }
   if (decision === APPROVAL_DECISIONS.REJECTED) {
+    const tokens = getSemanticStatusColors("danger");
     return {
       label: translate("Rejected", "مرفوض"),
-      color: "red" as const,
+      color: tokens.mantineColor,
       Icon: XCircle,
-      stepClass: "border-red-600 bg-red-600 text-white",
+      stepClass: "border-clay-600 bg-clay-600 text-white",
       badgeVariant: "light" as const,
     };
   }
+  const pending = getSemanticStatusColors("warning");
   return {
     label: translate("Pending", "قيد الانتظار"),
-    color: "dark" as const,
+    color: pending.mantineColor,
     Icon: Clock,
-    stepClass: "border-gray-300 bg-white text-gray-500",
+    stepClass: "border-ochre-200 bg-ochre-50 text-ochre-700",
     badgeVariant: "light" as const,
   };
 }
@@ -151,7 +154,7 @@ function ApprovalGateCard({
             </DecisionField>
             {decision === APPROVAL_DECISIONS.REJECTED && reason ? (
               <DecisionField label={translate("Rejection Reason", "سبب الرفض")}>
-                <p className="text-sm font-normal whitespace-pre-wrap text-red-800">{reason}</p>
+                <p className="text-sm font-normal whitespace-pre-wrap text-clay-800">{reason}</p>
               </DecisionField>
             ) : null}
           </>
@@ -172,7 +175,7 @@ function ApprovalGateCard({
           <Button size="xs" variant="light" color="teal" leftSection={<CheckCircle size={14} />} onClick={onApprove}>
             {translate("Record Approval", "تسجيل الاعتماد")}
           </Button>
-          <Button size="xs" variant="light" color="red" leftSection={<XCircle size={14} />} onClick={onReject}>
+          <Button size="xs" variant="light" color="clay" leftSection={<XCircle size={14} />} onClick={onReject}>
             {translate("Record Rejection", "تسجيل الرفض")}
           </Button>
         </div>
@@ -441,7 +444,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
               <Button variant="light" color="dark" radius="md" onClick={closeConfirm} fullWidth>
                 {translation.cancel}
               </Button>
-              <Button type="submit" color="red" loading={rejectMutation.isPending} radius="md" fullWidth>
+              <Button type="submit" color="clay" loading={rejectMutation.isPending} radius="md" fullWidth>
                 {translate("Confirm Rejection", "تأكيد الرفض")}
               </Button>
             </div>

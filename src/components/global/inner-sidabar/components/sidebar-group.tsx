@@ -34,7 +34,7 @@ export default function SidebarGroup({
   const className = [
     "group flex w-full items-center rounded-lg px-2.5 py-2 text-sm! font-semibold! transition-colors",
     collapsed ? "justify-center px-2" : "gap-2.5",
-    isActive ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100",
+    isActive ? "bg-teal-800 text-white" : "text-gray-600 hover:bg-gray-100",
   ].join(" ");
 
   const content = (

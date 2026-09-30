@@ -172,10 +172,10 @@ function ConversionUnitCard({
     <div className="relative min-w-36 overflow-hidden rounded-xl border border-gray-200 bg-white">
       <div className="flex flex-col gap-2 px-3 py-2.5 ps-3.5">
         <div className="flex items-center gap-1.5">
-          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-plum-50 text-plum-600">
             <Ruler size={11} strokeWidth={2.25} />
           </div>
-          <span className="text-xs font-semibold tracking-wide text-indigo-700 uppercase">{unitLabel}</span>
+          <span className="text-xs font-semibold tracking-wide text-plum-700 uppercase">{unitLabel}</span>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -346,7 +346,7 @@ function ItemRow({
         <Button
           type="button"
           variant="subtle"
-          color="red"
+          color="clay"
           size="xs"
           radius="md"
           p={6}

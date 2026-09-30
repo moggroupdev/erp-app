@@ -2,10 +2,10 @@ import type { LucideIcon } from "lucide-react";
 
 const iconStyles = {
   teal: "bg-teal-100 text-teal-700",
-  amber: "bg-amber-100 text-amber-700",
+  amber: "bg-ochre-100 text-ochre-700",
   slate: "bg-stone-100 text-stone-600",
-  sky: "bg-sky-100 text-sky-700",
-  rose: "bg-rose-100 text-rose-700",
+  sky: "bg-haze-100 text-haze-700",
+  rose: "bg-clay-100 text-clay-700",
 };
 
 export default function ReportCard({

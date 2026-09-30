@@ -96,22 +96,22 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                   </Table.Td>
                   <Table.Td>
                     {row.completedAt ? (
-                      <span className="inline-flex gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      <span className="inline-flex gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
                         <CheckCircle size={12} />
                         {translate("Completed", "مكتمل")}
                       </span>
                     ) : (
-                      <span className="inline-flex gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      <span className="inline-flex gap-1 rounded-full bg-ochre-50 px-2 py-0.5 text-xs font-medium text-ochre-700">
                         <Clock size={12} />
                         {translate("Open", "مفتوح")}
                       </span>
                     )}
                   </Table.Td>
-                  <Table.Td className="font-semibold text-orange-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
+                  <Table.Td className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</Table.Td>
                   <Table.Td
                     className={`font-semibold ${
-                      row.difference > 0 ? "text-emerald-700" : row.difference < 0 ? "text-rose-700" : "text-gray-800"
+                      row.difference > 0 ? "text-teal-700" : row.difference < 0 ? "text-clay-700" : "text-gray-800"
                     }`}
                   >
                     {formatMoney(row.difference)}
@@ -127,14 +127,14 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                 <Table.Th />
                 <Table.Th />
                 <Table.Th />
-                <Table.Th className="font-semibold text-orange-600">{formatMoney(totalCalculatedAmount)}</Table.Th>
+                <Table.Th className="font-semibold text-ochre-600">{formatMoney(totalCalculatedAmount)}</Table.Th>
                 <Table.Th className="font-semibold text-gray-800">{formatMoney(totalInvoicePurchases)}</Table.Th>
                 <Table.Th
                   className={`font-semibold ${
                     totalDifference > 0
-                      ? "text-emerald-700"
+                      ? "text-teal-700"
                       : totalDifference < 0
-                        ? "text-rose-700"
+                        ? "text-clay-700"
                         : "text-gray-800"
                   }`}
                 >
@@ -150,7 +150,7 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                 <Table.Th />
                 <Table.Th />
                 <Table.Th />
-                <Table.Th className="font-semibold text-orange-600">{formatMoney(totalAbsoluteDifference)}</Table.Th>
+                <Table.Th className="font-semibold text-ochre-600">{formatMoney(totalAbsoluteDifference)}</Table.Th>
               </Table.Tr>
             </Table.Tfoot>
           </Table>

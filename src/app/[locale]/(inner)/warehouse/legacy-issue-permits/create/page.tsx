@@ -222,7 +222,7 @@ function SortableItemRow({
         <Button
           type="button"
           variant="subtle"
-          color="red"
+          color="clay"
           size="xs"
           radius="md"
           p={6}
@@ -606,7 +606,7 @@ export default function Page() {
             checked={isCancelled}
             onChange={(e) => setIsCancelled(e.currentTarget.checked)}
             label={translate("Set as cancelled", "تعيين كإذن ملغي")}
-            color="red"
+            color="clay"
           />
         </section>
 

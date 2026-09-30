@@ -78,7 +78,7 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
           {
             key: translate("Status", "الحالة"),
             value: (
-              <Badge size="sm" variant="light" color="red" radius="md">
+              <Badge size="sm" variant="light" color="clay" radius="md">
                 {translate("Cancelled", "ملغي")}
               </Badge>
             ),

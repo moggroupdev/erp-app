@@ -77,8 +77,8 @@ function StatusPill({
   tone: "success" | "warning" | "neutral";
 }) {
   const tones = {
-    success: "bg-emerald-50 text-emerald-800",
-    warning: "bg-amber-50 text-amber-800",
+    success: "bg-teal-50 text-teal-800",
+    warning: "bg-ochre-50 text-ochre-800",
     neutral: "bg-stone-50 text-stone-700",
   };
 

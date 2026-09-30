@@ -237,7 +237,7 @@ export default function MaterialBomSection({
                                   <PermissionGuard permission={PERMISSIONS.DELETE_MANUFACTURED_MATERIAL_BOM}>
                                     <Menu.Item
                                       leftSection={<Trash2 size={14} />}
-                                      color="red"
+                                      color="clay"
                                       onClick={() => {
                                         deleteMutation.reset();
                                         setItemToDelete(item);

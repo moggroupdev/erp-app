@@ -17,7 +17,7 @@ import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/config";
 
-const ZERO_VALUE_CLASS = "text-orange-500";
+const ZERO_VALUE_CLASS = "text-ochre-600";
 
 type MaterialPriceSource = {
   unitPrice: number;

@@ -83,7 +83,7 @@ export default function Page() {
           errorTitle={translate("Error loading departments", "خطأ في تحميل الأقسام")}
           errorMessage={error}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: reload }}
-          className="rounded-lg border border-red-100"
+          className="rounded-lg border border-clay-100"
         />
       ) : departments.length === 0 ? (
         <EmptySection

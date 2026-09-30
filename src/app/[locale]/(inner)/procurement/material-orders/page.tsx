@@ -40,9 +40,9 @@ function getOrderStatusLabel(
   order: Pick<MaterialPurchaseOrderWithSupplier, "cancelledAt" | "completedAt">,
   translate: (en: string, ar: string) => string,
 ) {
-  if (order.cancelledAt) return { label: translate("Cancelled", "ملغي"), className: "text-red-600 font-bold" };
+  if (order.cancelledAt) return { label: translate("Cancelled", "ملغي"), className: "text-clay-600 font-bold" };
   if (order.completedAt) return { label: translate("Completed", "مكتمل"), className: "text-teal-600 font-bold" };
-  return { label: translate("Open", "مفتوح"), className: "text-orange-600 font-bold" };
+  return { label: translate("Open", "مفتوح"), className: "text-ochre-600 font-bold" };
 }
 
 export default function Page() {
@@ -253,7 +253,7 @@ export default function Page() {
                             <span className="text-gray-400">-</span>
                           )}
                         </Table.Td>
-                        <Table.Td className={hasMismatch ? "font-semibold text-orange-600" : undefined}>
+                        <Table.Td className={hasMismatch ? "font-semibold text-ochre-600" : undefined}>
                           {formatMoney(order.totalAmount)}
                         </Table.Td>
                         <Table.Td>

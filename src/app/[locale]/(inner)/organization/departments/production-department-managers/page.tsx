@@ -95,7 +95,7 @@ export default function Page() {
           errorTitle={translate("Error loading production departments", "خطأ في تحميل أقسام الإنتاج")}
           errorMessage={errorMessage}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
-          className="rounded-2xl border border-red-100 bg-white"
+          className="rounded-2xl border border-clay-100 bg-white"
         />
       ) : !assignments || assignments.length === 0 ? (
         <EmptySection

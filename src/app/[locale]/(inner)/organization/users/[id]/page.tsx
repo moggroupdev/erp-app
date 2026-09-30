@@ -124,9 +124,9 @@ export default function Page() {
                   </button>
 
                   {dangerZoneOpen && (
-                    <div className="mt-2.5 rounded-xl border border-red-50 bg-red-50/40 p-4">
-                      <h4 className="text-sm font-semibold text-red-700">{translate("Delete user", "حذف المستخدم")}</h4>
-                      <p className="mt-1.5 text-sm text-red-600/80">
+                    <div className="mt-2.5 rounded-xl border border-clay-50 bg-clay-50/40 p-4">
+                      <h4 className="text-sm font-semibold text-clay-700">{translate("Delete user", "حذف المستخدم")}</h4>
+                      <p className="mt-1.5 text-sm text-clay-600/80">
                         {translate(
                           "Delete this account. The user will no longer appear in active lists.",
                           "حذف هذا الحساب. لن يظهر المستخدم بعد ذلك في القوائم النشطة.",
@@ -134,7 +134,7 @@ export default function Page() {
                       </p>
                       <Button
                         mt="md"
-                        color="red"
+                        color="clay"
                         variant="light"
                         radius="md"
                         leftSection={<Trash2 size={15} />}

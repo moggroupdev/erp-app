@@ -63,7 +63,7 @@ export default function LowStockMaterialsTable({ data }: { data: MaterialsInvent
                   <Table.Td className="font-mono text-xs text-stone-500">{material.code}</Table.Td>
                   <Table.Td>{formatQuantity(material.quantity)}</Table.Td>
                   <Table.Td>{formatQuantity(material.minimumStock)}</Table.Td>
-                  <Table.Td className="font-semibold text-amber-700">{formatQuantity(material.deficit)}</Table.Td>
+                  <Table.Td className="font-semibold text-ochre-700">{formatQuantity(material.deficit)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

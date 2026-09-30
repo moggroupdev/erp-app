@@ -34,7 +34,7 @@ export default function ProductProductionRoutesSection({
 
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-haze-50 text-haze-600">
             <Route size={16} />
           </div>
           <div className="flex flex-col gap-1">
@@ -91,7 +91,7 @@ export default function ProductProductionRoutesSection({
                             strokeDasharray={`${(percentage / 100) * 219.9} 219.9`}
                           />
                         </svg>
-                        <div className="z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-blue-500 text-white shadow-sm">
+                        <div className="z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-haze-500 text-white shadow-sm">
                           <span className="text-[10px] leading-none font-medium opacity-80">
                             {translate("Step", "خطوة")}
                           </span>
@@ -103,7 +103,7 @@ export default function ProductProductionRoutesSection({
                         <p className="line-clamp-2 text-sm font-semibold text-gray-800">
                           {getProductionSubDepartmentLabel(route.productionSubDepartment, locale)}
                         </p>
-                        <p className="mt-1 text-xs font-medium text-blue-500 tabular-nums">
+                        <p className="mt-1 text-xs font-medium text-haze-600 tabular-nums">
                           {percentage}% {translate("of path", "من المسار")}
                         </p>
                       </div>
@@ -114,7 +114,7 @@ export default function ProductProductionRoutesSection({
                         className="mx-1 mb-16 flex w-8 shrink-0 items-center justify-center sm:mx-2 sm:w-10"
                         aria-hidden
                       >
-                        <ArrowRight size={18} className="text-blue-500 rtl:rotate-180" />
+                        <ArrowRight size={18} className="text-haze-600 rtl:rotate-180" />
                       </div>
                     )}
                   </div>

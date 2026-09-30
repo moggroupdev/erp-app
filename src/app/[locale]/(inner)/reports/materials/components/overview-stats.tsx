@@ -51,7 +51,7 @@ export default function OverviewStats({ overview }: { overview: MaterialsInvento
 
       <div className="rounded-3xl bg-white p-5 sm:p-6">
         <div className="mb-4 flex items-center gap-3">
-          <AlertTriangle size={18} className="text-amber-600" />
+          <AlertTriangle size={18} className="text-ochre-600" />
           <div className="flex flex-col gap-1">
             <h3 className="text-sm font-semibold text-stone-800">
               {translate("Stock Health Snapshot", "لمحة عن صحة المخزون")}
@@ -116,8 +116,8 @@ function KpiCard({
 function AlertPill({ label, count, tone }: { label: string; count: number; tone: "neutral" | "warning" | "info" }) {
   const tones = {
     neutral: " bg-stone-50 text-stone-700",
-    warning: " bg-amber-50 text-amber-800",
-    info: " bg-sky-50 text-sky-800",
+    warning: " bg-ochre-50 text-ochre-800",
+    info: " bg-haze-50 text-haze-800",
   };
 
   return (

@@ -36,7 +36,7 @@ const PAGE_TITLE = { en: "Create Materials Receipt", ar: "إنشاء سند اس
 const REMAINING_EPSILON = 1e-9;
 
 const UNSTYLED_INPUT_STYLES = { input: { minHeight: 0, height: "auto", padding: 0 } } as const;
-const QUANTITY_ERROR_CELL_CLASS = "bg-red-50";
+const QUANTITY_ERROR_CELL_CLASS = "bg-clay-50";
 const QUANTITY_CELL_CLASS = "transition-colors focus-within:bg-teal-50/60";
 
 type ReceiptDraftRow = {
@@ -134,7 +134,7 @@ function ReceiptItemRow({
   const unitOptions = getRowUnitOptions(row, locale);
 
   return (
-    <Table.Tr className={row.fullyReceived ? "bg-emerald-50/40 text-gray-500" : "text-gray-700"}>
+    <Table.Tr className={row.fullyReceived ? "bg-teal-50/40 text-gray-500" : "text-gray-700"}>
       <Table.Td className="min-w-56 font-semibold text-gray-800">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">

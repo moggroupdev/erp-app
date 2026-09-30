@@ -121,8 +121,8 @@ export default function ColorThemePrintDocument() {
             <h1 className="text-xl font-semibold text-gray-900">{translate("Color Theme", "نظام الألوان")}</h1>
             <p className="mt-1 text-[10px] text-gray-500">
               {translate(
-                "A4 reference for the proposed semantic palette.",
-                "مرجع A4 للوحة الألوان الدلالية المقترحة.",
+                "A4 reference for the registered semantic palette.",
+                "مرجع A4 للوحة الألوان الدلالية المسجلة.",
               )}
             </p>
           </div>

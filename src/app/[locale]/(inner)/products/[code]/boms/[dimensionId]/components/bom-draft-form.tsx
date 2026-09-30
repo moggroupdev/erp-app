@@ -463,7 +463,7 @@ export default function BomDraftForm({
                 const isMmRow = !!row.materialType && isManufacturedMaterial(row.materialType);
 
                 return (
-                  <Table.Tr key={row.key} className={isDuplicate ? "bg-red-50/70" : undefined}>
+                  <Table.Tr key={row.key} className={isDuplicate ? "bg-clay-50/70" : undefined}>
                     <Table.Td data-bom-row-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <SelectMaterial
                         value={row.materialCode}

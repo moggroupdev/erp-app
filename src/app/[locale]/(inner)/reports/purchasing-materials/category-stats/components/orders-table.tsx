@@ -151,12 +151,12 @@ export default function CategoryOrdersTable({
                     </Table.Td>
                     <Table.Td>
                       {row.completedAt ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
                           <CheckCircle size={12} />
                           {translate("Completed", "مكتمل")}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-ochre-50 px-2 py-0.5 text-xs font-medium text-ochre-700">
                           <Clock size={12} />
                           {translate("Open", "مفتوح")}
                         </span>
@@ -184,7 +184,7 @@ export default function CategoryOrdersTable({
           </div>
 
           <Alert
-            color="orange"
+            color="ochre"
             variant="light"
             radius="lg"
             icon={<AlertTriangle size={18} />}

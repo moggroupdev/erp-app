@@ -288,7 +288,7 @@ export default function LinkRequisitionsModal({
           </Badge>
         </div>
 
-        {localError && <p className="text-sm text-red-600">{localError}</p>}
+        {localError && <p className="text-sm text-clay-600">{localError}</p>}
 
         <div className="flex gap-2">
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>

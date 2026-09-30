@@ -61,7 +61,7 @@ function InvoicePurchasesFooter({ invoices, orderTotalAmount }: { invoices: Supp
     <Table.Tfoot className="bg-gray-50">
       <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
         <Table.Th colSpan={2}>{translate("Sum of invoice amounts", "مجموع مبالغ الفواتير")}</Table.Th>
-        <Table.Th className={hasMismatch ? "font-semibold text-orange-600" : undefined}>
+        <Table.Th className={hasMismatch ? "font-semibold text-ochre-600" : undefined}>
           {formatSum(totalPurchases)}
         </Table.Th>
         <Table.Th>{formatSum(totalDiscount)}</Table.Th>
@@ -75,7 +75,7 @@ function InvoicePurchasesFooter({ invoices, orderTotalAmount }: { invoices: Supp
             ? translate("Calculated items total (mismatch)", "إجمالي الأصناف المحسوب (غير متطابق)")
             : translate("Calculated items total", "إجمالي الأصناف المحسوب")}
         </Table.Th>
-        <Table.Th className={hasMismatch ? "font-semibold text-orange-600" : undefined}>
+        <Table.Th className={hasMismatch ? "font-semibold text-ochre-600" : undefined}>
           {formatMoney(orderTotalAmount)}
         </Table.Th>
         <Table.Th colSpan={4} />

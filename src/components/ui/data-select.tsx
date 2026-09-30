@@ -30,7 +30,7 @@ export default function DataSelect({
         value && clearable ? (
           <CircleX
             size={15}
-            className="cursor-pointer text-red-400 hover:text-red-500"
+            className="cursor-pointer text-clay-600 hover:text-clay-600"
             onClick={(e) => {
               e.stopPropagation(); // Prevents the dropdown from opening
               setValue(null);

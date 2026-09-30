@@ -78,7 +78,7 @@ export default function CategoryStatsEmpty() {
               <div className="mx-auto mt-3 h-2 w-16 rounded bg-stone-100" />
             </div>
             <div className="rounded-2xl border border-stone-200/80 bg-white p-3">
-              <div className="mx-auto mt-2 h-16 w-16 rounded-full border-[6px] border-stone-100 border-t-amber-200" />
+              <div className="mx-auto mt-2 h-16 w-16 rounded-full border-[6px] border-stone-100 border-t-ochre-200" />
               <div className="mx-auto mt-3 h-2 w-16 rounded bg-stone-100" />
             </div>
           </div>

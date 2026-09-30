@@ -21,7 +21,7 @@ import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conve
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading } from "../components";
 
-const ZERO_VALUE_CLASS = "text-orange-500";
+const ZERO_VALUE_CLASS = "text-ochre-600";
 /** Internal grid lines only — no outer table frame. Uses logical inline-end so RTL/LTR both work. */
 const TABLE_CELL_CLASS =
   "[&_td]:border-e [&_td]:border-b [&_td]:border-gray-300 [&_td]:px-1 [&_td]:py-1 [&_th]:border-e [&_th]:border-b [&_th]:border-gray-300 [&_th]:px-1 [&_th]:py-1 [&_tr>*:last-child]:border-e-0 [&_tbody>tr:last-child>*]:border-b-0";

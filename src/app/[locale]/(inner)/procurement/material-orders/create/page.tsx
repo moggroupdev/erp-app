@@ -164,7 +164,7 @@ function ItemRow({
   const fullyLinked = quantity !== null && row.allocations.length > 0 && Math.abs(linkedTotal - quantity) <= 1e-9;
 
   return (
-    <Table.Tr className={invalid ? "bg-red-50 [&>td]:bg-red-50" : undefined}>
+    <Table.Tr className={invalid ? "bg-clay-50 [&>td]:bg-clay-50" : undefined}>
       <Table.Td className="pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
       <Table.Td className="align-top!">
         <div className="flex flex-col gap-1.5 py-0.5">
@@ -311,7 +311,7 @@ function ItemRow({
         <Button
           type="button"
           variant="subtle"
-          color="red"
+          color="clay"
           size="xs"
           radius="md"
           p={6}

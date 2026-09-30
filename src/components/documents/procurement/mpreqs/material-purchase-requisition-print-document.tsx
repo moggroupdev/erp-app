@@ -221,7 +221,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
           emptyLabel={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")}
         />
         {missingPriceCount > 0 ? (
-          <p className="text-[9px] leading-relaxed text-amber-700">
+          <p className="text-[9px] leading-relaxed text-ochre-700">
             {translate(
               `${missingPriceCount} item(s) without a last purchase price were excluded from this total estimate.`,
               `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير الإجمالي.`,

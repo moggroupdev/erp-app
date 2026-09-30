@@ -28,7 +28,7 @@ export default function SidebarItem({ label, href, icon: Icon, isActive, collaps
       className={[
         "group flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12.75px] font-medium transition-colors",
         collapsed ? "justify-center px-2" : "",
-        isActive ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+        isActive ? "bg-haze-50 text-haze-700" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
       ].join(" ")}
     >
       <Icon size={15} className="shrink-0" />

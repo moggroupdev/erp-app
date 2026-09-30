@@ -57,7 +57,7 @@ export default function SidebarUserMenu({ collapsed, onNavigate }: { collapsed: 
             </Menu.Item>
 
             <Menu.Item
-              color="red"
+              color="clay"
               type="button"
               leftSection={<LogOut size={15} className={translate("rotate-180", "")} />}
               onClick={async () => {
@@ -124,7 +124,7 @@ export default function SidebarUserMenu({ collapsed, onNavigate }: { collapsed: 
               <Button
                 type="button"
                 variant="subtle"
-                color="red"
+                color="clay"
                 radius="md"
                 fullWidth
                 justify="flex-start"

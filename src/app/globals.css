@@ -3,19 +3,51 @@
 @theme {
   --animate-fade-in: fade-in 0.35s ease-out;
 
-  /* Light teal surfaces + mid teal text use teal-800 so chips, badges, and icons match Mantine. */
+  /* Primary — see color-theme.ts */
   --color-teal-50: #e2eceb;
   --color-teal-100: #d4e2e1;
   --color-teal-200: #bcd2d1;
   --color-teal-600: #115e59;
-  --color-teal-700: #115e59;
+  --color-teal-700: #134e4a;
+  --color-teal-800: #115e59;
+  --color-teal-900: #134e4a;
 
-  /* Soft blue (haze) — same wash/text pattern as teal. */
+  /* Information */
   --color-haze-50: #daf1fc;
   --color-haze-100: #bee5f9;
   --color-haze-200: #93d3f4;
   --color-haze-600: #2478b5;
-  --color-haze-700: #2478b5;
+  --color-haze-700: #1c6296;
+  --color-haze-800: #2478b5;
+  --color-haze-900: #1c6296;
+
+  /* Warning */
+  --color-ochre-50: #f7efe1;
+  --color-ochre-100: #f1dfc1;
+  --color-ochre-200: #e5c68f;
+  --color-ochre-600: #966516;
+  --color-ochre-700: #755015;
+  --color-ochre-800: #966516;
+  --color-ochre-900: #755015;
+
+  /* Danger */
+  --color-clay-50: #f7e9e7;
+  --color-clay-100: #f0d7d3;
+  --color-clay-200: #e5bcb6;
+  --color-clay-500: #ad5250;
+  --color-clay-600: #ad5250;
+  --color-clay-700: #863f3d;
+  --color-clay-800: #ad5250;
+  --color-clay-900: #863f3d;
+
+  /* Accent / categorization */
+  --color-plum-50: #f0ebf2;
+  --color-plum-100: #e2d8e6;
+  --color-plum-200: #ccbcd3;
+  --color-plum-600: #765c80;
+  --color-plum-700: #5c4664;
+  --color-plum-800: #765c80;
+  --color-plum-900: #5c4664;
 
   /* Logo navy and its light wash. */
   --color-navy: #052565;

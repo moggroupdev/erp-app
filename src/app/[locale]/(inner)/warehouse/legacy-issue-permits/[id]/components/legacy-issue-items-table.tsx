@@ -215,7 +215,7 @@ function DragOverlayRow({
         </colgroup>
       )}
       <Table.Tbody>
-        <Table.Tr className="bg-blue-50 text-gray-600 [&_td]:border-x-0 [&_td]:border-y-3 [&_td]:border-blue-500">
+        <Table.Tr className="bg-haze-50 text-gray-600 [&_td]:border-x-0 [&_td]:border-y-3 [&_td]:border-haze-600">
           <ItemRowCells item={item} index={index} canReorder isDragging getMainCategoryTitle={getMainCategoryTitle} />
         </Table.Tr>
       </Table.Tbody>

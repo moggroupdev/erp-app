@@ -26,11 +26,7 @@ function PaletteCard({
           <h2 className="text-base font-semibold text-gray-800">{translate(color.label.en, color.label.ar)}</h2>
           <p className="mt-1 text-xs text-gray-500">{translate(color.role.en, color.role.ar)}</p>
         </div>
-        <Badge
-          radius="md"
-          style={{ backgroundColor: color.shades[50], color: color.shades[700] }}
-          className="shrink-0 normal-case"
-        >
+        <Badge radius="md" variant="light" color={colorName} className="shrink-0 normal-case">
           {translate(color.role.en, color.role.ar)}
         </Badge>
       </div>
@@ -82,23 +78,14 @@ function ComponentSpecimen({
   translate: (en: string, ar: string) => string;
 }) {
   const color = colorTheme[colorName];
-  const textStyle = { color: color.shades[700] };
-  const surfaceStyle = { backgroundColor: color.shades[50], color: color.shades[700] };
 
   if (colorName === "teal") {
     return (
       <article className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
         <SpecimenHeader colorName={colorName} translate={translate} />
-        <Button style={{ backgroundColor: color.shades[600], color: "#ffffff" }}>
-          {translate(color.examples[0].en, color.examples[0].ar)}
-        </Button>
-        <TextInput
-          label={translate("Requisition code", "كود طلب الشراء")}
-          value="MPR-2026-0042"
-          readOnly
-          styles={{ input: { borderColor: color.shades[600] }, label: textStyle }}
-        />
-        <Tabs defaultValue="all" variant="outline" styles={{ tab: textStyle }}>
+        <Button color="teal">{translate(color.examples[0].en, color.examples[0].ar)}</Button>
+        <TextInput label={translate("Requisition code", "كود طلب الشراء")} value="MPR-2026-0042" readOnly color="teal" />
+        <Tabs defaultValue="all" variant="outline" color="teal">
           <TabsList>
             <TabsTab value="all">{translate("All", "الكل")}</TabsTab>
             <TabsTab value="active">{translate("Active", "نشط")}</TabsTab>
@@ -112,21 +99,17 @@ function ComponentSpecimen({
     return (
       <article className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
         <SpecimenHeader colorName={colorName} translate={translate} />
-        <Alert
-          icon={<Info size={16} />}
-          title={translate("Invoice PDF attached", "تم إرفاق ملف PDF للفاتورة")}
-          style={surfaceStyle}
-        >
+        <Alert color="haze" icon={<Info size={16} />} title={translate("Invoice PDF attached", "تم إرفاق ملف PDF للفاتورة")}>
           {translate("The source document is available to view or download.", "المستند المصدر متاح للعرض أو التنزيل.")}
         </Alert>
-        <Button variant="light" style={surfaceStyle} leftSection={<FileText size={15} />}>
+        <Button variant="light" color="haze" leftSection={<FileText size={15} />}>
           {translate("View audit history", "عرض سجل التدقيق")}
         </Button>
         <TextInput
           label={translate("System note", "ملاحظة النظام")}
           value={translate("Imported from spreadsheet", "تم الاستيراد من جدول بيانات")}
           readOnly
-          styles={{ input: { borderColor: color.shades[200] }, label: textStyle }}
+          color="haze"
         />
       </article>
     );
@@ -137,19 +120,19 @@ function ComponentSpecimen({
       <article className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
         <SpecimenHeader colorName={colorName} translate={translate} />
         <Alert
+          color="ochre"
           icon={<CircleAlert size={16} />}
           title={translate("Pending manager approval", "بانتظار اعتماد المدير")}
-          style={surfaceStyle}
         >
           {translate("The requisition cannot proceed until it is approved.", "لا يمكن متابعة طلب الشراء حتى يتم اعتماده.")}
         </Alert>
-        <div className="flex items-center justify-between gap-3 rounded-lg p-3" style={surfaceStyle}>
+        <div className="flex items-center justify-between gap-3 rounded-lg bg-ochre-50 p-3 text-ochre-700">
           <span className="text-xs font-medium">{translate("Low-stock level", "مستوى المخزون المنخفض")}</span>
-          <Badge style={{ backgroundColor: color.shades[600], color: "#ffffff" }} radius="md">
+          <Badge color="ochre" radius="md">
             25%
           </Badge>
         </div>
-        <Progress value={25} size="lg" radius="xl" styles={{ section: { backgroundColor: color.shades[600] } }} />
+        <Progress value={25} size="lg" radius="xl" color="ochre" />
       </article>
     );
   }
@@ -158,11 +141,7 @@ function ComponentSpecimen({
     return (
       <article className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
         <SpecimenHeader colorName={colorName} translate={translate} />
-        <Alert
-          icon={<CircleAlert size={16} />}
-          title={translate("Submission rejected", "تم رفض الإرسال")}
-          style={surfaceStyle}
-        >
+        <Alert color="clay" icon={<CircleAlert size={16} />} title={translate("Submission rejected", "تم رفض الإرسال")}>
           {translate("Correct the highlighted fields before submitting again.", "صحح الحقول المحددة قبل إعادة الإرسال.")}
         </Alert>
         <TextInput
@@ -170,9 +149,9 @@ function ComponentSpecimen({
           value="INV-1427"
           error={translate("This invoice number already exists", "رقم الفاتورة مستخدم بالفعل")}
           readOnly
-          styles={{ input: { borderColor: color.shades[600] }, label: textStyle, error: textStyle }}
+          color="clay"
         />
-        <Button style={{ backgroundColor: color.shades[600], color: "#ffffff" }} leftSection={<Trash2 size={15} />}>
+        <Button color="clay" leftSection={<Trash2 size={15} />}>
           {translate("Delete purchase order", "حذف أمر التوريد")}
         </Button>
       </article>
@@ -182,8 +161,8 @@ function ComponentSpecimen({
   return (
     <article className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
       <SpecimenHeader colorName={colorName} translate={translate} />
-      <div className="flex items-center gap-3 rounded-lg p-3" style={surfaceStyle}>
-        <ThemeIcon variant="filled" radius="md" style={{ backgroundColor: color.shades[600], color: "#ffffff" }}>
+      <div className="flex items-center gap-3 rounded-lg bg-plum-50 p-3 text-plum-700">
+        <ThemeIcon variant="filled" radius="md" color="plum">
           <PackageSearch size={16} />
         </ThemeIcon>
         <div>
@@ -193,17 +172,17 @@ function ComponentSpecimen({
       </div>
       <div className="flex flex-wrap gap-2">
         {color.examples.slice(1, 4).map((example) => (
-          <Badge key={example.en} radius="md" style={surfaceStyle} className="normal-case">
+          <Badge key={example.en} radius="md" variant="light" color="plum" className="normal-case">
             {translate(example.en, example.ar)}
           </Badge>
         ))}
       </div>
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between text-xs" style={textStyle}>
+      <div className="flex flex-col gap-2 text-plum-700">
+        <div className="flex items-center justify-between text-xs">
           <span>{translate("Materials report", "تقرير المواد")}</span>
           <span>64%</span>
         </div>
-        <Progress value={64} size="lg" radius="xl" styles={{ section: { backgroundColor: color.shades[600] } }} />
+        <Progress value={64} size="lg" radius="xl" color="plum" />
       </div>
     </article>
   );
@@ -215,7 +194,7 @@ function SpecimenHeader({ colorName, translate }: { colorName: ColorThemeName; t
   return (
     <div className="flex items-center justify-between gap-2">
       <h3 className="text-sm font-semibold text-gray-800">{translate(color.label.en, color.label.ar)}</h3>
-      <Badge radius="md" style={{ backgroundColor: color.shades[50], color: color.shades[700] }} className="normal-case">
+      <Badge radius="md" variant="light" color={colorName} className="normal-case">
         {translate(color.role.en, color.role.ar)}
       </Badge>
     </div>
@@ -232,8 +211,8 @@ export default async function Page({ params }: LocalePageProps) {
       header={{
         title: translate("Color Theme Lab", "مختبر ألوان الواجهة"),
         subTitle: translate(
-          "A development-only preview of the calm, semantic palette proposed for the ERP.",
-          "معاينة خاصة بالتطوير للوحة الألوان الهادئة والدلالية المقترحة لنظام ERP.",
+          "Development preview of the registered semantic palette (Mantine + Tailwind).",
+          "معاينة تطويرية للوحة الألوان الدلالية المسجلة (Mantine + Tailwind).",
         ),
         backLink: true,
         sideElements: <ColorThemePrintDocument />,
@@ -243,14 +222,14 @@ export default async function Page({ params }: LocalePageProps) {
         <section className="rounded-xl bg-teal-50 p-4 sm:p-5">
           <p className="text-sm font-semibold text-teal-800">
             {translate(
-              "Preview only — no existing screens have been recolored.",
-              "هذه معاينة فقط — لم يتم تعديل ألوان الشاشات الحالية.",
+              "All five semantic colors are registered in the shared theme.",
+              "الألوان الدلالية الخمسة مسجلة في الثيم المشترك.",
             )}
           </p>
           <p className="mt-1 text-xs text-teal-700">
             {translate(
-              "Teal and haze are already active. Ochre, clay, and plum are candidates to approve before they are added to the shared theme.",
-              "الأخضر المزرق والأزرق الضبابي مستخدمان بالفعل. أما المغرة والطيني والبرقوقي فهي ألوان مرشحة للاعتماد قبل إضافتها إلى الثيم المشترك.",
+              "Use this page to verify Mantine variants and Tailwind tokens before rolling changes into feature screens.",
+              "استخدم هذه الصفحة للتحقق من متغيرات Mantine ورموز Tailwind قبل تطبيق التغييرات على شاشات النظام.",
             )}
           </p>
         </section>

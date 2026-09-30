@@ -284,7 +284,7 @@ export default function AddQuotationItemsModal({
                   const selected = isMaterialGroupSelected(group);
                   const hasError = group.items.some((item) => errorItemId === item.requisitionItemId);
                   return (
-                    <Table.Tr key={group.materialCode} className={`text-gray-600 ${hasError ? "bg-red-50" : ""}`}>
+                    <Table.Tr key={group.materialCode} className={`text-gray-600 ${hasError ? "bg-clay-50" : ""}`}>
                       <Table.Td>
                         <Checkbox
                           checked={selected}
@@ -317,7 +317,7 @@ export default function AddQuotationItemsModal({
           </div>
         )}
 
-        {localError && <p className="text-xs leading-[1.75] text-red-600">{localError}</p>}
+        {localError && <p className="text-xs leading-[1.75] text-clay-600">{localError}</p>}
 
         <div className="flex gap-2">
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>

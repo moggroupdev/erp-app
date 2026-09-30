@@ -79,7 +79,7 @@ export default function AddressCard({
               <h3 className="truncate text-base font-semibold text-gray-900">{headline}</h3>
 
               <span
-                className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${isInEgypt ? "bg-amber-100 text-amber-800" : "bg-blue-100 text-blue-700"}`}
+                className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${isInEgypt ? "bg-ochre-100 text-ochre-800" : "bg-haze-100 text-haze-700"}`}
               >
                 {translate(isInEgypt ? "In Egypt" : "Outside Egypt", isInEgypt ? "داخل مصر" : "خارج مصر")}
               </span>

@@ -353,7 +353,7 @@ export default function RoleForm({
                               allDomainSelected
                                 ? "bg-haze-100 text-haze-700"
                                 : selectedInDomain > 0
-                                  ? "bg-amber-100 text-amber-800"
+                                  ? "bg-ochre-100 text-ochre-800"
                                   : "bg-gray-100 text-gray-500"
                             }`}
                           >
@@ -436,7 +436,7 @@ export default function RoleForm({
 
       <Modal opened={confirmOpened} onClose={closeConfirm} title={translate("Confirm role update", "تأكيد تحديث الدور")}>
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-4 text-amber-900">
+          <div className="flex items-start gap-3 rounded-xl bg-ochre-50 p-4 text-ochre-900">
             <TriangleAlert size={18} className="mt-0.5 shrink-0" />
             <p className="text-sm leading-[1.75]">
               {translate(

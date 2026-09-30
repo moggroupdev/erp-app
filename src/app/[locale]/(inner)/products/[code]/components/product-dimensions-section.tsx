@@ -103,7 +103,7 @@ export default function ProductDimensionsSection({
 
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-haze-50 text-haze-600">
             <Box size={16} />
           </div>
           <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export default function ProductDimensionsSection({
             </Table.Thead>
             <Table.Tbody>
               {dimensions.map((dimension) => (
-                <Table.Tr key={dimension.id} className={dimension.isDefault ? "bg-blue-50/60" : "text-gray-600"}>
+                <Table.Tr key={dimension.id} className={dimension.isDefault ? "bg-haze-50/60" : "text-gray-600"}>
                   <Table.Td className="text-gray-600">{product.title}</Table.Td>
                   {showLengthDepth && (
                     <>
@@ -182,7 +182,7 @@ export default function ProductDimensionsSection({
                       <Badge
                         size="sm"
                         variant="light"
-                        color="blue"
+                        color="haze"
                         radius="md"
                         leftSection={<Star size={12} className="fill-current" />}
                       >
@@ -199,7 +199,7 @@ export default function ProductDimensionsSection({
                           <button
                             type="button"
                             onClick={() => handleOpenDefaultModal(dimension.id)}
-                            className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-blue-100 hover:text-blue-600"
+                            className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-haze-100 hover:text-haze-600"
                           >
                             <Star size={14} />
                           </button>
@@ -234,7 +234,7 @@ export default function ProductDimensionsSection({
                             component={Link}
                             href={getLocalizedHref(`/products/${product.code}/boms/${dimension.id}`)}
                             variant="light"
-                            color="blue"
+                            color="haze"
                             size="xs"
                             radius="md"
                           >
@@ -279,7 +279,7 @@ export default function ProductDimensionsSection({
             <Button variant="light" color="dark" radius="md" onClick={handleCloseDefaultModal} fullWidth>
               {translation.cancel}
             </Button>
-            <Button type="submit" color="blue" loading={setDefaultDimensionMutation.isPending} radius="md" fullWidth>
+            <Button type="submit" color="haze" loading={setDefaultDimensionMutation.isPending} radius="md" fullWidth>
               {translation.confirm}
             </Button>
           </div>

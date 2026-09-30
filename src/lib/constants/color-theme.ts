@@ -8,11 +8,7 @@ type ThemeColor = {
   shades: Record<50 | 100 | 200 | 600 | 700, string>;
 };
 
-/**
- * The proposed application palette. Only teal and haze are registered in the
- * active theme today; the remaining colors are previewed in the development
- * color lab before being adopted by application screens.
- */
+/** Canonical semantic palette for Mantine, Tailwind, and the development color lab. */
 export const colorTheme: Record<ColorThemeName, ThemeColor> = {
   teal: {
     label: { en: "Teal", ar: "أخضر مزرق" },

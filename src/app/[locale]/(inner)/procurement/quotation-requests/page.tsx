@@ -200,7 +200,7 @@ function ItemRow({
         <Button
           type="button"
           variant="subtle"
-          color="red"
+          color="clay"
           size="xs"
           radius="md"
           p={6}

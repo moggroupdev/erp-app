@@ -17,7 +17,7 @@ export default function CopyButton({ text, className }: { text: string; classNam
       title={label}
       onClick={() => copyToClipboard(text, setCopied)}
       className={`rounded-md p-1 transition-colors ${
-        copied ? "bg-teal-50 text-teal-600" : "bg-blue-50 text-blue-400 hover:text-blue-600"
+        copied ? "bg-teal-50 text-teal-600" : "bg-haze-50 text-haze-600 hover:text-haze-600"
       } ${className ?? ""}`}
     >
       {copied ? <Check size={12.5} strokeWidth={2.5} /> : <Copy size={12.5} />}
