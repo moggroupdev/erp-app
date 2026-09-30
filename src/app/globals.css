@@ -70,3 +70,55 @@
     opacity: 1;
   }
 }
+
+/* One size smaller than the desktop scale, below Tailwind's sm breakpoint. */
+@media (max-width: 639px) {
+  .mantine-Button-root {
+    --button-height-xs: 26px;
+    --button-height-sm: 30px;
+    --button-height-md: 36px;
+    --button-height-lg: 42px;
+    --button-height-xl: 50px;
+
+    --button-height-compact-xs: 20px;
+    --button-height-compact-sm: 22px;
+    --button-height-compact-md: 26px;
+    --button-height-compact-lg: 30px;
+    --button-height-compact-xl: 34px;
+
+    --button-padding-x-xs: 10px;
+    --button-padding-x-sm: 14px;
+    --button-padding-x-md: 18px;
+    --button-padding-x-lg: 22px;
+    --button-padding-x-xl: 26px;
+
+    --button-padding-x-compact-xs: 6px;
+    --button-padding-x-compact-sm: 7px;
+    --button-padding-x-compact-md: 8px;
+    --button-padding-x-compact-lg: 10px;
+    --button-padding-x-compact-xl: 12px;
+
+    /* Default size is sm. Label steps down one notch; line-height stays at 1. */
+    font-size: var(--mantine-font-size-xs);
+  }
+
+  .mantine-Button-root[data-size="xs"],
+  .mantine-Button-root[data-size="compact-xs"] {
+    font-size: calc(0.6875rem * var(--mantine-scale));
+  }
+
+  .mantine-Button-root[data-size="md"],
+  .mantine-Button-root[data-size="compact-md"] {
+    font-size: var(--mantine-font-size-sm);
+  }
+
+  .mantine-Button-root[data-size="lg"],
+  .mantine-Button-root[data-size="compact-lg"] {
+    font-size: var(--mantine-font-size-md);
+  }
+
+  .mantine-Button-root[data-size="xl"],
+  .mantine-Button-root[data-size="compact-xl"] {
+    font-size: var(--mantine-font-size-lg);
+  }
+}
