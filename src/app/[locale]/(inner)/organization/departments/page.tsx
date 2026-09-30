@@ -10,6 +10,7 @@ import useDepartments from "@/hooks/reference/use-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type DepartmentWithManager } from "@/types/departments";
 import { Menu } from "@mantine/core";
+import { Factory, Plus } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -53,18 +54,22 @@ export default function Page() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <RefetchButton isFetching={loading} onRefetch={reload} />
           <ActionsMenu>
             {canAddDepartment && (
-              <Menu.Item onClick={openModal}>{translate("Add New Department", "إضافة قسم جديد")}</Menu.Item>
+              <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
+                {translate("Add new department", "إضافة قسم جديد")}
+              </Menu.Item>
             )}
+            {canAddDepartment && canReadProductionDepartmentManagers && <Menu.Divider />}
             {canReadProductionDepartmentManagers && (
               <Menu.Item
                 component={Link}
                 href={getLocalizedHref("/organization/departments/production-department-managers")}
+                leftSection={<Factory size={14} />}
               >
-                {translate("Show Production Departments", "عرض أقسام الإنتاج")}
+                {translate("Show production departments", "عرض أقسام الإنتاج")}
               </Menu.Item>
             )}
           </ActionsMenu>

@@ -107,7 +107,7 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canAddRequisition && (
@@ -116,7 +116,7 @@ export default function Page() {
                   href={getLocalizedHref("/procurement/material-requisitions/create")}
                   leftSection={<Plus size={14} />}
                 >
-                  {translate("Create", "إنشاء")}
+                  {translate("Create purchase requisition", "إنشاء طلب شراء")}
                 </Menu.Item>
               )}
             </ActionsMenu>

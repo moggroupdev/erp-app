@@ -139,7 +139,7 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canPrintSuppliersList && (
@@ -153,6 +153,7 @@ export default function Page() {
                   {allSuppliers && <SuppliersListPrintDocument suppliers={allSuppliers} />}
                 </PrintDocument>
               )}
+              {canPrintSuppliersList && canAddSupplier && <Menu.Divider />}
               {canAddSupplier && (
                 <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
                   {translate("Add New Supplier", "إضافة مورد جديد")}

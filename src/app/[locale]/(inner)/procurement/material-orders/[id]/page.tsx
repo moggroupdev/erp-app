@@ -119,13 +119,13 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={refetch} />
             <ActionsMenu>
               {order && (
                 <PrintDocument
                   title={`${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} - ${order.code}`}
-                  buttonLabel={translate("Print", "طباعة")}
+                  buttonLabel={translate("Print purchase order", "طباعة أمر التوريد")}
                   buttonType="menu"
                   paperWidth={210}
                   paperHeight={297}

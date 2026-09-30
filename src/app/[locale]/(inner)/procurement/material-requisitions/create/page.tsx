@@ -384,7 +384,7 @@ export default function Page() {
             <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
             <ActionsMenu>
               <Menu.Item leftSection={<Plus size={14} />} onClick={addRow}>
-                {translate("Add Row", "إضافة صف")}
+                {translate("Add requisition row", "إضافة صف لطلب الشراء")}
               </Menu.Item>
             </ActionsMenu>
           </div>

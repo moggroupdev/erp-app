@@ -106,7 +106,7 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canCreatePermit && (
@@ -115,7 +115,7 @@ export default function Page() {
                   href={getLocalizedHref("/warehouse/legacy-issue-permits/create")}
                   leftSection={<Plus size={14} />}
                 >
-                  {translate("Create", "إنشاء")}
+                  {translate("Create issue permit", "إنشاء إذن صرف")}
                 </Menu.Item>
               )}
             </ActionsMenu>

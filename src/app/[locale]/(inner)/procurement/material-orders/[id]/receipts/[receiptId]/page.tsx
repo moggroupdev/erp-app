@@ -77,14 +77,15 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canCreateIvt && (
                 <Menu.Item leftSection={<PackagePlus size={14} />} onClick={openIvtModal}>
-                  {translate("Create اذن إضافة", "إنشاء إذن إضافة")}
+                  {translate("Create inventory receipt", "إنشاء إذن إضافة")}
                 </Menu.Item>
               )}
+              {canCreateIvt && receipt && receipt.items.length > 0 && <Menu.Divider />}
               {receipt && receipt.items.length > 0 && (
                 <Menu.Item leftSection={<ClipboardCheck size={14} />} onClick={openInspectionModal}>
                   {translate("Inspection Report", "محضر الفحص")}

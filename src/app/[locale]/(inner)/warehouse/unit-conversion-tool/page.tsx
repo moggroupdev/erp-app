@@ -18,7 +18,7 @@ import {
 } from "@/lib/helpers/unit-conversion";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import { Button, Menu, NumberInput, Table } from "@mantine/core";
-import { Calculator, Layers, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
+import { Eraser, Plus, Ruler, Scale, Tag, Trash2, Wallet } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import ActionsMenu from "@/components/ui/actions-menu";
 import DataSelect from "@/components/ui/data-select";
@@ -455,8 +455,8 @@ export default function Page() {
         confirmNavigate: confirmNavigation,
         sideElements: (
           <ActionsMenu>
-            <Menu.Item onClick={clearAll} disabled={!isDirty}>
-              {translate("Clear", "مسح")}
+            <Menu.Item leftSection={<Eraser size={14} />} onClick={clearAll} disabled={!isDirty}>
+              {translate("Clear calculator", "مسح الحاسبة")}
             </Menu.Item>
           </ActionsMenu>
         ),

@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Menu } from "@mantine/core";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -93,13 +93,13 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {requisition && (
                 <PrintDocument
                   title={`${translate("Material Purchase Requisition", "طلب شراء خامات")} - ${requisition.code}`}
-                  buttonLabel={translate("Print", "طباعة")}
+                  buttonLabel={translate("Print requisition", "طباعة طلب الشراء")}
                   buttonType="menu"
                   paperWidth={297}
                   paperHeight={210}
@@ -113,16 +113,22 @@ export default function Page() {
                   />
                 </PrintDocument>
               )}
+              {(canCreateOrder && canAddOrder) || (requisition && editable && canUpdateRequisition) ? (
+                <Menu.Divider />
+              ) : null}
               {canCreateOrder && canAddOrder && (
                 <Menu.Item
                   component={Link}
                   href={getLocalizedHref(`/procurement/material-orders/create?requisitionId=${requisition!.id}`)}
+                  leftSection={<Plus size={14} />}
                 >
                   {translate("Create purchase order", "إنشاء أمر توريد")}
                 </Menu.Item>
               )}
               {requisition && editable && canUpdateRequisition && (
-                <Menu.Item onClick={openHeaderModal}>{translate("Edit", "تعديل")}</Menu.Item>
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={openHeaderModal}>
+                  {translate("Edit requisition", "تعديل طلب الشراء")}
+                </Menu.Item>
               )}
             </ActionsMenu>
           </div>
@@ -149,7 +155,7 @@ export default function Page() {
                 <ActionsMenu>
                   {editable && canUpdateRequisition && (
                     <Menu.Item leftSection={<Plus size={14} />} onClick={handleAddItem}>
-                      {translate("Add Item", "إضافة بند")}
+                      {translate("Add requisition item", "إضافة بند لطلب الشراء")}
                     </Menu.Item>
                   )}
                 </ActionsMenu>

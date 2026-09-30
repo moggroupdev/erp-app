@@ -113,7 +113,7 @@ export default function MaterialBomSection({
           <ActionsMenu>
             {canAddBom && (
               <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
-                {hasBom ? translate("Add Item", "إضافة بند") : translate("Create BOM", "إنشاء قائمة مواد")}
+                {hasBom ? translate("Add BOM item", "إضافة بند لقائمة المواد") : translate("Create BOM", "إنشاء قائمة مواد")}
               </Menu.Item>
             )}
           </ActionsMenu>

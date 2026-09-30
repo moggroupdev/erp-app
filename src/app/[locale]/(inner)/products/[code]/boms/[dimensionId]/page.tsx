@@ -542,7 +542,7 @@ export default function Page() {
                       {canAddBom && (
                         <>
                           <Menu.Item leftSection={<Plus size={14} />} onClick={handleOpenAppendModal}>
-                            {translate("Add Item", "إضافة بند")}
+                            {translate("Add BOM item", "إضافة بند لقائمة المواد")}
                           </Menu.Item>
                           <Menu.Item
                             component={Link}

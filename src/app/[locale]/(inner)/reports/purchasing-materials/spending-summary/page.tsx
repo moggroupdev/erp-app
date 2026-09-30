@@ -110,7 +110,7 @@ export default function Page() {
         title={reportTitle}
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {data && !isFetching && !errorMessage && (

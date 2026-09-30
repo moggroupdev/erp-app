@@ -103,7 +103,7 @@ export default function Page() {
           "عرض الأدوار وصلاحيات الوصول عبر المؤسسة.",
         ),
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canAddRole && (

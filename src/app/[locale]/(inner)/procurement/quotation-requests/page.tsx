@@ -460,7 +460,7 @@ export default function Page() {
           <ActionsMenu>
             <PrintDocument
               buttonType="menu"
-              buttonLabel={translate("Print", "طباعة")}
+              buttonLabel={translate("Print quotation request", "طباعة طلب عرض السعر")}
               title={printTitle}
               paperWidth={210}
               paperHeight={297}
@@ -595,8 +595,9 @@ export default function Page() {
               <Menu.Item leftSection={<ListPlus size={14} />} onClick={openAddItems}>
                 {translate("Add from requisitions", "إضافة من طلبات الشراء")}
               </Menu.Item>
+              <Menu.Divider />
               <Menu.Item leftSection={<Plus size={14} />} onClick={addRow}>
-                {translate("Add Row", "إضافة صف")}
+                {translate("Add quotation row", "إضافة صف لطلب العرض")}
               </Menu.Item>
             </ActionsMenu>
           }

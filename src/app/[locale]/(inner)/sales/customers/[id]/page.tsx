@@ -13,6 +13,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Menu } from "@mantine/core";
+import { MapPin, Pencil } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
@@ -76,11 +77,13 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
             <ActionsMenu>
               {customer && canUpdateCustomer && (
-                <Menu.Item onClick={openUpdateModal}>{translate("Edit", "تعديل")}</Menu.Item>
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
+                  {translate("Edit customer", "تعديل العميل")}
+                </Menu.Item>
               )}
             </ActionsMenu>
           </div>
@@ -122,7 +125,9 @@ export default function Page() {
 
                 <ActionsMenu>
                   {canUpdateCustomer && (
-                    <Menu.Item onClick={openAddressModal}>{translate("Add New Address", "إضافة عنوان جديد")}</Menu.Item>
+                    <Menu.Item leftSection={<MapPin size={14} />} onClick={openAddressModal}>
+                      {translate("Add new address", "إضافة عنوان جديد")}
+                    </Menu.Item>
                   )}
                 </ActionsMenu>
               </div>

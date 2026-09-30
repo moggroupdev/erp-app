@@ -14,7 +14,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Button, Menu } from "@mantine/core";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -83,11 +83,13 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={loading} onRefetch={() => userQuery.refetch()} />
             <ActionsMenu>
               {user && !user.isAdmin && !user.deletedAt && canUpdateUser && (
-                <Menu.Item onClick={openUpdateModal}>{translate("Edit", "تعديل")}</Menu.Item>
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
+                  {translate("Edit user", "تعديل المستخدم")}
+                </Menu.Item>
               )}
             </ActionsMenu>
           </div>

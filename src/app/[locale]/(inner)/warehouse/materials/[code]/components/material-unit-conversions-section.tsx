@@ -52,7 +52,7 @@ export default function MaterialUnitConversionsSection({ material }: { material:
         <ActionsMenu>
           {canUpdateMaterial && (
             <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
-              {translate("Add Unit", "إضافة وحدة")}
+              {translate("Add alternate unit", "إضافة وحدة بديلة")}
             </Menu.Item>
           )}
         </ActionsMenu>

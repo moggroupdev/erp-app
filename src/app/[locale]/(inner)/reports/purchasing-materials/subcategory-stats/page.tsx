@@ -139,7 +139,7 @@ export default function Page() {
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
           subCategoryId ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
               <ActionsMenu>
                 {data && !isFetching && !errorMessage && (

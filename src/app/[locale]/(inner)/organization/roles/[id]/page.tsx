@@ -13,6 +13,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Menu } from "@mantine/core";
+import { Pencil } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
@@ -59,12 +60,16 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={handleRetry} />
             <ActionsMenu>
               {role && canUpdateRole && (
-                <Menu.Item component={Link} href={getLocalizedHref(`/organization/roles/${id}/edit`)}>
-                  {translate("Edit", "تعديل")}
+                <Menu.Item
+                  component={Link}
+                  href={getLocalizedHref(`/organization/roles/${id}/edit`)}
+                  leftSection={<Pencil size={14} />}
+                >
+                  {translate("Edit role", "تعديل الدور")}
                 </Menu.Item>
               )}
             </ActionsMenu>

@@ -85,15 +85,16 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
             {material && (
               <ActionsMenu>
                 {canUpdateMaterial && (
                   <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
-                    {translate("Edit", "تعديل")}
+                    {translate("Edit material", "تعديل المادة")}
                   </Menu.Item>
                 )}
+                {canUpdateMaterial && (canSetMaterialType || canSetMarketPrice) && <Menu.Divider />}
                 {canSetMaterialType && (
                   <Menu.Item leftSection={<Repeat size={14} />} onClick={openTypeModal}>
                     {translate("Change Material Type", "تغيير نوع المادة")}

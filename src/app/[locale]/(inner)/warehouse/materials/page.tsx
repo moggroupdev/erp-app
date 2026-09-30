@@ -162,7 +162,7 @@ export default function Page() {
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canPrintMaterialsList && (
@@ -170,6 +170,7 @@ export default function Page() {
                   {translate("Print Materials List", "طباعة قائمة المواد")}
                 </Menu.Item>
               )}
+              {canPrintMaterialsList && canAddMaterial && <Menu.Divider />}
               {canAddMaterial && (
                 <Menu.Item leftSection={<Plus size={14} />} onClick={openModal}>
                   {translate("Add New Material", "إضافة مادة جديدة")}

@@ -7,7 +7,7 @@ import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/productio
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { ProductProductionRoute } from "@/types/product";
 import { Menu } from "@mantine/core";
-import { ArrowRight, Plus, Route } from "lucide-react";
+import { ArrowRight, Pencil, Plus, Route } from "lucide-react";
 import EmptySection from "@/components/ui/sections/empty";
 import ActionsMenu from "@/components/ui/actions-menu";
 import ProductProductionRoutesModal from "@/components/global/data-modals/product-production-routes-modal";
@@ -54,7 +54,7 @@ export default function ProductProductionRoutesSection({
           {canUpdateProduct && (
             <Menu.Item
               onClick={openModal}
-              leftSection={productionRoutes.length > 0 ? null : <Plus size={14} />}
+              leftSection={productionRoutes.length > 0 ? <Pencil size={14} /> : <Plus size={14} />}
             >
               {productionRoutes.length > 0
                 ? translate("Edit Routes", "تعديل المسارات")

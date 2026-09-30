@@ -249,7 +249,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
                 {translate("Download PDF", "تنزيل PDF")}
               </Menu.Item>
             )}
-
+            {hasPdf && canUpdate && <Menu.Divider />}
             {canUpdate && (
               <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
                 {(props) => (

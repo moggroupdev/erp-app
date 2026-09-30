@@ -80,7 +80,7 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         sideElements: (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
             {product && (
               <ActionsMenu>
@@ -89,6 +89,7 @@ export default function Page() {
                     {translate("Edit Basic Information", "تعديل المعلومات الأساسية")}
                   </Menu.Item>
                 )}
+                {canUpdateProduct && canSetPricingFactor && <Menu.Divider />}
                 {canSetPricingFactor && (
                   <Menu.Item leftSection={<Tag size={14} />} onClick={openPricingFactorModal}>
                     {translate("Set Pricing Factor", "تعيين معامل التسعير")}
