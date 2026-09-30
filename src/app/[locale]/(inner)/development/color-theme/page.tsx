@@ -3,6 +3,7 @@ import { CircleAlert, FileText, Info, PackageSearch, Trash2 } from "lucide-react
 import { notFound } from "next/navigation";
 import LayoutBox from "@/components/ui/layout-box";
 import { colorTheme, colorThemeOrder, type ColorThemeName } from "@/lib/constants/color-theme";
+import ColorThemePrintDocument from "./color-theme-print-document";
 import type { LocalePageProps } from "@/lib/i18n/types";
 import { getI18nFromParams } from "@/lib/i18n/utils";
 
@@ -235,6 +236,7 @@ export default async function Page({ params }: LocalePageProps) {
           "معاينة خاصة بالتطوير للوحة الألوان الهادئة والدلالية المقترحة لنظام ERP.",
         ),
         backLink: true,
+        sideElements: <ColorThemePrintDocument />,
       }}
     >
       <main className="flex flex-col gap-8">
