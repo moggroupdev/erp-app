@@ -32,6 +32,10 @@
 }
 
 @layer base {
+  ::selection {
+    background-color: #052565;
+    color: #fff;
+  }
   * {
     font-family: var(--font-alexandria);
   }
