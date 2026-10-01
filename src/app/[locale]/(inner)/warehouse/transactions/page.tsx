@@ -108,7 +108,7 @@ export default function Page() {
       header={{
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="light" />,
       }}
     >
       <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">

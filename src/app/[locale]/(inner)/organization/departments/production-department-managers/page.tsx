@@ -85,7 +85,7 @@ export default function Page() {
           </p>
         </div>
 
-        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="outline" />
       </header>
 
       {isFetching ? (
@@ -95,7 +95,7 @@ export default function Page() {
           errorTitle={translate("Error loading production departments", "خطأ في تحميل أقسام الإنتاج")}
           errorMessage={errorMessage}
           button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
-          className="rounded-2xl border border-clay-100 bg-white"
+          className="border-clay-100 rounded-2xl border bg-white"
         />
       ) : !assignments || assignments.length === 0 ? (
         <EmptySection

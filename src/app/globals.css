@@ -105,9 +105,37 @@
   }
 }
 
+/* Matches Mantine Button default size (sm) and radius="md", including the mobile scale below.
+   Width follows height so icon buttons stay square when horizontal padding would otherwise stretch them. */
+.refetch-button-sized {
+  --button-height-sm: calc(2.25rem * var(--mantine-scale));
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--button-height-sm);
+  height: var(--button-height-sm);
+  padding: 0;
+  border-radius: var(--mantine-radius-md);
+  line-height: 1;
+}
+
+.mantine-Button-root.icon-square {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--button-height, var(--button-height-sm));
+  height: var(--button-height, var(--button-height-sm));
+  padding-inline: 0;
+}
+
 /* One size smaller than the desktop scale, below Tailwind's sm breakpoint. */
 @media (max-width: 639px) {
-  .mantine-Button-root {
+  .mantine-Button-root,
+  .refetch-button-sized {
     --button-height-xs: 26px;
     --button-height-sm: 30px;
     --button-height-md: 36px;

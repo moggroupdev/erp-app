@@ -28,11 +28,12 @@ export default function LayoutBox({
   return (
     <div className="root-flex-1 flex min-h-full flex-col gap-4 rounded-[20px] bg-white p-4 shadow-lg sm:p-6">
       {header && (
-        <header className="flex flex-wrap items-start justify-between gap-2">
+        <header className="flex flex-wrap items-center justify-between gap-2 sm:items-start">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               {header.backLink && (
                 <Button
+                  className="inline-flex! size-10! shrink-0 items-center justify-center p-0! max-sm:size-[34px]! max-sm:[&_svg]:size-4!"
                   onClick={() => {
                     if (header.confirmNavigate && !header.confirmNavigate()) return;
                     if (typeof header.backLink === "string") router.push(header.backLink);
@@ -43,8 +44,6 @@ export default function LayoutBox({
                   color="dark"
                   radius={20}
                   p={0}
-                  h={40}
-                  w={40}
                 >
                   <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0", "180deg")})` }} />
                 </Button>

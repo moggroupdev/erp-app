@@ -247,10 +247,8 @@ export default function SelectMaterial({
         </div>
         <Tooltip label={translate("Browse materials", "تصفح المواد")} withArrow>
           <ActionIcon
-            variant="light"
-            color="teal"
-            radius="md"
             size={36}
+            variant="light"
             onMouseDown={(event) => {
               event.preventDefault();
               preserveSelectSearchRef.current = true;

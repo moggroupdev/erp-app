@@ -425,7 +425,7 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} />,
+        sideElements: <RefetchButton isFetching={loading} onRefetch={() => bomQuery.refetch()} variant="light" />,
       }}
     >
       {loading ? (

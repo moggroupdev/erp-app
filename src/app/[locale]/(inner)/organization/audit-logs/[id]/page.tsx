@@ -44,7 +44,7 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="light" />,
       }}
     >
       {isFetching ? (
