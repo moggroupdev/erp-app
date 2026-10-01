@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { LayoutDashboard } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -10,11 +11,12 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import type { DashboardPeriod } from "@/types/reports";
-import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
+import ReportPageHeader from "@/components/ui/report-page-header";
 import PeriodSwitch from "./components/period-switch";
 import QuickStats from "./components/quick-stats";
+import DashboardSkeleton from "./components/dashboard-skeleton";
 
 const PAGE_TITLE = { en: "Dashboard", ar: "لوحة التحكم" };
 
@@ -39,28 +41,34 @@ export default function Page() {
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1>{translate(PAGE_TITLE.en, PAGE_TITLE.ar)}</h1>
-          <p>{translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <PeriodSwitch period={period} onChange={setPeriod} />
-          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-        </div>
-      </header>
+    <div className="space-y-6">
+      <ReportPageHeader
+        breadcrumbs={[{ label: PAGE_TITLE }]}
+        icon={LayoutDashboard}
+        title={translate(PAGE_TITLE.en, PAGE_TITLE.ar)}
+        subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
+        sideElement={
+          <div className="flex flex-wrap items-center gap-3">
+            <PeriodSwitch period={period} onChange={setPeriod} />
+            <RefetchButton variant="light" isFetching={isFetching} onRefetch={() => refetch()} />
+          </div>
+        }
+      />
 
-      {isFetching ? (
-        <LoadingSection />
-      ) : errorMessage ? (
-        <ErrorSection
-          errorTitle={translate("Error loading dashboard", "خطأ في تحميل لوحة التحكم")}
-          errorMessage={errorMessage}
-          button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
-        />
+      {!data ? (
+        errorMessage ? (
+          <ErrorSection
+            errorTitle={translate("Error loading dashboard", "خطأ في تحميل لوحة التحكم")}
+            errorMessage={errorMessage}
+            button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
+          />
+        ) : (
+          <DashboardSkeleton />
+        )
       ) : (
-        data && <QuickStats stats={data} period={period} />
+        <div className={isFetching ? "opacity-70" : undefined}>
+          <QuickStats stats={data} period={period} />
+        </div>
       )}
     </div>
   );

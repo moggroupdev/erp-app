@@ -21,7 +21,7 @@ export default function PeriodSwitch({
   };
 
   return (
-    <div className="flex rounded-xl bg-gray-100 p-1" role="tablist">
+    <div className="flex rounded-2xl bg-gray-100 p-1" role="tablist">
       {PERIODS.map((item) => {
         const selected = item === period;
         return (
@@ -31,7 +31,9 @@ export default function PeriodSwitch({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(item)}
-            className={`rounded-lg px-3 py-1.5 text-sm ${selected ? "bg-white font-medium text-haze-700" : "text-gray-600"}`}
+            className={`rounded-xl px-3 py-1.5 text-sm transition-colors ${
+              selected ? "bg-white font-medium text-haze-700 shadow-sm" : "text-gray-600 hover:text-gray-800"
+            }`}
           >
             {labels[item]}
           </button>
