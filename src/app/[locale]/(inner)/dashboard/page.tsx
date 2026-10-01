@@ -10,7 +10,6 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import type { DashboardPeriod } from "@/types/reports";
-import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -40,18 +39,18 @@ export default function Page() {
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   return (
-    <LayoutBox
-      header={{
-        title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        subTitle: translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar),
-        sideElements: (
-          <div className="flex flex-wrap items-center gap-3">
-            <PeriodSwitch period={period} onChange={setPeriod} />
-            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-          </div>
-        ),
-      }}
-    >
+    <div className="flex flex-col gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1>{translate(PAGE_TITLE.en, PAGE_TITLE.ar)}</h1>
+          <p>{translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <PeriodSwitch period={period} onChange={setPeriod} />
+          <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+        </div>
+      </header>
+
       {isFetching ? (
         <LoadingSection />
       ) : errorMessage ? (
@@ -63,6 +62,6 @@ export default function Page() {
       ) : (
         data && <QuickStats stats={data} period={period} />
       )}
-    </LayoutBox>
+    </div>
   );
 }

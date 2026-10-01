@@ -69,9 +69,9 @@ export default function StatusDonut({
   if (embedded) return <div className="flex flex-col gap-4">{body}</div>;
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-5">
+    <section className="flex flex-col gap-4 rounded-2xl bg-white p-5">
       <header className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-gray-600">{icon}</div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600">{icon}</div>
         <div className="flex flex-col gap-1">
           <h2 className="text-sm font-semibold text-gray-800">{title}</h2>
           <p className="text-xs text-gray-500">{description}</p>

@@ -117,10 +117,10 @@ function StockCard({
   const { locale, translate } = useI18n();
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-5">
+    <section className="flex flex-col gap-4 rounded-2xl bg-white p-5">
       <header className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-gray-600">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600">
             <ShieldCheck size={18} />
           </div>
           <div className="flex flex-col gap-1">
@@ -174,9 +174,9 @@ function RecentPermits({
   const { translate } = useI18n();
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-5">
+    <section className="flex flex-col gap-4 rounded-2xl bg-white p-5">
       <header className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-gray-600">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600">
           <History size={18} />
         </div>
         <div className="flex flex-col gap-1">
@@ -194,7 +194,7 @@ function RecentPermits({
               <ProtectedLink
                 permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
                 href={`/warehouse/legacy-issue-permits/${permit.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3"
+                className="flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3"
               >
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="truncate text-sm font-medium text-gray-800">{permit.issuePermitNumber}</span>
@@ -252,7 +252,7 @@ function KpiTile({
   tone: keyof typeof toneClass;
 }) {
   return (
-    <div className="rounded-2xl bg-gray-50 p-5">
+    <div className="rounded-2xl bg-white p-5">
       <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneClass[tone]}`}>{icon}</div>
       <p className="mt-4 text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
       <p className="mt-1 text-2xl font-semibold text-gray-800">{value}</p>
@@ -263,7 +263,7 @@ function KpiTile({
 
 function MiniStat({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-white px-4 py-3">
+    <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
       <span className="text-gray-500">{icon}</span>
       <div className="flex flex-col">
         <span className="text-xs text-gray-500">{label}</span>
