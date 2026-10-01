@@ -11,7 +11,6 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { FolderKanban } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
-import ActionsMenu from "@/components/ui/actions-menu";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
@@ -84,11 +83,10 @@ export default function Page() {
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
           mainCategoryId ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:gap-4">
               <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-              <ActionsMenu>
-                {data && !isFetching && !errorMessage && (
-                  <PrintDocument title={printTitle} buttonType="menu" paperWidth={210} paperHeight={297}>
+              {data && !isFetching && !errorMessage && (
+                <PrintDocument title={printTitle} buttonType="icon" paperWidth={210} paperHeight={297}>
                   <MaterialsReportPrintDocument
                     title={reportTitle}
                     scopeLabel={data.category.title}
@@ -106,9 +104,8 @@ export default function Page() {
                     topMaterialsByQuantity={data.topMaterialsByQuantity}
                     lowStockMaterials={data.lowStockMaterials}
                   />
-                  </PrintDocument>
-                )}
-              </ActionsMenu>
+                </PrintDocument>
+              )}
             </div>
           ) : undefined
         }

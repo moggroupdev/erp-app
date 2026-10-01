@@ -11,7 +11,6 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { FileDiff } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
-import ActionsMenu from "@/components/ui/actions-menu";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
@@ -96,11 +95,10 @@ export default function Page() {
         title={reportTitle}
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            <ActionsMenu>
-              {data && !isFetching && !errorMessage && (
-                <PrintDocument title={printTitle} buttonType="menu" paperWidth={210} paperHeight={297}>
+            {data && !isFetching && !errorMessage && (
+              <PrintDocument title={printTitle} buttonType="icon" paperWidth={210} paperHeight={297}>
                 <PurchasingMaterialsTotalAmountMismatchesPrintDocument
                   title={reportTitle}
                   startDate={from}
@@ -109,9 +107,8 @@ export default function Page() {
                   orders={data.orders}
                   completedWithoutInvoiceTotal={data.completedWithoutInvoiceTotal}
                 />
-                </PrintDocument>
-              )}
-            </ActionsMenu>
+              </PrintDocument>
+            )}
           </div>
         }
       />

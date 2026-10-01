@@ -141,12 +141,14 @@ export default function PrintDocument({
     </Button>
   ) : (
     <button
-      title={label}
+      type="button"
       onClick={handlePrint}
       disabled={loading}
-      className="rounded-md text-xs text-gray-800 hover:text-gray-800/75 disabled:opacity-50"
+      title={label}
+      aria-label={label}
+      className="text-gray-600 hover:text-gray-800 disabled:cursor-not-allowed disabled:text-gray-300"
     >
-      {loadingIcon}
+      {loading ? <Printer size={14} className="animate-pulse" /> : <Printer size={14} />}
     </button>
   );
 

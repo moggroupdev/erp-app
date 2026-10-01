@@ -16,7 +16,6 @@ import { resolveDisplayUnit, toDisplayQuantity, toDisplayUnitPrice } from "@/lib
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { History } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
-import ActionsMenu from "@/components/ui/actions-menu";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
@@ -148,11 +147,10 @@ export default function Page() {
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
           materialCode ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:gap-4">
               <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-              <ActionsMenu>
-                {displayData && !isFetching && !errorMessage && (
-                  <PrintDocument title={printTitle} buttonType="menu" paperWidth={210} paperHeight={297}>
+              {displayData && !isFetching && !errorMessage && (
+                <PrintDocument title={printTitle} buttonType="icon" paperWidth={210} paperHeight={297}>
                   <PurchasingMaterialsPriceHistoryPrintDocument
                     title={reportTitle}
                     startDate={from}
@@ -163,9 +161,8 @@ export default function Page() {
                     summary={displayData.summary}
                     entries={displayData.entries}
                   />
-                  </PrintDocument>
-                )}
-              </ActionsMenu>
+                </PrintDocument>
+              )}
             </div>
           ) : undefined
         }
