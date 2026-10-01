@@ -97,18 +97,14 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
 
       <header className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="border-haze-100 text-haze-600 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-white">
-            <Shield size={28} />
+          <div className="border-haze-100 text-haze-600 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-white">
+            <Shield size={24} />
           </div>
           <div className="flex flex-col gap-1">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">{role.name}</h2>
+            <h2>{role.name}</h2>
             {role.description && <p className="max-w-2xl text-sm text-gray-500">{role.description}</p>}
           </div>
         </div>
-
-        <Badge size="lg" variant="light" color="haze" radius="md" leftSection={<KeyRound size={14} />}>
-          {translate(`${permissions.length} Permissions`, `${permissions.length} صلاحيات`)}
-        </Badge>
       </header>
 
       <Divider variant="dashed" />
@@ -116,21 +112,21 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
       <DetailsTable rows={rows} />
 
       <section className="mt-4 flex flex-col gap-4 bg-white">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="border-haze-100 bg-haze-50 text-haze-600 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
-              <KeyRound size={18} />
-            </div>
-            <div>
-              <h4 className="text-base font-semibold text-gray-900">{translate("Permissions", "الصلاحيات")}</h4>
-              <p className="mt-0.5 text-sm text-gray-500">
-                {translate("Access rights for this role, grouped by domain.", "صلاحيات هذا الدور، مجمّعة حسب المجال.")}
-              </p>
-            </div>
+        <div className="flex items-start gap-3">
+          <div className="border-haze-100 bg-haze-50 text-haze-600 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
+            <KeyRound size={18} />
           </div>
-          <span className="bg-haze-50 text-haze-700 rounded-full px-2.5 py-1 text-xs font-medium">
-            {translate(`${permissions.length} selected`, `${permissions.length} محددة`)}
-          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="text-base font-semibold text-gray-900">{translate("Permissions", "الصلاحيات")}</h4>
+              <span className="bg-haze-50 text-haze-700 rounded-full px-2.5 py-1 text-xs font-medium">
+                {translate(`${permissions.length} selected`, `${permissions.length} محددة`)}
+              </span>
+            </div>
+            <p className="mt-0.5 text-sm text-gray-500">
+              {translate("Access rights for this role, grouped by domain.", "صلاحيات هذا الدور، مجمّعة حسب المجال.")}
+            </p>
+          </div>
         </div>
 
         {permissionGroups.length === 0 ? (
@@ -140,7 +136,10 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
         ) : (
           <div className="flex flex-col gap-3">
             {permissionGroups.map((group) => (
-              <div key={group.domain} className="flex flex-col gap-2.5 rounded-xl border border-gray-100 bg-gray-50/60 p-4">
+              <div
+                key={group.domain}
+                className="flex flex-col gap-2.5 rounded-xl border border-gray-100/50 bg-gray-50/60 p-4"
+              >
                 <div className="flex items-center justify-between gap-2 border-b border-dashed border-gray-200 pb-2">
                   <div className="flex items-center gap-2">
                     <span className="bg-haze-600 h-4 w-1 rounded-full" aria-hidden />
@@ -150,9 +149,15 @@ export default function RoleDetails({ role }: { role: RoleWithCreatorWithPermiss
                     {group.permissions.length}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {group.permissions.map((permission) => (
-                    <Badge key={permission} variant="light" color="haze" radius="md" className="normal-case">
+                    <Badge
+                      key={permission}
+                      variant="light"
+                      color="haze"
+                      radius="md"
+                      className="normal-case max-sm:[--badge-fz:var(--badge-fz-xs)]! max-sm:[--badge-height:var(--badge-height-xs)]! max-sm:[--badge-padding-x:var(--badge-padding-x-xs)]!"
+                    >
                       {getPermissionLabel(permission, locale)}
                     </Badge>
                   ))}
