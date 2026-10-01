@@ -87,9 +87,9 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-teal-50/15 p-4 sm:p-5">
+    <section className="flex flex-col gap-4 rounded-xl bg-haze-50/15 p-4 sm:p-5">
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-gray-200">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-haze-700 ring-1 ring-gray-200">
           <Icon size={18} />
         </div>
         <div className="min-w-0">
@@ -126,7 +126,7 @@ function ItemRow({
   return (
     <Table.Tr>
       <Table.Td className="w-8 min-w-8 text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td className="min-w-56 transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="min-w-56 transition-colors focus-within:bg-haze-50/60">
         <SelectMaterial
           value={row.materialCode}
           setValue={(next) => {
@@ -143,7 +143,7 @@ function ItemRow({
           withBrowseModal
         />
       </Table.Td>
-      <Table.Td className="min-w-52 transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="min-w-52 transition-colors focus-within:bg-haze-50/60">
         <TextInput
           value={row.specifications}
           onChange={(e) => onUpdate(row.key, { specifications: e.target.value })}
@@ -153,7 +153,7 @@ function ItemRow({
           styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
         />
       </Table.Td>
-      <Table.Td className="min-w-20 transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="min-w-20 transition-colors focus-within:bg-haze-50/60">
         <NumberInput
           value={row.quantity}
           onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
@@ -167,7 +167,7 @@ function ItemRow({
           styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
         />
       </Table.Td>
-      <Table.Td className="min-w-20 transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="min-w-20 transition-colors focus-within:bg-haze-50/60">
         {showUnitSelect(row) ? (
           <DataSelect
             value={row.unitOfMeasurementSelected}
