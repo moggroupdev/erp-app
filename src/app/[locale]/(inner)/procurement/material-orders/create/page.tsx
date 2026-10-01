@@ -20,10 +20,9 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialUnitConversionSummary } from "@/types/material";
-import { Badge, Button, Menu, NumberInput, Table, TextInput } from "@mantine/core";
+import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
 import { ArrowLeft, ClipboardList, Link2, Package, Plus, Trash2, X } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
-import ActionsMenu from "@/components/ui/actions-menu";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
 import { MPO_DELIVERY_TIMINGS, type MpoDeliveryTiming } from "@/lib/constants/enums/mpo-delivery-timings";
@@ -803,11 +802,9 @@ export default function Page() {
                 </p>
               </div>
             </div>
-            <ActionsMenu>
-              <Menu.Item leftSection={<Plus size={14} />} onClick={openAdd}>
-                {translate("Add from requisitions", "إضافة من طلبات الشراء")}
-              </Menu.Item>
-            </ActionsMenu>
+            <Button type="button" color="teal" leftSection={<Plus size={14} />} onClick={openAdd}>
+              {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+            </Button>
           </div>
           <div className="px-5 py-5">
             {rows.length === 0 ? (
