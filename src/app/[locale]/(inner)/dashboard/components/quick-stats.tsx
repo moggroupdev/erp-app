@@ -2,17 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import {
-  Boxes,
-  ClipboardList,
-  HandCoins,
-  History,
-  PackageSearch,
-  ShieldCheck,
-  ShoppingCart,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { Boxes, ClipboardList, HandCoins, History, PackageSearch, ShieldCheck, ShoppingCart, Users } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { localeDirections } from "@/lib/i18n/config";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -40,11 +30,24 @@ export default function QuickStats({ stats, period }: { stats: DashboardQuickSta
   const current = stats.periods[period];
   const requisitionTotal = current.requisitions.pending + current.requisitions.approved + current.requisitions.rejected;
   const orderTotal = current.purchaseOrders.open + current.purchaseOrders.completed + current.purchaseOrders.cancelled;
-  const permitTotal = current.legacyIssuePermits.active + current.legacyIssuePermits.cancelled;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        <KpiTile
+          label={translate("Requisitions", "طلبات الشراء")}
+          value={requisitionTotal}
+          hint={translate(`${current.requisitions.pending} pending`, `${current.requisitions.pending} قيد الانتظار`)}
+          icon={<ClipboardList size={18} />}
+          tone="teal"
+        />
+        <KpiTile
+          label={translate("Purchase orders", "أوامر التوريد")}
+          value={orderTotal}
+          hint={translate(`${current.purchaseOrders.open} open`, `${current.purchaseOrders.open} مفتوحة`)}
+          icon={<ShoppingCart size={18} />}
+          tone="clay"
+        />
         <KpiTile
           label={translate("New customers", "عملاء جدد")}
           value={current.customersCreated}
@@ -58,38 +61,6 @@ export default function QuickStats({ stats, period }: { stats: DashboardQuickSta
           hint={translate("Created in this period.", "أُضيفوا خلال هذه الفترة.")}
           icon={<HandCoins size={18} />}
           tone="plum"
-        />
-        <KpiTile
-          label={translate("Invoice total", "إجمالي الفواتير")}
-          value={formatMoney(current.invoices.totalAmount, currency)}
-          hint={translate(`${current.invoices.count} invoices`, `${current.invoices.count} فاتورة`)}
-          icon={<Wallet size={18} />}
-          tone="teal"
-          valueClassName="text-haze-800"
-        />
-        <KpiTile
-          label={translate("Requisitions", "طلبات الشراء")}
-          value={requisitionTotal}
-          hint={translate(`${current.requisitions.pending} pending`, `${current.requisitions.pending} قيد الانتظار`)}
-          icon={<ClipboardList size={18} />}
-          tone="ochre"
-        />
-        <KpiTile
-          label={translate("Purchase orders", "أوامر التوريد")}
-          value={orderTotal}
-          hint={translate(`${current.purchaseOrders.open} open`, `${current.purchaseOrders.open} مفتوحة`)}
-          icon={<ShoppingCart size={18} />}
-          tone="haze"
-        />
-        <KpiTile
-          label={translate("Issue permits", "أذونات الصرف")}
-          value={permitTotal}
-          hint={translate(
-            `${current.legacyIssuePermits.cancelled} cancelled`,
-            `${current.legacyIssuePermits.cancelled} ملغاة`,
-          )}
-          icon={<History size={18} />}
-          tone="clay"
         />
       </div>
 
@@ -137,16 +108,26 @@ function KpiTile({
   valueClassName?: string;
 }) {
   return (
-    <article className="relative overflow-hidden rounded-b-3xl bg-white p-5 sm:p-6">
+    <article className="relative min-w-0 overflow-hidden rounded-b-3xl bg-white p-4 xl:p-5">
       <div className={`absolute inset-x-0 top-0 h-1 ${accentClass[tone]}`} />
 
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
-          <p className={`mt-2 text-3xl font-semibold tracking-tight ${valueClassName}`}>{value}</p>
-          <p className="mt-2 text-xs leading-relaxed text-gray-500">{hint}</p>
+      <div className="relative flex min-w-0 flex-col gap-1.5 sm:gap-2">
+        <div className="flex items-start justify-between gap-2">
+          <p className="min-w-0 text-[11px] leading-snug font-medium tracking-wide text-gray-500 uppercase sm:text-xs">
+            {label}
+          </p>
+          <div
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg sm:h-8 sm:w-8 xl:h-7 xl:w-7 2xl:h-9 2xl:w-9 [&_svg]:size-3.5 sm:[&_svg]:size-4 2xl:[&_svg]:size-[18px] ${toneClass[tone]}`}
+          >
+            {icon}
+          </div>
         </div>
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${toneClass[tone]}`}>{icon}</div>
+        <p
+          className={`text-xl leading-none font-semibold tracking-tight wrap-break-word sm:text-2xl xl:text-lg 2xl:text-2xl ${valueClassName}`}
+        >
+          {value}
+        </p>
+        <p className="text-[11px] leading-snug text-gray-500 sm:text-xs">{hint}</p>
       </div>
     </article>
   );

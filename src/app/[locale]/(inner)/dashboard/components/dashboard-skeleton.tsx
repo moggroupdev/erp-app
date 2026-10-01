@@ -5,8 +5,8 @@ import { Skeleton } from "@mantine/core";
 export default function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
-        {Array.from({ length: 6 }).map((_, index) => (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
           <div key={index} className="rounded-3xl bg-white p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-1 flex-col gap-3">

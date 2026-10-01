@@ -19,14 +19,6 @@ export type DashboardPeriodStats = {
   productsCreated: number;
   requisitions: DashboardStatusCounts;
   purchaseOrders: DashboardOrderCounts;
-  invoices: {
-    count: number;
-    totalAmount: number;
-  };
-  legacyIssuePermits: {
-    active: number;
-    cancelled: number;
-  };
 };
 
 export type DashboardStock = {
