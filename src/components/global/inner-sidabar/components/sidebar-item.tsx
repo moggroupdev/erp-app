@@ -12,11 +12,20 @@ type SidebarItemProps = {
   icon: LucideIcon;
   isActive: boolean;
   collapsed?: boolean;
+  compact?: boolean;
   nested?: boolean;
   onClick?: () => void;
 };
 
-export default function SidebarItem({ label, href, icon: Icon, isActive, collapsed = false, onClick }: SidebarItemProps) {
+export default function SidebarItem({
+  label,
+  href,
+  icon: Icon,
+  isActive,
+  collapsed = false,
+  compact = false,
+  onClick,
+}: SidebarItemProps) {
   const { translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
   const localizedLabel = translate(label.en, label.ar);
@@ -27,12 +36,13 @@ export default function SidebarItem({ label, href, icon: Icon, isActive, collaps
       href={getLocalizedHref(href)}
       onClick={onClick}
       className={[
-        "group flex items-center gap-2 rounded-lg px-2 py-1.5 text-[12.75px] font-medium transition-colors",
+        "group flex items-center gap-2 rounded-lg px-2 py-1.5 font-medium transition-colors",
+        compact ? "text-xs" : "text-[12.75px]",
         collapsed ? "justify-center px-2" : "",
         isActive ? sidebarNavTheme.itemActive : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
       ].join(" ")}
     >
-      <Icon size={15} className="shrink-0" />
+      <Icon size={compact ? 13 : 15} className="shrink-0" />
       {!collapsed && <span className="truncate">{localizedLabel}</span>}
     </Link>
   );

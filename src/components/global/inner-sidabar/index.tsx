@@ -104,7 +104,7 @@ export default function InnerSidebar() {
               }}
             >
               <hr className="border-gray-200" />
-              <SidebarBody collapsed={false} onNavigate={closeDrawer} />
+              <SidebarBody collapsed={false} compact onNavigate={closeDrawer} />
             </Drawer.Body>
           </div>
         </Drawer.Content>
