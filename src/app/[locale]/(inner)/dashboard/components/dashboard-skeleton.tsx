@@ -5,7 +5,7 @@ import { Skeleton } from "@mantine/core";
 export default function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="rounded-3xl bg-white p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
@@ -20,20 +20,12 @@ export default function DashboardSkeleton() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
-        <article className="overflow-hidden rounded-3xl bg-white xl:col-span-3">
-          <ChartHeaderSkeleton />
-          <div className="px-5 py-5 sm:px-6">
-            <Skeleton height={280} radius="lg" />
-          </div>
-        </article>
-        <article className="overflow-hidden rounded-3xl bg-white xl:col-span-2">
-          <ChartHeaderSkeleton />
-          <div className="px-5 py-5 sm:px-6">
-            <Skeleton height={280} radius="lg" />
-          </div>
-        </article>
-      </div>
+      <article className="overflow-hidden rounded-3xl bg-white">
+        <ChartHeaderSkeleton />
+        <div className="px-5 py-5 sm:px-6">
+          <Skeleton height={220} radius="lg" />
+        </div>
+      </article>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {Array.from({ length: 2 }).map((_, index) => (

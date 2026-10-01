@@ -1,6 +1,6 @@
 "use client";
 
-import { cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import {
   Boxes,
@@ -30,7 +30,6 @@ import ProtectedLink from "@/components/ui/protected-link";
 import ReportCard from "../../reports/materials/components/report-card";
 import ReportLinkCard from "../../reports/components/report-link-card";
 import type { DashboardPeriod, DashboardPeriodStats, DashboardQuickStats } from "@/types/reports";
-import ActivityChart from "./activity-chart";
 import StatusDistribution from "./status-distribution";
 
 const { teal, ochre, clay } = semanticPalette;
@@ -45,7 +44,7 @@ export default function QuickStats({ stats, period }: { stats: DashboardQuickSta
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <KpiTile
           label={translate("New customers", "عملاء جدد")}
           value={current.customersCreated}
@@ -94,14 +93,7 @@ export default function QuickStats({ stats, period }: { stats: DashboardQuickSta
         />
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-5">
-        <div className="h-full xl:col-span-3">
-          <ActivityChart stats={current} />
-        </div>
-        <div className="h-full xl:col-span-2">
-          <StatusDistribution stats={current} />
-        </div>
-      </div>
+      <StatusDistribution stats={current} />
 
       <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-2">
         <StockHealth stats={current} stock={stats.stock} currency={currency} />
