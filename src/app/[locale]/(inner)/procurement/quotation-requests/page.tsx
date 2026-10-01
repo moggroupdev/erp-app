@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { Button, Menu, NumberInput, SegmentedControl, Table, Textarea, TextInput } from "@mantine/core";
+import { Button, NumberInput, SegmentedControl, Table, Textarea, TextInput } from "@mantine/core";
 import type { LucideIcon } from "lucide-react";
 import { Building2, ClipboardList, FilePenLine, ListPlus, NotebookPen, Plus, Printer, Trash2, Truck } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
-import ActionsMenu from "@/components/ui/actions-menu";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
 import PrintDocument from "@/components/ui/print-document";
@@ -80,28 +79,23 @@ function Section({
   icon: Icon,
   title,
   description,
-  action,
   children,
 }: {
   icon: LucideIcon;
   title: string;
   description?: string;
-  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <section className="flex flex-col gap-4 rounded-xl bg-teal-50/15 p-4 sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-gray-200">
-            <Icon size={18} />
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-            {description ? <p className="mt-1 max-w-2xl text-xs leading-[1.75] text-gray-500">{description}</p> : null}
-          </div>
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-teal-700 ring-1 ring-gray-200">
+          <Icon size={18} />
         </div>
-        {action ? <div className="shrink-0">{action}</div> : null}
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+          {description ? <p className="mt-1 max-w-2xl text-xs leading-[1.75] text-gray-500">{description}</p> : null}
+        </div>
       </div>
       {children}
     </section>
@@ -457,34 +451,6 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
         confirmNavigate: confirmNavigation,
-        sideElements: (
-          <ActionsMenu>
-            <PrintDocument
-              buttonType="menu"
-              buttonLabel={translate("Print quotation request", "طباعة طلب عرض السعر")}
-              title={printTitle}
-              paperWidth={210}
-              paperHeight={297}
-              icon={<Printer size={14} />}
-              renderTrigger={({ onClick, disabled, label, icon }) => (
-                <Menu.Item onClick={() => handlePrintClick(onClick)} disabled={disabled} leftSection={icon}>
-                  {label}
-                </Menu.Item>
-              )}
-            >
-              {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
-                <SupplierQuotationRequestPrintDocument
-                  supplierDisplayName={supplierDisplayName}
-                  supplierContactName={supplierContactName.trim() || null}
-                  notes={notes.trim() || null}
-                  items={printItems}
-                  preparedBy={preparedBy}
-                  purchasingDepartmentManager={purchasingDepartmentManager}
-                />
-              ) : null}
-            </PrintDocument>
-          </ActionsMenu>
-        ),
       }}
     >
       <div className="flex flex-col gap-5">
@@ -591,17 +557,6 @@ export default function Page() {
             "Add the materials to request prices for. You can include specifications, quantity, and unit per row.",
             "أضف المواد المطلوب تسعيرها. يمكنك إضافة المواصفات والكمية والوحدة لكل صف.",
           )}
-          action={
-            <ActionsMenu>
-              <Menu.Item leftSection={<ListPlus size={14} />} onClick={openAddItems}>
-                {translate("Add from requisitions", "إضافة من طلبات الشراء")}
-              </Menu.Item>
-              <Menu.Divider />
-              <Menu.Item leftSection={<Plus size={14} />} onClick={addRow}>
-                {translate("Add quotation row", "إضافة صف لطلب العرض")}
-              </Menu.Item>
-            </ActionsMenu>
-          }
         >
           <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
             <Table withColumnBorders className="w-full min-w-160" horizontalSpacing="xs" verticalSpacing="xs">
@@ -639,17 +594,18 @@ export default function Page() {
                 ))}
               </Table.Tbody>
               <Table.Tfoot className="bg-gray-50">
-                <Table.Tr className="h-9">
+                <Table.Tr>
                   <Table.Td />
-                  <Table.Td>
-                    <span className="text-xs font-medium text-gray-500">
-                      {translate(`${filledItemCount} item(s)`, `${filledItemCount} بند`)}
-                    </span>
+                  <Table.Td colSpan={5}>
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="button" variant="light" size="xs" leftSection={<Plus size={14} />} onClick={addRow}>
+                        {translate("Add quotation row", "إضافة صف لطلب العرض")}
+                      </Button>
+                      <Button type="button" size="xs" leftSection={<ListPlus size={14} />} onClick={openAddItems}>
+                        {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+                      </Button>
+                    </div>
                   </Table.Td>
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
-                  <Table.Td />
                 </Table.Tr>
               </Table.Tfoot>
             </Table>
@@ -681,6 +637,32 @@ export default function Page() {
         </Section>
 
         {validationError ? <ErrorAlert error={validationError} /> : null}
+
+        <div className="flex justify-end">
+          <PrintDocument
+            buttonLabel={translate("Print quotation request", "طباعة طلب عرض السعر")}
+            title={printTitle}
+            paperWidth={210}
+            paperHeight={297}
+            icon={<Printer size={14} />}
+            renderTrigger={({ onClick, disabled, label, icon }) => (
+              <Button onClick={() => handlePrintClick(onClick)} disabled={disabled} leftSection={icon}>
+                {translate("Print", "طباعة")}
+              </Button>
+            )}
+          >
+            {supplierDisplayName && printItems.length > 0 && preparedBy.name ? (
+              <SupplierQuotationRequestPrintDocument
+                supplierDisplayName={supplierDisplayName}
+                supplierContactName={supplierContactName.trim() || null}
+                notes={notes.trim() || null}
+                items={printItems}
+                preparedBy={preparedBy}
+                purchasingDepartmentManager={purchasingDepartmentManager}
+              />
+            ) : null}
+          </PrintDocument>
+        </div>
       </div>
 
       <AddQuotationItemsModal opened={addItemsOpened} onClose={closeAddItems} onAdd={handleAddItems} />
