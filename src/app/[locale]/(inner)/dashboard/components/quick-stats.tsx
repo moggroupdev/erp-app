@@ -1,219 +1,274 @@
 "use client";
 
 import type { ReactNode } from "react";
-import {
-  Boxes,
-  CheckCircle2,
-  ClipboardList,
-  Clock,
-  HandCoins,
-  PackageSearch,
-  ReceiptText,
-  ShoppingCart,
-  TriangleAlert,
-  Users,
-  Wallet,
-  XCircle,
-} from "lucide-react";
+import { Boxes, ClipboardList, HandCoins, History, PackageSearch, ShieldCheck, ShoppingCart, Users, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
-import type { DashboardQuickStats } from "@/types/reports";
+import { formatDate } from "@/lib/helpers/date-formaters";
+import { semanticPalette } from "@/lib/constants/color-palette";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { getStockStatusLabel, STOCK_STATUSES } from "@/lib/constants/enums/derived/stock-statuses";
+import {
+  getProductionSubDepartmentLabel,
+  PRODUCTION_SUB_DEPARTMENT_VALUES,
+  type ProductionSubDepartment,
+} from "@/lib/constants/enums/production-sub-departments";
+import ProtectedLink from "@/components/ui/protected-link";
+import type { DashboardPeriod, DashboardPeriodStats, DashboardQuickStats } from "@/types/reports";
+import StatusDonut from "./status-donut";
 
-export default function QuickStats({ stats }: { stats: DashboardQuickStats }) {
-  const { translate, translation } = useI18n();
+const { haze, teal, ochre, clay, plum } = semanticPalette;
+
+export default function QuickStats({ stats, period }: { stats: DashboardQuickStats; period: DashboardPeriod }) {
+  const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
+  const current = stats.periods[period];
+  const requisitionTotal = current.requisitions.pending + current.requisitions.approved + current.requisitions.rejected;
+  const orderTotal = current.purchaseOrders.open + current.purchaseOrders.completed + current.purchaseOrders.cancelled;
+  const permitTotal = current.legacyIssuePermits.active + current.legacyIssuePermits.cancelled;
 
   return (
-    <div className="flex flex-col gap-8">
-      <StatsGroup
-        title={translate("Directory", "الدليل")}
-        description={translate("Customers and suppliers currently on file.", "العملاء والموردون المسجلون حالياً.")}
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <MetricTile
-            label={translate("Customers", "العملاء")}
-            value={stats.directory.customers.total}
-            hint={translate(
-              `${stats.directory.customers.blacklisted} blacklisted`,
-              `${stats.directory.customers.blacklisted} في القائمة السوداء`,
-            )}
-            icon={<Users size={18} />}
-          />
-          <MetricTile
-            label={translate("Suppliers", "الموردون")}
-            value={stats.directory.suppliers.total}
-            hint={translate(
-              `${stats.directory.suppliers.blacklisted} blacklisted`,
-              `${stats.directory.suppliers.blacklisted} في القائمة السوداء`,
-            )}
-            icon={<HandCoins size={18} />}
-          />
-        </div>
-      </StatsGroup>
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+        <KpiTile
+          label={translate("New customers", "عملاء جدد")}
+          value={current.customersCreated}
+          hint={translate("Created in this period.", "أُضيفوا خلال هذه الفترة.")}
+          icon={<Users size={18} />}
+          tone="haze"
+        />
+        <KpiTile
+          label={translate("New suppliers", "موردون جدد")}
+          value={current.suppliersCreated}
+          hint={translate("Created in this period.", "أُضيفوا خلال هذه الفترة.")}
+          icon={<HandCoins size={18} />}
+          tone="plum"
+        />
+        <KpiTile
+          label={translate("Requisitions", "طلبات الشراء")}
+          value={requisitionTotal}
+          hint={translate(`${current.requisitions.pending} pending`, `${current.requisitions.pending} قيد الانتظار`)}
+          icon={<ClipboardList size={18} />}
+          tone="ochre"
+        />
+        <KpiTile
+          label={translate("Purchase orders", "أوامر التوريد")}
+          value={orderTotal}
+          hint={translate(`${current.purchaseOrders.open} open`, `${current.purchaseOrders.open} مفتوحة`)}
+          icon={<ShoppingCart size={18} />}
+          tone="haze"
+        />
+        <KpiTile
+          label={translate("Invoice total", "إجمالي الفواتير")}
+          value={formatMoney(current.invoices.totalAmount, currency)}
+          hint={translate(`${current.invoices.count} invoices`, `${current.invoices.count} فاتورة`)}
+          icon={<Wallet size={18} />}
+          tone="teal"
+        />
+        <KpiTile
+          label={translate("Issue permits", "أذونات الصرف")}
+          value={permitTotal}
+          hint={translate(`${current.legacyIssuePermits.cancelled} cancelled`, `${current.legacyIssuePermits.cancelled} ملغاة`)}
+          icon={<History size={18} />}
+          tone="clay"
+        />
+      </div>
 
-      <StatsGroup
-        title={translate("Catalog and stock", "الكتالوج والمخزون")}
-        description={translate(
-          "Active materials and products, with current stock value.",
-          "المواد والمنتجات النشطة، مع قيمة المخزون الحالية.",
-        )}
-      >
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <MetricTile
-            label={translate("Materials", "المواد")}
-            value={stats.catalog.materials.total}
-            hint={translate("Active materials in the catalog.", "المواد النشطة في سجل المواد.")}
-            icon={<Boxes size={18} />}
-          />
-          <MetricTile
-            label={translate("Products", "المنتجات")}
-            value={stats.catalog.products.total}
-            hint={translate("Active products in the catalog.", "المنتجات النشطة في الكتالوج.")}
-            icon={<PackageSearch size={18} />}
-          />
-          <MetricTile
-            label={translate("Inventory value", "قيمة المخزون")}
-            value={formatMoney(stats.catalog.materials.inventoryValue, currency)}
-            hint={translate("Quantity times unit price.", "الكمية مضروبة في سعر الوحدة.")}
-            icon={<Wallet size={18} />}
-            valueClassName="text-haze-700"
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <StatusDonut
+          title={translate("Requisition status", "حالة طلبات الشراء")}
+          description={translate("Current approval state of requisitions created in this period.", "حالة الموافقة الحالية للطلبات المُنشأة خلال هذه الفترة.")}
+          icon={<ClipboardList size={18} />}
+          data={[
+            { key: "pending", name: translate("Pending", "قيد الانتظار"), count: current.requisitions.pending, color: ochre[600] },
+            { key: "approved", name: translate("Approved", "معتمدة"), count: current.requisitions.approved, color: teal[600] },
+            { key: "rejected", name: translate("Rejected", "مرفوضة"), count: current.requisitions.rejected, color: clay[600] },
+          ]}
+        />
+        <StatusDonut
+          title={translate("Order status", "حالة أوامر التوريد")}
+          description={translate("Current state of purchase orders created in this period.", "الحالة الحالية لأوامر التوريد المُنشأة خلال هذه الفترة.")}
+          icon={<ShoppingCart size={18} />}
+          data={[
+            { key: "open", name: translate("Open", "مفتوحة"), count: current.purchaseOrders.open, color: haze[600] },
+            { key: "completed", name: translate("Completed", "مكتملة"), count: current.purchaseOrders.completed, color: teal[600] },
+            { key: "cancelled", name: translate("Cancelled", "ملغاة"), count: current.purchaseOrders.cancelled, color: clay[600] },
+          ]}
+        />
+      </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <MetricTile
-            label={translate("Low stock", "مخزون منخفض")}
-            value={stats.catalog.materials.lowStock}
-            hint={translate("Above zero and at or below the minimum.", "أعلى من الصفر وعند حد الطلب أو دونه.")}
-            icon={<TriangleAlert size={18} />}
-            valueClassName="text-ochre-700"
-          />
-          <MetricTile
-            label={translate("Out of stock", "نفد من المخزون")}
-            value={stats.catalog.materials.outOfStock}
-            hint={translate("Quantity is zero.", "الكمية تساوي صفراً.")}
-            icon={<XCircle size={18} />}
-            valueClassName="text-clay-700"
-          />
-        </div>
-      </StatsGroup>
-
-      <StatsGroup
-        title={translate("Procurement", "المشتريات")}
-        description={translate(
-          "Material requisitions, purchase orders, and linked invoices.",
-          "طلبات شراء الخامات وأوامر التوريد والفواتير المرتبطة بها.",
-        )}
-      >
-        <StatusRow title={translate("Requisitions", "طلبات الشراء")}>
-          <MetricTile
-            label={translate("Pending", "قيد الانتظار")}
-            value={stats.procurement.requisitions.pending}
-            hint={translate("Waiting on one or more approvals.", "بانتظار موافقة واحدة أو أكثر.")}
-            icon={<Clock size={18} />}
-            valueClassName="text-ochre-700"
-          />
-          <MetricTile
-            label={translate("Approved", "معتمدة")}
-            value={stats.procurement.requisitions.approved}
-            hint={translate("All three approvals granted.", "تمت الموافقات الثلاث.")}
-            icon={<CheckCircle2 size={18} />}
-            valueClassName="text-teal-700"
-          />
-          <MetricTile
-            label={translate("Rejected", "مرفوضة")}
-            value={stats.procurement.requisitions.rejected}
-            hint={translate("At least one approval was rejected.", "رُفضت موافقة واحدة على الأقل.")}
-            icon={<XCircle size={18} />}
-            valueClassName="text-clay-700"
-          />
-        </StatusRow>
-
-        <StatusRow title={translate("Purchase orders", "أوامر التوريد")}>
-          <MetricTile
-            label={translate("Open", "مفتوحة")}
-            value={stats.procurement.purchaseOrders.open}
-            hint={translate("Not completed or cancelled.", "لم تكتمل ولم تُلغَ.")}
-            icon={<ShoppingCart size={18} />}
-          />
-          <MetricTile
-            label={translate("Completed", "مكتملة")}
-            value={stats.procurement.purchaseOrders.completed}
-            hint={translate("Fully received.", "تم استلامها بالكامل.")}
-            icon={<CheckCircle2 size={18} />}
-            valueClassName="text-teal-700"
-          />
-          <MetricTile
-            label={translate("Cancelled", "ملغاة")}
-            value={stats.procurement.purchaseOrders.cancelled}
-            hint={translate("Cancelled before completion.", "أُلغيت قبل الاكتمال.")}
-            icon={<XCircle size={18} />}
-            valueClassName="text-clay-700"
-          />
-        </StatusRow>
-
-        <StatusRow title={translate("Invoices", "الفواتير")} columns={2}>
-          <MetricTile
-            label={translate("Invoice count", "عدد الفواتير")}
-            value={stats.procurement.invoices.count}
-            hint={translate("Linked to material purchase orders.", "مرتبطة بأوامر توريد الخامات.")}
-            icon={<ClipboardList size={18} />}
-          />
-          <MetricTile
-            label={translate("Invoice total", "إجمالي الفواتير")}
-            value={formatMoney(stats.procurement.invoices.totalAmount, currency)}
-            hint={translate("Sum of invoice totals.", "مجموع إجمالي الفواتير.")}
-            icon={<ReceiptText size={18} />}
-            valueClassName="text-haze-700"
-          />
-        </StatusRow>
-      </StatsGroup>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <StockCard stats={current} stock={stats.stock} currency={currency} />
+        <RecentPermits permits={stats.recentLegacyIssuePermits} locale={locale} />
+      </div>
     </div>
   );
 }
 
-function StatsGroup({ title, description, children }: { title: string; description: string; children: ReactNode }) {
+function StockCard({
+  stats,
+  stock,
+  currency,
+}: {
+  stats: DashboardPeriodStats;
+  stock: DashboardQuickStats["stock"];
+  currency: string;
+}) {
+  const { locale, translate } = useI18n();
+
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-semibold text-gray-800">{title}</h2>
-        <p className="text-xs text-gray-500">{description}</p>
+    <section className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-5">
+      <header className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-gray-600">
+            <ShieldCheck size={18} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-semibold text-gray-800">{translate("Current stock", "المخزون الحالي")}</h2>
+            <p className="text-xs text-gray-500">
+              {translate("On-hand quantity and value, independent of the period.", "الكمية والقيمة المتاحة الآن، بغض النظر عن الفترة.")}
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <p className="text-2xl font-semibold text-haze-700">{formatMoney(stock.inventoryValue, currency)}</p>
+
+      <StatusDonut
+        embedded
+        data={[
+          { key: STOCK_STATUSES.IN_STOCK, name: getStockStatusLabel(STOCK_STATUSES.IN_STOCK, locale), count: stock.inStock, color: teal[600] },
+          { key: STOCK_STATUSES.LOW_STOCK, name: getStockStatusLabel(STOCK_STATUSES.LOW_STOCK, locale), count: stock.lowStock, color: ochre[600] },
+          {
+            key: STOCK_STATUSES.OUT_OF_STOCK,
+            name: getStockStatusLabel(STOCK_STATUSES.OUT_OF_STOCK, locale),
+            count: stock.outOfStock,
+            color: clay[600],
+          },
+        ]}
+      />
+
+      <div className="grid grid-cols-2 gap-3">
+        <MiniStat
+          icon={<Boxes size={16} />}
+          label={translate("Materials added", "مواد مضافة")}
+          value={stats.materialsCreated}
+        />
+        <MiniStat
+          icon={<PackageSearch size={16} />}
+          label={translate("Products added", "منتجات مضافة")}
+          value={stats.productsCreated}
+        />
       </div>
-      {children}
     </section>
   );
 }
 
-function StatusRow({ title, columns = 3, children }: { title: string; columns?: 2 | 3; children: ReactNode }) {
-  const gridClass = columns === 2 ? "md:grid-cols-2" : "md:grid-cols-3";
+function RecentPermits({
+  permits,
+  locale,
+}: {
+  permits: DashboardQuickStats["recentLegacyIssuePermits"];
+  locale: ReturnType<typeof useI18n>["locale"];
+}) {
+  const { translate } = useI18n();
 
   return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-xs font-medium tracking-wide text-gray-500 uppercase">{title}</h3>
-      <div className={`grid grid-cols-1 gap-4 ${gridClass}`}>{children}</div>
-    </div>
+    <section className="flex flex-col gap-4 rounded-2xl bg-gray-50 p-5">
+      <header className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-gray-600">
+          <History size={18} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-semibold text-gray-800">{translate("Recent issue permits", "أحدث أذونات الصرف")}</h2>
+          <p className="text-xs text-gray-500">{translate("Latest permits by date.", "أحدث الأذونات حسب التاريخ.")}</p>
+        </div>
+      </header>
+
+      {permits.length === 0 ? (
+        <p className="py-10 text-center text-sm text-gray-500">{translate("No data", "لا توجد بيانات")}</p>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {permits.map((permit) => (
+            <li key={permit.id}>
+              <ProtectedLink
+                permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
+                href={`/warehouse/legacy-issue-permits/${permit.id}`}
+                className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3"
+              >
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="truncate text-sm font-medium text-gray-800">{permit.issuePermitNumber}</span>
+                  <span className="truncate text-xs text-gray-500">
+                    {departmentLabel(permit.productionSubDepartment, locale, translate)}
+                    {permit.contractNumber ? ` · ${permit.contractNumber}` : ""}
+                  </span>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span className="text-xs text-gray-500">{formatDate(permit.date, locale)}</span>
+                  {permit.isCancelled && (
+                    <span className="text-xs font-medium text-clay-700">{translate("Cancelled", "ملغاة")}</span>
+                  )}
+                </div>
+              </ProtectedLink>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
-function MetricTile({
+function departmentLabel(
+  value: string | null,
+  locale: ReturnType<typeof useI18n>["locale"],
+  translate: (en: string, ar: string) => string,
+) {
+  if (!value) return translate("Not set", "غير محدد");
+  if ((PRODUCTION_SUB_DEPARTMENT_VALUES as readonly string[]).includes(value)) {
+    return getProductionSubDepartmentLabel(value as ProductionSubDepartment, locale);
+  }
+  return value;
+}
+
+const toneClass = {
+  haze: "bg-haze-50 text-haze-700",
+  teal: "bg-teal-50 text-teal-700",
+  ochre: "bg-ochre-50 text-ochre-700",
+  clay: "bg-clay-50 text-clay-700",
+  plum: "bg-plum-50 text-plum-700",
+} as const;
+
+function KpiTile({
   label,
   value,
   hint,
   icon,
-  valueClassName = "text-gray-800",
+  tone,
 }: {
   label: string;
   value: ReactNode;
-  hint?: string;
+  hint: string;
   icon: ReactNode;
-  valueClassName?: string;
+  tone: keyof typeof toneClass;
 }) {
   return (
     <div className="rounded-2xl bg-gray-50 p-5">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-gray-600">{icon}</div>
+      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneClass[tone]}`}>{icon}</div>
       <p className="mt-4 text-xs font-medium tracking-wide text-gray-500 uppercase">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold ${valueClassName}`}>{value}</p>
-      {hint && <p className="mt-1.5 text-xs text-gray-500">{hint}</p>}
+      <p className="mt-1 text-2xl font-semibold text-gray-800">{value}</p>
+      <p className="mt-1.5 text-xs text-gray-500">{hint}</p>
+    </div>
+  );
+}
+
+function MiniStat({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl bg-white px-4 py-3">
+      <span className="text-gray-500">{icon}</span>
+      <div className="flex flex-col">
+        <span className="text-xs text-gray-500">{label}</span>
+        <span className="text-sm font-semibold text-gray-800">{value}</span>
+      </div>
     </div>
   );
 }

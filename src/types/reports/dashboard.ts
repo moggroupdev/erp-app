@@ -1,38 +1,52 @@
-export type DashboardPartyCounts = {
-  total: number;
-  blacklisted: number;
+export type DashboardPeriod = "week" | "month" | "overall";
+
+export type DashboardStatusCounts = {
+  pending: number;
+  approved: number;
+  rejected: number;
+};
+
+export type DashboardOrderCounts = {
+  open: number;
+  completed: number;
+  cancelled: number;
+};
+
+export type DashboardPeriodStats = {
+  customersCreated: number;
+  suppliersCreated: number;
+  materialsCreated: number;
+  productsCreated: number;
+  requisitions: DashboardStatusCounts;
+  purchaseOrders: DashboardOrderCounts;
+  invoices: {
+    count: number;
+    totalAmount: number;
+  };
+  legacyIssuePermits: {
+    active: number;
+    cancelled: number;
+  };
+};
+
+export type DashboardStock = {
+  inventoryValue: number;
+  outOfStock: number;
+  lowStock: number;
+  inStock: number;
+};
+
+export type DashboardRecentLegacyIssuePermit = {
+  id: string;
+  issuePermitNumber: string;
+  date: string;
+  productionSubDepartment: string | null;
+  isCancelled: boolean;
+  contractNumber: string | null;
 };
 
 export type DashboardQuickStats = {
-  directory: {
-    customers: DashboardPartyCounts;
-    suppliers: DashboardPartyCounts;
-  };
-  catalog: {
-    materials: {
-      total: number;
-      inventoryValue: number;
-      lowStock: number;
-      outOfStock: number;
-    };
-    products: {
-      total: number;
-    };
-  };
-  procurement: {
-    requisitions: {
-      pending: number;
-      approved: number;
-      rejected: number;
-    };
-    purchaseOrders: {
-      open: number;
-      completed: number;
-      cancelled: number;
-    };
-    invoices: {
-      count: number;
-      totalAmount: number;
-    };
-  };
+  periods: Record<DashboardPeriod, DashboardPeriodStats>;
+  stock: DashboardStock;
+  recentLegacyIssuePermits: DashboardRecentLegacyIssuePermit[];
 };
