@@ -172,10 +172,10 @@ function ConversionUnitCard({
     <div className="relative min-w-36 overflow-hidden rounded-xl border border-gray-200 bg-white">
       <div className="flex flex-col gap-2 px-3 py-2.5 ps-3.5">
         <div className="flex items-center gap-1.5">
-          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-plum-50 text-plum-600">
+          <div className="bg-plum-50 text-plum-600 flex h-5 w-5 shrink-0 items-center justify-center rounded-md">
             <Ruler size={11} strokeWidth={2.25} />
           </div>
-          <span className="text-xs font-semibold tracking-wide text-plum-700 uppercase">{unitLabel}</span>
+          <span className="text-plum-700 text-xs font-semibold tracking-wide uppercase">{unitLabel}</span>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -190,12 +190,12 @@ function ConversionUnitCard({
           ) : null}
 
           {unitPrice != null ? (
-            <div className="flex items-center justify-between gap-3 rounded-lg bg-teal-50/70 px-2 py-1.5">
-              <div className="flex items-center gap-1.5 text-teal-700/80">
+            <div className="bg-haze-50/70 flex items-center justify-between gap-3 rounded-lg px-2 py-1.5">
+              <div className="text-haze-700/80 flex items-center gap-1.5">
                 <Tag size={12} strokeWidth={2} />
                 <span className="text-[11px] font-medium">{translate("Unit Price", "سعر الوحدة")}</span>
               </div>
-              <span className="text-xs font-semibold text-teal-800 tabular-nums">{formatMoney(unitPrice, currency)}</span>
+              <span className="text-haze-800 text-xs font-semibold tabular-nums">{formatMoney(unitPrice, currency)}</span>
             </div>
           ) : null}
         </div>
@@ -214,7 +214,7 @@ function OtherUnitsCell({
   currency: string;
 }) {
   if (!computation || computation.otherUnits.length === 0) {
-    return <span className="text-sm text-gray-400">—</span>;
+    return null;
   }
 
   return (
@@ -256,10 +256,10 @@ function ItemRow({
 
   return (
     <Table.Tr className="text-nowrap">
-      <Table.Td className={`${TABLE_COLUMN_CLASS.index} text-center text-xs font-medium text-gray-500`}>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.index} pt-1.5! text-center align-top! text-xs font-medium text-gray-500`}>
         {index + 1}
       </Table.Td>
-      <Table.Td className={`${TABLE_COLUMN_CLASS.material} transition-colors focus-within:bg-teal-50/60`}>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.material} focus-within:bg-haze-50/60 align-top! transition-colors`}>
         <SelectMaterial
           value={row.materialCode}
           setValue={(next) => {
@@ -275,7 +275,7 @@ function ItemRow({
           withBrowseModal
         />
       </Table.Td>
-      <Table.Td className={`${TABLE_COLUMN_CLASS.quantity} transition-colors focus-within:bg-teal-50/60`}>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.quantity} focus-within:bg-haze-50/60 align-top! transition-colors`}>
         {row.material ? (
           <NumberInput
             value={row.quantity}
@@ -291,7 +291,7 @@ function ItemRow({
           />
         ) : null}
       </Table.Td>
-      <Table.Td className={`${TABLE_COLUMN_CLASS.unit} transition-colors focus-within:bg-teal-50/60`}>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.unit} focus-within:bg-haze-50/60 align-top! transition-colors`}>
         {row.material ? (
           showUnitSelect(row) ? (
             <DataSelect
@@ -310,13 +310,13 @@ function ItemRow({
               styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
             />
           ) : (
-            <span className="text-sm text-gray-600">
+            <span className="inline-block pt-1.5 text-sm text-gray-600">
               {row.enteredUnit ? getMaterialUnitLabel(row.enteredUnit, locale) : ""}
             </span>
           )
         ) : null}
       </Table.Td>
-      <Table.Td className={`${TABLE_COLUMN_CLASS.unitPrice} transition-colors focus-within:bg-teal-50/60`}>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.unitPrice} focus-within:bg-haze-50/60 align-top! transition-colors`}>
         {row.material ? (
           <NumberInput
             value={row.unitPrice}
@@ -335,14 +335,12 @@ function ItemRow({
       <Table.Td className={`${TABLE_COLUMN_CLASS.otherUnits} py-2! align-top!`}>
         <OtherUnitsCell computation={computation} locale={locale} currency={translation.currency} />
       </Table.Td>
-      <Table.Td className={`${TABLE_COLUMN_CLASS.lineValue} font-medium text-gray-800`}>
-        {computation?.lineValue != null ? (
-          formatMoney(computation.lineValue, translation.currency)
-        ) : (
-          <span className="text-gray-400">—</span>
-        )}
+      <Table.Td className={`${TABLE_COLUMN_CLASS.lineValue} pt-1.5! align-top! font-medium text-gray-800`}>
+        <span className="inline-block pt-2.5!">
+          {computation?.lineValue != null ? formatMoney(computation.lineValue, translation.currency) : null}
+        </span>
       </Table.Td>
-      <Table.Td className={TABLE_COLUMN_CLASS.actions}>
+      <Table.Td className={`${TABLE_COLUMN_CLASS.actions} align-top!`}>
         <Button
           type="button"
           variant="subtle"
@@ -521,8 +519,7 @@ export default function Page() {
                   <Button
                     type="button"
                     variant="light"
-                    color="teal"
-                    radius="md"
+                    color="dark"
                     size="xs"
                     leftSection={<Plus size={14} />}
                     onClick={addRow}
@@ -544,7 +541,7 @@ export default function Page() {
         <section className="overflow-hidden border-y border-gray-200/75 bg-white">
           <div className="flex flex-col gap-4 p-5 md:p-6">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
+              <div className="bg-haze-50 text-haze-600 flex h-8 w-8 items-center justify-center rounded-lg">
                 <Wallet size={15} />
               </div>
               <h5 className="text-sm font-semibold text-gray-800">{translate("Value summary", "ملخص القيمة")}</h5>
@@ -554,7 +551,7 @@ export default function Page() {
               <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {translate("Grand total", "الإجمالي الكلي")}
               </p>
-              <p className="text-3xl font-semibold tracking-tight text-teal-700">
+              <p className="text-haze-700 text-3xl font-semibold tracking-tight">
                 {formatMoney(totals.totalValue, translation.currency)}
               </p>
               <p className="text-xs text-gray-500">

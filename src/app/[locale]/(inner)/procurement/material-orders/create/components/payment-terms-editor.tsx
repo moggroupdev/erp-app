@@ -1,9 +1,8 @@
 "use client";
 
-import { ActionIcon, Menu, NumberInput, Table } from "@mantine/core";
+import { ActionIcon, Button, NumberInput, Table } from "@mantine/core";
 import { Plus, Trash2, Wallet } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
-import ActionsMenu from "@/components/ui/actions-menu";
 import { formatMoney } from "@/lib/helpers/format-money";
 import {
   MPO_PAYMENT_VALUE_KIND_LABELS_LIST,
@@ -104,13 +103,11 @@ export default function PaymentTermsEditor({
             </p>
           </div>
         </div>
-        <ActionsMenu>
-          {scheduleReady && (
-            <Menu.Item leftSection={<Plus size={14} />} onClick={addTerm}>
-              {translate("Add payment", "إضافة دفعة")}
-            </Menu.Item>
-          )}
-        </ActionsMenu>
+        {scheduleReady && (
+          <Button type="button" color="teal" leftSection={<Plus size={14} />} onClick={addTerm}>
+            {translate("Add payment", "إضافة دفعة")}
+          </Button>
+        )}
       </div>
 
       {!scheduleReady ? (
@@ -324,7 +321,7 @@ export default function PaymentTermsEditor({
                     {translate("Remaining", "المتبقي")}
                   </Table.Td>
                   <Table.Td>
-                    <span className="text-sm font-medium text-ochre-800 tabular-nums">
+                    <span className="text-ochre-800 text-sm font-medium tabular-nums">
                       {formatMoney(remainingAmount, currency)}
                     </span>
                   </Table.Td>
@@ -338,7 +335,7 @@ export default function PaymentTermsEditor({
                     {translate("Over by", "الزيادة")}
                   </Table.Td>
                   <Table.Td>
-                    <span className="text-sm font-medium text-clay-700 tabular-nums">
+                    <span className="text-clay-700 text-sm font-medium tabular-nums">
                       {formatMoney(Math.abs(remainingAmount), currency)}
                     </span>
                   </Table.Td>

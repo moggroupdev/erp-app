@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { type LucideIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, type LucideIcon } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 
 type BreadcrumbItem = {
@@ -31,31 +32,43 @@ export default function ReportPageHeader({
 }
 
 function Breadcrumbs({ items, sideElement }: { items: BreadcrumbItem[]; sideElement?: React.ReactNode | null }) {
-  const { translate } = useI18n();
+  const { translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
+  const router = useRouter();
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-dashed border-gray-300 pb-4">
-      <nav className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-        {items.map((item, index) => {
-          const label = translate(item.label.en, item.label.ar);
-          const isLast = index === items.length - 1;
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          title={translation.back}
+          aria-label={translation.back}
+          className="shrink-0 text-gray-800/75 transition-colors hover:text-gray-800"
+        >
+          <ArrowLeft size={14} style={{ transform: `rotateY(${translate("0deg", "180deg")})` }} />
+        </button>
+        <nav className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+          {items.map((item, index) => {
+            const label = translate(item.label.en, item.label.ar);
+            const isLast = index === items.length - 1;
 
-          return (
-            <div key={`${item.label.en}-${index}`} className="flex items-center gap-2 text-xs">
-              {item.href && !isLast ? (
-                <Link href={getLocalizedHref(item.href)} className="text-gray-800/75 transition-colors hover:text-gray-800">
-                  {label}
-                </Link>
-              ) : (
-                <span className={isLast ? "text-gray-800" : "text-gray-800/75"}>{label}</span>
-              )}
+            return (
+              <div key={`${item.label.en}-${index}`} className="flex items-center gap-2 text-xs">
+                {item.href && !isLast ? (
+                  <Link href={getLocalizedHref(item.href)} className="text-gray-800/75 transition-colors hover:text-gray-800">
+                    {label}
+                  </Link>
+                ) : (
+                  <span className={isLast ? "text-gray-800" : "text-gray-800/75"}>{label}</span>
+                )}
 
-              {!isLast ? <span className="text-gray-800/35">/</span> : null}
-            </div>
-          );
-        })}
-      </nav>
+                {!isLast ? <span className="text-gray-800/35">/</span> : null}
+              </div>
+            );
+          })}
+        </nav>
+      </div>
 
       {sideElement}
     </div>

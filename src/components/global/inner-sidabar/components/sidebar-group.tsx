@@ -10,6 +10,7 @@ import SidebarItem from "./sidebar-item";
 type SidebarGroupProps = {
   group: SidebarGroupConfig;
   collapsed: boolean;
+  compact?: boolean;
   expanded: boolean;
   isActive: boolean;
   activeChildHref?: string;
@@ -20,6 +21,7 @@ type SidebarGroupProps = {
 export default function SidebarGroup({
   group,
   collapsed,
+  compact = false,
   expanded,
   isActive,
   activeChildHref,
@@ -33,20 +35,24 @@ export default function SidebarGroup({
   const hasChildren = group.items.length > 0;
 
   const className = [
-    "group flex w-full items-center rounded-lg px-2.5 py-2 text-sm! font-semibold! transition-colors",
+    "group flex w-full items-center rounded-lg px-2.5 py-2 font-semibold! transition-colors",
+    compact ? "text-[13px]!" : "text-sm!",
     collapsed ? "justify-center px-2" : "gap-2.5",
     isActive ? sidebarNavTheme.parentActive : "text-gray-600 hover:bg-gray-100",
   ].join(" ");
 
   const content = (
     <>
-      <group.icon size={18} className="shrink-0" />
+      <group.icon size={compact ? 16 : 18} className="shrink-0" />
 
       {!collapsed && (
         <>
           <span className="flex-1 truncate text-start">{localizedLabel}</span>
           {hasChildren && (
-            <ChevronDown size={14} className={`shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
+            <ChevronDown
+              size={compact ? 12 : 14}
+              className={`shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
           )}
         </>
       )}
@@ -89,6 +95,7 @@ export default function SidebarGroup({
               label={item.label}
               href={item.href}
               icon={item.icon}
+              compact={compact}
               isActive={activeChildHref === item.href}
               onClick={onLeafClick}
             />

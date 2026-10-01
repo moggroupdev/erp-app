@@ -16,6 +16,9 @@ export const staleTimes = {
   supplierInvoices: 5 * MINUTE,
   materialPurchaseRequisitions: 5 * MINUTE,
   auditLogs: 0,
+  dashboard: {
+    quickStats: 5 * MINUTE,
+  },
   reports: {
     materialsInventorySummary: 5 * MINUTE,
     materialsCategoryStats: 5 * MINUTE,

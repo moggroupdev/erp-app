@@ -9,7 +9,15 @@ import SidebarGroup from "./sidebar-group";
 import SidebarItem from "./sidebar-item";
 import SidebarUserMenu from "./sidebar-user-menu";
 
-export default function SidebarBody({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
+export default function SidebarBody({
+  collapsed,
+  compact = false,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  compact?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = getPathnameWithoutLocale(usePathname());
   const { user, isInitializing } = useUser();
 
@@ -50,6 +58,7 @@ export default function SidebarBody({ collapsed, onNavigate }: { collapsed: bool
                   href={entry.href}
                   icon={entry.icon}
                   collapsed={collapsed}
+                  compact={compact}
                   isActive={isPathActive(pathname, entry.href)}
                   onClick={onNavigate}
                 />
@@ -68,6 +77,7 @@ export default function SidebarBody({ collapsed, onNavigate }: { collapsed: bool
                 key={entryKey}
                 group={entry}
                 collapsed={collapsed}
+                compact={compact}
                 expanded={expanded}
                 isActive={isActive}
                 activeChildHref={activeChild?.href}

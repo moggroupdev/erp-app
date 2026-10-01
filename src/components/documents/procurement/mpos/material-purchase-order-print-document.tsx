@@ -53,7 +53,7 @@ type MaterialPurchaseOrderPrintDocumentProps = {
 
 function PrintOrgHeader() {
   return (
-    <div className="flex flex-col gap-2 font-semibold">
+    <div className="flex flex-col gap-0.5 font-semibold">
       <p className="text-xs text-gray-800">موج العاشر من رمضـــــان</p>
       <p className="text-xs text-gray-800">إدارة المشتريات والمخـازن</p>
       <p className="text-xs text-gray-800">المخــــــــزن الرئيســـــــــــــــي</p>

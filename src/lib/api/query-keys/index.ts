@@ -163,6 +163,10 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "requisition-follow-up", productionSubDepartment, filters] as const,
     },
   },
+  dashboard: {
+    all: ["dashboard"] as const,
+    quickStats: () => [...queryKeys.dashboard.all, "quick-stats"] as const,
+  },
   profile: {
     all: ["profile"] as const,
   },

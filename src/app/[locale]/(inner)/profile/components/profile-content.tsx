@@ -54,6 +54,7 @@ export default function ProfileContent() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+        backLink: true,
         subTitle: translate(
           "Your personal and organizational details for reference. You can update your password here; other fields are managed by administrators.",
           "بياناتك الشخصية والتنظيمية للمرجعية. يمكنك تحديث كلمة المرور من هنا، أما بقية الحقول فيديرها المسؤولون.",

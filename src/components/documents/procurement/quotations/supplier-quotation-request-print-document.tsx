@@ -31,7 +31,7 @@ function SignatureBlock({ contact, title, companyName }: SignatureBlockProps) {
   ].filter((row): row is { icon: typeof Mail; value: string } => !!row);
 
   return (
-    <div className="flex min-w-48 flex-1 flex-col gap-1 border-s-2 border-teal-800 ps-3">
+    <div className="flex min-w-48 flex-1 flex-col gap-1 border-s-2 border-haze-800 ps-3">
       <p className="mb-1.5 text-sm font-semibold text-gray-900">{contact.name}</p>
       <p className="text-[10px] text-gray-600">
         {title}
@@ -42,7 +42,7 @@ function SignatureBlock({ contact, title, companyName }: SignatureBlockProps) {
         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
           {details.map(({ icon: Icon, value }) => (
             <span key={value} className="inline-flex items-center gap-1.5 text-[10px] text-gray-700">
-              <Icon size={11} className="shrink-0 text-teal-800" aria-hidden />
+              <Icon size={11} className="shrink-0 text-haze-800" aria-hidden />
               <span className="break-all">{value}</span>
             </span>
           ))}

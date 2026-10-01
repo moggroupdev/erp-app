@@ -17,10 +17,9 @@ import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Button, Menu, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
+import { Button, NumberInput, Table, TextInput, Textarea } from "@mantine/core";
 import { Plus, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
-import ActionsMenu from "@/components/ui/actions-menu";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
@@ -95,7 +94,7 @@ function ItemRow({
   return (
     <Table.Tr>
       <Table.Td className="w-[2.5%] text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
         <SelectMaterial
           value={row.materialCode}
           setValue={(next) => {
@@ -112,7 +111,7 @@ function ItemRow({
           withBrowseModal
         />
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
         <NumberInput
           value={row.quantity}
           onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
@@ -126,7 +125,7 @@ function ItemRow({
           styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
         />
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
         {showUnitSelect(row) ? (
           <DataSelect
             value={row.unitOfMeasurementSelected}
@@ -149,7 +148,7 @@ function ItemRow({
           </span>
         )}
       </Table.Td>
-      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
         <TextInput
           value={row.notes}
           onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
@@ -380,14 +379,7 @@ export default function Page() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
-            <ActionsMenu>
-              <Menu.Item leftSection={<Plus size={14} />} onClick={addRow}>
-                {translate("Add requisition row", "إضافة صف لطلب الشراء")}
-              </Menu.Item>
-            </ActionsMenu>
-          </div>
+          <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
 
           <div className="overflow-x-auto rounded-xl">
             <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
@@ -424,6 +416,24 @@ export default function Page() {
                   />
                 ))}
               </Table.Tbody>
+              <Table.Tfoot className="bg-gray-50">
+                <Table.Tr>
+                  <Table.Td />
+                  <Table.Td colSpan={5}>
+                    <Button
+                      type="button"
+                      variant="light"
+                      color="dark"
+                      size="xs"
+                      radius="md"
+                      leftSection={<Plus size={14} />}
+                      onClick={addRow}
+                    >
+                      {translate("Add row", "إضافة صف")}
+                    </Button>
+                  </Table.Td>
+                </Table.Tr>
+              </Table.Tfoot>
             </Table>
           </div>
         </section>
@@ -442,7 +452,7 @@ export default function Page() {
           >
             {translation.cancel}
           </Button>
-          <Button type="submit" radius="md" color="teal" disabled={mutation.isPending}>
+          <Button type="submit" radius="md" color="haze" disabled={mutation.isPending}>
             {translate("Create", "إنشاء")}
           </Button>
         </div>
@@ -463,23 +473,10 @@ export default function Page() {
             )}
           </p>
           <div className="flex gap-2">
-            <Button
-              variant="light"
-              color="dark"
-              radius="md"
-              onClick={closeConfirm}
-              disabled={mutation.isPending}
-              fullWidth
-            >
+            <Button variant="light" color="dark" radius="md" onClick={closeConfirm} disabled={mutation.isPending} fullWidth>
               {translation.cancel}
             </Button>
-            <Button
-              radius="md"
-              color="teal"
-              loading={mutation.isPending}
-              onClick={handleConfirmCreate}
-              fullWidth
-            >
+            <Button radius="md" color="haze" loading={mutation.isPending} onClick={handleConfirmCreate} fullWidth>
               {translate("Confirm & Create", "تأكيد وإنشاء")}
             </Button>
           </div>

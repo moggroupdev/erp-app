@@ -237,7 +237,7 @@ export default function AddQuotationItemsModal({
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   return (
-    <Modal opened={opened} onClose={onClose} title={translate("Add from requisitions", "إضافة من طلبات الشراء")} size="60%">
+    <Modal opened={opened} onClose={onClose} title={translate("Add from requisitions", "إضافة من طلبات الشراء")} size="xl">
       <div className="flex flex-col gap-3">
         <p className="text-xs leading-[1.75] text-gray-600">
           {translate(
@@ -317,13 +317,13 @@ export default function AddQuotationItemsModal({
           </div>
         )}
 
-        {localError && <p className="text-xs leading-[1.75] text-clay-600">{localError}</p>}
+        {localError && <p className="text-clay-600 text-xs leading-[1.75]">{localError}</p>}
 
         <div className="flex gap-2">
           <Button variant="light" color="dark" radius="md" onClick={onClose} fullWidth>
             {translation.cancel}
           </Button>
-          <Button radius="md" color="teal" onClick={handleAdd} fullWidth disabled={isFetching}>
+          <Button radius="md" color="haze" onClick={handleAdd} fullWidth disabled={isFetching}>
             {translate("Add to quotation", "إضافة إلى طلب عرض السعر")}
           </Button>
         </div>

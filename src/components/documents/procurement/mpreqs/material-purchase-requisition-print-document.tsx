@@ -29,7 +29,7 @@ function getDecisionLabel(decision: ApprovalDecision, translate: (en: string, ar
 
 function PrintOrgHeader() {
   return (
-    <div className="flex flex-col gap-2 font-semibold">
+    <div className="flex flex-col gap-0.5 font-semibold">
       <p className="text-xs text-gray-800">موج العاشر من رمضـــــان</p>
       <p className="text-xs text-gray-800">إدارة المشتريات والمخـازن</p>
       <p className="text-xs text-gray-800">المخــــــــزن الرئيســـــــــــــــي</p>
@@ -39,7 +39,7 @@ function PrintOrgHeader() {
 
 function ApprovalSignatureBlock({ title, name }: { title: string; name: string | null }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
+    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
       <p className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">{title}</p>
       <p className="text-[11px] font-medium text-gray-800">{name ?? "-"}</p>
     </div>
@@ -66,7 +66,7 @@ function ApprovalGateBlock({
   const decisionLabel = getDecisionLabel(decision, translate);
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
+    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
       <p className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">{title}</p>
 
       <div className="flex min-h-14 flex-1 flex-col gap-1">
@@ -130,7 +130,18 @@ export default function MaterialPurchaseRequisitionPrintDocument({
 
   const itemFooterRows = [
     [translate(`Total (${currency})`, `الإجمالي (${currency})`), "", "", "", "", "", formatMoney(subtotal), "", "", ""],
-    [translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`), "", "", "", "", "", formatMoney(vat), "", "", ""],
+    [
+      translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`),
+      "",
+      "",
+      "",
+      "",
+      "",
+      formatMoney(vat),
+      "",
+      "",
+      "",
+    ],
     [
       translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`),
       "",
@@ -221,7 +232,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
           emptyLabel={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")}
         />
         {missingPriceCount > 0 ? (
-          <p className="text-[9px] leading-relaxed text-ochre-700">
+          <p className="text-ochre-700 text-[9px] leading-relaxed">
             {translate(
               `${missingPriceCount} item(s) without a last purchase price were excluded from this total estimate.`,
               `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير الإجمالي.`,

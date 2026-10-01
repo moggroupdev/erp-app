@@ -149,6 +149,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+        backLink: true,
         subTitle: translate(
           "Manage organization users, roles, and department assignments.",
           "إدارة مستخدمي المؤسسة وأدوارهم وتعييناتهم للأقسام.",

@@ -18,7 +18,7 @@ export default function ActionsMenu({ children, color }: { children: React.React
   return (
     <Menu offset={8} withinPortal withArrow>
       <Menu.Target>
-        <Button variant="light" color={color || "dark"} radius="md" px="sm" aria-label={translate("Actions", "الإجراءات")}>
+        <Button variant="light" color={color || "dark"} className="icon-square" px={0}>
           <MenuIcon size={15} />
         </Button>
       </Menu.Target>

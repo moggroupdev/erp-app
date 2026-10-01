@@ -3,14 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDisclosure } from "@mantine/hooks";
+import { useRouter } from "next/navigation";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useHasPermission from "@/hooks/use-has-permission";
 import useDepartments from "@/hooks/reference/use-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type DepartmentWithManager } from "@/types/departments";
-import { Menu } from "@mantine/core";
-import { Factory, Plus } from "lucide-react";
+import { Button, Menu } from "@mantine/core";
+import { ArrowLeft, Factory, Plus } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -22,8 +23,9 @@ import DepartmentsLoadingSkeleton from "./components/departments-loading-skeleto
 const title = { en: "Departments", ar: "الأقسام" };
 
 export default function Page() {
-  const { translate } = useI18n();
+  const { translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
+  const router = useRouter();
 
   useDocumentTitle(translate(title.en, title.ar), "dashboard");
 
@@ -48,7 +50,20 @@ export default function Page() {
     <div className="root-flex-1 flex h-full flex-col gap-4">
       <header className="flex flex-wrap justify-between gap-2">
         <div className="flex flex-col gap-2">
-          <h1>{translate(title.en, title.ar)}</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              className="inline-flex! size-10! shrink-0 items-center justify-center p-0! max-sm:size-[34px]! max-sm:[&_svg]:size-4!"
+              onClick={() => router.back()}
+              title={translation.back}
+              variant="light"
+              color="dark"
+              radius={20}
+              p={0}
+            >
+              <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0", "180deg")})` }} />
+            </Button>
+            <h1>{translate(title.en, title.ar)}</h1>
+          </div>
           <p className="text-gray-500">
             {translate("Manage your departments and their managers.", "إدارة الأقسام والمدراء.")}
           </p>

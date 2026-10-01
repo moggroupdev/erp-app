@@ -191,7 +191,7 @@ export default function Page() {
       header={{
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="light" />,
       }}
     >
       <div className="flex flex-col gap-3">

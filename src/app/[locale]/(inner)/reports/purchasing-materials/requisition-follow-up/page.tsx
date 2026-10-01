@@ -18,7 +18,6 @@ import {
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { ClipboardList } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
-import ActionsMenu from "@/components/ui/actions-menu";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
@@ -145,11 +144,10 @@ export default function Page() {
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
         sideElement={
           productionSubDepartment ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:gap-4">
               <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-              <ActionsMenu>
-                {data && !isFetching && !errorMessage && (
-                  <PrintDocument title={printTitle} buttonType="menu" paperWidth={297} paperHeight={210}>
+              {data && !isFetching && !errorMessage && (
+                <PrintDocument title={printTitle} buttonType="icon" paperWidth={297} paperHeight={210}>
                   <PurchasingMaterialsRequisitionFollowUpPrintDocument
                     title={reportTitle}
                     productionSubDepartmentLabel={departmentLabel!}
@@ -159,9 +157,8 @@ export default function Page() {
                     totals={data.totals}
                     missingPriceCount={data.missingPriceCount}
                   />
-                  </PrintDocument>
-                )}
-              </ActionsMenu>
+                </PrintDocument>
+              )}
             </div>
           ) : undefined
         }
