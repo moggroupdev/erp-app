@@ -1,9 +1,24 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { Boxes, ClipboardList, HandCoins, History, PackageSearch, ShieldCheck, ShoppingCart, Users } from "lucide-react";
-import { useI18n } from "@/lib/i18n/hooks";
+import {
+  Boxes,
+  ChevronRight,
+  ClipboardList,
+  FileBarChart,
+  HandCoins,
+  History,
+  LayoutGrid,
+  PackageSearch,
+  ScrollText,
+  ShieldCheck,
+  ShoppingCart,
+  Users,
+  Warehouse,
+} from "lucide-react";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { localeDirections } from "@/lib/i18n/config";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatDate } from "@/lib/helpers/date-formaters";
@@ -17,17 +32,63 @@ import {
 } from "@/lib/constants/enums/production-sub-departments";
 import useHasPermission from "@/hooks/use-has-permission";
 import ProtectedLink from "@/components/ui/protected-link";
-import ReportCard from "../../reports/materials/components/report-card";
-import ReportLinkCard from "../../reports/components/report-link-card";
 import type { DashboardPeriod, DashboardPeriodStats, DashboardQuickStats } from "@/types/reports";
+import DashboardPanel from "./dashboard-panel";
 import StatusDistribution from "./status-distribution";
 
 const { teal, ochre, clay } = semanticPalette;
+
+const SHORTCUTS: {
+  permission: Permission | readonly Permission[];
+  label: { en: string; ar: string };
+  description: { en: string; ar: string };
+  href: string;
+  icon: typeof FileBarChart;
+}[] = [
+  {
+    permission: ALL_REPORT_PERMISSIONS,
+    label: { en: "Reports", ar: "التقارير" },
+    description: { en: "Inventory and purchasing reports.", ar: "تقارير المخزون والمشتريات." },
+    href: "/reports",
+    icon: FileBarChart,
+  },
+  {
+    permission: PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT,
+    label: { en: "Inventory summary", ar: "ملخص المخزون" },
+    description: { en: "Stock value and material health.", ar: "قيمة المخزون وحالة المواد." },
+    href: "/reports/materials/inventory-summary",
+    icon: Warehouse,
+  },
+  {
+    permission: PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS,
+    label: { en: "Purchase requisitions", ar: "طلبات شراء الخامات" },
+    description: { en: "Open the requisition list.", ar: "الانتقال إلى قائمة طلبات الشراء." },
+    href: "/procurement/material-requisitions",
+    icon: ClipboardList,
+  },
+  {
+    permission: PERMISSIONS.READ_LEGACY_ISSUE_PERMITS,
+    label: { en: "Issue permits", ar: "أذونات الصرف" },
+    description: { en: "Open the legacy issue permit list.", ar: "الانتقال إلى قائمة أذونات الصرف." },
+    href: "/warehouse/legacy-issue-permits",
+    icon: ScrollText,
+  },
+];
+
+function useVisibleShortcuts() {
+  const reports = useHasPermission(SHORTCUTS[0].permission);
+  const inventory = useHasPermission(SHORTCUTS[1].permission);
+  const requisitions = useHasPermission(SHORTCUTS[2].permission);
+  const permits = useHasPermission(SHORTCUTS[3].permission);
+  const allowed = [reports, inventory, requisitions, permits];
+  return SHORTCUTS.filter((_, index) => allowed[index]);
+}
 
 export default function QuickStats({ stats, period }: { stats: DashboardQuickStats; period: DashboardPeriod }) {
   const { translate, translation } = useI18n();
   const currency = translation.currency;
   const current = stats.periods[period];
+  const shortcuts = useVisibleShortcuts();
   const requisitionTotal = current.requisitions.pending + current.requisitions.approved + current.requisitions.rejected;
   const orderTotal = current.purchaseOrders.open + current.purchaseOrders.completed + current.purchaseOrders.cancelled;
 
@@ -64,14 +125,22 @@ export default function QuickStats({ stats, period }: { stats: DashboardQuickSta
         />
       </div>
 
-      <StatusDistribution stats={current} />
-
-      <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-2">
-        <StockHealth stats={current} stock={stats.stock} currency={currency} />
-        <RecentPermits permits={stats.recentLegacyIssuePermits} />
+      <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-12">
+        <div className="min-w-0 xl:col-span-7">
+          <StatusDistribution stats={current} />
+        </div>
+        <div className="min-w-0 xl:col-span-5">
+          <StockHealth stats={current} stock={stats.stock} currency={currency} />
+        </div>
+        <div className={shortcuts.length > 0 ? "min-w-0 xl:col-span-8" : "min-w-0 xl:col-span-12"}>
+          <RecentPermits permits={stats.recentLegacyIssuePermits} />
+        </div>
+        {shortcuts.length > 0 && (
+          <div className="min-w-0 xl:col-span-4">
+            <QuickLinks shortcuts={shortcuts} />
+          </div>
+        )}
       </div>
-
-      <QuickLinks />
     </div>
   );
 }
@@ -150,25 +219,28 @@ function StockHealth({
       name: getStockStatusLabel(STOCK_STATUSES.IN_STOCK, locale),
       count: stock.inStock,
       color: teal[600],
+      bar: "bg-teal-600",
     },
     {
       key: STOCK_STATUSES.LOW_STOCK,
       name: getStockStatusLabel(STOCK_STATUSES.LOW_STOCK, locale),
       count: stock.lowStock,
       color: ochre[600],
+      bar: "bg-ochre-600",
     },
     {
       key: STOCK_STATUSES.OUT_OF_STOCK,
       name: getStockStatusLabel(STOCK_STATUSES.OUT_OF_STOCK, locale),
       count: stock.outOfStock,
       color: clay[600],
+      bar: "bg-clay-600",
     },
   ];
   const chartData = slices.filter((item) => item.count > 0);
   const total = slices.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <ReportCard
+    <DashboardPanel
       title={translate("Current stock", "المخزون الحالي")}
       description={translate(
         "On-hand quantity and value, independent of the period.",
@@ -176,89 +248,118 @@ function StockHealth({
       )}
       icon={ShieldCheck}
       accent="teal"
-      className="h-full"
     >
-      <div className="flex flex-col gap-5">
-        <p className="text-haze-800 text-2xl font-semibold tracking-tight">{formatMoney(stock.inventoryValue, currency)}</p>
-
-        <div className="grid items-center gap-4 lg:grid-cols-[11rem_1fr]">
-          {total === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-500">{translate("No data", "لا توجد بيانات")}</p>
-          ) : (
-            <div className="relative h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    dataKey="count"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={48}
-                    outerRadius={72}
-                    paddingAngle={3}
-                    stroke="none"
-                  >
-                    {chartData.map((item) => (
-                      <Cell key={item.key} fill={item.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(count) => {
-                      const items = Number(count ?? 0);
-                      const pct = total > 0 ? ((items / total) * 100).toFixed(1) : "0";
-                      return `${items} · ${pct}%`;
-                    }}
-                    contentStyle={{ borderRadius: 12, border: `1px solid ${chartNeutralColors[2]}`, direction: dir }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-semibold text-gray-800">{total}</span>
-                <span className="text-[11px] text-gray-500">{translate("Materials", "مواد")}</span>
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <StockPill label={getStockStatusLabel(STOCK_STATUSES.IN_STOCK, locale)} count={stock.inStock} tone="teal" />
-            <StockPill label={getStockStatusLabel(STOCK_STATUSES.LOW_STOCK, locale)} count={stock.lowStock} tone="ochre" />
-            <StockPill
-              label={getStockStatusLabel(STOCK_STATUSES.OUT_OF_STOCK, locale)}
-              count={stock.outOfStock}
-              tone="clay"
-            />
-          </div>
+      <div className="flex h-full flex-col gap-5">
+        <div>
+          <p className="text-[11px] font-medium tracking-wide text-gray-400 uppercase">
+            {translate("Inventory value", "قيمة المخزون")}
+          </p>
+          <p className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
+            {formatMoney(stock.inventoryValue, currency)}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid items-center gap-4 sm:grid-cols-[9.5rem_1fr]">
+          {total === 0 ? (
+            <p className="py-8 text-center text-sm text-gray-500 sm:col-span-2">
+              {translate("No stocked materials.", "لا توجد مواد في المخزون.")}
+            </p>
+          ) : (
+            <>
+              <div className="relative mx-auto h-36 w-full max-w-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      dataKey="count"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={42}
+                      outerRadius={62}
+                      paddingAngle={3}
+                      stroke="none"
+                    >
+                      {chartData.map((item) => (
+                        <Cell key={item.key} fill={item.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(count) => {
+                        const items = Number(count ?? 0);
+                        const pct = total > 0 ? ((items / total) * 100).toFixed(1) : "0";
+                        return `${items} · ${pct}%`;
+                      }}
+                      contentStyle={{ borderRadius: 12, border: `1px solid ${chartNeutralColors[2]}`, direction: dir }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-lg font-semibold text-gray-800">{total}</span>
+                  <span className="text-[11px] text-gray-500">{translate("Materials", "مواد")}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {slices.map((slice) => (
+                  <StockMeter
+                    key={slice.key}
+                    label={slice.name}
+                    count={slice.count}
+                    total={total}
+                    color={slice.color}
+                    barClassName={slice.bar}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="mt-auto grid grid-cols-2 gap-2 border-t border-gray-100 pt-4">
           <MiniStat
-            icon={<Boxes size={16} />}
+            icon={<Boxes size={15} />}
             label={translate("Materials added", "مواد مضافة")}
             value={stats.materialsCreated}
           />
           <MiniStat
-            icon={<PackageSearch size={16} />}
+            icon={<PackageSearch size={15} />}
             label={translate("Products added", "منتجات مضافة")}
             value={stats.productsCreated}
           />
         </div>
       </div>
-    </ReportCard>
+    </DashboardPanel>
   );
 }
 
-function StockPill({ label, count, tone }: { label: string; count: number; tone: "teal" | "ochre" | "clay" }) {
-  const tones = {
-    teal: "bg-teal-50 text-teal-800",
-    ochre: "bg-ochre-50 text-ochre-800",
-    clay: "bg-clay-50 text-clay-800",
-  };
+function StockMeter({
+  label,
+  count,
+  total,
+  color,
+  barClassName,
+}: {
+  label: string;
+  count: number;
+  total: number;
+  color: string;
+  barClassName: string;
+}) {
+  const width = total > 0 ? Math.max((count / total) * 100, count > 0 ? 4 : 0) : 0;
 
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3 ${tones[tone]}`}>
-      <span className="text-sm font-medium">{label}</span>
-      <span className="text-lg font-semibold">{count}</span>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="flex min-w-0 items-center gap-2 text-gray-600">
+          <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+          <span className="truncate">{label}</span>
+        </span>
+        <span className="font-semibold text-gray-800">{count}</span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
+        <div className={`h-full rounded-full ${barClassName}`} style={{ width: `${width}%` }} />
+      </div>
     </div>
   );
 }
@@ -267,15 +368,22 @@ function RecentPermits({ permits }: { permits: DashboardQuickStats["recentLegacy
   const { locale, translate } = useI18n();
 
   return (
-    <ReportCard
+    <DashboardPanel
       title={translate("Recent issue permits", "أحدث أذونات الصرف")}
       description={translate("Latest permits by date.", "أحدث الأذونات حسب التاريخ.")}
       icon={History}
       accent="gray"
-      className="h-full"
+      trailing={
+        <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">{permits.length}</span>
+      }
     >
       {permits.length === 0 ? (
-        <p className="py-10 text-center text-sm text-gray-500">{translate("No data", "لا توجد بيانات")}</p>
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-400">
+            <History size={18} />
+          </div>
+          <p className="text-sm text-gray-500">{translate("No issue permits yet.", "لا توجد أذونات صرف بعد.")}</p>
+        </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {permits.map((permit) => (
@@ -283,31 +391,39 @@ function RecentPermits({ permits }: { permits: DashboardQuickStats["recentLegacy
               <ProtectedLink
                 permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
                 href={`/warehouse/legacy-issue-permits/${permit.id}`}
-                className="flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3 transition-colors hover:bg-gray-100"
+                className="group flex items-center gap-3 rounded-2xl border border-transparent bg-gray-50 px-3 py-3 transition-colors hover:border-haze-200 hover:bg-white"
               >
-                <div className="flex min-w-0 flex-col gap-1">
-                  <span className="truncate text-sm font-medium text-gray-800">{permit.issuePermitNumber}</span>
-                  <span className="truncate text-xs text-gray-500">
-                    {departmentLabel(permit.productionSubDepartment, locale, translate)}
-                    {permit.contractNumber ? ` · ${permit.contractNumber}` : ""}
-                  </span>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-1 text-end">
-                  <span className="text-xs text-gray-500">{formatDate(permit.date, locale)}</span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                      permit.isCancelled ? "bg-clay-50 text-clay-700" : "bg-teal-50 text-teal-700"
-                    }`}
-                  >
-                    {permit.isCancelled ? translate("Cancelled", "ملغاة") : translate("Active", "سارية")}
-                  </span>
+                <span
+                  className={`h-9 w-1 shrink-0 rounded-full ${permit.isCancelled ? "bg-clay-600" : "bg-teal-600"}`}
+                  aria-hidden
+                />
+                <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-gray-800 group-hover:text-haze-800">
+                      {permit.issuePermitNumber}
+                    </p>
+                    <p className="truncate text-xs text-gray-500">
+                      {departmentLabel(permit.productionSubDepartment, locale, translate)}
+                      {permit.contractNumber ? ` · ${permit.contractNumber}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2 sm:flex-col sm:items-end sm:gap-1">
+                    <span className="text-xs text-gray-500">{formatDate(permit.date, locale)}</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        permit.isCancelled ? "bg-clay-50 text-clay-700" : "bg-teal-50 text-teal-700"
+                      }`}
+                    >
+                      {permit.isCancelled ? translate("Cancelled", "ملغاة") : translate("Active", "سارية")}
+                    </span>
+                  </div>
                 </div>
               </ProtectedLink>
             </li>
           ))}
         </ul>
       )}
-    </ReportCard>
+    </DashboardPanel>
   );
 }
 
@@ -325,68 +441,53 @@ function departmentLabel(
 
 function MiniStat({ icon, label, value }: { icon: ReactNode; label: string; value: number }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-      <span className="text-gray-500">{icon}</span>
-      <div className="flex flex-col">
-        <span className="text-xs text-gray-500">{label}</span>
-        <span className="text-sm font-semibold text-gray-800">{value}</span>
+    <div className="flex min-w-0 items-center gap-2.5">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500">{icon}</span>
+      <div className="min-w-0">
+        <p className="truncate text-[11px] text-gray-500">{label}</p>
+        <p className="text-sm font-semibold text-gray-800">{value}</p>
       </div>
     </div>
   );
 }
 
-const SHORTCUTS: {
-  permission: Permission | readonly Permission[];
-  label: { en: string; ar: string };
-  description: { en: string; ar: string };
-  href: string;
-}[] = [
-  {
-    permission: ALL_REPORT_PERMISSIONS,
-    label: { en: "Reports", ar: "التقارير" },
-    description: { en: "Inventory and purchasing reports.", ar: "تقارير المخزون والمشتريات." },
-    href: "/reports",
-  },
-  {
-    permission: PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT,
-    label: { en: "Inventory summary", ar: "ملخص المخزون" },
-    description: { en: "Stock value and material health.", ar: "قيمة المخزون وحالة المواد." },
-    href: "/reports/materials/inventory-summary",
-  },
-  {
-    permission: PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS,
-    label: { en: "Purchase requisitions", ar: "طلبات شراء الخامات" },
-    description: { en: "Open the requisition list.", ar: "الانتقال إلى قائمة طلبات الشراء." },
-    href: "/procurement/material-requisitions",
-  },
-  {
-    permission: PERMISSIONS.READ_LEGACY_ISSUE_PERMITS,
-    label: { en: "Issue permits", ar: "أذونات الصرف" },
-    description: { en: "Open the legacy issue permit list.", ar: "الانتقال إلى قائمة أذونات الصرف." },
-    href: "/warehouse/legacy-issue-permits",
-  },
-];
-
-function QuickLinks() {
-  const { translate } = useI18n();
-  const allowed = [
-    useHasPermission(SHORTCUTS[0].permission),
-    useHasPermission(SHORTCUTS[1].permission),
-    useHasPermission(SHORTCUTS[2].permission),
-    useHasPermission(SHORTCUTS[3].permission),
-  ];
-  const visible = SHORTCUTS.filter((_, index) => allowed[index]);
-
-  if (visible.length === 0) return null;
+function QuickLinks({ shortcuts }: { shortcuts: typeof SHORTCUTS }) {
+  const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
+  const isRtl = localeDirections[locale] === "rtl";
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-gray-800">{translate("Shortcuts", "اختصارات")}</h2>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {visible.map((item) => (
-          <ReportLinkCard key={item.href} report={item} />
-        ))}
+    <DashboardPanel
+      title={translate("Shortcuts", "اختصارات")}
+      description={translate("Open a related list or report.", "الانتقال إلى قائمة أو تقرير مرتبط.")}
+      icon={LayoutGrid}
+      accent="sky"
+    >
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-1">
+        {shortcuts.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={getLocalizedHref(item.href)}
+              className="group flex items-center gap-3 rounded-2xl border border-gray-100 px-3 py-3 transition-colors hover:border-haze-200 hover:bg-haze-50/60"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600 transition-colors group-hover:bg-white group-hover:text-haze-700">
+                <Icon size={16} />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium text-gray-800 group-hover:text-haze-800">
+                  {translate(item.label.en, item.label.ar)}
+                </span>
+                <span className="block truncate text-xs text-gray-500">
+                  {translate(item.description.en, item.description.ar)}
+                </span>
+              </span>
+              <ChevronRight size={16} className={`shrink-0 text-gray-300 group-hover:text-haze-600 ${isRtl ? "rotate-180" : ""}`} />
+            </Link>
+          );
+        })}
       </div>
-    </section>
+    </DashboardPanel>
   );
 }
