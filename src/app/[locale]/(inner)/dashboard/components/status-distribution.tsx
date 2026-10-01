@@ -27,6 +27,11 @@ function countFor(stats: DashboardPeriodStats, key: StatusKey) {
   return stats.purchaseOrders[key];
 }
 
+function segmentCount(value: unknown) {
+  if (Array.isArray(value) && value.length === 2) return Number(value[1]) - Number(value[0]);
+  return Number(value ?? 0);
+}
+
 function StatusTooltip({
   active,
   payload,
@@ -42,30 +47,47 @@ function StatusTooltip({
 }) {
   if (!active || !payload?.length) return null;
 
-  const rows = payload.filter((item) => Number(item.value) > 0);
+  const rows = payload
+    .map((item) => ({
+      key: String(item.dataKey ?? "") as StatusKey,
+      value: segmentCount(item.value),
+      color: item.color,
+    }))
+    .filter((item) => item.value > 0 && item.key in labels);
+
   if (rows.length === 0) return null;
 
-  const rowTotal = rows.reduce((sum, item) => sum + Number(item.value), 0);
+  const rowTotal = rows.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <div
-      className="rounded-xl bg-white px-3 py-2 text-xs shadow-sm"
+      className="min-w-48 rounded-xl bg-white px-3 py-2.5 text-xs shadow-md"
       style={{ direction: dir, border: `1px solid ${chartNeutralColors[2]}` }}
     >
-      <p className="mb-1 font-medium text-gray-800">{label}</p>
-      <ul className="flex flex-col gap-1">
+      <div className="mb-2 flex items-center justify-between gap-4">
+        <p className="font-semibold text-gray-800">{label}</p>
+        <p className="font-semibold text-gray-800">{rowTotal}</p>
+      </div>
+      <div className="mb-2 flex h-1.5 overflow-hidden rounded-full">
+        {rows.map((item) => (
+          <span
+            key={item.key}
+            className="h-full"
+            style={{ width: `${(item.value / rowTotal) * 100}%`, backgroundColor: item.color }}
+          />
+        ))}
+      </div>
+      <ul className="flex flex-col gap-1.5">
         {rows.map((item) => {
-          const key = String(item.dataKey ?? "") as StatusKey;
-          const value = Number(item.value);
-          const share = rowTotal > 0 ? Math.round((value / rowTotal) * 100) : 0;
+          const share = Math.round((item.value / rowTotal) * 100);
           return (
-            <li key={key} className="flex items-center justify-between gap-4 text-gray-600">
-              <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                {labels[key]}
+            <li key={item.key} className="flex items-center justify-between gap-4 text-gray-600">
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                <span className="truncate">{labels[item.key]}</span>
               </span>
-              <span className="font-medium text-gray-800">
-                {value}
+              <span className="shrink-0 font-medium text-gray-800">
+                {item.value}
                 <span className="ms-1 font-normal text-gray-400">{share}%</span>
               </span>
             </li>
@@ -74,6 +96,15 @@ function StatusTooltip({
       </ul>
     </div>
   );
+}
+
+function statusRanges(counts: number[]): [number, number][] {
+  let cursor = 0;
+  return counts.map((count) => {
+    const start = cursor;
+    cursor += count;
+    return [start, cursor];
+  });
 }
 
 export default function StatusDistribution({ stats }: { stats: DashboardPeriodStats }) {
@@ -99,33 +130,45 @@ export default function StatusDistribution({ stats }: { stats: DashboardPeriodSt
   const orderTotal = stats.purchaseOrders.open + stats.purchaseOrders.completed + stats.purchaseOrders.cancelled;
   const total = requisitionTotal + orderTotal;
 
+  const [pendingRange, approvedRange, rejectedRange] = statusRanges([
+    stats.requisitions.pending,
+    stats.requisitions.approved,
+    stats.requisitions.rejected,
+  ]);
+  const [openRange, completedRange, cancelledRange] = statusRanges([
+    stats.purchaseOrders.open,
+    stats.purchaseOrders.completed,
+    stats.purchaseOrders.cancelled,
+  ]);
+  const axisMax = Math.max(requisitionTotal, orderTotal);
+
   const data = [
     {
       name: groupLabels.requisitions,
-      pending: stats.requisitions.pending,
-      approved: stats.requisitions.approved,
-      rejected: stats.requisitions.rejected,
-      open: 0,
-      completed: 0,
-      cancelled: 0,
+      pending: pendingRange,
+      approved: approvedRange,
+      rejected: rejectedRange,
+      open: [0, 0],
+      completed: [0, 0],
+      cancelled: [0, 0],
     },
     {
       name: groupLabels.orders,
-      pending: 0,
-      approved: 0,
-      rejected: 0,
-      open: stats.purchaseOrders.open,
-      completed: stats.purchaseOrders.completed,
-      cancelled: stats.purchaseOrders.cancelled,
+      pending: [0, 0],
+      approved: [0, 0],
+      rejected: [0, 0],
+      open: openRange,
+      completed: completedRange,
+      cancelled: cancelledRange,
     },
   ];
 
   return (
     <DashboardPanel
-      title={translate("Status distribution", "توزيع الحالات")}
+      title={translate("Requisition and order status", "حالة الطلبات وأوامر التوريد")}
       description={translate(
-        "Current state of requisitions and purchase orders created in this period.",
-        "الحالة الحالية لطلبات الشراء وأوامر التوريد المُنشأة خلال هذه الفترة.",
+        "How many are still open, finished, or closed in this period.",
+        "كم منها ما زال مفتوحاً أو مكتملاً أو مغلقاً خلال هذه الفترة.",
       )}
       icon={Rows3}
       accent="amber"
@@ -149,19 +192,16 @@ export default function StatusDistribution({ stats }: { stats: DashboardPeriodSt
             <SummaryChip label={groupLabels.orders} value={orderTotal} />
           </div>
 
-          <div className="h-44" dir={dir}>
+          <div className="h-36" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data}
-                layout="vertical"
-                style={{ direction: "ltr" }}
-                margin={{ top: 4, right: 8, left: 0, bottom: 4 }}
-                barCategoryGap="28%"
-              >
+              <BarChart data={data} layout="vertical" margin={{ top: 4, right: 0, left: 0, bottom: 0 }} barCategoryGap="32%">
                 <CartesianGrid strokeDasharray="3 3" stroke={chartNeutralColors[2]} horizontal={false} />
                 <XAxis
                   type="number"
+                  domain={[0, axisMax]}
+                  allowDataOverflow
                   allowDecimals={false}
+                  padding={{ left: 0, right: 0 }}
                   tick={{ fontSize: 11, fill: chartNeutralColors[0] }}
                   reversed={isRtl}
                   axisLine={false}
@@ -170,11 +210,12 @@ export default function StatusDistribution({ stats }: { stats: DashboardPeriodSt
                 <YAxis
                   type="category"
                   dataKey="name"
-                  width={128}
+                  width={112}
                   tick={{ fontSize: 11, fill: chartNeutralColors[0] }}
                   orientation={isRtl ? "right" : "left"}
                   axisLine={false}
                   tickLine={false}
+                  padding={{ top: 0, bottom: 0 }}
                 />
                 <Tooltip
                   cursor={{ fill: chartNeutralColors[2], opacity: 0.35 }}
@@ -183,7 +224,13 @@ export default function StatusDistribution({ stats }: { stats: DashboardPeriodSt
                   )}
                 />
                 {SERIES.map((series) => (
-                  <Bar key={series.key} dataKey={series.key} stackId="status" fill={series.color} maxBarSize={22} />
+                  <Bar
+                    key={series.key}
+                    dataKey={series.key}
+                    fill={series.color}
+                    maxBarSize={18}
+                    isAnimationActive={false}
+                  />
                 ))}
               </BarChart>
             </ResponsiveContainer>

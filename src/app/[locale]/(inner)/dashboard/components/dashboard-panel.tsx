@@ -31,7 +31,7 @@ export default function DashboardPanel({
 }) {
   return (
     <article
-      className={`flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm ${className}`}
+      className={`flex h-full flex-col overflow-hidden rounded-3xl bg-white ${className}`}
     >
       <header className="flex items-start justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5">
         <div className="flex min-w-0 items-start gap-3">

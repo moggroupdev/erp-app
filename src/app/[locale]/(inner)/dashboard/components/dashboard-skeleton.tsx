@@ -21,7 +21,7 @@ export default function DashboardSkeleton() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <article className="overflow-hidden rounded-3xl border border-gray-200/80 bg-white xl:col-span-7">
+        <article className="overflow-hidden rounded-3xl bg-white xl:col-span-7">
           <PanelHeaderSkeleton />
           <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 sm:py-5">
             <div className="grid grid-cols-2 gap-2">
@@ -36,7 +36,7 @@ export default function DashboardSkeleton() {
           </div>
         </article>
 
-        <article className="overflow-hidden rounded-3xl border border-gray-200/80 bg-white xl:col-span-5">
+        <article className="overflow-hidden rounded-3xl bg-white xl:col-span-5">
           <PanelHeaderSkeleton />
           <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 sm:py-5">
             <Skeleton height={28} width={160} radius="md" />
@@ -55,7 +55,7 @@ export default function DashboardSkeleton() {
           </div>
         </article>
 
-        <article className="overflow-hidden rounded-3xl border border-gray-200/80 bg-white xl:col-span-8">
+        <article className="overflow-hidden rounded-3xl bg-white xl:col-span-8">
           <PanelHeaderSkeleton />
           <div className="flex flex-col gap-2 px-4 py-4 sm:px-5 sm:py-5">
             {Array.from({ length: 5 }).map((_, index) => (
@@ -64,7 +64,7 @@ export default function DashboardSkeleton() {
           </div>
         </article>
 
-        <article className="overflow-hidden rounded-3xl border border-gray-200/80 bg-white xl:col-span-4">
+        <article className="overflow-hidden rounded-3xl bg-white xl:col-span-4">
           <PanelHeaderSkeleton />
           <div className="flex flex-col gap-2 px-4 py-4 sm:px-5 sm:py-5">
             {Array.from({ length: 4 }).map((_, index) => (
