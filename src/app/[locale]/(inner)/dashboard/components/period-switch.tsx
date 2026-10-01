@@ -21,7 +21,10 @@ export default function PeriodSwitch({
   };
 
   return (
-    <div className="flex rounded-2xl bg-gray-100 p-1" role="tablist">
+    <div
+      className="inline-flex h-[calc(2.25rem*var(--mantine-scale))] items-center rounded-(--mantine-radius-md) bg-white p-0.5 max-sm:h-[30px]"
+      role="tablist"
+    >
       {PERIODS.map((item) => {
         const selected = item === period;
         return (
@@ -31,8 +34,8 @@ export default function PeriodSwitch({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(item)}
-            className={`rounded-xl px-3 py-1.5 text-sm transition-colors ${
-              selected ? "bg-white font-medium text-haze-700 shadow-sm" : "text-gray-600 hover:text-gray-800"
+            className={`h-full rounded-[calc(var(--mantine-radius-md)-2px)] px-2.5 text-sm! transition-colors ${
+              selected ? "bg-gray-100 font-medium text-gray-800" : "text-gray-600 hover:text-gray-800"
             }`}
           >
             {labels[item]}

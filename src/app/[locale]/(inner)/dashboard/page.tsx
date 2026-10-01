@@ -57,7 +57,7 @@ export default function Page() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <PeriodSwitch period={period} onChange={setPeriod} />
-          <RefetchButton variant="outline" isFetching={isFetching} onRefetch={() => refetch()} />
+          <RefetchButton variant="white" isFetching={isFetching} onRefetch={() => refetch()} />
         </div>
       </header>
 
