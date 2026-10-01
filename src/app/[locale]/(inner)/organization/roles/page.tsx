@@ -98,6 +98,7 @@ export default function Page() {
     <LayoutBox
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+        backLink: true,
         subTitle: translate(
           "View roles and their access permissions across the organization.",
           "عرض الأدوار وصلاحيات الوصول عبر المؤسسة.",

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useHasPermission from "@/hooks/use-has-permission";
@@ -19,6 +20,8 @@ import {
   PRODUCTION_SUB_DEPARTMENT_KIND_VALUES,
 } from "@/lib/constants/enums/production-sub-departments";
 import { type ProductionDepartmentManagerAssignment } from "@/types/production-department-managers";
+import { Button } from "@mantine/core";
+import { ArrowLeft } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -29,7 +32,8 @@ import ProductionDepartmentManagerCard from "./components/production-department-
 const title = { en: "Production Departments", ar: "أقسام الإنتاج" };
 
 export default function Page() {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
+  const router = useRouter();
 
   useDocumentTitle(translate(title.en, title.ar), "dashboard");
 
@@ -76,7 +80,20 @@ export default function Page() {
     <div className="root-flex-1 flex h-full flex-col gap-6 rounded-2xl">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-gray-800 sm:text-2xl">{translate(title.en, title.ar)}</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              className="inline-flex! size-10! shrink-0 items-center justify-center p-0! max-sm:size-[34px]! max-sm:[&_svg]:size-4!"
+              onClick={() => router.back()}
+              title={translation.back}
+              variant="light"
+              color="dark"
+              radius={20}
+              p={0}
+            >
+              <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0", "180deg")})` }} />
+            </Button>
+            <h1 className="text-xl font-semibold text-gray-800 sm:text-2xl">{translate(title.en, title.ar)}</h1>
+          </div>
           <p className="text-sm text-gray-500">
             {translate(
               "Assign a manager and deputy manager to each production department.",
