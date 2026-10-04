@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   ShoppingCart,
   Users,
-  Warehouse,
 } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { localeDirections } from "@/lib/i18n/config";
@@ -54,11 +53,18 @@ const SHORTCUTS: {
     icon: FileBarChart,
   },
   {
-    permission: PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT,
-    label: { en: "Inventory summary", ar: "ملخص المخزون" },
-    description: { en: "Stock value and material health.", ar: "قيمة المخزون وحالة المواد." },
-    href: "/reports/materials/inventory-summary",
-    icon: Warehouse,
+    permission: PERMISSIONS.READ_MATERIALS,
+    label: { en: "Materials list", ar: "قائمة المواد" },
+    description: { en: "Open the warehouse materials list.", ar: "الانتقال إلى قائمة مواد المخزن." },
+    href: "/warehouse/materials",
+    icon: Boxes,
+  },
+  {
+    permission: PERMISSIONS.READ_PRODUCTS,
+    label: { en: "Product catalog", ar: "كتالوج المنتجات" },
+    description: { en: "Open the product catalog.", ar: "الانتقال إلى كتالوج المنتجات." },
+    href: "/products",
+    icon: PackageSearch,
   },
   {
     permission: PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS,
@@ -78,10 +84,11 @@ const SHORTCUTS: {
 
 function useVisibleShortcuts() {
   const reports = useHasPermission(SHORTCUTS[0].permission);
-  const inventory = useHasPermission(SHORTCUTS[1].permission);
-  const requisitions = useHasPermission(SHORTCUTS[2].permission);
-  const permits = useHasPermission(SHORTCUTS[3].permission);
-  const allowed = [reports, inventory, requisitions, permits];
+  const materials = useHasPermission(SHORTCUTS[1].permission);
+  const products = useHasPermission(SHORTCUTS[2].permission);
+  const requisitions = useHasPermission(SHORTCUTS[3].permission);
+  const permits = useHasPermission(SHORTCUTS[4].permission);
+  const allowed = [reports, materials, products, requisitions, permits];
   return SHORTCUTS.filter((_, index) => allowed[index]);
 }
 
@@ -126,7 +133,7 @@ export default function QuickStats({ stats, period }: { stats: DashboardQuickSta
         />
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-12">
+      <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7">
           <StatusDistribution stats={current} />
         </div>
@@ -502,7 +509,7 @@ function QuickLinks({ shortcuts }: { shortcuts: typeof SHORTCUTS }) {
                 <span className="group-hover:text-haze-800 block truncate text-sm font-medium text-gray-800">
                   {translate(item.label.en, item.label.ar)}
                 </span>
-                <span className="block truncate text-xs text-gray-500">
+                <span className="mt-1 block truncate text-xs text-gray-500">
                   {translate(item.description.en, item.description.ar)}
                 </span>
               </span>
