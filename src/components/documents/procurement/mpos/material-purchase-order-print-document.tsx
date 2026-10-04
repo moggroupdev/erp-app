@@ -162,7 +162,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
         className="flex break-inside-avoid flex-col gap-2 border-t border-gray-300 pt-3"
         dir={isArabic ? "rtl" : "ltr"}
       >
-        <h2 className="text-sm font-semibold text-gray-900">{translate("General Terms:", "القواعد العامة:")}</h2>
+        <h2 className="text-sm font-semibold text-gray-900">{translate("Terms:", "الشروط:")}</h2>
         <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-[11px] leading-relaxed text-gray-800">
           {generalTerms.map((term, index) => (
             <li key={term.key} className="flex gap-2">
