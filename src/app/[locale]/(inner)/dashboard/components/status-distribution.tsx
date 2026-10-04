@@ -38,62 +38,101 @@ function StatusTooltip({
   label,
   labels,
   dir,
+  grandTotal,
+  translate,
 }: {
   active?: boolean;
   payload?: ReadonlyArray<{ dataKey?: unknown; value?: unknown; color?: string }>;
   label?: string | number;
   labels: Record<StatusKey, string>;
   dir: "ltr" | "rtl";
+  grandTotal: number;
+  translate: (en: string, ar: string) => string;
 }) {
   if (!active || !payload?.length) return null;
 
+  const seriesOrder = SERIES.map((series) => series.key);
   const rows = payload
     .map((item) => ({
       key: String(item.dataKey ?? "") as StatusKey,
       value: segmentCount(item.value),
       color: item.color,
     }))
-    .filter((item) => item.value > 0 && item.key in labels);
+    .filter((item) => item.value > 0 && item.key in labels)
+    .sort((a, b) => seriesOrder.indexOf(a.key) - seriesOrder.indexOf(b.key));
 
   if (rows.length === 0) return null;
 
   const rowTotal = rows.reduce((sum, item) => sum + item.value, 0);
+  const periodShare = grandTotal > 0 ? Math.round((rowTotal / grandTotal) * 100) : 0;
+  const showPeriodShare = grandTotal > 0 && rowTotal < grandTotal;
 
   return (
     <div
-      className="min-w-48 rounded-xl bg-white px-3 py-2.5 text-xs shadow-md"
-      style={{ direction: dir, border: `1px solid ${chartNeutralColors[2]}` }}
+      className="max-w-80 min-w-52 overflow-hidden rounded-2xl bg-white text-xs shadow-lg ring-1 ring-gray-200/90"
+      style={{ direction: dir }}
     >
-      <div className="mb-2 flex items-center justify-between gap-4">
-        <p className="font-semibold text-gray-800">{label}</p>
-        <p className="font-semibold text-gray-800">{rowTotal}</p>
+      <div className="border-b border-gray-100 bg-gray-50/70 px-3.5 py-2.5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-medium tracking-wide text-gray-400 uppercase">
+              {translate("Status breakdown", "تفصيل الحالات")}
+            </p>
+            <p className="mt-0.5 truncate text-sm font-semibold text-gray-900">{label}</p>
+          </div>
+          <div className="shrink-0 text-end">
+            <p className="text-lg leading-none font-semibold text-gray-900 tabular-nums">{rowTotal}</p>
+            <p className="mt-1 text-[10px] text-gray-500">
+              {showPeriodShare
+                ? translate(`${periodShare}% of all in period`, `${periodShare}% من إجمالي الفترة`)
+                : translate("In this period", "خلال هذه الفترة")}
+            </p>
+          </div>
+        </div>
       </div>
-      <div className="mb-2 flex h-1.5 overflow-hidden rounded-full">
-        {rows.map((item) => (
-          <span
-            key={item.key}
-            className="h-full"
-            style={{ width: `${(item.value / rowTotal) * 100}%`, backgroundColor: item.color }}
-          />
-        ))}
+
+      <div className="px-3.5 py-3">
+        <div className="mb-3 flex h-2 gap-0.5 overflow-hidden rounded-full bg-gray-100 p-0.5">
+          {rows.map((item) => (
+            <span
+              key={item.key}
+              className="h-full min-w-[3px] rounded-full"
+              style={{ flex: item.value, backgroundColor: item.color }}
+            />
+          ))}
+        </div>
+
+        <ul className="flex flex-col gap-2.5">
+          {rows.map((item) => {
+            const share = rowTotal > 0 ? Math.round((item.value / rowTotal) * 100) : 0;
+            return (
+              <li key={item.key} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-center gap-2 text-gray-600">
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full ring-1 ring-gray-200/80"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="truncate font-medium">{labels[item.key]}</span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-2">
+                    <span className="rounded-md bg-gray-50 px-1.5 py-0.5 text-[10px] font-semibold text-gray-500 tabular-nums">
+                      {share}%
+                    </span>
+                    <span className="min-w-5 text-sm font-semibold text-gray-900 tabular-nums">{item.value}</span>
+                  </span>
+                </div>
+                <div className="h-1 overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className="h-full rounded-full transition-[width]"
+                    style={{ width: `${share}%`, backgroundColor: item.color }}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       </div>
-      <ul className="flex flex-col gap-1.5">
-        {rows.map((item) => {
-          const share = Math.round((item.value / rowTotal) * 100);
-          return (
-            <li key={item.key} className="flex items-center justify-between gap-4 text-gray-600">
-              <span className="flex min-w-0 items-center gap-2">
-                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="truncate">{labels[item.key]}</span>
-              </span>
-              <span className="shrink-0 font-medium text-gray-800">
-                {item.value}
-                <span className="ms-1 font-normal text-gray-400">{share}%</span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
     </div>
   );
 }
@@ -172,9 +211,7 @@ export default function StatusDistribution({ stats }: { stats: DashboardPeriodSt
       )}
       icon={Rows3}
       accent="amber"
-      trailing={
-        <span className="rounded-full bg-ochre-50 px-2.5 py-1 text-xs font-semibold text-ochre-800">{total}</span>
-      }
+      trailing={<span className="bg-ochre-50 text-ochre-800 rounded-full px-2.5 py-1 text-xs font-semibold">{total}</span>}
     >
       {total === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 py-10 text-center">
@@ -192,9 +229,19 @@ export default function StatusDistribution({ stats }: { stats: DashboardPeriodSt
             <SummaryChip label={groupLabels.orders} value={orderTotal} />
           </div>
 
-          <div className="h-36" dir="ltr">
+          <div className="h-44" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} layout="vertical" margin={{ top: 4, right: 0, left: 0, bottom: 0 }} barCategoryGap="32%">
+              <BarChart
+                data={data}
+                layout="vertical"
+                margin={
+                  isRtl
+                    ? { top: 8, right: -42, left: 0, bottom: 0 }
+                    : { top: 8, right: 0, left: -42, bottom: 0 }
+                }
+                barGap={-20}
+                barSize={15}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke={chartNeutralColors[2]} horizontal={false} />
                 <XAxis
                   type="number"
@@ -220,23 +267,25 @@ export default function StatusDistribution({ stats }: { stats: DashboardPeriodSt
                 <Tooltip
                   cursor={{ fill: chartNeutralColors[2], opacity: 0.35 }}
                   content={({ active, payload, label }) => (
-                    <StatusTooltip active={active} payload={payload} label={label} labels={labels} dir={dir} />
+                    <StatusTooltip
+                      active={active}
+                      payload={payload}
+                      label={label}
+                      labels={labels}
+                      dir={dir}
+                      grandTotal={total}
+                      translate={translate}
+                    />
                   )}
                 />
                 {SERIES.map((series) => (
-                  <Bar
-                    key={series.key}
-                    dataKey={series.key}
-                    fill={series.color}
-                    maxBarSize={18}
-                    isAnimationActive={false}
-                  />
+                  <Bar key={series.key} dataKey={series.key} fill={series.color} isAnimationActive={false} />
                 ))}
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {(["requisitions", "orders"] as const).map((group) => (
               <div key={group} className="flex flex-col gap-2">
                 <p className="text-[11px] font-medium tracking-wide text-gray-400 uppercase">{groupLabels[group]}</p>
