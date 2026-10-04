@@ -8,6 +8,7 @@ import {
   ChevronRight,
   ClipboardList,
   FileBarChart,
+  Banknote,
   HandCoins,
   History,
   LayoutGrid,
@@ -16,7 +17,6 @@ import {
   ShieldCheck,
   ShoppingCart,
   Users,
-  Warehouse,
 } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { localeDirections } from "@/lib/i18n/config";
@@ -53,11 +53,18 @@ const SHORTCUTS: {
     icon: FileBarChart,
   },
   {
-    permission: PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT,
-    label: { en: "Inventory summary", ar: "ملخص المخزون" },
-    description: { en: "Stock value and material health.", ar: "قيمة المخزون وحالة المواد." },
-    href: "/reports/materials/inventory-summary",
-    icon: Warehouse,
+    permission: PERMISSIONS.READ_MATERIALS,
+    label: { en: "Materials list", ar: "قائمة المواد" },
+    description: { en: "Open the warehouse materials list.", ar: "الانتقال إلى قائمة مواد المخزن." },
+    href: "/warehouse/materials",
+    icon: Boxes,
+  },
+  {
+    permission: PERMISSIONS.READ_PRODUCTS,
+    label: { en: "Product catalog", ar: "كتالوج المنتجات" },
+    description: { en: "Open the product catalog.", ar: "الانتقال إلى كتالوج المنتجات." },
+    href: "/products",
+    icon: PackageSearch,
   },
   {
     permission: PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS,
@@ -77,10 +84,11 @@ const SHORTCUTS: {
 
 function useVisibleShortcuts() {
   const reports = useHasPermission(SHORTCUTS[0].permission);
-  const inventory = useHasPermission(SHORTCUTS[1].permission);
-  const requisitions = useHasPermission(SHORTCUTS[2].permission);
-  const permits = useHasPermission(SHORTCUTS[3].permission);
-  const allowed = [reports, inventory, requisitions, permits];
+  const materials = useHasPermission(SHORTCUTS[1].permission);
+  const products = useHasPermission(SHORTCUTS[2].permission);
+  const requisitions = useHasPermission(SHORTCUTS[3].permission);
+  const permits = useHasPermission(SHORTCUTS[4].permission);
+  const allowed = [reports, materials, products, requisitions, permits];
   return SHORTCUTS.filter((_, index) => allowed[index]);
 }
 
@@ -125,7 +133,7 @@ export default function QuickStats({ stats, period }: { stats: DashboardQuickSta
         />
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-4 xl:grid-cols-12">
+      <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-7">
           <StatusDistribution stats={current} />
         </div>
@@ -250,14 +258,7 @@ function StockHealth({
       accent="teal"
     >
       <div className="flex h-full flex-col gap-5">
-        <div>
-          <p className="text-[11px] font-medium tracking-wide text-gray-400 uppercase">
-            {translate("Inventory value", "قيمة المخزون")}
-          </p>
-          <p className="mt-1 text-2xl font-semibold tracking-tight text-gray-800">
-            {formatMoney(stock.inventoryValue, currency)}
-          </p>
-        </div>
+        <InventoryValueHighlight value={stock.inventoryValue} currency={currency} translate={translate} />
 
         <div className="grid items-center gap-4 sm:grid-cols-[9.5rem_1fr]">
           {total === 0 ? (
@@ -296,7 +297,7 @@ function StockHealth({
                 </ResponsiveContainer>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-semibold text-gray-800">{total}</span>
-                  <span className="text-[11px] text-gray-500">{translate("Materials", "مواد")}</span>
+                  <span className="text-[11px] text-gray-500">{translate("Items", "صنف")}</span>
                 </div>
               </div>
 
@@ -319,17 +320,46 @@ function StockHealth({
         <div className="mt-auto grid grid-cols-2 gap-2 border-t border-gray-100 pt-4">
           <MiniStat
             icon={<Boxes size={15} />}
-            label={translate("Materials added", "مواد مضافة")}
+            label={translate("New Materials", "مواد جديدة")}
             value={stats.materialsCreated}
           />
           <MiniStat
             icon={<PackageSearch size={15} />}
-            label={translate("Products added", "منتجات مضافة")}
+            label={translate("New Products", "منتجات جديدة")}
             value={stats.productsCreated}
           />
         </div>
       </div>
     </DashboardPanel>
+  );
+}
+
+function InventoryValueHighlight({
+  value,
+  currency,
+  translate,
+}: {
+  value: number;
+  currency: string;
+  translate: (en: string, ar: string) => string;
+}) {
+  const amount = formatMoney(value);
+
+  return (
+    <div className="flex items-center gap-2 rounded-xl bg-teal-50/45 px-2.5 py-2">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700">
+        <Banknote size={14} strokeWidth={2} />
+      </span>
+      <div className="flex min-w-0 flex-1 items-baseline justify-between gap-2">
+        <span className="truncate text-[10px] font-medium tracking-wide text-teal-900/55 uppercase sm:text-[11px]">
+          {translate("Inventory value", "قيمة المخزون")}
+        </span>
+        <p className="shrink-0 leading-none">
+          <span className="text-base font-semibold tracking-tight text-gray-900 tabular-nums sm:text-lg">{amount}</span>
+          {currency ? <span className="ms-1 text-[10px] font-medium text-gray-500 sm:text-[11px]">{currency}</span> : null}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -391,7 +421,7 @@ function RecentPermits({ permits }: { permits: DashboardQuickStats["recentLegacy
               <ProtectedLink
                 permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
                 href={`/warehouse/legacy-issue-permits/${permit.id}`}
-                className="group flex items-center gap-3 rounded-2xl border border-transparent bg-gray-50 px-3 py-3 transition-colors hover:border-haze-200 hover:bg-white"
+                className="group hover:border-haze-200 flex items-center gap-3 rounded-2xl border border-transparent bg-gray-50 px-3 py-3 transition-colors hover:bg-white"
               >
                 <span
                   className={`h-9 w-1 shrink-0 rounded-full ${permit.isCancelled ? "bg-clay-600" : "bg-teal-600"}`}
@@ -399,7 +429,7 @@ function RecentPermits({ permits }: { permits: DashboardQuickStats["recentLegacy
                 />
                 <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-gray-800 group-hover:text-haze-800">
+                    <p className="group-hover:text-haze-800 truncate text-sm font-semibold text-gray-800">
                       {permit.issuePermitNumber}
                     </p>
                     <p className="truncate text-xs text-gray-500">
@@ -470,20 +500,23 @@ function QuickLinks({ shortcuts }: { shortcuts: typeof SHORTCUTS }) {
             <Link
               key={item.href}
               href={getLocalizedHref(item.href)}
-              className="group flex items-center gap-3 rounded-2xl border border-gray-100 px-3 py-3 transition-colors hover:border-haze-200 hover:bg-haze-50/60"
+              className="group hover:border-haze-200 hover:bg-haze-50/60 flex items-center gap-3 rounded-2xl border border-gray-100 px-3 py-3 transition-colors"
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600 transition-colors group-hover:bg-white group-hover:text-haze-700">
+              <span className="group-hover:text-haze-700 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-600 transition-colors group-hover:bg-white">
                 <Icon size={16} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-gray-800 group-hover:text-haze-800">
+                <span className="group-hover:text-haze-800 block truncate text-sm font-medium text-gray-800">
                   {translate(item.label.en, item.label.ar)}
                 </span>
-                <span className="block truncate text-xs text-gray-500">
+                <span className="mt-1 block truncate text-xs text-gray-500">
                   {translate(item.description.en, item.description.ar)}
                 </span>
               </span>
-              <ChevronRight size={16} className={`shrink-0 text-gray-300 group-hover:text-haze-600 ${isRtl ? "rotate-180" : ""}`} />
+              <ChevronRight
+                size={16}
+                className={`group-hover:text-haze-600 shrink-0 text-gray-300 ${isRtl ? "rotate-180" : ""}`}
+              />
             </Link>
           );
         })}

@@ -39,7 +39,7 @@ export default function DashboardSkeleton() {
         <article className="overflow-hidden rounded-3xl bg-white xl:col-span-5">
           <PanelHeaderSkeleton />
           <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 sm:py-5">
-            <Skeleton height={28} width={160} radius="md" />
+            <Skeleton height={40} radius="md" />
             <div className="grid items-center gap-4 sm:grid-cols-[9.5rem_1fr]">
               <Skeleton height={144} circle className="mx-auto" />
               <div className="flex flex-col gap-3">
