@@ -212,13 +212,19 @@ export default function MaterialModal({
         />
 
         {isOldMaterial && (
-          <Alert color="clay" variant="light" icon={<AlertTriangle size={16} />} title={translate("Warning", "تنبيه")} radius="lg" >
+          <Alert
+            radius="lg"
+            color="clay"
+            variant="light"
+            icon={<AlertTriangle size={16} />}
+            title={translate("Warning", "تنبيه")}
+          >
             <p className="text-sm">
               {translate(
                 "This item may be linked to other processes, such as purchase orders, product bills of materials, and so on. Limit corrections to the description without altering the item's identity.",
-                "قد تكون هذه المادة قد ارتبطت بعمليات أخرى كطلبات الشراء وقوائم مواد المنتجات وغيرها. اقتصر على تصحيح التوصيف دون تغيير هوية المادة."
+                "قد تكون هذه المادة قد ارتبطت بعمليات أخرى كطلبات الشراء وقوائم مواد المنتجات وغيرها. اقتصر على تصحيح التوصيف دون تغيير هوية المادة.",
               )}
-              </p>
+            </p>
           </Alert>
         )}
 
