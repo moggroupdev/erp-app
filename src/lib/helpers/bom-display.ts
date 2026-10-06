@@ -128,12 +128,14 @@ export function getFlattenedMaterialRows(
       for (const component of item.material.manufacturedMaterialBoms ?? []) {
         const componentUnit = component.unitOfMeasurementSelected ?? component.material.unitOfMeasurement;
         const compQty = component.quantityRequired;
+        // MM recipes have no legacy quantity; scale the parent line, or stay null when the parent has none.
+        const scaledLegacyQuantity = item.legacyQuantity == null ? null : item.legacyQuantity * compQty;
 
         rows.push({
           id: `${item.id}:${component.id}`,
           materialCode: component.materialCode,
           quantityRequired: parentQty * compQty,
-          legacyQuantity: null,
+          legacyQuantity: scaledLegacyQuantity,
           unitOfMeasurementSelected: componentUnit,
           notes: component.notes,
           material: component.material,
