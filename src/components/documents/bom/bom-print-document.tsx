@@ -49,6 +49,7 @@ type BomPrintDocumentProps = {
   mainCategoryTitle: string | null;
   costingMethod: CostingMethod;
   itemCostingOverrides?: Record<string, ItemCostingMethod>;
+  quantityMode?: "required" | "legacy";
 };
 
 export default function BomPrintDocument({
@@ -59,6 +60,7 @@ export default function BomPrintDocument({
   mainCategoryTitle,
   costingMethod,
   itemCostingOverrides,
+  quantityMode = "required",
 }: BomPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
 
@@ -72,6 +74,12 @@ export default function BomPrintDocument({
         <div className="flex flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             <span>{translate("Bill of Materials", "قائمة المواد")}</span>
+            {quantityMode === "legacy" && (
+              <>
+                <span> - </span>
+                <span className="text-ochre-600 font-semibold">{translate("Legacy Quantities", "الكميات القديمة")}</span>
+              </>
+            )}
             <span> - </span>
             <span className="font-mono text-xs">{bom.product.code}</span>
           </p>
@@ -143,7 +151,11 @@ export default function BomPrintDocument({
                       <td className="font-mono text-gray-600">{item.material.code}</td>
                       <td className="font-medium wrap-break-word text-gray-800">{item.material.title}</td>
                       <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
-                      <td>{formatQuantity(item.quantityRequired)}</td>
+                      <td>
+                        {quantityMode === "legacy" && item.legacyQuantity === null
+                          ? "-"
+                          : formatQuantity(item.quantityRequired)}
+                      </td>
                       <td className={unitCost === 0 ? ZERO_VALUE_CLASS : undefined}>
                         <span className="inline-flex items-center gap-1">
                           <span>{formatMoney(toDisplayUnitPrice(unitCost, factor))}</span>
@@ -234,7 +246,11 @@ export default function BomPrintDocument({
                       ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
                       : "-"}
                   </td>
-                  <td>{formatQuantity(row.quantityRequired)}</td>
+                  <td>
+                    {quantityMode === "legacy" && row.legacyQuantity === null
+                      ? "-"
+                      : formatQuantity(row.quantityRequired)}
+                  </td>
                   <td
                     className={
                       isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)

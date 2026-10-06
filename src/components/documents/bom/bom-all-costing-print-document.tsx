@@ -47,6 +47,7 @@ type BomAllCostingPrintDocumentProps = {
   totalManufacturingCost: number;
   manufacturingItemCount: number;
   itemCount: number;
+  quantityMode?: "required" | "legacy";
 };
 
 function sumLineCosts(items: FlattenedBomRow[], method: ItemCostingMethod) {
@@ -61,6 +62,7 @@ export default function BomAllCostingPrintDocument({
   totalManufacturingCost,
   manufacturingItemCount,
   itemCount,
+  quantityMode = "required",
 }: BomAllCostingPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
 
@@ -87,6 +89,12 @@ export default function BomAllCostingPrintDocument({
             <span>{translate("Bill of Materials", "قائمة المواد")}</span>
             <span> - </span>
             <span>{translate("All Costing Methods", "كل أسس التكلفة")}</span>
+            {quantityMode === "legacy" && (
+              <>
+                <span> - </span>
+                <span className="text-ochre-600 font-semibold">{translate("Legacy Quantities", "الكميات القديمة")}</span>
+              </>
+            )}
             <span> - </span>
             <span className="font-mono text-xs">{bom.product.code}</span>
           </p>
@@ -176,7 +184,11 @@ export default function BomAllCostingPrintDocument({
                         <td className="font-mono text-gray-600">{item.material.code}</td>
                         <td className="font-medium wrap-break-word text-gray-800">{item.material.title}</td>
                         <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
-                        <td>{formatQuantity(item.quantityRequired)}</td>
+                        <td>
+                          {quantityMode === "legacy" && item.legacyQuantity === null
+                            ? "-"
+                            : formatQuantity(item.quantityRequired)}
+                        </td>
                         {COSTING_COLUMNS.map((method) => (
                           <CostCells key={method} unitCost={prices[method].unitCost} lineCost={prices[method].lineCost} />
                         ))}
@@ -264,7 +276,11 @@ export default function BomAllCostingPrintDocument({
                       ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
                       : "-"}
                   </td>
-                  <td>{formatQuantity(row.quantityRequired)}</td>
+                  <td>
+                    {quantityMode === "legacy" && row.legacyQuantity === null
+                      ? "-"
+                      : formatQuantity(row.quantityRequired)}
+                  </td>
                   <td
                     className={
                       isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)

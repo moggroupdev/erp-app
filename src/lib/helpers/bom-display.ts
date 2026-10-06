@@ -17,6 +17,8 @@ import type { MmBom } from "@/types/mm-bom";
 
 export const UNCATEGORIZED_ID = "__uncategorized__";
 
+export type QuantityDisplayMode = "required" | "legacy";
+
 export type MaterialCostPriceFields = {
   unitPrice: number;
   lastPurchasePrice: number | null;
@@ -27,6 +29,7 @@ export type FlattenedBomRow = {
   id: string;
   materialCode: string;
   quantityRequired: number;
+  legacyQuantity?: number | null;
   unitOfMeasurementSelected: MaterialUnit | null;
   notes: string | null;
   material: BomItemWithMaterial["material"] | BomMmComponent["material"];
@@ -47,6 +50,7 @@ export type ManufacturingCostRow = {
   materialCode: string;
   materialTitle: string;
   quantityRequired: number;
+  legacyQuantity?: number | null;
   unitManufacturingCost: number;
   totalManufacturingCost: number;
   productionSubDepartment: ProductionSubDepartment | null;
@@ -103,21 +107,33 @@ export function getMaterialLineCost(
   return baseQuantity * getMaterialCostPrice(material, costingMethod);
 }
 
-export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): FlattenedBomRow[] {
+export function getFlattenedMaterialRows(
+  items: BomItemWithMaterial[],
+  quantityMode: QuantityDisplayMode = "required",
+): FlattenedBomRow[] {
   const rows: FlattenedBomRow[] = [];
+  const filteredItems =
+    quantityMode === "required"
+      ? items.filter((item) => item.quantityRequired > 0)
+      : items;
 
-  for (const item of items) {
+  for (const item of filteredItems) {
     const expandRecipe =
       isManufacturedMaterial(item.material.materialType) && usesMmRecipe(item.mmSourcingType);
+
+    const parentQty =
+      quantityMode === "legacy" ? (item.legacyQuantity ?? 0) : item.quantityRequired;
 
     if (expandRecipe) {
       for (const component of item.material.manufacturedMaterialBoms ?? []) {
         const componentUnit = component.unitOfMeasurementSelected ?? component.material.unitOfMeasurement;
+        const compQty = component.quantityRequired;
 
         rows.push({
           id: `${item.id}:${component.id}`,
           materialCode: component.materialCode,
-          quantityRequired: item.quantityRequired * component.quantityRequired,
+          quantityRequired: parentQty * compQty,
+          legacyQuantity: null,
           unitOfMeasurementSelected: componentUnit,
           notes: component.notes,
           material: component.material,
@@ -125,10 +141,10 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
           sourceBomItem: null,
           productionSubDepartment: item.productionSubDepartment,
           manufacturedComponentContext: {
-            parentQuantity: item.quantityRequired,
+            parentQuantity: parentQty,
             parentUnit: item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
             parentMaterial: item.material,
-            componentQuantity: component.quantityRequired,
+            componentQuantity: compQty,
             componentUnit,
           },
         });
@@ -138,10 +154,13 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
     }
 
     // Raw/spare, purchased MM, or legacy null-sourcing MM: price as a normal material row.
+    const qty = quantityMode === "legacy" ? (item.legacyQuantity ?? 0) : item.quantityRequired;
+
     rows.push({
       id: item.id,
       materialCode: item.materialCode,
-      quantityRequired: item.quantityRequired,
+      quantityRequired: qty,
+      legacyQuantity: item.legacyQuantity,
       unitOfMeasurementSelected: item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
       notes: item.notes,
       material: item.material,
@@ -154,8 +173,16 @@ export function getFlattenedMaterialRows(items: BomItemWithMaterial[]): Flattene
   return rows;
 }
 
-export function getManufacturingCostRows(items: BomItemWithMaterial[]): ManufacturingCostRow[] {
-  return items
+export function getManufacturingCostRows(
+  items: BomItemWithMaterial[],
+  quantityMode: QuantityDisplayMode = "required",
+): ManufacturingCostRow[] {
+  const filteredItems =
+    quantityMode === "required"
+      ? items.filter((item) => item.quantityRequired > 0)
+      : items;
+
+  return filteredItems
     .filter(
       (item) =>
         isManufacturedMaterial(item.material.materialType) && usesMmRecipe(item.mmSourcingType),
@@ -164,8 +191,9 @@ export function getManufacturingCostRows(items: BomItemWithMaterial[]): Manufact
       const unitManufacturingCost = isExternallyManufacturedMmSourcing(item.mmSourcingType)
         ? (item.material.lastOutsourcingCost ?? 0)
         : 0;
+      const qty = quantityMode === "legacy" ? (item.legacyQuantity ?? 0) : item.quantityRequired;
       const baseQuantity = getEnteredQuantityInBaseUnit(
-        item.quantityRequired,
+        qty,
         item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
         item.material,
       );
@@ -174,7 +202,8 @@ export function getManufacturingCostRows(items: BomItemWithMaterial[]): Manufact
         id: item.id,
         materialCode: item.material.code,
         materialTitle: item.material.title,
-        quantityRequired: item.quantityRequired,
+        quantityRequired: qty,
+        legacyQuantity: item.legacyQuantity,
         unitManufacturingCost,
         totalManufacturingCost: baseQuantity * unitManufacturingCost,
         productionSubDepartment: item.productionSubDepartment,

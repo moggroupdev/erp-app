@@ -50,19 +50,8 @@ import {
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Divider, Menu, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
-import {
-  Calculator,
-  EllipsisVertical,
-  Factory,
-  Layers,
-  Pencil,
-  Plus,
-  Printer,
-  Replace,
-  Trash2,
-  Wallet,
-} from "lucide-react";
+import { ActionIcon, Badge, Button, Divider, Menu, Radio, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
+import { Calculator, EllipsisVertical, Factory, Layers, Pencil, Plus, Printer, Replace, Trash2, Wallet } from "lucide-react";
 import { useUser } from "@/contexts/user/hook";
 import PermissionGuard from "@/components/guards/permission";
 import LayoutBox from "@/components/ui/layout-box";
@@ -80,9 +69,11 @@ import BomNoCostPrintDocument from "@/components/documents/bom/bom-no-cost-print
 import BomZeroPricePrintDocument from "@/components/documents/bom/bom-zero-price-print-document";
 import BomAllCostingPrintDocument from "@/components/documents/bom/bom-all-costing-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
+import Modal from "@/components/ui/modal";
 import CopyButton from "@/components/ui/copy-button";
 import BomItemUnitPrice from "./components/bom-item-unit-price";
 import BulkZeroCostingModal from "./components/bulk-zero-costing-modal";
+import type { QuantityDisplayMode } from "@/lib/helpers/bom-display";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
 const DELETE_ALL_CONFIRM_PHRASE = "DELETE";
@@ -131,6 +122,8 @@ export default function Page() {
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [deleteAllOpened, { open: openDeleteAll, close: closeDeleteAll }] = useDisclosure(false);
   const [bulkZeroCostingOpened, { open: openBulkZeroCosting, close: closeBulkZeroCosting }] = useDisclosure(false);
+  const [quantityModeOpened, { open: openQuantityModeModal, close: closeQuantityModeModal }] = useDisclosure(false);
+  const [quantityMode, setQuantityMode] = useState<QuantityDisplayMode>("required");
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
@@ -208,9 +201,9 @@ export default function Page() {
   const bomItems = bom?.standardBoms ?? [];
   const hasBom = bomItems.length > 0;
 
-  const materialRows = useMemo(() => getFlattenedMaterialRows(bomItems), [bomItems]);
+  const materialRows = useMemo(() => getFlattenedMaterialRows(bomItems, quantityMode), [bomItems, quantityMode]);
   const manufacturingRows = useMemo(() => {
-    const rows = getManufacturingCostRows(bomItems);
+    const rows = getManufacturingCostRows(bomItems, quantityMode);
 
     return [...rows].sort(
       (a, b) =>
@@ -218,7 +211,7 @@ export default function Page() {
         a.materialTitle.localeCompare(b.materialTitle, locale) ||
         a.materialCode.localeCompare(b.materialCode, locale),
     );
-  }, [bomItems, locale]);
+  }, [bomItems, locale, quantityMode]);
 
   const totals = useMemo(() => {
     return getBomDisplayTotals({
@@ -479,6 +472,12 @@ export default function Page() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
+                    {quantityMode === "legacy" && (
+                      <Badge size="sm" variant="light" color="ochre" radius="md">
+                        {translate("Legacy Quantities Mode", "وضع الكميات القديمة")}
+                      </Badge>
+                    )}
+
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium text-gray-500">{translate("Costing", "أساس التكلفة")}</span>
                       <SegmentedControl
@@ -495,6 +494,10 @@ export default function Page() {
                     </div>
 
                     <ActionsMenu>
+                      <Menu.Item leftSection={<Calculator size={14} />} onClick={openQuantityModeModal}>
+                        {translate("Quantity Display Settings", "إعدادات عرض الكميات")}
+                      </Menu.Item>
+                      <Menu.Divider />
                       <Menu.Item
                         leftSection={<Printer size={14} />}
                         onClick={() => {
@@ -592,6 +595,7 @@ export default function Page() {
                       mainCategoryTitle={productMainCategory?.title || null}
                       costingMethod={costingMethod}
                       itemCostingOverrides={itemCostingOverrides}
+                      quantityMode={quantityMode}
                     />
                   ) : printVariant === "no-cost" ? (
                     <BomNoCostPrintDocument
@@ -600,6 +604,7 @@ export default function Page() {
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
                       totalItemCount={totals.itemCount}
+                      quantityMode={quantityMode}
                     />
                   ) : printVariant === "all-costing" ? (
                     <BomAllCostingPrintDocument
@@ -610,6 +615,7 @@ export default function Page() {
                       totalManufacturingCost={totals.totalManufacturingCost}
                       manufacturingItemCount={totals.manufacturingItemCount}
                       itemCount={totals.itemCount}
+                      quantityMode={quantityMode}
                     />
                   ) : (
                     <BomZeroPricePrintDocument
@@ -735,14 +741,22 @@ export default function Page() {
                                         </div>
                                       </Table.Td>
                                       <Table.Td
-                                        className={`font-medium ${item.quantityRequired === 0 ? zeroValueClass : "text-gray-800"}`}
+                                        className={`font-medium ${
+                                          quantityMode === "legacy" && item.legacyQuantity === null
+                                            ? "text-gray-400"
+                                            : item.quantityRequired === 0
+                                              ? zeroValueClass
+                                              : "text-gray-800"
+                                        }`}
                                       >
-                                        {formatEnteredQuantityForDisplay(
-                                          item.quantityRequired,
-                                          enteredUnit,
-                                          unit,
-                                          item.material,
-                                        )}
+                                        {quantityMode === "legacy" && item.legacyQuantity === null
+                                          ? "-"
+                                          : formatEnteredQuantityForDisplay(
+                                              item.quantityRequired,
+                                              enteredUnit,
+                                              unit,
+                                              item.material,
+                                            )}
                                       </Table.Td>
                                       <Table.Td>
                                         <BomItemUnitPrice
@@ -910,6 +924,49 @@ export default function Page() {
                   existingItems={bomItems}
                 />
 
+                <Modal
+                  opened={quantityModeOpened}
+                  onClose={closeQuantityModeModal}
+                  title={translate("Quantity Display Mode", "وضع عرض الكمية")}
+                  size="lg"
+                >
+                  <div className="flex flex-col gap-4">
+                    <p className="text-sm text-gray-600">
+                      {translate(
+                        "Choose which quantity value to use across the BOM view and printed documents.",
+                        "اختر قيمة الكمية المستخدمة في عرض قائمة المواد والمستندات المطبوعة.",
+                      )}
+                    </p>
+
+                    <Radio.Group value={quantityMode} onChange={(value) => setQuantityMode(value as QuantityDisplayMode)}>
+                      <div className="flex flex-col gap-3">
+                        <Radio
+                          value="required"
+                          label={translate("Required Quantity (Standard)", "الكمية المطلوبة (الافتراضية)")}
+                          description={translate(
+                            "Display standard required quantities. Items with no required quantity are hidden.",
+                            "عرض الكميات المطلوبة الافتراضية. يتم إخفاء البنود التي بدون كمية مطلوبة.",
+                          )}
+                        />
+                        <Radio
+                          value="legacy"
+                          label={translate("Legacy Quantity", "الكمية القديمة")}
+                          description={translate(
+                            "Display legacy quantities for comparison. Printable documents will also use legacy quantities.",
+                            "عرض الكميات القديمة للمقارنة. ستعتمد المستندات المطبوعة أيضاً على الكمية القديمة.",
+                          )}
+                        />
+                      </div>
+                    </Radio.Group>
+
+                    <div className="flex justify-end pt-2">
+                      <Button color="teal" radius="md" onClick={closeQuantityModeModal}>
+                        {translate("Done", "تم")}
+                      </Button>
+                    </div>
+                  </div>
+                </Modal>
+
                 <BulkZeroCostingModal
                   opened={bulkZeroCostingOpened}
                   onClose={closeBulkZeroCosting}
@@ -1019,7 +1076,7 @@ function ManufacturingCostsSection({
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-start gap-2.5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ochre-50 text-ochre-600">
+        <div className="bg-ochre-50 text-ochre-600 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
           <Factory size={16} />
         </div>
         <div className="flex flex-col gap-1">

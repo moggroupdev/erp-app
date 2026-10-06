@@ -22,6 +22,7 @@ type BomNoCostPrintDocumentProps = {
   manufacturingRows: ManufacturingCostRow[];
   mainCategoryTitle: string | null;
   totalItemCount: number;
+  quantityMode?: "required" | "legacy";
 };
 
 export default function BomNoCostPrintDocument({
@@ -30,6 +31,7 @@ export default function BomNoCostPrintDocument({
   manufacturingRows,
   mainCategoryTitle,
   totalItemCount,
+  quantityMode = "required",
 }: BomNoCostPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
 
@@ -45,6 +47,12 @@ export default function BomNoCostPrintDocument({
             <span>{translate("Bill of Materials", "قائمة المواد")}</span>
             <span> - </span>
             <span>{translate("Without Costs", "بدون تكاليف")}</span>
+            {quantityMode === "legacy" && (
+              <>
+                <span> - </span>
+                <span className="text-ochre-600 font-semibold">{translate("Legacy Quantities", "الكميات القديمة")}</span>
+              </>
+            )}
             <span> - </span>
             <span className="font-mono text-xs">{bom.product.code}</span>
           </p>
@@ -90,7 +98,11 @@ export default function BomNoCostPrintDocument({
                       <td className="font-mono text-gray-600">{item.material.code}</td>
                       <td className="font-medium wrap-break-word text-gray-800">{item.material.title}</td>
                       <td>{getMaterialUnitLabel(enteredUnit, locale)}</td>
-                      <td>{formatQuantity(item.quantityRequired)}</td>
+                      <td>
+                        {quantityMode === "legacy" && item.legacyQuantity === null
+                          ? "-"
+                          : formatQuantity(item.quantityRequired)}
+                      </td>
                       <td className="wrap-break-word text-gray-600">
                         <div className="flex flex-col gap-0.5 leading-relaxed">
                           {item.notes ? <span>{item.notes}</span> : null}
@@ -156,7 +168,11 @@ export default function BomNoCostPrintDocument({
                       ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
                       : "-"}
                   </td>
-                  <td>{formatQuantity(row.quantityRequired)}</td>
+                  <td>
+                    {quantityMode === "legacy" && row.legacyQuantity === null
+                      ? "-"
+                      : formatQuantity(row.quantityRequired)}
+                  </td>
                 </tr>
               ))}
               <tr className="border-t border-gray-300 bg-gray-50 font-medium">
