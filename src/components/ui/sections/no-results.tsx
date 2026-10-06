@@ -20,7 +20,7 @@ export default function NoResultsSection({ keyword, image = null, useDefaultImg 
       {image ? (
         <Image src={image} alt={alt} height={65} width={65} />
       ) : useDefaultImg ? (
-        <Image src="/images/landscape.png" alt={alt} height={50} width={50} />
+        <Image src="/images/empty.png" alt={alt} height={60} width={60} />
       ) : null}
       <p className="text-gray-800">{translate(`No results found for "${keyword}"`, `لا توجد نتائج لـ"${keyword}"`)}</p>
       {button && (
