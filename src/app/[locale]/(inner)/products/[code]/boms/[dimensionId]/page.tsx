@@ -494,10 +494,6 @@ export default function Page() {
                     </div>
 
                     <ActionsMenu>
-                      <Menu.Item leftSection={<Calculator size={14} />} onClick={openQuantityModeModal}>
-                        {translate("Quantity Display Settings", "إعدادات عرض الكميات")}
-                      </Menu.Item>
-                      <Menu.Divider />
                       <Menu.Item
                         leftSection={<Printer size={14} />}
                         onClick={() => {
@@ -533,13 +529,14 @@ export default function Page() {
                         </Menu.Item>
                       )}
 
+                      <Menu.Divider />
+                      <Menu.Item leftSection={<Calculator size={14} />} onClick={openQuantityModeModal}>
+                        {translate("Quantity Display Settings", "إعدادات عرض الكميات")}
+                      </Menu.Item>
                       {zeroEffectivePriceItems.length > 0 && (
-                        <>
-                          <Menu.Divider />
-                          <Menu.Item leftSection={<Replace size={14} />} onClick={openBulkZeroCosting}>
-                            {translate("Update Zero Prices", "تحديث الأسعار الصفرية")}
-                          </Menu.Item>
-                        </>
+                        <Menu.Item leftSection={<Replace size={14} />} onClick={openBulkZeroCosting}>
+                          {translate("Update Zero Prices", "تحديث الأسعار الصفرية")}
+                        </Menu.Item>
                       )}
                       {canManageBom && <Menu.Divider />}
                       {canAddBom && (
