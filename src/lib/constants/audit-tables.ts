@@ -40,6 +40,7 @@ export const AUDITED_TABLE_VALUES = [
   "material_purchase_order_items",
   "material_purchase_order_item_contract_items",
   "material_purchase_order_item_requisition_items",
+  "material_purchase_order_payment_terms",
   "material_purchase_receipts",
   "material_purchase_receipt_items",
   "supplier_invoices",
@@ -116,11 +117,15 @@ const AUDITED_TABLE_LABELS: Record<AuditedTable, TableLabel> = {
   material_purchase_order_items: { en: "Material Purchase Order Items", ar: "بنود أمر توريد الخامات" },
   material_purchase_order_item_contract_items: {
     en: "MPO Contract Allocations",
-    ar: "تخصيصات العقد في أمر الخامات",
+    ar: "تخصيصات العقد في أمر توريد الخامات",
   },
   material_purchase_order_item_requisition_items: {
     en: "MPO Requisition Allocations",
-    ar: "تخصيصات الطلب في أمر الخامات",
+    ar: "تخصيصات الطلب في أمر توريد الخامات",
+  },
+  material_purchase_order_payment_terms: {
+    en: "MPO Payment Terms",
+    ar: "شروط السداد في أمر توريد الخامات",
   },
   material_purchase_receipts: { en: "Material Purchase Receipts", ar: "إذون استلام الخامات" },
   material_purchase_receipt_items: { en: "Material Receipt Items", ar: "بنود إذن استلام الخامات" },

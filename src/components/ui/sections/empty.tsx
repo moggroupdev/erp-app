@@ -23,7 +23,7 @@ export default function EmptySection({
       {img ? (
         <Image src={img} alt={message || translate("Empty", "فارغ")} height={65} width={65} />
       ) : useDefaultImg ? (
-        <Image src="/images/landscape.png" alt={message || translate("Empty", "فارغ")} height={50} width={50} />
+        <Image src="/images/empty.png" alt={message || translate("Empty", "فارغ")} height={60} width={60} />
       ) : null}
       <p>{message || translate("Empty", "فارغ")}</p>
       {children}

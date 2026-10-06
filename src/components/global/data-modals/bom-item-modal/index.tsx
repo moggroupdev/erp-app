@@ -49,6 +49,7 @@ export default function BomItemModal({
   const [selectedMaterial, setSelectedMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
   const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
+  const [legacyQuantity, setLegacyQuantity] = useState<number | string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [mmSourcingType, setMmSourcingType] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
@@ -78,6 +79,7 @@ export default function BomItemModal({
     setSelectedMaterial(null);
     setUnit(null);
     setQuantityRequired("");
+    setLegacyQuantity(null);
     setProductionSubDepartment(null);
     setMmSourcingType(null);
     setNotes("");
@@ -90,6 +92,7 @@ export default function BomItemModal({
       materialCode: itemToUpdate.materialCode,
       unit: itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement,
       quantityRequired: itemToUpdate.quantityRequired,
+      legacyQuantity: itemToUpdate.legacyQuantity,
       productionSubDepartment: itemToUpdate.productionSubDepartment,
       mmSourcingType: itemToUpdate.mmSourcingType,
       notes: itemToUpdate.notes,
@@ -102,6 +105,7 @@ export default function BomItemModal({
       setMaterialCode(initialEditValues.materialCode);
       setSelectedMaterial(null);
       setQuantityRequired(initialEditValues.quantityRequired);
+      setLegacyQuantity(initialEditValues.legacyQuantity ?? null);
       setProductionSubDepartment(initialEditValues.productionSubDepartment);
       setMmSourcingType(initialEditValues.mmSourcingType);
       setNotes(initialEditValues.notes || "");
@@ -118,12 +122,14 @@ export default function BomItemModal({
 
   const mutation = useMutation({
     mutationFn: async () => {
+      const resolvedLegacyQuantity = legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null;
       const dto = {
         materialCode: materialCode!,
         quantityRequired: Number(quantityRequired),
         unitOfMeasurementSelected: unit as MaterialUnit,
         productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
         mmSourcingType: resolvedMmSourcingType,
+        legacyQuantity: resolvedLegacyQuantity,
         notes: notes.trim() || null,
       };
 
@@ -179,8 +185,18 @@ export default function BomItemModal({
     }
 
     const normalizedQuantity = Number(quantityRequired);
-    if (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0) {
-      return setValidationError(translate("Quantity must be a positive number.", "يجب أن تكون الكمية رقماً موجباً."));
+    if (Number.isNaN(normalizedQuantity) || normalizedQuantity < 0) {
+      return setValidationError(translate("Quantity must be a non-negative number.", "يجب أن تكون الكمية رقماً غير سالب."));
+    }
+
+    const normalizedLegacy = legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null;
+    if (normalizedQuantity === 0 && normalizedLegacy === 0) {
+      return setValidationError(
+        translate(
+          "Quantity required and legacy quantity cannot both be zero.",
+          "لا يمكن أن تكون الكمية المطلوبة والكمية القديمة كلاهما صفرًا في نفس الوقت.",
+        ),
+      );
     }
 
     mutation.mutate();
@@ -203,16 +219,21 @@ export default function BomItemModal({
   const isDataChanged = initialEditValues
     ? materialCode !== initialEditValues.materialCode ||
       formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
+      (legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null) !== initialEditValues.legacyQuantity ||
       productionSubDepartment !== initialEditValues.productionSubDepartment ||
       unit !== initialEditValues.unit ||
       (mmSourcingType ?? null) !== (initialEditValues.mmSourcingType ?? null) ||
       (notes.trim() || null) !== initialEditValues.notes
     : true;
 
+  const normalizedQty = quantityRequired !== "" ? Number(quantityRequired) : NaN;
+  const normalizedLegacyQty = legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null;
   const isReadyToSubmit =
     !!materialCode &&
     quantityRequired !== "" &&
-    Number(quantityRequired) > 0 &&
+    !Number.isNaN(normalizedQty) &&
+    normalizedQty >= 0 &&
+    !(normalizedQty === 0 && normalizedLegacyQty === 0) &&
     !!productionSubDepartment &&
     !!unit &&
     (!isMmMaterial || !!mmSourcingType) &&
@@ -294,6 +315,21 @@ export default function BomItemModal({
             />
           )}
         </div>
+
+        <NumberInput
+          value={legacyQuantity ?? ""}
+          onChange={(value) => setLegacyQuantity(value === "" ? null : Number(value))}
+          label={translate("Legacy Quantity (Optional)", "الكمية القديمة (اختياري)")}
+          description={translate(
+            "Reference quantity from legacy data for comparison only. Uses the same unit as Quantity Required.",
+            "كمية مرجعية من البيانات القديمة للمقارنة فقط. تستخدم نفس وحدة الكمية المطلوبة.",
+          )}
+          placeholder={translate("Enter legacy quantity", "أدخل الكمية القديمة")}
+          min={0}
+          allowNegative={false}
+          decimalScale={6}
+          radius="md"
+        />
 
         <Textarea
           value={notes}

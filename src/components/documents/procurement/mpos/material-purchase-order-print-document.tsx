@@ -10,8 +10,8 @@ import type { MaterialPurchaseOrderDetailed } from "@/types/material-purchase-or
 
 const GENERAL_TERMS = [
   {
-    ar: "يتم تقديم فاتورة موضح بها أرقام أمر التوريد والبيانات الضريبية.",
-    en: "An invoice must be submitted showing the purchase order numbers and the tax details.",
+    ar: "يتم تقديم فاتورة موضح بها رقم أمر التوريد والبيانات الضريبية.",
+    en: "An invoice must be submitted showing the purchase order number and the tax details.",
   },
   {
     ar: "يتم توقيع غرامات تأخير بواقع 1% عن كل يوم تأخير بحد أقصى 10%.",
@@ -26,8 +26,8 @@ const GENERAL_TERMS = [
     en: "The company reserves the right to reject items that do not conform to the specifications and supply terms.",
   },
   {
-    ar: "يتم الفحص والاستلام وفق ما هو موضح في هذا الأمر، على أن تُقبل الأصناف من لجنة الفحص. ويُعد الاستلام قبولاً بالتوريد، غير أن القبول النهائي يتم طبقًا لمحضر الفحص الفني.",
-    en: "Inspection and receipt shall follow what is stated in this order, and the items shall be accepted by the inspection committee. Receipt constitutes acceptance of the supply; however, final acceptance shall be in accordance with the technical inspection report.",
+    ar: "يتم الفحص والاستلام وفق ما هو موضح في هذا الأمر، على أن تُقبل الأصناف من لجنة الفحص ولها الحق في رفض كل ما هو غير مطابق.",
+    en: "Inspection and acceptance shall be conducted in accordance with the terms of this order; the inspection committee shall accept the items, reserving the right to reject any items that do not conform to specifications.",
   },
   {
     ar: "قبول الأصناف الموضحة في أمر التوريد عند ورودها لا يعفي المورد من مسؤولية التوريدات غير المطابقة.",
@@ -162,7 +162,7 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
         className="flex break-inside-avoid flex-col gap-2 border-t border-gray-300 pt-3"
         dir={isArabic ? "rtl" : "ltr"}
       >
-        <h2 className="text-sm font-semibold text-gray-900">{translate("General Terms:", "القواعد العامة:")}</h2>
+        <h2 className="text-sm font-semibold text-gray-900">{translate("Terms:", "الشروط:")}</h2>
         <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-[11px] leading-relaxed text-gray-800">
           {generalTerms.map((term, index) => (
             <li key={term.key} className="flex gap-2">

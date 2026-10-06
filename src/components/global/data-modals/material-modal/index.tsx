@@ -11,7 +11,8 @@ import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { TextInput, Button, Textarea, NumberInput } from "@mantine/core";
+import { TextInput, Button, Textarea, NumberInput, Alert } from "@mantine/core";
+import { AlertCircle, AlertTriangle } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import SelectMaterialMain from "@/components/global/selections/reference-based/select-material-main";
@@ -193,6 +194,10 @@ export default function MaterialModal({
 
   const isReadyToSubmit = isRequiredInputFilled && (materialToUpdate ? isDataChanged : true);
 
+  const isOldMaterial = materialToUpdate?.createdAt
+    ? new Date().getTime() - new Date(materialToUpdate.createdAt).getTime() > 24 * 60 * 60 * 1000
+    : false;
+
   return (
     <Modal opened={opened} onClose={handleClose} title={titleLabel}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -205,6 +210,34 @@ export default function MaterialModal({
           autoFocus
           radius="md"
         />
+
+        {!materialToUpdate && (
+          <Alert radius="lg" color="haze" variant="light" icon={<AlertCircle size={16} />}>
+            <p className="text-sm">
+              {translate(
+                "Provide a detailed title for the material to help identify it.",
+                "أضف عنوانًا مفصلًا وموضحًا للمادة.",
+              )}
+            </p>
+          </Alert>
+        )}
+
+        {isOldMaterial && (
+          <Alert
+            radius="lg"
+            color="clay"
+            variant="light"
+            icon={<AlertTriangle size={16} />}
+            title={translate("Warning", "تنبيه")}
+          >
+            <p className="text-sm">
+              {translate(
+                "This item may be linked to other processes, such as purchase orders, product bills of materials, and so on. Limit corrections to the description without altering the item's identity.",
+                "قد تكون هذه المادة قد ارتبطت بعمليات أخرى كطلبات الشراء وقوائم مواد المنتجات وغيرها. اقتصر على تصحيح التوصيف دون تغيير هوية المادة.",
+              )}
+            </p>
+          </Alert>
+        )}
 
         <Textarea
           value={description}
