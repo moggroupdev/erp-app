@@ -456,23 +456,23 @@ export default function BomDraftForm({
           <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="h-9">
-                <Table.Th className="w-[24%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[31%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Material", "المادة")}
                 </Table.Th>
-                <Table.Th className="w-[13%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[11%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Manufacturing Source", "مصدر التصنيع")}
                 </Table.Th>
-                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  {translate("Unit", "الوحدة")}
+                </Table.Th>
+                <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Quantity", "الكمية")}
                 </Table.Th>
                 {showLegacyQuantity && (
-                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                  <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Legacy Qty", "الكمية القديمة")}
                   </Table.Th>
                 )}
-                <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Unit", "الوحدة")}
-                </Table.Th>
                 <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Unit Price", "سعر الوحدة")} ({currency})
                 </Table.Th>
@@ -482,13 +482,13 @@ export default function BomDraftForm({
                 <Table.Th
                   className={
                     showLegacyQuantity
-                      ? "w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase"
+                      ? "w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase"
                       : "w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase"
                   }
                 >
                   {translate("Notes", "الملاحظات")}
                 </Table.Th>
-                <Table.Th className="w-[5%]" />
+                <Table.Th className="w-[4%]" />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -536,6 +536,26 @@ export default function BomDraftForm({
                         <span className="text-sm text-gray-400">-</span>
                       )}
                     </Table.Td>
+                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+                      {showUnitSelect(row) ? (
+                        <DataSelect
+                          value={row.unit}
+                          setValue={(next) => {
+                            const resolved = typeof next === "function" ? next(row.unit) : next;
+                            updateRow(row.key, { unit: (resolved as MaterialUnit | null) ?? row.unitOfMeasurement });
+                          }}
+                          data={getRowUnitOptions(row, locale)}
+                          variant="unstyled"
+                          radius={0}
+                          searchable
+                          styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
+                        />
+                      ) : (
+                        <span className="text-sm text-gray-600">
+                          {row.unitOfMeasurement ? getMaterialUnitLabel(row.unitOfMeasurement, locale) : ""}
+                        </span>
+                      )}
+                    </Table.Td>
                     <Table.Td data-bom-qty-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <NumberInput
                         value={row.quantityRequired}
@@ -566,26 +586,6 @@ export default function BomDraftForm({
                         />
                       </Table.Td>
                     )}
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-                      {showUnitSelect(row) ? (
-                        <DataSelect
-                          value={row.unit}
-                          setValue={(next) => {
-                            const resolved = typeof next === "function" ? next(row.unit) : next;
-                            updateRow(row.key, { unit: (resolved as MaterialUnit | null) ?? row.unitOfMeasurement });
-                          }}
-                          data={getRowUnitOptions(row, locale)}
-                          variant="unstyled"
-                          radius={0}
-                          searchable
-                          styles={{ input: { minHeight: 0, height: "auto", padding: 0, cursor: "pointer" } }}
-                        />
-                      ) : (
-                        <span className="text-sm text-gray-600">
-                          {row.unitOfMeasurement ? getMaterialUnitLabel(row.unitOfMeasurement, locale) : ""}
-                        </span>
-                      )}
-                    </Table.Td>
                     <Table.Td>
                       <span className="text-sm text-gray-600">{row.materialCode ? formatMoney(displayUnitPrice) : ""}</span>
                     </Table.Td>
