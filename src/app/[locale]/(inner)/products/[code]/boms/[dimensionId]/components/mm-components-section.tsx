@@ -66,9 +66,9 @@ export default function MmComponentsSection({
   if (mmRows.length === 0) return null;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-haze-100 bg-haze-50/50 p-4">
-      <div className="mb-2.5 flex items-start gap-2 border-b border-haze-100 pb-3.5">
-        <Info size={14} className="mt-0.5 shrink-0 text-haze-600" />
+    <section className="bg-haze-50/50 overflow-hidden rounded-xl p-4">
+      <div className="border-haze-100 mb-2.5 flex items-start gap-2 border-b pb-3.5">
+        <Info size={14} className="text-haze-600 mt-0.5 shrink-0" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <h3 className="text-sm font-semibold text-gray-900">
@@ -98,7 +98,7 @@ export default function MmComponentsSection({
 
           return (
             <div key={group.key} className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-              <div className="flex items-center justify-between gap-2 border-b border-gray-200 bg-ochre-50/50 px-2.5 py-2.5">
+              <div className="bg-ochre-50/50 flex items-center justify-between gap-2 border-b border-gray-200 px-2.5 py-2.5">
                 <div className="flex gap-1.5">
                   <p className="truncate text-xs font-semibold text-gray-900">{group.materialTitle}</p>
                   <p className="truncate text-xs text-gray-500">{group.materialCode}</p>
@@ -142,7 +142,8 @@ export default function MmComponentsSection({
                         </Table.Td>
                         <Table.Td>
                           <span className="text-xs font-medium text-gray-700">
-                            {getMaterialUnitLabel(component.unitOfMeasurement, locale)} {formatQuantity(component.quantityRequired)}
+                            {getMaterialUnitLabel(component.unitOfMeasurement, locale)}{" "}
+                            {formatQuantity(component.quantityRequired)}
                           </span>
                         </Table.Td>
                       </Table.Tr>
