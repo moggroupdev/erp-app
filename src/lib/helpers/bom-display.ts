@@ -107,15 +107,21 @@ export function getMaterialLineCost(
   return baseQuantity * getMaterialCostPrice(material, costingMethod);
 }
 
+function includeInQuantityMode(
+  item: { quantityRequired: number; noLongerUsed: boolean },
+  quantityMode: QuantityDisplayMode,
+) {
+  if (quantityMode === "legacy") return true;
+  // Required mode is the working BOM: retired comparison lines stay hidden.
+  return !item.noLongerUsed && item.quantityRequired > 0;
+}
+
 export function getFlattenedMaterialRows(
   items: BomItemWithMaterial[],
   quantityMode: QuantityDisplayMode = "required",
 ): FlattenedBomRow[] {
   const rows: FlattenedBomRow[] = [];
-  const filteredItems =
-    quantityMode === "required"
-      ? items.filter((item) => item.quantityRequired > 0)
-      : items;
+  const filteredItems = items.filter((item) => includeInQuantityMode(item, quantityMode));
 
   for (const item of filteredItems) {
     const expandRecipe =
@@ -128,12 +134,14 @@ export function getFlattenedMaterialRows(
       for (const component of item.material.manufacturedMaterialBoms ?? []) {
         const componentUnit = component.unitOfMeasurementSelected ?? component.material.unitOfMeasurement;
         const compQty = component.quantityRequired;
+        // MM recipes have no legacy quantity; scale the parent line, or stay null when the parent has none.
+        const scaledLegacyQuantity = item.legacyQuantity == null ? null : item.legacyQuantity * compQty;
 
         rows.push({
           id: `${item.id}:${component.id}`,
           materialCode: component.materialCode,
           quantityRequired: parentQty * compQty,
-          legacyQuantity: null,
+          legacyQuantity: scaledLegacyQuantity,
           unitOfMeasurementSelected: componentUnit,
           notes: component.notes,
           material: component.material,
@@ -177,10 +185,7 @@ export function getManufacturingCostRows(
   items: BomItemWithMaterial[],
   quantityMode: QuantityDisplayMode = "required",
 ): ManufacturingCostRow[] {
-  const filteredItems =
-    quantityMode === "required"
-      ? items.filter((item) => item.quantityRequired > 0)
-      : items;
+  const filteredItems = items.filter((item) => includeInQuantityMode(item, quantityMode));
 
   return filteredItems
     .filter(

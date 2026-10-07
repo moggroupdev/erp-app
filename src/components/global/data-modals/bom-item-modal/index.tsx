@@ -15,7 +15,7 @@ import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial } from "@/types/bom";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import { Alert, Button, NumberInput, Textarea } from "@mantine/core";
+import { Alert, Button, Checkbox, NumberInput, Textarea } from "@mantine/core";
 import { Info } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
@@ -50,6 +50,8 @@ export default function BomItemModal({
   const [unit, setUnit] = useState<string | null>(null);
   const [quantityRequired, setQuantityRequired] = useState<number | string>("");
   const [legacyQuantity, setLegacyQuantity] = useState<number | string | null>(null);
+  const [showLegacyQuantity, setShowLegacyQuantity] = useState(false);
+  const [noLongerUsed, setNoLongerUsed] = useState(false);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
   const [mmSourcingType, setMmSourcingType] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
@@ -80,6 +82,8 @@ export default function BomItemModal({
     setUnit(null);
     setQuantityRequired("");
     setLegacyQuantity(null);
+    setShowLegacyQuantity(false);
+    setNoLongerUsed(false);
     setProductionSubDepartment(null);
     setMmSourcingType(null);
     setNotes("");
@@ -93,6 +97,7 @@ export default function BomItemModal({
       unit: itemToUpdate.unitOfMeasurementSelected ?? itemToUpdate.material.unitOfMeasurement,
       quantityRequired: itemToUpdate.quantityRequired,
       legacyQuantity: itemToUpdate.legacyQuantity,
+      noLongerUsed: itemToUpdate.noLongerUsed,
       productionSubDepartment: itemToUpdate.productionSubDepartment,
       mmSourcingType: itemToUpdate.mmSourcingType,
       notes: itemToUpdate.notes,
@@ -106,6 +111,8 @@ export default function BomItemModal({
       setSelectedMaterial(null);
       setQuantityRequired(initialEditValues.quantityRequired);
       setLegacyQuantity(initialEditValues.legacyQuantity ?? null);
+      setShowLegacyQuantity(initialEditValues.noLongerUsed);
+      setNoLongerUsed(initialEditValues.noLongerUsed);
       setProductionSubDepartment(initialEditValues.productionSubDepartment);
       setMmSourcingType(initialEditValues.mmSourcingType);
       setNotes(initialEditValues.notes || "");
@@ -125,11 +132,12 @@ export default function BomItemModal({
       const resolvedLegacyQuantity = legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null;
       const dto = {
         materialCode: materialCode!,
-        quantityRequired: Number(quantityRequired),
+        quantityRequired: noLongerUsed ? 0 : Number(quantityRequired),
         unitOfMeasurementSelected: unit as MaterialUnit,
         productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
         mmSourcingType: resolvedMmSourcingType,
         legacyQuantity: resolvedLegacyQuantity,
+        noLongerUsed,
         notes: notes.trim() || null,
       };
 
@@ -169,9 +177,7 @@ export default function BomItemModal({
     }
 
     if (!productionSubDepartment) {
-      return setValidationError(
-        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
-      );
+      return setValidationError(translate("Please select a production department.", "يرجى اختيار قسم الانتاج."));
     }
 
     if (!unit) {
@@ -179,22 +185,31 @@ export default function BomItemModal({
     }
 
     if (isMmMaterial && !mmSourcingType) {
+      return setValidationError(translate("Please select a manufacturing source.", "يرجى اختيار مصدر التصنيع."));
+    }
+
+    const normalizedQuantity = noLongerUsed ? 0 : Number(quantityRequired);
+    if (!noLongerUsed && (Number.isNaN(normalizedQuantity) || normalizedQuantity <= 0)) {
       return setValidationError(
-        translate("Please select a manufacturing source.", "يرجى اختيار مصدر التصنيع."),
+        translate(
+          "Quantity must be greater than 0, or mark the line as no longer used.",
+          "يجب أن تكون الكمية أكبر من 0، أو علّم البند بأنه لم يعد مستخدماً.",
+        ),
       );
     }
 
-    const normalizedQuantity = Number(quantityRequired);
-    if (Number.isNaN(normalizedQuantity) || normalizedQuantity < 0) {
-      return setValidationError(translate("Quantity must be a non-negative number.", "يجب أن تكون الكمية رقماً غير سالب."));
+    const normalizedLegacy = legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null;
+    if (normalizedLegacy !== null && (Number.isNaN(normalizedLegacy) || normalizedLegacy < 0)) {
+      return setValidationError(
+        translate("Legacy quantity must be a non-negative number.", "يجب أن تكون الكمية القديمة رقماً غير سالب."),
+      );
     }
 
-    const normalizedLegacy = legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null;
-    if (normalizedQuantity === 0 && normalizedLegacy === 0) {
+    if (noLongerUsed && (normalizedLegacy === null || normalizedLegacy <= 0)) {
       return setValidationError(
         translate(
-          "Quantity required and legacy quantity cannot both be zero.",
-          "لا يمكن أن تكون الكمية المطلوبة والكمية القديمة كلاهما صفرًا في نفس الوقت.",
+          "A line that is no longer used needs a legacy quantity greater than 0.",
+          "البند الذي لم يعد مستخدماً يحتاج كمية قديمة أكبر من 0.",
         ),
       );
     }
@@ -218,22 +233,24 @@ export default function BomItemModal({
 
   const isDataChanged = initialEditValues
     ? materialCode !== initialEditValues.materialCode ||
-      formatQuantity(Number(quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
-      (legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null) !== initialEditValues.legacyQuantity ||
+      formatQuantity(Number(noLongerUsed ? 0 : quantityRequired)) !== formatQuantity(initialEditValues.quantityRequired) ||
+      (legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null) !==
+        initialEditValues.legacyQuantity ||
+      noLongerUsed !== initialEditValues.noLongerUsed ||
       productionSubDepartment !== initialEditValues.productionSubDepartment ||
       unit !== initialEditValues.unit ||
       (mmSourcingType ?? null) !== (initialEditValues.mmSourcingType ?? null) ||
       (notes.trim() || null) !== initialEditValues.notes
     : true;
 
-  const normalizedQty = quantityRequired !== "" ? Number(quantityRequired) : NaN;
+  const normalizedQty = noLongerUsed ? 0 : quantityRequired !== "" ? Number(quantityRequired) : NaN;
   const normalizedLegacyQty = legacyQuantity !== null && legacyQuantity !== "" ? Number(legacyQuantity) : null;
+  const quantityOk = noLongerUsed
+    ? normalizedLegacyQty !== null && normalizedLegacyQty > 0
+    : !Number.isNaN(normalizedQty) && normalizedQty > 0;
   const isReadyToSubmit =
     !!materialCode &&
-    quantityRequired !== "" &&
-    !Number.isNaN(normalizedQty) &&
-    normalizedQty >= 0 &&
-    !(normalizedQty === 0 && normalizedLegacyQty === 0) &&
+    quantityOk &&
     !!productionSubDepartment &&
     !!unit &&
     (!isMmMaterial || !!mmSourcingType) &&
@@ -299,6 +316,7 @@ export default function BomItemModal({
             allowNegative={false}
             decimalScale={6}
             required
+            disabled={noLongerUsed}
             radius="md"
           />
 
@@ -316,20 +334,52 @@ export default function BomItemModal({
           )}
         </div>
 
-        <NumberInput
-          value={legacyQuantity ?? ""}
-          onChange={(value) => setLegacyQuantity(value === "" ? null : Number(value))}
-          label={translate("Legacy Quantity (Optional)", "الكمية القديمة (اختياري)")}
-          description={translate(
-            "Reference quantity from legacy data for comparison only. Uses the same unit as Quantity Required.",
-            "كمية مرجعية من البيانات القديمة للمقارنة فقط. تستخدم نفس وحدة الكمية المطلوبة.",
-          )}
-          placeholder={translate("Enter legacy quantity", "أدخل الكمية القديمة")}
-          min={0}
-          allowNegative={false}
-          decimalScale={6}
-          radius="md"
-        />
+        {showLegacyQuantity ? (
+          <div className="flex flex-col gap-3 rounded-lg border border-gray-200 p-3">
+            <Checkbox
+              checked={noLongerUsed}
+              onChange={(event) => {
+                const checked = event.currentTarget.checked;
+                setNoLongerUsed(checked);
+                if (checked) setQuantityRequired(0);
+                else if (Number(quantityRequired) === 0) setQuantityRequired("");
+              }}
+              label={translate("No longer used", "لم يعد مستخدماً")}
+              description={translate(
+                "Keep this line for comparison only. Quantity becomes 0 and a legacy quantity is required.",
+                "أبق هذا البند للمقارنة فقط. تصبح الكمية 0 وتكون الكمية القديمة مطلوبة.",
+              )}
+              color="ochre"
+            />
+            <NumberInput
+              value={legacyQuantity ?? ""}
+              onChange={(value) => setLegacyQuantity(value === "" ? null : Number(value))}
+              label={
+                noLongerUsed
+                  ? translate("Legacy Quantity", "الكمية القديمة")
+                  : translate("Legacy Quantity (Optional)", "الكمية القديمة (اختياري)")
+              }
+              description={translate(
+                "Reference quantity from legacy data for comparison only. Uses the same unit as Quantity Required.",
+                "كمية مرجعية من البيانات القديمة للمقارنة فقط. تستخدم نفس وحدة الكمية المطلوبة.",
+              )}
+              placeholder={translate("Enter legacy quantity", "أدخل الكمية القديمة")}
+              min={0}
+              allowNegative={false}
+              decimalScale={6}
+              required={noLongerUsed}
+              radius="md"
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowLegacyQuantity(true)}
+            className="w-fit cursor-pointer text-xs! text-gray-500 underline hover:text-gray-600"
+          >
+            {translate("Legacy comparison", "المقارنة مع الكميات القديمة")}
+          </button>
+        )}
 
         <Textarea
           value={notes}

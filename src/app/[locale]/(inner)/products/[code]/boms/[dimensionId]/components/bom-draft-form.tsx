@@ -39,6 +39,7 @@ export type BomDraftRow = {
   unitPrice: number;
   quantityRequired: number | "";
   legacyQuantity: number | "" | null;
+  noLongerUsed: boolean;
   mmSourcingType: MmSourcingType | null;
   notes: string;
 };
@@ -47,6 +48,7 @@ export type BomDraftSubmitItem = {
   materialCode: string;
   quantityRequired: number;
   legacyQuantity: number | null;
+  noLongerUsed: boolean;
   unitOfMeasurementSelected: MaterialUnit;
   mmSourcingType: MmSourcingType | null;
   notes: string | null;
@@ -68,6 +70,7 @@ export function createEmptyRow(): BomDraftRow {
     unitPrice: 0,
     quantityRequired: "",
     legacyQuantity: "",
+    noLongerUsed: false,
     mmSourcingType: null,
     notes: "",
   };
@@ -85,9 +88,48 @@ export function mapBomItemToDraftRow(item: BomItemWithMaterial): BomDraftRow {
     unitPrice: item.material.unitPrice,
     quantityRequired: item.quantityRequired,
     legacyQuantity: item.legacyQuantity ?? "",
+    noLongerUsed: item.noLongerUsed,
     mmSourcingType: item.mmSourcingType,
     notes: item.notes || "",
   };
+}
+
+function DraftToggle({
+  checked,
+  onChange,
+  label,
+  ariaLabel,
+  className,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label?: string;
+  ariaLabel?: string;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      onClick={() => onChange(!checked)}
+      className={`focus-visible:outline-ochre-600 inline-flex cursor-pointer items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 ${className ?? ""}`}
+    >
+      <span
+        className={`relative inline-flex h-4 w-7 shrink-0 rounded-full transition-colors ${
+          checked ? "bg-ochre-600" : "bg-gray-200"
+        }`}
+      >
+        <span
+          className={`absolute start-0.5 top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+            checked ? "translate-x-3 rtl:-translate-x-3" : ""
+          }`}
+        />
+      </span>
+      {label ? <span className={checked ? "text-ochre-700 text-sm" : "text-sm text-gray-600"}>{label}</span> : null}
+    </button>
+  );
 }
 
 function showUnitSelect(row: BomDraftRow) {
@@ -103,6 +145,21 @@ function getRowFactor(row: BomDraftRow) {
   return resolveDisplayUnit(row.unit, row.unitOfMeasurement, row.unitConversions).factor;
 }
 
+const DRAFT_COLUMN_MIN_WIDTH = {
+  material: 380,
+  manufacturingSource: 150,
+  unit: 95,
+  quantity: 112,
+  legacyQuantity: 124,
+  removed: 75,
+  unitPrice: 140,
+  lineTotal: 140,
+  notes: 175,
+  remove: 42,
+} as const;
+
+type DraftColumnKey = keyof typeof DRAFT_COLUMN_MIN_WIDTH;
+
 function serializeRowsSnapshot(rows: BomDraftRow[]) {
   return JSON.stringify(
     rows.map((row) => ({
@@ -110,6 +167,7 @@ function serializeRowsSnapshot(rows: BomDraftRow[]) {
       unit: row.unit,
       quantityRequired: row.quantityRequired === "" ? "" : Number(row.quantityRequired),
       legacyQuantity: row.legacyQuantity === "" || row.legacyQuantity === null ? null : Number(row.legacyQuantity),
+      noLongerUsed: row.noLongerUsed,
       mmSourcingType: row.mmSourcingType,
       notes: row.notes.trim(),
     })),
@@ -149,7 +207,7 @@ export default function BomDraftForm({
   const privateRequest = usePrivateRequest();
 
   const [rows, setRows] = useState<BomDraftRow[]>(initialRows);
-  const [showLegacyQuantity, setShowLegacyQuantity] = useState<boolean>(false);
+  const [showLegacyQuantity, setShowLegacyQuantity] = useState(false);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(initialDepartment);
   const [validationError, setValidationError] = useState("");
   const [duplicateCodes, setDuplicateCodes] = useState<Set<string>>(new Set());
@@ -177,7 +235,12 @@ export default function BomDraftForm({
       productionSubDepartment !== null ||
       rows.length > 1 ||
       rows.some(
-        (row) => !!row.materialCode || row.quantityRequired !== "" || row.legacyQuantity !== "" || row.notes.trim() !== "",
+        (row) =>
+          !!row.materialCode ||
+          row.quantityRequired !== "" ||
+          row.legacyQuantity !== "" ||
+          row.noLongerUsed ||
+          row.notes.trim() !== "",
       )
     );
   }, [mode, productionSubDepartment, initialDepartment, rows, initialRowsSnapshot]);
@@ -350,11 +413,20 @@ export default function BomDraftForm({
         }
       }
 
-      if (qty === 0 && (legacyQtyVal === null || legacyQtyVal === 0)) {
+      if (row.noLongerUsed) {
+        if (legacyQtyVal === null || legacyQtyVal <= 0) {
+          return setValidationError(
+            translate(
+              `${rowLabel}: a line that is no longer used needs a legacy quantity greater than 0.`,
+              `${rowLabel}: البند الذي لم يعد مستخدماً يحتاج كمية قديمة أكبر من 0.`,
+            ),
+          );
+        }
+      } else if (qty <= 0) {
         return setValidationError(
           translate(
-            `${rowLabel}: quantity required can only be 0 if a non-zero legacy quantity is specified.`,
-            `${rowLabel}: لا يمكن أن تكون الكمية المطلوبة صفر إلا في حالة تحديد كمية قديمة أكبر من صفر.`,
+            `${rowLabel}: quantity must be greater than 0, or mark the line as no longer used.`,
+            `${rowLabel}: يجب أن تكون الكمية أكبر من 0، أو علّم البند بأنه لم يعد مستخدماً.`,
           ),
         );
       }
@@ -390,8 +462,9 @@ export default function BomDraftForm({
         productionSubDepartment: productionSubDepartment as ProductionSubDepartment,
         items: rows.map((row) => ({
           materialCode: row.materialCode!,
-          quantityRequired: Number(row.quantityRequired),
+          quantityRequired: row.noLongerUsed ? 0 : Number(row.quantityRequired),
           legacyQuantity: row.legacyQuantity === "" || row.legacyQuantity === null ? null : Number(row.legacyQuantity),
+          noLongerUsed: row.noLongerUsed,
           unitOfMeasurementSelected: row.unit as MaterialUnit,
           mmSourcingType: row.materialType && isManufacturedMaterial(row.materialType) ? row.mmSourcingType : null,
           notes: row.notes.trim() || null,
@@ -402,6 +475,24 @@ export default function BomDraftForm({
       // Parent surfaces the error via submitError; keep the modal open.
     }
   }
+
+  const draftColumns: { key: DraftColumnKey; label: string; align?: "center" }[] = [
+    { key: "material", label: translate("Material", "المادة") },
+    { key: "manufacturingSource", label: translate("Manufacturing Source", "مصدر التصنيع") },
+    { key: "unit", label: translate("Unit", "الوحدة") },
+    { key: "quantity", label: translate("Quantity", "الكمية") },
+    ...(showLegacyQuantity
+      ? [
+          { key: "legacyQuantity" as const, label: translate("Legacy Qty", "الكمية القديمة") },
+          { key: "removed" as const, label: translate("Removed", "تم إلغاءه"), align: "center" as const },
+        ]
+      : []),
+    { key: "unitPrice", label: `${translate("Unit Price", "سعر الوحدة")} (${currency})` },
+    { key: "lineTotal", label: `${translate("Line Total", "إجمالي البند")} (${currency})` },
+    { key: "notes", label: translate("Notes", "الملاحظات") },
+    { key: "remove", label: "", align: "center" },
+  ];
+  const draftTableMinWidth = draftColumns.reduce((sum, column) => sum + DRAFT_COLUMN_MIN_WIDTH[column.key], 0);
 
   const submitLabel =
     mode === "edit" ? translate("Update BOM", "تحديث قائمة المواد") : translate("Create BOM", "إنشاء قائمة المواد");
@@ -441,54 +532,40 @@ export default function BomDraftForm({
               disabled={lockDepartment}
             />
           </div>
-          <label className="flex cursor-pointer items-center gap-2 pb-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
-              checked={showLegacyQuantity}
-              onChange={(e) => setShowLegacyQuantity(e.target.checked)}
-              className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
-            />
-            {translate("Show Legacy Quantity", "إظهار الكمية القديمة")}
-          </label>
+          <DraftToggle
+            checked={showLegacyQuantity}
+            onChange={setShowLegacyQuantity}
+            label={translate("Legacy comparison", "المقارنة مع الكميات القديمة")}
+            className="mb-2"
+          />
         </div>
 
-        <div ref={tableRef} className="overflow-x-auto rounded-xl" onKeyDownCapture={handleTableKeyDown}>
-          <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+        <div ref={tableRef} className="w-full max-w-full overflow-x-auto rounded-xl" onKeyDownCapture={handleTableKeyDown}>
+          <Table
+            withColumnBorders
+            className="table-fixed"
+            style={{ width: "100%", minWidth: draftTableMinWidth }}
+            horizontalSpacing="xs"
+            verticalSpacing="xs"
+          >
+            <colgroup>
+              {draftColumns.map((column) => (
+                <col key={column.key} style={{ width: DRAFT_COLUMN_MIN_WIDTH[column.key] }} />
+              ))}
+            </colgroup>
             <Table.Thead className="bg-gray-50">
-              <Table.Tr className="h-9">
-                <Table.Th className="w-[24%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Material", "المادة")}
-                </Table.Th>
-                <Table.Th className="w-[13%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Manufacturing Source", "مصدر التصنيع")}
-                </Table.Th>
-                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Quantity", "الكمية")}
-                </Table.Th>
-                {showLegacyQuantity && (
-                  <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Legacy Qty", "الكمية القديمة")}
+              <Table.Tr className="min-h-9">
+                {draftColumns.map((column) => (
+                  <Table.Th
+                    key={column.key}
+                    style={{ minWidth: DRAFT_COLUMN_MIN_WIDTH[column.key], whiteSpace: "nowrap" }}
+                    className={`text-xs font-medium tracking-wide whitespace-nowrap text-gray-500 uppercase ${
+                      column.align === "center" ? "text-center" : ""
+                    }`}
+                  >
+                    {column.label}
                   </Table.Th>
-                )}
-                <Table.Th className="w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Unit", "الوحدة")}
-                </Table.Th>
-                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Unit Price", "سعر الوحدة")} ({currency})
-                </Table.Th>
-                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Line Total", "إجمالي البند")} ({currency})
-                </Table.Th>
-                <Table.Th
-                  className={
-                    showLegacyQuantity
-                      ? "w-[12%] text-xs font-medium tracking-wide text-gray-500 uppercase"
-                      : "w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase"
-                  }
-                >
-                  {translate("Notes", "الملاحظات")}
-                </Table.Th>
-                <Table.Th className="w-[5%]" />
+                ))}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -500,7 +577,10 @@ export default function BomDraftForm({
                 const isMmRow = !!row.materialType && isManufacturedMaterial(row.materialType);
 
                 return (
-                  <Table.Tr key={row.key} className={isDuplicate ? "bg-clay-50/70" : undefined}>
+                  <Table.Tr
+                    key={row.key}
+                    className={isDuplicate ? "bg-clay-50/70" : row.noLongerUsed ? "bg-ochre-50/70" : undefined}
+                  >
                     <Table.Td data-bom-row-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <SelectMaterial
                         value={row.materialCode}
@@ -536,36 +616,6 @@ export default function BomDraftForm({
                         <span className="text-sm text-gray-400">-</span>
                       )}
                     </Table.Td>
-                    <Table.Td data-bom-qty-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
-                      <NumberInput
-                        value={row.quantityRequired}
-                        onChange={(value) => updateRow(row.key, { quantityRequired: value === "" ? "" : Number(value) })}
-                        min={0}
-                        allowNegative={false}
-                        decimalScale={6}
-                        hideControls
-                        variant="unstyled"
-                        radius={0}
-                        placeholder={translate("Enter quantity", "أدخل الكمية")}
-                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-                      />
-                    </Table.Td>
-                    {showLegacyQuantity && (
-                      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-                        <NumberInput
-                          value={row.legacyQuantity ?? ""}
-                          onChange={(value) => updateRow(row.key, { legacyQuantity: value === "" ? "" : Number(value) })}
-                          min={0}
-                          allowNegative={false}
-                          decimalScale={6}
-                          hideControls
-                          variant="unstyled"
-                          radius={0}
-                          placeholder={translate("Optional", "اختياري")}
-                          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
-                        />
-                      </Table.Td>
-                    )}
                     <Table.Td className="transition-colors focus-within:bg-teal-50/60">
                       {showUnitSelect(row) ? (
                         <DataSelect
@@ -586,6 +636,59 @@ export default function BomDraftForm({
                         </span>
                       )}
                     </Table.Td>
+                    <Table.Td data-bom-qty-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
+                      <NumberInput
+                        value={row.quantityRequired}
+                        onChange={(value) => {
+                          const next = value === "" ? "" : Number(value);
+                          updateRow(row.key, {
+                            quantityRequired: next,
+                            noLongerUsed: row.noLongerUsed && next !== 0 && next !== "" ? false : row.noLongerUsed,
+                          });
+                        }}
+                        min={0}
+                        allowNegative={false}
+                        decimalScale={6}
+                        hideControls
+                        disabled={showLegacyQuantity && row.noLongerUsed}
+                        variant="unstyled"
+                        radius={0}
+                        placeholder={translate("Enter quantity", "أدخل الكمية")}
+                        styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+                      />
+                    </Table.Td>
+                    {showLegacyQuantity && (
+                      <Table.Td className="transition-colors focus-within:bg-teal-50/60">
+                        <NumberInput
+                          value={row.legacyQuantity ?? ""}
+                          onChange={(value) => updateRow(row.key, { legacyQuantity: value === "" ? "" : Number(value) })}
+                          min={0}
+                          allowNegative={false}
+                          decimalScale={6}
+                          hideControls
+                          variant="unstyled"
+                          radius={0}
+                          placeholder={row.noLongerUsed ? translate("Required", "مطلوب") : translate("Optional", "اختياري")}
+                          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+                        />
+                      </Table.Td>
+                    )}
+                    {showLegacyQuantity && (
+                      <Table.Td>
+                        <div className="flex justify-center">
+                          <DraftToggle
+                            checked={row.noLongerUsed}
+                            ariaLabel={translate("No longer used", "لم يعد مستخدماً")}
+                            onChange={(checked) =>
+                              updateRow(row.key, {
+                                noLongerUsed: checked,
+                                quantityRequired: checked ? 0 : row.quantityRequired === 0 ? "" : row.quantityRequired,
+                              })
+                            }
+                          />
+                        </div>
+                      </Table.Td>
+                    )}
                     <Table.Td>
                       <span className="text-sm text-gray-600">{row.materialCode ? formatMoney(displayUnitPrice) : ""}</span>
                     </Table.Td>
@@ -604,20 +707,22 @@ export default function BomDraftForm({
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
-                    <Table.Td>
-                      <Button
-                        type="button"
-                        variant="subtle"
-                        color="gray"
-                        size="xs"
-                        radius="md"
-                        p={6}
-                        disabled={rows.length <= 1}
-                        onClick={() => removeRow(row.key)}
-                        title={translate("Remove row", "حذف الصف")}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
+                    <Table.Td className="px-0">
+                      <div className="flex justify-center">
+                        <Button
+                          type="button"
+                          variant="subtle"
+                          color="gray"
+                          size="xs"
+                          radius="md"
+                          p={4}
+                          disabled={rows.length <= 1}
+                          onClick={() => removeRow(row.key)}
+                          title={translate("Remove row", "حذف الصف")}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
                     </Table.Td>
                   </Table.Tr>
                 );
@@ -640,6 +745,7 @@ export default function BomDraftForm({
                 </Table.Td>
                 <Table.Td />
                 <Table.Td />
+                {showLegacyQuantity && <Table.Td />}
                 {showLegacyQuantity && <Table.Td />}
                 <Table.Td />
                 <Table.Td>

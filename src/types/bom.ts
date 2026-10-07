@@ -14,6 +14,7 @@ export type BomItem = {
   productionSubDepartment: ProductionSubDepartment | null;
   mmSourcingType: MmSourcingType | null;
   legacyQuantity: number | null;
+  noLongerUsed: boolean;
   notes: string | null;
   createdAt: Date;
   createdBy: string;
@@ -49,6 +50,7 @@ export type BomItemWithMaterial = {
   productionSubDepartment: ProductionSubDepartment | null;
   mmSourcingType: MmSourcingType | null;
   legacyQuantity: number | null;
+  noLongerUsed: boolean;
   notes: string | null;
   material: {
     code: string;
@@ -119,6 +121,7 @@ export type CreateBomItemDto = {
   productionSubDepartment: ProductionSubDepartment;
   mmSourcingType: MmSourcingType | null;
   legacyQuantity?: number | null;
+  noLongerUsed?: boolean;
   notes: string | null;
 };
 
@@ -130,12 +133,13 @@ export type ReplaceDepartmentBomItemDto = {
   unitOfMeasurementSelected: MaterialUnit;
   mmSourcingType: MmSourcingType | null;
   legacyQuantity?: number | null;
+  noLongerUsed?: boolean;
   notes: string | null;
 };
 
 export type ReplaceDepartmentBomDto = { items: ReplaceDepartmentBomItemDto[] };
 
-export type UpdateBomItemDto = Partial<Pick<CreateBomItemDto, "quantityRequired" | "notes" | "legacyQuantity">> & {
+export type UpdateBomItemDto = Partial<Pick<CreateBomItemDto, "quantityRequired" | "notes" | "legacyQuantity" | "noLongerUsed">> & {
   materialCode: string;
   unitOfMeasurementSelected: MaterialUnit;
   productionSubDepartment: ProductionSubDepartment;
