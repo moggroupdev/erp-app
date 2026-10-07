@@ -94,6 +94,44 @@ export function mapBomItemToDraftRow(item: BomItemWithMaterial): BomDraftRow {
   };
 }
 
+function DraftToggle({
+  checked,
+  onChange,
+  label,
+  ariaLabel,
+  className,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label?: string;
+  ariaLabel?: string;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      onClick={() => onChange(!checked)}
+      className={`focus-visible:outline-ochre-600 inline-flex cursor-pointer items-center gap-2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 ${className ?? ""}`}
+    >
+      <span
+        className={`relative inline-flex h-4 w-7 shrink-0 rounded-full transition-colors ${
+          checked ? "bg-ochre-600" : "bg-gray-200"
+        }`}
+      >
+        <span
+          className={`absolute start-0.5 top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+            checked ? "translate-x-3 rtl:-translate-x-3" : ""
+          }`}
+        />
+      </span>
+      {label ? <span className={checked ? "text-ochre-700 text-sm" : "text-sm text-gray-600"}>{label}</span> : null}
+    </button>
+  );
+}
+
 function showUnitSelect(row: BomDraftRow) {
   return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
 }
@@ -461,22 +499,19 @@ export default function BomDraftForm({
               disabled={lockDepartment}
             />
           </div>
-          <label className="flex cursor-pointer items-center gap-2 pb-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
-              checked={showLegacyQuantity}
-              onChange={(e) => setShowLegacyQuantity(e.target.checked)}
-              className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
-            />
-            {translate("Legacy comparison", "المقارنة مع الكميات القديمة")}
-          </label>
+          <DraftToggle
+            checked={showLegacyQuantity}
+            onChange={setShowLegacyQuantity}
+            label={translate("Legacy comparison", "المقارنة مع الكميات القديمة")}
+            className="mb-2"
+          />
         </div>
 
         <div ref={tableRef} className="overflow-x-auto rounded-xl" onKeyDownCapture={handleTableKeyDown}>
           <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">
-              <Table.Tr className="h-9">
-                <Table.Th className={showLegacyQuantity ? "w-[28%] text-xs font-medium tracking-wide text-gray-500 uppercase" : "w-[31%] text-xs font-medium tracking-wide text-gray-500 uppercase"}>
+              <Table.Tr className="min-h-9">
+                <Table.Th className="w-[35%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Material", "المادة")}
                 </Table.Th>
                 <Table.Th className="w-[11%] text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -494,8 +529,11 @@ export default function BomDraftForm({
                   </Table.Th>
                 )}
                 {showLegacyQuantity && (
-                  <Table.Th className="w-[7%] text-center text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Unused", "غير مستخدم")}
+                  <Table.Th
+                    style={{ width: 75, minWidth: 75, maxWidth: 75 }}
+                    className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                  >
+                    {translate("Removed", "تم إلغاءه")}
                   </Table.Th>
                 )}
                 <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -507,13 +545,13 @@ export default function BomDraftForm({
                 <Table.Th
                   className={
                     showLegacyQuantity
-                      ? "w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase"
+                      ? "w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase"
                       : "w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase"
                   }
                 >
                   {translate("Notes", "الملاحظات")}
                 </Table.Th>
-                <Table.Th className="w-[4%]" />
+                <Table.Th style={{ width: 40, minWidth: 40, maxWidth: 40 }} />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -525,7 +563,10 @@ export default function BomDraftForm({
                 const isMmRow = !!row.materialType && isManufacturedMaterial(row.materialType);
 
                 return (
-                  <Table.Tr key={row.key} className={isDuplicate ? "bg-clay-50/70" : undefined}>
+                  <Table.Tr
+                    key={row.key}
+                    className={isDuplicate ? "bg-clay-50/70" : row.noLongerUsed ? "bg-ochre-50/70" : undefined}
+                  >
                     <Table.Td data-bom-row-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <SelectMaterial
                         value={row.materialCode}
@@ -613,29 +654,25 @@ export default function BomDraftForm({
                           hideControls
                           variant="unstyled"
                           radius={0}
-                          placeholder={
-                            row.noLongerUsed ? translate("Required", "مطلوب") : translate("Optional", "اختياري")
-                          }
+                          placeholder={row.noLongerUsed ? translate("Required", "مطلوب") : translate("Optional", "اختياري")}
                           styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                         />
                       </Table.Td>
                     )}
                     {showLegacyQuantity && (
-                      <Table.Td className="text-center">
-                        <input
-                          type="checkbox"
-                          checked={row.noLongerUsed}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            updateRow(row.key, {
-                              noLongerUsed: checked,
-                              quantityRequired: checked ? 0 : row.quantityRequired === 0 ? "" : row.quantityRequired,
-                            });
-                          }}
-                          title={translate("No longer used", "لم يعد مستخدماً")}
-                          aria-label={translate("No longer used", "لم يعد مستخدماً")}
-                          className="rounded border-gray-300"
-                        />
+                      <Table.Td style={{ width: 44, paddingInline: 2 }}>
+                        <div className="flex justify-center">
+                          <DraftToggle
+                            checked={row.noLongerUsed}
+                            ariaLabel={translate("No longer used", "لم يعد مستخدماً")}
+                            onChange={(checked) =>
+                              updateRow(row.key, {
+                                noLongerUsed: checked,
+                                quantityRequired: checked ? 0 : row.quantityRequired === 0 ? "" : row.quantityRequired,
+                              })
+                            }
+                          />
+                        </div>
                       </Table.Td>
                     )}
                     <Table.Td>
@@ -656,20 +693,22 @@ export default function BomDraftForm({
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
-                    <Table.Td>
-                      <Button
-                        type="button"
-                        variant="subtle"
-                        color="gray"
-                        size="xs"
-                        radius="md"
-                        p={6}
-                        disabled={rows.length <= 1}
-                        onClick={() => removeRow(row.key)}
-                        title={translate("Remove row", "حذف الصف")}
-                      >
-                        <Trash2 size={14} />
-                      </Button>
+                    <Table.Td style={{ width: 32, paddingInline: 0 }}>
+                      <div className="flex justify-center">
+                        <Button
+                          type="button"
+                          variant="subtle"
+                          color="gray"
+                          size="xs"
+                          radius="md"
+                          p={4}
+                          disabled={rows.length <= 1}
+                          onClick={() => removeRow(row.key)}
+                          title={translate("Remove row", "حذف الصف")}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
                     </Table.Td>
                   </Table.Tr>
                 );
