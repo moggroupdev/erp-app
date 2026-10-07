@@ -727,8 +727,9 @@ export default function Page() {
                                                 >
                                                   {translate("Purchased Manufactured Material", "مادة مصنّعة مشتراة")}
                                                 </Badge>
-                                              </Tooltip>
+                                                </Tooltip>
                                             )}
+                                          {item.sourceBomItem?.noLongerUsed && <NoLongerUsedBadge />}
                                         </div>
                                       </Table.Td>
                                       <Table.Td>
@@ -1057,6 +1058,26 @@ function CalculationCard({
   );
 }
 
+function NoLongerUsedBadge() {
+  const { translate } = useI18n();
+
+  return (
+    <Tooltip
+      withArrow
+      multiline
+      maw={280}
+      label={translate(
+        "This line is kept only for comparison with the legacy quantity. The current required quantity is 0.",
+        "هذا البند محفوظ للمقارنة مع الكمية القديمة فقط. الكمية المطلوبة الحالية هي 0.",
+      )}
+    >
+      <Badge size="xs" variant="light" color="ochre" radius="sm" className="shrink-0 cursor-help">
+        {translate("No longer used", "لم يعد مستخدماً")}
+      </Badge>
+    </Tooltip>
+  );
+}
+
 function ManufacturingCostsSection({
   rows,
   totalManufacturingCost,
@@ -1141,13 +1162,16 @@ function ManufacturingCostsSection({
                   </div>
                 </Table.Td>
                 <Table.Td>
-                  <ProtectedLink
-                    permission={PERMISSIONS.READ_MATERIALS}
-                    href={`/warehouse/materials/${row.materialCode}`}
-                    className="font-medium text-gray-800 hover:underline"
-                  >
-                    {row.materialTitle}
-                  </ProtectedLink>
+                  <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_MATERIALS}
+                      href={`/warehouse/materials/${row.materialCode}`}
+                      className="font-medium text-gray-800 hover:underline"
+                    >
+                      {row.materialTitle}
+                    </ProtectedLink>
+                    {row.sourceBomItem.noLongerUsed && <NoLongerUsedBadge />}
+                  </div>
                 </Table.Td>
                 <Table.Td>
                   {row.sourceBomItem.mmSourcingType ? (
@@ -1165,7 +1189,13 @@ function ManufacturingCostsSection({
                       : "-"}
                   </span>
                 </Table.Td>
-                <Table.Td className="font-medium text-gray-800">{formatQuantity(row.quantityRequired)}</Table.Td>
+                <Table.Td
+                  className={`font-medium ${
+                    row.sourceBomItem.noLongerUsed && row.quantityRequired === 0 ? "text-ochre-600" : "text-gray-800"
+                  }`}
+                >
+                  {formatQuantity(row.quantityRequired)}
+                </Table.Td>
                 <Table.Td>
                   {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
                     ? "-"

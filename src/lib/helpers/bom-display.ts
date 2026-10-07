@@ -107,15 +107,21 @@ export function getMaterialLineCost(
   return baseQuantity * getMaterialCostPrice(material, costingMethod);
 }
 
+function includeInQuantityMode(
+  item: { quantityRequired: number; noLongerUsed: boolean },
+  quantityMode: QuantityDisplayMode,
+) {
+  if (quantityMode === "legacy") return true;
+  // Retired lines stay visible at quantity 0. Other zero rows are not valid.
+  return item.quantityRequired > 0 || item.noLongerUsed;
+}
+
 export function getFlattenedMaterialRows(
   items: BomItemWithMaterial[],
   quantityMode: QuantityDisplayMode = "required",
 ): FlattenedBomRow[] {
   const rows: FlattenedBomRow[] = [];
-  const filteredItems =
-    quantityMode === "required"
-      ? items.filter((item) => item.quantityRequired > 0)
-      : items;
+  const filteredItems = items.filter((item) => includeInQuantityMode(item, quantityMode));
 
   for (const item of filteredItems) {
     const expandRecipe =
@@ -179,10 +185,7 @@ export function getManufacturingCostRows(
   items: BomItemWithMaterial[],
   quantityMode: QuantityDisplayMode = "required",
 ): ManufacturingCostRow[] {
-  const filteredItems =
-    quantityMode === "required"
-      ? items.filter((item) => item.quantityRequired > 0)
-      : items;
+  const filteredItems = items.filter((item) => includeInQuantityMode(item, quantityMode));
 
   return filteredItems
     .filter(
