@@ -145,6 +145,21 @@ function getRowFactor(row: BomDraftRow) {
   return resolveDisplayUnit(row.unit, row.unitOfMeasurement, row.unitConversions).factor;
 }
 
+const DRAFT_COLUMN_MIN_WIDTH = {
+  material: 380,
+  manufacturingSource: 150,
+  unit: 95,
+  quantity: 112,
+  legacyQuantity: 124,
+  removed: 75,
+  unitPrice: 140,
+  lineTotal: 140,
+  notes: 175,
+  remove: 42,
+} as const;
+
+type DraftColumnKey = keyof typeof DRAFT_COLUMN_MIN_WIDTH;
+
 function serializeRowsSnapshot(rows: BomDraftRow[]) {
   return JSON.stringify(
     rows.map((row) => ({
@@ -192,7 +207,7 @@ export default function BomDraftForm({
   const privateRequest = usePrivateRequest();
 
   const [rows, setRows] = useState<BomDraftRow[]>(initialRows);
-  const [showLegacyQuantity, setShowLegacyQuantity] = useState(() => initialRows.some((row) => row.noLongerUsed));
+  const [showLegacyQuantity, setShowLegacyQuantity] = useState(false);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(initialDepartment);
   const [validationError, setValidationError] = useState("");
   const [duplicateCodes, setDuplicateCodes] = useState<Set<string>>(new Set());
@@ -461,6 +476,24 @@ export default function BomDraftForm({
     }
   }
 
+  const draftColumns: { key: DraftColumnKey; label: string; align?: "center" }[] = [
+    { key: "material", label: translate("Material", "المادة") },
+    { key: "manufacturingSource", label: translate("Manufacturing Source", "مصدر التصنيع") },
+    { key: "unit", label: translate("Unit", "الوحدة") },
+    { key: "quantity", label: translate("Quantity", "الكمية") },
+    ...(showLegacyQuantity
+      ? [
+          { key: "legacyQuantity" as const, label: translate("Legacy Qty", "الكمية القديمة") },
+          { key: "removed" as const, label: translate("Removed", "تم إلغاءه"), align: "center" as const },
+        ]
+      : []),
+    { key: "unitPrice", label: `${translate("Unit Price", "سعر الوحدة")} (${currency})` },
+    { key: "lineTotal", label: `${translate("Line Total", "إجمالي البند")} (${currency})` },
+    { key: "notes", label: translate("Notes", "الملاحظات") },
+    { key: "remove", label: "", align: "center" },
+  ];
+  const draftTableMinWidth = draftColumns.reduce((sum, column) => sum + DRAFT_COLUMN_MIN_WIDTH[column.key], 0);
+
   const submitLabel =
     mode === "edit" ? translate("Update BOM", "تحديث قائمة المواد") : translate("Create BOM", "إنشاء قائمة المواد");
 
@@ -507,51 +540,32 @@ export default function BomDraftForm({
           />
         </div>
 
-        <div ref={tableRef} className="overflow-x-auto rounded-xl" onKeyDownCapture={handleTableKeyDown}>
-          <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
+        <div ref={tableRef} className="w-full max-w-full overflow-x-auto rounded-xl" onKeyDownCapture={handleTableKeyDown}>
+          <Table
+            withColumnBorders
+            className="table-fixed"
+            style={{ width: "100%", minWidth: draftTableMinWidth }}
+            horizontalSpacing="xs"
+            verticalSpacing="xs"
+          >
+            <colgroup>
+              {draftColumns.map((column) => (
+                <col key={column.key} style={{ width: DRAFT_COLUMN_MIN_WIDTH[column.key] }} />
+              ))}
+            </colgroup>
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="min-h-9">
-                <Table.Th className="w-[35%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Material", "المادة")}
-                </Table.Th>
-                <Table.Th className="w-[11%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Manufacturing Source", "مصدر التصنيع")}
-                </Table.Th>
-                <Table.Th className="w-[8%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Unit", "الوحدة")}
-                </Table.Th>
-                <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Quantity", "الكمية")}
-                </Table.Th>
-                {showLegacyQuantity && (
-                  <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                    {translate("Legacy Qty", "الكمية القديمة")}
-                  </Table.Th>
-                )}
-                {showLegacyQuantity && (
+                {draftColumns.map((column) => (
                   <Table.Th
-                    style={{ width: 75, minWidth: 75, maxWidth: 75 }}
-                    className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                    key={column.key}
+                    style={{ minWidth: DRAFT_COLUMN_MIN_WIDTH[column.key], whiteSpace: "nowrap" }}
+                    className={`text-xs font-medium tracking-wide whitespace-nowrap text-gray-500 uppercase ${
+                      column.align === "center" ? "text-center" : ""
+                    }`}
                   >
-                    {translate("Removed", "تم إلغاءه")}
+                    {column.label}
                   </Table.Th>
-                )}
-                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Unit Price", "سعر الوحدة")} ({currency})
-                </Table.Th>
-                <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {translate("Line Total", "إجمالي البند")} ({currency})
-                </Table.Th>
-                <Table.Th
-                  className={
-                    showLegacyQuantity
-                      ? "w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase"
-                      : "w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase"
-                  }
-                >
-                  {translate("Notes", "الملاحظات")}
-                </Table.Th>
-                <Table.Th style={{ width: 40, minWidth: 40, maxWidth: 40 }} />
+                ))}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -660,7 +674,7 @@ export default function BomDraftForm({
                       </Table.Td>
                     )}
                     {showLegacyQuantity && (
-                      <Table.Td style={{ width: 44, paddingInline: 2 }}>
+                      <Table.Td>
                         <div className="flex justify-center">
                           <DraftToggle
                             checked={row.noLongerUsed}
@@ -693,7 +707,7 @@ export default function BomDraftForm({
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
-                    <Table.Td style={{ width: 32, paddingInline: 0 }}>
+                    <Table.Td className="px-0">
                       <div className="flex justify-center">
                         <Button
                           type="button"
