@@ -111,7 +111,7 @@ export default function BomItemModal({
       setSelectedMaterial(null);
       setQuantityRequired(initialEditValues.quantityRequired);
       setLegacyQuantity(initialEditValues.legacyQuantity ?? null);
-      setShowLegacyQuantity(initialEditValues.legacyQuantity != null || initialEditValues.noLongerUsed);
+      setShowLegacyQuantity(initialEditValues.noLongerUsed);
       setNoLongerUsed(initialEditValues.noLongerUsed);
       setProductionSubDepartment(initialEditValues.productionSubDepartment);
       setMmSourcingType(initialEditValues.mmSourcingType);
@@ -306,26 +306,6 @@ export default function BomItemModal({
           required
         />
 
-        <Checkbox
-          checked={noLongerUsed}
-          onChange={(event) => {
-            const checked = event.currentTarget.checked;
-            setNoLongerUsed(checked);
-            if (checked) {
-              setQuantityRequired(0);
-              setShowLegacyQuantity(true);
-            } else if (Number(quantityRequired) === 0) {
-              setQuantityRequired("");
-            }
-          }}
-          label={translate("No longer used", "لم يعد مستخدماً")}
-          description={translate(
-            "Keep this line for comparison only. Quantity becomes 0 and a legacy quantity is required.",
-            "أبق هذا البند للمقارنة فقط. تصبح الكمية 0 وتكون الكمية القديمة مطلوبة.",
-          )}
-          color="ochre"
-        />
-
         <div className={showUnitSelect ? "grid gap-3 sm:grid-cols-2" : undefined}>
           <NumberInput
             value={quantityRequired}
@@ -354,33 +334,50 @@ export default function BomItemModal({
           )}
         </div>
 
-        {showLegacyQuantity || noLongerUsed ? (
-          <NumberInput
-            value={legacyQuantity ?? ""}
-            onChange={(value) => setLegacyQuantity(value === "" ? null : Number(value))}
-            label={
-              noLongerUsed
-                ? translate("Legacy Quantity", "الكمية القديمة")
-                : translate("Legacy Quantity (Optional)", "الكمية القديمة (اختياري)")
-            }
-            description={translate(
-              "Reference quantity from legacy data for comparison only. Uses the same unit as Quantity Required.",
-              "كمية مرجعية من البيانات القديمة للمقارنة فقط. تستخدم نفس وحدة الكمية المطلوبة.",
-            )}
-            placeholder={translate("Enter legacy quantity", "أدخل الكمية القديمة")}
-            min={0}
-            allowNegative={false}
-            decimalScale={6}
-            required={noLongerUsed}
-            radius="md"
-          />
+        {showLegacyQuantity ? (
+          <div className="flex flex-col gap-3 rounded-lg border border-gray-200 p-3">
+            <Checkbox
+              checked={noLongerUsed}
+              onChange={(event) => {
+                const checked = event.currentTarget.checked;
+                setNoLongerUsed(checked);
+                if (checked) setQuantityRequired(0);
+                else if (Number(quantityRequired) === 0) setQuantityRequired("");
+              }}
+              label={translate("No longer used", "لم يعد مستخدماً")}
+              description={translate(
+                "Keep this line for comparison only. Quantity becomes 0 and a legacy quantity is required.",
+                "أبق هذا البند للمقارنة فقط. تصبح الكمية 0 وتكون الكمية القديمة مطلوبة.",
+              )}
+              color="ochre"
+            />
+            <NumberInput
+              value={legacyQuantity ?? ""}
+              onChange={(value) => setLegacyQuantity(value === "" ? null : Number(value))}
+              label={
+                noLongerUsed
+                  ? translate("Legacy Quantity", "الكمية القديمة")
+                  : translate("Legacy Quantity (Optional)", "الكمية القديمة (اختياري)")
+              }
+              description={translate(
+                "Reference quantity from legacy data for comparison only. Uses the same unit as Quantity Required.",
+                "كمية مرجعية من البيانات القديمة للمقارنة فقط. تستخدم نفس وحدة الكمية المطلوبة.",
+              )}
+              placeholder={translate("Enter legacy quantity", "أدخل الكمية القديمة")}
+              min={0}
+              allowNegative={false}
+              decimalScale={6}
+              required={noLongerUsed}
+              radius="md"
+            />
+          </div>
         ) : (
           <button
             type="button"
             onClick={() => setShowLegacyQuantity(true)}
             className="w-fit cursor-pointer text-xs! text-gray-500 underline hover:text-gray-600"
           >
-            {translate("Add legacy quantity", "إضافة الكمية القديمة")}
+            {translate("Legacy comparison", "المقارنة مع الكميات القديمة")}
           </button>
         )}
 

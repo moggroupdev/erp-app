@@ -154,7 +154,7 @@ export default function BomDraftForm({
   const privateRequest = usePrivateRequest();
 
   const [rows, setRows] = useState<BomDraftRow[]>(initialRows);
-  const [showLegacyQuantity, setShowLegacyQuantity] = useState<boolean>(false);
+  const [showLegacyQuantity, setShowLegacyQuantity] = useState(() => initialRows.some((row) => row.noLongerUsed));
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(initialDepartment);
   const [validationError, setValidationError] = useState("");
   const [duplicateCodes, setDuplicateCodes] = useState<Set<string>>(new Set());
@@ -172,7 +172,6 @@ export default function BomDraftForm({
 
   const error = validationError || (submitError ? getErrorMessage(locale, submitError) : "");
   const currency = translation.currency;
-  const legacyColumnVisible = showLegacyQuantity || rows.some((row) => row.noLongerUsed);
 
   const isDirty = useMemo(() => {
     if (mode === "edit") {
@@ -469,7 +468,7 @@ export default function BomDraftForm({
               onChange={(e) => setShowLegacyQuantity(e.target.checked)}
               className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
             />
-            {translate("Show Legacy Quantity", "إظهار الكمية القديمة")}
+            {translate("Legacy comparison", "المقارنة مع الكميات القديمة")}
           </label>
         </div>
 
@@ -477,7 +476,7 @@ export default function BomDraftForm({
           <Table withColumnBorders className="w-full table-fixed" horizontalSpacing="xs" verticalSpacing="xs">
             <Table.Thead className="bg-gray-50">
               <Table.Tr className="h-9">
-                <Table.Th className="w-[31%] text-xs font-medium tracking-wide text-gray-500 uppercase">
+                <Table.Th className={showLegacyQuantity ? "w-[28%] text-xs font-medium tracking-wide text-gray-500 uppercase" : "w-[31%] text-xs font-medium tracking-wide text-gray-500 uppercase"}>
                   {translate("Material", "المادة")}
                 </Table.Th>
                 <Table.Th className="w-[11%] text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -489,9 +488,14 @@ export default function BomDraftForm({
                 <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                   {translate("Quantity", "الكمية")}
                 </Table.Th>
-                {legacyColumnVisible && (
+                {showLegacyQuantity && (
                   <Table.Th className="w-[7%] text-xs font-medium tracking-wide text-gray-500 uppercase">
                     {translate("Legacy Qty", "الكمية القديمة")}
+                  </Table.Th>
+                )}
+                {showLegacyQuantity && (
+                  <Table.Th className="w-[7%] text-center text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Unused", "غير مستخدم")}
                   </Table.Th>
                 )}
                 <Table.Th className="w-[9%] text-xs font-medium tracking-wide text-gray-500 uppercase">
@@ -502,8 +506,8 @@ export default function BomDraftForm({
                 </Table.Th>
                 <Table.Th
                   className={
-                    legacyColumnVisible
-                      ? "w-[14%] text-xs font-medium tracking-wide text-gray-500 uppercase"
+                    showLegacyQuantity
+                      ? "w-[10%] text-xs font-medium tracking-wide text-gray-500 uppercase"
                       : "w-[15%] text-xs font-medium tracking-wide text-gray-500 uppercase"
                   }
                 >
@@ -580,19 +584,25 @@ export default function BomDraftForm({
                     <Table.Td data-bom-qty-key={row.key} className="transition-colors focus-within:bg-teal-50/60">
                       <NumberInput
                         value={row.quantityRequired}
-                        onChange={(value) => updateRow(row.key, { quantityRequired: value === "" ? "" : Number(value) })}
+                        onChange={(value) => {
+                          const next = value === "" ? "" : Number(value);
+                          updateRow(row.key, {
+                            quantityRequired: next,
+                            noLongerUsed: row.noLongerUsed && next !== 0 && next !== "" ? false : row.noLongerUsed,
+                          });
+                        }}
                         min={0}
                         allowNegative={false}
                         decimalScale={6}
                         hideControls
-                        disabled={row.noLongerUsed}
+                        disabled={showLegacyQuantity && row.noLongerUsed}
                         variant="unstyled"
                         radius={0}
                         placeholder={translate("Enter quantity", "أدخل الكمية")}
                         styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
                       />
                     </Table.Td>
-                    {legacyColumnVisible && (
+                    {showLegacyQuantity && (
                       <Table.Td className="transition-colors focus-within:bg-teal-50/60">
                         <NumberInput
                           value={row.legacyQuantity ?? ""}
@@ -610,16 +620,8 @@ export default function BomDraftForm({
                         />
                       </Table.Td>
                     )}
-                    <Table.Td>
-                      <span className="text-sm text-gray-600">{row.materialCode ? formatMoney(displayUnitPrice) : ""}</span>
-                    </Table.Td>
-                    <Table.Td>
-                      <span className="text-sm font-medium text-gray-600">
-                        {lineTotal !== null ? formatMoney(lineTotal) : ""}
-                      </span>
-                    </Table.Td>
-                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
-                      <label className="mb-1 flex cursor-pointer items-start gap-1.5 text-xs leading-snug text-gray-600">
+                    {showLegacyQuantity && (
+                      <Table.Td className="text-center">
                         <input
                           type="checkbox"
                           checked={row.noLongerUsed}
@@ -629,12 +631,22 @@ export default function BomDraftForm({
                               noLongerUsed: checked,
                               quantityRequired: checked ? 0 : row.quantityRequired === 0 ? "" : row.quantityRequired,
                             });
-                            if (checked) setShowLegacyQuantity(true);
                           }}
-                          className="mt-0.5 rounded border-gray-300"
+                          title={translate("No longer used", "لم يعد مستخدماً")}
+                          aria-label={translate("No longer used", "لم يعد مستخدماً")}
+                          className="rounded border-gray-300"
                         />
-                        <span>{translate("No longer used", "لم يعد مستخدماً")}</span>
-                      </label>
+                      </Table.Td>
+                    )}
+                    <Table.Td>
+                      <span className="text-sm text-gray-600">{row.materialCode ? formatMoney(displayUnitPrice) : ""}</span>
+                    </Table.Td>
+                    <Table.Td>
+                      <span className="text-sm font-medium text-gray-600">
+                        {lineTotal !== null ? formatMoney(lineTotal) : ""}
+                      </span>
+                    </Table.Td>
+                    <Table.Td className="transition-colors focus-within:bg-teal-50/60">
                       <TextInput
                         value={row.notes}
                         onChange={(e) => updateRow(row.key, { notes: e.target.value })}
@@ -680,7 +692,8 @@ export default function BomDraftForm({
                 </Table.Td>
                 <Table.Td />
                 <Table.Td />
-                {legacyColumnVisible && <Table.Td />}
+                {showLegacyQuantity && <Table.Td />}
+                {showLegacyQuantity && <Table.Td />}
                 <Table.Td />
                 <Table.Td>
                   <Badge size="sm" variant="light" color="dark" radius="md">

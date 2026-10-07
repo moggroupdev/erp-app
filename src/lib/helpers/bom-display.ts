@@ -112,8 +112,8 @@ function includeInQuantityMode(
   quantityMode: QuantityDisplayMode,
 ) {
   if (quantityMode === "legacy") return true;
-  // Retired lines stay visible at quantity 0. Other zero rows are not valid.
-  return item.quantityRequired > 0 || item.noLongerUsed;
+  // Required mode is the working BOM: retired comparison lines stay hidden.
+  return !item.noLongerUsed && item.quantityRequired > 0;
 }
 
 export function getFlattenedMaterialRows(
