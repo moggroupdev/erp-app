@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, Table } from "@mantine/core";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -22,6 +22,7 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { materialPurchaseOrderUpdateBlock } from "../helpers";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -52,6 +53,7 @@ export default function Page() {
   const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
   const canAddSupplierInvoice = useHasPermission(PERMISSIONS.ADD_SUPPLIER_INVOICE);
   const canAddReceipt = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_RECEIPT);
+  const canUpdateOrder = useHasPermission(PERMISSIONS.UPDATE_MATERIAL_PURCHASE_ORDER);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -122,6 +124,20 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={refetch} />
             <ActionsMenu>
+              {order &&
+                canUpdateOrder &&
+                !isReceiptsFetching &&
+                !receiptsError &&
+                paginatedReceipts?.data.length === 0 &&
+                materialPurchaseOrderUpdateBlock(order, false) === null && (
+                  <Menu.Item
+                    component={Link}
+                    href={getLocalizedHref(`/procurement/material-orders/${id}/edit`)}
+                    leftSection={<Pencil size={14} />}
+                  >
+                    {translate("Edit", "تعديل")}
+                  </Menu.Item>
+                )}
               {order && (
                 <PrintDocument
                   title={`${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} - ${order.code}`}

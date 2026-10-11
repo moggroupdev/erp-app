@@ -1,0 +1,1143 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import type { Locale } from "@/lib/i18n/types";
+import useDocumentTitle from "@/hooks/use-document-title";
+import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
+import usePrivateRequest from "@/hooks/use-private-request";
+import materialPurchaseOrdersApi from "@/lib/api/material-purchase-orders";
+import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisitions";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { VAT_PERCENT, VAT_RATE } from "@/lib/constants/global";
+import { formatMoney } from "@/lib/helpers/format-money";
+import { formatQuantity } from "@/lib/helpers/format-quantity";
+import { queryKeys } from "@/lib/api/query-keys";
+import { staleTimes } from "@/lib/constants/stale-times";
+import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { MaterialUnitConversionSummary } from "@/types/material";
+import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
+import { ArrowLeft, ClipboardList, Link2, Package, Plus, Trash2, X } from "lucide-react";
+import ErrorAlert from "@/components/ui/error-alert";
+import Modal from "@/components/ui/modal";
+import DataSelect from "@/components/ui/data-select";
+import { MPO_DELIVERY_TIMINGS, type MpoDeliveryTiming } from "@/lib/constants/enums/mpo-delivery-timings";
+import type { MpoDeliveryLocation } from "@/lib/constants/enums/mpo-delivery-locations";
+import OrderDetailsFields from "../create/components/order-details-fields";
+import PaymentTermsEditor from "../create/components/payment-terms-editor";
+import {
+  createPaymentTermDraft,
+  toPaymentTermDtos,
+  validatePaymentTerms,
+  type PaymentTermDraft,
+} from "../create/components/payment-terms";
+import LoadingSection from "@/components/ui/sections/loading";
+import ErrorSection from "@/components/ui/sections/error";
+import { convertEnteredQuantityBetweenUnits } from "../helpers";
+import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
+import {
+  getProductionSubDepartmentLabel,
+  type ProductionSubDepartment,
+} from "@/lib/constants/enums/production-sub-departments";
+import LinkRequisitionsModal, { type AllocationDraft } from "../create/components/link-requisitions-modal";
+import AddFromRequisitionsModal, { type AddedMaterialLine } from "../create/components/add-from-requisitions-modal";
+import { getRequisitionStatus } from "../../material-requisitions/helpers";
+import type { MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
+
+const CREATE_TITLE = { en: "Create Material Purchase Order", ar: "إنشاء أمر توريد خامات" };
+const EDIT_TITLE = { en: "Edit Material Purchase Order", ar: "تعديل أمر توريد خامات" };
+
+/** Preferred and minimum widths for the items table. Columns stay at least `minWidth` wide and the table scrolls on small screens. */
+const ITEM_COLUMN_WIDTHS = {
+  index: { width: "3rem", minWidth: undefined },
+  material: { width: undefined, minWidth: undefined },
+  quantity: { width: "5.5rem", minWidth: undefined },
+  unit: { width: "6.5rem", minWidth: undefined },
+  unitPrice: { width: "8.5rem", minWidth: undefined },
+  lineTotal: { width: "9rem", minWidth: undefined },
+  requisitions: { width: "18rem", minWidth: undefined },
+  notes: { width: "12rem", minWidth: undefined },
+  remove: { width: "3rem", minWidth: undefined },
+} as const;
+
+function CreateOrderHeading({ onBack, title }: { onBack: () => void; title: { en: string; ar: string } }) {
+  const { translate, translation } = useI18n();
+
+  return (
+    <header className="flex items-center gap-3">
+      <Button
+        type="button"
+        onClick={onBack}
+        title={translation.back}
+        aria-label={translation.back}
+        variant="light"
+        color="dark"
+        radius={20}
+        p={0}
+        h={40}
+        w={40}
+      >
+        <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0deg", "180deg")})` }} />
+      </Button>
+      <h1>{translate(title.en, title.ar)}</h1>
+    </header>
+  );
+}
+
+type ItemDraftRow = {
+  key: string;
+  materialCode: string | null;
+  materialTitle: string;
+  materialType: MaterialType | null;
+  unitOfMeasurement: MaterialUnit | null;
+  unitConversions: MaterialUnitConversionSummary[];
+  unitOfMeasurementSelected: MaterialUnit | null;
+  quantity: number | "";
+  unitPrice: number | "";
+  notes: string;
+  allocations: AllocationDraft[];
+};
+
+function createRowKey() {
+  return `mpo-item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function showUnitSelect(row: ItemDraftRow) {
+  return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+}
+
+function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {
+  return getMaterialUnitSelectOptions(row.unitOfMeasurement, row.unitConversions, locale);
+}
+
+function allocationLinkedTotal(row: ItemDraftRow) {
+  return row.allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0);
+}
+
+function mergeAllocations(existing: AllocationDraft[], incoming: AllocationDraft[]): AllocationDraft[] {
+  const byId = new Map(existing.map((allocation) => [allocation.materialPurchaseRequisitionItemId, allocation]));
+  for (const allocation of incoming) {
+    const prev = byId.get(allocation.materialPurchaseRequisitionItemId);
+    if (prev) {
+      byId.set(allocation.materialPurchaseRequisitionItemId, {
+        ...prev,
+        quantityAllocated: Number((prev.quantityAllocated + allocation.quantityAllocated).toFixed(6)),
+        quantityRemaining: allocation.quantityRemaining,
+      });
+    } else {
+      byId.set(allocation.materialPurchaseRequisitionItemId, allocation);
+    }
+  }
+  return [...byId.values()];
+}
+
+function ItemRow({
+  row,
+  index,
+  locale,
+  currency,
+  onUpdate,
+  onRemove,
+  onLinkRequisitions,
+  onRemoveAllocation,
+  invalid,
+}: {
+  row: ItemDraftRow;
+  index: number;
+  locale: Locale;
+  currency: string;
+  onUpdate: (key: string, patch: Partial<ItemDraftRow>) => void;
+  onRemove: (key: string) => void;
+  onLinkRequisitions: (key: string) => void;
+  onRemoveAllocation: (rowKey: string, requisitionItemId: string) => void;
+  invalid: boolean;
+}) {
+  const { translate } = useI18n();
+  const quantity = typeof row.quantity === "number" ? row.quantity : null;
+  const unitPrice = typeof row.unitPrice === "number" ? row.unitPrice : null;
+  const lineTotal = quantity !== null && unitPrice !== null ? quantity * unitPrice : null;
+  const linkedTotal = allocationLinkedTotal(row);
+  const unitLabel = row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : "";
+  const fullyLinked = quantity !== null && row.allocations.length > 0 && Math.abs(linkedTotal - quantity) <= 1e-9;
+
+  return (
+    <Table.Tr className={invalid ? "bg-clay-50 [&>td]:bg-clay-50" : undefined}>
+      <Table.Td className="pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
+      <Table.Td className="align-top!">
+        <div className="flex flex-col gap-1.5 py-0.5">
+          <span className="text-sm font-medium text-gray-800">{row.materialTitle || row.materialCode}</span>
+          {row.materialCode && <span className="font-mono text-xs text-gray-400">{row.materialCode}</span>}
+        </div>
+      </Table.Td>
+      <Table.Td className="pt-2 align-top!">
+        <span className="text-sm text-gray-700">{quantity !== null ? formatQuantity(quantity) : ""}</span>
+      </Table.Td>
+      <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
+        {showUnitSelect(row) ? (
+          <DataSelect
+            value={row.unitOfMeasurementSelected}
+            setValue={(next) => {
+              const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
+              const nextUnit = (resolved as MaterialUnit | null) ?? row.unitOfMeasurement;
+              if (!nextUnit || !row.unitOfMeasurement || !row.unitOfMeasurementSelected) {
+                onUpdate(row.key, { unitOfMeasurementSelected: nextUnit });
+                return;
+              }
+              const convertedAllocations = row.allocations.map((allocation) => ({
+                ...allocation,
+                quantityAllocated: convertEnteredQuantityBetweenUnits(
+                  allocation.quantityAllocated,
+                  row.unitOfMeasurementSelected!,
+                  nextUnit,
+                  row.unitOfMeasurement!,
+                  row.unitConversions,
+                ),
+              }));
+              const nextQty = convertedAllocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0);
+              onUpdate(row.key, {
+                unitOfMeasurementSelected: nextUnit,
+                allocations: convertedAllocations,
+                quantity: Number(nextQty.toFixed(6)),
+              });
+            }}
+            data={getRowUnitOptions(row, locale)}
+            variant="unstyled"
+            radius={0}
+            searchable
+            placeholder={translate("Select unit", "اختر الوحدة")}
+            styles={{ input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0, cursor: "pointer" } }}
+          />
+        ) : (
+          <span className="text-sm text-gray-600">
+            {row.unitOfMeasurementSelected ? getMaterialUnitLabel(row.unitOfMeasurementSelected, locale) : ""}
+          </span>
+        )}
+      </Table.Td>
+      <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
+        <NumberInput
+          value={row.unitPrice}
+          onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
+          min={0}
+          allowNegative={false}
+          decimalScale={6}
+          hideControls
+          variant="unstyled"
+          radius={0}
+          placeholder={translate("Enter price", "أدخل السعر")}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0 } }}
+          aria-label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
+        />
+      </Table.Td>
+      <Table.Td className="pt-2 align-top!">
+        <span className="text-sm font-medium text-gray-600">{lineTotal !== null ? formatMoney(lineTotal) : ""}</span>
+      </Table.Td>
+      <Table.Td className="align-top!">
+        <div className="flex flex-col gap-1.5 py-0.5">
+          <div className="flex items-center justify-between gap-2">
+            <Badge
+              size="xs"
+              variant="light"
+              color={fullyLinked ? "teal" : "orange"}
+              radius="md"
+              leftSection={<Link2 size={10} />}
+            >
+              {quantity !== null ? `${formatQuantity(linkedTotal)} ${unitLabel}`.trim() : formatQuantity(linkedTotal)}
+            </Badge>
+            <Button
+              type="button"
+              variant="subtle"
+              color="teal"
+              size="compact-xs"
+              radius="md"
+              px={6}
+              leftSection={<Link2 size={12} />}
+              disabled={!row.materialCode || !row.unitOfMeasurementSelected}
+              onClick={() => onLinkRequisitions(row.key)}
+            >
+              {translate("Edit", "تعديل")}
+            </Button>
+          </div>
+
+          <ul className="m-0 flex list-none flex-col gap-1 p-0">
+            {row.allocations.map((allocation) => (
+              <li
+                key={allocation.materialPurchaseRequisitionItemId}
+                className="group flex items-start justify-between gap-2 rounded-md bg-teal-800/[0.07] px-2 py-1.5"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+                    <span className="font-mono text-[11px] font-semibold text-teal-900">{allocation.requisitionCode}</span>
+                    <span className="text-[11px] text-teal-800/75">
+                      {formatQuantity(allocation.quantityAllocated)} {unitLabel}
+                    </span>
+                  </div>
+                  {allocation.productionSubDepartment && (
+                    <p className="mt-0.5 truncate text-[10px] text-teal-800/50">
+                      {getProductionSubDepartmentLabel(
+                        allocation.productionSubDepartment as ProductionSubDepartment,
+                        locale,
+                      )}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-md p-0.5 text-teal-800/50 opacity-70 transition-colors group-hover:opacity-100 hover:bg-teal-800/10 hover:text-teal-900"
+                  onClick={() => onRemoveAllocation(row.key, allocation.materialPurchaseRequisitionItemId)}
+                  title={translate("Remove link", "إزالة الربط")}
+                  aria-label={translate("Remove link", "إزالة الربط")}
+                >
+                  <X size={12} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Table.Td>
+      <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
+        <TextInput
+          value={row.notes}
+          onChange={(e) => onUpdate(row.key, { notes: e.target.value })}
+          placeholder={translate("Optional", "اختياري")}
+          variant="unstyled"
+          radius={0}
+          styles={{ input: { minHeight: 0, height: "auto", padding: 0 } }}
+        />
+      </Table.Td>
+      <Table.Td className="align-top!">
+        <Button
+          type="button"
+          variant="subtle"
+          color="clay"
+          size="xs"
+          radius="md"
+          p={6}
+          onClick={() => onRemove(row.key)}
+          title={translate("Remove row", "حذف الصف")}
+        >
+          <Trash2 size={14} />
+        </Button>
+      </Table.Td>
+    </Table.Tr>
+  );
+}
+
+function draftFromOrder(order: MaterialPurchaseOrderDetailed) {
+  const paymentTerms = [...order.paymentTerms]
+    .sort((a, b) => a.sequenceOrder - b.sequenceOrder)
+    .map(
+      (term): PaymentTermDraft => ({
+        key: term.id,
+        event: term.event,
+        offsetDays: term.offsetDays ?? "",
+        valueKind: term.valueKind,
+        value: term.value != null ? Number(term.value) : "",
+      }),
+    );
+
+  const rows: ItemDraftRow[] = order.items.map((item) => ({
+    key: item.id,
+    materialCode: item.materialCode,
+    materialTitle: item.material.title,
+    materialType: item.material.materialType,
+    unitOfMeasurement: item.material.unitOfMeasurement,
+    unitConversions: item.material.unitConversions ?? [],
+    unitOfMeasurementSelected: item.unitOfMeasurementSelected,
+    quantity: Number(item.quantityOrdered),
+    unitPrice: Number(item.unitPrice),
+    notes: item.notes ?? "",
+    allocations: (item.requisitionAllocations ?? []).map((allocation) => ({
+      materialPurchaseRequisitionItemId: allocation.materialPurchaseRequisitionItemId,
+      requisitionId: allocation.requisition.id,
+      requisitionCode: allocation.requisition.code,
+      productionSubDepartment: allocation.requisition.productionSubDepartment,
+      unitOfMeasurementSelected: allocation.unitOfMeasurementSelected,
+      quantityRemaining: 0,
+      quantityAllocated: convertEnteredQuantityBetweenUnits(
+        Number(allocation.quantityAllocated),
+        allocation.unitOfMeasurementSelected,
+        item.unitOfMeasurementSelected,
+        item.material.unitOfMeasurement,
+        item.material.unitConversions ?? [],
+      ),
+    })),
+  }));
+
+  return {
+    supplierId: order.supplier.id,
+    deliveryLocation: order.deliveryLocation,
+    deliveryTiming: order.deliveryTiming,
+    deliveryPeriodDays: (order.deliveryPeriodDays ?? "") as number | "",
+    notes: order.notes ?? "",
+    rows,
+    paymentTerms: paymentTerms.length > 0 ? paymentTerms : [createPaymentTermDraft()],
+  };
+}
+
+export default function OrderForm({
+  mode = "create",
+  order,
+}: {
+  mode?: "create" | "edit";
+  order?: MaterialPurchaseOrderDetailed;
+}) {
+  const isEdit = mode === "edit" && !!order;
+  const initial = isEdit ? draftFromOrder(order) : null;
+  const pageTitle = isEdit ? EDIT_TITLE : CREATE_TITLE;
+  const { locale, translate, translation } = useI18n();
+  const getLocalizedHref = useLocaleHref();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const requisitionIdParam = isEdit ? null : searchParams.get("requisitionId");
+  const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
+
+  const [supplierId, setSupplierId] = useState<string | null>(initial?.supplierId ?? null);
+  const [deliveryLocation, setDeliveryLocation] = useState<MpoDeliveryLocation | null>(initial?.deliveryLocation ?? null);
+  const [deliveryTiming, setDeliveryTiming] = useState<MpoDeliveryTiming | null>(initial?.deliveryTiming ?? null);
+  const [deliveryPeriodDays, setDeliveryPeriodDays] = useState<number | "">(initial?.deliveryPeriodDays ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [rows, setRows] = useState<ItemDraftRow[]>(initial?.rows ?? []);
+  const [paymentTerms, setPaymentTerms] = useState<PaymentTermDraft[]>(initial?.paymentTerms ?? [createPaymentTermDraft()]);
+  const [validationError, setValidationError] = useState("");
+  const [invalidRowKey, setInvalidRowKey] = useState<string | null>(null);
+  const [invalidPaymentTermKeys, setInvalidPaymentTermKeys] = useState<string[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [prefillDone, setPrefillDone] = useState(!requisitionIdParam);
+  const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
+  const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
+  const [linkRowKey, setLinkRowKey] = useState<string | null>(null);
+  const editBaseline = useRef(initial ? JSON.stringify(initial) : null);
+
+  useDocumentTitle(
+    `${translate(pageTitle.en, pageTitle.ar)} | ${translate("Material Purchase Orders", "أوامر توريد الخامات")}`,
+  );
+
+  const {
+    data: seedRequisition,
+    isFetching: isSeedFetching,
+    error: seedError,
+  } = useQuery({
+    queryKey: queryKeys.materialPurchaseRequisitions.detail(requisitionIdParam || "none"),
+    queryFn: ({ signal }) => materialPurchaseRequisitionsApi.get({ privateRequest, id: requisitionIdParam!, signal }),
+    staleTime: staleTimes.materialPurchaseRequisitions,
+    enabled: !!requisitionIdParam,
+  });
+
+  useEffect(() => {
+    if (!requisitionIdParam || !seedRequisition || prefillDone) return;
+
+    if (getRequisitionStatus(seedRequisition) !== "approved") {
+      setValidationError(
+        translate(
+          "Only fully approved requisitions can be used to create a purchase order.",
+          "يمكن إنشاء أمر توريد فقط من طلبات الشراء المعتمدة بالكامل.",
+        ),
+      );
+      setPrefillDone(true);
+      return;
+    }
+
+    const remainingItems = seedRequisition.items.filter((item) => Number(item.quantityRemaining) > 1e-9);
+    if (remainingItems.length === 0) {
+      setValidationError(
+        translate("This requisition has no remaining quantity to order.", "لا توجد كمية متبقية للطلب في طلب الشراء هذا."),
+      );
+      setPrefillDone(true);
+      return;
+    }
+
+    setRows(
+      remainingItems.map((item) => {
+        const { factor } = resolveDisplayUnit(
+          item.unitOfMeasurementSelected,
+          item.material.unitOfMeasurement,
+          item.material.unitConversions,
+        );
+        const unitPrice =
+          item.unitPrice != null && Number(item.unitPrice) > 0 ? toDisplayUnitPrice(Number(item.unitPrice), factor) : "";
+
+        return {
+          key: createRowKey(),
+          materialCode: item.materialCode,
+          materialTitle: item.material.title,
+          materialType: item.material.materialType,
+          unitOfMeasurement: item.material.unitOfMeasurement,
+          unitConversions: item.material.unitConversions,
+          unitOfMeasurementSelected: item.unitOfMeasurementSelected,
+          quantity: Number(item.quantityRemaining),
+          unitPrice,
+          notes: item.notes ?? "",
+          allocations: [
+            {
+              materialPurchaseRequisitionItemId: item.id,
+              requisitionId: seedRequisition.id,
+              requisitionCode: seedRequisition.code,
+              productionSubDepartment: seedRequisition.productionSubDepartment,
+              unitOfMeasurementSelected: item.unitOfMeasurementSelected,
+              quantityRemaining: Number(item.quantityRemaining),
+              quantityAllocated: Number(item.quantityRemaining),
+            },
+          ],
+        };
+      }),
+    );
+
+    setPrefillDone(true);
+  }, [requisitionIdParam, seedRequisition, prefillDone, translate]);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const items = rows.map((row) => {
+        const requisitionAllocations = row.allocations.map((allocation) => ({
+          materialPurchaseRequisitionItemId: allocation.materialPurchaseRequisitionItemId,
+          quantityAllocated: convertEnteredQuantityBetweenUnits(
+            allocation.quantityAllocated,
+            row.unitOfMeasurementSelected!,
+            allocation.unitOfMeasurementSelected,
+            row.unitOfMeasurement!,
+            row.unitConversions,
+          ),
+        }));
+
+        return {
+          materialCode: row.materialCode!,
+          unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
+          quantityOrdered: Number(row.quantity),
+          unitPrice: Number(row.unitPrice),
+          notes: row.notes.trim() || null,
+          requisitionAllocations,
+        };
+      });
+
+      const payload = {
+        deliveryLocation: deliveryLocation!,
+        deliveryTiming: deliveryTiming!,
+        deliveryPeriodDays: deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS ? Number(deliveryPeriodDays) : null,
+        notes: notes.trim() || null,
+        items,
+        paymentTerms: toPaymentTermDtos(paymentTerms),
+      };
+
+      if (isEdit) {
+        return await materialPurchaseOrdersApi.update({
+          privateRequest,
+          id: order.id,
+          dto: payload,
+        });
+      }
+
+      return await materialPurchaseOrdersApi.create({
+        privateRequest,
+        dto: {
+          supplierId: supplierId!,
+          ...payload,
+        },
+      });
+    },
+    onSuccess: async (saved) => {
+      setSubmitted(true);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.materialPurchaseOrders.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.materialPurchaseRequisitions.all }),
+      ]);
+      router.push(getLocalizedHref(`/procurement/material-orders/${saved.id}`));
+    },
+  });
+
+  const error = validationError || (mutation.error ? getErrorMessage(locale, mutation.error) : "");
+
+  const isDirty = useMemo(() => {
+    if (isEdit && editBaseline.current) {
+      return (
+        editBaseline.current !==
+        JSON.stringify({
+          supplierId,
+          deliveryLocation,
+          deliveryTiming,
+          deliveryPeriodDays,
+          notes,
+          rows,
+          paymentTerms,
+        })
+      );
+    }
+
+    const paymentDirty =
+      paymentTerms.length > 1 ||
+      paymentTerms.some(
+        (term) => term.event !== null || term.valueKind !== null || term.value !== "" || term.offsetDays !== "",
+      );
+    return (
+      supplierId !== null ||
+      deliveryLocation !== null ||
+      deliveryTiming !== null ||
+      deliveryPeriodDays !== "" ||
+      notes.trim() !== "" ||
+      rows.length > 0 ||
+      paymentDirty
+    );
+  }, [isEdit, supplierId, deliveryLocation, deliveryTiming, deliveryPeriodDays, notes, rows, paymentTerms]);
+
+  const confirmNavigation = useUnsavedChangesWarning(isDirty && !submitted);
+
+  const excludedRequisitionItemIds = useMemo(
+    () => rows.flatMap((row) => row.allocations.map((allocation) => allocation.materialPurchaseRequisitionItemId)),
+    [rows],
+  );
+
+  const subtotal = useMemo(
+    () =>
+      rows.reduce((sum, row) => {
+        const qty = typeof row.quantity === "number" ? row.quantity : 0;
+        const price = typeof row.unitPrice === "number" ? row.unitPrice : 0;
+        return sum + qty * price;
+      }, 0),
+    [rows],
+  );
+  const vatAmount = subtotal * VAT_RATE;
+  const grandTotal = subtotal + vatAmount;
+
+  const linkRow = linkRowKey ? rows.find((row) => row.key === linkRowKey) : null;
+
+  function updateRow(key: string, patch: Partial<ItemDraftRow>) {
+    setInvalidRowKey((current) => (current === key ? null : current));
+    setRows((prev) => prev.map((row) => (row.key === key ? { ...row, ...patch } : row)));
+  }
+
+  function removeRow(key: string) {
+    setInvalidRowKey((current) => (current === key ? null : current));
+    setRows((prev) => prev.filter((row) => row.key !== key));
+    if (linkRowKey === key) setLinkRowKey(null);
+  }
+
+  function removeAllocation(rowKey: string, requisitionItemId: string) {
+    setInvalidRowKey((current) => (current === rowKey ? null : current));
+    setRows((prev) =>
+      prev.flatMap((row) => {
+        if (row.key !== rowKey) return [row];
+        const allocations = row.allocations.filter(
+          (allocation) => allocation.materialPurchaseRequisitionItemId !== requisitionItemId,
+        );
+        if (allocations.length === 0) return [];
+        const quantity = Number(allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0).toFixed(6));
+        return [{ ...row, allocations, quantity }];
+      }),
+    );
+  }
+
+  function handleAddFromRequisitions(lines: AddedMaterialLine[]) {
+    setValidationError("");
+    setRows((prev) => {
+      const next = [...prev];
+      for (const line of lines) {
+        const existingIndex = next.findIndex((row) => row.materialCode === line.materialCode);
+        if (existingIndex >= 0) {
+          const existing = next[existingIndex];
+          const convertedIncoming = line.allocations.map((allocation) => ({
+            ...allocation,
+            quantityAllocated: convertEnteredQuantityBetweenUnits(
+              allocation.quantityAllocated,
+              line.unitOfMeasurementSelected,
+              existing.unitOfMeasurementSelected!,
+              existing.unitOfMeasurement!,
+              existing.unitConversions,
+            ),
+          }));
+          const allocations = mergeAllocations(existing.allocations, convertedIncoming);
+          const quantity = Number(allocations.reduce((sum, allocation) => sum + allocation.quantityAllocated, 0).toFixed(6));
+          next[existingIndex] = { ...existing, allocations, quantity };
+        } else {
+          next.push({
+            key: createRowKey(),
+            materialCode: line.materialCode,
+            materialTitle: line.materialTitle,
+            materialType: line.materialType,
+            unitOfMeasurement: line.unitOfMeasurement,
+            unitConversions: line.unitConversions,
+            unitOfMeasurementSelected: line.unitOfMeasurementSelected,
+            quantity: line.quantity,
+            unitPrice: "",
+            notes: "",
+            allocations: line.allocations,
+          });
+        }
+      }
+      return next;
+    });
+  }
+
+  function handleLinkSave(allocations: AllocationDraft[], nextQuantityOrdered: number) {
+    if (!linkRowKey) return;
+    if (allocations.length === 0) {
+      removeRow(linkRowKey);
+      return;
+    }
+    updateRow(linkRowKey, {
+      allocations,
+      quantity: nextQuantityOrdered,
+    });
+  }
+
+  function rejectRow(key: string, message: string) {
+    setInvalidRowKey(key);
+    setValidationError(message);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setValidationError("");
+    setInvalidRowKey(null);
+    setInvalidPaymentTermKeys([]);
+
+    if (!supplierId) {
+      return setValidationError(translate("Please select a supplier.", "يرجى اختيار مورد."));
+    }
+
+    if (!deliveryLocation) {
+      return setValidationError(translate("Please select a delivery location.", "يرجى اختيار مكان التسليم."));
+    }
+
+    if (!deliveryTiming) {
+      return setValidationError(translate("Please select a delivery period.", "يرجى اختيار مدة التوريد."));
+    }
+
+    if (deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS) {
+      if (deliveryPeriodDays === "" || !Number.isInteger(deliveryPeriodDays) || deliveryPeriodDays <= 0) {
+        return setValidationError(
+          translate("Enter a positive number of days for delivery.", "أدخل عدداً موجباً من الأيام للتوريد."),
+        );
+      }
+    }
+
+    if (rows.length === 0) {
+      return setValidationError(
+        translate(
+          "Please add at least one item from open purchase requisitions.",
+          "يرجى إضافة بند واحد على الأقل من طلبات الشراء المفتوحة.",
+        ),
+      );
+    }
+
+    for (let index = 0; index < rows.length; index++) {
+      const row = rows[index];
+      const rowLabel = translate(`Row ${index + 1}`, `الصف ${index + 1}`);
+      const materialName = row.materialTitle || row.materialCode;
+
+      if (!row.materialCode) {
+        return rejectRow(row.key, translate(`${rowLabel}: please select a material.`, `${rowLabel}: يرجى اختيار مادة.`));
+      }
+
+      if (row.allocations.length === 0) {
+        return rejectRow(
+          row.key,
+          translate(
+            `${rowLabel}: material ${materialName} must be linked to open purchase requisition lines.`,
+            `${rowLabel}: يجب ربط المادة ${materialName} ببنود طلبات شراء مفتوحة.`,
+          ),
+        );
+      }
+
+      if (!row.unitOfMeasurementSelected || !row.unitOfMeasurement) {
+        return rejectRow(
+          row.key,
+          translate(
+            `${rowLabel}: please select the unit for material ${materialName}.`,
+            `${rowLabel}: يرجى اختيار الوحدة للمادة ${materialName}.`,
+          ),
+        );
+      }
+
+      if (row.quantity === "") {
+        return rejectRow(
+          row.key,
+          translate(
+            `${rowLabel}: quantity for material ${materialName} is missing.`,
+            `${rowLabel}: كمية المادة ${materialName} غير موجودة.`,
+          ),
+        );
+      }
+
+      const qty = Number(row.quantity);
+      if (Number.isNaN(qty) || qty <= 0) {
+        return rejectRow(
+          row.key,
+          translate(
+            `${rowLabel}: quantity for material ${materialName} must be greater than zero.`,
+            `${rowLabel}: يجب أن تكون كمية المادة ${materialName} أكبر من صفر.`,
+          ),
+        );
+      }
+
+      if (row.unitPrice === "") {
+        return rejectRow(
+          row.key,
+          translate(
+            `${rowLabel}: please enter the unit price for material ${materialName}.`,
+            `${rowLabel}: يرجى إدخال سعر الوحدة للمادة ${materialName}.`,
+          ),
+        );
+      }
+
+      const price = Number(row.unitPrice);
+      if (Number.isNaN(price) || price <= 0) {
+        return rejectRow(
+          row.key,
+          translate(
+            `${rowLabel}: unit price for material ${materialName} must be greater than zero.`,
+            `${rowLabel}: يجب أن يكون سعر الوحدة للمادة ${materialName} أكبر من صفر.`,
+          ),
+        );
+      }
+
+      const linkedTotal = allocationLinkedTotal(row);
+      if (Math.abs(linkedTotal - qty) > 1e-9) {
+        return rejectRow(
+          row.key,
+          translate(
+            `${rowLabel}: linked requisition quantity must equal ordered quantity for material ${materialName}.`,
+            `${rowLabel}: يجب أن تساوي كمية طلبات الشراء المربوطة الكمية المطلوبة للمادة ${materialName}.`,
+          ),
+        );
+      }
+    }
+
+    const paymentError = validatePaymentTerms(paymentTerms, grandTotal, translate);
+    if (paymentError) {
+      setInvalidPaymentTermKeys(paymentError.termKeys);
+      return setValidationError(paymentError.message);
+    }
+
+    handleOpenConfirm();
+  }
+
+  function handleConfirmCreate() {
+    mutation.mutate();
+  }
+
+  function handleOpenConfirm() {
+    mutation.reset();
+    openConfirm();
+  }
+
+  if (requisitionIdParam && isSeedFetching && !prefillDone) {
+    return (
+      <div className="flex min-h-full flex-col gap-5">
+        <CreateOrderHeading title={pageTitle} onBack={() => router.back()} />
+        <LoadingSection message={translate("Loading requisition", "جاري تحميل طلب الشراء")} />
+      </div>
+    );
+  }
+
+  if (requisitionIdParam && seedError && !prefillDone) {
+    return (
+      <div className="flex min-h-full flex-col gap-5">
+        <CreateOrderHeading title={pageTitle} onBack={() => router.back()} />
+        <ErrorSection
+          errorTitle={translate("Failed to load requisition", "تعذر تحميل طلب الشراء")}
+          errorMessage={getErrorMessage(locale, seedError)}
+          button={{
+            text: translate("Back to orders", "العودة إلى الأوامر"),
+            onClick: () => router.push(getLocalizedHref("/procurement/material-orders")),
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-full flex-col gap-5">
+      <CreateOrderHeading
+        title={pageTitle}
+        onBack={() => {
+          if (confirmNavigation()) router.back();
+        }}
+      />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        {seedRequisition && getRequisitionStatus(seedRequisition) === "approved" && (
+          <div className="rounded-xl bg-teal-800/[0.07] px-4 py-3 text-sm text-teal-900">
+            {translate(
+              `Prefilling from requisition ${seedRequisition.code}. You can adjust prices and links, or add more open requisition lines before creating the order.`,
+              `يتم التعبئة من طلب الشراء ${seedRequisition.code}. يمكنك تعديل الأسعار والربط أو إضافة المزيد من بنود طلبات الشراء المفتوحة قبل إنشاء الأمر.`,
+            )}
+          </div>
+        )}
+
+        <OrderDetailsFields
+          supplierId={supplierId}
+          setSupplierId={setSupplierId}
+          onSupplierSelect={() => setValidationError("")}
+          deliveryLocation={deliveryLocation}
+          setDeliveryLocation={setDeliveryLocation}
+          deliveryTiming={deliveryTiming}
+          setDeliveryTiming={setDeliveryTiming}
+          deliveryPeriodDays={deliveryPeriodDays}
+          setDeliveryPeriodDays={setDeliveryPeriodDays}
+          notes={notes}
+          setNotes={setNotes}
+          supplierLocked={isEdit}
+        />
+
+        <section className="overflow-hidden rounded-2xl bg-white">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-2xl bg-teal-800 text-white">
+                <Package size={18} />
+              </span>
+              <div>
+                <h4 className="text-base font-semibold text-gray-950">{translate("Items", "البنود")}</h4>
+                <p className="text-sm text-gray-500">
+                  {translate("Lines taken from open purchase requisitions.", "بنود مأخوذة من طلبات الشراء المفتوحة.")}
+                </p>
+              </div>
+            </div>
+            <Button type="button" color="teal" leftSection={<Plus size={14} />} onClick={openAdd}>
+              {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+            </Button>
+          </div>
+          <div className="px-5 py-5">
+            {rows.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-teal-800/2.5 px-6 py-12 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-800/15 text-teal-900">
+                  <ClipboardList size={26} strokeWidth={1.75} />
+                </div>
+                <div className="flex max-w-md flex-col gap-1.5">
+                  <h5 className="text-base font-semibold text-gray-900">{translate("No items yet", "لا توجد بنود بعد")}</h5>
+                  <p className="text-sm leading-[1.75] text-gray-500">
+                    {translate(
+                      "Start by adding open purchase requisition lines.",
+                      "ابدأ بإضافة بنود من طلبات الشراء المفتوحة.",
+                    )}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table withColumnBorders className="w-full min-w-max" horizontalSpacing="xs" verticalSpacing="xs">
+                  <colgroup>
+                    {Object.entries(ITEM_COLUMN_WIDTHS).map(([column, size]) => (
+                      <col key={column} style={{ width: size.width, minWidth: size.minWidth }} />
+                    ))}
+                  </colgroup>
+                  <Table.Thead className="bg-gray-50 whitespace-nowrap">
+                    <Table.Tr className="h-9">
+                      <Table.Th
+                        className="text-center! text-gray-500"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.index.minWidth }}
+                      >
+                        #
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.material.minWidth }}
+                      >
+                        {translate("Material", "المادة")}
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.quantity.minWidth }}
+                      >
+                        {translate("Quantity", "الكمية")}
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.unit.minWidth }}
+                      >
+                        {translate("Unit", "الوحدة")}
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.unitPrice.minWidth }}
+                      >
+                        {translate("Unit Price", "سعر الوحدة")} ({translation.currency})
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.lineTotal.minWidth }}
+                      >
+                        {translate("Line Total", "إجمالي البند")} ({translation.currency})
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.requisitions.minWidth }}
+                      >
+                        {translate("Requisitions", "طلبات الشراء")}
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.notes.minWidth }}
+                      >
+                        {translate("Notes", "الملاحظات")}
+                      </Table.Th>
+                      <Table.Th style={{ minWidth: ITEM_COLUMN_WIDTHS.remove.minWidth }} />
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {rows.map((row, index) => (
+                      <ItemRow
+                        key={row.key}
+                        row={row}
+                        index={index}
+                        locale={locale}
+                        currency={translation.currency}
+                        onUpdate={updateRow}
+                        onRemove={removeRow}
+                        onLinkRequisitions={setLinkRowKey}
+                        onRemoveAllocation={removeAllocation}
+                        invalid={row.key === invalidRowKey}
+                      />
+                    ))}
+                  </Table.Tbody>
+                  <Table.Tfoot className="border-t border-gray-200 bg-gray-50">
+                    <Table.Tr className="h-9">
+                      <Table.Td />
+                      <Table.Td colSpan={4} className="text-sm text-gray-600">
+                        {translate("Total", "الإجمالي")}
+                      </Table.Td>
+                      <Table.Td>
+                        <span className="text-sm font-medium text-gray-800">{formatMoney(subtotal)}</span>
+                      </Table.Td>
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                    </Table.Tr>
+                    <Table.Tr className="h-9">
+                      <Table.Td />
+                      <Table.Td colSpan={4} className="text-sm text-gray-600">
+                        {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
+                      </Table.Td>
+                      <Table.Td>
+                        <span className="text-sm font-medium text-gray-800">{formatMoney(vatAmount)}</span>
+                      </Table.Td>
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                    </Table.Tr>
+                    <Table.Tr className="h-9">
+                      <Table.Td />
+                      <Table.Td colSpan={4} className="text-sm font-semibold text-gray-950">
+                        {translate("Grand total", "الإجمالي الكلي")}
+                      </Table.Td>
+                      <Table.Td>
+                        <span className="text-sm font-semibold text-gray-950">{formatMoney(grandTotal)}</span>
+                      </Table.Td>
+                      <Table.Td />
+                      <Table.Td />
+                      <Table.Td />
+                    </Table.Tr>
+                  </Table.Tfoot>
+                </Table>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <PaymentTermsEditor
+          terms={paymentTerms}
+          onChange={(next) => {
+            setPaymentTerms(next);
+            setInvalidPaymentTermKeys((current) => {
+              if (current.length === 0) return current;
+              const previousByKey = new Map(paymentTerms.map((term) => [term.key, term]));
+              return current.filter((key) => {
+                const previous = previousByKey.get(key);
+                const updated = next.find((term) => term.key === key);
+                if (!previous || !updated) return false;
+                return (
+                  previous.event === updated.event &&
+                  previous.offsetDays === updated.offsetDays &&
+                  previous.valueKind === updated.valueKind &&
+                  previous.value === updated.value
+                );
+              });
+            });
+          }}
+          totalAmount={grandTotal}
+          currency={translation.currency}
+          invalidTermKeys={invalidPaymentTermKeys}
+        />
+
+        {error && !confirmOpened && <ErrorAlert error={error} />}
+
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="light"
+            color="dark"
+            radius="md"
+            onClick={() => {
+              if (confirmNavigation()) router.push(getLocalizedHref("/procurement/material-orders"));
+            }}
+          >
+            {translation.cancel}
+          </Button>
+          <Button type="submit" radius="md" color="teal" disabled={mutation.isPending}>
+            {isEdit ? translate("Save", "حفظ") : translate("Create", "إنشاء")}
+          </Button>
+        </div>
+      </form>
+
+      <Modal
+        opened={confirmOpened}
+        onClose={() => {
+          if (!mutation.isPending) closeConfirm();
+        }}
+        title={
+          isEdit
+            ? translate("Confirm update order", "تأكيد تحديث الأمر")
+            : translate("Confirm create order", "تأكيد إنشاء الأمر")
+        }
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-gray-600">
+            {isEdit
+              ? translate(
+                  "Are you sure you want to update this material purchase order?",
+                  "هل أنت متأكد من تحديث أمر توريد الخامات هذا؟",
+                )
+              : translate(
+                  "Are you sure you want to create this material purchase order?",
+                  "هل أنت متأكد من إنشاء أمر توريد الخامات هذا؟",
+                )}
+          </p>
+          <div className="flex gap-2">
+            <Button variant="light" color="dark" radius="md" onClick={closeConfirm} disabled={mutation.isPending} fullWidth>
+              {translation.cancel}
+            </Button>
+            <Button radius="md" color="teal" loading={mutation.isPending} onClick={handleConfirmCreate} fullWidth>
+              {isEdit ? translate("Confirm & Save", "تأكيد وحفظ") : translate("Confirm & Create", "تأكيد وإنشاء")}
+            </Button>
+          </div>
+          {error && <ErrorAlert error={error} />}
+        </div>
+      </Modal>
+
+      <AddFromRequisitionsModal
+        opened={addOpened}
+        onClose={closeAdd}
+        excludedRequisitionItemIds={excludedRequisitionItemIds}
+        excludeMaterialPurchaseOrderId={isEdit ? order.id : undefined}
+        onAdd={handleAddFromRequisitions}
+      />
+
+      {linkRow && linkRow.materialCode && linkRow.unitOfMeasurementSelected && linkRow.unitOfMeasurement && (
+        <LinkRequisitionsModal
+          opened={!!linkRowKey}
+          onClose={() => setLinkRowKey(null)}
+          materialCode={linkRow.materialCode}
+          materialTitle={linkRow.materialTitle}
+          orderUnit={linkRow.unitOfMeasurementSelected}
+          baseUnit={linkRow.unitOfMeasurement}
+          unitConversions={linkRow.unitConversions}
+          existingAllocations={linkRow.allocations}
+          excludeMaterialPurchaseOrderId={isEdit ? order.id : undefined}
+          onSave={handleLinkSave}
+        />
+      )}
+    </div>
+  );
+}

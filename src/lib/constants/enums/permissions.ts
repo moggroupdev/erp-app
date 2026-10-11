@@ -62,6 +62,7 @@ export const PERMISSION_VALUES = [
   "update_legacy_issue_permit",
   "read_material_purchase_orders",
   "add_material_purchase_order",
+  "update_material_purchase_order",
   "add_material_purchase_receipt",
   "read_supplier_invoices",
   "add_supplier_invoice",
@@ -528,6 +529,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "إنشاء أمر توريد مواد",
     },
   },
+  update_material_purchase_order: {
+    value: "update_material_purchase_order",
+    label: {
+      en: "Update Material Purchase Order",
+      ar: "تحديث أمر توريد مواد",
+    },
+  },
   add_material_purchase_receipt: {
     value: "add_material_purchase_receipt",
     label: {
@@ -836,6 +844,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "approve_material_purchase_requisition_manager",
       "read_material_purchase_orders",
       "add_material_purchase_order",
+      "update_material_purchase_order",
       "add_material_purchase_receipt",
       "read_supplier_invoices",
       "add_supplier_invoice",

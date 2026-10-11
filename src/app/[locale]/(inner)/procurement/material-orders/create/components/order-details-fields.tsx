@@ -19,6 +19,7 @@ type OrderDetailsFieldsProps = {
   setDeliveryPeriodDays: (days: number | "") => void;
   notes: string;
   setNotes: (notes: string) => void;
+  supplierLocked?: boolean;
 };
 
 function ChoiceCard({
@@ -72,6 +73,7 @@ export default function OrderDetailsFields({
   setDeliveryPeriodDays,
   notes,
   setNotes,
+  supplierLocked = false,
 }: OrderDetailsFieldsProps) {
   const { translate } = useI18n();
   const withinDays = deliveryTiming === MPO_DELIVERY_TIMINGS.WITHIN_DAYS;
@@ -106,8 +108,9 @@ export default function OrderDetailsFields({
             onSupplierSelect={onSupplierSelect}
             label={translate("Supplier", "المورد")}
             placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
-            searchable
-            clearable
+            disabled={supplierLocked}
+            clearable={!supplierLocked}
+            searchable={!supplierLocked}
             required
           />
         </div>

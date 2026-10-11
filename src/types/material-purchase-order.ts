@@ -154,6 +154,8 @@ export type CreateMaterialPurchaseOrderDto = {
   paymentTerms: CreateMaterialPurchaseOrderPaymentTermDto[];
 };
 
+export type UpdateMaterialPurchaseOrderDto = Omit<CreateMaterialPurchaseOrderDto, "supplierId">;
+
 // =============== Material Purchase Receipts ===============
 
 export type MaterialPurchaseReceipt = {
