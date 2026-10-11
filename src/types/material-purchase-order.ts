@@ -69,6 +69,7 @@ export type MaterialPurchaseOrder = {
   cancelledAt: Date | null;
   notes: string | null;
   createdAt: Date;
+  updatedAt: Date | null;
   createdBy: string;
 };
 
