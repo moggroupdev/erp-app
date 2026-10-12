@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
 import { Button, NumberInput, Table, Textarea, TextInput } from "@mantine/core";
-import { ArrowLeft, CalendarClock, Package, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, CalendarClock, ListPlus, Package, Plus, Trash2 } from "lucide-react";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
@@ -19,6 +20,8 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
+import { convertEnteredQuantityBetweenUnits } from "../../material-orders/helpers";
+import AddQuotationItemsModal, { type QuotationItemLine } from "../../quotation-requests/components/add-items-modal";
 
 const PAGE_TITLE = { en: "Create Request for Quotation", ar: "إنشاء طلب عرض سعر" };
 
@@ -62,6 +65,10 @@ function showUnitSelect(row: ItemDraft) {
   return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
 }
 
+function isEmptyRow(row: ItemDraft) {
+  return row.materialCode === null && row.quantity === "" && row.notes.trim() === "";
+}
+
 function toIso(value: string | null) {
   if (!value) return null;
   const date = new Date(value);
@@ -79,6 +86,7 @@ export default function Page() {
   const [responseDeadline, setResponseDeadline] = useState<string | null>(null);
   const [rows, setRows] = useState<ItemDraft[]>([emptyRow()]);
   const [error, setError] = useState("");
+  const [addItemsOpened, { open: openAddItems, close: closeAddItems }] = useDisclosure(false);
 
   const isDirty =
     notes.trim() !== "" ||
@@ -98,6 +106,50 @@ export default function Page() {
 
   function removeRow(key: string) {
     setRows((current) => (current.length <= 1 ? current : current.filter((row) => row.key !== key)));
+  }
+
+  function addFromRequisitions(lines: QuotationItemLine[]) {
+    setError("");
+    setRows((current) => {
+      const next = current.filter((row) => !isEmptyRow(row));
+
+      for (const line of lines) {
+        const existingIndex = next.findIndex((row) => row.materialCode === line.materialCode);
+        if (existingIndex >= 0) {
+          const existing = next[existingIndex];
+          const existingQty = typeof existing.quantity === "number" ? existing.quantity : 0;
+          const addedQty =
+            existing.unitOfMeasurementSelected && existing.unitOfMeasurement
+              ? convertEnteredQuantityBetweenUnits(
+                  line.quantity,
+                  line.unitOfMeasurementSelected,
+                  existing.unitOfMeasurementSelected,
+                  existing.unitOfMeasurement,
+                  existing.unitConversions,
+                )
+              : line.quantity;
+          next[existingIndex] = {
+            ...existing,
+            quantity: Number((existingQty + addedQty).toFixed(6)),
+          };
+          continue;
+        }
+
+        next.push({
+          key: createKey(),
+          materialCode: line.materialCode,
+          materialTitle: line.materialTitle,
+          materialType: line.materialType,
+          unitOfMeasurement: line.unitOfMeasurement,
+          unitConversions: line.unitConversions,
+          unitOfMeasurementSelected: line.unitOfMeasurementSelected,
+          quantity: line.quantity,
+          notes: "",
+        });
+      }
+
+      return next.length > 0 ? next : [emptyRow()];
+    });
   }
 
   function applyMaterial(key: string, material: MaterialWithUnitConversionsSelection | null) {
@@ -277,16 +329,21 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Td />
                     <Table.Td colSpan={5}>
-                      <Button
-                        type="button"
-                        variant="light"
-                        color="haze"
-                        size="xs"
-                        leftSection={<Plus size={14} />}
-                        onClick={addRow}
-                      >
-                        {translate("Add material row", "إضافة صف مادة")}
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="light"
+                          color="haze"
+                          size="xs"
+                          leftSection={<Plus size={14} />}
+                          onClick={addRow}
+                        >
+                          {translate("Add material row", "إضافة صف مادة")}
+                        </Button>
+                        <Button type="button" color="haze" size="xs" leftSection={<ListPlus size={14} />} onClick={openAddItems}>
+                          {translate("Add from requisitions", "إضافة من طلبات الشراء")}
+                        </Button>
+                      </div>
                     </Table.Td>
                   </Table.Tr>
                 </Table.Tfoot>
@@ -314,6 +371,8 @@ export default function Page() {
           </Button>
         </div>
       </form>
+
+      <AddQuotationItemsModal opened={addItemsOpened} onClose={closeAddItems} onAdd={addFromRequisitions} />
     </div>
   );
 }
