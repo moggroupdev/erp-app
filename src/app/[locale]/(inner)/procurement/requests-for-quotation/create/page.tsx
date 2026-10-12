@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { Button, NumberInput, Table, Textarea, TextInput } from "@mantine/core";
-import { ArrowLeft, CalendarClock, ListPlus, Package, Plus, Trash2 } from "lucide-react";
-import DateTimePickerInput from "@/components/ui/datetime-picker-input";
+import { ArrowLeft, FileText, ListPlus, Package, Plus, Trash2 } from "lucide-react";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
@@ -69,12 +68,6 @@ function isEmptyRow(row: ItemDraft) {
   return row.materialCode === null && row.quantity === "" && row.notes.trim() === "";
 }
 
-function toIso(value: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toISOString();
-}
-
 export default function Page() {
   const { locale, translate, translation } = useI18n();
   const href = useLocaleHref();
@@ -83,15 +76,12 @@ export default function Page() {
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
   const [notes, setNotes] = useState("");
-  const [responseDeadline, setResponseDeadline] = useState<string | null>(null);
   const [rows, setRows] = useState<ItemDraft[]>([emptyRow()]);
   const [error, setError] = useState("");
   const [addItemsOpened, { open: openAddItems, close: closeAddItems }] = useDisclosure(false);
 
   const isDirty =
-    notes.trim() !== "" ||
-    responseDeadline !== null ||
-    rows.some((row) => row.materialCode || row.quantity !== "" || row.notes.trim() !== "");
+    notes.trim() !== "" || rows.some((row) => row.materialCode || row.quantity !== "" || row.notes.trim() !== "");
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
 
   const usedCodes = useMemo(() => rows.map((row) => row.materialCode).filter((code): code is string => !!code), [rows]);
@@ -195,7 +185,6 @@ export default function Page() {
         privateRequest,
         dto: {
           notes: notes.trim() || null,
-          responseDeadline: toIso(responseDeadline),
           items: items.map((row) => ({
             materialCode: row.materialCode!,
             unitOfMeasurementSelected: row.unitOfMeasurementSelected!,
@@ -244,27 +233,17 @@ export default function Page() {
         <section className="overflow-hidden rounded-2xl bg-white">
           <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
             <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
-              <CalendarClock size={18} />
+              <FileText size={18} />
             </span>
             <div>
               <h4 className="text-base font-semibold text-gray-950">{translate("Request details", "بيانات الطلب")}</h4>
               <p className="text-sm text-gray-500">
-                {translate(
-                  "When suppliers should reply, and any note that goes with the request.",
-                  "موعد رد الموردين، وأي ملاحظة ترفق مع الطلب.",
-                )}
+                {translate("Any note that goes with the request.", "أي ملاحظة ترفق مع الطلب.")}
               </p>
             </div>
           </div>
 
-          <div className="grid gap-4 px-5 py-5 md:grid-cols-2">
-            <DateTimePickerInput
-              label={translate("Response deadline", "آخر موعد للرد")}
-              placeholder={translate("Select date and time", "اختر التاريخ والوقت")}
-              value={responseDeadline}
-              onChange={setResponseDeadline}
-              clearable
-            />
+          <div className="px-5 py-5">
             <Textarea
               label={translate("Notes", "الملاحظات")}
               placeholder={translate("Optional note for this request", "ملاحظة اختيارية لهذا الطلب")}
@@ -367,7 +346,7 @@ export default function Page() {
             {translation.cancel}
           </Button>
           <Button type="submit" radius="md" color="haze" loading={mutation.isPending}>
-            {translate("Save draft", "حفظ المسودة")}
+            {translate("Create", "إنشاء")}
           </Button>
         </div>
       </form>

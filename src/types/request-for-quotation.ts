@@ -4,8 +4,7 @@ import type { MaterialUnitConversionSummary } from "@/types/material";
 
 type UserRef = { id: string; name: string };
 
-export type RequestForQuotationStatus = "draft" | "issued" | "closed" | "cancelled";
-export type SupplierQuotationStatus = "invited" | "submitted" | "declined";
+export type RequestForQuotationStatus = "open" | "closed" | "cancelled";
 
 type QuotationMaterial = {
   code: string;
@@ -19,13 +18,10 @@ type QuotationMaterial = {
 export type RequestForQuotation = {
   id: string;
   code: string;
-  responseDeadline: string | null;
   notes: string | null;
-  issuedAt: string | null;
   closedAt: string | null;
   cancelledAt: string | null;
   createdAt: string;
-  updatedAt: string | null;
   createdBy: string;
 };
 
@@ -62,11 +58,8 @@ export type SupplierQuotation = {
   deliveryTerms: string | null;
   deliveryPeriodDays: number | null;
   validUntil: string | null;
-  submittedAt: string | null;
-  declinedAt: string | null;
   notes: string | null;
   createdAt: string;
-  updatedAt: string | null;
   createdBy: UserRef;
   supplier: { id: string; name: string };
   items: SupplierQuotationItem[];
@@ -98,28 +91,10 @@ export type CreateRequestForQuotationItemDto = {
 };
 
 export type CreateRequestForQuotationDto = {
-  responseDeadline?: string | null;
   notes: string | null;
   items: CreateRequestForQuotationItemDto[];
 };
 
 export type UpdateRequestForQuotationDto = {
-  responseDeadline?: string | null;
   notes?: string | null;
-};
-
-export type SubmitSupplierQuotationItemDto = {
-  requestForQuotationItemId: string;
-  unitOfMeasurementSelected: MaterialUnit;
-  unitPrice: number;
-  notes: string | null;
-};
-
-export type SubmitSupplierQuotationDto = {
-  paymentTerms: string | null;
-  deliveryTerms: string | null;
-  deliveryPeriodDays: number;
-  validUntil: string;
-  notes: string | null;
-  items: SubmitSupplierQuotationItemDto[];
 };

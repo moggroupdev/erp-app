@@ -8,14 +8,11 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
-import { getSupplierQuotationStatus, priceInUnit } from "../../helpers";
+import { priceInUnit } from "../../helpers";
 
 export default function ComparisonTable({ request }: { request: RequestForQuotationDetailed }) {
   const { translate } = useI18n();
-  const submitted = request.supplierQuotations.filter((quotation) => getSupplierQuotationStatus(quotation) === "submitted");
-  const visible = !!request.issuedAt || !!request.closedAt;
-
-  if (!visible) return null;
+  const quotations = request.supplierQuotations;
 
   return (
     <section className="overflow-hidden rounded-2xl bg-white">
@@ -35,29 +32,29 @@ export default function ComparisonTable({ request }: { request: RequestForQuotat
       </div>
 
       <div className="px-5 py-5">
-        {submitted.length === 0 ? (
+        {quotations.length === 0 ? (
           <div className="bg-plum-50/50 flex flex-col items-center justify-center gap-3 rounded-xl px-6 py-10 text-center">
             <div className="bg-plum-50 text-plum-700 flex h-14 w-14 items-center justify-center rounded-2xl">
               <Scale size={26} strokeWidth={1.75} />
             </div>
             <p className="max-w-md text-sm leading-7 text-gray-500">
               {translate(
-                "Submitted quotations appear here so you can compare unit prices.",
-                "تظهر عروض الأسعار المقدمة هنا لمقارنة سعر الوحدة.",
+                "Quotations appear here so you can compare unit prices.",
+                "تظهر عروض الأسعار هنا لمقارنة سعر الوحدة.",
               )}
             </p>
           </div>
         ) : (
-          <ComparisonGrid request={request} submitted={submitted} />
+          <ComparisonGrid request={request} quotations={quotations} />
         )}
       </div>
     </section>
   );
 }
 
-function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDetailed; submitted: SupplierQuotation[] }) {
+function ComparisonGrid({ request, quotations }: { request: RequestForQuotationDetailed; quotations: SupplierQuotation[] }) {
   const { locale, translate, translation } = useI18n();
-  const grandTotals = submitted.map((quotation) => quotationGrandTotal(quotation, request.items));
+  const grandTotals = quotations.map((quotation) => quotationGrandTotal(quotation, request.items));
   const lowestGrand = grandTotals.reduce<number | null>((min, entry) => {
     if (!entry?.complete) return min;
     if (min == null || entry.total < min) return entry.total;
@@ -67,22 +64,22 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
     {
       key: "payment",
       label: translate("Payment terms", "شروط الدفع"),
-      values: submitted.map((quotation) => textOrNull(quotation.paymentTerms)),
+      values: quotations.map((quotation) => textOrNull(quotation.paymentTerms)),
     },
     {
       key: "delivery-terms",
       label: translate("Delivery terms", "شروط التوريد"),
-      values: submitted.map((quotation) => textOrNull(quotation.deliveryTerms)),
+      values: quotations.map((quotation) => textOrNull(quotation.deliveryTerms)),
     },
     {
       key: "valid-until",
       label: translate("Valid until", "صالح حتى"),
-      values: submitted.map((quotation) => (quotation.validUntil ? formatDateAndTime(quotation.validUntil, locale) : null)),
+      values: quotations.map((quotation) => (quotation.validUntil ? formatDateAndTime(quotation.validUntil, locale) : null)),
     },
     {
       key: "notes",
       label: translate("Notes", "الملاحظات"),
-      values: submitted.map((quotation) => textOrNull(quotation.notes)),
+      values: quotations.map((quotation) => textOrNull(quotation.notes)),
     },
   ].filter((row) => row.values.some((value) => value != null));
 
@@ -97,7 +94,7 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
             <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
               {translate("Requested", "المطلوب")}
             </Table.Th>
-            {submitted.map((quotation) => (
+            {quotations.map((quotation) => (
               <Table.Th key={quotation.id} className="min-w-44 text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {quotation.supplier.name}
               </Table.Th>
@@ -106,7 +103,7 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
         </Table.Thead>
         <Table.Tbody>
           {request.items.map((item) => {
-            const prices = submitted.map((quotation) => comparablePrice(quotation, item));
+            const prices = quotations.map((quotation) => comparablePrice(quotation, item));
             const lowest = prices.reduce<number | null>((min, price) => {
               if (price == null) return min;
               if (min == null || price < min) return price;
@@ -122,7 +119,7 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
                   const isLowest = price != null && lowest != null && price === lowest;
                   const total = price == null ? null : price * Number(item.quantityRequested);
                   return (
-                    <Table.Td key={submitted[index].id} className={isLowest ? "bg-teal-50" : undefined}>
+                    <Table.Td key={quotations[index].id} className={isLowest ? "bg-teal-50" : undefined}>
                       {price == null || total == null ? (
                         <span className="text-sm text-gray-400">{translate("No price", "بدون سعر")}</span>
                       ) : (
@@ -156,7 +153,7 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
               const isLowest =
                 entry?.complete === true && lowestGrand != null && Math.abs(entry.total - lowestGrand) < 0.005;
               return (
-                <Table.Td key={submitted[index].id} className={isLowest ? "bg-teal-50" : undefined}>
+                <Table.Td key={quotations[index].id} className={isLowest ? "bg-teal-50" : undefined}>
                   {entry == null ? (
                     <span className="text-sm text-gray-400">-</span>
                   ) : (
@@ -184,7 +181,7 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
             <Table.Td colSpan={2} className="text-sm font-medium text-gray-700">
               {translate("Delivery period", "مدة التوريد")}
             </Table.Td>
-            {submitted.map((quotation) => (
+            {quotations.map((quotation) => (
               <Table.Td key={quotation.id} className="text-sm text-gray-700">
                 {quotation.deliveryPeriodDays != null
                   ? translate(`${quotation.deliveryPeriodDays} days`, `${quotation.deliveryPeriodDays} يوم`)
@@ -198,7 +195,7 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
                 {row.label}
               </Table.Td>
               {row.values.map((value, index) => (
-                <Table.Td key={submitted[index].id} className="max-w-xs text-sm wrap-break-word text-gray-700">
+                <Table.Td key={quotations[index].id} className="max-w-xs text-sm wrap-break-word text-gray-700">
                   {value ?? <span className="text-gray-400">-</span>}
                 </Table.Td>
               ))}

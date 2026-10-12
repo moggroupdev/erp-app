@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Collapse, NumberInput, Table, TextInput } from "@mantine/core";
+import { Button, Collapse, NumberInput, Table, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { ChevronDown, Users } from "lucide-react";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
@@ -18,7 +18,6 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
-import { getSupplierQuotationStatus, getSupplierQuotationStatusLabel } from "../../helpers";
 
 const cellField = {
   variant: "unstyled" as const,
@@ -51,7 +50,7 @@ export default function SupplierQuotations({
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const editable = canUpdate && !!request.issuedAt && !request.closedAt && !request.cancelledAt;
+  const editable = canUpdate && !request.closedAt && !request.cancelledAt;
 
   function refresh() {
     return queryClient.invalidateQueries({ queryKey: queryKeys.requestForQuotations.detail(request.id) });
@@ -83,8 +82,8 @@ export default function SupplierQuotations({
             <h4 className="text-base font-semibold text-gray-950">{translate("Supplier quotations", "عروض الموردين")}</h4>
             <p className="text-sm text-gray-500">
               {translate(
-                "Invite suppliers, then record the prices and terms they offer.",
-                "ادعُ الموردين، ثم سجّل الأسعار والشروط التي يعرضونها.",
+                "Add suppliers, then record the prices and terms they offer.",
+                "أضف الموردين، ثم سجّل الأسعار والشروط التي يعرضونها.",
               )}
             </p>
           </div>
@@ -106,7 +105,7 @@ export default function SupplierQuotations({
               loading={invite.isPending}
               onClick={() => invite.mutate()}
             >
-              {translate("Invite", "دعوة")}
+              {translate("Add", "إضافة")}
             </Button>
           </div>
         )}
@@ -120,7 +119,7 @@ export default function SupplierQuotations({
               <Users size={26} strokeWidth={1.75} />
             </div>
             <p className="max-w-md text-sm leading-7 text-gray-500">
-              {translate("No suppliers invited yet.", "لم تتم دعوة موردين بعد.")}
+              {translate("No suppliers added yet.", "لم يُضف موردون بعد.")}
             </p>
           </div>
         ) : (
@@ -156,9 +155,6 @@ function QuotationCard({
   const { locale, translate, translation } = useI18n();
   const privateRequest = usePrivateRequest();
   const [opened, { toggle }] = useDisclosure(false);
-  const status = getSupplierQuotationStatus(quotation);
-  const statusMeta = getSupplierQuotationStatusLabel(status, translate);
-  const invited = status === "invited";
 
   const [paymentTerms, setPaymentTerms] = useState(quotation.paymentTerms ?? "");
   const [deliveryTerms, setDeliveryTerms] = useState(quotation.deliveryTerms ?? "");
@@ -178,69 +174,8 @@ function QuotationCard({
     return initial;
   });
 
-  const submit = useMutation({
-    mutationFn: () => {
-      const items = request.items.flatMap((item) => {
-        const draft = prices[item.id];
-        if (!draft || draft.price === "") return [];
-        return [
-          {
-            requestForQuotationItemId: item.id,
-            unitOfMeasurementSelected: draft.unit,
-            unitPrice: Number(draft.price),
-            notes: draft.notes.trim() || null,
-          },
-        ];
-      });
-      if (items.length === 0 || deliveryPeriodDays === "" || !validUntil) {
-        throw new Error(
-          translate(
-            "Enter a validity date, delivery days, and at least one price.",
-            "أدخل تاريخ الصلاحية ومدة التوريد وسعراً واحداً على الأقل.",
-          ),
-        );
-      }
-      return requestForQuotationsApi.submitQuotation({
-        privateRequest,
-        id: request.id,
-        quotationId: quotation.id,
-        dto: {
-          paymentTerms: paymentTerms.trim() || null,
-          deliveryTerms: deliveryTerms.trim() || null,
-          deliveryPeriodDays: Number(deliveryPeriodDays),
-          validUntil: toIso(validUntil)!,
-          notes: notes.trim() || null,
-          items,
-        },
-      });
-    },
-    onSuccess: async () => {
-      onError("");
-      await onSaved();
-    },
-    onError: (err) => onError(getErrorMessage(locale, err)),
-  });
-
-  const decline = useMutation({
-    mutationFn: () =>
-      requestForQuotationsApi.declineQuotation({ privateRequest, id: request.id, quotationId: quotation.id }),
-    onSuccess: async () => {
-      onError("");
-      await onSaved();
-    },
-    onError: (err) => onError(getErrorMessage(locale, err)),
-  });
-
   const save = useMutation({
     mutationFn: async () => {
-      if (deliveryPeriodDays === "" || !validUntil) {
-        throw new Error(
-          translate(
-            "A submitted quotation needs a validity date and delivery days.",
-            "عرض السعر المقدم يحتاج تاريخ صلاحية ومدة توريد.",
-          ),
-        );
-      }
       await requestForQuotationsApi.updateQuotation({
         privateRequest,
         id: request.id,
@@ -248,7 +183,7 @@ function QuotationCard({
         dto: {
           paymentTerms: paymentTerms.trim() || null,
           deliveryTerms: deliveryTerms.trim() || null,
-          deliveryPeriodDays: Number(deliveryPeriodDays),
+          deliveryPeriodDays: deliveryPeriodDays === "" ? null : Number(deliveryPeriodDays),
           validUntil: toIso(validUntil),
           notes: notes.trim() || null,
         },
@@ -312,32 +247,11 @@ function QuotationCard({
         >
           <ChevronDown size={16} className={`shrink-0 text-gray-400 transition-transform ${opened ? "rotate-180" : ""}`} />
           <h3 className="truncate text-sm font-semibold text-gray-950">{quotation.supplier.name}</h3>
-          <Badge variant="light" color={statusMeta.color} radius="md">
-            {statusMeta.label}
-          </Badge>
         </button>
-        {editable && invited && (
-          <Button
-            variant="light"
-            color="clay"
-            radius="md"
-            loading={decline.isPending}
-            onClick={() => {
-              if (window.confirm(translate("Decline this supplier?", "رفض هذا المورد؟"))) decline.mutate();
-            }}
-          >
-            {translate("Decline", "رفض")}
-          </Button>
-        )}
       </div>
 
       <Collapse in={opened}>
-        {status === "declined" ? (
-          <p className="text-clay-700 px-4 py-4 text-sm">
-            {translate("This supplier declined to quote.", "رفض هذا المورد تقديم عرض.")}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-4 px-4 py-4">
+        <div className="flex flex-col gap-4 px-4 py-4">
             <div className="grid gap-3 md:grid-cols-2">
               <TextInput
                 label={translate("Payment terms", "شروط الدفع")}
@@ -495,19 +409,12 @@ function QuotationCard({
 
             {editable && (
               <div className="flex justify-end">
-                {invited ? (
-                  <Button color="haze" radius="md" loading={submit.isPending} onClick={() => submit.mutate()}>
-                    {translate("Submit quotation", "تقديم عرض السعر")}
-                  </Button>
-                ) : (
-                  <Button color="haze" radius="md" loading={save.isPending} onClick={() => save.mutate()}>
-                    {translate("Save changes", "حفظ التعديلات")}
-                  </Button>
-                )}
+                <Button color="haze" radius="md" loading={save.isPending} onClick={() => save.mutate()}>
+                  {translate("Save changes", "حفظ التعديلات")}
+                </Button>
               </div>
             )}
           </div>
-        )}
       </Collapse>
     </article>
   );

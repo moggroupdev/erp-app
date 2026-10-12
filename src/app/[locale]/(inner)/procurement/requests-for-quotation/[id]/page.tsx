@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
-import { ArrowLeft, CalendarClock, CircleCheck, ClipboardList, FileText, Package, Plus, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, CircleCheck, ClipboardList, FileText, Package, Plus, Trash2 } from "lucide-react";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
 import CopyButton from "@/components/ui/copy-button";
-import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import DataSelect from "@/components/ui/data-select";
 import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
@@ -29,22 +28,11 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import type { RequestForQuotationDetailed } from "@/types/request-for-quotation";
-import {
-  getRequestForQuotationStatus,
-  getRequestForQuotationStatusLabel,
-  isRequestDraft,
-  isRequestIssued,
-} from "../helpers";
+import { getRequestForQuotationStatus, getRequestForQuotationStatusLabel } from "../helpers";
 import ComparisonTable from "./components/comparison-table";
 import SupplierQuotations from "./components/supplier-quotations";
 
 const PAGE_TITLE = { en: "Request for Quotation", ar: "طلب عرض سعر" };
-
-function toIso(value: string | null) {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toISOString();
-}
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -56,7 +44,6 @@ export default function Page() {
   const canUpdate = useHasPermission(PERMISSIONS.UPDATE_REQUEST_FOR_QUOTATION);
 
   const [error, setError] = useState("");
-  const [deadline, setDeadline] = useState<string | null>(null);
   const [newMaterial, setNewMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
   const [newQuantity, setNewQuantity] = useState<number | "">("");
   const [newUnit, setNewUnit] = useState<MaterialUnit | null>(null);
@@ -73,31 +60,9 @@ export default function Page() {
     "dashboard",
   );
 
-  const deadlineSeeded = useRef(false);
-
-  useEffect(() => {
-    if (!request || deadlineSeeded.current) return;
-    setDeadline(request.responseDeadline);
-    deadlineSeeded.current = true;
-  }, [request]);
-
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: queryKeys.requestForQuotations.all });
   }
-
-  const issue = useMutation({
-    mutationFn: () =>
-      requestForQuotationsApi.issue({
-        privateRequest,
-        id,
-        responseDeadline: toIso(deadline)!,
-      }),
-    onSuccess: async () => {
-      setError("");
-      await refresh();
-    },
-    onError: (err) => setError(getErrorMessage(locale, err)),
-  });
 
   const close = useMutation({
     mutationFn: () => requestForQuotationsApi.close({ privateRequest, id }),
@@ -144,12 +109,11 @@ export default function Page() {
     onError: (err) => setError(getErrorMessage(locale, err)),
   });
 
-  const status = request ? getRequestForQuotationStatus(request) : "draft";
+  const status = request ? getRequestForQuotationStatus(request) : "open";
   const statusMeta = getRequestForQuotationStatusLabel(status, translate);
-  const draft = request ? isRequestDraft(request) : false;
-  const issued = request ? isRequestIssued(request) : false;
+  const open = status === "open";
   const showUnitChoices = !!newMaterial && isRawMaterial(newMaterial.materialType) && newMaterial.unitConversions.length > 0;
-  const canAct = canUpdate && (draft || issued);
+  const canAct = canUpdate && open;
 
   function goBack() {
     router.push(href("/procurement/requests-for-quotation"));
@@ -209,62 +173,36 @@ export default function Page() {
                 <div>
                   <h4 className="text-base font-semibold text-gray-950">{translate("Request details", "بيانات الطلب")}</h4>
                   <p className="text-sm text-gray-500">
-                    {translate("Who created it, when suppliers should reply, and any note on the request.", "من أنشأه، وموعد رد الموردين، وأي ملاحظة على الطلب.")}
+                    {translate("Who created it, and any note on the request.", "من أنشأه، وأي ملاحظة على الطلب.")}
                   </p>
                 </div>
               </div>
 
-              <RequestFacts request={request} showDeadline={!draft || !canUpdate} />
+              <RequestFacts request={request} />
 
               {canAct && (
                 <div className="flex flex-wrap items-end justify-between gap-3 border-t border-gray-100 bg-haze-50/40 px-5 py-4">
                   <div className="flex min-w-0 items-start gap-3">
-                    <span
-                      className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-white ${draft ? "bg-haze-600" : "bg-teal-600"}`}
-                    >
-                      {draft ? <Send size={16} /> : <CircleCheck size={16} />}
+                    <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-white">
+                      <CircleCheck size={16} />
                     </span>
                     <div>
                       <p className="text-sm font-medium text-gray-950">
-                        {draft
-                          ? translate("Ready to send", "جاهز للإرسال")
-                          : translate("Comparison in progress", "المقارنة جارية")}
+                        {translate("Request is open", "الطلب مفتوح")}
                       </p>
                       <p className="mt-0.5 max-w-xl text-sm text-gray-500">
-                        {draft
-                          ? translate(
-                              "Set the reply deadline, then issue the request so suppliers can be invited.",
-                              "حدد آخر موعد للرد، ثم أصدر الطلب لتتمكن من دعوة الموردين.",
-                            )
-                          : translate(
-                              "Close the request when you are done comparing, or cancel it if it is no longer needed.",
-                              "أغلق الطلب بعد انتهاء المقارنة، أو ألغه إذا لم يعد مطلوباً.",
-                            )}
+                        {translate(
+                          "Close the request when you are done comparing, or cancel it if it is no longer needed.",
+                          "أغلق الطلب بعد انتهاء المقارنة، أو ألغه إذا لم يعد مطلوباً.",
+                        )}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-wrap items-end gap-2">
-                    {draft && (
-                      <DateTimePickerInput
-                        label={translate("Response deadline", "آخر موعد للرد")}
-                        placeholder={translate("Select date and time", "اختر التاريخ والوقت")}
-                        value={deadline}
-                        onChange={setDeadline}
-                        className="w-72 max-w-full"
-                        required
-                      />
-                    )}
-                    {draft && (
-                      <Button color="haze" radius="md" loading={issue.isPending} disabled={!deadline} onClick={() => issue.mutate()}>
-                        {translate("Issue", "إصدار")}
-                      </Button>
-                    )}
-                    {issued && (
-                      <Button color="teal" radius="md" loading={close.isPending} onClick={() => close.mutate()}>
-                        {translate("Close", "إغلاق")}
-                      </Button>
-                    )}
+                    <Button color="teal" radius="md" loading={close.isPending} onClick={() => close.mutate()}>
+                      {translate("Close", "إغلاق")}
+                    </Button>
                     <Button
                       color="clay"
                       variant="light"
@@ -322,7 +260,7 @@ export default function Page() {
                           <Table.Th className="w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
                             {translate("Notes", "الملاحظات")}
                           </Table.Th>
-                          {draft && canUpdate && <Table.Th className="w-12" />}
+                          {open && canUpdate && <Table.Th className="w-12" />}
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
@@ -342,7 +280,7 @@ export default function Page() {
                             <Table.Td className="text-sm whitespace-pre-wrap text-gray-600">
                               {item.notes?.trim() ? item.notes : <span className="text-gray-400">-</span>}
                             </Table.Td>
-                            {draft && canUpdate && (
+                            {open && canUpdate && (
                               <Table.Td>
                                 <Button
                                   variant="subtle"
@@ -367,7 +305,7 @@ export default function Page() {
                 )}
               </div>
 
-              {draft && canUpdate && (
+              {open && canUpdate && (
                 <div className="border-t border-gray-100 px-5 py-4">
                   <p className="mb-3 text-sm font-medium text-gray-900">{translate("Add a material", "إضافة مادة")}</p>
                   <div className="grid items-end gap-3 lg:grid-cols-[minmax(0,1.4fr)_8rem_10rem_minmax(0,1fr)_auto]">
@@ -439,7 +377,7 @@ export default function Page() {
               )}
             </section>
 
-            {!draft && <SupplierQuotations request={request} canUpdate={canUpdate} />}
+            <SupplierQuotations request={request} canUpdate={canUpdate} />
             <ComparisonTable request={request} />
           </div>
         )
@@ -448,13 +386,7 @@ export default function Page() {
   );
 }
 
-function RequestFacts({
-  request,
-  showDeadline,
-}: {
-  request: RequestForQuotationDetailed;
-  showDeadline: boolean;
-}) {
+function RequestFacts({ request }: { request: RequestForQuotationDetailed }) {
   const { locale, translate } = useI18n();
 
   const facts: { label: string; value: ReactNode }[] = [
@@ -469,20 +401,6 @@ function RequestFacts({
     },
   ];
 
-  if (showDeadline) {
-    facts.push({
-      label: translate("Response deadline", "آخر موعد للرد"),
-      value: request.responseDeadline ? (
-        <span className="inline-flex items-center gap-1.5">
-          <CalendarClock size={14} className="text-haze-600" />
-          {formatDateAndTime(request.responseDeadline, locale)}
-        </span>
-      ) : (
-        <span className="text-gray-400">-</span>
-      ),
-    });
-  }
-
   facts.push(
     {
       label: translate("Created", "تاريخ الإنشاء"),
@@ -494,12 +412,6 @@ function RequestFacts({
     },
   );
 
-  if (request.issuedAt) {
-    facts.push({
-      label: translate("Issued", "تاريخ الإصدار"),
-      value: formatDateAndTime(request.issuedAt, locale),
-    });
-  }
   if (request.closedAt) {
     facts.push({
       label: translate("Closed", "تاريخ الإغلاق"),

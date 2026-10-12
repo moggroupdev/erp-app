@@ -7,7 +7,6 @@ import type {
   RequestForQuotationDetailed,
   RequestForQuotationItem,
   RequestForQuotationListItem,
-  SubmitSupplierQuotationDto,
   SupplierQuotation,
   SupplierQuotationItem,
   SupplierQuotationItemOption,
@@ -114,22 +113,6 @@ const requestForQuotationsApi = {
     });
   },
 
-  async issue({
-    privateRequest,
-    id,
-    responseDeadline,
-  }: {
-    privateRequest: PrivateRequest;
-    id: string;
-    responseDeadline: string;
-  }) {
-    return await privateRequest<RequestForQuotation>({
-      method: "POST",
-      url: `request-for-quotations/${id}/issue`,
-      data: { responseDeadline },
-    });
-  },
-
   async close({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
     return await privateRequest<RequestForQuotation>({
       method: "POST",
@@ -181,39 +164,6 @@ const requestForQuotationsApi = {
       method: "PATCH",
       url: `request-for-quotations/${id}/supplier-quotations/${quotationId}`,
       data: dto,
-    });
-  },
-
-  async submitQuotation({
-    privateRequest,
-    id,
-    quotationId,
-    dto,
-  }: {
-    privateRequest: PrivateRequest;
-    id: string;
-    quotationId: string;
-    dto: SubmitSupplierQuotationDto;
-  }) {
-    return await privateRequest<SupplierQuotation>({
-      method: "POST",
-      url: `request-for-quotations/${id}/supplier-quotations/${quotationId}/submit`,
-      data: dto,
-    });
-  },
-
-  async declineQuotation({
-    privateRequest,
-    id,
-    quotationId,
-  }: {
-    privateRequest: PrivateRequest;
-    id: string;
-    quotationId: string;
-  }) {
-    return await privateRequest<SupplierQuotation>({
-      method: "POST",
-      url: `request-for-quotations/${id}/supplier-quotations/${quotationId}/decline`,
     });
   },
 

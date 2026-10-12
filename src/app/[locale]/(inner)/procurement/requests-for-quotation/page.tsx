@@ -101,8 +101,7 @@ export default function Page() {
   }, [activePage, debouncedKeyword, status]);
 
   const statusOptions = [
-    { value: "draft", label: translate("Draft", "مسودة") },
-    { value: "issued", label: translate("Issued", "صادر") },
+    { value: "open", label: translate("Open", "مفتوح") },
     { value: "closed", label: translate("Closed", "مغلق") },
     { value: "cancelled", label: translate("Cancelled", "ملغي") },
   ];
@@ -183,7 +182,6 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
-                    <Table.Th>{translate("Response deadline", "آخر موعد للرد")}</Table.Th>
                     <Table.Th>{translate("Created by", "أنشأه")}</Table.Th>
                     <Table.Th>{translate("Created", "تاريخ الإنشاء")}</Table.Th>
                   </Table.Tr>
@@ -208,9 +206,6 @@ export default function Page() {
                           <Badge variant="light" color={statusMeta.color} radius="md">
                             {statusMeta.label}
                           </Badge>
-                        </Table.Td>
-                        <Table.Td>
-                          {request.responseDeadline ? formatDateAndTime(request.responseDeadline, locale) : <EmptyValue />}
                         </Table.Td>
                         <Table.Td>{request.createdBy?.name ?? <EmptyValue />}</Table.Td>
                         <Table.Td>{formatDateAndTime(request.createdAt, locale)}</Table.Td>
