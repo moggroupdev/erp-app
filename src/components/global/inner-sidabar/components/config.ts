@@ -182,6 +182,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.PRINT_SUPPLIER_QUOTATION_REQUEST,
       },
       {
+        label: { en: "Requests for Quotation", ar: "طلبات عروض الأسعار" },
+        href: "/procurement/requests-for-quotation",
+        icon: ClipboardList,
+        requiredPermission: PERMISSIONS.READ_REQUEST_FOR_QUOTATIONS,
+      },
+      {
         label: { en: "Material Purchase Requisitions", ar: "طلبات شراء الخامات" },
         href: "/procurement/material-requisitions",
         icon: ClipboardList,

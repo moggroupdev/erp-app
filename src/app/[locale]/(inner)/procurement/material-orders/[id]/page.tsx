@@ -32,6 +32,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
+import { EmptyValue } from "@/components/ui/entity-details";
 import PrintDocument from "@/components/ui/print-document";
 import MaterialPurchaseOrderPrintDocument from "@/components/documents/procurement/mpos/material-purchase-order-print-document";
 import OrderDetails from "./components/order-details";
@@ -196,6 +197,7 @@ export default function Page() {
                           {translate(`Subtotal (${translation.currency})`, `المجموع الفرعي (${translation.currency})`)}
                         </Table.Th>
                         <Table.Th>{translate("Requisitions", "طلبات الشراء")}</Table.Th>
+                        <Table.Th>{translate("Quotation", "عرض السعر")}</Table.Th>
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -266,6 +268,19 @@ export default function Page() {
                                       allocations={item.requisitionAllocations ?? []}
                                     />
                                   </Table.Td>
+                                  <Table.Td>
+                                    {item.supplierQuotation ? (
+                                      <ProtectedLink
+                                        permission={PERMISSIONS.READ_REQUEST_FOR_QUOTATIONS}
+                                        href={`/procurement/requests-for-quotation/${item.supplierQuotation.requestForQuotationId}`}
+                                        className="font-mono hover:underline"
+                                      >
+                                        {item.supplierQuotation.requestForQuotationCode}
+                                      </ProtectedLink>
+                                    ) : (
+                                      <EmptyValue />
+                                    )}
+                                  </Table.Td>
                                 </Table.Tr>
                               </>
                             )}
@@ -280,12 +295,14 @@ export default function Page() {
                         </Table.Th>
                         <Table.Th>{formatMoney(subtotal)}</Table.Th>
                         <Table.Th />
+                        <Table.Th />
                       </Table.Tr>
                       <Table.Tr className="font-medium text-gray-800">
                         <Table.Th colSpan={7} className="text-end">
                           {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
                         </Table.Th>
                         <Table.Th>{formatMoney(vat)}</Table.Th>
+                        <Table.Th />
                         <Table.Th />
                       </Table.Tr>
                       <Table.Tr className="font-semibold text-gray-900">
@@ -296,6 +313,7 @@ export default function Page() {
                           )}
                         </Table.Th>
                         <Table.Th>{formatMoney(grandTotal)}</Table.Th>
+                        <Table.Th />
                         <Table.Th />
                       </Table.Tr>
                     </Table.Tfoot>

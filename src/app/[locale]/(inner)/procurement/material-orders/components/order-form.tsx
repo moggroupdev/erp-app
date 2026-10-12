@@ -45,6 +45,7 @@ import {
 } from "@/lib/constants/enums/production-sub-departments";
 import LinkRequisitionsModal, { type AllocationDraft } from "../create/components/link-requisitions-modal";
 import AddFromRequisitionsModal, { type AddedMaterialLine } from "../create/components/add-from-requisitions-modal";
+import QuotationItemSelect from "./quotation-item-select";
 import { getRequisitionStatus } from "../../material-requisitions/helpers";
 import type { MaterialPurchaseOrderDetailed } from "@/types/material-purchase-order";
 
@@ -60,6 +61,7 @@ const ITEM_COLUMN_WIDTHS = {
   unitPrice: { width: "8.5rem", minWidth: undefined },
   lineTotal: { width: "9rem", minWidth: undefined },
   requisitions: { width: "18rem", minWidth: undefined },
+  quotation: { width: "14rem", minWidth: undefined },
   notes: { width: "12rem", minWidth: undefined },
   remove: { width: "3rem", minWidth: undefined },
 } as const;
@@ -100,6 +102,7 @@ type ItemDraftRow = {
   unitPrice: number | "";
   notes: string;
   allocations: AllocationDraft[];
+  supplierQuotationItemId: string | null;
 };
 
 function createRowKey() {
@@ -145,6 +148,7 @@ function ItemRow({
   onLinkRequisitions,
   onRemoveAllocation,
   invalid,
+  supplierId,
 }: {
   row: ItemDraftRow;
   index: number;
@@ -155,6 +159,7 @@ function ItemRow({
   onLinkRequisitions: (key: string) => void;
   onRemoveAllocation: (rowKey: string, requisitionItemId: string) => void;
   invalid: boolean;
+  supplierId: string | null;
 }) {
   const { translate } = useI18n();
   const quantity = typeof row.quantity === "number" ? row.quantity : null;
@@ -298,6 +303,22 @@ function ItemRow({
           </ul>
         </div>
       </Table.Td>
+      <Table.Td className="min-w-52 align-top!">
+        <QuotationItemSelect
+          supplierId={supplierId}
+          materialCode={row.materialCode}
+          unitOfMeasurement={row.unitOfMeasurement}
+          unitOfMeasurementSelected={row.unitOfMeasurementSelected}
+          unitConversions={row.unitConversions}
+          value={row.supplierQuotationItemId}
+          onChange={({ id, unitPrice }) =>
+            onUpdate(row.key, {
+              supplierQuotationItemId: id,
+              ...(unitPrice != null ? { unitPrice } : {}),
+            })
+          }
+        />
+      </Table.Td>
       <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
         <TextInput
           value={row.notes}
@@ -350,6 +371,7 @@ function draftFromOrder(order: MaterialPurchaseOrderDetailed) {
     quantity: Number(item.quantityOrdered),
     unitPrice: Number(item.unitPrice),
     notes: item.notes ?? "",
+    supplierQuotationItemId: item.supplierQuotationItemId ?? null,
     allocations: (item.requisitionAllocations ?? []).map((allocation) => ({
       materialPurchaseRequisitionItemId: allocation.materialPurchaseRequisitionItemId,
       requisitionId: allocation.requisition.id,
@@ -472,6 +494,7 @@ export default function OrderForm({
           quantity: Number(item.quantityRemaining),
           unitPrice,
           notes: item.notes ?? "",
+          supplierQuotationItemId: null,
           allocations: [
             {
               materialPurchaseRequisitionItemId: item.id,
@@ -510,6 +533,7 @@ export default function OrderForm({
           quantityOrdered: Number(row.quantity),
           unitPrice: Number(row.unitPrice),
           notes: row.notes.trim() || null,
+          supplierQuotationItemId: row.supplierQuotationItemId,
           requisitionAllocations,
         };
       });
@@ -663,6 +687,7 @@ export default function OrderForm({
             quantity: line.quantity,
             unitPrice: "",
             notes: "",
+            supplierQuotationItemId: null,
             allocations: line.allocations,
           });
         }
@@ -869,7 +894,10 @@ export default function OrderForm({
 
         <OrderDetailsFields
           supplierId={supplierId}
-          setSupplierId={setSupplierId}
+          setSupplierId={(next) => {
+            setSupplierId(next);
+            setRows((current) => current.map((row) => ({ ...row, supplierQuotationItemId: null })));
+          }}
           onSupplierSelect={() => setValidationError("")}
           deliveryLocation={deliveryLocation}
           setDeliveryLocation={setDeliveryLocation}
@@ -969,6 +997,12 @@ export default function OrderForm({
                       </Table.Th>
                       <Table.Th
                         className="text-xs font-medium tracking-wide text-gray-500 uppercase"
+                        style={{ minWidth: ITEM_COLUMN_WIDTHS.quotation.minWidth }}
+                      >
+                        {translate("Quotation", "عرض السعر")}
+                      </Table.Th>
+                      <Table.Th
+                        className="text-xs font-medium tracking-wide text-gray-500 uppercase"
                         style={{ minWidth: ITEM_COLUMN_WIDTHS.notes.minWidth }}
                       >
                         {translate("Notes", "الملاحظات")}
@@ -989,6 +1023,7 @@ export default function OrderForm({
                         onLinkRequisitions={setLinkRowKey}
                         onRemoveAllocation={removeAllocation}
                         invalid={row.key === invalidRowKey}
+                        supplierId={supplierId}
                       />
                     ))}
                   </Table.Tbody>
@@ -1004,6 +1039,7 @@ export default function OrderForm({
                       <Table.Td />
                       <Table.Td />
                       <Table.Td />
+                      <Table.Td />
                     </Table.Tr>
                     <Table.Tr className="h-9">
                       <Table.Td />
@@ -1016,6 +1052,7 @@ export default function OrderForm({
                       <Table.Td />
                       <Table.Td />
                       <Table.Td />
+                      <Table.Td />
                     </Table.Tr>
                     <Table.Tr className="h-9">
                       <Table.Td />
@@ -1025,6 +1062,7 @@ export default function OrderForm({
                       <Table.Td>
                         <span className="text-sm font-semibold text-gray-950">{formatMoney(grandTotal)}</span>
                       </Table.Td>
+                      <Table.Td />
                       <Table.Td />
                       <Table.Td />
                       <Table.Td />

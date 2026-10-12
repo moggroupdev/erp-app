@@ -139,6 +139,15 @@ export const queryKeys = {
         excludeMaterialPurchaseOrderId ?? null,
       ] as const,
   },
+  requestForQuotations: {
+    all: ["request-for-quotations"] as const,
+    lists: () => [...queryKeys.requestForQuotations.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.requestForQuotations.lists(), filters] as const,
+    details: () => [...queryKeys.requestForQuotations.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.requestForQuotations.details(), id] as const,
+    quotationItems: (supplierId: string, materialCode?: string) =>
+      [...queryKeys.requestForQuotations.all, "quotation-items", supplierId, materialCode ?? null] as const,
+  },
   reports: {
     all: ["reports"] as const,
     materials: {

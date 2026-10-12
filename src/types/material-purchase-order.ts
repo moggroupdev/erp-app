@@ -98,6 +98,11 @@ export type MaterialPurchaseOrderItem = {
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
+  supplierQuotationItemId: string | null;
+  supplierQuotation: {
+    requestForQuotationId: string;
+    requestForQuotationCode: string;
+  } | null;
   material: PurchaseMaterialWithUnitConversion;
   /** Accepted qty across receipts, in the order line's selected unit. */
   quantityReceived?: number;
@@ -135,6 +140,7 @@ export type CreateMaterialPurchaseOrderItemDto = {
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
+  supplierQuotationItemId?: string | null;
   requisitionAllocations: CreateMaterialPurchaseOrderItemRequisitionAllocationDto[];
 };
 
