@@ -11,6 +11,7 @@ import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
 import CopyButton from "@/components/ui/copy-button";
 import ActionsMenu from "@/components/ui/actions-menu";
+import DeleteModal from "@/components/ui/delete-modal";
 import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -44,6 +45,8 @@ export default function Page() {
 
   const [error, setError] = useState("");
   const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
+  const [closeOpened, { open: openClose, close: closeCloseModal }] = useDisclosure(false);
+  const [cancelOpened, { open: openCancel, close: closeCancelModal }] = useDisclosure(false);
 
   const {
     data: request,
@@ -64,14 +67,18 @@ export default function Page() {
 
   const close = useMutation({
     mutationFn: () => requestForQuotationsApi.close({ privateRequest, id }),
-    onSuccess: refresh,
-    onError: (err) => setError(getErrorMessage(locale, err)),
+    onSuccess: async () => {
+      closeCloseModal();
+      await refresh();
+    },
   });
 
   const cancel = useMutation({
     mutationFn: () => requestForQuotationsApi.cancel({ privateRequest, id }),
-    onSuccess: refresh,
-    onError: (err) => setError(getErrorMessage(locale, err)),
+    onSuccess: async () => {
+      closeCancelModal();
+      await refresh();
+    },
   });
 
   const deleteItem = useMutation({
@@ -84,7 +91,6 @@ export default function Page() {
   const statusMeta = getRequestForQuotationStatusLabel(status, translate);
   const open = status === "open";
   const canAct = canUpdate && open;
-  const statusBusy = close.isPending || cancel.isPending;
 
   function goBack() {
     router.push(href("/procurement/requests-for-quotation"));
@@ -151,16 +157,41 @@ export default function Page() {
 
               <RequestFacts request={request} />
 
-              <RequestStatusBar
-                status={status}
-                canAct={canAct}
-                busy={statusBusy}
-                onClose={() => close.mutate()}
-                onCancel={() => {
-                  if (window.confirm(translate("Cancel this request?", "إلغاء هذا الطلب؟"))) cancel.mutate();
-                }}
-              />
+              <RequestStatusBar status={status} canAct={canAct} onClose={openClose} onCancel={openCancel} />
             </section>
+
+            <DeleteModal
+              opened={closeOpened}
+              onClose={() => {
+                closeCloseModal();
+                close.reset();
+              }}
+              title={translate("Close this request?", "إغلاق هذا الطلب؟")}
+              subTitle={translate(
+                "Materials and quotations can no longer be changed after closing.",
+                "لن يمكن تعديل المواد أو عروض الأسعار بعد الإغلاق.",
+              )}
+              warning={translate("This action cannot be undone.", "هذا الإجراء لا يمكن التراجع عنه.")}
+              action={() => close.mutate()}
+              loading={close.isPending}
+              error={close.error ? getErrorMessage(locale, close.error) : ""}
+            />
+            <DeleteModal
+              opened={cancelOpened}
+              onClose={() => {
+                closeCancelModal();
+                cancel.reset();
+              }}
+              title={translate("Cancel this request?", "إلغاء هذا الطلب؟")}
+              subTitle={translate(
+                "The request will be cancelled and can no longer be changed.",
+                "سيتم إلغاء الطلب ولن يمكن تعديله بعد ذلك.",
+              )}
+              warning={translate("This action cannot be undone.", "هذا الإجراء لا يمكن التراجع عنه.")}
+              action={() => cancel.mutate()}
+              loading={cancel.isPending}
+              error={cancel.error ? getErrorMessage(locale, cancel.error) : ""}
+            />
 
             <section className="overflow-hidden rounded-2xl bg-white">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
@@ -254,7 +285,6 @@ export default function Page() {
                   </div>
                 )}
               </div>
-
             </section>
 
             <SupplierQuotations request={request} canUpdate={canUpdate} />
@@ -278,13 +308,11 @@ export default function Page() {
 function RequestStatusBar({
   status,
   canAct,
-  busy,
   onClose,
   onCancel,
 }: {
   status: RequestForQuotationStatus;
   canAct: boolean;
-  busy: boolean;
   onClose: () => void;
   onCancel: () => void;
 }) {
@@ -292,7 +320,6 @@ function RequestStatusBar({
 
   const copy = {
     open: {
-      surface: "bg-haze-50/70",
       icon: "bg-haze-600 text-white",
       Icon: CircleCheck,
       title: translate("Request is open", "الطلب مفتوح"),
@@ -302,17 +329,12 @@ function RequestStatusBar({
       ),
     },
     closed: {
-      surface: "bg-teal-50/70",
       icon: "bg-teal-600 text-white",
       Icon: Lock,
       title: translate("Request is closed", "الطلب مغلق"),
-      body: translate(
-        "Materials and quotations can no longer be changed.",
-        "لم يعد بالإمكان تعديل المواد أو عروض الأسعار.",
-      ),
+      body: translate("Materials and quotations can no longer be changed.", "لم يعد بالإمكان تعديل المواد أو عروض الأسعار."),
     },
     cancelled: {
-      surface: "bg-clay-50/70",
       icon: "bg-clay-600 text-white",
       Icon: Ban,
       title: translate("Request is cancelled", "الطلب ملغي"),
@@ -323,7 +345,7 @@ function RequestStatusBar({
   const Icon = copy.Icon;
 
   return (
-    <div className={`flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-5 py-4 ${copy.surface}`}>
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-5 py-4">
       <div className="flex min-w-0 items-start gap-3">
         <span className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl ${copy.icon}`}>
           <Icon size={16} />
@@ -336,11 +358,11 @@ function RequestStatusBar({
 
       {canAct && (
         <ActionsMenu>
-          <Menu.Item color="teal" leftSection={<CircleCheck size={14} />} disabled={busy} onClick={onClose}>
+          <Menu.Item leftSection={<CircleCheck size={14} />} onClick={onClose}>
             {translate("Close request", "إغلاق الطلب")}
           </Menu.Item>
           <Menu.Divider />
-          <Menu.Item color="clay" leftSection={<Ban size={14} />} disabled={busy} onClick={onCancel}>
+          <Menu.Item leftSection={<Ban size={14} />} onClick={onCancel}>
             {translate("Cancel request", "إلغاء الطلب")}
           </Menu.Item>
         </ActionsMenu>
