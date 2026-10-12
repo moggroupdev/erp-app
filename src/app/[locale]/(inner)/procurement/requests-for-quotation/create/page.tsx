@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Button, NumberInput, Table, Textarea, TextInput } from "@mantine/core";
-import { ArrowLeft, CalendarClock, ClipboardList, Package, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, CalendarClock, Package, Plus, Trash2 } from "lucide-react";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import ErrorAlert from "@/components/ui/error-alert";
 import DataSelect from "@/components/ui/data-select";
@@ -90,6 +90,14 @@ export default function Page() {
 
   function updateRow(key: string, patch: Partial<ItemDraft>) {
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
+  }
+
+  function addRow() {
+    setRows((current) => [...current, emptyRow()]);
+  }
+
+  function removeRow(key: string) {
+    setRows((current) => (current.length <= 1 ? current : current.filter((row) => row.key !== key)));
   }
 
   function applyMaterial(key: string, material: MaterialWithUnitConversionsSelection | null) {
@@ -217,82 +225,73 @@ export default function Page() {
         </section>
 
         <section className="overflow-hidden rounded-2xl bg-white">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
-            <div className="flex items-center gap-3">
-              <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
-                <Package size={18} />
-              </span>
-              <div>
-                <h4 className="text-base font-semibold text-gray-950">{translate("Materials", "المواد")}</h4>
-                <p className="text-sm text-gray-500">
-                  {translate("Each row is a material you want suppliers to price.", "كل صف مادة تريد من الموردين تسعيرها.")}
-                </p>
-              </div>
+          <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
+            <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
+              <Package size={18} />
+            </span>
+            <div>
+              <h4 className="text-base font-semibold text-gray-950">{translate("Materials", "المواد")}</h4>
+              <p className="text-sm text-gray-500">
+                {translate("Each row is a material you want suppliers to price.", "كل صف مادة تريد من الموردين تسعيرها.")}
+              </p>
             </div>
-            <Button
-              type="button"
-              color="haze"
-              leftSection={<Plus size={14} />}
-              onClick={() => setRows((current) => [...current, emptyRow()])}
-            >
-              {translate("Add material", "إضافة مادة")}
-            </Button>
           </div>
 
           <div className="px-5 py-5">
-            {rows.length === 0 ? (
-              <div className="bg-haze-50/40 flex flex-col items-center justify-center gap-4 rounded-xl px-6 py-12 text-center">
-                <div className="bg-haze-50 text-haze-700 flex h-14 w-14 items-center justify-center rounded-2xl">
-                  <ClipboardList size={26} strokeWidth={1.75} />
-                </div>
-                <div className="flex max-w-md flex-col gap-1.5">
-                  <h5 className="text-base font-semibold text-gray-900">
-                    {translate("No materials yet", "لا توجد مواد بعد")}
-                  </h5>
-                  <p className="text-sm leading-7 text-gray-500">
-                    {translate("Add the materials you want quoted.", "أضف المواد التي تريد عرض سعر لها.")}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table withColumnBorders className="w-full min-w-184" horizontalSpacing="xs" verticalSpacing="xs">
-                  <Table.Thead className="bg-gray-50 whitespace-nowrap">
-                    <Table.Tr className="h-9">
-                      <Table.Th className="w-12 text-center! text-gray-500">#</Table.Th>
-                      <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Material", "المادة")}
-                      </Table.Th>
-                      <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Quantity", "الكمية")}
-                      </Table.Th>
-                      <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Unit", "الوحدة")}
-                      </Table.Th>
-                      <Table.Th className="w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                        {translate("Notes", "الملاحظات")}
-                      </Table.Th>
-                      <Table.Th className="w-12" />
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {rows.map((row, index) => (
-                      <ItemRow
-                        key={row.key}
-                        row={row}
-                        index={index}
-                        locale={locale}
-                        usedCodes={usedCodes}
-                        canRemove
-                        onMaterialSelect={applyMaterial}
-                        onUpdate={updateRow}
-                        onRemove={(key) => setRows((current) => current.filter((item) => item.key !== key))}
-                      />
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              </div>
-            )}
+            <div className="overflow-x-auto rounded">
+              <Table withColumnBorders className="w-full min-w-184" horizontalSpacing="xs" verticalSpacing="xs">
+                <Table.Thead className="bg-gray-50 whitespace-nowrap">
+                  <Table.Tr className="h-9">
+                    <Table.Th className="w-12 text-center! text-gray-500">#</Table.Th>
+                    <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Material", "المادة")}
+                    </Table.Th>
+                    <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Quantity", "الكمية")}
+                    </Table.Th>
+                    <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Unit", "الوحدة")}
+                    </Table.Th>
+                    <Table.Th className="w-60 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Notes", "الملاحظات")}
+                    </Table.Th>
+                    <Table.Th className="w-12" />
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {rows.map((row, index) => (
+                    <ItemRow
+                      key={row.key}
+                      row={row}
+                      index={index}
+                      locale={locale}
+                      usedCodes={usedCodes}
+                      canRemove={rows.length > 1}
+                      onMaterialSelect={applyMaterial}
+                      onUpdate={updateRow}
+                      onRemove={removeRow}
+                    />
+                  ))}
+                </Table.Tbody>
+                <Table.Tfoot className="bg-gray-50">
+                  <Table.Tr>
+                    <Table.Td />
+                    <Table.Td colSpan={5}>
+                      <Button
+                        type="button"
+                        variant="light"
+                        color="haze"
+                        size="xs"
+                        leftSection={<Plus size={14} />}
+                        onClick={addRow}
+                      >
+                        {translate("Add material row", "إضافة صف مادة")}
+                      </Button>
+                    </Table.Td>
+                  </Table.Tr>
+                </Table.Tfoot>
+              </Table>
+            </div>
           </div>
         </section>
 
