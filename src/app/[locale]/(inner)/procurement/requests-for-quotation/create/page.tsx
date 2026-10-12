@@ -80,13 +80,13 @@ export default function Page() {
   const [rows, setRows] = useState<ItemDraft[]>([emptyRow()]);
   const [error, setError] = useState("");
 
-  const isDirty = notes.trim() !== "" || responseDeadline !== null || rows.some((row) => row.materialCode || row.quantity !== "" || row.notes.trim() !== "");
+  const isDirty =
+    notes.trim() !== "" ||
+    responseDeadline !== null ||
+    rows.some((row) => row.materialCode || row.quantity !== "" || row.notes.trim() !== "");
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
 
-  const usedCodes = useMemo(
-    () => rows.map((row) => row.materialCode).filter((code): code is string => !!code),
-    [rows],
-  );
+  const usedCodes = useMemo(() => rows.map((row) => row.materialCode).filter((code): code is string => !!code), [rows]);
 
   function updateRow(key: string, patch: Partial<ItemDraft>) {
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...patch } : row)));
@@ -183,7 +183,7 @@ export default function Page() {
       >
         <section className="overflow-hidden rounded-2xl bg-white">
           <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-            <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+            <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
               <CalendarClock size={18} />
             </span>
             <div>
@@ -212,7 +212,6 @@ export default function Page() {
               onChange={(event) => setNotes(event.currentTarget.value)}
               radius="md"
               autosize
-              minRows={2}
             />
           </div>
         </section>
@@ -220,32 +219,36 @@ export default function Page() {
         <section className="overflow-hidden rounded-2xl bg-white">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
             <div className="flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+              <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
                 <Package size={18} />
               </span>
               <div>
                 <h4 className="text-base font-semibold text-gray-950">{translate("Materials", "المواد")}</h4>
                 <p className="text-sm text-gray-500">
-                  {translate(
-                    "Each row is a material you want suppliers to price.",
-                    "كل صف مادة تريد من الموردين تسعيرها.",
-                  )}
+                  {translate("Each row is a material you want suppliers to price.", "كل صف مادة تريد من الموردين تسعيرها.")}
                 </p>
               </div>
             </div>
-            <Button type="button" color="haze" leftSection={<Plus size={14} />} onClick={() => setRows((current) => [...current, emptyRow()])}>
+            <Button
+              type="button"
+              color="haze"
+              leftSection={<Plus size={14} />}
+              onClick={() => setRows((current) => [...current, emptyRow()])}
+            >
               {translate("Add material", "إضافة مادة")}
             </Button>
           </div>
 
           <div className="px-5 py-5">
             {rows.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-haze-50/40 px-6 py-12 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-haze-50 text-haze-700">
+              <div className="bg-haze-50/40 flex flex-col items-center justify-center gap-4 rounded-xl px-6 py-12 text-center">
+                <div className="bg-haze-50 text-haze-700 flex h-14 w-14 items-center justify-center rounded-2xl">
                   <ClipboardList size={26} strokeWidth={1.75} />
                 </div>
                 <div className="flex max-w-md flex-col gap-1.5">
-                  <h5 className="text-base font-semibold text-gray-900">{translate("No materials yet", "لا توجد مواد بعد")}</h5>
+                  <h5 className="text-base font-semibold text-gray-900">
+                    {translate("No materials yet", "لا توجد مواد بعد")}
+                  </h5>
                   <p className="text-sm leading-7 text-gray-500">
                     {translate("Add the materials you want quoted.", "أضف المواد التي تريد عرض سعر لها.")}
                   </p>
@@ -340,7 +343,7 @@ function ItemRow({
   return (
     <Table.Tr>
       <Table.Td className="pt-2 text-center align-top! text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-      <Table.Td className="align-top! transition-colors focus-within:bg-haze-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 align-top! transition-colors">
         <SelectMaterial
           value={row.materialCode}
           setValue={(next) => {
@@ -356,7 +359,7 @@ function ItemRow({
           withBrowseModal
         />
       </Table.Td>
-      <Table.Td className="align-top! transition-colors focus-within:bg-haze-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 align-top! transition-colors">
         <NumberInput
           value={row.quantity}
           onChange={(value) => onUpdate(row.key, { quantity: value === "" ? "" : Number(value) })}
@@ -369,7 +372,7 @@ function ItemRow({
           {...cellField}
         />
       </Table.Td>
-      <Table.Td className="align-top! transition-colors focus-within:bg-haze-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 align-top! transition-colors">
         {showUnitSelect(row) ? (
           <DataSelect
             value={row.unitOfMeasurementSelected}
@@ -391,7 +394,7 @@ function ItemRow({
           </span>
         )}
       </Table.Td>
-      <Table.Td className="align-top! transition-colors focus-within:bg-haze-50/60">
+      <Table.Td className="focus-within:bg-haze-50/60 align-top! transition-colors">
         <TextInput
           value={row.notes}
           onChange={(event) => onUpdate(row.key, { notes: event.currentTarget.value })}

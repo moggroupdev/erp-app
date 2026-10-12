@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
-import { CircleCheck, ClipboardList, Package, Plus, Send, Trash2 } from "lucide-react";
-import LayoutBox from "@/components/ui/layout-box";
+import { ArrowLeft, CalendarClock, CircleCheck, ClipboardList, FileText, Package, Plus, Send, Trash2 } from "lucide-react";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
+import CopyButton from "@/components/ui/copy-button";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import DataSelect from "@/components/ui/data-select";
 import ErrorAlert from "@/components/ui/error-alert";
-import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import { CreatorLink } from "@/components/ui/entity-details";
 import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -26,8 +26,9 @@ import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
+import type { RequestForQuotationDetailed } from "@/types/request-for-quotation";
 import {
   getRequestForQuotationStatus,
   getRequestForQuotationStatusLabel,
@@ -46,12 +47,13 @@ function toIso(value: string | null) {
 }
 
 export default function Page() {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
+  const href = useLocaleHref();
+  const router = useRouter();
   const { id } = useParams<{ id: string }>();
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
   const canUpdate = useHasPermission(PERMISSIONS.UPDATE_REQUEST_FOR_QUOTATION);
-  useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
   const [error, setError] = useState("");
   const [deadline, setDeadline] = useState<string | null>(null);
@@ -65,6 +67,11 @@ export default function Page() {
     queryFn: ({ signal }) => requestForQuotationsApi.get({ privateRequest, id, signal }),
     staleTime: staleTimes.requestForQuotations,
   });
+
+  useDocumentTitle(
+    request?.code ?? translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+    "dashboard",
+  );
 
   const deadlineSeeded = useRef(false);
 
@@ -142,42 +149,45 @@ export default function Page() {
   const draft = request ? isRequestDraft(request) : false;
   const issued = request ? isRequestIssued(request) : false;
   const showUnitChoices = !!newMaterial && isRawMaterial(newMaterial.materialType) && newMaterial.unitConversions.length > 0;
+  const canAct = canUpdate && (draft || issued);
 
-  const rows: DetailRow[] = request
-    ? [
-        { key: translate("Code", "الكود"), value: request.code, mono: true, copyText: request.code },
-        {
-          key: translate("Status", "الحالة"),
-          value: (
-            <Badge variant="light" color={statusMeta.color} radius="md">
-              {statusMeta.label}
-            </Badge>
-          ),
-        },
-        {
-          key: translate("Response deadline", "آخر موعد للرد"),
-          value: request.responseDeadline ? formatDateAndTime(request.responseDeadline, locale) : <EmptyValue />,
-        },
-        {
-          key: translate("Created", "تاريخ الإنشاء"),
-          value: formatDateAndTime(request.createdAt, locale),
-        },
-        { key: translate("Created by", "أنشأه"), value: <CreatorLink creator={request.createdBy} /> },
-        {
-          key: translate("Notes", "الملاحظات"),
-          value: request.notes ? <span className="whitespace-pre-wrap font-normal">{request.notes}</span> : <EmptyValue />,
-        },
-      ]
-    : [];
+  function goBack() {
+    router.push(href("/procurement/requests-for-quotation"));
+  }
 
   return (
-    <LayoutBox
-      header={{
-        backLink: true,
-        title: request?.code ?? translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
-      }}
-    >
+    <div className="flex min-h-full flex-col gap-5">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Button
+            type="button"
+            variant="light"
+            color="dark"
+            radius={20}
+            p={0}
+            h={40}
+            w={40}
+            onClick={goBack}
+            aria-label={translation.back}
+            title={translation.back}
+          >
+            <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0deg", "180deg")})` }} />
+          </Button>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="truncate">{request?.code ?? translate(PAGE_TITLE.en, PAGE_TITLE.ar)}</h1>
+              {request && (
+                <Badge variant="light" color={statusMeta.color} radius="md">
+                  {statusMeta.label}
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-gray-500">{translate(PAGE_TITLE.en, PAGE_TITLE.ar)}</p>
+          </div>
+        </div>
+        <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="white" />
+      </header>
+
       {isFetching && !request ? (
         <LoadingSection message={translate("Loading request...", "جاري تحميل الطلب...")} />
       ) : loadError ? (
@@ -190,31 +200,44 @@ export default function Page() {
         request && (
           <div className="flex flex-col gap-6">
             {error && <ErrorAlert error={error} />}
-            <EntityDetails title={request.code} icon={Package} rows={rows} />
 
-            {canUpdate && (draft || issued) && (
-              <section className="overflow-hidden rounded-2xl bg-white">
-                <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
-                  <div className="flex items-center gap-3">
+            <section className="overflow-hidden rounded-2xl bg-white">
+              <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
+                <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+                  <FileText size={18} />
+                </span>
+                <div>
+                  <h4 className="text-base font-semibold text-gray-950">{translate("Request details", "بيانات الطلب")}</h4>
+                  <p className="text-sm text-gray-500">
+                    {translate("Who created it, when suppliers should reply, and any note on the request.", "من أنشأه، وموعد رد الموردين، وأي ملاحظة على الطلب.")}
+                  </p>
+                </div>
+              </div>
+
+              <RequestFacts request={request} showDeadline={!draft || !canUpdate} />
+
+              {canAct && (
+                <div className="flex flex-wrap items-end justify-between gap-3 border-t border-gray-100 bg-haze-50/40 px-5 py-4">
+                  <div className="flex min-w-0 items-start gap-3">
                     <span
-                      className={`flex size-10 items-center justify-center rounded-2xl text-white ${draft ? "bg-haze-600" : "bg-teal-600"}`}
+                      className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl text-white ${draft ? "bg-haze-600" : "bg-teal-600"}`}
                     >
-                      {draft ? <Send size={18} /> : <CircleCheck size={18} />}
+                      {draft ? <Send size={16} /> : <CircleCheck size={16} />}
                     </span>
                     <div>
-                      <h4 className="text-base font-semibold text-gray-950">
+                      <p className="text-sm font-medium text-gray-950">
                         {draft
-                          ? translate("Issue this request", "إصدار هذا الطلب")
-                          : translate("Close or cancel", "إغلاق أو إلغاء")}
-                      </h4>
-                      <p className="text-sm text-gray-500">
+                          ? translate("Ready to send", "جاهز للإرسال")
+                          : translate("Comparison in progress", "المقارنة جارية")}
+                      </p>
+                      <p className="mt-0.5 max-w-xl text-sm text-gray-500">
                         {draft
                           ? translate(
-                              "Set the reply deadline, then send the request to suppliers.",
-                              "حدد آخر موعد للرد، ثم أرسل الطلب إلى الموردين.",
+                              "Set the reply deadline, then issue the request so suppliers can be invited.",
+                              "حدد آخر موعد للرد، ثم أصدر الطلب لتتمكن من دعوة الموردين.",
                             )
                           : translate(
-                              "Close the request when comparison is done, or cancel it if it is no longer needed.",
+                              "Close the request when you are done comparing, or cancel it if it is no longer needed.",
                               "أغلق الطلب بعد انتهاء المقارنة، أو ألغه إذا لم يعد مطلوباً.",
                             )}
                       </p>
@@ -255,8 +278,8 @@ export default function Page() {
                     </Button>
                   </div>
                 </div>
-              </section>
-            )}
+              )}
+            </section>
 
             <section className="overflow-hidden rounded-2xl bg-white">
               <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
@@ -316,7 +339,7 @@ export default function Page() {
                             <Table.Td className="text-sm text-gray-700">
                               {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
                             </Table.Td>
-                            <Table.Td className="text-sm text-gray-600">
+                            <Table.Td className="text-sm whitespace-pre-wrap text-gray-600">
                               {item.notes?.trim() ? item.notes : <span className="text-gray-400">-</span>}
                             </Table.Td>
                             {draft && canUpdate && (
@@ -345,9 +368,9 @@ export default function Page() {
               </div>
 
               {draft && canUpdate && (
-                <div className="border-t border-gray-100 bg-gray-50 px-5 py-4">
+                <div className="border-t border-gray-100 px-5 py-4">
                   <p className="mb-3 text-sm font-medium text-gray-900">{translate("Add a material", "إضافة مادة")}</p>
-                  <div className="grid items-end gap-3 md:grid-cols-[minmax(0,1.4fr)_8rem_10rem_minmax(0,1fr)_auto]">
+                  <div className="grid items-end gap-3 lg:grid-cols-[minmax(0,1.4fr)_8rem_10rem_minmax(0,1fr)_auto]">
                     <SelectMaterial
                       label={translate("Material", "المادة")}
                       value={newMaterial?.code ?? null}
@@ -421,6 +444,91 @@ export default function Page() {
           </div>
         )
       )}
-    </LayoutBox>
+    </div>
+  );
+}
+
+function RequestFacts({
+  request,
+  showDeadline,
+}: {
+  request: RequestForQuotationDetailed;
+  showDeadline: boolean;
+}) {
+  const { locale, translate } = useI18n();
+
+  const facts: { label: string; value: ReactNode }[] = [
+    {
+      label: translate("Code", "الكود"),
+      value: (
+        <span className="flex items-center gap-1.5 font-mono">
+          {request.code}
+          <CopyButton text={request.code} />
+        </span>
+      ),
+    },
+  ];
+
+  if (showDeadline) {
+    facts.push({
+      label: translate("Response deadline", "آخر موعد للرد"),
+      value: request.responseDeadline ? (
+        <span className="inline-flex items-center gap-1.5">
+          <CalendarClock size={14} className="text-haze-600" />
+          {formatDateAndTime(request.responseDeadline, locale)}
+        </span>
+      ) : (
+        <span className="text-gray-400">-</span>
+      ),
+    });
+  }
+
+  facts.push(
+    {
+      label: translate("Created", "تاريخ الإنشاء"),
+      value: formatDateAndTime(request.createdAt, locale),
+    },
+    {
+      label: translate("Created by", "أنشأه"),
+      value: <CreatorLink creator={request.createdBy} />,
+    },
+  );
+
+  if (request.issuedAt) {
+    facts.push({
+      label: translate("Issued", "تاريخ الإصدار"),
+      value: formatDateAndTime(request.issuedAt, locale),
+    });
+  }
+  if (request.closedAt) {
+    facts.push({
+      label: translate("Closed", "تاريخ الإغلاق"),
+      value: formatDateAndTime(request.closedAt, locale),
+    });
+  }
+  if (request.cancelledAt) {
+    facts.push({
+      label: translate("Cancelled", "تاريخ الإلغاء"),
+      value: <span className="text-clay-700">{formatDateAndTime(request.cancelledAt, locale)}</span>,
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-5 px-5 py-5">
+      <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+        {facts.map((fact) => (
+          <div key={fact.label}>
+            <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase">{fact.label}</dt>
+            <dd className="mt-1 text-sm font-medium text-gray-900">{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div>
+        <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{translate("Notes", "الملاحظات")}</p>
+        <p className="mt-1 text-sm whitespace-pre-wrap text-gray-800">
+          {request.notes?.trim() ? request.notes : <span className="text-gray-400">-</span>}
+        </p>
+      </div>
+    </div>
   );
 }
