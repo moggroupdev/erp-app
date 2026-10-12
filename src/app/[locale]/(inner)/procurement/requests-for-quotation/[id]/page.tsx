@@ -3,16 +3,16 @@
 import { useState, type ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
-import { ArrowLeft, CircleCheck, ClipboardList, FileText, Package, Plus, Trash2 } from "lucide-react";
+import { useDisclosure } from "@mantine/hooks";
+import { Badge, Button, Menu, Table } from "@mantine/core";
+import { ArrowLeft, Ban, CircleCheck, ClipboardList, FileText, Lock, Package, Plus, Trash2 } from "lucide-react";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
 import CopyButton from "@/components/ui/copy-button";
-import DataSelect from "@/components/ui/data-select";
+import ActionsMenu from "@/components/ui/actions-menu";
 import ErrorAlert from "@/components/ui/error-alert";
 import { CreatorLink } from "@/components/ui/entity-details";
-import SelectMaterial from "@/components/global/selections/remote-based/select-material";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
@@ -20,15 +20,14 @@ import requestForQuotationsApi from "@/lib/api/request-for-quotations";
 import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import type { RequestForQuotationDetailed } from "@/types/request-for-quotation";
+import type { RequestForQuotationDetailed, RequestForQuotationStatus } from "@/types/request-for-quotation";
 import { getRequestForQuotationStatus, getRequestForQuotationStatusLabel } from "../helpers";
+import AddMaterialModal from "./components/add-material-modal";
 import ComparisonTable from "./components/comparison-table";
 import SupplierQuotations from "./components/supplier-quotations";
 
@@ -44,21 +43,20 @@ export default function Page() {
   const canUpdate = useHasPermission(PERMISSIONS.UPDATE_REQUEST_FOR_QUOTATION);
 
   const [error, setError] = useState("");
-  const [newMaterial, setNewMaterial] = useState<MaterialWithUnitConversionsSelection | null>(null);
-  const [newQuantity, setNewQuantity] = useState<number | "">("");
-  const [newUnit, setNewUnit] = useState<MaterialUnit | null>(null);
-  const [newNotes, setNewNotes] = useState("");
+  const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
 
-  const { data: request, isFetching, error: loadError, refetch } = useQuery({
+  const {
+    data: request,
+    isFetching,
+    error: loadError,
+    refetch,
+  } = useQuery({
     queryKey: queryKeys.requestForQuotations.detail(id),
     queryFn: ({ signal }) => requestForQuotationsApi.get({ privateRequest, id, signal }),
     staleTime: staleTimes.requestForQuotations,
   });
 
-  useDocumentTitle(
-    request?.code ?? translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-    "dashboard",
-  );
+  useDocumentTitle(request?.code ?? translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: queryKeys.requestForQuotations.all });
@@ -76,33 +74,6 @@ export default function Page() {
     onError: (err) => setError(getErrorMessage(locale, err)),
   });
 
-  const addItem = useMutation({
-    mutationFn: () => {
-      if (!newMaterial || newQuantity === "" || !newUnit || Number(newQuantity) <= 0) {
-        throw new Error(translate("Choose a material, unit, and a quantity greater than zero.", "اختر المادة والوحدة وكمية أكبر من صفر."));
-      }
-      return requestForQuotationsApi.addItem({
-        privateRequest,
-        id,
-        dto: {
-          materialCode: newMaterial.code,
-          unitOfMeasurementSelected: newUnit,
-          quantityRequested: Number(newQuantity),
-          notes: newNotes.trim() || null,
-        },
-      });
-    },
-    onSuccess: async () => {
-      setNewMaterial(null);
-      setNewQuantity("");
-      setNewUnit(null);
-      setNewNotes("");
-      setError("");
-      await refresh();
-    },
-    onError: (err) => setError(getErrorMessage(locale, err)),
-  });
-
   const deleteItem = useMutation({
     mutationFn: (itemId: string) => requestForQuotationsApi.deleteItem({ privateRequest, id, itemId }),
     onSuccess: refresh,
@@ -112,8 +83,8 @@ export default function Page() {
   const status = request ? getRequestForQuotationStatus(request) : "open";
   const statusMeta = getRequestForQuotationStatusLabel(status, translate);
   const open = status === "open";
-  const showUnitChoices = !!newMaterial && isRawMaterial(newMaterial.materialType) && newMaterial.unitConversions.length > 0;
   const canAct = canUpdate && open;
+  const statusBusy = close.isPending || cancel.isPending;
 
   function goBack() {
     router.push(href("/procurement/requests-for-quotation"));
@@ -167,7 +138,7 @@ export default function Page() {
 
             <section className="overflow-hidden rounded-2xl bg-white">
               <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-                <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+                <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
                   <FileText size={18} />
                 </span>
                 <div>
@@ -180,62 +151,41 @@ export default function Page() {
 
               <RequestFacts request={request} />
 
-              {canAct && (
-                <div className="flex flex-wrap items-end justify-between gap-3 border-t border-gray-100 bg-haze-50/40 px-5 py-4">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-white">
-                      <CircleCheck size={16} />
-                    </span>
-                    <div>
-                      <p className="text-sm font-medium text-gray-950">
-                        {translate("Request is open", "الطلب مفتوح")}
-                      </p>
-                      <p className="mt-0.5 max-w-xl text-sm text-gray-500">
-                        {translate(
-                          "Close the request when you are done comparing, or cancel it if it is no longer needed.",
-                          "أغلق الطلب بعد انتهاء المقارنة، أو ألغه إذا لم يعد مطلوباً.",
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-end gap-2">
-                    <Button color="teal" radius="md" loading={close.isPending} onClick={() => close.mutate()}>
-                      {translate("Close", "إغلاق")}
-                    </Button>
-                    <Button
-                      color="clay"
-                      variant="light"
-                      radius="md"
-                      loading={cancel.isPending}
-                      onClick={() => {
-                        if (window.confirm(translate("Cancel this request?", "إلغاء هذا الطلب؟"))) cancel.mutate();
-                      }}
-                    >
-                      {translate("Cancel", "إلغاء")}
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <RequestStatusBar
+                status={status}
+                canAct={canAct}
+                busy={statusBusy}
+                onClose={() => close.mutate()}
+                onCancel={() => {
+                  if (window.confirm(translate("Cancel this request?", "إلغاء هذا الطلب؟"))) cancel.mutate();
+                }}
+              />
             </section>
 
             <section className="overflow-hidden rounded-2xl bg-white">
-              <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-                <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
-                  <Package size={18} />
-                </span>
-                <div>
-                  <h4 className="text-base font-semibold text-gray-950">{translate("Materials", "المواد")}</h4>
-                  <p className="text-sm text-gray-500">
-                    {translate("Quantities suppliers are asked to price.", "الكميات المطلوب تسعيرها من الموردين.")}
-                  </p>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
+                    <Package size={18} />
+                  </span>
+                  <div>
+                    <h4 className="text-base font-semibold text-gray-950">{translate("Materials", "المواد")}</h4>
+                    <p className="text-sm text-gray-500">
+                      {translate("Quantities suppliers are asked to price.", "الكميات المطلوب تسعيرها من الموردين.")}
+                    </p>
+                  </div>
                 </div>
+                {open && canUpdate && (
+                  <Button color="haze" radius="md" leftSection={<Plus size={14} />} onClick={openAdd}>
+                    {translate("Add material", "إضافة مادة")}
+                  </Button>
+                )}
               </div>
 
               <div className="px-5 py-5">
                 {request.items.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center gap-4 rounded-xl bg-haze-50/40 px-6 py-12 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-haze-50 text-haze-700">
+                  <div className="bg-haze-50/40 flex flex-col items-center justify-center gap-4 rounded-xl px-6 py-12 text-center">
+                    <div className="bg-haze-50 text-haze-700 flex h-14 w-14 items-center justify-center rounded-2xl">
                       <ClipboardList size={26} strokeWidth={1.75} />
                     </div>
                     <p className="max-w-md text-sm leading-7 text-gray-500">
@@ -305,82 +255,95 @@ export default function Page() {
                 )}
               </div>
 
-              {open && canUpdate && (
-                <div className="border-t border-gray-100 px-5 py-4">
-                  <p className="mb-3 text-sm font-medium text-gray-900">{translate("Add a material", "إضافة مادة")}</p>
-                  <div className="grid items-end gap-3 lg:grid-cols-[minmax(0,1.4fr)_8rem_10rem_minmax(0,1fr)_auto]">
-                    <SelectMaterial
-                      label={translate("Material", "المادة")}
-                      value={newMaterial?.code ?? null}
-                      setValue={(next) => {
-                        const resolved = typeof next === "function" ? next(newMaterial?.code ?? null) : next;
-                        if (!resolved) {
-                          setNewMaterial(null);
-                          setNewUnit(null);
-                        }
-                      }}
-                      onMaterialSelect={(material) => {
-                        setNewMaterial(material);
-                        setNewUnit(material?.unitOfMeasurement ?? null);
-                      }}
-                      excludeCodes={request.items.map((item) => item.materialCode)}
-                      placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
-                      withBrowseModal
-                    />
-                    <NumberInput
-                      label={translate("Quantity", "الكمية")}
-                      value={newQuantity}
-                      onChange={(value) => setNewQuantity(value === "" ? "" : Number(value))}
-                      min={0}
-                      allowNegative={false}
-                      decimalScale={6}
-                      hideControls
-                      placeholder={translate("Enter quantity", "أدخل الكمية")}
-                      radius="md"
-                    />
-                    {showUnitChoices ? (
-                      <DataSelect
-                        label={translate("Unit", "الوحدة")}
-                        value={newUnit}
-                        setValue={(next) => setNewUnit((next as MaterialUnit | null) ?? null)}
-                        data={getMaterialUnitSelectOptions(newMaterial.unitOfMeasurement, newMaterial.unitConversions, locale)}
-                        placeholder={translate("Select unit", "اختر الوحدة")}
-                        searchable
-                      />
-                    ) : (
-                      <TextInput
-                        label={translate("Unit", "الوحدة")}
-                        value={newUnit ? getMaterialUnitLabel(newUnit, locale) : ""}
-                        placeholder={translate("Select a material first", "اختر المادة أولاً")}
-                        readOnly
-                        radius="md"
-                      />
-                    )}
-                    <TextInput
-                      label={translate("Notes", "الملاحظات")}
-                      value={newNotes}
-                      onChange={(event) => setNewNotes(event.currentTarget.value)}
-                      placeholder={translate("Optional note", "ملاحظة اختيارية")}
-                      radius="md"
-                    />
-                    <Button
-                      color="haze"
-                      radius="md"
-                      leftSection={<Plus size={14} />}
-                      loading={addItem.isPending}
-                      onClick={() => addItem.mutate()}
-                    >
-                      {translate("Add", "إضافة")}
-                    </Button>
-                  </div>
-                </div>
-              )}
             </section>
 
             <SupplierQuotations request={request} canUpdate={canUpdate} />
             <ComparisonTable request={request} />
+
+            {open && canUpdate && (
+              <AddMaterialModal
+                opened={addOpened}
+                onClose={closeAdd}
+                requestId={request.id}
+                excludeCodes={request.items.map((item) => item.materialCode)}
+              />
+            )}
           </div>
         )
+      )}
+    </div>
+  );
+}
+
+function RequestStatusBar({
+  status,
+  canAct,
+  busy,
+  onClose,
+  onCancel,
+}: {
+  status: RequestForQuotationStatus;
+  canAct: boolean;
+  busy: boolean;
+  onClose: () => void;
+  onCancel: () => void;
+}) {
+  const { translate } = useI18n();
+
+  const copy = {
+    open: {
+      surface: "bg-haze-50/70",
+      icon: "bg-haze-600 text-white",
+      Icon: CircleCheck,
+      title: translate("Request is open", "الطلب مفتوح"),
+      body: translate(
+        "Close the request when you are done comparing, or cancel it if it is no longer needed.",
+        "أغلق الطلب بعد انتهاء المقارنة، أو ألغه إذا لم يعد مطلوباً.",
+      ),
+    },
+    closed: {
+      surface: "bg-teal-50/70",
+      icon: "bg-teal-600 text-white",
+      Icon: Lock,
+      title: translate("Request is closed", "الطلب مغلق"),
+      body: translate(
+        "Materials and quotations can no longer be changed.",
+        "لم يعد بالإمكان تعديل المواد أو عروض الأسعار.",
+      ),
+    },
+    cancelled: {
+      surface: "bg-clay-50/70",
+      icon: "bg-clay-600 text-white",
+      Icon: Ban,
+      title: translate("Request is cancelled", "الطلب ملغي"),
+      body: translate("This request is no longer needed.", "لم يعد هذا الطلب مطلوباً."),
+    },
+  }[status];
+
+  const Icon = copy.Icon;
+
+  return (
+    <div className={`flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 px-5 py-4 ${copy.surface}`}>
+      <div className="flex min-w-0 items-start gap-3">
+        <span className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl ${copy.icon}`}>
+          <Icon size={16} />
+        </span>
+        <div>
+          <p className="text-sm font-medium text-gray-950">{copy.title}</p>
+          <p className="mt-0.5 max-w-xl text-sm text-gray-500">{copy.body}</p>
+        </div>
+      </div>
+
+      {canAct && (
+        <ActionsMenu>
+          <Menu.Item color="teal" leftSection={<CircleCheck size={14} />} disabled={busy} onClick={onClose}>
+            {translate("Close request", "إغلاق الطلب")}
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item color="clay" leftSection={<Ban size={14} />} disabled={busy} onClick={onCancel}>
+            {translate("Cancel request", "إلغاء الطلب")}
+          </Menu.Item>
+        </ActionsMenu>
       )}
     </div>
   );

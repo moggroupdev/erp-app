@@ -119,7 +119,7 @@ function ComparisonGrid({ request, quotations }: { request: RequestForQuotationD
                   const isLowest = price != null && lowest != null && price === lowest;
                   const total = price == null ? null : price * Number(item.quantityRequested);
                   return (
-                    <Table.Td key={quotations[index].id} className={isLowest ? "bg-teal-50" : undefined}>
+                    <Table.Td key={quotations[index].id}>
                       {price == null || total == null ? (
                         <span className="text-sm text-gray-400">{translate("No price", "بدون سعر")}</span>
                       ) : (
@@ -145,7 +145,7 @@ function ComparisonGrid({ request, quotations }: { request: RequestForQuotationD
               </Table.Tr>
             );
           })}
-          <Table.Tr className="bg-gray-50">
+          <Table.Tr className="bg-gray-50!">
             <Table.Td colSpan={2} className="text-sm font-semibold text-gray-800">
               {translate("Grand total", "الإجمالي الكلي")}
             </Table.Td>
