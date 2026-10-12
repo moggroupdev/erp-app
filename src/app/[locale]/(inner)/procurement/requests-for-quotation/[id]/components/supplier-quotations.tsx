@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, NumberInput, TextInput } from "@mantine/core";
+import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
+import { Users } from "lucide-react";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import DataSelect from "@/components/ui/data-select";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -17,6 +18,12 @@ import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
 import { getSupplierQuotationStatus, getSupplierQuotationStatusLabel } from "../../helpers";
+
+const cellField = {
+  variant: "unstyled" as const,
+  radius: 0,
+  styles: { input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0 } },
+};
 
 function toIso(value: string | null) {
   if (!value) return null;
@@ -65,30 +72,52 @@ export default function SupplierQuotations({
   });
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 className="text-lg font-semibold">{translate("Supplier quotations", "عروض الموردين")}</h2>
+    <section className="overflow-hidden rounded-2xl bg-white">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-gray-100 px-5 py-4">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+            <Users size={18} />
+          </span>
+          <div>
+            <h4 className="text-base font-semibold text-gray-950">{translate("Supplier quotations", "عروض الموردين")}</h4>
+            <p className="text-sm text-gray-500">
+              {translate(
+                "Invite suppliers, then record the prices and terms they offer.",
+                "ادعُ الموردين، ثم سجّل الأسعار والشروط التي يعرضونها.",
+              )}
+            </p>
+          </div>
+        </div>
         {editable && (
-          <div className="flex min-w-72 flex-1 items-end gap-2">
+          <div className="flex w-full max-w-md items-end gap-2">
             <SelectSupplier
               value={supplierId}
               setValue={setSupplierId}
               excludeIds={request.supplierQuotations.map((quotation) => quotation.supplierId)}
-              placeholder={translate("Invite a supplier", "دعوة مورد")}
-              className="flex-1"
+              label={translate("Supplier", "المورد")}
+              placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
+              className="min-w-0 flex-1"
             />
-            <Button color="haze" disabled={!supplierId} loading={invite.isPending} onClick={() => invite.mutate()}>
+            <Button color="haze" radius="md" disabled={!supplierId} loading={invite.isPending} onClick={() => invite.mutate()}>
               {translate("Invite", "دعوة")}
             </Button>
           </div>
         )}
       </div>
-      {error && <ErrorAlert error={error} />}
-      {request.supplierQuotations.length === 0 ? (
-        <p className="text-sm text-gray-500">{translate("No suppliers invited yet.", "لم تتم دعوة موردين بعد.")}</p>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {request.supplierQuotations.map((quotation) => (
+
+      <div className="flex flex-col gap-4 px-5 py-5">
+        {error && <ErrorAlert error={error} />}
+        {request.supplierQuotations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-haze-50/40 px-6 py-10 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-haze-50 text-haze-700">
+              <Users size={26} strokeWidth={1.75} />
+            </div>
+            <p className="max-w-md text-sm leading-7 text-gray-500">
+              {translate("No suppliers invited yet.", "لم تتم دعوة موردين بعد.")}
+            </p>
+          </div>
+        ) : (
+          request.supplierQuotations.map((quotation) => (
             <QuotationCard
               key={quotation.id}
               request={request}
@@ -97,9 +126,9 @@ export default function SupplierQuotations({
               onError={setError}
               onSaved={refresh}
             />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </section>
   );
 }
@@ -261,10 +290,10 @@ function QuotationCard({
   });
 
   return (
-    <article className="rounded-2xl border border-gray-100 bg-white p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <article className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50/40">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 bg-white px-4 py-3">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold">{quotation.supplier.name}</h3>
+          <h3 className="text-sm font-semibold text-gray-950">{quotation.supplier.name}</h3>
           <Badge variant="light" color={statusMeta.color} radius="md">
             {statusMeta.label}
           </Badge>
@@ -273,6 +302,7 @@ function QuotationCard({
           <Button
             variant="light"
             color="clay"
+            radius="md"
             loading={decline.isPending}
             onClick={() => {
               if (window.confirm(translate("Decline this supplier?", "رفض هذا المورد؟"))) decline.mutate();
@@ -284,12 +314,13 @@ function QuotationCard({
       </div>
 
       {status === "declined" ? (
-        <p className="text-sm text-gray-500">{translate("This supplier declined to quote.", "رفض هذا المورد تقديم عرض.")}</p>
+        <p className="px-4 py-4 text-sm text-clay-700">{translate("This supplier declined to quote.", "رفض هذا المورد تقديم عرض.")}</p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 px-4 py-4">
           <div className="grid gap-3 md:grid-cols-2">
             <TextInput
               label={translate("Payment terms", "شروط الدفع")}
+              placeholder={translate("e.g. 30 days after delivery", "مثال: خلال 30 يوماً من التسليم")}
               value={paymentTerms}
               onChange={(event) => setPaymentTerms(event.currentTarget.value)}
               disabled={!editable}
@@ -297,6 +328,7 @@ function QuotationCard({
             />
             <TextInput
               label={translate("Delivery terms", "شروط التوريد")}
+              placeholder={translate("e.g. Delivered to our factories", "مثال: التسليم في مصانعنا")}
               value={deliveryTerms}
               onChange={(event) => setDeliveryTerms(event.currentTarget.value)}
               disabled={!editable}
@@ -304,20 +336,27 @@ function QuotationCard({
             />
             <NumberInput
               label={translate("Delivery period (days)", "مدة التوريد (أيام)")}
+              placeholder={translate("Enter days", "أدخل عدد الأيام")}
               value={deliveryPeriodDays}
               onChange={(value) => setDeliveryPeriodDays(value === "" ? "" : Number(value))}
               min={1}
+              allowDecimal={false}
+              allowNegative={false}
+              hideControls
               disabled={!editable}
               radius="md"
             />
             <DateTimePickerInput
               label={translate("Valid until", "صالح حتى")}
+              placeholder={translate("Select date and time", "اختر التاريخ والوقت")}
               value={validUntil}
               onChange={setValidUntil}
               disabled={!editable}
+              clearable={editable}
             />
             <TextInput
-              label={translate("Notes", "ملاحظات")}
+              label={translate("Notes", "الملاحظات")}
+              placeholder={translate("Optional note about this quotation", "ملاحظة اختيارية عن هذا العرض")}
               value={notes}
               onChange={(event) => setNotes(event.currentTarget.value)}
               disabled={!editable}
@@ -325,27 +364,44 @@ function QuotationCard({
               className="md:col-span-2"
             />
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-start text-gray-500">
-                  <th className="py-1 font-medium">{translate("Material", "المادة")}</th>
-                  <th className="py-1 font-medium">{translate("Requested", "المطلوب")}</th>
-                  <th className="py-1 font-medium">{translate("Unit", "الوحدة")}</th>
-                  <th className="py-1 font-medium">{translate(`Unit price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}</th>
-                </tr>
-              </thead>
-              <tbody>
+
+          <div className="overflow-x-auto rounded-xl bg-white">
+            <Table withColumnBorders className="w-full min-w-184" horizontalSpacing="xs" verticalSpacing="xs">
+              <Table.Thead className="bg-gray-50 whitespace-nowrap">
+                <Table.Tr className="h-9">
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Material", "المادة")}
+                  </Table.Th>
+                  <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Requested", "المطلوب")}
+                  </Table.Th>
+                  <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Unit", "الوحدة")}
+                  </Table.Th>
+                  <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate(`Unit price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+                  </Table.Th>
+                  <Table.Th className="w-48 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                    {translate("Notes", "الملاحظات")}
+                  </Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {request.items.map((item) => {
                   const draft = prices[item.id];
                   const showUnits = isRawMaterial(item.material.materialType) && item.material.unitConversions.length > 0;
                   return (
-                    <tr key={item.id} className="border-t border-gray-100">
-                      <td className="py-2 pe-3">{item.material.title}</td>
-                      <td className="py-2 pe-3">
+                    <Table.Tr key={item.id}>
+                      <Table.Td>
+                        <div className="flex flex-col gap-0.5 py-0.5">
+                          <span className="text-sm font-medium text-gray-800">{item.material.title}</span>
+                          <span className="font-mono text-xs text-gray-400">{item.materialCode}</span>
+                        </div>
+                      </Table.Td>
+                      <Table.Td className="text-sm text-gray-700">
                         {formatQuantity(item.quantityRequested)} {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
-                      </td>
-                      <td className="py-2 pe-3">
+                      </Table.Td>
+                      <Table.Td className="align-top! transition-colors focus-within:bg-haze-50/60">
                         {editable && showUnits ? (
                           <DataSelect
                             value={draft?.unit ?? item.unitOfMeasurementSelected}
@@ -361,12 +417,18 @@ function QuotationCard({
                               item.material.unitConversions,
                               locale,
                             )}
+                            searchable
+                            placeholder={translate("Select unit", "اختر الوحدة")}
+                            {...cellField}
+                            styles={{ input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0, cursor: "pointer" } }}
                           />
                         ) : (
-                          getMaterialUnitLabel(draft?.unit ?? item.unitOfMeasurementSelected, locale)
+                          <span className="text-sm text-gray-700">
+                            {getMaterialUnitLabel(draft?.unit ?? item.unitOfMeasurementSelected, locale)}
+                          </span>
                         )}
-                      </td>
-                      <td className="py-2">
+                      </Table.Td>
+                      <Table.Td className="align-top! transition-colors focus-within:bg-haze-50/60">
                         <NumberInput
                           value={draft?.price ?? ""}
                           onChange={(value) =>
@@ -376,25 +438,45 @@ function QuotationCard({
                             }))
                           }
                           min={0}
+                          allowNegative={false}
+                          decimalScale={6}
                           hideControls
                           disabled={!editable}
-                          radius="md"
+                          placeholder={translate("Enter price", "أدخل السعر")}
+                          aria-label={translate("Unit price", "سعر الوحدة")}
+                          {...cellField}
                         />
-                      </td>
-                    </tr>
+                      </Table.Td>
+                      <Table.Td className="align-top! transition-colors focus-within:bg-haze-50/60">
+                        <TextInput
+                          value={draft?.notes ?? ""}
+                          onChange={(event) =>
+                            setPrices((current) => ({
+                              ...current,
+                              [item.id]: { ...current[item.id], notes: event.currentTarget.value },
+                            }))
+                          }
+                          disabled={!editable}
+                          placeholder={translate("Optional note", "ملاحظة اختيارية")}
+                          aria-label={translate("Line notes", "ملاحظات البند")}
+                          {...cellField}
+                        />
+                      </Table.Td>
+                    </Table.Tr>
                   );
                 })}
-              </tbody>
-            </table>
+              </Table.Tbody>
+            </Table>
           </div>
+
           {editable && (
             <div className="flex justify-end">
               {invited ? (
-                <Button color="haze" loading={submit.isPending} onClick={() => submit.mutate()}>
+                <Button color="haze" radius="md" loading={submit.isPending} onClick={() => submit.mutate()}>
                   {translate("Submit quotation", "تقديم عرض السعر")}
                 </Button>
               ) : (
-                <Button color="haze" variant="light" loading={save.isPending} onClick={() => save.mutate()}>
+                <Button color="haze" radius="md" loading={save.isPending} onClick={() => save.mutate()}>
                   {translate("Save changes", "حفظ التعديلات")}
                 </Button>
               )}
