@@ -131,7 +131,7 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
                             className={
                               isLowest
                                 ? "flex items-center gap-1 text-sm font-semibold text-teal-700"
-                                : "text-sm text-gray-800"
+                                : "flex items-center gap-1 text-sm text-gray-800"
                             }
                           >
                             {formatMoney(price, translation.currency)}
@@ -161,7 +161,11 @@ function ComparisonGrid({ request, submitted }: { request: RequestForQuotationDe
                     <span className="text-sm text-gray-400">-</span>
                   ) : (
                     <span
-                      className={isLowest ? "text-sm font-semibold text-teal-700" : "text-sm font-semibold text-gray-900"}
+                      className={
+                        isLowest
+                          ? "flex items-center gap-1 text-sm font-semibold text-teal-700"
+                          : "flex items-center gap-1 text-sm font-semibold text-gray-900"
+                      }
                     >
                       {formatMoney(entry.total, translation.currency)}
                       {isLowest && <LowestBadge />}
