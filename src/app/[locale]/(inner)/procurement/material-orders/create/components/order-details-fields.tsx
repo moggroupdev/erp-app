@@ -106,6 +106,7 @@ export default function OrderDetailsFields({
             value={supplierId}
             setValue={setSupplierId}
             onSupplierSelect={onSupplierSelect}
+            withBrowseModal
             label={translate("Supplier", "المورد")}
             placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
             disabled={supplierLocked}

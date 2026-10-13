@@ -33,6 +33,7 @@ export default function SupplierPicker({
             id="purchasing-supplier-stats-supplier"
             value={value}
             setValue={setValue}
+            withBrowseModal
             placeholder={translate("Search or select a supplier...", "ابحث أو اختر مورداً...")}
             clearable
             searchable
