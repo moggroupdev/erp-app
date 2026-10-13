@@ -225,18 +225,25 @@ export default function Page() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <Table withColumnBorders className="w-full min-w-160" horizontalSpacing="xs" verticalSpacing="xs">
+                    <Table
+                      withColumnBorders
+                      className="w-full min-w-160 [&_td]:align-middle! [&_th]:align-middle!"
+                      horizontalSpacing="xs"
+                      verticalSpacing={10}
+                    >
                       <Table.Thead className="bg-gray-50 whitespace-nowrap">
-                        <Table.Tr className="h-9">
-                          <Table.Th className="w-12 text-center! text-gray-500">#</Table.Th>
-                          <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                            {translate("Material", "المادة")}
-                          </Table.Th>
+                        <Table.Tr className="h-8">
                           <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                            {translate("Quantity", "الكمية")}
+                            {translate("Code", "الكود")}
+                          </Table.Th>
+                          <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {translate("Item", "الصنف")}
                           </Table.Th>
                           <Table.Th className="w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
                             {translate("Unit", "الوحدة")}
+                          </Table.Th>
+                          <Table.Th className="w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                            {translate("Quantity", "الكمية")}
                           </Table.Th>
                           <Table.Th className="w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
                             {translate("Notes", "الملاحظات")}
@@ -245,19 +252,14 @@ export default function Page() {
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
-                        {request.items.map((item, index) => (
+                        {request.items.map((item) => (
                           <Table.Tr key={item.id}>
-                            <Table.Td className="text-center text-xs font-medium text-gray-500">{index + 1}</Table.Td>
-                            <Table.Td>
-                              <div className="flex flex-col gap-0.5 py-0.5">
-                                <span className="text-sm font-medium text-gray-800">{item.material.title}</span>
-                                <span className="font-mono text-xs text-gray-400">{item.materialCode}</span>
-                              </div>
-                            </Table.Td>
-                            <Table.Td className="text-sm text-gray-700">{formatQuantity(item.quantityRequested)}</Table.Td>
+                            <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
+                            <Table.Td className="text-sm font-medium text-gray-800">{item.material.title}</Table.Td>
                             <Table.Td className="text-sm text-gray-700">
                               {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
                             </Table.Td>
+                            <Table.Td className="text-sm text-gray-700">{formatQuantity(item.quantityRequested)}</Table.Td>
                             <Table.Td className="text-sm whitespace-pre-wrap text-gray-600">
                               {item.notes?.trim() ? item.notes : <span className="text-gray-400">-</span>}
                             </Table.Td>
@@ -268,7 +270,7 @@ export default function Page() {
                                   color="clay"
                                   size="xs"
                                   radius="md"
-                                  p={6}
+                                  p={4}
                                   loading={deleteItem.isPending && deleteItem.variables === item.id}
                                   onClick={() => deleteItem.mutate(item.id)}
                                   title={translate("Remove material", "حذف المادة")}
