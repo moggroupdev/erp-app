@@ -103,6 +103,7 @@ type ItemDraftRow = {
   notes: string;
   allocations: AllocationDraft[];
   supplierQuotationItemId: string | null;
+  quotationCode: string | null;
 };
 
 function createRowKey() {
@@ -188,8 +189,12 @@ function ItemRow({
             setValue={(next) => {
               const resolved = typeof next === "function" ? next(row.unitOfMeasurementSelected) : next;
               const nextUnit = (resolved as MaterialUnit | null) ?? row.unitOfMeasurement;
+              const unlink =
+                nextUnit !== row.unitOfMeasurementSelected
+                  ? { supplierQuotationItemId: null, quotationCode: null }
+                  : {};
               if (!nextUnit || !row.unitOfMeasurement || !row.unitOfMeasurementSelected) {
-                onUpdate(row.key, { unitOfMeasurementSelected: nextUnit });
+                onUpdate(row.key, { unitOfMeasurementSelected: nextUnit, ...unlink });
                 return;
               }
               const convertedAllocations = row.allocations.map((allocation) => ({
@@ -207,6 +212,7 @@ function ItemRow({
                 unitOfMeasurementSelected: nextUnit,
                 allocations: convertedAllocations,
                 quantity: Number(nextQty.toFixed(6)),
+                ...unlink,
               });
             }}
             data={getRowUnitOptions(row, locale)}
@@ -225,7 +231,13 @@ function ItemRow({
       <Table.Td className="align-top! transition-colors focus-within:bg-teal-800/5">
         <NumberInput
           value={row.unitPrice}
-          onChange={(value) => onUpdate(row.key, { unitPrice: value === "" ? "" : Number(value) })}
+          onChange={(value) => {
+            const nextPrice = value === "" ? "" : Number(value);
+            onUpdate(row.key, {
+              unitPrice: nextPrice,
+              ...(nextPrice !== row.unitPrice ? { supplierQuotationItemId: null, quotationCode: null } : {}),
+            });
+          }}
           min={0}
           allowNegative={false}
           decimalScale={6}
@@ -307,13 +319,16 @@ function ItemRow({
         <QuotationItemSelect
           supplierId={supplierId}
           materialCode={row.materialCode}
+          materialTitle={row.materialTitle}
           unitOfMeasurement={row.unitOfMeasurement}
           unitOfMeasurementSelected={row.unitOfMeasurementSelected}
           unitConversions={row.unitConversions}
           value={row.supplierQuotationItemId}
-          onChange={({ id, unitPrice }) =>
+          linkedCode={row.quotationCode}
+          onChange={({ id, code, unitPrice }) =>
             onUpdate(row.key, {
               supplierQuotationItemId: id,
+              quotationCode: code,
               ...(unitPrice != null ? { unitPrice } : {}),
             })
           }
@@ -372,6 +387,7 @@ function draftFromOrder(order: MaterialPurchaseOrderDetailed) {
     unitPrice: Number(item.unitPrice),
     notes: item.notes ?? "",
     supplierQuotationItemId: item.supplierQuotationItemId ?? null,
+    quotationCode: item.supplierQuotation?.requestForQuotationCode ?? null,
     allocations: (item.requisitionAllocations ?? []).map((allocation) => ({
       materialPurchaseRequisitionItemId: allocation.materialPurchaseRequisitionItemId,
       requisitionId: allocation.requisition.id,
@@ -495,6 +511,7 @@ export default function OrderForm({
           unitPrice,
           notes: item.notes ?? "",
           supplierQuotationItemId: null,
+          quotationCode: null,
           allocations: [
             {
               materialPurchaseRequisitionItemId: item.id,
@@ -688,6 +705,7 @@ export default function OrderForm({
             unitPrice: "",
             notes: "",
             supplierQuotationItemId: null,
+            quotationCode: null,
             allocations: line.allocations,
           });
         }
@@ -896,7 +914,9 @@ export default function OrderForm({
           supplierId={supplierId}
           setSupplierId={(next) => {
             setSupplierId(next);
-            setRows((current) => current.map((row) => ({ ...row, supplierQuotationItemId: null })));
+            setRows((current) =>
+              current.map((row) => ({ ...row, supplierQuotationItemId: null, quotationCode: null })),
+            );
           }}
           onSupplierSelect={() => setValidationError("")}
           deliveryLocation={deliveryLocation}
