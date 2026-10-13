@@ -9,6 +9,13 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
 import { priceInUnit } from "../../helpers";
+import RfqFixedTable from "../../components/rfq-fixed-table";
+import {
+  RFQ_COMPARISON_COLUMN_MIN_WIDTH,
+  columnMinWidthStyle,
+  comparisonTableColumnWidths,
+  rfqTableHeaderClass,
+} from "../../table-layout";
 
 export default function ComparisonTable({ request }: { request: RequestForQuotationDetailed }) {
   const { translate } = useI18n();
@@ -83,25 +90,31 @@ function ComparisonGrid({ request, quotations }: { request: RequestForQuotationD
     },
   ].filter((row) => row.values.some((value) => value != null));
 
+  const comparisonColumns = RFQ_COMPARISON_COLUMN_MIN_WIDTH;
+  const columnWidths = comparisonTableColumnWidths(quotations.length);
+
   return (
-    <div className="overflow-x-auto">
-      <Table withColumnBorders className="w-full min-w-max" horizontalSpacing="xs" verticalSpacing="xs">
-        <Table.Thead className="bg-gray-50 whitespace-nowrap">
-          <Table.Tr className="h-9">
-            <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-              {translate("Material", "المادة")}
+    <RfqFixedTable columnWidths={columnWidths} verticalSpacing="xs">
+      <Table.Thead className="bg-gray-50">
+        <Table.Tr className="h-9">
+          <Table.Th style={columnMinWidthStyle(comparisonColumns.material)} className={rfqTableHeaderClass}>
+            {translate("Material", "المادة")}
+          </Table.Th>
+          <Table.Th style={columnMinWidthStyle(comparisonColumns.requested)} className={rfqTableHeaderClass}>
+            {translate("Requested", "المطلوب")}
+          </Table.Th>
+          {quotations.map((quotation) => (
+            <Table.Th
+              key={quotation.id}
+              style={columnMinWidthStyle(comparisonColumns.supplier)}
+              className={rfqTableHeaderClass}
+            >
+              {quotation.supplier.name}
             </Table.Th>
-            <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-              {translate("Requested", "المطلوب")}
-            </Table.Th>
-            {quotations.map((quotation) => (
-              <Table.Th key={quotation.id} className="min-w-44 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {quotation.supplier.name}
-              </Table.Th>
-            ))}
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
+          ))}
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
           {request.items.map((item) => {
             const prices = quotations.map((quotation) => comparablePrice(quotation, item));
             const lowest = prices.reduce<number | null>((min, price) => {
@@ -111,7 +124,7 @@ function ComparisonGrid({ request, quotations }: { request: RequestForQuotationD
             }, null);
             return (
               <Table.Tr key={item.id}>
-                <Table.Td className="font-medium text-gray-800">{item.material.title}</Table.Td>
+                <Table.Td className="text-sm font-medium wrap-break-word text-gray-800">{item.material.title}</Table.Td>
                 <Table.Td className="text-sm whitespace-nowrap text-gray-700">
                   {formatQuantity(item.quantityRequested)} {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
                 </Table.Td>
@@ -195,15 +208,14 @@ function ComparisonGrid({ request, quotations }: { request: RequestForQuotationD
                 {row.label}
               </Table.Td>
               {row.values.map((value, index) => (
-                <Table.Td key={quotations[index].id} className="max-w-xs text-sm wrap-break-word text-gray-700">
+                <Table.Td key={quotations[index].id} className="text-sm wrap-break-word text-gray-700">
                   {value ?? <span className="text-gray-400">-</span>}
                 </Table.Td>
               ))}
             </Table.Tr>
           ))}
-        </Table.Tbody>
-      </Table>
-    </div>
+      </Table.Tbody>
+    </RfqFixedTable>
   );
 }
 

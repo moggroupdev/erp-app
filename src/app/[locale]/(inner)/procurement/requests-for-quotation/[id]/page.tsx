@@ -28,6 +28,13 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { RequestForQuotationDetailed, RequestForQuotationStatus } from "@/types/request-for-quotation";
 import { getRequestForQuotationStatus, getRequestForQuotationStatusLabel } from "../helpers";
+import RfqFixedTable from "../components/rfq-fixed-table";
+import {
+  RFQ_MATERIAL_COLUMN_MIN_WIDTH,
+  columnMinWidthStyle,
+  materialTableColumnWidths,
+  rfqTableHeaderClass,
+} from "../table-layout";
 import AddMaterialModal from "./components/add-material-modal";
 import ComparisonTable from "./components/comparison-table";
 import SupplierQuotations from "./components/supplier-quotations";
@@ -91,6 +98,9 @@ export default function Page() {
   const statusMeta = getRequestForQuotationStatusLabel(status, translate);
   const open = status === "open";
   const canAct = canUpdate && open;
+  const showMaterialRemove = open && canUpdate;
+  const materialColumnWidths = materialTableColumnWidths(showMaterialRemove);
+  const materialColumns = RFQ_MATERIAL_COLUMN_MIN_WIDTH;
 
   function goBack() {
     router.push(href("/procurement/requests-for-quotation"));
@@ -224,67 +234,66 @@ export default function Page() {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <Table
-                      withColumnBorders
-                      className="w-full min-w-160 [&_td]:align-middle! [&_th]:align-middle!"
-                      horizontalSpacing="xs"
-                      verticalSpacing={10}
-                    >
-                      <Table.Thead className="bg-gray-50 whitespace-nowrap">
-                        <Table.Tr className="h-8">
-                          <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                            {translate("Code", "الكود")}
-                          </Table.Th>
-                          <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                            {translate("Item", "الصنف")}
-                          </Table.Th>
-                          <Table.Th className="w-32 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                            {translate("Unit", "الوحدة")}
-                          </Table.Th>
-                          <Table.Th className="w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                            {translate("Quantity", "الكمية")}
-                          </Table.Th>
-                          <Table.Th className="w-56 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                            {translate("Notes", "الملاحظات")}
-                          </Table.Th>
-                          {open && canUpdate && <Table.Th className="w-12" />}
+                  <RfqFixedTable columnWidths={materialColumnWidths} verticalSpacing={10}>
+                    <Table.Thead className="bg-gray-50">
+                      <Table.Tr className="h-8">
+                        <Table.Th style={columnMinWidthStyle(materialColumns.code)} className={rfqTableHeaderClass}>
+                          {translate("Code", "الكود")}
+                        </Table.Th>
+                        <Table.Th style={columnMinWidthStyle(materialColumns.item)} className={rfqTableHeaderClass}>
+                          {translate("Item", "الصنف")}
+                        </Table.Th>
+                        <Table.Th style={columnMinWidthStyle(materialColumns.unit)} className={rfqTableHeaderClass}>
+                          {translate("Unit", "الوحدة")}
+                        </Table.Th>
+                        <Table.Th style={columnMinWidthStyle(materialColumns.quantity)} className={rfqTableHeaderClass}>
+                          {translate("Quantity", "الكمية")}
+                        </Table.Th>
+                        <Table.Th style={columnMinWidthStyle(materialColumns.notes)} className={rfqTableHeaderClass}>
+                          {translate("Notes", "الملاحظات")}
+                        </Table.Th>
+                        {showMaterialRemove && (
+                          <Table.Th
+                            style={columnMinWidthStyle(materialColumns.remove)}
+                            className={rfqTableHeaderClass}
+                            aria-hidden
+                          />
+                        )}
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {request.items.map((item) => (
+                        <Table.Tr key={item.id}>
+                          <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
+                          <Table.Td className="text-sm font-medium wrap-break-word text-gray-800">{item.material.title}</Table.Td>
+                          <Table.Td className="text-sm text-gray-700">
+                            {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
+                          </Table.Td>
+                          <Table.Td className="text-sm text-gray-700">{formatQuantity(item.quantityRequested)}</Table.Td>
+                          <Table.Td className="text-sm whitespace-pre-wrap wrap-break-word text-gray-600">
+                            {item.notes?.trim() ? item.notes : <span className="text-gray-400">-</span>}
+                          </Table.Td>
+                          {showMaterialRemove && (
+                            <Table.Td>
+                              <Button
+                                variant="subtle"
+                                color="clay"
+                                size="xs"
+                                radius="md"
+                                p={4}
+                                loading={deleteItem.isPending && deleteItem.variables === item.id}
+                                onClick={() => deleteItem.mutate(item.id)}
+                                title={translate("Remove material", "حذف المادة")}
+                                aria-label={translate("Remove material", "حذف المادة")}
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </Table.Td>
+                          )}
                         </Table.Tr>
-                      </Table.Thead>
-                      <Table.Tbody>
-                        {request.items.map((item) => (
-                          <Table.Tr key={item.id}>
-                            <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
-                            <Table.Td className="text-sm font-medium text-gray-800">{item.material.title}</Table.Td>
-                            <Table.Td className="text-sm text-gray-700">
-                              {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
-                            </Table.Td>
-                            <Table.Td className="text-sm text-gray-700">{formatQuantity(item.quantityRequested)}</Table.Td>
-                            <Table.Td className="text-sm whitespace-pre-wrap text-gray-600">
-                              {item.notes?.trim() ? item.notes : <span className="text-gray-400">-</span>}
-                            </Table.Td>
-                            {open && canUpdate && (
-                              <Table.Td>
-                                <Button
-                                  variant="subtle"
-                                  color="clay"
-                                  size="xs"
-                                  radius="md"
-                                  p={4}
-                                  loading={deleteItem.isPending && deleteItem.variables === item.id}
-                                  onClick={() => deleteItem.mutate(item.id)}
-                                  title={translate("Remove material", "حذف المادة")}
-                                  aria-label={translate("Remove material", "حذف المادة")}
-                                >
-                                  <Trash2 size={14} />
-                                </Button>
-                              </Table.Td>
-                            )}
-                          </Table.Tr>
-                        ))}
-                      </Table.Tbody>
-                    </Table>
-                  </div>
+                      ))}
+                    </Table.Tbody>
+                  </RfqFixedTable>
                 )}
               </div>
             </section>

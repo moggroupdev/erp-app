@@ -20,6 +20,15 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
+import RfqFixedTable from "../../components/rfq-fixed-table";
+import {
+  RFQ_QUOTATION_LINE_COLUMN_MIN_WIDTH,
+  columnMinWidthStyle,
+  quotationLineTableColumnWidths,
+  rfqTableHeaderClass,
+} from "../../table-layout";
+
+const quotationLineColumnWidths = quotationLineTableColumnWidths();
 
 const cellField = {
   variant: "unstyled" as const,
@@ -377,43 +386,20 @@ function QuotationCard({
               />
             </div>
 
-            <div className="overflow-x-auto rounded-xl bg-white">
-              <Table
-                withColumnBorders
-                className="w-full min-w-184 [&_td]:align-middle! [&_th]:align-middle!"
-                horizontalSpacing="xs"
-                verticalSpacing={10}
-              >
-                <Table.Thead className="bg-gray-50 whitespace-nowrap">
-                  <Table.Tr className="h-8">
-                    <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Code", "الكود")}
-                    </Table.Th>
-                    <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Item", "الصنف")}
-                    </Table.Th>
-                    <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Unit", "الوحدة")}
-                    </Table.Th>
-                    <Table.Th className="w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Quantity", "الكمية")}
-                    </Table.Th>
-                    <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Unit price", "سعر الوحدة")}
-                    </Table.Th>
-                    <Table.Th className="w-48 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Notes", "الملاحظات")}
-                    </Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
+            <RfqFixedTable
+              columnWidths={quotationLineColumnWidths}
+              verticalSpacing={10}
+              scrollClassName="rounded-xl bg-white"
+            >
+              <QuotationLineTableHead />
+              <Table.Tbody>
                   {request.items.map((item) => {
                     const draft = prices[item.id];
                     const showUnits = isRawMaterial(item.material.materialType) && item.material.unitConversions.length > 0;
                     return (
                       <Table.Tr key={item.id}>
                         <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
-                        <Table.Td className="text-sm font-medium text-gray-800">{item.material.title}</Table.Td>
+                        <Table.Td className="text-sm font-medium wrap-break-word text-gray-800">{item.material.title}</Table.Td>
                         <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
                           {editable && showUnits ? (
                             <DataSelect
@@ -489,8 +475,7 @@ function QuotationCard({
                     );
                   })}
                 </Table.Tbody>
-              </Table>
-            </div>
+            </RfqFixedTable>
 
             {editable && (
               <div className="flex justify-end">
@@ -546,57 +531,59 @@ function QuotationSummary({ request, quotation }: { request: RequestForQuotation
         ))}
       </dl>
 
-      <div className="overflow-x-auto rounded-xl bg-white">
-        <Table
-          withColumnBorders
-          className="w-full min-w-184 [&_td]:align-middle! [&_th]:align-middle!"
-          horizontalSpacing="xs"
-          verticalSpacing={10}
-        >
-          <Table.Thead className="bg-gray-50 whitespace-nowrap">
-            <Table.Tr className="h-8">
-              <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Code", "الكود")}
-              </Table.Th>
-              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Item", "الصنف")}
-              </Table.Th>
-              <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Unit", "الوحدة")}
-              </Table.Th>
-              <Table.Th className="w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Quantity", "الكمية")}
-              </Table.Th>
-              <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Unit price", "سعر الوحدة")}
-              </Table.Th>
-              <Table.Th className="w-48 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Notes", "الملاحظات")}
-              </Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
+      <RfqFixedTable columnWidths={quotationLineColumnWidths} verticalSpacing={10} scrollClassName="rounded-xl bg-white">
+        <QuotationLineTableHead />
+        <Table.Tbody>
             {request.items.map((item) => {
               const line = quotation.items.find((entry) => entry.requestForQuotationItemId === item.id);
               const unit = line?.unitOfMeasurementSelected ?? item.unitOfMeasurementSelected;
               return (
                 <Table.Tr key={item.id}>
                   <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
-                  <Table.Td className="text-sm font-medium text-gray-800">{item.material.title}</Table.Td>
+                  <Table.Td className="text-sm font-medium wrap-break-word text-gray-800">{item.material.title}</Table.Td>
                   <Table.Td className="text-sm text-gray-700">{getMaterialUnitLabel(unit, locale)}</Table.Td>
                   <Table.Td className="text-sm text-gray-700">{formatQuantity(item.quantityRequested)}</Table.Td>
                   <Table.Td className="text-sm text-gray-800">
                     {line ? formatMoney(Number(line.unitPrice)) : <span className="text-gray-400">-</span>}
                   </Table.Td>
-                  <Table.Td className="text-sm whitespace-pre-wrap text-gray-600">
+                  <Table.Td className="text-sm whitespace-pre-wrap wrap-break-word text-gray-600">
                     {line?.notes?.trim() ? line.notes : <span className="text-gray-400">-</span>}
                   </Table.Td>
                 </Table.Tr>
               );
             })}
-          </Table.Tbody>
-        </Table>
-      </div>
+        </Table.Tbody>
+      </RfqFixedTable>
     </div>
+  );
+}
+
+function QuotationLineTableHead() {
+  const { translate } = useI18n();
+  const columns = RFQ_QUOTATION_LINE_COLUMN_MIN_WIDTH;
+
+  return (
+    <Table.Thead className="bg-gray-50">
+      <Table.Tr className="h-8">
+        <Table.Th style={columnMinWidthStyle(columns.code)} className={rfqTableHeaderClass}>
+          {translate("Code", "الكود")}
+        </Table.Th>
+        <Table.Th style={columnMinWidthStyle(columns.item)} className={rfqTableHeaderClass}>
+          {translate("Item", "الصنف")}
+        </Table.Th>
+        <Table.Th style={columnMinWidthStyle(columns.unit)} className={rfqTableHeaderClass}>
+          {translate("Unit", "الوحدة")}
+        </Table.Th>
+        <Table.Th style={columnMinWidthStyle(columns.quantity)} className={rfqTableHeaderClass}>
+          {translate("Quantity", "الكمية")}
+        </Table.Th>
+        <Table.Th style={columnMinWidthStyle(columns.unitPrice)} className={rfqTableHeaderClass}>
+          {translate("Unit price", "سعر الوحدة")}
+        </Table.Th>
+        <Table.Th style={columnMinWidthStyle(columns.notes)} className={rfqTableHeaderClass}>
+          {translate("Notes", "الملاحظات")}
+        </Table.Th>
+      </Table.Tr>
+    </Table.Thead>
   );
 }
