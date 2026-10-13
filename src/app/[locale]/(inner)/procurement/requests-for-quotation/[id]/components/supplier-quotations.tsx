@@ -15,6 +15,8 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import getErrorMessage from "@/lib/helpers/get-error-message";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
@@ -36,6 +38,65 @@ type PriceDraft = {
   price: number | "";
   notes: string;
 };
+
+function sameText(draft: string, saved: string | null) {
+  return draft.trim() === (saved ?? "").trim();
+}
+
+function samePeriod(draft: number | "", saved: number | null) {
+  if (draft === "") return saved == null;
+  return Number(draft) === Number(saved);
+}
+
+function samePrice(draft: number | "", saved: number | null) {
+  if (draft === "") return saved == null;
+  if (saved == null) return false;
+  return Math.abs(Number(draft) - Number(saved)) < 1e-6;
+}
+
+function quotationIsDirty({
+  quotation,
+  items,
+  paymentTerms,
+  deliveryTerms,
+  deliveryPeriodDays,
+  validUntil,
+  notes,
+  prices,
+}: {
+  quotation: SupplierQuotation;
+  items: RequestForQuotationDetailed["items"];
+  paymentTerms: string;
+  deliveryTerms: string;
+  deliveryPeriodDays: number | "";
+  validUntil: string | null;
+  notes: string;
+  prices: Record<string, PriceDraft>;
+}) {
+  if (
+    !sameText(paymentTerms, quotation.paymentTerms) ||
+    !sameText(deliveryTerms, quotation.deliveryTerms) ||
+    !samePeriod(deliveryPeriodDays, quotation.deliveryPeriodDays) ||
+    toIso(validUntil) !== toIso(quotation.validUntil) ||
+    !sameText(notes, quotation.notes)
+  ) {
+    return true;
+  }
+
+  return items.some((item) => {
+    const existing = quotation.items.find((line) => line.requestForQuotationItemId === item.id);
+    const draft = prices[item.id] ?? {
+      unit: existing?.unitOfMeasurementSelected ?? item.unitOfMeasurementSelected,
+      price: existing ? Number(existing.unitPrice) : "",
+      notes: existing?.notes ?? "",
+    };
+    const priced = draft.price !== "";
+    if (!priced && !existing) return false;
+    if (!samePrice(draft.price, existing ? Number(existing.unitPrice) : null)) return true;
+    if (draft.unit !== (existing?.unitOfMeasurementSelected ?? item.unitOfMeasurementSelected)) return true;
+    return !sameText(draft.notes, existing?.notes ?? null);
+  });
+}
 
 export default function SupplierQuotations({
   request,
@@ -174,6 +235,18 @@ function QuotationCard({
     return initial;
   });
 
+  const locked = !!request.closedAt || !!request.cancelledAt;
+  const dirty = quotationIsDirty({
+    quotation,
+    items: request.items,
+    paymentTerms,
+    deliveryTerms,
+    deliveryPeriodDays,
+    validUntil,
+    notes,
+    prices,
+  });
+
   const save = useMutation({
     mutationFn: async () => {
       await requestForQuotationsApi.updateQuotation({
@@ -251,6 +324,9 @@ function QuotationCard({
       </div>
 
       <Collapse in={opened}>
+        {locked ? (
+          <QuotationSummary request={request} quotation={quotation} />
+        ) : (
         <div className="flex flex-col gap-4 px-4 py-4">
             <div className="grid gap-3 md:grid-cols-2">
               <TextInput
@@ -409,13 +485,118 @@ function QuotationCard({
 
             {editable && (
               <div className="flex justify-end">
-                <Button color="haze" radius="md" loading={save.isPending} onClick={() => save.mutate()}>
+                <Button color="haze" radius="md" loading={save.isPending} disabled={!dirty} onClick={() => save.mutate()}>
                   {translate("Save changes", "حفظ التعديلات")}
                 </Button>
               </div>
             )}
           </div>
+        )}
       </Collapse>
     </article>
+  );
+}
+
+function QuotationSummary({
+  request,
+  quotation,
+}: {
+  request: RequestForQuotationDetailed;
+  quotation: SupplierQuotation;
+}) {
+  const { locale, translate, translation } = useI18n();
+
+  const facts: { label: string; value: string | null; wide?: boolean }[] = [
+    {
+      label: translate("Payment terms", "شروط الدفع"),
+      value: quotation.paymentTerms?.trim() || null,
+    },
+    {
+      label: translate("Delivery terms", "شروط التوريد"),
+      value: quotation.deliveryTerms?.trim() || null,
+    },
+    {
+      label: translate("Delivery period (days)", "مدة التوريد (أيام)"),
+      value: quotation.deliveryPeriodDays != null ? String(quotation.deliveryPeriodDays) : null,
+    },
+    {
+      label: translate("Valid until", "صالح حتى"),
+      value: quotation.validUntil ? formatDateAndTime(quotation.validUntil, locale) : null,
+    },
+    {
+      label: translate("Notes", "الملاحظات"),
+      value: quotation.notes?.trim() || null,
+      wide: true,
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4 px-4 py-4">
+      <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
+        {facts.map((fact) => (
+          <div key={fact.label} className={fact.wide ? "sm:col-span-2" : undefined}>
+            <dt className="text-xs font-medium tracking-wide text-gray-500 uppercase">{fact.label}</dt>
+            <dd className="mt-1 text-sm whitespace-pre-wrap text-gray-900">
+              {fact.value ? fact.value : <span className="text-gray-400">-</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="overflow-x-auto rounded-xl bg-white">
+        <Table withColumnBorders className="w-full min-w-184" horizontalSpacing="xs" verticalSpacing="xs">
+          <Table.Thead className="bg-gray-50 whitespace-nowrap">
+            <Table.Tr className="h-9">
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Material", "المادة")}
+              </Table.Th>
+              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Requested", "المطلوب")}
+              </Table.Th>
+              <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Unit", "الوحدة")}
+              </Table.Th>
+              <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate(`Unit price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+              </Table.Th>
+              <Table.Th className="w-48 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Notes", "الملاحظات")}
+              </Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {request.items.map((item) => {
+              const line = quotation.items.find((entry) => entry.requestForQuotationItemId === item.id);
+              return (
+                <Table.Tr key={item.id}>
+                  <Table.Td>
+                    <div className="flex flex-col gap-0.5 py-0.5">
+                      <span className="text-sm font-medium text-gray-800">{item.material.title}</span>
+                      <span className="font-mono text-xs text-gray-400">{item.materialCode}</span>
+                    </div>
+                  </Table.Td>
+                  <Table.Td className="text-sm text-gray-700">
+                    {formatQuantity(item.quantityRequested)} {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
+                  </Table.Td>
+                  <Table.Td className="text-sm text-gray-700">
+                    {line ? (
+                      getMaterialUnitLabel(line.unitOfMeasurementSelected, locale)
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </Table.Td>
+                  <Table.Td className="text-sm text-gray-800">
+                    {line ? formatMoney(Number(line.unitPrice)) : <span className="text-gray-400">-</span>}
+                  </Table.Td>
+                  <Table.Td className="text-sm whitespace-pre-wrap text-gray-600">
+                    {line?.notes?.trim() ? line.notes : <span className="text-gray-400">-</span>}
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      </div>
+    </div>
   );
 }
