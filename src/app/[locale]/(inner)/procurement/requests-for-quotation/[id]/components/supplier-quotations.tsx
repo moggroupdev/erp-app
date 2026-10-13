@@ -23,8 +23,9 @@ import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/req
 
 const cellField = {
   variant: "unstyled" as const,
+  size: "xs" as const,
   radius: 0,
-  styles: { input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0 } },
+  styles: { input: { minHeight: 0, height: "1.25rem", padding: 0, minWidth: 0, lineHeight: 1.25 } },
 };
 
 function toIso(value: string | null) {
@@ -213,7 +214,7 @@ function QuotationCard({
   onError: (message: string) => void;
   onSaved: () => Promise<void>;
 }) {
-  const { locale, translate, translation } = useI18n();
+  const { locale, translate } = useI18n();
   const privateRequest = usePrivateRequest();
   const [opened, { toggle }] = useDisclosure(false);
 
@@ -327,7 +328,7 @@ function QuotationCard({
         {locked ? (
           <QuotationSummary request={request} quotation={quotation} />
         ) : (
-        <div className="flex flex-col gap-4 px-4 py-4">
+          <div className="flex flex-col gap-4 px-4 py-4">
             <div className="grid gap-3 md:grid-cols-2">
               <TextInput
                 label={translate("Payment terms", "شروط الدفع")}
@@ -377,20 +378,28 @@ function QuotationCard({
             </div>
 
             <div className="overflow-x-auto rounded-xl bg-white">
-              <Table withColumnBorders className="w-full min-w-184" horizontalSpacing="xs" verticalSpacing="xs">
+              <Table
+                withColumnBorders
+                className="w-full min-w-184 [&_td]:align-middle! [&_th]:align-middle!"
+                horizontalSpacing="xs"
+                verticalSpacing={10}
+              >
                 <Table.Thead className="bg-gray-50 whitespace-nowrap">
-                  <Table.Tr className="h-9">
-                    <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Material", "المادة")}
+                  <Table.Tr className="h-8">
+                    <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Code", "الكود")}
                     </Table.Th>
                     <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate("Requested", "المطلوب")}
+                      {translate("Item", "الصنف")}
                     </Table.Th>
                     <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Unit", "الوحدة")}
                     </Table.Th>
-                    <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      {translate(`Unit price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+                    <Table.Th className="w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Quantity", "الكمية")}
+                    </Table.Th>
+                    <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                      {translate("Unit price", "سعر الوحدة")}
                     </Table.Th>
                     <Table.Th className="w-48 text-xs font-medium tracking-wide text-gray-500 uppercase">
                       {translate("Notes", "الملاحظات")}
@@ -403,17 +412,9 @@ function QuotationCard({
                     const showUnits = isRawMaterial(item.material.materialType) && item.material.unitConversions.length > 0;
                     return (
                       <Table.Tr key={item.id}>
-                        <Table.Td>
-                          <div className="flex flex-col gap-0.5 py-0.5">
-                            <span className="text-sm font-medium text-gray-800">{item.material.title}</span>
-                            <span className="font-mono text-xs text-gray-400">{item.materialCode}</span>
-                          </div>
-                        </Table.Td>
-                        <Table.Td className="text-sm text-gray-700">
-                          {formatQuantity(item.quantityRequested)}{" "}
-                          {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
-                        </Table.Td>
-                        <Table.Td className="focus-within:bg-haze-50/60 align-top! transition-colors">
+                        <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
+                        <Table.Td className="text-sm font-medium text-gray-800">{item.material.title}</Table.Td>
+                        <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
                           {editable && showUnits ? (
                             <DataSelect
                               value={draft?.unit ?? item.unitOfMeasurementSelected}
@@ -433,7 +434,14 @@ function QuotationCard({
                               placeholder={translate("Select unit", "اختر الوحدة")}
                               {...cellField}
                               styles={{
-                                input: { minHeight: 0, height: "auto", padding: 0, minWidth: 0, cursor: "pointer" },
+                                input: {
+                                  minHeight: 0,
+                                  height: "1.25rem",
+                                  padding: 0,
+                                  minWidth: 0,
+                                  lineHeight: 1.25,
+                                  cursor: "pointer",
+                                },
                               }}
                             />
                           ) : (
@@ -442,7 +450,8 @@ function QuotationCard({
                             </span>
                           )}
                         </Table.Td>
-                        <Table.Td className="focus-within:bg-haze-50/60 align-top! transition-colors">
+                        <Table.Td className="text-sm text-gray-700">{formatQuantity(item.quantityRequested)}</Table.Td>
+                        <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
                           <NumberInput
                             value={draft?.price ?? ""}
                             onChange={(value) =>
@@ -461,7 +470,7 @@ function QuotationCard({
                             {...cellField}
                           />
                         </Table.Td>
-                        <Table.Td className="focus-within:bg-haze-50/60 align-top! transition-colors">
+                        <Table.Td className="focus-within:bg-haze-50/60 transition-colors">
                           <TextInput
                             value={draft?.notes ?? ""}
                             onChange={(event) =>
@@ -497,14 +506,8 @@ function QuotationCard({
   );
 }
 
-function QuotationSummary({
-  request,
-  quotation,
-}: {
-  request: RequestForQuotationDetailed;
-  quotation: SupplierQuotation;
-}) {
-  const { locale, translate, translation } = useI18n();
+function QuotationSummary({ request, quotation }: { request: RequestForQuotationDetailed; quotation: SupplierQuotation }) {
+  const { locale, translate } = useI18n();
 
   const facts: { label: string; value: string | null; wide?: boolean }[] = [
     {
@@ -544,20 +547,28 @@ function QuotationSummary({
       </dl>
 
       <div className="overflow-x-auto rounded-xl bg-white">
-        <Table withColumnBorders className="w-full min-w-184" horizontalSpacing="xs" verticalSpacing="xs">
+        <Table
+          withColumnBorders
+          className="w-full min-w-184 [&_td]:align-middle! [&_th]:align-middle!"
+          horizontalSpacing="xs"
+          verticalSpacing={10}
+        >
           <Table.Thead className="bg-gray-50 whitespace-nowrap">
-            <Table.Tr className="h-9">
-              <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Material", "المادة")}
+            <Table.Tr className="h-8">
+              <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Code", "الكود")}
               </Table.Th>
               <Table.Th className="text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate("Requested", "المطلوب")}
+                {translate("Item", "الصنف")}
               </Table.Th>
               <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {translate("Unit", "الوحدة")}
               </Table.Th>
-              <Table.Th className="w-40 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                {translate(`Unit price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
+              <Table.Th className="w-28 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Quantity", "الكمية")}
+              </Table.Th>
+              <Table.Th className="w-36 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                {translate("Unit price", "سعر الوحدة")}
               </Table.Th>
               <Table.Th className="w-48 text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {translate("Notes", "الملاحظات")}
@@ -567,24 +578,13 @@ function QuotationSummary({
           <Table.Tbody>
             {request.items.map((item) => {
               const line = quotation.items.find((entry) => entry.requestForQuotationItemId === item.id);
+              const unit = line?.unitOfMeasurementSelected ?? item.unitOfMeasurementSelected;
               return (
                 <Table.Tr key={item.id}>
-                  <Table.Td>
-                    <div className="flex flex-col gap-0.5 py-0.5">
-                      <span className="text-sm font-medium text-gray-800">{item.material.title}</span>
-                      <span className="font-mono text-xs text-gray-400">{item.materialCode}</span>
-                    </div>
-                  </Table.Td>
-                  <Table.Td className="text-sm text-gray-700">
-                    {formatQuantity(item.quantityRequested)} {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
-                  </Table.Td>
-                  <Table.Td className="text-sm text-gray-700">
-                    {line ? (
-                      getMaterialUnitLabel(line.unitOfMeasurementSelected, locale)
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </Table.Td>
+                  <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
+                  <Table.Td className="text-sm font-medium text-gray-800">{item.material.title}</Table.Td>
+                  <Table.Td className="text-sm text-gray-700">{getMaterialUnitLabel(unit, locale)}</Table.Td>
+                  <Table.Td className="text-sm text-gray-700">{formatQuantity(item.quantityRequested)}</Table.Td>
                   <Table.Td className="text-sm text-gray-800">
                     {line ? formatMoney(Number(line.unitPrice)) : <span className="text-gray-400">-</span>}
                   </Table.Td>
