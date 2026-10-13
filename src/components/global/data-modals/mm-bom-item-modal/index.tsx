@@ -9,7 +9,7 @@ import mmBomsApi from "@/lib/api/mm-boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MmBomItemWithMaterial } from "@/types/mm-bom";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
@@ -51,7 +51,7 @@ export default function MmBomItemModal({
   const baseUnit = activeMaterial?.unitOfMeasurement ?? null;
   const unitConversions = activeMaterial?.unitConversions ?? [];
   const materialType = activeMaterial?.materialType ?? null;
-  const showUnitSelect = !!materialType && isRawMaterial(materialType);
+  const showUnitSelect = !!materialType && supportsUnitConversions(materialType);
 
   const allExcludeCodes = useMemo(
     () => [...excludeMaterialCodes, manufacturedMaterialCode],

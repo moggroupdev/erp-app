@@ -17,7 +17,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { resolveDisplayUnit, toBaseQuantity, toDisplayQuantity } from "@/lib/helpers/unit-conversion";
@@ -101,7 +101,7 @@ function buildRows(items: MaterialPurchaseOrderItem[]): ReceiptDraftRow[] {
 }
 
 function showUnitSelect(row: ReceiptDraftRow) {
-  return isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+  return supportsUnitConversions(row.materialType) && row.unitConversions.length > 0;
 }
 
 function getRowUnitOptions(row: ReceiptDraftRow, locale: Locale) {

@@ -23,7 +23,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PURCHASING_DEPARTMENT_ID } from "@/lib/constants/global";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -672,7 +672,7 @@ function QuotationCard({
                 <Table.Tbody>
                   {request.items.map((item) => {
                     const draft = prices[item.id];
-                    const showUnits = isRawMaterial(item.material.materialType) && item.material.unitConversions.length > 0;
+                    const showUnits = supportsUnitConversions(item.material.materialType) && item.material.unitConversions.length > 0;
                     return (
                       <Table.Tr key={item.id}>
                         <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>

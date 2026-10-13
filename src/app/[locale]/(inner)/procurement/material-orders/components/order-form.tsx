@@ -17,7 +17,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 import { Badge, Button, NumberInput, Table, TextInput } from "@mantine/core";
@@ -111,7 +111,7 @@ function createRowKey() {
 }
 
 function showUnitSelect(row: ItemDraftRow) {
-  return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+  return !!row.materialType && supportsUnitConversions(row.materialType) && row.unitConversions.length > 0;
 }
 
 function getRowUnitOptions(row: ItemDraftRow, locale: Locale) {

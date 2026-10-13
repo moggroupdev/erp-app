@@ -14,7 +14,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import requestForQuotationsApi from "@/lib/api/request-for-quotations";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions, type MaterialType } from "@/lib/constants/enums/material-types";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
@@ -62,7 +62,7 @@ function emptyRow(): ItemDraft {
 }
 
 function showUnitSelect(row: ItemDraft) {
-  return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+  return !!row.materialType && supportsUnitConversions(row.materialType) && row.unitConversions.length > 0;
 }
 
 function isEmptyRow(row: ItemDraft) {

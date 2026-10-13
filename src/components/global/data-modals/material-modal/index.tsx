@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Material, MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { isManufacturedMaterial, isSparePart } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import { MATERIAL_UNITS } from "@/lib/constants/enums/material-units";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -75,10 +75,17 @@ export default function MaterialModal({
     } else reset();
   }, [materialToUpdate, helpers]);
 
-  // Non-raw materials always use count as the unit of measurement
+  // Spare parts always use count. Manufactured materials default to count but can use any unit.
   useEffect(() => {
-    if (!materialType || isRawMaterial(materialType as MaterialType)) return;
-    setUnitOfMeasurement(MATERIAL_UNITS.COUNT);
+    if (!materialType) return;
+    const type = materialType as MaterialType;
+    if (isSparePart(type)) {
+      setUnitOfMeasurement(MATERIAL_UNITS.COUNT);
+      return;
+    }
+    if (isManufacturedMaterial(type)) {
+      setUnitOfMeasurement((current) => current ?? MATERIAL_UNITS.COUNT);
+    }
   }, [materialType]);
 
   // Clear subcategory only when main category changes to one it no longer belongs to
@@ -89,7 +96,7 @@ export default function MaterialModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainCategoryId, subCategoryId]);
 
-  const isUnitLockedToCount = !!materialType && !isRawMaterial(materialType as MaterialType);
+  const isUnitLockedToCount = !!materialType && isSparePart(materialType as MaterialType);
 
   const mutation = useMutation({
     mutationFn: async () => {

@@ -13,7 +13,7 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
+import { isManufacturedMaterial, supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { Menu } from "@mantine/core";
 import { Pencil, Repeat, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -143,7 +143,7 @@ export default function Page() {
 
             <MaterialDetails material={material} />
 
-            {isRawMaterial(material.materialType) && <MaterialUnitConversionsSection material={material} />}
+            {supportsUnitConversions(material.materialType) && <MaterialUnitConversionsSection material={material} />}
 
             {isManufacturedMaterial(material.materialType) && (
               <MaterialBomSection material={material} bom={bomQuery.data || null} />

@@ -11,7 +11,7 @@ import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
-import { isManufacturedMaterial, isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import { isManufacturedMaterial, supportsUnitConversions, type MaterialType } from "@/lib/constants/enums/material-types";
 import { usesMmRecipe, type MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
@@ -133,7 +133,7 @@ function DraftToggle({
 }
 
 function showUnitSelect(row: BomDraftRow) {
-  return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+  return !!row.materialType && supportsUnitConversions(row.materialType) && row.unitConversions.length > 0;
 }
 
 function getRowUnitOptions(row: BomDraftRow, locale: Locale) {

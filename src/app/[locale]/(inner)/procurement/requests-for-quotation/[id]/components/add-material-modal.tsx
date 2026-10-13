@@ -10,7 +10,7 @@ import SelectMaterial from "@/components/global/selections/remote-based/select-m
 import usePrivateRequest from "@/hooks/use-private-request";
 import requestForQuotationsApi from "@/lib/api/request-for-quotations";
 import { queryKeys } from "@/lib/api/query-keys";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -37,7 +37,7 @@ export default function AddMaterialModal({
   const [notes, setNotes] = useState("");
   const [validationError, setValidationError] = useState("");
 
-  const showUnitChoices = !!material && isRawMaterial(material.materialType) && material.unitConversions.length > 0;
+  const showUnitChoices = !!material && supportsUnitConversions(material.materialType) && material.unitConversions.length > 0;
 
   const addItem = useMutation({
     mutationFn: () => {
