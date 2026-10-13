@@ -1,18 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge, Button, Collapse, NumberInput, Table, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { ChevronDown, CircleDot, Store, Users } from "lucide-react";
+import { ChevronDown, CircleDot, Printer, Store, Users } from "lucide-react";
 import { toast } from "sonner";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import DataSelect from "@/components/ui/data-select";
 import ErrorAlert from "@/components/ui/error-alert";
+import PrintDocument from "@/components/ui/print-document";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
+import SupplierQuotationRequestPrintDocument, {
+  type SupplierQuotationRequestContact,
+} from "@/components/documents/procurement/quotations/supplier-quotation-request-print-document";
+import useUser from "@/contexts/user/hook";
+import useHasPermission from "@/hooks/use-has-permission";
 import usePrivateRequest from "@/hooks/use-private-request";
+import departmentsApi from "@/lib/api/departments";
 import requestForQuotationsApi from "@/lib/api/request-for-quotations";
 import { queryKeys } from "@/lib/api/query-keys";
+import { PURCHASING_DEPARTMENT_ID } from "@/lib/constants/global";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { isRawMaterial } from "@/lib/constants/enums/material-types";
 import getErrorMessage from "@/lib/helpers/get-error-message";
@@ -157,13 +166,49 @@ export default function SupplierQuotations({
   canUpdate: boolean;
 }) {
   const { locale, translate } = useI18n();
+  const { user } = useUser();
+  const canPrint = useHasPermission(PERMISSIONS.PRINT_SUPPLIER_QUOTATION_REQUEST);
   const privateRequest = usePrivateRequest();
+  const privateRequestRef = useRef(privateRequest);
+  privateRequestRef.current = privateRequest;
   const queryClient = useQueryClient();
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [expandQuotationId, setExpandQuotationId] = useState<string | null>(null);
+  const [purchasingDepartmentManager, setPurchasingDepartmentManager] = useState<SupplierQuotationRequestContact | null>(
+    null,
+  );
 
   const editable = canUpdate && !request.closedAt && !request.cancelledAt;
+  const preparedBy: SupplierQuotationRequestContact = {
+    name: user?.name ?? "",
+    email: user?.email ?? null,
+    phone: user?.phone ?? null,
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    departmentsApi
+      .get({ privateRequest: privateRequestRef.current, id: PURCHASING_DEPARTMENT_ID })
+      .then((department) => {
+        if (cancelled) return;
+        const manager = department.manager;
+        if (!manager) return;
+        setPurchasingDepartmentManager({
+          name: manager.name,
+          email: manager.email,
+          phone: manager.phone,
+        });
+      })
+      .catch(() => {
+        // Leave the signature block hidden if the purchasing department cannot be loaded.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function refresh() {
     return queryClient.invalidateQueries({ queryKey: queryKeys.requestForQuotations.detail(request.id) });
@@ -253,6 +298,9 @@ export default function SupplierQuotations({
               request={request}
               quotation={quotation}
               editable={editable}
+              canPrint={canPrint}
+              preparedBy={preparedBy}
+              purchasingDepartmentManager={purchasingDepartmentManager}
               defaultExpanded={quotation.id === expandQuotationId}
               onError={setError}
               onSaved={refresh}
@@ -264,10 +312,73 @@ export default function SupplierQuotations({
   );
 }
 
+function QuotationLetterPrint({
+  request,
+  quotation,
+  preparedBy,
+  purchasingDepartmentManager,
+}: {
+  request: RequestForQuotationDetailed;
+  quotation: SupplierQuotation;
+  preparedBy: SupplierQuotationRequestContact;
+  purchasingDepartmentManager: SupplierQuotationRequestContact | null;
+}) {
+  const { locale, translate } = useI18n();
+  const supplierName = quotation.supplier.name;
+  const hasItems = request.items.length > 0;
+  const printTitle = translate(`Request for Quotation - ${supplierName}`, `طلب عرض سعر - ${supplierName}`);
+  const printItems = request.items.map((item) => ({
+    materialTitle: item.material.title,
+    materialCode: item.material.code,
+    unitLabel: getMaterialUnitLabel(item.unitOfMeasurementSelected, locale),
+    quantity: Number(item.quantityRequested),
+    specifications: item.notes?.trim() || null,
+  }));
+
+  return (
+    <PrintDocument
+      buttonLabel={translate("Print quotation request", "طباعة طلب عرض السعر")}
+      title={printTitle}
+      paperWidth={210}
+      paperHeight={297}
+      icon={<Printer size={14} />}
+      renderTrigger={({ onClick, disabled, label, icon }) => (
+        <button
+          type="button"
+          title={label}
+          aria-label={label}
+          disabled={disabled || !hasItems}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (!hasItems) return;
+            onClick();
+          }}
+          className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:text-gray-800 disabled:cursor-not-allowed disabled:text-gray-300"
+        >
+          {icon}
+        </button>
+      )}
+    >
+      {hasItems ? (
+        <SupplierQuotationRequestPrintDocument
+          supplierDisplayName={supplierName}
+          notes={request.notes}
+          items={printItems}
+          preparedBy={preparedBy}
+          purchasingDepartmentManager={purchasingDepartmentManager}
+        />
+      ) : null}
+    </PrintDocument>
+  );
+}
+
 function QuotationCard({
   request,
   quotation,
   editable,
+  canPrint,
+  preparedBy,
+  purchasingDepartmentManager,
   defaultExpanded = false,
   onError,
   onSaved,
@@ -275,6 +386,9 @@ function QuotationCard({
   request: RequestForQuotationDetailed;
   quotation: SupplierQuotation;
   editable: boolean;
+  canPrint: boolean;
+  preparedBy: SupplierQuotationRequestContact;
+  purchasingDepartmentManager: SupplierQuotationRequestContact | null;
   defaultExpanded?: boolean;
   onError: (message: string) => void;
   onSaved: () => Promise<void>;
@@ -402,14 +516,17 @@ function QuotationCard({
         opened ? "border-haze-200" : "border-gray-100 hover:border-gray-200"
       }`}
     >
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={opened}
-        className={`flex w-full items-center gap-3 px-4 py-3 text-start transition-colors ${
+      <div
+        className={`flex w-full items-center gap-1.5 px-4 py-3 transition-colors ${
           opened ? "bg-haze-50/40" : "hover:bg-gray-50/80"
         }`}
       >
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={opened}
+          className="flex min-w-0 flex-1 items-center gap-3 text-start"
+        >
         <span
           className={`flex size-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
             opened ? "bg-haze-600 text-white" : "bg-haze-50 text-haze-700"
@@ -463,7 +580,16 @@ function QuotationCard({
             <ChevronDown size={16} />
           </span>
         </span>
-      </button>
+        </button>
+        {canPrint && (
+          <QuotationLetterPrint
+            request={request}
+            quotation={quotation}
+            preparedBy={preparedBy}
+            purchasingDepartmentManager={purchasingDepartmentManager}
+          />
+        )}
+      </div>
 
       <Collapse in={opened} transitionDuration={200}>
         {locked ? (

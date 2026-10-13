@@ -20,7 +20,7 @@ import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { convertEnteredQuantityBetweenUnits } from "../../material-orders/helpers";
-import AddQuotationItemsModal, { type QuotationItemLine } from "../../quotation-requests/components/add-items-modal";
+import AddQuotationItemsModal, { type QuotationItemLine } from "../components/add-items-modal";
 import { RFQ_SECTION_ICON_SHELL_CLASS } from "../components/section-icon-shell";
 
 const PAGE_TITLE = { en: "Create Request for Quotation", ar: "إنشاء طلب عرض سعر" };

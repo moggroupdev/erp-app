@@ -176,12 +176,6 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_SUPPLIERS,
       },
       {
-        label: { en: "Quotation Request", ar: "طلب عرض سعر" },
-        href: "/procurement/quotation-requests",
-        icon: FileSearch,
-        requiredPermission: PERMISSIONS.PRINT_SUPPLIER_QUOTATION_REQUEST,
-      },
-      {
         label: { en: "Requests for Quotation", ar: "طلبات عروض الأسعار" },
         href: "/procurement/requests-for-quotation",
         icon: ClipboardList,
