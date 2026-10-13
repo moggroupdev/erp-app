@@ -20,7 +20,8 @@ export const RFQ_QUOTATION_LINE_COLUMN_MIN_WIDTH = {
 
 export const RFQ_COMPARISON_COLUMN_MIN_WIDTH = {
   material: 260,
-  requested: 160,
+  unit: 96,
+  quantityRequested: 112,
   supplier: 176,
 } as const;
 
@@ -48,7 +49,8 @@ export function comparisonTableColumnWidths(supplierCount: number): number[] {
   const columns = RFQ_COMPARISON_COLUMN_MIN_WIDTH;
   return [
     columns.material,
-    columns.requested,
+    columns.unit,
+    columns.quantityRequested,
     ...Array.from({ length: supplierCount }, () => columns.supplier),
   ];
 }

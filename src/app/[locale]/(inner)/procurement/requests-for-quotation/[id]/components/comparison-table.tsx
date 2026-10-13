@@ -100,8 +100,11 @@ function ComparisonGrid({ request, quotations }: { request: RequestForQuotationD
           <Table.Th style={columnMinWidthStyle(comparisonColumns.material)} className={rfqTableHeaderClass}>
             {translate("Material", "المادة")}
           </Table.Th>
-          <Table.Th style={columnMinWidthStyle(comparisonColumns.requested)} className={rfqTableHeaderClass}>
-            {translate("Requested", "المطلوب")}
+          <Table.Th style={columnMinWidthStyle(comparisonColumns.unit)} className={rfqTableHeaderClass}>
+            {translate("Unit", "الوحدة")}
+          </Table.Th>
+          <Table.Th style={columnMinWidthStyle(comparisonColumns.quantityRequested)} className={rfqTableHeaderClass}>
+            {translate("Requested quantity", "الكمية المطلوبة")}
           </Table.Th>
           {quotations.map((quotation) => (
             <Table.Th
@@ -115,105 +118,107 @@ function ComparisonGrid({ request, quotations }: { request: RequestForQuotationD
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
-          {request.items.map((item) => {
-            const prices = quotations.map((quotation) => comparablePrice(quotation, item));
-            const lowest = prices.reduce<number | null>((min, price) => {
-              if (price == null) return min;
-              if (min == null || price < min) return price;
-              return min;
-            }, null);
+        {request.items.map((item) => {
+          const prices = quotations.map((quotation) => comparablePrice(quotation, item));
+          const lowest = prices.reduce<number | null>((min, price) => {
+            if (price == null) return min;
+            if (min == null || price < min) return price;
+            return min;
+          }, null);
+          return (
+            <Table.Tr key={item.id}>
+              <Table.Td className="text-sm font-medium wrap-break-word text-gray-800">{item.material.title}</Table.Td>
+              <Table.Td className="text-sm whitespace-nowrap text-gray-700">
+                {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
+              </Table.Td>
+              <Table.Td className="text-sm whitespace-nowrap text-gray-700">
+                {formatQuantity(item.quantityRequested)}
+              </Table.Td>
+              {prices.map((price, index) => {
+                const isLowest = price != null && lowest != null && price === lowest;
+                const total = price == null ? null : price * Number(item.quantityRequested);
+                return (
+                  <Table.Td key={quotations[index].id}>
+                    {price == null || total == null ? (
+                      <span className="text-sm text-gray-400">{translate("No price", "بدون سعر")}</span>
+                    ) : (
+                      <div className="flex flex-col gap-1.5">
+                        <span
+                          className={
+                            isLowest
+                              ? "flex items-center gap-1 text-sm font-semibold text-teal-700"
+                              : "flex items-center gap-1 text-sm text-gray-800"
+                          }
+                        >
+                          {formatMoney(price, translation.currency)}
+                          {isLowest && <LowestBadge />}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {translate("Total", "الإجمالي")}: {formatMoney(total, translation.currency)}
+                        </span>
+                      </div>
+                    )}
+                  </Table.Td>
+                );
+              })}
+            </Table.Tr>
+          );
+        })}
+        <Table.Tr className="bg-gray-50!">
+          <Table.Td className="text-sm font-semibold text-gray-800">{translate("Grand total", "الإجمالي الكلي")}</Table.Td>
+          <Table.Td />
+          <Table.Td />
+          {grandTotals.map((entry, index) => {
+            const isLowest = entry?.complete === true && lowestGrand != null && Math.abs(entry.total - lowestGrand) < 0.005;
             return (
-              <Table.Tr key={item.id}>
-                <Table.Td className="text-sm font-medium wrap-break-word text-gray-800">{item.material.title}</Table.Td>
-                <Table.Td className="text-sm whitespace-nowrap text-gray-700">
-                  {formatQuantity(item.quantityRequested)} {getMaterialUnitLabel(item.unitOfMeasurementSelected, locale)}
-                </Table.Td>
-                {prices.map((price, index) => {
-                  const isLowest = price != null && lowest != null && price === lowest;
-                  const total = price == null ? null : price * Number(item.quantityRequested);
-                  return (
-                    <Table.Td key={quotations[index].id}>
-                      {price == null || total == null ? (
-                        <span className="text-sm text-gray-400">{translate("No price", "بدون سعر")}</span>
-                      ) : (
-                        <div className="flex flex-col gap-1.5">
-                          <span
-                            className={
-                              isLowest
-                                ? "flex items-center gap-1 text-sm font-semibold text-teal-700"
-                                : "flex items-center gap-1 text-sm text-gray-800"
-                            }
-                          >
-                            {formatMoney(price, translation.currency)}
-                            {isLowest && <LowestBadge />}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {translate("Total", "الإجمالي")}: {formatMoney(total, translation.currency)}
-                          </span>
-                        </div>
-                      )}
-                    </Table.Td>
-                  );
-                })}
-              </Table.Tr>
+              <Table.Td key={quotations[index].id} className={isLowest ? "bg-teal-50" : undefined}>
+                {entry == null ? (
+                  <span className="text-sm text-gray-400">-</span>
+                ) : (
+                  <span
+                    className={
+                      isLowest
+                        ? "flex items-center gap-1 text-sm font-semibold text-teal-700"
+                        : "flex items-center gap-1 text-sm font-semibold text-gray-900"
+                    }
+                  >
+                    {formatMoney(entry.total, translation.currency)}
+                    {isLowest && <LowestBadge />}
+                    {!entry.complete && (
+                      <Badge ml={6} size="xs" variant="light" color="ochre">
+                        {translate("Partial", "جزئي")}
+                      </Badge>
+                    )}
+                  </span>
+                )}
+              </Table.Td>
             );
           })}
-          <Table.Tr className="bg-gray-50!">
-            <Table.Td colSpan={2} className="text-sm font-semibold text-gray-800">
-              {translate("Grand total", "الإجمالي الكلي")}
+        </Table.Tr>
+        <Table.Tr>
+          <Table.Td className="text-sm font-medium text-gray-700">{translate("Delivery period", "مدة التوريد")}</Table.Td>
+          <Table.Td />
+          <Table.Td />
+          {quotations.map((quotation) => (
+            <Table.Td key={quotation.id} className="text-sm text-gray-700">
+              {quotation.deliveryPeriodDays != null
+                ? translate(`${quotation.deliveryPeriodDays} days`, `${quotation.deliveryPeriodDays} يوم`)
+                : "-"}
             </Table.Td>
-            {grandTotals.map((entry, index) => {
-              const isLowest =
-                entry?.complete === true && lowestGrand != null && Math.abs(entry.total - lowestGrand) < 0.005;
-              return (
-                <Table.Td key={quotations[index].id} className={isLowest ? "bg-teal-50" : undefined}>
-                  {entry == null ? (
-                    <span className="text-sm text-gray-400">-</span>
-                  ) : (
-                    <span
-                      className={
-                        isLowest
-                          ? "flex items-center gap-1 text-sm font-semibold text-teal-700"
-                          : "flex items-center gap-1 text-sm font-semibold text-gray-900"
-                      }
-                    >
-                      {formatMoney(entry.total, translation.currency)}
-                      {isLowest && <LowestBadge />}
-                      {!entry.complete && (
-                        <Badge ml={6} size="xs" variant="light" color="ochre">
-                          {translate("Partial", "جزئي")}
-                        </Badge>
-                      )}
-                    </span>
-                  )}
-                </Table.Td>
-              );
-            })}
-          </Table.Tr>
-          <Table.Tr>
-            <Table.Td colSpan={2} className="text-sm font-medium text-gray-700">
-              {translate("Delivery period", "مدة التوريد")}
-            </Table.Td>
-            {quotations.map((quotation) => (
-              <Table.Td key={quotation.id} className="text-sm text-gray-700">
-                {quotation.deliveryPeriodDays != null
-                  ? translate(`${quotation.deliveryPeriodDays} days`, `${quotation.deliveryPeriodDays} يوم`)
-                  : "-"}
+          ))}
+        </Table.Tr>
+        {detailRows.map((row) => (
+          <Table.Tr key={row.key}>
+            <Table.Td className="text-sm font-medium text-gray-700">{row.label}</Table.Td>
+            <Table.Td />
+            <Table.Td />
+            {row.values.map((value, index) => (
+              <Table.Td key={quotations[index].id} className="text-sm wrap-break-word text-gray-700">
+                {value ?? <span className="text-gray-400">-</span>}
               </Table.Td>
             ))}
           </Table.Tr>
-          {detailRows.map((row) => (
-            <Table.Tr key={row.key}>
-              <Table.Td colSpan={2} className="text-sm font-medium text-gray-700">
-                {row.label}
-              </Table.Td>
-              {row.values.map((value, index) => (
-                <Table.Td key={quotations[index].id} className="text-sm wrap-break-word text-gray-700">
-                  {value ?? <span className="text-gray-400">-</span>}
-                </Table.Td>
-              ))}
-            </Table.Tr>
-          ))}
+        ))}
       </Table.Tbody>
     </RfqFixedTable>
   );
