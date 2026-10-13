@@ -23,6 +23,7 @@ import { useI18n } from "@/lib/i18n/hooks";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
 import { priceInUnit } from "../../helpers";
 import RfqFixedTable from "../../components/rfq-fixed-table";
+import { RFQ_SECTION_ICON_SHELL_CLASS } from "../../components/section-icon-shell";
 import {
   RFQ_QUOTATION_LINE_COLUMN_MIN_WIDTH,
   columnMinWidthStyle,
@@ -188,7 +189,7 @@ export default function SupplierQuotations({
     <section className="overflow-hidden rounded-2xl bg-white">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 px-5 py-4">
         <div className="flex items-center gap-3">
-          <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
+          <span className={`bg-haze-600 ${RFQ_SECTION_ICON_SHELL_CLASS}`}>
             <Users size={18} />
           </span>
           <div>

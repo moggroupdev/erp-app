@@ -10,6 +10,7 @@ import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { RequestForQuotationDetailed, SupplierQuotation } from "@/types/request-for-quotation";
 import { priceInUnit } from "../../helpers";
 import RfqFixedTable from "../../components/rfq-fixed-table";
+import { RFQ_SECTION_ICON_SHELL_CLASS } from "../../components/section-icon-shell";
 import {
   RFQ_COMPARISON_COLUMN_MIN_WIDTH,
   columnMinWidthStyle,
@@ -24,7 +25,7 @@ export default function ComparisonTable({ request }: { request: RequestForQuotat
   return (
     <section className="overflow-hidden rounded-2xl bg-white">
       <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-        <span className="bg-plum-600 flex size-10 items-center justify-center rounded-2xl text-white">
+        <span className={`bg-plum-600 ${RFQ_SECTION_ICON_SHELL_CLASS}`}>
           <Scale size={18} />
         </span>
         <div>

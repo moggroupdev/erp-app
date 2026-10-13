@@ -21,6 +21,7 @@ import type { Locale } from "@/lib/i18n/types";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
 import { convertEnteredQuantityBetweenUnits } from "../../material-orders/helpers";
 import AddQuotationItemsModal, { type QuotationItemLine } from "../../quotation-requests/components/add-items-modal";
+import { RFQ_SECTION_ICON_SHELL_CLASS } from "../components/section-icon-shell";
 
 const PAGE_TITLE = { en: "Create Request for Quotation", ar: "إنشاء طلب عرض سعر" };
 
@@ -232,7 +233,7 @@ export default function Page() {
       >
         <section className="overflow-hidden rounded-2xl bg-white">
           <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-            <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
+            <span className={`bg-haze-600 ${RFQ_SECTION_ICON_SHELL_CLASS}`}>
               <FileText size={18} />
             </span>
             <div>
@@ -257,7 +258,7 @@ export default function Page() {
 
         <section className="overflow-hidden rounded-2xl bg-white">
           <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
-            <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
+            <span className={`bg-haze-600 ${RFQ_SECTION_ICON_SHELL_CLASS}`}>
               <Package size={18} />
             </span>
             <div>
