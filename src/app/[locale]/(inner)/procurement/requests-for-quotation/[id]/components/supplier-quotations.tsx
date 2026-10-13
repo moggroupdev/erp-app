@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Collapse, NumberInput, Table, TextInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { ChevronDown, Users } from "lucide-react";
+import { toast } from "sonner";
 import DateTimePickerInput from "@/components/ui/datetime-picker-input";
 import DataSelect from "@/components/ui/data-select";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -120,6 +121,7 @@ export default function SupplierQuotations({
   const queryClient = useQueryClient();
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [expandQuotationId, setExpandQuotationId] = useState<string | null>(null);
 
   const editable = canUpdate && !request.closedAt && !request.cancelledAt;
 
@@ -134,9 +136,10 @@ export default function SupplierQuotations({
         id: request.id,
         supplierId: supplierId!,
       }),
-    onSuccess: async () => {
+    onSuccess: async (quotation) => {
       setSupplierId(null);
       setError("");
+      setExpandQuotationId(quotation.id);
       await refresh();
     },
     onError: (err) => setError(getErrorMessage(locale, err)),
@@ -200,6 +203,7 @@ export default function SupplierQuotations({
               request={request}
               quotation={quotation}
               editable={editable}
+              defaultExpanded={quotation.id === expandQuotationId}
               onError={setError}
               onSaved={refresh}
             />
@@ -214,18 +218,20 @@ function QuotationCard({
   request,
   quotation,
   editable,
+  defaultExpanded = false,
   onError,
   onSaved,
 }: {
   request: RequestForQuotationDetailed;
   quotation: SupplierQuotation;
   editable: boolean;
+  defaultExpanded?: boolean;
   onError: (message: string) => void;
   onSaved: () => Promise<void>;
 }) {
   const { locale, translate } = useI18n();
   const privateRequest = usePrivateRequest();
-  const [opened, { toggle }] = useDisclosure(false);
+  const [opened, { toggle }] = useDisclosure(defaultExpanded);
 
   const [paymentTerms, setPaymentTerms] = useState(quotation.paymentTerms ?? "");
   const [deliveryTerms, setDeliveryTerms] = useState(quotation.deliveryTerms ?? "");
@@ -315,8 +321,13 @@ function QuotationCard({
     onSuccess: async () => {
       onError("");
       await onSaved();
+      toast.success(translate("Quotation saved successfully.", "تم حفظ عرض السعر بنجاح."));
     },
-    onError: (err) => onError(getErrorMessage(locale, err)),
+    onError: (err) => {
+      const message = getErrorMessage(locale, err);
+      toast.error(message);
+      onError(message);
+    },
   });
 
   return (
