@@ -69,6 +69,7 @@ export type MaterialPurchaseOrder = {
   cancelledAt: Date | null;
   notes: string | null;
   createdAt: Date;
+  updatedAt: Date | null;
   createdBy: string;
 };
 
@@ -97,6 +98,11 @@ export type MaterialPurchaseOrderItem = {
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
+  supplierQuotationItemId: string | null;
+  supplierQuotation: {
+    requestForQuotationId: string;
+    requestForQuotationCode: string;
+  } | null;
   material: PurchaseMaterialWithUnitConversion;
   /** Accepted qty across receipts, in the order line's selected unit. */
   quantityReceived?: number;
@@ -134,6 +140,7 @@ export type CreateMaterialPurchaseOrderItemDto = {
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
+  supplierQuotationItemId?: string | null;
   requisitionAllocations: CreateMaterialPurchaseOrderItemRequisitionAllocationDto[];
 };
 
@@ -153,6 +160,8 @@ export type CreateMaterialPurchaseOrderDto = {
   items: CreateMaterialPurchaseOrderItemDto[];
   paymentTerms: CreateMaterialPurchaseOrderPaymentTermDto[];
 };
+
+export type UpdateMaterialPurchaseOrderDto = Omit<CreateMaterialPurchaseOrderDto, "supplierId">;
 
 // =============== Material Purchase Receipts ===============
 

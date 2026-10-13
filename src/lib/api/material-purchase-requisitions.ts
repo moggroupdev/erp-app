@@ -54,15 +54,20 @@ const materialPurchaseRequisitionsApi = {
   async listOpenItems({
     privateRequest,
     materialCode,
+    excludeMaterialPurchaseOrderId,
     signal,
   }: {
     privateRequest: PrivateRequest;
     materialCode?: string;
+    excludeMaterialPurchaseOrderId?: string;
     signal?: AbortSignal;
   }) {
     return await privateRequest<MaterialPurchaseRequisitionOpenItem[]>({
       url: "material-purchase-requisitions/open-items",
-      params: materialCode ? { materialCode } : undefined,
+      params: {
+        ...(materialCode ? { materialCode } : {}),
+        ...(excludeMaterialPurchaseOrderId ? { excludeMaterialPurchaseOrderId } : {}),
+      },
       signal,
     });
   },

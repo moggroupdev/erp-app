@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, Table } from "@mantine/core";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -22,6 +22,7 @@ import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import { materialPurchaseOrderUpdateBlock } from "../helpers";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
@@ -31,6 +32,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
+import { EmptyValue } from "@/components/ui/entity-details";
 import PrintDocument from "@/components/ui/print-document";
 import MaterialPurchaseOrderPrintDocument from "@/components/documents/procurement/mpos/material-purchase-order-print-document";
 import OrderDetails from "./components/order-details";
@@ -52,6 +54,7 @@ export default function Page() {
   const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
   const canAddSupplierInvoice = useHasPermission(PERMISSIONS.ADD_SUPPLIER_INVOICE);
   const canAddReceipt = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_RECEIPT);
+  const canUpdateOrder = useHasPermission(PERMISSIONS.UPDATE_MATERIAL_PURCHASE_ORDER);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -122,6 +125,20 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={refetch} />
             <ActionsMenu>
+              {order &&
+                canUpdateOrder &&
+                !isReceiptsFetching &&
+                !receiptsError &&
+                paginatedReceipts?.data.length === 0 &&
+                materialPurchaseOrderUpdateBlock(order, false) === null && (
+                  <Menu.Item
+                    component={Link}
+                    href={getLocalizedHref(`/procurement/material-orders/${id}/edit`)}
+                    leftSection={<Pencil size={14} />}
+                  >
+                    {translate("Edit", "تعديل")}
+                  </Menu.Item>
+                )}
               {order && (
                 <PrintDocument
                   title={`${translate(PAGE_TITLE.en, PAGE_TITLE.ar)} - ${order.code}`}
@@ -180,6 +197,7 @@ export default function Page() {
                           {translate(`Subtotal (${translation.currency})`, `المجموع الفرعي (${translation.currency})`)}
                         </Table.Th>
                         <Table.Th>{translate("Requisitions", "طلبات الشراء")}</Table.Th>
+                        <Table.Th>{translate("Quotation", "عرض السعر")}</Table.Th>
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -250,6 +268,19 @@ export default function Page() {
                                       allocations={item.requisitionAllocations ?? []}
                                     />
                                   </Table.Td>
+                                  <Table.Td>
+                                    {item.supplierQuotation ? (
+                                      <ProtectedLink
+                                        permission={PERMISSIONS.READ_REQUEST_FOR_QUOTATIONS}
+                                        href={`/procurement/requests-for-quotation/${item.supplierQuotation.requestForQuotationId}`}
+                                        className="font-mono hover:underline"
+                                      >
+                                        {item.supplierQuotation.requestForQuotationCode}
+                                      </ProtectedLink>
+                                    ) : (
+                                      <EmptyValue />
+                                    )}
+                                  </Table.Td>
                                 </Table.Tr>
                               </>
                             )}
@@ -264,12 +295,14 @@ export default function Page() {
                         </Table.Th>
                         <Table.Th>{formatMoney(subtotal)}</Table.Th>
                         <Table.Th />
+                        <Table.Th />
                       </Table.Tr>
                       <Table.Tr className="font-medium text-gray-800">
                         <Table.Th colSpan={7} className="text-end">
                           {translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`)}
                         </Table.Th>
                         <Table.Th>{formatMoney(vat)}</Table.Th>
+                        <Table.Th />
                         <Table.Th />
                       </Table.Tr>
                       <Table.Tr className="font-semibold text-gray-900">
@@ -280,6 +313,7 @@ export default function Page() {
                           )}
                         </Table.Th>
                         <Table.Th>{formatMoney(grandTotal)}</Table.Th>
+                        <Table.Th />
                         <Table.Th />
                       </Table.Tr>
                     </Table.Tfoot>

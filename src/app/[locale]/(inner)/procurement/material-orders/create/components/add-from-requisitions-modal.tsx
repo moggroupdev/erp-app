@@ -109,12 +109,15 @@ export default function AddFromRequisitionsModal({
   opened,
   onClose,
   excludedRequisitionItemIds,
+  excludeMaterialPurchaseOrderId,
   onAdd,
 }: {
   opened: boolean;
   onClose: () => void;
   /** Requisition item IDs already linked on the draft order. */
   excludedRequisitionItemIds: string[];
+  /** While editing an order, remaining quantity ignores that order's current allocations. */
+  excludeMaterialPurchaseOrderId?: string;
   onAdd: (lines: AddedMaterialLine[]) => void;
 }) {
   const { locale, translate, translation } = useI18n();
@@ -131,8 +134,9 @@ export default function AddFromRequisitionsModal({
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.materialPurchaseRequisitions.openItems(),
-    queryFn: ({ signal }) => materialPurchaseRequisitionsApi.listOpenItems({ privateRequest, signal }),
+    queryKey: queryKeys.materialPurchaseRequisitions.openItems(undefined, excludeMaterialPurchaseOrderId),
+    queryFn: ({ signal }) =>
+      materialPurchaseRequisitionsApi.listOpenItems({ privateRequest, excludeMaterialPurchaseOrderId, signal }),
     staleTime: staleTimes.materialPurchaseRequisitions,
     enabled: opened,
   });

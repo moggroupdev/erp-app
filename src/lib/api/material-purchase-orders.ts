@@ -10,6 +10,7 @@ import type {
   MaterialPurchaseOrderWithSupplier,
   MaterialPurchaseReceipt,
   MaterialPurchaseReceiptDetailed,
+  UpdateMaterialPurchaseOrderDto,
 } from "@/types/material-purchase-order";
 
 const materialPurchaseOrdersApi = {
@@ -23,6 +24,22 @@ const materialPurchaseOrdersApi = {
     return await privateRequest<MaterialPurchaseOrder & { items: MaterialPurchaseOrderItem[] }>({
       method: "POST",
       url: "material-purchase-orders",
+      data: dto,
+    });
+  },
+
+  async update({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: UpdateMaterialPurchaseOrderDto;
+  }) {
+    return await privateRequest<MaterialPurchaseOrder & { items: MaterialPurchaseOrderItem[] }>({
+      method: "PATCH",
+      url: `material-purchase-orders/${id}`,
       data: dto,
     });
   },

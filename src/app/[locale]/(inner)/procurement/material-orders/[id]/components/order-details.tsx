@@ -61,6 +61,14 @@ export default function OrderDetails({ order }: { order: MaterialPurchaseOrderDe
       key: translate("PO Date", "تاريخ أمر التوريد"),
       value: formatDateAndTime(order.createdAt, locale),
     },
+    ...(order.updatedAt
+      ? [
+          {
+            key: translate("Last updated", "آخر تحديث"),
+            value: formatDateAndTime(order.updatedAt, locale),
+          },
+        ]
+      : []),
     {
       key: translate("Created By", "أنشئ بواسطة"),
       value: <CreatorLink creator={order.createdBy} />,

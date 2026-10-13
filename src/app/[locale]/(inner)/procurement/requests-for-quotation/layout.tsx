@@ -3,7 +3,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <PermissionGuard permission={PERMISSIONS.PRINT_SUPPLIER_QUOTATION_REQUEST} isForPage>
+    <PermissionGuard permission={PERMISSIONS.READ_REQUEST_FOR_QUOTATIONS} isForPage>
       {children}
     </PermissionGuard>
   );

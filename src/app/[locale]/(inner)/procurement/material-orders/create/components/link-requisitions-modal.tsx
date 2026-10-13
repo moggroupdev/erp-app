@@ -45,6 +45,7 @@ export default function LinkRequisitionsModal({
   baseUnit,
   unitConversions,
   existingAllocations,
+  excludeMaterialPurchaseOrderId,
   onSave,
 }: {
   opened: boolean;
@@ -55,6 +56,8 @@ export default function LinkRequisitionsModal({
   baseUnit: MaterialUnit;
   unitConversions: MaterialUnitConversionSummary[];
   existingAllocations: AllocationDraft[];
+  /** While editing an order, remaining quantity ignores that order's current allocations. */
+  excludeMaterialPurchaseOrderId?: string;
   /** Always sets order line quantity to the linked total. Empty allocations remove the line. */
   onSave: (allocations: AllocationDraft[], nextQuantityOrdered: number) => void;
 }) {
@@ -69,9 +72,14 @@ export default function LinkRequisitionsModal({
     error,
     refetch,
   } = useQuery({
-    queryKey: queryKeys.materialPurchaseRequisitions.openItems(materialCode),
+    queryKey: queryKeys.materialPurchaseRequisitions.openItems(materialCode, excludeMaterialPurchaseOrderId),
     queryFn: ({ signal }) =>
-      materialPurchaseRequisitionsApi.listOpenItems({ privateRequest, materialCode, signal }),
+      materialPurchaseRequisitionsApi.listOpenItems({
+        privateRequest,
+        materialCode,
+        excludeMaterialPurchaseOrderId,
+        signal,
+      }),
     staleTime: staleTimes.materialPurchaseRequisitions,
     enabled: opened && !!materialCode,
   });

@@ -140,6 +140,9 @@ export default function MaterialPurchaseOrderPrintDocument({ order }: MaterialPu
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4 [&>div>span:last-child]:text-[11px]">
         <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
         <PrintDetail label={translate("PO Date", "تاريخ أمر التوريد")} value={formatDateAndTime(order.createdAt, locale)} />
+        {order.updatedAt ? (
+          <PrintDetail label={translate("Last updated", "آخر تحديث")} value={formatDateAndTime(order.updatedAt, locale)} />
+        ) : null}
         <PrintDetail label={translate("Supplier", "المورد")} value={order.supplier.name} />
         {order.notes ? <PrintDetail label={translate("Notes", "الملاحظات")} value={order.notes} /> : null}
       </section>

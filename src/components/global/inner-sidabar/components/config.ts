@@ -1,6 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import { UserState } from "@/types/user";
-import { PERMISSIONS, MATERIAL_REPORT_PERMISSIONS, MATERIAL_PURCHASING_REPORT_PERMISSIONS, type Permission } from "@/lib/constants/enums/permissions";
+import {
+  PERMISSIONS,
+  MATERIAL_REPORT_PERMISSIONS,
+  MATERIAL_PURCHASING_REPORT_PERMISSIONS,
+  type Permission,
+} from "@/lib/constants/enums/permissions";
 import {
   BadgeDollarSign,
   Boxes,
@@ -176,16 +181,16 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_SUPPLIERS,
       },
       {
-        label: { en: "Quotation Request", ar: "طلب عرض سعر" },
-        href: "/procurement/quotation-requests",
-        icon: FileSearch,
-        requiredPermission: PERMISSIONS.PRINT_SUPPLIER_QUOTATION_REQUEST,
-      },
-      {
         label: { en: "Material Purchase Requisitions", ar: "طلبات شراء الخامات" },
         href: "/procurement/material-requisitions",
         icon: ClipboardList,
         requiredPermission: PERMISSIONS.READ_MATERIAL_PURCHASE_REQUISITIONS,
+      },
+      {
+        label: { en: "Requests for Quotation", ar: "طلبات عروض الأسعار" },
+        href: "/procurement/requests-for-quotation",
+        icon: FileSearch,
+        requiredPermission: PERMISSIONS.READ_REQUEST_FOR_QUOTATIONS,
       },
       {
         label: { en: "Material Purchase Orders", ar: "أوامر توريد الخامات" },
@@ -296,9 +301,7 @@ export function canAccessEntry(entry: SidebarEntryConfig, user: UserState): bool
   }
 
   if (entry.requiredPermission) {
-    const required = Array.isArray(entry.requiredPermission)
-      ? entry.requiredPermission
-      : [entry.requiredPermission];
+    const required = Array.isArray(entry.requiredPermission) ? entry.requiredPermission : [entry.requiredPermission];
     return required.some((p) => user.role.permissions.includes(p));
   }
   return true;

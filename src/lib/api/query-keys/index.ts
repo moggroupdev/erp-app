@@ -131,8 +131,22 @@ export const queryKeys = {
     list: (filters: ListFilters) => [...queryKeys.materialPurchaseRequisitions.lists(), filters] as const,
     details: () => [...queryKeys.materialPurchaseRequisitions.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.materialPurchaseRequisitions.details(), id] as const,
-    openItems: (materialCode?: string) =>
-      [...queryKeys.materialPurchaseRequisitions.all, "open-items", materialCode ?? null] as const,
+    openItems: (materialCode?: string, excludeMaterialPurchaseOrderId?: string) =>
+      [
+        ...queryKeys.materialPurchaseRequisitions.all,
+        "open-items",
+        materialCode ?? null,
+        excludeMaterialPurchaseOrderId ?? null,
+      ] as const,
+  },
+  requestForQuotations: {
+    all: ["request-for-quotations"] as const,
+    lists: () => [...queryKeys.requestForQuotations.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.requestForQuotations.lists(), filters] as const,
+    details: () => [...queryKeys.requestForQuotations.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.requestForQuotations.details(), id] as const,
+    quotationItems: (supplierId: string, materialCode?: string) =>
+      [...queryKeys.requestForQuotations.all, "quotation-items", supplierId, materialCode ?? null] as const,
   },
   reports: {
     all: ["reports"] as const,
