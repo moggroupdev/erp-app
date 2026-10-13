@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge, Table } from "@mantine/core";
-import { Check, Scale } from "lucide-react";
+import { Alert, Badge, Table } from "@mantine/core";
+import { Check, Info, Scale } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
@@ -53,7 +53,17 @@ export default function ComparisonTable({ request }: { request: RequestForQuotat
             </p>
           </div>
         ) : (
-          <ComparisonGrid request={request} quotations={quotations} />
+          <div className="flex flex-col gap-4">
+            {quotations.length === 1 && (
+              <Alert color="haze" variant="light" radius="md" icon={<Info size={16} />}>
+                {translate(
+                  "Only one supplier is on this request. Add another supplier quotation to compare prices side by side.",
+                  "يوجد مورد واحد فقط في هذا الطلب. أضف عرض سعر من مورد آخر لمقارنة الأسعار جنباً إلى جنب.",
+                )}
+              </Alert>
+            )}
+            <ComparisonGrid request={request} quotations={quotations} />
+          </div>
         )}
       </div>
     </section>
