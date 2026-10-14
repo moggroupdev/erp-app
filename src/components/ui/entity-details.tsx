@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Ban, type LucideIcon } from "lucide-react";
+import { Ban, ExternalLink, type LucideIcon } from "lucide-react";
 import { Divider, Table } from "@mantine/core";
 import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
@@ -18,6 +18,22 @@ export type DetailRow = {
 
 export function EmptyValue() {
   return <span className="text-gray-400">-</span>;
+}
+
+export function WebsiteLink({ website }: { website: string }) {
+  const href = /^https?:\/\//i.test(website) ? website : `https://${website}`;
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="text-haze-700 inline-flex max-w-full items-center gap-1.5 hover:underline"
+    >
+      <span className="min-w-0 break-all">{website}</span>
+      <ExternalLink size={14} className="shrink-0" />
+    </a>
+  );
 }
 
 export function CreatorLink({ creator }: { creator: { id: string; name: string } | null | undefined }) {

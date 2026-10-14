@@ -3,11 +3,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type CustomerWithCreator } from "@/types/customer";
 import { getCustomerClassificationLabel } from "@/lib/constants/enums/customer-classifications";
 import { Users } from "lucide-react";
-import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
-
-function toWebsiteHref(website: string) {
-  return /^https?:\/\//i.test(website) ? website : `https://${website}`;
-}
+import EntityDetails, { CreatorLink, EmptyValue, WebsiteLink, type DetailRow } from "@/components/ui/entity-details";
 
 export default function CustomerDetails({ customer }: { customer: CustomerWithCreator }) {
   const { locale, translate } = useI18n();
@@ -26,17 +22,20 @@ export default function CustomerDetails({ customer }: { customer: CustomerWithCr
     },
     {
       key: translate("Email", "البريد الإلكتروني"),
-      value: customer.email ? <a href={`mailto:${customer.email}`}>{customer.email}</a> : <EmptyValue />,
-    },
-    {
-      key: translate("Website", "الموقع الالكتروني"),
-      value: customer.website ? (
-        <a href={toWebsiteHref(customer.website)} target="_blank" rel="noreferrer">
-          {customer.website}
+      value: customer.email ? (
+        <a
+          href={`mailto:${customer.email}`}
+          className="break-all text-haze-700 underline decoration-haze-200 underline-offset-4 hover:decoration-haze-600"
+        >
+          {customer.email}
         </a>
       ) : (
         <EmptyValue />
       ),
+    },
+    {
+      key: translate("Website", "الموقع الالكتروني"),
+      value: customer.website ? <WebsiteLink website={customer.website} /> : <EmptyValue />,
     },
     {
       key: translate("Tax Number", "الرقم الضريبي"),

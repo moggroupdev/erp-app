@@ -88,7 +88,7 @@ export default function ContactPersonCard({
                 {contactPerson.phone}
               </a>
             ) : (
-              <p className="text-gray-400">{translate("No phone added", "لم تتم إضافة هاتف")}</p>
+              <p className="text-sm text-gray-400">{translate("No phone added", "لم تتم إضافة هاتف")}</p>
             )}
           </div>
 
@@ -101,7 +101,7 @@ export default function ContactPersonCard({
                 {contactPerson.email}
               </a>
             ) : (
-              <p className="text-gray-400">{translate("No email added", "لم تتم إضافة بريد إلكتروني")}</p>
+              <p className="text-sm text-gray-400">{translate("No email added", "لم تتم إضافة بريد إلكتروني")}</p>
             )}
           </div>
         </div>
