@@ -4,6 +4,7 @@ const MINUTE = 60 * 1000;
 export const staleTimes = {
   suppliers: 10 * MINUTE,
   customers: 5 * MINUTE,
+  contracts: 5 * MINUTE,
   users: 30 * MINUTE,
   profile: 5 * MINUTE,
   materials: 10 * MINUTE,

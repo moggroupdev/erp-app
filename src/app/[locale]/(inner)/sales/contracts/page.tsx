@@ -1,0 +1,229 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { Table, TextInput } from "@mantine/core";
+import { Search, X } from "lucide-react";
+import LayoutBox from "@/components/ui/layout-box";
+import LoadingSection from "@/components/ui/sections/loading";
+import ErrorSection from "@/components/ui/sections/error";
+import EmptySection from "@/components/ui/sections/empty";
+import NoResultsSection from "@/components/ui/sections/no-results";
+import PaginationHandler from "@/components/ui/pagination-handler";
+import CopyButton from "@/components/ui/copy-button";
+import RefetchButton from "@/components/ui/refetch-button";
+import DataSelect from "@/components/ui/data-select";
+import ProtectedLink from "@/components/ui/protected-link";
+import { EmptyValue } from "@/components/ui/entity-details";
+import useDocumentTitle from "@/hooks/use-document-title";
+import useDebouncedState from "@/hooks/use-debounced-state";
+import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
+import usePrivateRequest from "@/hooks/use-private-request";
+import contractsApi from "@/lib/api/contracts";
+import { queryKeys } from "@/lib/api/query-keys";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import { staleTimes } from "@/lib/constants/stale-times";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatMoney } from "@/lib/helpers/format-money";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
+import { useI18n } from "@/lib/i18n/hooks";
+import type { ContractListItem } from "@/types/contract";
+import { getContractStatusLabel } from "./helpers";
+
+const PAGE_TITLE = { en: "Contracts", ar: "العقود" };
+const PAGE_SIZE = 25;
+
+export default function Page() {
+  const { locale, translate, translation } = useI18n();
+  useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
+
+  const router = useRouter();
+  const urlSearchParams = useSearchParams();
+  const privateRequest = usePrivateRequest();
+
+  const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
+  const [status, setStatus] = useState<string | null>(urlSearchParams.get("status") || null);
+  const {
+    value: keyword,
+    debouncedValue: debouncedKeyword,
+    setPendingValue: setPendingKeyword,
+    setImmediateValue: setImmediateKeyword,
+  } = useDebouncedState(urlSearchParams.get("keyword") || "");
+
+  const urlParams = {
+    page: activePage.toString(),
+    keyword: debouncedKeyword,
+    status: status || "",
+  };
+  const params = { limit: PAGE_SIZE, ...removeEmptyParams(urlParams) };
+
+  const resetAllFilters = () => {
+    setActivePage(1);
+    setImmediateKeyword("");
+    setStatus(null);
+  };
+
+  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword, status });
+
+  const {
+    data: paginatedContracts,
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.contracts.list(params),
+    queryFn: ({ signal }) => contractsApi.list({ privateRequest, params, signal }),
+    placeholderData: keepPreviousData,
+    staleTime: staleTimes.contracts,
+  });
+
+  const errorMessage = error ? getErrorMessage(locale, error) : "";
+
+  useEffect(() => {
+    router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
+
+    const newFilters = { debouncedKeyword, status };
+    if (filtersChanged(newFilters)) {
+      updatePreviousFilters(newFilters);
+      if (activePage !== 1) {
+        setActivePage(1);
+        return;
+      }
+    }
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage, debouncedKeyword, status]);
+
+  const statusOptions = [
+    { value: "open", label: translate("Open", "مفتوح") },
+    { value: "completed", label: translate("Completed", "مكتمل") },
+    { value: "cancelled", label: translate("Cancelled", "ملغي") },
+  ];
+
+  return (
+    <LayoutBox
+      header={{
+        backLink: true,
+        title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+      }}
+    >
+      <div className="flex flex-wrap items-end gap-3">
+        <TextInput
+          value={keyword}
+          onChange={(event) => setPendingKeyword(event.currentTarget.value)}
+          placeholder={translate("Search...", "ابحث...")}
+          leftSection={<Search size={15} />}
+          radius="md"
+          className="min-w-64 flex-1"
+          rightSection={
+            keyword ? (
+              <button type="button" onClick={() => setImmediateKeyword("")}>
+                <X size={15} />
+              </button>
+            ) : undefined
+          }
+        />
+        <DataSelect
+          value={status}
+          setValue={setStatus}
+          data={statusOptions}
+          clearable
+          placeholder={translate("Status", "الحالة")}
+          className="w-72"
+        />
+      </div>
+
+      {isFetching ? (
+        <LoadingSection message={translate("Loading contracts...", "جاري تحميل العقود...")} />
+      ) : errorMessage ? (
+        <ErrorSection
+          errorTitle={translate("Error loading contracts", "خطأ في تحميل العقود")}
+          errorMessage={errorMessage}
+          button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
+        />
+      ) : (
+        paginatedContracts &&
+        (paginatedContracts.data.length === 0 ? (
+          debouncedKeyword || status ? (
+            <NoResultsSection
+              keyword={debouncedKeyword || status || ""}
+              button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
+            />
+          ) : (
+            <EmptySection useDefaultImg message={translate("No contracts found", "لا توجد عقود")} />
+          )
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>{translate("Code", "الكود")}</Table.Th>
+                    <Table.Th>{translate("Customer", "العميل")}</Table.Th>
+                    <Table.Th>{translate("Legacy number", "رقم العقد الورقي")}</Table.Th>
+                    <Table.Th>{translate("Work order number", "رقم أمر الشغل")}</Table.Th>
+                    <Table.Th>{translate("Status", "الحالة")}</Table.Th>
+                    <Table.Th>{translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}</Table.Th>
+                    <Table.Th>{translate("Delivery time", "موعد التسليم")}</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {paginatedContracts.data.map((contract) => {
+                    const statusMeta = getContractStatusLabel(contract, translate);
+                    return (
+                      <Table.Tr key={contract.id} className="text-gray-600">
+                        <Table.Td className="font-semibold text-gray-800">
+                          <div className="flex items-center gap-1.5">
+                            <ProtectedLink
+                              permission={PERMISSIONS.READ_CONTRACTS}
+                              href={`/sales/contracts/${contract.id}`}
+                              className="font-mono hover:underline"
+                            >
+                              {contract.code}
+                            </ProtectedLink>
+                            <CopyButton text={contract.code} />
+                          </div>
+                        </Table.Td>
+                        <Table.Td>
+                          <ProtectedLink
+                            permission={PERMISSIONS.READ_CUSTOMERS}
+                            href={`/sales/customers/${contract.customer.id}`}
+                            className="hover:underline"
+                          >
+                            {contract.customer.name}
+                          </ProtectedLink>
+                        </Table.Td>
+                        <Table.Td className="font-mono">
+                          {contract.legacyNumber ? contract.legacyNumber : <EmptyValue />}
+                        </Table.Td>
+                        <Table.Td className="font-mono">
+                          {contract.legacyWorkOrderNumber ? contract.legacyWorkOrderNumber : <EmptyValue />}
+                        </Table.Td>
+                        <Table.Td>
+                          <span className={statusMeta.className}>{statusMeta.label}</span>
+                        </Table.Td>
+                        <Table.Td>{formatMoney(Number(contract.totalAmount))}</Table.Td>
+                        <Table.Td>
+                          {contract.deliveryTime ? formatDateAndTime(contract.deliveryTime, locale) : <EmptyValue />}
+                        </Table.Td>
+                      </Table.Tr>
+                    );
+                  })}
+                </Table.Tbody>
+              </Table>
+            </div>
+            <PaginationHandler<ContractListItem>
+              paginatedData={paginatedContracts}
+              activePage={activePage}
+              setActivePage={setActivePage}
+            />
+          </>
+        ))
+      )}
+    </LayoutBox>
+  );
+}

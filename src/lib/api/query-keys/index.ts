@@ -62,6 +62,13 @@ export const queryKeys = {
     addresses: (id: string) => [...queryKeys.customers.detail(id), "addresses"] as const,
     contactPersons: (id: string) => [...queryKeys.customers.detail(id), "contact-persons"] as const,
   },
+  contracts: {
+    all: ["contracts"] as const,
+    lists: () => [...queryKeys.contracts.all, "list"] as const,
+    list: (filters: ListFilters) => [...queryKeys.contracts.lists(), filters] as const,
+    details: () => [...queryKeys.contracts.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.contracts.details(), id] as const,
+  },
   products: {
     all: ["products"] as const,
     lists: () => [...queryKeys.products.all, "list"] as const,
