@@ -5,6 +5,10 @@ import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-c
 import { HandCoins } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
+function toWebsiteHref(website: string) {
+  return /^https?:\/\//i.test(website) ? website : `https://${website}`;
+}
+
 export default function SupplierDetails({ supplier }: { supplier: SupplierWithCreator }) {
   const { locale, translate } = useI18n();
 
@@ -17,13 +21,28 @@ export default function SupplierDetails({ supplier }: { supplier: SupplierWithCr
       value: supplier.classification ? getSupplierClassificationLabel(supplier.classification, locale) : <EmptyValue />,
     },
     {
-      key: translate("Tax Number", "الرقم الضريبي"),
-      value: supplier.taxNumber ? (
-        <span className="font-mono">{supplier.taxNumber}</span>
+      key: translate("Website", "الموقع الالكتروني"),
+      value: supplier.website ? (
+        <a href={toWebsiteHref(supplier.website)} target="_blank" rel="noreferrer">
+          {supplier.website}
+        </a>
       ) : (
         <EmptyValue />
       ),
+    },
+    {
+      key: translate("Tax Number", "الرقم الضريبي"),
+      value: supplier.taxNumber ? <span className="font-mono">{supplier.taxNumber}</span> : <EmptyValue />,
       copyText: supplier.taxNumber ?? undefined,
+    },
+    {
+      key: translate("Commercial Registration", "رقم السجل التجاري"),
+      value: supplier.commercialRegistrationNumber ? (
+        <span className="font-mono">{supplier.commercialRegistrationNumber}</span>
+      ) : (
+        <EmptyValue />
+      ),
+      copyText: supplier.commercialRegistrationNumber ?? undefined,
     },
     {
       key: translate("Phone", "الهاتف"),

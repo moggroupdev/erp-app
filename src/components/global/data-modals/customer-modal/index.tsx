@@ -37,6 +37,9 @@ export default function CustomerModal({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
+  const [taxNumber, setTaxNumber] = useState("");
+  const [commercialRegistrationNumber, setCommercialRegistrationNumber] = useState("");
   const [classification, setClassification] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
@@ -44,6 +47,9 @@ export default function CustomerModal({
     setName("");
     setPhone("");
     setEmail("");
+    setWebsite("");
+    setTaxNumber("");
+    setCommercialRegistrationNumber("");
     setClassification(null);
     setNotes("");
   }
@@ -54,6 +60,9 @@ export default function CustomerModal({
       setName(customerToUpdate.name);
       setPhone(customerToUpdate.phone || "");
       setEmail(customerToUpdate.email || "");
+      setWebsite(customerToUpdate.website || "");
+      setTaxNumber(customerToUpdate.taxNumber || "");
+      setCommercialRegistrationNumber(customerToUpdate.commercialRegistrationNumber || "");
       setClassification(customerToUpdate.classification);
       setNotes(customerToUpdate.notes || "");
     } else reset();
@@ -65,6 +74,9 @@ export default function CustomerModal({
         name,
         phone: phone || null,
         email: email || null,
+        website: website.trim() || null,
+        taxNumber: taxNumber.trim() || null,
+        commercialRegistrationNumber: commercialRegistrationNumber.trim() || null,
         classification: classification && isValidCustomerClassification(classification) ? classification : null,
         notes: notes || null,
       };
@@ -124,6 +136,9 @@ export default function CustomerModal({
     ? name !== customerToUpdate.name ||
       (phone || null) !== customerToUpdate.phone ||
       (email || null) !== customerToUpdate.email ||
+      (website.trim() || null) !== customerToUpdate.website ||
+      (taxNumber.trim() || null) !== customerToUpdate.taxNumber ||
+      (commercialRegistrationNumber.trim() || null) !== customerToUpdate.commercialRegistrationNumber ||
       classification !== customerToUpdate.classification ||
       (notes || null) !== customerToUpdate.notes
     : false;
@@ -168,6 +183,30 @@ export default function CustomerModal({
           onChange={(e) => setEmail(e.target.value)}
           label={translate("Email (Optional)", "البريد الإلكتروني (اختياري)")}
           placeholder={translate("Enter Email", "أدخل البريد الإلكتروني")}
+          radius="md"
+        />
+
+        <TextInput
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          label={translate("Website (Optional)", "الموقع الالكتروني (اختياري)")}
+          placeholder={translate("Enter Website", "أدخل الموقع الالكتروني")}
+          radius="md"
+        />
+
+        <TextInput
+          value={taxNumber}
+          onChange={(e) => setTaxNumber(e.target.value)}
+          label={translate("Tax Number (Optional)", "الرقم الضريبي (اختياري)")}
+          placeholder={translate("Enter Tax Number", "أدخل الرقم الضريبي")}
+          radius="md"
+        />
+
+        <TextInput
+          value={commercialRegistrationNumber}
+          onChange={(e) => setCommercialRegistrationNumber(e.target.value)}
+          label={translate("Commercial Registration (Optional)", "رقم السجل التجاري (اختياري)")}
+          placeholder={translate("Enter Commercial Registration", "أدخل رقم السجل التجاري")}
           radius="md"
         />
 

@@ -11,7 +11,7 @@ export type ListFilters = Record<string, string | number | boolean | null | unde
  * - `details()` - prefix for every single-item (detail) query
  * - `detail(id)`- one item by id
  *
- * Example: invalidating `queryKeys.suppliers.all` refreshes lists, details, and addresses.
+ * Example: invalidating `queryKeys.suppliers.all` refreshes lists, details, addresses, and contact persons.
  * Invalidating `queryKeys.suppliers.detail(id)` refreshes only that supplier (and nested keys that start with it).
  */
 export const queryKeys = {
@@ -51,6 +51,7 @@ export const queryKeys = {
     details: () => [...queryKeys.suppliers.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.suppliers.details(), id] as const,
     addresses: (id: string) => [...queryKeys.suppliers.detail(id), "addresses"] as const,
+    contactPersons: (id: string) => [...queryKeys.suppliers.detail(id), "contact-persons"] as const,
   },
   customers: {
     all: ["customers"] as const,
@@ -59,6 +60,7 @@ export const queryKeys = {
     details: () => [...queryKeys.customers.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.customers.details(), id] as const,
     addresses: (id: string) => [...queryKeys.customers.detail(id), "addresses"] as const,
+    contactPersons: (id: string) => [...queryKeys.customers.detail(id), "contact-persons"] as const,
   },
   products: {
     all: ["products"] as const,

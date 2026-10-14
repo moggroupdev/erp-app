@@ -13,7 +13,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Menu } from "@mantine/core";
-import { MapPin, Pencil } from "lucide-react";
+import { MapPin, Pencil, UserRound } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
@@ -23,6 +23,8 @@ import EmptySection from "@/components/ui/sections/empty";
 import CustomerModal from "@/components/global/data-modals/customer-modal";
 import AddressModal from "@/components/global/data-modals/address-modal";
 import AddressCard from "@/components/global/address-card";
+import ContactPersonModal from "@/components/global/data-modals/contact-person-modal";
+import ContactPersonCard from "@/components/global/contact-person-card";
 import CustomerDetails from "./components/customer-details";
 
 const PAGE_TITLE = { en: "Customer Data", ar: "ملف العميل" };
@@ -47,11 +49,18 @@ export default function Page() {
     staleTime: staleTimes.customers,
   });
 
+  const contactPersonsQuery = useQuery({
+    queryKey: queryKeys.customers.contactPersons(id),
+    queryFn: ({ signal }) => customersApi.listContactPersons({ privateRequest, id, signal }),
+    staleTime: staleTimes.customers,
+  });
+
   const customer = customerQuery.data || null;
   const addresses = addressesQuery.data || [];
+  const contactPersons = contactPersonsQuery.data || [];
 
-  const loading = customerQuery.isFetching || addressesQuery.isFetching;
-  const queryError = customerQuery.error || addressesQuery.error;
+  const loading = customerQuery.isFetching || addressesQuery.isFetching || contactPersonsQuery.isFetching;
+  const queryError = customerQuery.error || addressesQuery.error || contactPersonsQuery.error;
   const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
 
   useDocumentTitle(`${customer?.name || translate(PAGE_TITLE.en, PAGE_TITLE.ar)} | ${translate("Customers", "العملاء")}`);
@@ -61,15 +70,22 @@ export default function Page() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.customers.addresses(id) }),
   });
 
+  const setPrimaryContactMutation = useMutation({
+    mutationFn: (contactPersonId: string) => customersApi.setPrimaryContactPerson({ privateRequest, id, contactPersonId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.customers.contactPersons(id) }),
+  });
+
   function handleRetry() {
     customerQuery.refetch();
     addressesQuery.refetch();
+    contactPersonsQuery.refetch();
   }
 
   // ========================= MODALS =========================
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] = useDisclosure(false);
+  const [contactModalOpened, { open: openContactModal, close: closeContactModal }] = useDisclosure(false);
 
   return (
     <LayoutBox
@@ -144,6 +160,48 @@ export default function Page() {
                         canUpdateCustomer
                           ? async (addressId) => {
                               await setDefaultAddressMutation.mutateAsync(addressId);
+                            }
+                          : undefined
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="mt-4 flex flex-col gap-4">
+              <ContactPersonModal
+                opened={contactModalOpened}
+                close={closeContactModal}
+                entityType="customer"
+                entityId={customer.id}
+                isFirstContact={contactPersons.length === 0}
+              />
+
+              <div className="flex items-center justify-between gap-3">
+                <h4 className="text-lg font-semibold text-gray-900">{translate("Contact Persons", "أشخاص الاتصال")}</h4>
+
+                <ActionsMenu>
+                  {canUpdateCustomer && (
+                    <Menu.Item leftSection={<UserRound size={14} />} onClick={openContactModal}>
+                      {translate("Add contact person", "إضافة شخص اتصال")}
+                    </Menu.Item>
+                  )}
+                </ActionsMenu>
+              </div>
+
+              {contactPersons.length === 0 ? (
+                <EmptySection message={translate("No contact persons added", "لا يوجد أشخاص اتصال مسجلون")} />
+              ) : (
+                <div className={`grid gap-3 ${contactPersons.length > 1 ? "md:grid-cols-2" : ""}`}>
+                  {contactPersons.map((contactPerson) => (
+                    <ContactPersonCard
+                      key={contactPerson.id}
+                      contactPerson={contactPerson}
+                      onSetPrimary={
+                        canUpdateCustomer
+                          ? async (contactPersonId) => {
+                              await setPrimaryContactMutation.mutateAsync(contactPersonId);
                             }
                           : undefined
                       }

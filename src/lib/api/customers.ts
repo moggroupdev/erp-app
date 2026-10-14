@@ -4,9 +4,11 @@ import type {
   Customer,
   CustomerWithCreator,
   CustomerAddress,
+  CustomerContactPerson,
   CreateCustomerDto,
   UpdateCustomerDto,
   CreateCustomerAddressDto,
+  CreateCustomerContactPersonDto,
 } from "@/types/customer";
 
 const customersApi = {
@@ -64,6 +66,51 @@ const customersApi = {
     return await privateRequest<CustomerAddress>({
       method: "PUT",
       url: `customers/${id}/addresses/${addressId}/default`,
+    });
+  },
+
+  // ========================= Contact persons =========================
+
+  async addContactPerson({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: CreateCustomerContactPersonDto;
+  }) {
+    return await privateRequest<CustomerContactPerson>({
+      method: "POST",
+      url: `customers/${id}/contact-persons`,
+      data: dto,
+    });
+  },
+
+  async listContactPersons({
+    privateRequest,
+    id,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<CustomerContactPerson[]>({ url: `customers/${id}/contact-persons`, signal });
+  },
+
+  async setPrimaryContactPerson({
+    privateRequest,
+    id,
+    contactPersonId,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    contactPersonId: string;
+  }) {
+    return await privateRequest<CustomerContactPerson>({
+      method: "PUT",
+      url: `customers/${id}/contact-persons/${contactPersonId}/primary`,
     });
   },
 };

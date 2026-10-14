@@ -5,6 +5,10 @@ import { getCustomerClassificationLabel } from "@/lib/constants/enums/customer-c
 import { Users } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
+function toWebsiteHref(website: string) {
+  return /^https?:\/\//i.test(website) ? website : `https://${website}`;
+}
+
 export default function CustomerDetails({ customer }: { customer: CustomerWithCreator }) {
   const { locale, translate } = useI18n();
 
@@ -23,6 +27,30 @@ export default function CustomerDetails({ customer }: { customer: CustomerWithCr
     {
       key: translate("Email", "البريد الإلكتروني"),
       value: customer.email ? <a href={`mailto:${customer.email}`}>{customer.email}</a> : <EmptyValue />,
+    },
+    {
+      key: translate("Website", "الموقع الالكتروني"),
+      value: customer.website ? (
+        <a href={toWebsiteHref(customer.website)} target="_blank" rel="noreferrer">
+          {customer.website}
+        </a>
+      ) : (
+        <EmptyValue />
+      ),
+    },
+    {
+      key: translate("Tax Number", "الرقم الضريبي"),
+      value: customer.taxNumber ? <span className="font-mono">{customer.taxNumber}</span> : <EmptyValue />,
+      copyText: customer.taxNumber ?? undefined,
+    },
+    {
+      key: translate("Commercial Registration", "رقم السجل التجاري"),
+      value: customer.commercialRegistrationNumber ? (
+        <span className="font-mono">{customer.commercialRegistrationNumber}</span>
+      ) : (
+        <EmptyValue />
+      ),
+      copyText: customer.commercialRegistrationNumber ?? undefined,
     },
     {
       key: translate("Notes", "الملاحظات"),

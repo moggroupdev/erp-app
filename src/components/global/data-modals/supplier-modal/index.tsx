@@ -37,7 +37,9 @@ export default function SupplierModal({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
   const [taxNumber, setTaxNumber] = useState("");
+  const [commercialRegistrationNumber, setCommercialRegistrationNumber] = useState("");
   const [classification, setClassification] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
@@ -45,7 +47,9 @@ export default function SupplierModal({
     setName("");
     setPhone("");
     setEmail("");
+    setWebsite("");
     setTaxNumber("");
+    setCommercialRegistrationNumber("");
     setClassification(null);
     setNotes("");
   }
@@ -56,7 +60,9 @@ export default function SupplierModal({
       setName(supplierToUpdate.name);
       setPhone(supplierToUpdate.phone || "");
       setEmail(supplierToUpdate.email || "");
+      setWebsite(supplierToUpdate.website || "");
       setTaxNumber(supplierToUpdate.taxNumber || "");
+      setCommercialRegistrationNumber(supplierToUpdate.commercialRegistrationNumber || "");
       setClassification(supplierToUpdate.classification);
       setNotes(supplierToUpdate.notes || "");
     } else reset();
@@ -68,7 +74,9 @@ export default function SupplierModal({
         name,
         phone: phone || null,
         email: email || null,
-        taxNumber: taxNumber || null,
+        website: website.trim() || null,
+        taxNumber: taxNumber.trim() || null,
+        commercialRegistrationNumber: commercialRegistrationNumber.trim() || null,
         classification: classification && isValidSupplierClassification(classification) ? classification : null,
         notes: notes || null,
       };
@@ -128,7 +136,9 @@ export default function SupplierModal({
     ? name !== supplierToUpdate.name ||
       (phone || null) !== supplierToUpdate.phone ||
       (email || null) !== supplierToUpdate.email ||
-      (taxNumber || null) !== supplierToUpdate.taxNumber ||
+      (website.trim() || null) !== supplierToUpdate.website ||
+      (taxNumber.trim() || null) !== supplierToUpdate.taxNumber ||
+      (commercialRegistrationNumber.trim() || null) !== supplierToUpdate.commercialRegistrationNumber ||
       classification !== supplierToUpdate.classification ||
       (notes || null) !== supplierToUpdate.notes
     : false;
@@ -159,10 +169,26 @@ export default function SupplierModal({
         />
 
         <TextInput
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          label={translate("Website (Optional)", "الموقع الالكتروني (اختياري)")}
+          placeholder={translate("Enter Website", "أدخل الموقع الالكتروني")}
+          radius="md"
+        />
+
+        <TextInput
           value={taxNumber}
           onChange={(e) => setTaxNumber(e.target.value)}
           label={translate("Tax Number (Optional)", "الرقم الضريبي (اختياري)")}
           placeholder={translate("Enter Tax Number", "أدخل الرقم الضريبي")}
+          radius="md"
+        />
+
+        <TextInput
+          value={commercialRegistrationNumber}
+          onChange={(e) => setCommercialRegistrationNumber(e.target.value)}
+          label={translate("Commercial Registration (Optional)", "رقم السجل التجاري (اختياري)")}
+          placeholder={translate("Enter Commercial Registration", "أدخل رقم السجل التجاري")}
           radius="md"
         />
 

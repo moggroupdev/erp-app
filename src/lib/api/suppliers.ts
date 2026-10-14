@@ -4,9 +4,11 @@ import type {
   Supplier,
   SupplierWithCreator,
   SupplierAddress,
+  SupplierContactPerson,
   CreateSupplierDto,
   UpdateSupplierDto,
   CreateSupplierAddressDto,
+  CreateSupplierContactPersonDto,
 } from "@/types/supplier";
 
 const suppliersApi = {
@@ -74,6 +76,51 @@ const suppliersApi = {
     return await privateRequest<SupplierAddress>({
       method: "PUT",
       url: `suppliers/${id}/addresses/${addressId}/default`,
+    });
+  },
+
+  // ========================= Contact persons =========================
+
+  async addContactPerson({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: CreateSupplierContactPersonDto;
+  }) {
+    return await privateRequest<SupplierContactPerson>({
+      method: "POST",
+      url: `suppliers/${id}/contact-persons`,
+      data: dto,
+    });
+  },
+
+  async listContactPersons({
+    privateRequest,
+    id,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<SupplierContactPerson[]>({ url: `suppliers/${id}/contact-persons`, signal });
+  },
+
+  async setPrimaryContactPerson({
+    privateRequest,
+    id,
+    contactPersonId,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    contactPersonId: string;
+  }) {
+    return await privateRequest<SupplierContactPerson>({
+      method: "PUT",
+      url: `suppliers/${id}/contact-persons/${contactPersonId}/primary`,
     });
   },
 };
