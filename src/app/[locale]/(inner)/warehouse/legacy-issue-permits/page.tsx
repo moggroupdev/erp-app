@@ -18,6 +18,10 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
+import {
+  getLegacyIssuePermitWorkOrderTypeLabel,
+  LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
+} from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { type LegacyIssuePermit } from "@/types/legacy-issue-permit";
 import { Badge, Menu, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
@@ -167,6 +171,7 @@ export default function Page() {
                     <Table.Th>{translate("Issue Permit Date", "تاريخ إذن الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Number", "رقم طلب الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Date", "تاريخ طلب الصرف")}</Table.Th>
+                    <Table.Th>{translate("Contract / Work Order", "العقد / أمر الشغل")}</Table.Th>
                     <Table.Th>{translate("Entry Date", "تاريخ الإدخال")}</Table.Th>
                     <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                   </Table.Tr>
@@ -197,6 +202,19 @@ export default function Page() {
                         <span className="font-mono">{transaction.issueOrderNumber}</span>
                       </Table.Td>
                       <Table.Td>{formatDate(transaction.issueOrderDate, locale)}</Table.Td>
+                      <Table.Td>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-500">
+                            {getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale)}
+                          </span>
+                          -
+                          <span className="font-mono">
+                            {(transaction.workOrderNumberType === LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
+                              ? transaction.contractNumber
+                              : transaction.workOrderNumber) || <span className="text-gray-400">-</span>}
+                          </span>
+                        </div>
+                      </Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.createdAt, locale)}</Table.Td>
                       <Table.Td className="max-w-xs truncate">
                         {transaction.notes || <span className="text-gray-400">-</span>}
