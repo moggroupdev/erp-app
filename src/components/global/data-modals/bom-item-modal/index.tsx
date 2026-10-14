@@ -9,7 +9,7 @@ import bomsApi from "@/lib/api/boms";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { queryKeys } from "@/lib/api/query-keys";
-import { isManufacturedMaterial, isRawMaterial } from "@/lib/constants/enums/material-types";
+import { isManufacturedMaterial, supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { isPurchasedMmSourcing, type MmSourcingType } from "@/lib/constants/enums/mm-sourcing-types";
 import { getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
@@ -61,7 +61,7 @@ export default function BomItemModal({
   const baseUnit = activeMaterial?.unitOfMeasurement ?? null;
   const unitConversions = activeMaterial?.unitConversions ?? [];
   const materialType = activeMaterial?.materialType ?? null;
-  const showUnitSelect = !!materialType && isRawMaterial(materialType);
+  const showUnitSelect = !!materialType && supportsUnitConversions(materialType);
   const isMmMaterial = !!materialType && isManufacturedMaterial(materialType);
 
   const departmentMaterialCodes = useMemo(() => {

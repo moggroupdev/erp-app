@@ -9,7 +9,7 @@ import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { LegacyIssuePermitItemDetailed } from "@/types/legacy-issue-permit";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
@@ -48,7 +48,7 @@ export default function LegacyIssueItemModal({
   const baseUnit = selectedMaterial?.unitOfMeasurement || itemToUpdate?.material?.unitOfMeasurement || null;
   const materialType = selectedMaterial?.materialType || itemToUpdate?.material?.materialType || null;
   const unitConversions = selectedMaterial?.unitConversions ?? [];
-  const showUnitSelect = !!materialType && isRawMaterial(materialType) && unitConversions.length > 0;
+  const showUnitSelect = !!materialType && supportsUnitConversions(materialType) && unitConversions.length > 0;
 
   const unitOptions = useMemo(
     () => getMaterialUnitSelectOptions(baseUnit, unitConversions, locale),

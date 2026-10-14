@@ -2,11 +2,13 @@
 
 /**
  * Unlike other query-based selectors,
- * SelectSupplier searches a live entity list via suppliersApi.
+ * SelectSupplier searches a live entity list via suppliersApi and optionally
+ * opens a browse modal (search + purchased material category + classification + results table).
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -15,8 +17,10 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import type { Supplier } from "@/types/supplier";
-import { Truck } from "lucide-react";
+import { ActionIcon, Tooltip } from "@mantine/core";
+import { Table2, Truck } from "lucide-react";
 import DataSelect, { GenericDataSelectProps } from "@/components/ui/data-select";
+import BrowseSuppliersModal from "./browse-suppliers-modal";
 
 type SelectableSupplier = Pick<Supplier, "id" | "name" | "code">;
 
@@ -26,6 +30,8 @@ export type SelectSupplierProps = Omit<GenericDataSelectProps, "data" | "value" 
   onSupplierSelect?: (supplier: SelectableSupplier | null) => void;
   /** Supplier ids to hide from the options list. */
   excludeIds?: string[];
+  /** Show a button that opens a browse modal for picking a supplier. */
+  withBrowseModal?: boolean;
 };
 
 export default function SelectSupplier({
@@ -33,6 +39,7 @@ export default function SelectSupplier({
   setValue,
   onSupplierSelect,
   excludeIds = [],
+  withBrowseModal = false,
   searchable = true,
   clearable = true,
   ...props
@@ -41,9 +48,14 @@ export default function SelectSupplier({
 
   const privateRequest = usePrivateRequest();
 
-  const { debouncedValue: debouncedSearch, setPendingValue: setSearch } = useDebouncedState("");
+  const { value: searchKeyword, debouncedValue: debouncedSearch, setPendingValue: setSearch } = useDebouncedState("");
 
   const [selectedSupplier, setSelectedSupplier] = useState<SelectableSupplier | null>(null);
+  const [browseOpened, { open: openBrowse, close: closeBrowse }] = useDisclosure(false);
+  const [browseKeyword, setBrowseKeyword] = useState("");
+  const browseKeywordRef = useRef("");
+  const preserveSelectSearchRef = useRef(false);
+  const selectWrapRef = useRef<HTMLDivElement>(null);
 
   const trimmedSearch = debouncedSearch.trim();
   const listParams = removeEmptyParams({ page: "1", limit: "20", keyword: trimmedSearch });
@@ -124,20 +136,55 @@ export default function SelectSupplier({
     } else onSupplierSelect?.(null);
   }
 
-  // Mantine syncs the search input to the selected option label after change.
-  // Ignore that so we do not fire another suppliers list request.
+  function getSelectedLabel() {
+    if (selectedSupplier && selectedSupplier.id === value) {
+      return `${selectedSupplier.name} - ${selectedSupplier.code}`;
+    }
+
+    return data.find((option) => option.value === value)?.label;
+  }
+
+  function captureBrowseKeyword() {
+    const selectedLabel = getSelectedLabel();
+    const inputValue = selectWrapRef.current?.querySelector("input")?.value.trim() ?? "";
+    const typed = searchKeyword.trim();
+    const fromInput = inputValue && inputValue !== selectedLabel ? inputValue : "";
+    const fromState = typed && typed !== selectedLabel ? typed : "";
+
+    browseKeywordRef.current = fromInput || fromState;
+  }
+
+  function handleOpenBrowse() {
+    preserveSelectSearchRef.current = true;
+    setBrowseKeyword(browseKeywordRef.current);
+    openBrowse();
+  }
+
+  function handleCloseBrowse() {
+    preserveSelectSearchRef.current = false;
+    closeBrowse();
+  }
+
+  function handleBrowseSelect(supplier: SelectableSupplier) {
+    setSelectedSupplier(supplier);
+    setValue(supplier.id);
+    setSearch("");
+    onSupplierSelect?.(supplier);
+    handleCloseBrowse();
+  }
+
+  // Mantine syncs the search input to the selected option label after change,
+  // and clears it on blur (e.g. when the browse modal takes focus).
   function handleSearchChange(search: string) {
-    const selectedLabel =
-      selectedSupplier && selectedSupplier.id === value
-        ? `${selectedSupplier.name} - ${selectedSupplier.code}`
-        : data.find((option) => option.value === value)?.label;
+    const selectedLabel = getSelectedLabel();
 
     if (selectedLabel && search === selectedLabel) return;
+    if (!search && preserveSelectSearchRef.current) return;
 
     setSearch(search);
   }
 
-  return (
+  const select = (
     <DataSelect
       {...props}
       value={value}
@@ -172,5 +219,40 @@ export default function SelectSupplier({
             : translate("No suppliers found", "لا يوجد موردون")
       }
     />
+  );
+
+  if (!withBrowseModal) return select;
+
+  return (
+    <>
+      <div className="flex items-end gap-2">
+        <div ref={selectWrapRef} className="flex-1">
+          {select}
+        </div>
+        <Tooltip label={translate("Browse suppliers", "تصفح الموردين")} withArrow>
+          <ActionIcon
+            size={36}
+            variant="light"
+            onMouseDown={(event) => {
+              event.preventDefault();
+              preserveSelectSearchRef.current = true;
+              captureBrowseKeyword();
+            }}
+            onClick={handleOpenBrowse}
+            disabled={props.disabled}
+          >
+            <Table2 size={15} />
+          </ActionIcon>
+        </Tooltip>
+      </div>
+
+      <BrowseSuppliersModal
+        opened={browseOpened}
+        close={handleCloseBrowse}
+        onSelect={handleBrowseSelect}
+        excludeIds={excludeIds}
+        initialKeyword={browseKeyword}
+      />
+    </>
   );
 }

@@ -62,3 +62,8 @@ export function isSparePart(materialType: MaterialType) {
 export function isManufacturedMaterial(materialType: MaterialType) {
   return materialType === MATERIAL_TYPES.MANUFACTURED_MATERIAL;
 }
+
+/** Spare parts stay on their base unit. Raw and manufactured materials can define alternate units. */
+export function supportsUnitConversions(materialType: MaterialType) {
+  return isRawMaterial(materialType) || isManufacturedMaterial(materialType);
+}

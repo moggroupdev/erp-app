@@ -13,7 +13,7 @@ import materialPurchaseRequisitionsApi from "@/lib/api/material-purchase-requisi
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
@@ -59,7 +59,7 @@ function createEmptyRow(): ItemDraftRow {
 }
 
 function showUnitSelect(row: ItemDraftRow) {
-  return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+  return !!row.materialType && supportsUnitConversions(row.materialType) && row.unitConversions.length > 0;
 }
 
 function isEmptyRow(row: ItemDraftRow) {

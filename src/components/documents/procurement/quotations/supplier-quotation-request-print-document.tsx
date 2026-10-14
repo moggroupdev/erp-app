@@ -31,7 +31,7 @@ function SignatureBlock({ contact, title, companyName }: SignatureBlockProps) {
   ].filter((row): row is { icon: typeof Mail; value: string } => !!row);
 
   return (
-    <div className="flex min-w-48 flex-1 flex-col gap-1 border-s-2 border-haze-800 ps-3">
+    <div className="border-haze-800 flex min-w-48 flex-1 flex-col gap-1 border-s-2 ps-3">
       <p className="mb-1.5 text-sm font-semibold text-gray-900">{contact.name}</p>
       <p className="text-[10px] text-gray-600">
         {title}
@@ -42,7 +42,7 @@ function SignatureBlock({ contact, title, companyName }: SignatureBlockProps) {
         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
           {details.map(({ icon: Icon, value }) => (
             <span key={value} className="inline-flex items-center gap-1.5 text-[10px] text-gray-700">
-              <Icon size={11} className="shrink-0 text-haze-800" aria-hidden />
+              <Icon size={11} className="text-haze-800 shrink-0" aria-hidden />
               <span className="break-all">{value}</span>
             </span>
           ))}
@@ -70,7 +70,8 @@ export default function SupplierQuotationRequestPrintDocument({
   purchasingDepartmentManager,
 }: SupplierQuotationRequestPrintDocumentProps) {
   const { locale, translate } = useI18n();
-  const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
+  const headerSrc =
+    typeof window !== "undefined" ? `${window.location.origin}/images/document-header.png` : "/images/document-header.png";
   const printedAt = formatDate(new Date(), locale);
   const companyName = translate("MOG 10th of Ramadan Company", "شركة موج العاشر من رمضان");
   const showSpecifications = items.some((item) => !!item.specifications?.trim());
@@ -95,15 +96,12 @@ export default function SupplierQuotationRequestPrintDocument({
 
   return (
     <div className="flex flex-col gap-5 text-xs text-gray-900">
-      <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
+      <header className="flex flex-col gap-3 border-b border-gray-300 pb-4">
+        <img src={headerSrc} alt={companyName} className="h-auto w-full object-contain" />
         <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">{companyName}</p>
-          <h1 className="text-2xl font-semibold">{translate("Request for Quotation", "طلب عرض سعر")}</h1>
-          <p className="text-[10px] text-gray-500">
-            <span className="font-medium text-gray-600">{translate("Date", "التاريخ")}:</span> {printedAt}
-          </p>
+          <h1 className="text-center text-2xl font-semibold">{translate("Request for Quotation", "طلب عرض سعر")}</h1>
+          <p className="text-center text-[10px] text-gray-500">{printedAt}</p>
         </div>
-        <img src={logoSrc} alt="" width={72} height={72} className="h-[72px] w-[72px] shrink-0 rounded object-contain" />
       </header>
 
       <section className="flex flex-col gap-3 text-[11px] leading-relaxed">

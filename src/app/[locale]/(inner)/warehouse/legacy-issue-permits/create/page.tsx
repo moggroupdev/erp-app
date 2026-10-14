@@ -34,7 +34,7 @@ import {
   LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
   type LegacyIssuePermitWorkOrderType,
 } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
-import { isRawMaterial, type MaterialType } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary, MaterialWithUnitConversionsSelection } from "@/types/material";
@@ -87,7 +87,7 @@ function createEmptyRow(): ItemDraftRow {
 }
 
 function showUnitSelect(row: ItemDraftRow) {
-  return !!row.materialType && isRawMaterial(row.materialType) && row.unitConversions.length > 0;
+  return !!row.materialType && supportsUnitConversions(row.materialType) && row.unitConversions.length > 0;
 }
 
 function isEmptyRow(row: ItemDraftRow) {

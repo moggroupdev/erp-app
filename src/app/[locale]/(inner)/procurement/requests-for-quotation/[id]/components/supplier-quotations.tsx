@@ -23,7 +23,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PURCHASING_DEPARTMENT_ID } from "@/lib/constants/global";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { isRawMaterial } from "@/lib/constants/enums/material-types";
+import { supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -258,15 +258,17 @@ export default function SupplierQuotations({
           </div>
         </div>
         {editable && (
-          <div className="flex w-full min-w-0 items-end gap-2 sm:w-104 md:w-120">
-            <SelectSupplier
-              value={supplierId}
-              setValue={setSupplierId}
-              excludeIds={request.supplierQuotations.map((quotation) => quotation.supplierId)}
-              label={translate("Supplier", "المورد")}
-              placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
-              className="w-full min-w-0 flex-1"
-            />
+          <div className="flex w-full items-end gap-2 sm:w-104 md:w-120">
+            <div className="flex-1">
+              <SelectSupplier
+                value={supplierId}
+                setValue={setSupplierId}
+                excludeIds={request.supplierQuotations.map((quotation) => quotation.supplierId)}
+                withBrowseModal
+                label={translate("Supplier", "المورد")}
+                placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
+              />
+            </div>
             <Button
               color="haze"
               radius="md"
@@ -527,59 +529,59 @@ function QuotationCard({
           aria-expanded={opened}
           className="flex min-w-0 flex-1 items-center gap-3 text-start"
         >
-        <span
-          className={`flex size-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
-            opened ? "bg-haze-600 text-white" : "bg-haze-50 text-haze-700"
-          }`}
-        >
-          {opened ? (
-            <Store size={16} strokeWidth={2} />
-          ) : (
-            <span className="text-sm font-semibold">{supplierInitial(quotation.supplier.name)}</span>
-          )}
-        </span>
-
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold text-gray-950">{quotation.supplier.name}</span>
-          {!opened && (
-            <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
-              {!dirty && savedSummary.priced > 0 && savedSummary.complete && (
-                <span>{formatMoney(savedSummary.lineTotal, translation.currency)}</span>
-              )}
-              {!dirty && savedSummary.priced > 0 && savedSummary.complete && quotation.deliveryPeriodDays != null && (
-                <span className="text-gray-400">·</span>
-              )}
-              {quotation.deliveryPeriodDays != null && (
-                <span>
-                  {translate(`${quotation.deliveryPeriodDays} days delivery`, `${quotation.deliveryPeriodDays} يوم توريد`)}
-                </span>
-              )}
-            </span>
-          )}
-        </span>
-
-        <span className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-          {editable && dirty && (
-            <Badge size="sm" variant="light" color="ochre" radius="md">
-              {translate("Unsaved", "غير محفوظ")}
-            </Badge>
-          )}
-          <Badge
-            size="sm"
-            variant="light"
-            color={pricingSummary.priced === pricingSummary.total && pricingSummary.total > 0 ? "teal" : "gray"}
-            radius="md"
-          >
-            {coverageLabel}
-          </Badge>
           <span
-            className={`flex size-7 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-transform ${
-              opened ? "rotate-180" : ""
+            className={`flex size-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
+              opened ? "bg-haze-600 text-white" : "bg-haze-50 text-haze-700"
             }`}
           >
-            <ChevronDown size={16} />
+            {opened ? (
+              <Store size={16} strokeWidth={2} />
+            ) : (
+              <span className="text-sm font-semibold">{supplierInitial(quotation.supplier.name)}</span>
+            )}
           </span>
-        </span>
+
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-semibold text-gray-950">{quotation.supplier.name}</span>
+            {!opened && (
+              <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-gray-500">
+                {!dirty && savedSummary.priced > 0 && savedSummary.complete && (
+                  <span>{formatMoney(savedSummary.lineTotal, translation.currency)}</span>
+                )}
+                {!dirty && savedSummary.priced > 0 && savedSummary.complete && quotation.deliveryPeriodDays != null && (
+                  <span className="text-gray-400">·</span>
+                )}
+                {quotation.deliveryPeriodDays != null && (
+                  <span>
+                    {translate(`${quotation.deliveryPeriodDays} days delivery`, `${quotation.deliveryPeriodDays} يوم توريد`)}
+                  </span>
+                )}
+              </span>
+            )}
+          </span>
+
+          <span className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+            {editable && dirty && (
+              <Badge size="sm" variant="light" color="ochre" radius="md">
+                {translate("Unsaved", "غير محفوظ")}
+              </Badge>
+            )}
+            <Badge
+              size="sm"
+              variant="light"
+              color={pricingSummary.priced === pricingSummary.total && pricingSummary.total > 0 ? "teal" : "gray"}
+              radius="md"
+            >
+              {coverageLabel}
+            </Badge>
+            <span
+              className={`flex size-7 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-transform ${
+                opened ? "rotate-180" : ""
+              }`}
+            >
+              <ChevronDown size={16} />
+            </span>
+          </span>
         </button>
         {canPrint && (
           <QuotationLetterPrint
@@ -672,7 +674,8 @@ function QuotationCard({
                 <Table.Tbody>
                   {request.items.map((item) => {
                     const draft = prices[item.id];
-                    const showUnits = isRawMaterial(item.material.materialType) && item.material.unitConversions.length > 0;
+                    const showUnits =
+                      supportsUnitConversions(item.material.materialType) && item.material.unitConversions.length > 0;
                     return (
                       <Table.Tr key={item.id}>
                         <Table.Td className="font-mono text-xs text-gray-500">{item.materialCode}</Table.Td>
