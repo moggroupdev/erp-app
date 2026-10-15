@@ -41,6 +41,15 @@ const productsApi = {
     return result.data;
   },
 
+  async downloadExcel({ privateRequest }: { privateRequest: PrivateRequest }) {
+    return await privateRequest<null>({
+      url: "products/excel",
+      params: { _t: Date.now() },
+      download: true,
+      filename: "products-catalog.xlsx",
+    });
+  },
+
   async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
     return await privateRequest<ProductWithCreator>({ url: `products/${code}`, signal });
   },
