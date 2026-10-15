@@ -1,0 +1,104 @@
+"use client";
+
+import dayjs from "dayjs";
+import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
+import { formatDate } from "@/lib/helpers/date-formaters";
+import { formatMoney } from "@/lib/helpers/format-money";
+import { useI18n } from "@/lib/i18n/hooks";
+import type { Locale } from "@/lib/i18n/types";
+import type { CustomerAddress } from "@/types/customer";
+import { lineTitle, selectedDimension, type DeliveryMode, type ItemDraft } from "../form-state";
+
+type ReviewStepProps = {
+  customerName: string;
+  customerCode: string;
+  legacyNumber: string;
+  legacyWorkOrderNumber: string;
+  createdAt: string | null;
+  startedAt: string | null;
+  deliveryTime: string | null;
+  deliveryMode: DeliveryMode;
+  selectedAddress: CustomerAddress | null;
+  addressLabel: (address: CustomerAddress) => string;
+  totalAmount: number;
+  items: ItemDraft[];
+};
+
+export default function ReviewStep({
+  customerName,
+  customerCode,
+  legacyNumber,
+  legacyWorkOrderNumber,
+  createdAt,
+  startedAt,
+  deliveryTime,
+  deliveryMode,
+  selectedAddress,
+  addressLabel,
+  totalAmount,
+  items,
+}: ReviewStepProps) {
+  const { locale, translate, translation } = useI18n();
+  const dimensionUnit = translation.productDimensionUnit;
+
+  return (
+    <section className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 p-4 md:grid-cols-2">
+        <SummaryItem label={translate("Customer", "العميل")} value={customerName ? `${customerName} - ${customerCode}` : ""} />
+        <SummaryItem label={translate("Legacy contract number", "رقم العقد الورقي")} value={legacyNumber.trim()} />
+        <SummaryItem label={translate("Legacy work order number", "رقم أمر الشغل الورقي")} value={legacyWorkOrderNumber.trim()} />
+        <SummaryItem label={translate("Contract date", "تاريخ العقد")} value={formatPickerDate(createdAt, locale)} />
+        <SummaryItem label={translate("Work order start", "بداية أمر الشغل")} value={formatPickerDate(startedAt, locale)} />
+        <SummaryItem label={translate("Delivery date", "تاريخ التسليم")} value={formatPickerDate(deliveryTime, locale)} />
+        <SummaryItem
+          label={translate("Delivery", "التسليم")}
+          value={deliveryMode === "factory" ? translate("Factory", "المصنع") : selectedAddress ? addressLabel(selectedAddress) : ""}
+        />
+        <SummaryItem label={translate("Total", "الإجمالي")} value={formatMoney(totalAmount)} />
+      </div>
+      {items.map((item, index) => {
+        const dimension = selectedDimension(item);
+        const quantity = Number(item.quantity) || 0;
+        const price = Number(item.unitPrice) || 0;
+        const produced = item.units.filter((unit) => unit.producedAt).length;
+        return (
+          <article key={item.key} className="rounded-xl border border-gray-200 p-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-semibold text-gray-900">
+                {index + 1}. {lineTitle(item) || translate("Untitled line", "بند بدون عنوان")}
+              </h3>
+              <span className="text-sm text-gray-600">{formatMoney(quantity * price)}</span>
+            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              {item.productCode}
+              {dimension ? ` · ${formatDimensionLabelText(dimension, dimensionUnit)}` : ""}
+              {` · ${quantity} × ${formatMoney(price)}`}
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              {translate(`${item.units.length} units`, `${item.units.length} وحدات`)}
+              {produced > 0
+                ? ` · ${translate(`${produced} produced`, `${produced} تم إنتاجها`)}`
+                : ` · ${translate("None marked produced", "لم يُحدد إنتاج")}`}
+            </p>
+            {item.notes.trim() ? <p className="mt-2 text-sm text-gray-700">{item.notes.trim()}</p> : null}
+          </article>
+        );
+      })}
+    </section>
+  );
+}
+
+function SummaryItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-sm font-medium text-gray-900">{value || "-"}</p>
+    </div>
+  );
+}
+
+function formatPickerDate(value: string | null, locale: Locale) {
+  if (!value) return "";
+  const parsed = dayjs(value);
+  return parsed.isValid() ? formatDate(parsed.toDate(), locale) : "";
+}
