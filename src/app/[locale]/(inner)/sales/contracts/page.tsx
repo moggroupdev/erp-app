@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Table, TextInput } from "@mantine/core";
-import { Search, X } from "lucide-react";
+import { Menu, Table, TextInput } from "@mantine/core";
+import { Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -13,12 +14,14 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import PaginationHandler from "@/components/ui/pagination-handler";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import DataSelect from "@/components/ui/data-select";
 import ProtectedLink from "@/components/ui/protected-link";
 import { EmptyValue } from "@/components/ui/entity-details";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
+import useHasPermission from "@/hooks/use-has-permission";
 import usePrivateRequest from "@/hooks/use-private-request";
 import contractsApi from "@/lib/api/contracts";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -28,7 +31,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { ContractListItem } from "@/types/contract";
 import { getContractStatusLabel } from "./helpers";
 
@@ -37,6 +40,8 @@ const PAGE_SIZE = 25;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
+  const canCreateLegacyContract = useHasPermission(PERMISSIONS.ADD_LEGACY_CONTRACT);
+  const getLocalizedHref = useLocaleHref();
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
   const router = useRouter();
@@ -108,7 +113,22 @@ export default function Page() {
       header={{
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: (
+          <div className="flex gap-3">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <ActionsMenu>
+              {canCreateLegacyContract && (
+                <Menu.Item
+                  component={Link}
+                  href={getLocalizedHref("/sales/contracts/legacy/create")}
+                  leftSection={<Plus size={14} />}
+                >
+                  {translate("Add legacy contract", "إضافة عقد مرحلي")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
+          </div>
+        ),
       }}
     >
       <div className="flex flex-wrap items-end gap-3">

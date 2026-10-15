@@ -50,6 +50,37 @@ export type ContractItem = {
   productUnits: ContractProductUnit[];
 };
 
+export type CreateLegacyContractUnitDto = {
+  serialNumber: string;
+  supplierSerialNumber: string | null;
+  producedAt: string | null;
+};
+
+export type CreateLegacyContractItemDto = {
+  productDimensionId: string;
+  title: string | null;
+  unitPrice: number;
+  quantity: number;
+  notes: string | null;
+  units: CreateLegacyContractUnitDto[];
+};
+
+export type CreateLegacyContractDto = {
+  customerId: string;
+  legacyNumber: string;
+  legacyWorkOrderNumber: string;
+  createdAt: string;
+  startedAt: string;
+  deliveryTime: string;
+  deliveryAddressId: string | null;
+  items: CreateLegacyContractItemDto[];
+};
+
+export type CreatedLegacyContract = {
+  id: string;
+  code: string;
+};
+
 export type ContractDetailed = {
   id: string;
   code: string;

@@ -52,6 +52,7 @@ export const PERMISSION_VALUES = [
   "read_previews",
   "read_offers",
   "read_contracts",
+  "add_legacy_contract",
   "read_receptions",
   "read_complaints",
   "read_production_plans",
@@ -382,6 +383,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Read Contracts",
       ar: "عرض العقود",
+    },
+  },
+  add_legacy_contract: {
+    value: "add_legacy_contract",
+    label: {
+      en: "Add Legacy Contract",
+      ar: "إضافة عقد مرحلي",
     },
   },
   read_complaints: {
@@ -804,6 +812,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_previews",
       "read_offers",
       "read_contracts",
+      "add_legacy_contract",
       "read_receptions",
       "read_complaints",
     ],
