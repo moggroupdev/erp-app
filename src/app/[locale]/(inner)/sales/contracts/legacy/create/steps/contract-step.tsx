@@ -1,7 +1,8 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { SegmentedControl, TextInput } from "@mantine/core";
+import { Alert, SegmentedControl, TextInput } from "@mantine/core";
+import { Info } from "lucide-react";
 import DataSelect from "@/components/ui/data-select";
 import DatePickerInput from "@/components/ui/date-picker-input";
 import ProtectedLink from "@/components/ui/protected-link";
@@ -112,7 +113,7 @@ export default function ContractStep({
           setStartedAt(value);
           clearStepError();
         }}
-        label={translate("Work order start", "بداية أمر الشغل")}
+        label={translate("Work order start date", "تاريخ بدء أمر الشغل")}
         placeholder={translate("Select a date", "اختر تاريخًا")}
         required
       />
@@ -122,7 +123,7 @@ export default function ContractStep({
           setDeliveryTime(value);
           clearStepError();
         }}
-        label={translate("Delivery date", "تاريخ التسليم")}
+        label={translate("Delivery planned date", "تاريخ التسليم المخطط")}
         placeholder={translate("Select a date", "اختر تاريخًا")}
         required
       />
@@ -151,19 +152,19 @@ export default function ContractStep({
             addressesLoading ? (
               <p className="text-sm text-gray-500">{translate("Loading addresses...", "جاري تحميل العناوين...")}</p>
             ) : addresses.length === 0 ? (
-              <p className="text-sm text-gray-600">
+              <Alert color="ochre" radius="md" icon={<Info size={16} />}>
                 {translate(
-                  "This customer has no addresses. Deliver at the factory, or add an address on the customer page.",
-                  "لا توجد عناوين لهذا العميل. اختر التسليم في المصنع، أو أضف عنوانًا من صفحة العميل.",
+                  "This customer has no addresses. Add an address on the customer page.",
+                  "لا توجد عناوين لهذا العميل. أضف عنوانًا من صفحة العميل.",
                 )}{" "}
                 <ProtectedLink
                   permission={PERMISSIONS.READ_CUSTOMERS}
                   href={`/sales/customers/${customerId}`}
-                  className="text-haze-700 underline"
+                  className="font-medium underline"
                 >
-                  {translate("Open customer", "فتح العميل")}
+                  {translate("Open customer page", "فتح ملف العميل")}
                 </ProtectedLink>
-              </p>
+              </Alert>
             ) : (
               <DataSelect
                 value={deliveryAddressId}
@@ -173,7 +174,7 @@ export default function ContractStep({
                   clearStepError();
                 }}
                 data={addresses.map((address) => ({ value: address.id, label: addressLabel(address) }))}
-                label={translate("Delivery address", "عنوان التسليم")}
+                label={translate("Delivery address", "موقع التسليم")}
                 placeholder={translate("Choose an address", "اختر عنوانًا")}
                 className="max-w-xl"
               />
@@ -182,7 +183,7 @@ export default function ContractStep({
             <p className="text-sm text-gray-500">{translate("Choose a customer first.", "اختر عميلاً أولاً.")}</p>
           )
         ) : (
-          <p className="text-sm text-gray-500">{translate("Fulfillment stays at the factory.", "يتم التنفيذ في المصنع.")}</p>
+          <p className="text-sm text-gray-500">{translate("Fulfillment stays at the factory.", "يتم التسليم في المصنع.")}</p>
         )}
       </div>
     </section>

@@ -290,10 +290,22 @@ export default function Page() {
           size="sm"
           allowNextStepsSelect={false}
         >
-          <Stepper.Step label={translate("Contract", "العقد")} description={translate("Customer and dates", "العميل والتواريخ")} />
-          <Stepper.Step label={translate("Lines", "البنود")} description={translate("Products and prices", "المنتجات والأسعار")} />
-          <Stepper.Step label={translate("Units", "الوحدات")} description={translate("Serial numbers", "الأرقام التسلسلية")} />
-          <Stepper.Step label={translate("Review", "المراجعة")} description={translate("Confirm and save", "التأكيد والحفظ")} />
+          <Stepper.Step
+            label={translate("Contract", "العقد")}
+            description={translate("Customer and dates", "العميل والتواريخ")}
+          />
+          <Stepper.Step
+            label={translate("Lines", "البنود")}
+            description={translate("Products and prices", "المنتجات والأسعار")}
+          />
+          <Stepper.Step
+            label={translate("Units", "الوحدات")}
+            description={translate("Serial numbers", "الأرقام التسلسلية")}
+          />
+          <Stepper.Step
+            label={translate("Review", "المراجعة")}
+            description={translate("Confirm and save", "التأكيد والحفظ")}
+          />
         </Stepper>
 
         {stepError ? <ErrorAlert error={stepError} /> : null}
@@ -364,9 +376,9 @@ export default function Page() {
           />
         ) : null}
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 border-t border-gray-200 pt-4">
           {step > 0 ? (
-            <Button type="button" variant="default" onClick={goBack}>
+            <Button type="button" variant="light" color="dark" onClick={goBack}>
               {translate("Back", "رجوع")}
             </Button>
           ) : (
