@@ -70,7 +70,7 @@ export default function Page() {
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [startedAt, setStartedAt] = useState<string | null>(null);
   const [deliveryTime, setDeliveryTime] = useState<string | null>(null);
-  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("factory");
+  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("address");
   const [deliveryAddressId, setDeliveryAddressId] = useState<string | null>(null);
   const [prefillAddress, setPrefillAddress] = useState(false);
   const [items, setItems] = useState<ItemDraft[]>(() => [createEmptyItem()]);
@@ -105,17 +105,7 @@ export default function Page() {
       items.length !== 1 ||
       items.some((item) => !isItemUntouched(item))
     );
-  }, [
-    submitted,
-    customerId,
-    legacyNumber,
-    legacyWorkOrderNumber,
-    createdAt,
-    startedAt,
-    deliveryTime,
-    deliveryMode,
-    items,
-  ]);
+  }, [submitted, customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime, deliveryMode, items]);
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
 
@@ -310,17 +300,29 @@ export default function Page() {
           size="sm"
           allowNextStepsSelect={false}
         >
-          <Stepper.Step label={translate("Contract", "العقد")} description={translate("Customer and dates", "العميل والتواريخ")} />
-          <Stepper.Step label={translate("Lines", "البنود")} description={translate("Products and prices", "المنتجات والأسعار")} />
-          <Stepper.Step label={translate("Units", "الوحدات")} description={translate("Serial numbers", "الأرقام التسلسلية")} />
-          <Stepper.Step label={translate("Review", "المراجعة")} description={translate("Confirm and save", "التأكيد والحفظ")} />
+          <Stepper.Step
+            label={translate("Contract", "العقد")}
+            description={translate("Customer and dates", "العميل والتواريخ")}
+          />
+          <Stepper.Step
+            label={translate("Lines", "البنود")}
+            description={translate("Products and prices", "المنتجات والأسعار")}
+          />
+          <Stepper.Step
+            label={translate("Units", "الوحدات")}
+            description={translate("Serial numbers", "الأرقام التسلسلية")}
+          />
+          <Stepper.Step
+            label={translate("Review", "المراجعة")}
+            description={translate("Confirm and save", "التأكيد والحفظ")}
+          />
         </Stepper>
 
         {stepError ? <ErrorAlert error={stepError} /> : null}
         {apiError ? <ErrorAlert error={apiError} /> : null}
 
         {step === 0 ? (
-          <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <SelectCustomer
               value={customerId}
               setValue={(next) => {
@@ -354,45 +356,40 @@ export default function Page() {
               required
               radius="md"
             />
-            <div className="md:col-span-2">
-              <p className="mb-3 text-sm text-gray-500">
-                {translate("Dates are saved at 2:00 PM.", "تُحفظ التواريخ عند الساعة 2:00 مساءً.")}
-              </p>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <DatePickerInput
-                  value={createdAt}
-                  onChange={(value) => {
-                    setCreatedAt(value);
-                    clearStepError();
-                  }}
-                  label={translate("Contract date", "تاريخ العقد")}
-                  placeholder={translate("Select a date", "اختر تاريخًا")}
-                  required
-                />
-                <DatePickerInput
-                  value={startedAt}
-                  onChange={(value) => {
-                    setStartedAt(value);
-                    clearStepError();
-                  }}
-                  label={translate("Work order start", "بداية أمر الشغل")}
-                  placeholder={translate("Select a date", "اختر تاريخًا")}
-                  required
-                />
-                <DatePickerInput
-                  value={deliveryTime}
-                  onChange={(value) => {
-                    setDeliveryTime(value);
-                    clearStepError();
-                  }}
-                  label={translate("Delivery date", "تاريخ التسليم")}
-                  placeholder={translate("Select a date", "اختر تاريخًا")}
-                  required
-                />
-              </div>
-            </div>
+
+            <DatePickerInput
+              value={createdAt}
+              onChange={(value) => {
+                setCreatedAt(value);
+                clearStepError();
+              }}
+              label={translate("Contract date", "تاريخ العقد")}
+              placeholder={translate("Select a date", "اختر تاريخًا")}
+              required
+            />
+            <DatePickerInput
+              value={startedAt}
+              onChange={(value) => {
+                setStartedAt(value);
+                clearStepError();
+              }}
+              label={translate("Work order start", "بداية أمر الشغل")}
+              placeholder={translate("Select a date", "اختر تاريخًا")}
+              required
+            />
+            <DatePickerInput
+              value={deliveryTime}
+              onChange={(value) => {
+                setDeliveryTime(value);
+                clearStepError();
+              }}
+              label={translate("Delivery date", "تاريخ التسليم")}
+              placeholder={translate("Select a date", "اختر تاريخًا")}
+              required
+            />
+
             <div className="flex flex-col gap-3 md:col-span-2">
-              <span className="text-sm font-medium text-gray-800">{translate("Delivery", "التسليم")}</span>
+              <span className="text-sm font-medium text-gray-800">{translate("Delivery location", "موقع التسليم")}</span>
               <SegmentedControl
                 value={deliveryMode}
                 onChange={(value) => {
@@ -403,8 +400,8 @@ export default function Page() {
                   clearStepError();
                 }}
                 data={[
+                  { value: "address", label: translate("Customer address", "موقع العميل") },
                   { value: "factory", label: translate("Factory", "المصنع") },
-                  { value: "address", label: translate("Customer address", "عنوان العميل") },
                 ]}
                 color="haze"
                 radius="md"
@@ -606,9 +603,7 @@ export default function Page() {
                         <Table.Tr>
                           <Table.Th w="8%">#</Table.Th>
                           <Table.Th w={imported ? "34%" : "46%"}>{translate("Serial number", "الرقم التسلسلي")}</Table.Th>
-                          {imported ? (
-                            <Table.Th w="30%">{translate("Supplier serial", "مسلسل المورد")}</Table.Th>
-                          ) : null}
+                          {imported ? <Table.Th w="30%">{translate("Supplier serial", "مسلسل المورد")}</Table.Th> : null}
                           <Table.Th w={imported ? "28%" : "46%"}>{translate("Produced", "الإنتاج")}</Table.Th>
                         </Table.Tr>
                       </Table.Thead>
@@ -740,15 +735,24 @@ export default function Page() {
         {step === 3 ? (
           <section className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 p-4 md:grid-cols-2">
-              <SummaryItem label={translate("Customer", "العميل")} value={customerName ? `${customerName} - ${customerCode}` : ""} />
+              <SummaryItem
+                label={translate("Customer", "العميل")}
+                value={customerName ? `${customerName} - ${customerCode}` : ""}
+              />
               <SummaryItem label={translate("Legacy contract number", "رقم العقد الورقي")} value={legacyNumber.trim()} />
               <SummaryItem
                 label={translate("Legacy work order number", "رقم أمر الشغل الورقي")}
                 value={legacyWorkOrderNumber.trim()}
               />
               <SummaryItem label={translate("Contract date", "تاريخ العقد")} value={formatPickerDate(createdAt, locale)} />
-              <SummaryItem label={translate("Work order start", "بداية أمر الشغل")} value={formatPickerDate(startedAt, locale)} />
-              <SummaryItem label={translate("Delivery date", "تاريخ التسليم")} value={formatPickerDate(deliveryTime, locale)} />
+              <SummaryItem
+                label={translate("Work order start", "بداية أمر الشغل")}
+                value={formatPickerDate(startedAt, locale)}
+              />
+              <SummaryItem
+                label={translate("Delivery date", "تاريخ التسليم")}
+                value={formatPickerDate(deliveryTime, locale)}
+              />
               <SummaryItem
                 label={translate("Delivery", "التسليم")}
                 value={
