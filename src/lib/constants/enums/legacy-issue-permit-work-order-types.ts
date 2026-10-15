@@ -6,6 +6,7 @@ export const LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPE_VALUES = [
   "in_warranty_maintenance",
   "out_of_warranty_maintenance",
   "service_contract",
+  "sold_goods",
 ] as const;
 
 export type LegacyIssuePermitWorkOrderType = (typeof LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPE_VALUES)[number];
@@ -45,6 +46,13 @@ export const LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPE_LABELS: LocalizedEntity<LegacyI
     label: {
       en: "Service Contract",
       ar: "عقد خدمة",
+    },
+  },
+  sold_goods: {
+    value: "sold_goods",
+    label: {
+      en: "Sold Goods",
+      ar: "بضاعة مباعة",
     },
   },
 };

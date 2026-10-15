@@ -3,7 +3,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type CustomerWithCreator } from "@/types/customer";
 import { getCustomerClassificationLabel } from "@/lib/constants/enums/customer-classifications";
 import { Users } from "lucide-react";
-import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import EntityDetails, { CreatorLink, EmptyValue, WebsiteLink, type DetailRow } from "@/components/ui/entity-details";
 
 export default function CustomerDetails({ customer }: { customer: CustomerWithCreator }) {
   const { locale, translate } = useI18n();
@@ -22,7 +22,34 @@ export default function CustomerDetails({ customer }: { customer: CustomerWithCr
     },
     {
       key: translate("Email", "البريد الإلكتروني"),
-      value: customer.email ? <a href={`mailto:${customer.email}`}>{customer.email}</a> : <EmptyValue />,
+      value: customer.email ? (
+        <a
+          href={`mailto:${customer.email}`}
+          className="break-all text-haze-700 underline decoration-haze-200 underline-offset-4 hover:decoration-haze-600"
+        >
+          {customer.email}
+        </a>
+      ) : (
+        <EmptyValue />
+      ),
+    },
+    {
+      key: translate("Website", "الموقع الالكتروني"),
+      value: customer.website ? <WebsiteLink website={customer.website} /> : <EmptyValue />,
+    },
+    {
+      key: translate("Tax Number", "الرقم الضريبي"),
+      value: customer.taxNumber ? <span className="font-mono">{customer.taxNumber}</span> : <EmptyValue />,
+      copyText: customer.taxNumber ?? undefined,
+    },
+    {
+      key: translate("Commercial Registration", "رقم السجل التجاري"),
+      value: customer.commercialRegistrationNumber ? (
+        <span className="font-mono">{customer.commercialRegistrationNumber}</span>
+      ) : (
+        <EmptyValue />
+      ),
+      copyText: customer.commercialRegistrationNumber ?? undefined,
     },
     {
       key: translate("Notes", "الملاحظات"),

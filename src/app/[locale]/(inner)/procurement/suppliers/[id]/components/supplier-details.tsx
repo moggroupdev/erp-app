@@ -3,7 +3,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type SupplierWithCreator } from "@/types/supplier";
 import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";
 import { HandCoins } from "lucide-react";
-import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import EntityDetails, { CreatorLink, EmptyValue, WebsiteLink, type DetailRow } from "@/components/ui/entity-details";
 
 export default function SupplierDetails({ supplier }: { supplier: SupplierWithCreator }) {
   const { locale, translate } = useI18n();
@@ -17,13 +17,22 @@ export default function SupplierDetails({ supplier }: { supplier: SupplierWithCr
       value: supplier.classification ? getSupplierClassificationLabel(supplier.classification, locale) : <EmptyValue />,
     },
     {
+      key: translate("Website", "الموقع الالكتروني"),
+      value: supplier.website ? <WebsiteLink website={supplier.website} /> : <EmptyValue />,
+    },
+    {
       key: translate("Tax Number", "الرقم الضريبي"),
-      value: supplier.taxNumber ? (
-        <span className="font-mono">{supplier.taxNumber}</span>
+      value: supplier.taxNumber ? <span className="font-mono">{supplier.taxNumber}</span> : <EmptyValue />,
+      copyText: supplier.taxNumber ?? undefined,
+    },
+    {
+      key: translate("Commercial Registration", "رقم السجل التجاري"),
+      value: supplier.commercialRegistrationNumber ? (
+        <span className="font-mono">{supplier.commercialRegistrationNumber}</span>
       ) : (
         <EmptyValue />
       ),
-      copyText: supplier.taxNumber ?? undefined,
+      copyText: supplier.commercialRegistrationNumber ?? undefined,
     },
     {
       key: translate("Phone", "الهاتف"),
@@ -31,7 +40,16 @@ export default function SupplierDetails({ supplier }: { supplier: SupplierWithCr
     },
     {
       key: translate("Email", "البريد الإلكتروني"),
-      value: supplier.email ? <a href={`mailto:${supplier.email}`}>{supplier.email}</a> : <EmptyValue />,
+      value: supplier.email ? (
+        <a
+          href={`mailto:${supplier.email}`}
+          className="break-all text-haze-700 underline decoration-haze-200 underline-offset-4 hover:decoration-haze-600"
+        >
+          {supplier.email}
+        </a>
+      ) : (
+        <EmptyValue />
+      ),
     },
     {
       key: translate("Notes", "الملاحظات"),

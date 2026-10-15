@@ -1,4 +1,5 @@
 import { Address } from "./address";
+import { ContactPerson } from "./contact-person";
 import type { SupplierClassification } from "@/lib/constants/enums/supplier-classifications";
 
 export type Supplier = {
@@ -7,7 +8,9 @@ export type Supplier = {
   name: string;
   phone: string | null;
   email: string | null;
+  website: string | null;
   taxNumber: string | null;
+  commercialRegistrationNumber: string | null;
   classification: SupplierClassification | null;
   notes: string | null;
   blacklistedAt: Date | null;
@@ -23,13 +26,17 @@ export type SupplierWithCreator = Supplier & {
 
 export type SupplierAddress = Address & { supplierId: string };
 
+export type SupplierContactPerson = ContactPerson & { supplierId: string };
+
 // ==================== DTOs ====================
 
 export type CreateSupplierDto = {
   name: string;
   phone: string | null;
   email: string | null;
+  website: string | null;
   taxNumber: string | null;
+  commercialRegistrationNumber: string | null;
   classification: SupplierClassification | null;
   notes: string | null;
 };
@@ -41,4 +48,12 @@ export type CreateSupplierAddressDto = {
   cityId: string | null; // Required if the country is Egypt
   addressLine: string | null;
   isDefault: boolean;
+};
+
+export type CreateSupplierContactPersonDto = {
+  name: string;
+  jobTitle: string | null;
+  phone: string | null;
+  email: string | null;
+  isPrimary: boolean;
 };
