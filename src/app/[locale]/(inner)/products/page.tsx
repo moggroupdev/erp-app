@@ -3,7 +3,7 @@
 import ProtectedLink from "@/components/ui/protected-link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery, useMutation, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -24,7 +24,6 @@ import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { type Product, type ProductWithDimensions } from "@/types/product";
 import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { toast } from "sonner";
 import { Download, Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -41,6 +40,7 @@ import ProductModal from "@/components/global/data-modals/product-modal";
 import SelectProductSourceType from "@/components/global/selections/enum-based/select-product-source-type";
 import SelectProductMain from "@/components/global/selections/reference-based/select-product-main";
 import SelectProductSub from "@/components/global/selections/reference-based/select-product-sub";
+import DownloadProductsExcelModal from "./components/download-excel-modal";
 
 const PAGE_TITLE = { en: "Products Catalog", ar: "كتالوج المنتجات" };
 
@@ -132,11 +132,6 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
-  const downloadExcelMutation = useMutation({
-    mutationFn: () => productsApi.downloadExcel({ privateRequest }),
-    onError: (downloadError) => toast.error(getErrorMessage(locale, downloadError)),
-  });
-
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
@@ -162,6 +157,7 @@ export default function Page() {
   // ========================= MODALS =========================
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
+  const [excelModalOpened, { open: openExcelModal, close: closeExcelModal }] = useDisclosure(false);
   const [productToUpdate, setProductToUpdate] = useState<Product | null>(null);
 
   function handleOpenUpdateModal(product: Product) {
@@ -196,14 +192,8 @@ export default function Page() {
                 </PrintDocument>
               )}
               {canPrintProductsList && (
-                <Menu.Item
-                  leftSection={<Download size={14} />}
-                  disabled={downloadExcelMutation.isPending}
-                  onClick={() => downloadExcelMutation.mutate()}
-                >
-                  {downloadExcelMutation.isPending
-                    ? translate("Downloading...", "جاري التنزيل...")
-                    : translate("Download Excel File", "تنزيل ملف إكسل")}
+                <Menu.Item leftSection={<Download size={14} />} onClick={openExcelModal}>
+                  {translate("Download Excel File", "تنزيل ملف إكسل")}
                 </Menu.Item>
               )}
               {canPrintProductsList && canAddProduct && <Menu.Divider />}
@@ -371,6 +361,8 @@ export default function Page() {
           </>
         ))
       )}
+
+      <DownloadProductsExcelModal opened={excelModalOpened} close={closeExcelModal} />
 
       <ProductModal
         opened={modalOpened}
