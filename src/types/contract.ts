@@ -76,6 +76,16 @@ export type CreateLegacyContractDto = {
   items: CreateLegacyContractItemDto[];
 };
 
+export type ValidateLegacyContractDto = Omit<CreateLegacyContractDto, "items">;
+
+export type ValidateLegacyContractItemsDto = {
+  items: { productDimensionId: string }[];
+};
+
+export type ValidateLegacyContractUnitsDto = {
+  items: CreateLegacyContractItemDto[];
+};
+
 export type CreatedLegacyContract = {
   id: string;
   code: string;

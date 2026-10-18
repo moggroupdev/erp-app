@@ -15,6 +15,7 @@ import contractsApi from "@/lib/api/contracts";
 import customersApi from "@/lib/api/customers";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { dateOnlyToTwoPmIso } from "@/lib/helpers/datetime-picker";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { CustomerAddress } from "@/types/customer";
@@ -52,6 +53,7 @@ export default function Page() {
 
   const [step, setStep] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
+  const [stepValidating, setStepValidating] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -126,7 +128,21 @@ export default function Page() {
     setStepError(null);
   }
 
-  function goNext() {
+  function contractHeaderDto() {
+    return {
+      customerId: customerId!,
+      legacyNumber: legacyNumber.trim(),
+      legacyWorkOrderNumber: legacyWorkOrderNumber.trim(),
+      createdAt: dateOnlyToTwoPmIso(createdAt)!,
+      startedAt: dateOnlyToTwoPmIso(startedAt)!,
+      deliveryTime: dateOnlyToTwoPmIso(deliveryTime)!,
+      deliveryAddressId: deliveryMode === "address" ? deliveryAddressId : null,
+    };
+  }
+
+  async function goNext() {
+    if (stepValidating || mutation.isPending) return;
+
     const error =
       step === 0
         ? validateContractStep(
@@ -149,16 +165,39 @@ export default function Page() {
       setStepError(error);
       return;
     }
+
     setStepError(null);
-    setStep((current) => Math.min(current + 1, 3));
+    setStepValidating(true);
+    try {
+      if (step === 0) {
+        await contractsApi.validateLegacyContract({ privateRequest, dto: contractHeaderDto() });
+      } else if (step === 1) {
+        await contractsApi.validateLegacyItems({
+          privateRequest,
+          dto: { items: items.map((item) => ({ productDimensionId: item.productDimensionId! })) },
+        });
+      } else {
+        await contractsApi.validateLegacyUnits({
+          privateRequest,
+          dto: { items: buildLegacyContractDto({ ...contractHeaderDto(), items }).items },
+        });
+      }
+      setStep((current) => Math.min(current + 1, 3));
+    } catch (apiError) {
+      setStepError(getErrorMessage(locale, apiError));
+    } finally {
+      setStepValidating(false);
+    }
   }
 
   function goBack() {
+    if (stepValidating) return;
     setStepError(null);
     setStep((current) => Math.max(current - 1, 0));
   }
 
   function createContract() {
+    if (stepValidating || mutation.isPending) return;
     const error =
       validateContractStep(
         {
@@ -187,7 +226,7 @@ export default function Page() {
     event.preventDefault();
     // Enter in fields triggers implicit form submit. Advance earlier steps;
     // never create from onSubmit (Next→Create button swap can also fire this).
-    if (step < 3) goNext();
+    if (step < 3) void goNext();
   }
 
   function selectCustomer(customer: { id: string; name: string; code: string } | null) {
@@ -354,14 +393,20 @@ export default function Page() {
 
         <div className="flex items-center justify-between gap-3 border-t border-gray-200 pt-4">
           {step > 0 ? (
-            <Button type="button" variant="light" color="dark" onClick={goBack}>
+            <Button type="button" variant="light" color="dark" disabled={stepValidating} onClick={goBack}>
               {translate("Back", "رجوع")}
             </Button>
           ) : (
             <span />
           )}
           {step < 3 ? (
-            <Button key="next" type="button" color="haze" onClick={goNext}>
+            <Button
+              key="next"
+              type="button"
+              color="haze"
+              loading={stepValidating}
+              onClick={() => void goNext()}
+            >
               {translate("Next", "التالي")}
             </Button>
           ) : (
