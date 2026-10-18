@@ -1,14 +1,14 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { Button, NumberInput, Textarea, TextInput } from "@mantine/core";
+import { Button, NumberInput, Textarea } from "@mantine/core";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import DataSelect from "@/components/ui/data-select";
 import SelectProduct, { type SelectableProduct } from "@/components/global/selections/remote-based/select-product";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
-import { createEmptyItem, lineTitle, type ItemDraft } from "../form-state";
+import { createEmptyItem, type ItemDraft } from "../form-state";
 
 const ASIDE_INPUT =
   "w-full min-w-0 bg-transparent py-2.5 text-base font-semibold text-gray-900 tabular-nums outline-none placeholder:font-normal placeholder:text-gray-400";
@@ -31,7 +31,6 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
     <section className="flex flex-col gap-3">
       {items.map((item, index) => {
         const amount = lineAmount(item);
-        const name = lineTitle(item);
         return (
           <article key={item.key} className="overflow-hidden rounded-xl border border-gray-200">
             <header className="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-900">
@@ -39,7 +38,7 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                 <span className="bg-haze-100 text-haze-700 inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md px-1.5 text-xs font-semibold">
                   {index + 1}
                 </span>
-                <span className="truncate">{name || translate("Line", "البند")}</span>
+                <span className="truncate">{item.productTitle || translate("Line", "البند")}</span>
               </h3>
               <Button
                 type="button"
@@ -89,15 +88,17 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                   disabled={!item.productCode || item.dimensions.length === 0}
                   required
                 />
-                <TextInput
+                <Textarea
                   value={item.title}
                   onChange={(event) => {
                     const title = event.currentTarget.value;
                     setItems((current) => current.map((row) => (row.key === item.key ? { ...row, title } : row)));
                   }}
-                  label={translate("Title", "العنوان")}
-                  placeholder={item.productTitle || translate("Line title", "عنوان البند")}
+                  label={translate("Description", "البيان")}
+                  placeholder={item.productTitle || translate("Line description", "بيان البند")}
                   radius="md"
+                  autosize
+                  minRows={2}
                   className="sm:col-span-2"
                 />
                 <Textarea
