@@ -5,7 +5,6 @@ import useLocations from "@/hooks/reference/use-locations";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { contractItemTitle } from "@/app/[locale]/(inner)/sales/contracts/helpers";
 import type { ContractDetailed, ContractItem, ContractProductUnit } from "@/types/contract";
 
 export type ContractReviewPrintVariant = "items" | "units";
@@ -82,7 +81,7 @@ function ContractItemPrintBlock({
   dimensionUnit: string;
   translate: (en: string, ar: string) => string;
 }) {
-  const title = contractItemTitle(item);
+  const lineTitle = item.title?.trim() || "";
   const cancelled = !!item.cancelledAt;
   const lineAmount = item.quantity * item.unitPrice;
   const units = item.productUnits;
@@ -105,24 +104,28 @@ function ContractItemPrintBlock({
 
   return (
     <section className="flex break-inside-avoid flex-col gap-2.5">
-      <PrintSectionHeading
-        title={
-          <span className="flex flex-wrap items-baseline gap-2">
-            <span>
-              {index + 1}. {title}
-            </span>
-            {cancelled ? (
-              <span className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
-                {translate("Cancelled", "ملغي")}
+      <div className="flex flex-col gap-1">
+        <PrintSectionHeading
+          title={
+            <span className="flex flex-wrap items-center gap-2">
+              <span>
+                {index + 1}. {item.product.title}
               </span>
-            ) : null}
-          </span>
-        }
-      />
+              <span className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-gray-700">
+                {item.product.code}
+              </span>
+              {cancelled ? (
+                <span className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
+                  {translate("Cancelled", "ملغي")}
+                </span>
+              ) : null}
+            </span>
+          }
+        />
+        {lineTitle ? <p className="py-1 text-[11px] leading-relaxed text-gray-600">{lineTitle}</p> : null}
+      </div>
 
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3 [&>div>span:last-child]:text-[11px]">
-        <PrintDetail label={translate("Title", "العنوان")} value={item.title?.trim() || "-"} />
-        <PrintDetail label={translate("Product code", "كود المنتج")} value={item.product.code} mono />
+      <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4 [&>div>span:last-child]:text-[11px]">
         <PrintDetail
           label={translate("Dimension", "المقاس")}
           value={formatDimensionLabelText(item.productDimension, dimensionUnit)}
@@ -171,9 +174,8 @@ function ContractItemsPrintTable({
 
   const headers = [
     "#",
-    translate("Title", "العنوان"),
+    translate("Description", "البيان"),
     translate("Product", "المنتج"),
-    translate("Product code", "كود المنتج"),
     translate("Dimension", "المقاس"),
     translate("Quantity", "الكمية"),
     translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`),
@@ -182,8 +184,8 @@ function ContractItemsPrintTable({
   ];
 
   const columnWidths = showNotes
-    ? ["4%", "14%", "14%", "10%", "12%", "6%", "11%", "11%", "18%"]
-    : ["5%", "18%", "18%", "12%", "14%", "7%", "13%", "13%"];
+    ? ["4%", "22%", "16%", "12%", "7%", "11%", "11%", "17%"]
+    : ["5%", "26%", "20%", "16%", "8%", "12%", "13%"];
 
   const rows = items.map((item, index) => {
     const lineTitle = item.title?.trim() || "-";
@@ -207,8 +209,10 @@ function ContractItemsPrintTable({
       ) : (
         lineTitle
       ),
-      item.product.title,
-      item.product.code,
+      <span className="flex flex-col gap-0.5">
+        <span>{item.product.title}</span>
+        <span className="font-mono text-gray-600">{item.product.code}</span>
+      </span>,
       formatDimensionLabelText(item.productDimension, dimensionUnit),
       String(item.quantity),
       formatMoney(item.unitPrice),
@@ -223,7 +227,7 @@ function ContractItemsPrintTable({
     ];
   });
 
-  const lineTotalIndex = 7;
+  const lineTotalIndex = 6;
   const footer = headers.map(() => "");
   footer[1] = translate(`Total (${currency})`, `الإجمالي (${currency})`);
   footer[lineTotalIndex] = formatMoney(
@@ -236,9 +240,8 @@ function ContractItemsPrintTable({
       rows={rows}
       footerRow={footer}
       columnWidths={columnWidths}
-      monoColumnIndexes={[3]}
-      noWrapIndexes={[0, 5, 6, 7]}
-      tableClassName="text-[9px] [&_td]:align-top [&_th]:text-[8px]"
+      noWrapIndexes={[0, 4, 5, 6]}
+      tableClassName="border border-gray-300 text-[9px] [&_td]:border [&_td]:border-gray-300 [&_td]:align-top [&_th]:border [&_th]:border-gray-300 [&_th]:text-[8px]"
       emptyLabel={translate("No items on this contract review", "لا توجد بنود في مراجعة العقد هذه")}
     />
   );
@@ -349,7 +352,7 @@ export default function ContractReviewPrintDocument({ contract, variant = "units
           translate={translate}
         />
       ) : (
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-6">
           {contract.items.map((item, index) => (
             <ContractItemPrintBlock
               key={item.id}
