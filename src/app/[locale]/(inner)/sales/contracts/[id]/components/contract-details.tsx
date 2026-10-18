@@ -1,7 +1,7 @@
 "use client";
 
 import { FileText } from "lucide-react";
-import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import EntityDetails, { CreatorLink, type DetailRow } from "@/components/ui/entity-details";
 import ProtectedLink from "@/components/ui/protected-link";
 import useLocations from "@/hooks/reference/use-locations";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
@@ -78,20 +78,24 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
         </ProtectedLink>
       ),
     },
-    {
-      key: translate("Legacy number", "رقم مراجعة العقد"),
-      value: contract.legacyNumber ? <span className="font-mono">{contract.legacyNumber}</span> : <EmptyValue />,
-      copyText: contract.legacyNumber || undefined,
-    },
-    {
-      key: translate("Work order number", "رقم أمر الشغل"),
-      value: contract.legacyWorkOrderNumber ? (
-        <span className="font-mono">{contract.legacyWorkOrderNumber}</span>
-      ) : (
-        <EmptyValue />
-      ),
-      copyText: contract.legacyWorkOrderNumber || undefined,
-    },
+    ...(contract.legacyNumber
+      ? [
+          {
+            key: translate("Legacy number", "رقم مراجعة العقد"),
+            value: <span className="font-mono">{contract.legacyNumber}</span>,
+            copyText: contract.legacyNumber,
+          },
+        ]
+      : []),
+    ...(contract.legacyWorkOrderNumber
+      ? [
+          {
+            key: translate("Work order number", "رقم أمر الشغل"),
+            value: <span className="font-mono">{contract.legacyWorkOrderNumber}</span>,
+            copyText: contract.legacyWorkOrderNumber,
+          },
+        ]
+      : []),
     {
       key: translate("Delivery address", "عنوان التسليم"),
       value: address ? (
@@ -102,14 +106,22 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
         translate("Factory", "المصنع")
       ),
     },
-    {
-      key: translate("Delivery time", "موعد التسليم"),
-      value: contract.deliveryTime ? formatDateAndTime(contract.deliveryTime, locale) : <EmptyValue />,
-    },
-    {
-      key: translate("Work order start", "بداية أمر الشغل"),
-      value: contract.startedAt ? formatDateAndTime(contract.startedAt, locale) : <EmptyValue />,
-    },
+    ...(contract.deliveryTime
+      ? [
+          {
+            key: translate("Delivery time", "موعد التسليم"),
+            value: formatDateAndTime(contract.deliveryTime, locale),
+          },
+        ]
+      : []),
+    ...(contract.startedAt
+      ? [
+          {
+            key: translate("Work order start", "بداية أمر الشغل"),
+            value: formatDateAndTime(contract.startedAt, locale),
+          },
+        ]
+      : []),
     ...(contract.completedAt
       ? [
           {
@@ -138,30 +150,50 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
             : []),
         ]
       : []),
-    {
-      key: translate("Discount", "الخصم"),
-      value: contract.discountPct == null ? <EmptyValue /> : `${contract.discountPct}%`,
-    },
+    ...(contract.discountPct != null
+      ? [
+          {
+            key: translate("Discount", "الخصم"),
+            value: `${contract.discountPct}%`,
+          },
+        ]
+      : []),
     {
       key: translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`),
       value: formatMoney(contract.totalAmount),
     },
-    {
-      key: translate("Inquiry", "الاستفسار"),
-      value: contract.inquiry ? inquiryStatusLabel(contract.inquiry.status, translate) : <EmptyValue />,
-    },
-    {
-      key: translate("Preview", "المعاينة"),
-      value: contract.preview ? formatDateAndTime(contract.preview.scheduledAt, locale) : <EmptyValue />,
-    },
-    {
-      key: translate("Offer", "العرض"),
-      value: contract.offer ? offerStatusLabel(contract.offer.status, translate) : <EmptyValue />,
-    },
-    {
-      key: translate("Notes", "الملاحظات"),
-      value: contract.notes ? <span className="font-normal whitespace-pre-wrap">{contract.notes}</span> : <EmptyValue />,
-    },
+    ...(contract.inquiry
+      ? [
+          {
+            key: translate("Inquiry", "الاستفسار"),
+            value: inquiryStatusLabel(contract.inquiry.status, translate),
+          },
+        ]
+      : []),
+    ...(contract.preview
+      ? [
+          {
+            key: translate("Preview", "المعاينة"),
+            value: formatDateAndTime(contract.preview.scheduledAt, locale),
+          },
+        ]
+      : []),
+    ...(contract.offer
+      ? [
+          {
+            key: translate("Offer", "العرض"),
+            value: offerStatusLabel(contract.offer.status, translate),
+          },
+        ]
+      : []),
+    ...(contract.notes
+      ? [
+          {
+            key: translate("Notes", "الملاحظات"),
+            value: <span className="font-normal whitespace-pre-wrap">{contract.notes}</span>,
+          },
+        ]
+      : []),
     {
       key: translate("Created by", "أنشئ بواسطة"),
       value: <CreatorLink creator={contract.createdBy} />,
