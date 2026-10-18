@@ -158,8 +158,7 @@ export default function Page() {
     setStep((current) => Math.max(current - 1, 0));
   }
 
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
+  function createContract() {
     const error =
       validateContractStep(
         {
@@ -182,6 +181,13 @@ export default function Page() {
     }
     setStepError(null);
     mutation.mutate();
+  }
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    // Enter in fields triggers implicit form submit. Advance earlier steps;
+    // never create from onSubmit (Next→Create button swap can also fire this).
+    if (step < 3) goNext();
   }
 
   function selectCustomer(customer: { id: string; name: string; code: string } | null) {
@@ -355,11 +361,17 @@ export default function Page() {
             <span />
           )}
           {step < 3 ? (
-            <Button type="button" color="haze" onClick={goNext}>
+            <Button key="next" type="button" color="haze" onClick={goNext}>
               {translate("Next", "التالي")}
             </Button>
           ) : (
-            <Button type="submit" color="haze" loading={mutation.isPending}>
+            <Button
+              key="create"
+              type="button"
+              color="haze"
+              loading={mutation.isPending}
+              onClick={createContract}
+            >
               {translate("Create legacy contract", "إنشاء العقد المرحلي")}
             </Button>
           )}
