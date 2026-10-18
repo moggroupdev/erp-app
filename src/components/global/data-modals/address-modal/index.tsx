@@ -13,6 +13,8 @@ import Modal from "@/components/ui/modal";
 import SelectGovernorate from "@/components/global/selections/reference-based/select-governorate";
 import SelectCity from "@/components/global/selections/reference-based/select-city";
 import SelectCountry from "@/components/global/selections/reference-based/select-country";
+import type { CustomerAddress } from "@/types/customer";
+import type { SupplierAddress } from "@/types/supplier";
 
 type LocationScope = "in-egypt" | "outside-egypt";
 
@@ -20,9 +22,17 @@ type AddressModalProps = {
   opened: boolean;
   close: () => void;
   isFirstAddress: boolean;
+  onCreated?: (address: CustomerAddress | SupplierAddress) => void;
 } & ({ entityType: "customer"; entityId: string } | { entityType: "supplier"; entityId: string });
 
-export default function AddressModal({ opened, close, entityType, entityId, isFirstAddress }: AddressModalProps) {
+export default function AddressModal({
+  opened,
+  close,
+  entityType,
+  entityId,
+  isFirstAddress,
+  onCreated,
+}: AddressModalProps) {
   const { locale, translate, translation } = useI18n();
 
   const queryClient = useQueryClient();
@@ -71,7 +81,7 @@ export default function AddressModal({ opened, close, entityType, entityId, isFi
       if (entityType === "supplier") return await suppliersApi.addAddress({ privateRequest, id: entityId, dto });
       return null;
     },
-    onSuccess: async () => {
+    onSuccess: async (created) => {
       const addressesKey =
         entityType === "customer"
           ? queryKeys.customers.addresses(entityId)
@@ -79,6 +89,7 @@ export default function AddressModal({ opened, close, entityType, entityId, isFi
             ? queryKeys.suppliers.addresses(entityId)
             : null;
       if (addressesKey) await queryClient.invalidateQueries({ queryKey: addressesKey });
+      if (created) onCreated?.(created);
       handleClose();
     },
   });
