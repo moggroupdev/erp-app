@@ -130,8 +130,8 @@ export default function ContractStep({
         />
       </section>
 
-      <section className="rounded-xl border border-gray-200">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
+      <section className="overflow-hidden rounded-xl border border-gray-200">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3">
           <div>
             <h2 className="text-sm font-semibold text-gray-900">{translate("Delivery", "التسليم")}</h2>
             <p className="text-xs text-gray-500">
@@ -164,7 +164,9 @@ export default function ContractStep({
                 <Factory size={18} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">{translate("Factory fulfillment", "التسليم من المصنع")}</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {translate("Factory fulfillment", "التسليم من المصنع")}
+                </p>
                 <p className="mt-0.5 text-sm text-gray-600">
                   {translate("Fulfillment stays at the factory.", "يتم التسليم في المصنع.")}
                 </p>
@@ -178,15 +180,15 @@ export default function ContractStep({
               {translate("Loading addresses...", "جاري تحميل العناوين...")}
             </div>
           ) : addresses.length === 0 ? (
-            <div className="flex gap-3 rounded-xl border border-ochre-200 bg-ochre-50 px-4 py-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ochre-100 text-ochre-700">
+            <div className="border-ochre-200 bg-ochre-50 flex gap-3 rounded-xl border px-4 py-3">
+              <div className="bg-ochre-100 text-ochre-700 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                 <MapPinOff size={18} />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-ochre-800">
+                <p className="text-ochre-800 text-sm font-semibold">
                   {translate("No delivery addresses", "لا توجد عناوين تسليم")}
                 </p>
-                <p className="mt-0.5 text-sm text-ochre-700">
+                <p className="text-ochre-700 mt-0.5 text-sm">
                   {translate(
                     "This customer has no addresses yet. Add one on the customer page, then come back.",
                     "لا توجد عناوين لهذا العميل بعد. أضف عنوانًا من صفحة العميل ثم عد إلى هنا.",
@@ -195,7 +197,7 @@ export default function ContractStep({
                 <ProtectedLink
                   permission={PERMISSIONS.READ_CUSTOMERS}
                   href={`/sales/customers/${customerId}`}
-                  className="mt-2 inline-flex text-sm font-semibold text-ochre-800 underline underline-offset-2"
+                  className="text-ochre-800 mt-2 inline-flex text-sm font-semibold underline underline-offset-2"
                 >
                   {translate("Open customer page", "فتح ملف العميل")}
                 </ProtectedLink>
@@ -232,7 +234,7 @@ export default function ContractStep({
                     className={[
                       "flex h-full flex-col gap-2.5 rounded-xl border p-3 text-start transition-colors",
                       selected
-                        ? "border-haze-600 bg-haze-50 ring-1 ring-haze-200"
+                        ? "border-haze-600 bg-haze-50 ring-haze-200 ring-1"
                         : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50",
                     ].join(" ")}
                   >
@@ -248,7 +250,9 @@ export default function ContractStep({
                         </span>
                         <div className="min-w-0">
                           <p className="truncate text-sm font-semibold text-gray-900">{headline}</p>
-                          <p className="truncate text-xs text-gray-500">{locationText || translate("Location unavailable", "الموقع غير متاح")}</p>
+                          <p className="truncate text-xs text-gray-500">
+                            {locationText || translate("Location unavailable", "الموقع غير متاح")}
+                          </p>
                         </div>
                       </div>
                       <span
@@ -261,7 +265,7 @@ export default function ContractStep({
                       </span>
                     </div>
 
-                    <p className="line-clamp-2 min-h-10 text-sm leading-snug text-gray-700">
+                    <p className="my-1 line-clamp-2 text-sm leading-snug text-gray-700">
                       {address.addressLine?.trim() || translate("No details added", "لم تتم إضافة تفاصيل")}
                     </p>
 

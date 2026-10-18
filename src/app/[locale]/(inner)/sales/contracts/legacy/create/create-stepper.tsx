@@ -36,16 +36,17 @@ export default function CreateStepper({ active, onStepClick }: CreateStepperProp
   const progress = STEPS.length <= 1 ? 0 : (active / (STEPS.length - 1)) * 100;
 
   return (
-    <nav aria-label={translate("Contract steps", "خطوات العقد")} className="rounded-xl bg-gray-50/80 px-3 py-6 sm:px-5">
+    <nav aria-label={translate("Contract steps", "خطوات العقد")} className="rounded-xl bg-gray-50/80 px-3 py-8 sm:px-4">
       <ol className="relative grid grid-cols-2 gap-y-4 sm:grid-cols-4 sm:gap-y-0">
+        {/* Track sits on the icon vertical center, behind the step buttons */}
         <div
           aria-hidden
-          className="pointer-events-none absolute start-[12.5%] top-5 hidden h-0.5 w-3/4 bg-gray-200 sm:block"
+          className="pointer-events-none absolute start-[12.5%] top-6.5 z-0 hidden h-0.5 w-3/4 -translate-y-1/2 bg-gray-200 sm:block"
         />
         <div
           aria-hidden
-          className="bg-haze-600 pointer-events-none absolute start-[12.5%] top-5 hidden h-0.5 w-3/4 origin-left transition-transform duration-300 ease-out motion-reduce:transition-none sm:block rtl:origin-right"
-          style={{ transform: `scaleX(${progress / 100})` }}
+          className="bg-haze-600 pointer-events-none absolute start-[12.5%] top-6.5 z-0 hidden h-0.5 w-3/4 origin-left -translate-y-1/2 transition-transform duration-300 ease-out motion-reduce:transition-none sm:block rtl:origin-right"
+          style={{ transform: `translateY(-50%) scaleX(${progress / 100})` }}
         />
 
         {STEPS.map((step, index) => {
@@ -62,19 +63,17 @@ export default function CreateStepper({ active, onStepClick }: CreateStepperProp
                 onClick={() => onStepClick(index)}
                 aria-current={current ? "step" : undefined}
                 className={[
-                  "group flex w-full max-w-40 flex-col items-center gap-2 rounded-xl px-2 py-5 transition-colors",
-                  current ? "ring-haze-200 bg-white ring-1" : "",
-                  reachable && !current ? "hover:bg-white/80" : "",
-                  !reachable ? "cursor-default opacity-55" : "",
+                  "group flex w-full max-w-40 flex-col items-center gap-2 rounded-xl px-2 py-1.5 transition-colors",
+                  !reachable ? "cursor-default" : "",
                 ].join(" ")}
               >
                 <span
                   className={[
-                    "flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors",
+                    "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors",
                     done
                       ? "border-haze-600 bg-haze-600 text-white"
                       : current
-                        ? "border-haze-600 bg-haze-50 text-haze-700"
+                        ? "border-haze-600 bg-haze-50 text-haze-700 ring-haze-100 ring-4"
                         : "border-gray-300 bg-white text-gray-400",
                   ].join(" ")}
                 >
