@@ -2,7 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { Button, NumberInput, Textarea, TextInput } from "@mantine/core";
-import { Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2 } from "lucide-react";
 import DataSelect from "@/components/ui/data-select";
 import SelectProduct, { type SelectableProduct } from "@/components/global/selections/remote-based/select-product";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
@@ -10,7 +10,8 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
 import { createEmptyItem, lineTitle, type ItemDraft } from "../form-state";
 
-const LABEL_WRAP = { label: { whiteSpace: "normal" as const } };
+const ASIDE_INPUT =
+  "w-full min-w-0 bg-transparent py-2.5 text-base font-semibold text-gray-900 tabular-nums outline-none placeholder:font-normal placeholder:text-gray-400";
 
 type LinesStepProps = {
   items: ItemDraft[];
@@ -27,133 +28,193 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
   const totalAmount = items.reduce((sum, item) => sum + (lineAmount(item) ?? 0), 0);
 
   return (
-    <section className="overflow-hidden rounded-xl border border-gray-200">
+    <section className="flex flex-col gap-3">
       {items.map((item, index) => {
         const amount = lineAmount(item);
         const name = lineTitle(item);
         return (
-          <article key={item.key} className="border-b border-gray-200">
-            <div className="flex items-center justify-between gap-3 px-4 pt-3">
-              <h3 className="flex min-w-0 items-center gap-2 text-sm font-semibold text-gray-900">
-                <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md bg-haze-50 px-1.5 text-xs font-semibold text-haze-700">
+          <article key={item.key} className="overflow-hidden rounded-xl border border-gray-200">
+            <header className="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-900">
+              <h3 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+                <span className="bg-haze-100 text-haze-700 inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md px-1.5 text-xs font-semibold">
                   {index + 1}
                 </span>
                 <span className="truncate">{name || translate("Line", "البند")}</span>
               </h3>
               <Button
                 type="button"
-                variant="subtle"
+                variant="white"
                 color="clay"
-                size="compact-sm"
+                size="sm"
                 leftSection={<Trash2 size={14} />}
                 onClick={() => setItems((current) => current.filter((row) => row.key !== item.key))}
                 className="shrink-0"
               >
                 {translate("Remove", "حذف")}
               </Button>
-            </div>
+            </header>
 
-            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
-              <SelectProduct
-                value={item.productCode}
-                setValue={(next) => {
-                  const resolved = typeof next === "function" ? next(item.productCode) : next;
-                  if (!resolved) applyProduct(item.key, null);
-                }}
-                onProductSelect={(product) => applyProduct(item.key, product)}
-                label={translate("Product", "المنتج")}
-                placeholder={translate("Search products", "ابحث عن المنتجات")}
-                required
-                className="sm:col-span-2"
-              />
-              <DataSelect
-                value={item.productDimensionId}
-                setValue={(next) => {
-                  const resolved = typeof next === "function" ? next(item.productDimensionId) : next;
-                  setItems((current) =>
-                    current.map((row) => (row.key === item.key ? { ...row, productDimensionId: resolved } : row)),
-                  );
-                  clearStepError();
-                }}
-                data={item.dimensions.map((option) => ({
-                  value: option.id,
-                  label: formatDimensionLabelText(option, dimensionUnit),
-                }))}
-                label={translate("Dimension", "المقاس")}
-                placeholder={
-                  item.productCode
-                    ? translate("Choose a dimension", "اختر مقاسًا")
-                    : translate("Choose a product first", "اختر منتجًا أولاً")
-                }
-                disabled={!item.productCode || item.dimensions.length === 0}
-                required
-              />
-              <TextInput
-                value={item.title}
-                onChange={(event) => {
-                  const title = event.currentTarget.value;
-                  setItems((current) => current.map((row) => (row.key === item.key ? { ...row, title } : row)));
-                }}
-                label={translate("Title", "العنوان")}
-                placeholder={item.productTitle || translate("Line title", "عنوان البند")}
-                radius="md"
-              />
-              <NumberInput
-                value={item.unitPrice}
-                onChange={(value) => {
-                  setItems((current) =>
-                    current.map((row) =>
-                      row.key === item.key ? { ...row, unitPrice: value === "" ? "" : Number(value) } : row,
-                    ),
-                  );
-                  clearStepError();
-                }}
-                label={translate(`Unit price (${currency})`, `سعر الوحدة (${currency})`)}
-                placeholder="0.00"
-                min={0}
-                decimalScale={2}
-                allowNegative={false}
-                hideControls
-                required
-                radius="md"
-                styles={LABEL_WRAP}
-              />
-              <NumberInput
-                value={item.quantity}
-                onChange={(value) => updateQuantity(item.key, value)}
-                label={translate("Quantity", "الكمية")}
-                placeholder="1"
-                min={1}
-                allowDecimal={false}
-                allowNegative={false}
-                required
-                radius="md"
-                styles={LABEL_WRAP}
-              />
-              <div>
-                <p className="mb-[5px] text-sm font-medium">{translate(`Amount (${currency})`, `المبلغ (${currency})`)}</p>
-                <div className="flex h-9 items-center rounded-md bg-haze-50 px-3 text-sm font-semibold text-haze-700 tabular-nums">
-                  {amount == null ? "-" : formatMoney(amount)}
-                </div>
+            <div className="flex flex-col lg:flex-row">
+              <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+                <SelectProduct
+                  value={item.productCode}
+                  setValue={(next) => {
+                    const resolved = typeof next === "function" ? next(item.productCode) : next;
+                    if (!resolved) applyProduct(item.key, null);
+                  }}
+                  onProductSelect={(product) => applyProduct(item.key, product)}
+                  label={translate("Product", "المنتج")}
+                  placeholder={translate("Search products", "ابحث عن المنتجات")}
+                  required
+                />
+                <DataSelect
+                  value={item.productDimensionId}
+                  setValue={(next) => {
+                    const resolved = typeof next === "function" ? next(item.productDimensionId) : next;
+                    setItems((current) =>
+                      current.map((row) => (row.key === item.key ? { ...row, productDimensionId: resolved } : row)),
+                    );
+                    clearStepError();
+                  }}
+                  data={item.dimensions.map((option) => ({
+                    value: option.id,
+                    label: formatDimensionLabelText(option, dimensionUnit),
+                  }))}
+                  label={translate("Dimension", "المقاس")}
+                  placeholder={
+                    item.productCode
+                      ? translate("Choose a dimension", "اختر مقاسًا")
+                      : translate("Choose a product first", "اختر منتجًا أولاً")
+                  }
+                  disabled={!item.productCode || item.dimensions.length === 0}
+                  required
+                />
+                <TextInput
+                  value={item.title}
+                  onChange={(event) => {
+                    const title = event.currentTarget.value;
+                    setItems((current) => current.map((row) => (row.key === item.key ? { ...row, title } : row)));
+                  }}
+                  label={translate("Title", "العنوان")}
+                  placeholder={item.productTitle || translate("Line title", "عنوان البند")}
+                  radius="md"
+                  className="sm:col-span-2"
+                />
+                <Textarea
+                  value={item.notes}
+                  onChange={(event) => {
+                    const notes = event.currentTarget.value;
+                    setItems((current) => current.map((row) => (row.key === item.key ? { ...row, notes } : row)));
+                  }}
+                  label={translate("Notes", "ملاحظات")}
+                  placeholder={translate("Optional notes", "ملاحظات اختيارية")}
+                  radius="md"
+                  autosize
+                  minRows={1}
+                  className="sm:col-span-2"
+                />
               </div>
-              <Textarea
-                value={item.notes}
-                onChange={(event) => {
-                  const notes = event.currentTarget.value;
-                  setItems((current) => current.map((row) => (row.key === item.key ? { ...row, notes } : row)));
-                }}
-                label={translate("Notes", "ملاحظات")}
-                placeholder={translate("Optional notes", "ملاحظات اختيارية")}
-                radius="md"
-                autosize
-                minRows={1}
-              />
+
+              <aside className="flex w-full shrink-0 flex-col border-t border-gray-200 bg-gray-50 lg:w-80 lg:border-s lg:border-t-0">
+                <div className="border-b border-gray-200 px-4 py-2.5">
+                  <p className="text-xs font-semibold tracking-wide text-gray-500">
+                    {translate("Line pricing", "تسعير البند")}
+                  </p>
+                </div>
+
+                <div className="flex flex-1 flex-col gap-3 p-4">
+                  <label className="block">
+                    <span className="mb-1.5 flex items-center justify-between gap-2 text-xs font-medium text-gray-600">
+                      <span>
+                        {translate("Unit price", "سعر الوحدة")}
+                        <span className="text-clay-600"> *</span>
+                      </span>
+                      <span className="font-normal text-gray-400">{currency}</span>
+                    </span>
+                    <div className="focus-within:border-haze-600 focus-within:ring-haze-200 rounded-lg border border-gray-200 bg-white px-3 transition-colors focus-within:ring-1">
+                      <NumberInput
+                        value={item.unitPrice}
+                        onChange={(value) => {
+                          setItems((current) =>
+                            current.map((row) =>
+                              row.key === item.key ? { ...row, unitPrice: value === "" ? "" : Number(value) } : row,
+                            ),
+                          );
+                          clearStepError();
+                        }}
+                        placeholder="0.00"
+                        min={0}
+                        decimalScale={2}
+                        allowNegative={false}
+                        hideControls
+                        required
+                        variant="unstyled"
+                        classNames={{ input: ASIDE_INPUT }}
+                      />
+                    </div>
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-1.5 block text-xs font-medium text-gray-600">
+                      {translate("Quantity", "الكمية")}
+                      <span className="text-clay-600"> *</span>
+                    </span>
+                    <div className="focus-within:border-haze-600 focus-within:ring-haze-200 flex items-stretch overflow-hidden rounded-lg border border-gray-200 bg-white transition-colors focus-within:ring-1">
+                      <button
+                        type="button"
+                        aria-label={translate("Decrease quantity", "إنقاص الكمية")}
+                        disabled={item.quantity !== "" && Number(item.quantity) <= 1}
+                        onClick={() => {
+                          const current = item.quantity === "" ? 1 : Number(item.quantity);
+                          updateQuantity(item.key, Math.max(1, current - 1));
+                        }}
+                        className="flex w-10 shrink-0 items-center justify-center border-e border-gray-200 text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <NumberInput
+                        value={item.quantity}
+                        onChange={(value) => updateQuantity(item.key, value)}
+                        placeholder="1"
+                        min={1}
+                        allowDecimal={false}
+                        allowNegative={false}
+                        hideControls
+                        required
+                        variant="unstyled"
+                        classNames={{ input: `${ASIDE_INPUT} px-2! text-center` }}
+                      />
+                      <button
+                        type="button"
+                        aria-label={translate("Increase quantity", "زيادة الكمية")}
+                        onClick={() => {
+                          const current = item.quantity === "" ? 0 : Number(item.quantity);
+                          updateQuantity(item.key, current + 1);
+                        }}
+                        className="flex w-10 shrink-0 items-center justify-center border-s border-gray-200 text-gray-600 transition-colors hover:bg-gray-50"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </label>
+
+                  <div className="mt-auto rounded-lg bg-white px-3 py-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-haze-700 text-xs font-medium">{translate("Amount", "المبلغ")}</p>
+                      <p className="text-haze-600/80 text-xs">{currency}</p>
+                    </div>
+                    <p className="text-haze-700 mt-1 text-xl font-semibold tracking-tight tabular-nums">
+                      {amount == null ? "-" : formatMoney(amount)}
+                    </p>
+                  </div>
+                </div>
+              </aside>
             </div>
           </article>
         );
       })}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-gray-50 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3">
         <Button
           type="button"
           variant="light"
@@ -165,7 +226,7 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
         </Button>
         <div className="text-end">
           <p className="text-xs text-gray-500">{translate(`Total (${currency})`, `الإجمالي (${currency})`)}</p>
-          <p className="text-base font-semibold text-haze-700 tabular-nums">{formatMoney(totalAmount)}</p>
+          <p className="text-haze-700 text-base font-semibold tabular-nums">{formatMoney(totalAmount)}</p>
         </div>
       </div>
     </section>
