@@ -23,11 +23,43 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
-import type { ContractProductUnit } from "@/types/contract";
+import type { ContractItem, ContractProductUnit } from "@/types/contract";
 import ContractDetails from "./components/contract-details";
 import { contractItemTitle } from "../helpers";
 
 const PAGE_TITLE = { en: "Contract", ar: "عقد" };
+
+type UnitColumnKey =
+  | "supplierSerialNumber"
+  | "producedAt"
+  | "receivedAt"
+  | "deliveredAt"
+  | "installedAt"
+  | "warrantyStartedAt"
+  | "cancelledAt";
+
+const UNIT_COLUMNS: {
+  key: UnitColumnKey;
+  width: string;
+  label: { en: string; ar: string };
+}[] = [
+  { key: "supplierSerialNumber", width: "16%", label: { en: "Supplier serial", ar: "مسلسل المورد" } },
+  { key: "producedAt", width: "14%", label: { en: "Production end", ar: "انتهاء الإنتاج" } },
+  { key: "receivedAt", width: "14%", label: { en: "Received", ar: "الاستلام" } },
+  { key: "deliveredAt", width: "14%", label: { en: "Delivered", ar: "التسليم" } },
+  { key: "installedAt", width: "14%", label: { en: "Installed", ar: "التركيب" } },
+  { key: "warrantyStartedAt", width: "14%", label: { en: "Warranty start", ar: "بداية الضمان" } },
+  { key: "cancelledAt", width: "12%", label: { en: "Cancelled", ar: "الإلغاء" } },
+];
+
+function unitHasValue(unit: ContractProductUnit, key: UnitColumnKey) {
+  const value = unit[key];
+  return typeof value === "string" ? value.trim().length > 0 : !!value;
+}
+
+function visibleUnitColumns(units: ContractProductUnit[]) {
+  return UNIT_COLUMNS.filter((column) => units.some((unit) => unitHasValue(unit, column.key)));
+}
 
 function UnitDate({ value, locale }: { value: string | null; locale: Locale }) {
   if (!value) return <EmptyValue />;
@@ -51,11 +83,11 @@ export default function Page() {
   });
 
   useDocumentTitle(
-    contract ? translate(`${PAGE_TITLE.en} ${contract.code}`, `${PAGE_TITLE.ar} ${contract.code}`) : translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+    contract
+      ? translate(`${PAGE_TITLE.en} ${contract.code}`, `${PAGE_TITLE.ar} ${contract.code}`)
+      : translate(PAGE_TITLE.en, PAGE_TITLE.ar),
     "dashboard",
   );
-
-  const itemsWithUnits = contract?.items.filter((item) => item.productUnits.length > 0) ?? [];
 
   return (
     <LayoutBox
@@ -75,133 +107,184 @@ export default function Page() {
         />
       ) : (
         contract && (
-          <>
+          <div className="flex flex-col gap-4">
             <ContractDetails contract={contract} />
 
-            <section className="mt-4 flex flex-col gap-4">
-              <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
+            <section className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 className="text-base font-semibold text-gray-900">{translate("Items", "البنود")}</h2>
+                {contract.items.length > 0 ? (
+                  <span className="text-xs font-medium text-gray-500 tabular-nums">
+                    {translate(`${contract.items.length} lines`, `${contract.items.length} بنود`)}
+                    {" · "}
+                    {formatMoney(Number(contract.totalAmount))} {translation.currency}
+                  </span>
+                ) : null}
+              </div>
+
               {contract.items.length === 0 ? (
                 <EmptySection message={translate("No items on this contract", "لا توجد بنود في هذا العقد")} />
               ) : (
-                <div className="overflow-x-auto">
-                  <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>{translate("Product", "المنتج")}</Table.Th>
-                        <Table.Th>{translate("Code", "الكود")}</Table.Th>
-                        <Table.Th>{translate("Dimensions", "الأبعاد")}</Table.Th>
-                        <Table.Th>{translate("Quantity", "الكمية")}</Table.Th>
-                        <Table.Th>
-                          {translate(`Unit price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
-                        </Table.Th>
-                        <Table.Th>
-                          {translate(`Line amount (${translation.currency})`, `قيمة البند (${translation.currency})`)}
-                        </Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {contract.items.map((item) => {
-                        const title = contractItemTitle(item);
-                        return (
-                          <Table.Tr key={item.id} className={item.cancelledAt ? "text-gray-400" : "text-gray-600"}>
-                            <Table.Td className={item.cancelledAt ? "font-semibold text-gray-400" : "font-semibold text-gray-800"}>
-                              <div className="flex items-center gap-2">
-                                <span>{title}</span>
-                                {item.cancelledAt ? (
-                                  <span className="text-clay-600 text-xs font-bold">{translate("Cancelled", "ملغي")}</span>
-                                ) : null}
-                              </div>
-                            </Table.Td>
-                            <Table.Td>
-                              <div className="flex items-center gap-1.5">
-                                <ProtectedLink
-                                  permission={PERMISSIONS.READ_PRODUCTS}
-                                  href={`/products/${item.product.code}`}
-                                  className="font-mono hover:underline"
-                                >
-                                  {item.product.code}
-                                </ProtectedLink>
-                                <CopyButton text={item.product.code} />
-                              </div>
-                            </Table.Td>
-                            <Table.Td>{formatDimensionLabel(item.productDimension, translation.productDimensionUnit)}</Table.Td>
-                            <Table.Td>{item.quantity}</Table.Td>
-                            <Table.Td>{formatMoney(item.unitPrice)}</Table.Td>
-                            <Table.Td className={item.cancelledAt ? "font-semibold text-gray-400" : "font-semibold text-gray-800"}>
-                              {formatMoney(item.quantity * item.unitPrice)}
-                            </Table.Td>
-                          </Table.Tr>
-                        );
-                      })}
-                    </Table.Tbody>
-                  </Table>
+                <div className="flex flex-col gap-3">
+                  {contract.items.map((item, index) => (
+                    <ContractItemCard
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      locale={locale}
+                      currency={translation.currency}
+                      dimensionUnit={translation.productDimensionUnit}
+                    />
+                  ))}
                 </div>
               )}
             </section>
-
-            <section className="mt-4 flex flex-col gap-4">
-              <h4 className="text-lg font-semibold text-gray-900">{translate("Product units", "وحدات المنتج")}</h4>
-              {itemsWithUnits.length === 0 ? (
-                <EmptySection message={translate("No product units on this contract", "لا توجد وحدات منتج في هذا العقد")} />
-              ) : (
-                itemsWithUnits.map((item) => (
-                  <div key={item.id} className="flex flex-col gap-2">
-                    <h5 className="text-sm font-semibold text-gray-800">{contractItemTitle(item)}</h5>
-                    <div className="overflow-x-auto">
-                      <Table className="w-full table-fixed text-nowrap" verticalSpacing="xs" highlightOnHover>
-                        <Table.Thead>
-                          <Table.Tr>
-                            <Table.Th w="14%">{translate("Serial", "الرقم المسلسل")}</Table.Th>
-                            <Table.Th w="14%">{translate("Supplier serial", "مسلسل المورد")}</Table.Th>
-                            <Table.Th w="12%">{translate("Produced", "الإنتاج")}</Table.Th>
-                            <Table.Th w="12%">{translate("Received", "الاستلام")}</Table.Th>
-                            <Table.Th w="12%">{translate("Delivered", "التسليم")}</Table.Th>
-                            <Table.Th w="12%">{translate("Installed", "التركيب")}</Table.Th>
-                            <Table.Th w="14%">{translate("Warranty start", "بداية الضمان")}</Table.Th>
-                            <Table.Th w="10%">{translate("Cancelled", "الإلغاء")}</Table.Th>
-                          </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                          {item.productUnits.map((unit) => (
-                            <UnitRow key={unit.id} unit={unit} locale={locale} />
-                          ))}
-                        </Table.Tbody>
-                      </Table>
-                    </div>
-                  </div>
-                ))
-              )}
-            </section>
-          </>
+          </div>
         )
       )}
     </LayoutBox>
   );
 }
 
-function UnitRow({ unit, locale }: { unit: ContractProductUnit; locale: Locale }) {
+function ContractItemCard({
+  item,
+  index,
+  locale,
+  currency,
+  dimensionUnit,
+}: {
+  item: ContractItem;
+  index: number;
+  locale: Locale;
+  currency: string;
+  dimensionUnit: string;
+}) {
+  const { translate } = useI18n();
+  const title = contractItemTitle(item);
+  const cancelled = !!item.cancelledAt;
+  const lineAmount = item.quantity * item.unitPrice;
+  const units = item.productUnits;
+  const columns = visibleUnitColumns(units);
+  const serialWidth = columns.length === 0 ? "100%" : "18%";
+
   return (
-    <Table.Tr className={unit.cancelledAt ? "text-gray-400" : "text-gray-600"}>
-      <Table.Td className="font-mono font-semibold text-gray-800">{unit.serialNumber}</Table.Td>
-      <Table.Td className="font-mono">{unit.supplierSerialNumber || <EmptyValue />}</Table.Td>
-      <Table.Td>
-        <UnitDate value={unit.producedAt} locale={locale} />
+    <article
+      className={[
+        "overflow-hidden rounded-xl border",
+        cancelled ? "border-gray-200 bg-gray-50/60" : "border-gray-200 bg-white",
+      ].join(" ")}
+    >
+      <header
+        className={[
+          "flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5",
+          cancelled ? "border-gray-200 bg-gray-100/80" : "border-gray-200 bg-gray-50",
+        ].join(" ")}
+      >
+        <h3
+          className={[
+            "flex min-w-0 items-center gap-2 text-sm font-semibold",
+            cancelled ? "text-gray-500" : "text-gray-900",
+          ].join(" ")}
+        >
+          <span
+            className={[
+              "inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md px-1.5 text-xs font-semibold tabular-nums",
+              cancelled ? "bg-gray-200 text-gray-600" : "bg-haze-100 text-haze-700",
+            ].join(" ")}
+          >
+            {index + 1}
+          </span>
+          <span className="truncate">{title}</span>
+          {cancelled ? (
+            <span className="bg-clay-100 text-clay-700 shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold">
+              {translate("Cancelled", "ملغي")}
+            </span>
+          ) : null}
+        </h3>
+        <span
+          className={[
+            "shrink-0 text-sm font-semibold tabular-nums",
+            cancelled ? "text-gray-400 line-through" : "text-gray-900",
+          ].join(" ")}
+        >
+          {formatMoney(lineAmount)}
+        </span>
+      </header>
+
+      <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-gray-600">
+          <div className="flex items-center gap-1.5">
+            <ProtectedLink
+              permission={PERMISSIONS.READ_PRODUCTS}
+              href={`/products/${item.product.code}`}
+              className="font-mono font-medium text-gray-800 hover:underline"
+            >
+              {item.product.code}
+            </ProtectedLink>
+            <CopyButton text={item.product.code} />
+          </div>
+          <span>{formatDimensionLabel(item.productDimension, dimensionUnit)}</span>
+          <span className="tabular-nums">
+            {item.quantity} × {formatMoney(item.unitPrice)} {currency}
+          </span>
+          {units.length > 0 ? (
+            <span className="text-xs font-medium text-gray-500 tabular-nums">
+              {translate(`${units.length} units`, `${units.length} وحدات`)}
+            </span>
+          ) : null}
+        </div>
+
+        {item.notes?.trim() ? <p className="text-sm whitespace-pre-wrap text-gray-700">{item.notes.trim()}</p> : null}
+
+        {item.cancellationReason?.trim() ? (
+          <p className="text-clay-700 text-xs whitespace-pre-wrap">
+            {translate("Cancellation reason", "سبب الإلغاء")}: {item.cancellationReason.trim()}
+          </p>
+        ) : null}
+
+        {units.length > 0 ? (
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <Table className="w-full table-fixed text-nowrap" verticalSpacing="xs" highlightOnHover>
+              <Table.Thead>
+                <Table.Tr className="bg-gray-50">
+                  <Table.Th w={serialWidth}>{translate("Serial", "الرقم المسلسل")}</Table.Th>
+                  {columns.map((column) => (
+                    <Table.Th key={column.key} w={column.width}>
+                      {translate(column.label.en, column.label.ar)}
+                    </Table.Th>
+                  ))}
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {units.map((unit) => (
+                  <UnitRow key={unit.id} unit={unit} locale={locale} columns={columns} />
+                ))}
+              </Table.Tbody>
+            </Table>
+          </div>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function UnitRow({ unit, locale, columns }: { unit: ContractProductUnit; locale: Locale; columns: typeof UNIT_COLUMNS }) {
+  const cancelled = !!unit.cancelledAt;
+
+  return (
+    <Table.Tr className={cancelled ? "text-gray-400" : "text-gray-600"}>
+      <Table.Td className={cancelled ? "font-mono font-semibold text-gray-400" : "font-mono font-semibold text-gray-800"}>
+        {unit.serialNumber}
       </Table.Td>
-      <Table.Td>
-        <UnitDate value={unit.receivedAt} locale={locale} />
-      </Table.Td>
-      <Table.Td>
-        <UnitDate value={unit.deliveredAt} locale={locale} />
-      </Table.Td>
-      <Table.Td>
-        <UnitDate value={unit.installedAt} locale={locale} />
-      </Table.Td>
-      <Table.Td>
-        <UnitDate value={unit.warrantyStartedAt} locale={locale} />
-      </Table.Td>
-      <Table.Td>
-        <UnitDate value={unit.cancelledAt} locale={locale} />
-      </Table.Td>
+      {columns.map((column) => (
+        <Table.Td key={column.key} className={column.key === "supplierSerialNumber" ? "font-mono" : undefined}>
+          {column.key === "supplierSerialNumber" ? (
+            unit.supplierSerialNumber || <EmptyValue />
+          ) : (
+            <UnitDate value={unit[column.key]} locale={locale} />
+          )}
+        </Table.Td>
+      ))}
     </Table.Tr>
   );
 }
