@@ -57,11 +57,13 @@ function formatUnitCell(unit: ContractProductUnit, key: UnitColumnKey, locale: L
 }
 
 function PrintOrgHeader() {
+  const { translate } = useI18n();
+
   return (
     <div className="flex flex-col gap-0.5 font-semibold">
-      <p className="text-xs text-gray-800">مجموعة شركات مـــوج</p>
-      <p className="text-xs text-gray-800">موج العاشر من رمضان</p>
-      <p className="text-xs text-gray-800">إدارة المبيعــــــــــــــــــــات</p>
+      <p className="text-xs text-gray-800">{translate("MOG Companies Group", "مجموعة شركات مـــوج")}</p>
+      <p className="text-xs text-gray-800">{translate("MOG 10th of Ramadan", "موج العاشر من رمضان")}</p>
+      <p className="text-xs text-gray-800">{translate("Sales Department", "إدارة المبيعــــــــــــــــــــات")}</p>
     </div>
   );
 }
