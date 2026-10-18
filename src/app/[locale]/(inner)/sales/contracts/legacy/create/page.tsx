@@ -66,8 +66,6 @@ export default function Page() {
   const [deliveryAddressId, setDeliveryAddressId] = useState<string | null>(null);
   const [prefillAddress, setPrefillAddress] = useState(false);
   const [items, setItems] = useState<ItemDraft[]>(() => [createEmptyItem()]);
-  const [pasteDrafts, setPasteDrafts] = useState<Record<string, string>>({});
-  const [pasteNotes, setPasteNotes] = useState<Record<string, string>>({});
 
   const addressesQuery = useQuery({
     queryKey: queryKeys.customers.addresses(customerId ?? "none"),
@@ -325,15 +323,7 @@ export default function Page() {
         ) : null}
 
         {step === 2 ? (
-          <UnitsStep
-            items={items}
-            setItems={setItems}
-            pasteDrafts={pasteDrafts}
-            setPasteDrafts={setPasteDrafts}
-            pasteNotes={pasteNotes}
-            setPasteNotes={setPasteNotes}
-            clearStepError={clearStepError}
-          />
+          <UnitsStep items={items} setItems={setItems} clearStepError={clearStepError} />
         ) : null}
 
         {step === 3 ? (

@@ -30,6 +30,14 @@ type Translate = (en: string, ar: string) => string;
 
 const SERIAL_PATTERN = /^\d{12}$/;
 
+/** Convert Eastern/Persian digits to ASCII, then keep digits only. */
+export function normalizeSerialDigits(value: string) {
+  return value
+    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 0x0660))
+    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 0x06f0))
+    .replace(/\D/g, "");
+}
+
 export function createKey(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -105,24 +113,6 @@ export function lineTitle(item: ItemDraft) {
   const title = item.title.trim();
   if (title) return title;
   return item.productTitle.trim();
-}
-
-export function applyPastedSerials(item: ItemDraft, raw: string) {
-  const lines = raw
-    .split(/\r?\n/)
-    .map((line) => line.replace(/\D/g, "").slice(0, 12))
-    .filter((line) => line.length > 0);
-
-  return {
-    item: {
-      ...item,
-      units: item.units.map((unit, index) => ({
-        ...unit,
-        serialNumber: lines[index] ?? unit.serialNumber,
-      })),
-    },
-    extra: Math.max(0, lines.length - item.units.length),
-  };
 }
 
 export function validateContractStep(

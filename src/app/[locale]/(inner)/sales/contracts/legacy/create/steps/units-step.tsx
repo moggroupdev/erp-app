@@ -1,175 +1,216 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { Button, Table, TextInput, Textarea } from "@mantine/core";
+import { Button, TextInput } from "@mantine/core";
+import { Dices } from "lucide-react";
 import DatePickerInput from "@/components/ui/date-picker-input";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { useI18n } from "@/lib/i18n/hooks";
-import { applyPastedSerials, isImportedSource, lineTitle, selectedDimension, type ItemDraft } from "../form-state";
+import {
+  isImportedSource,
+  lineTitle,
+  normalizeSerialDigits,
+  selectedDimension,
+  type ItemDraft,
+  type UnitDraft,
+} from "../form-state";
+
+const FIELD_INPUT =
+  "w-full min-w-0 bg-transparent py-2 text-sm font-medium text-gray-900 tabular-nums outline-none placeholder:font-normal placeholder:text-gray-400";
 
 type UnitsStepProps = {
   items: ItemDraft[];
   setItems: Dispatch<SetStateAction<ItemDraft[]>>;
-  pasteDrafts: Record<string, string>;
-  setPasteDrafts: Dispatch<SetStateAction<Record<string, string>>>;
-  pasteNotes: Record<string, string>;
-  setPasteNotes: Dispatch<SetStateAction<Record<string, string>>>;
   clearStepError: () => void;
 };
 
-export default function UnitsStep({
-  items,
-  setItems,
-  pasteDrafts,
-  setPasteDrafts,
-  pasteNotes,
-  setPasteNotes,
-  clearStepError,
-}: UnitsStepProps) {
+function createRandomSerial(used: Set<string>) {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const serial = Array.from(crypto.getRandomValues(new Uint8Array(12)), (byte) => String(byte % 10)).join("");
+    if (!used.has(serial)) return serial;
+  }
+  return Array.from(crypto.getRandomValues(new Uint8Array(12)), (byte) => String(byte % 10)).join("");
+}
+
+export default function UnitsStep({ items, setItems, clearStepError }: UnitsStepProps) {
   const { translate, translation } = useI18n();
   const dimensionUnit = translation.productDimensionUnit;
 
+  function patchUnit(itemKey: string, unitKey: string, patch: Partial<UnitDraft>) {
+    setItems((current) =>
+      current.map((row) =>
+        row.key === itemKey
+          ? {
+              ...row,
+              units: row.units.map((entry) => (entry.key === unitKey ? { ...entry, ...patch } : entry)),
+            }
+          : row,
+      ),
+    );
+    clearStepError();
+  }
+
+  function usedSerials(exceptUnitKey?: string) {
+    const used = new Set<string>();
+    for (const item of items) {
+      for (const unit of item.units) {
+        if (exceptUnitKey && unit.key === exceptUnitKey) continue;
+        const serial = unit.serialNumber.trim();
+        if (serial) used.add(serial);
+      }
+    }
+    return used;
+  }
+
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex flex-col gap-3">
       {items.map((item, index) => {
         const imported = isImportedSource(item.sourceType);
         const dimension = selectedDimension(item);
+        const name = lineTitle(item);
+        const filledCount = item.units.filter((unit) => unit.serialNumber.trim().length === 12).length;
+        const unitCount = item.units.length;
+        const allFilled = unitCount > 0 && filledCount === unitCount;
+
         return (
-          <article key={item.key} className="flex flex-col gap-3 rounded-xl border border-gray-200 p-4">
-            <div>
-              <h3 className="text-sm font-semibold text-gray-900">
-                {translate("Line", "البند")} {index + 1}
-                {lineTitle(item) ? ` · ${lineTitle(item)}` : ""}
+          <article key={item.key} className="overflow-hidden rounded-xl border border-gray-200">
+            <header className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-gray-50 px-4 py-2.5">
+              <h3 className="flex min-w-0 items-center gap-2 text-sm font-semibold text-gray-900">
+                <span className="bg-haze-100 text-haze-700 inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-md px-1.5 text-xs font-semibold">
+                  {index + 1}
+                </span>
+                <span className="truncate">{name || translate("Line", "البند")}</span>
+                {dimension ? (
+                  <span className="hidden truncate text-xs font-normal text-gray-500 sm:inline">
+                    {formatDimensionLabelText(dimension, dimensionUnit)}
+                  </span>
+                ) : null}
+                {imported ? (
+                  <span className="bg-plum-100 text-plum-700 rounded-md px-1.5 py-0.5 text-[11px] font-medium">
+                    {translate("Imported", "مستورد")}
+                  </span>
+                ) : null}
               </h3>
-              <p className="text-sm text-gray-500">
-                {dimension ? formatDimensionLabelText(dimension, dimensionUnit) : item.productCode}
-                {item.quantity !== "" ? ` · ${item.quantity}` : ""}
-              </p>
-            </div>
-            <div className="overflow-x-auto">
-              <Table className="w-full table-fixed" verticalSpacing="xs">
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th w="8%">#</Table.Th>
-                    <Table.Th w={imported ? "34%" : "46%"}>{translate("Serial number", "الرقم التسلسلي")}</Table.Th>
-                    {imported ? <Table.Th w="30%">{translate("Supplier serial", "مسلسل المورد")}</Table.Th> : null}
-                    <Table.Th w={imported ? "28%" : "46%"}>{translate("Produced", "الإنتاج")}</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {item.units.map((unit, unitIndex) => (
-                    <Table.Tr key={unit.key}>
-                      <Table.Td className="text-gray-500">{unitIndex + 1}</Table.Td>
-                      <Table.Td>
-                        <TextInput
-                          value={unit.serialNumber}
-                          onChange={(event) => {
-                            const serialNumber = event.currentTarget.value.replace(/\D/g, "").slice(0, 12);
-                            setItems((current) =>
-                              current.map((row) =>
-                                row.key === item.key
-                                  ? {
-                                      ...row,
-                                      units: row.units.map((entry) =>
-                                        entry.key === unit.key ? { ...entry, serialNumber } : entry,
-                                      ),
-                                    }
-                                  : row,
-                              ),
-                            );
-                            clearStepError();
+              <div
+                className={[
+                  "shrink-0 rounded-md px-2 py-1 text-xs font-semibold tabular-nums",
+                  allFilled ? "bg-teal-100 text-teal-700" : "bg-ochre-100 text-ochre-800",
+                ].join(" ")}
+              >
+                {filledCount}/{unitCount}
+              </div>
+            </header>
+
+            <div className="divide-y divide-gray-100">
+              {item.units.map((unit, unitIndex) => {
+                const serialLen = unit.serialNumber.length;
+                const serialComplete = serialLen === 12;
+
+                return (
+                  <div key={unit.key} className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 xl:grid-cols-12">
+                    <div className="flex items-center gap-2 sm:col-span-2 xl:col-span-1">
+                      <span
+                        className={[
+                          "inline-flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold tabular-nums",
+                          serialComplete ? "bg-teal-100 text-teal-700" : "bg-gray-100 text-gray-500",
+                        ].join(" ")}
+                      >
+                        {unitIndex + 1}
+                      </span>
+                      <span className="text-xs font-medium text-gray-500 xl:hidden">
+                        {translate("Unit", "وحدة")} {unitIndex + 1}
+                      </span>
+                    </div>
+
+                    <label className={imported ? "xl:col-span-4" : "sm:col-span-1 xl:col-span-6"}>
+                      <span className="mb-1.5 flex items-center justify-between gap-2 text-xs font-medium text-gray-600">
+                        <span>
+                          {translate("Serial number", "الرقم التسلسلي")}
+                          <span className="text-clay-600"> *</span>
+                        </span>
+                        <span
+                          className={["tabular-nums", serialComplete ? "font-semibold text-teal-700" : "text-gray-400"].join(
+                            " ",
+                          )}
+                        >
+                          {serialLen}/12
+                        </span>
+                      </span>
+                      <div className="flex items-stretch gap-2">
+                        <div
+                          className={[
+                            "focus-within:border-haze-600 focus-within:ring-haze-200 min-w-0 flex-1 rounded-lg border bg-white px-3 transition-colors focus-within:ring-1",
+                            serialComplete ? "border-teal-200" : "border-gray-200",
+                          ].join(" ")}
+                        >
+                          <TextInput
+                            value={unit.serialNumber}
+                            onChange={(event) => {
+                              const serialNumber = normalizeSerialDigits(event.currentTarget.value).slice(0, 12);
+                              patchUnit(item.key, unit.key, { serialNumber });
+                            }}
+                            placeholder="000000000000"
+                            maxLength={12}
+                            inputMode="numeric"
+                            variant="unstyled"
+                            required
+                            classNames={{ input: FIELD_INPUT }}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="light"
+                          color="haze"
+                          className="shrink-0 self-stretch"
+                          onClick={() => {
+                            const serialNumber = createRandomSerial(usedSerials(unit.key));
+                            patchUnit(item.key, unit.key, { serialNumber });
                           }}
-                          placeholder="000000000000"
-                          maxLength={12}
-                          inputMode="numeric"
-                          radius="md"
-                          required
-                        />
-                      </Table.Td>
-                      {imported ? (
-                        <Table.Td>
+                          aria-label={translate("Generate serial number", "توليد رقم تسلسلي")}
+                          title={translate("Generate serial number", "توليد رقم تسلسلي")}
+                        >
+                          <Dices size={14} />
+                        </Button>
+                      </div>
+                    </label>
+
+                    {imported ? (
+                      <label className="xl:col-span-4">
+                        <span className="mb-1.5 block text-xs font-medium text-gray-600">
+                          {translate("Supplier serial", "مسلسل المورد")}
+                          <span className="text-clay-600"> *</span>
+                        </span>
+                        <div className="focus-within:border-haze-600 focus-within:ring-haze-200 rounded-lg border border-gray-200 bg-white px-3 transition-colors focus-within:ring-1">
                           <TextInput
                             value={unit.supplierSerialNumber}
                             onChange={(event) => {
                               const supplierSerialNumber = event.currentTarget.value;
-                              setItems((current) =>
-                                current.map((row) =>
-                                  row.key === item.key
-                                    ? {
-                                        ...row,
-                                        units: row.units.map((entry) =>
-                                          entry.key === unit.key ? { ...entry, supplierSerialNumber } : entry,
-                                        ),
-                                      }
-                                    : row,
-                                ),
-                              );
-                              clearStepError();
+                              patchUnit(item.key, unit.key, { supplierSerialNumber });
                             }}
                             placeholder={translate("Supplier serial", "مسلسل المورد")}
-                            radius="md"
+                            variant="unstyled"
                             required
+                            classNames={{ input: FIELD_INPUT }}
                           />
-                        </Table.Td>
-                      ) : null}
-                      <Table.Td>
-                        <DatePickerInput
-                          value={unit.producedAt}
-                          onChange={(value) => {
-                            setItems((current) =>
-                              current.map((row) =>
-                                row.key === item.key
-                                  ? {
-                                      ...row,
-                                      units: row.units.map((entry) =>
-                                        entry.key === unit.key ? { ...entry, producedAt: value } : entry,
-                                      ),
-                                    }
-                                  : row,
-                              ),
-                            );
-                          }}
-                          placeholder={translate("Optional", "اختياري")}
-                          clearable
-                        />
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+                        </div>
+                      </label>
+                    ) : null}
+
+                    <label className={imported ? "xl:col-span-3" : "xl:col-span-5"}>
+                      <span className="mb-1.5 block text-xs font-medium text-gray-600">
+                        {translate("Production end date", "تاريخ الانتهاء من الانتاج")}
+                      </span>
+                      <DatePickerInput
+                        value={unit.producedAt}
+                        onChange={(value) => patchUnit(item.key, unit.key, { producedAt: value })}
+                        placeholder={translate("Optional", "اختياري")}
+                        clearable
+                      />
+                    </label>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex flex-col gap-2 md:flex-row md:items-end">
-              <Textarea
-                value={pasteDrafts[item.key] ?? ""}
-                onChange={(event) => setPasteDrafts((current) => ({ ...current, [item.key]: event.currentTarget.value }))}
-                label={translate("Paste serials", "لصق الأرقام التسلسلية")}
-                placeholder={translate("One 12-digit serial per line", "رقم تسلسلي من 12 رقمًا في كل سطر")}
-                autosize
-                minRows={2}
-                radius="md"
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="light"
-                color="haze"
-                onClick={() => {
-                  const result = applyPastedSerials(item, pasteDrafts[item.key] ?? "");
-                  setItems((current) => current.map((row) => (row.key === item.key ? result.item : row)));
-                  setPasteNotes((current) => ({
-                    ...current,
-                    [item.key]:
-                      result.extra > 0
-                        ? translate(`${result.extra} extra serials were ignored.`, `تم تجاهل ${result.extra} أرقام زائدة.`)
-                        : "",
-                  }));
-                  clearStepError();
-                }}
-              >
-                {translate("Fill serials", "تعبئة الأرقام")}
-              </Button>
-            </div>
-            {pasteNotes[item.key] ? <p className="text-sm text-gray-500">{pasteNotes[item.key]}</p> : null}
           </article>
         );
       })}
