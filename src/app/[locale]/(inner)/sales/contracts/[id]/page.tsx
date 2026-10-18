@@ -8,9 +8,11 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
 import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
 import { EmptyValue } from "@/components/ui/entity-details";
+import ContractReviewPrintDocument from "@/components/documents/sales/contract-review-print-document";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import contractsApi from "@/lib/api/contracts";
@@ -94,7 +96,25 @@ export default function Page() {
       header={{
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: (
+          <div className="flex items-center gap-3">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            {contract ? (
+              <PrintDocument
+                title={translate(`${PAGE_TITLE.en} - ${contract.code}`, `${PAGE_TITLE.ar} - ${contract.code}`)}
+                buttonLabel={translate("Print contract review", "طباعة مراجعة العقد")}
+                buttonType="button"
+                paperWidth={210}
+                paperHeight={297}
+                paperMarginX={12}
+                paperMarginTop={12}
+                paperMarginBottom={14}
+              >
+                <ContractReviewPrintDocument contract={contract} />
+              </PrintDocument>
+            ) : null}
+          </div>
+        ),
       }}
     >
       {isFetching ? (
