@@ -14,6 +14,14 @@ import type {
   SetProductPricingFactorDto,
 } from "@/types/product";
 
+export type ProductExcelColumnOptions = {
+  reviewEstimate?: boolean;
+  addedToDatabase?: boolean;
+  design?: boolean;
+  completionDate?: boolean;
+  notes?: boolean;
+};
+
 const productsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateProductDto }) {
     return await privateRequest<Product>({ method: "POST", url: "products", data: dto });
@@ -39,6 +47,21 @@ const productsApi = {
     });
 
     return result.data;
+  },
+
+  async downloadExcel({
+    privateRequest,
+    columns = {},
+  }: {
+    privateRequest: PrivateRequest;
+    columns?: ProductExcelColumnOptions;
+  }) {
+    return await privateRequest<null>({
+      url: "products/excel",
+      params: removeEmptyColumnFlags(columns),
+      download: true,
+      filename: "products-catalog.xlsx",
+    });
   },
 
   async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
@@ -150,5 +173,15 @@ const productsApi = {
     return await privateRequest<ProductProductionRoute[]>({ url: `products/${code}/production-routes`, signal });
   },
 };
+
+function removeEmptyColumnFlags(columns: ProductExcelColumnOptions): Dictionary {
+  const params: Dictionary = {};
+  if (columns.reviewEstimate) params.reviewEstimate = true;
+  if (columns.addedToDatabase) params.addedToDatabase = true;
+  if (columns.design) params.design = true;
+  if (columns.completionDate) params.completionDate = true;
+  if (columns.notes) params.notes = true;
+  return params;
+}
 
 export default productsApi;

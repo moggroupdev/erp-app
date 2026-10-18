@@ -24,7 +24,7 @@ import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { type Product, type ProductWithDimensions } from "@/types/product";
 import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Pencil, Plus, Search, X } from "lucide-react";
+import { Download, Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -40,6 +40,7 @@ import ProductModal from "@/components/global/data-modals/product-modal";
 import SelectProductSourceType from "@/components/global/selections/enum-based/select-product-source-type";
 import SelectProductMain from "@/components/global/selections/reference-based/select-product-main";
 import SelectProductSub from "@/components/global/selections/reference-based/select-product-sub";
+import DownloadProductsExcelModal from "./components/download-excel-modal";
 
 const PAGE_TITLE = { en: "Products Catalog", ar: "كتالوج المنتجات" };
 
@@ -156,6 +157,7 @@ export default function Page() {
   // ========================= MODALS =========================
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
+  const [excelModalOpened, { open: openExcelModal, close: closeExcelModal }] = useDisclosure(false);
   const [productToUpdate, setProductToUpdate] = useState<Product | null>(null);
 
   function handleOpenUpdateModal(product: Product) {
@@ -175,7 +177,7 @@ export default function Page() {
               {canPrintProductsList && (
                 <PrintDocument
                   buttonType="menu"
-                  title={translate(`Products List - ${printDate}`, `قائمة المنتجات - ${printDate}`)}
+                  title={translate(`Print Products List`, `طباعة قائمة المنتجات`)}
                   onBeforePrint={async () => {
                     if (!allProducts) await fetchAllProducts();
                   }}
@@ -188,6 +190,11 @@ export default function Page() {
                     />
                   )}
                 </PrintDocument>
+              )}
+              {canPrintProductsList && (
+                <Menu.Item leftSection={<Download size={14} />} onClick={openExcelModal}>
+                  {translate("Download Excel File", "تنزيل ملف إكسل")}
+                </Menu.Item>
               )}
               {canPrintProductsList && canAddProduct && <Menu.Divider />}
               {canAddProduct && (
@@ -300,7 +307,11 @@ export default function Page() {
                     return (
                       <Table.Tr key={product.code} className="text-gray-600">
                         <Table.Td className="align-top font-semibold text-gray-800">
-                          <ProtectedLink permission={PERMISSIONS.READ_PRODUCTS} href={`/products/${product.code}`} className="hover:underline">
+                          <ProtectedLink
+                            permission={PERMISSIONS.READ_PRODUCTS}
+                            href={`/products/${product.code}`}
+                            className="hover:underline"
+                          >
                             {product.title}
                           </ProtectedLink>
                         </Table.Td>
@@ -350,6 +361,8 @@ export default function Page() {
           </>
         ))
       )}
+
+      <DownloadProductsExcelModal opened={excelModalOpened} close={closeExcelModal} />
 
       <ProductModal
         opened={modalOpened}

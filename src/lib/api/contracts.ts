@@ -1,6 +1,6 @@
 import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
-import type { ContractDetailed, ContractListItem } from "@/types/contract";
+import type { ContractDetailed, ContractListItem, CreatedLegacyContract, CreateLegacyContractDto } from "@/types/contract";
 
 const contractsApi = {
   async list({
@@ -17,6 +17,10 @@ const contractsApi = {
 
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<ContractDetailed>({ url: `contracts/${id}`, signal });
+  },
+
+  async createLegacy({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateLegacyContractDto }) {
+    return await privateRequest<CreatedLegacyContract>({ method: "POST", url: "contracts/legacy", data: dto });
   },
 };
 
