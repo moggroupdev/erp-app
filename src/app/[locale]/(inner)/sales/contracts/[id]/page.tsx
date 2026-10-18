@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Menu, Table } from "@mantine/core";
-import { Printer } from "lucide-react";
+import { Table } from "@mantine/core";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -99,47 +99,42 @@ export default function Page() {
         sideElements: (
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
-            {contract ? (
-              <Menu offset={8} withinPortal withArrow>
-                <Menu.Target>
-                  <Button color="dark" variant="light" radius="md" leftSection={<Printer size={15} />}>
-                    {translate("Print contract review", "طباعة مراجعة العقد")}
-                  </Button>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <PrintDocument
-                    title={translate(
-                      `${PAGE_TITLE.en} - ${contract.code} - Items`,
-                      `${PAGE_TITLE.ar} - ${contract.code} - البنود`,
-                    )}
-                    buttonLabel={translate("Items only", "البنود فقط")}
-                    buttonType="menu"
-                    paperWidth={210}
-                    paperHeight={297}
-                    paperMarginX={12}
-                    paperMarginTop={12}
-                    paperMarginBottom={14}
-                  >
-                    <ContractReviewPrintDocument contract={contract} variant="items" />
-                  </PrintDocument>
-                  <PrintDocument
-                    title={translate(
-                      `${PAGE_TITLE.en} - ${contract.code} - Items with units`,
-                      `${PAGE_TITLE.ar} - ${contract.code} - البنود مع الوحدات`,
-                    )}
-                    buttonLabel={translate("Items with units", "البنود مع الوحدات")}
-                    buttonType="menu"
-                    paperWidth={210}
-                    paperHeight={297}
-                    paperMarginX={12}
-                    paperMarginTop={12}
-                    paperMarginBottom={14}
-                  >
-                    <ContractReviewPrintDocument contract={contract} variant="units" />
-                  </PrintDocument>
-                </Menu.Dropdown>
-              </Menu>
-            ) : null}
+            <ActionsMenu>
+              {contract && (
+                <PrintDocument
+                  title={translate(
+                    `${PAGE_TITLE.en} - ${contract.code} - Items`,
+                    `${PAGE_TITLE.ar} - ${contract.code} - البنود`,
+                  )}
+                  buttonLabel={translate("Print contract review", "طباعة مراجعة العقد")}
+                  buttonType="menu"
+                  paperWidth={210}
+                  paperHeight={297}
+                  paperMarginX={12}
+                  paperMarginTop={12}
+                  paperMarginBottom={14}
+                >
+                  <ContractReviewPrintDocument contract={contract} variant="items" />
+                </PrintDocument>
+              )}
+              {contract && (
+                <PrintDocument
+                  title={translate(
+                    `${PAGE_TITLE.en} - ${contract.code} - Items with units`,
+                    `${PAGE_TITLE.ar} - ${contract.code} - البنود مع الوحدات`,
+                  )}
+                  buttonLabel={translate("Print detailed with units", "طباعة تفصيلي بالوحدات")}
+                  buttonType="menu"
+                  paperWidth={210}
+                  paperHeight={297}
+                  paperMarginX={12}
+                  paperMarginTop={12}
+                  paperMarginBottom={14}
+                >
+                  <ContractReviewPrintDocument contract={contract} variant="units" />
+                </PrintDocument>
+              )}
+            </ActionsMenu>
           </div>
         ),
       }}
