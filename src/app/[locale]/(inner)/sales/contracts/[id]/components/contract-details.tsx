@@ -9,7 +9,6 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { ContractDetailed } from "@/types/contract";
-import { getContractStatusLabel } from "../../helpers";
 
 function inquiryStatusLabel(status: string, translate: (en: string, ar: string) => string) {
   switch (status) {
@@ -52,7 +51,6 @@ function offerStatusLabel(status: string, translate: (en: string, ar: string) =>
 export default function ContractDetails({ contract }: { contract: ContractDetailed }) {
   const { locale, translate, translation } = useI18n();
   const { helpers } = useLocations();
-  const status = getContractStatusLabel(contract, translate);
 
   const address = contract.deliveryAddress;
   const country = address ? helpers.getCountryById(address.countryId) : null;
@@ -93,10 +91,6 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
         <EmptyValue />
       ),
       copyText: contract.legacyWorkOrderNumber || undefined,
-    },
-    {
-      key: translate("Status", "الحالة"),
-      value: <span className={status.className}>{status.label}</span>,
     },
     {
       key: translate("Delivery address", "عنوان التسليم"),

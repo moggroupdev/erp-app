@@ -91,7 +91,7 @@ export default function Page() {
       !!createdAt ||
       !!startedAt ||
       !!deliveryTime ||
-      deliveryMode !== "factory" ||
+      deliveryMode !== "address" ||
       items.length !== 1 ||
       items.some((item) => !isItemUntouched(item))
     );
