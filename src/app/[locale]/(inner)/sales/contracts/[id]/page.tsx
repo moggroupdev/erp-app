@@ -27,7 +27,7 @@ import type { ContractItem, ContractProductUnit } from "@/types/contract";
 import ContractDetails from "./components/contract-details";
 import { contractItemTitle } from "../helpers";
 
-const PAGE_TITLE = { en: "Contract", ar: "عقد" };
+const PAGE_TITLE = { en: "Contract Details", ar: "تفاصيل العقد" };
 
 type UnitColumnKey =
   | "supplierSerialNumber"
@@ -93,7 +93,7 @@ export default function Page() {
     <LayoutBox
       header={{
         backLink: true,
-        title: contract?.code || translate(PAGE_TITLE.en, PAGE_TITLE.ar),
+        title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
       }}
     >
