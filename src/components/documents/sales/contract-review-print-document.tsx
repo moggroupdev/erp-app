@@ -57,9 +57,9 @@ function formatUnitCell(unit: ContractProductUnit, key: UnitColumnKey, locale: L
 function PrintOrgHeader() {
   return (
     <div className="flex flex-col gap-0.5 font-semibold">
-      <p className="text-xs text-gray-800">موج العاشر من رمضـــــان</p>
-      <p className="text-xs text-gray-800">إدارة المشتريات والمخـازن</p>
-      <p className="text-xs text-gray-800">المخــــــــزن الرئيســـــــــــــــي</p>
+      <p className="text-xs text-gray-800">مجموعة شركات مـــوج</p>
+      <p className="text-xs text-gray-800">موج العاشر من رمضان</p>
+      <p className="text-xs text-gray-800">إدارة المبيعــــــــــــــــــــات</p>
     </div>
   );
 }
@@ -85,7 +85,10 @@ function ContractItemPrintBlock({
   const units = item.productUnits;
   const columns = visibleUnitColumns(units);
 
-  const unitHeaders = [translate("Serial", "الرقم المسلسل"), ...columns.map((column) => translate(column.label.en, column.label.ar))];
+  const unitHeaders = [
+    translate("Serial", "الرقم المسلسل"),
+    ...columns.map((column) => translate(column.label.en, column.label.ar)),
+  ];
 
   const unitRows = units.map((unit) => [
     unit.serialNumber,
@@ -114,7 +117,7 @@ function ContractItemPrintBlock({
         }
       />
 
-      <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4 [&>div>span:last-child]:text-[11px]">
+      <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3 [&>div>span:last-child]:text-[11px]">
         <PrintDetail label={translate("Product code", "كود المنتج")} value={item.product.code} mono />
         <PrintDetail
           label={translate("Dimension", "المقاس")}
@@ -131,10 +134,7 @@ function ContractItemPrintBlock({
         />
         {item.notes?.trim() ? <PrintDetail label={translate("Notes", "الملاحظات")} value={item.notes.trim()} /> : null}
         {item.cancellationReason?.trim() ? (
-          <PrintDetail
-            label={translate("Cancellation reason", "سبب الإلغاء")}
-            value={item.cancellationReason.trim()}
-          />
+          <PrintDetail label={translate("Cancellation reason", "سبب الإلغاء")} value={item.cancellationReason.trim()} />
         ) : null}
       </div>
 
@@ -191,38 +191,29 @@ export default function ContractReviewPrintDocument({ contract }: ContractReview
         <img src={logoSrc} alt="" width={100} height={100} className="h-24 w-24 shrink-0 rounded object-contain" />
       </header>
 
-      <section className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-4 [&>div>span:last-child]:text-[11px]">
-        <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
+      <section className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3 [&>div>span:last-child]:text-[11px]">
+        <PrintDetail label={translate("Customer", "العميل")} value={contract.customer.name} />
         <PrintDetail
           label={translate("Contract review date", "تاريخ مراجعة العقد")}
           value={formatDateAndTime(contract.createdAt, locale)}
         />
-        <PrintDetail label={translate("Customer", "العميل")} value={contract.customer.name} />
-        {contract.legacyNumber ? (
+        {contract.startedAt ? (
           <PrintDetail
-            label={translate("Legacy number", "رقم مراجعة العقد")}
-            value={contract.legacyNumber}
-            mono
+            label={translate("Work order start", "بداية أمر الشغل")}
+            value={formatDateAndTime(contract.startedAt, locale)}
           />
         ) : null}
+        {contract.legacyNumber ? (
+          <PrintDetail label={translate("Legacy number", "رقم مراجعة العقد")} value={contract.legacyNumber} mono />
+        ) : null}
         {contract.legacyWorkOrderNumber ? (
-          <PrintDetail
-            label={translate("Work order number", "رقم أمر الشغل")}
-            value={contract.legacyWorkOrderNumber}
-            mono
-          />
+          <PrintDetail label={translate("Work order number", "رقم أمر الشغل")} value={contract.legacyWorkOrderNumber} mono />
         ) : null}
         <PrintDetail label={translate("Delivery address", "عنوان التسليم")} value={deliveryAddressValue} />
         {contract.deliveryTime ? (
           <PrintDetail
             label={translate("Delivery time", "موعد التسليم")}
             value={formatDateAndTime(contract.deliveryTime, locale)}
-          />
-        ) : null}
-        {contract.startedAt ? (
-          <PrintDetail
-            label={translate("Work order start", "بداية أمر الشغل")}
-            value={formatDateAndTime(contract.startedAt, locale)}
           />
         ) : null}
         {contract.completedAt ? (
@@ -245,10 +236,7 @@ export default function ContractReviewPrintDocument({ contract }: ContractReview
           />
         ) : null}
         {contract.cancellationReason?.trim() ? (
-          <PrintDetail
-            label={translate("Cancellation reason", "سبب الإلغاء")}
-            value={contract.cancellationReason.trim()}
-          />
+          <PrintDetail label={translate("Cancellation reason", "سبب الإلغاء")} value={contract.cancellationReason.trim()} />
         ) : null}
         {contract.notes?.trim() ? (
           <PrintDetail label={translate("Notes", "الملاحظات")} value={contract.notes.trim()} />
