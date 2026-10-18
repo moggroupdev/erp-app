@@ -8,8 +8,11 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { contractItemTitle } from "@/app/[locale]/(inner)/sales/contracts/helpers";
 import type { ContractDetailed, ContractItem, ContractProductUnit } from "@/types/contract";
 
+export type ContractReviewPrintVariant = "items" | "units";
+
 type ContractReviewPrintDocumentProps = {
   contract: ContractDetailed;
+  variant?: ContractReviewPrintVariant;
 };
 
 type UnitColumnKey =
@@ -118,6 +121,7 @@ function ContractItemPrintBlock({
       />
 
       <div className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3 [&>div>span:last-child]:text-[11px]">
+        <PrintDetail label={translate("Title", "العنوان")} value={item.title?.trim() || "-"} />
         <PrintDetail label={translate("Product code", "كود المنتج")} value={item.product.code} mono />
         <PrintDetail
           label={translate("Dimension", "المقاس")}
@@ -152,7 +156,95 @@ function ContractItemPrintBlock({
   );
 }
 
-export default function ContractReviewPrintDocument({ contract }: ContractReviewPrintDocumentProps) {
+function ContractItemsPrintTable({
+  items,
+  currency,
+  dimensionUnit,
+  translate,
+}: {
+  items: ContractItem[];
+  currency: string;
+  dimensionUnit: string;
+  translate: (en: string, ar: string) => string;
+}) {
+  const showNotes = items.some((item) => !!item.notes?.trim() || !!item.cancellationReason?.trim());
+
+  const headers = [
+    "#",
+    translate("Title", "العنوان"),
+    translate("Product", "المنتج"),
+    translate("Product code", "كود المنتج"),
+    translate("Dimension", "المقاس"),
+    translate("Quantity", "الكمية"),
+    translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`),
+    translate(`Line Total (${currency})`, `إجمالي البند (${currency})`),
+    ...(showNotes ? [translate("Notes", "الملاحظات")] : []),
+  ];
+
+  const columnWidths = showNotes
+    ? ["4%", "14%", "14%", "10%", "12%", "6%", "11%", "11%", "18%"]
+    : ["5%", "18%", "18%", "12%", "14%", "7%", "13%", "13%"];
+
+  const rows = items.map((item, index) => {
+    const lineTitle = item.title?.trim() || "-";
+    const cancelled = !!item.cancelledAt;
+    const noteParts = [
+      item.notes?.trim() || "",
+      item.cancellationReason?.trim()
+        ? `${translate("Cancellation reason", "سبب الإلغاء")}: ${item.cancellationReason.trim()}`
+        : "",
+    ].filter(Boolean);
+
+    return [
+      String(index + 1),
+      cancelled ? (
+        <span>
+          {lineTitle}{" "}
+          <span className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">
+            {translate("Cancelled", "ملغي")}
+          </span>
+        </span>
+      ) : (
+        lineTitle
+      ),
+      item.product.title,
+      item.product.code,
+      formatDimensionLabelText(item.productDimension, dimensionUnit),
+      String(item.quantity),
+      formatMoney(item.unitPrice),
+      formatMoney(item.quantity * item.unitPrice),
+      ...(showNotes
+        ? [
+            <span key="notes" className="whitespace-pre-line">
+              {noteParts.join("\n") || "-"}
+            </span>,
+          ]
+        : []),
+    ];
+  });
+
+  const lineTotalIndex = 7;
+  const footer = headers.map(() => "");
+  footer[1] = translate(`Total (${currency})`, `الإجمالي (${currency})`);
+  footer[lineTotalIndex] = formatMoney(
+    items.reduce((sum, item) => (item.cancelledAt ? sum : sum + item.quantity * item.unitPrice), 0),
+  );
+
+  return (
+    <PrintTable
+      headers={headers}
+      rows={rows}
+      footerRow={footer}
+      columnWidths={columnWidths}
+      monoColumnIndexes={[3]}
+      noWrapIndexes={[0, 5, 6, 7]}
+      tableClassName="text-[9px] [&_td]:align-top [&_th]:text-[8px]"
+      emptyLabel={translate("No items on this contract review", "لا توجد بنود في مراجعة العقد هذه")}
+    />
+  );
+}
+
+export default function ContractReviewPrintDocument({ contract, variant = "units" }: ContractReviewPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
   const { helpers } = useLocations();
   const currency = translation.currency;
@@ -249,6 +341,13 @@ export default function ContractReviewPrintDocument({ contract }: ContractReview
         <p className="py-2 text-[10px] text-gray-500">
           {translate("No items on this contract review", "لا توجد بنود في مراجعة العقد هذه")}
         </p>
+      ) : variant === "items" ? (
+        <ContractItemsPrintTable
+          items={contract.items}
+          currency={currency}
+          dimensionUnit={dimensionUnit}
+          translate={translate}
+        />
       ) : (
         <div className="flex flex-col gap-5">
           {contract.items.map((item, index) => (
