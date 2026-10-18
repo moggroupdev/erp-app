@@ -171,7 +171,7 @@ export default function Page() {
                     <Table.Th>{translate("Issue Permit Date", "تاريخ إذن الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Number", "رقم طلب الصرف")}</Table.Th>
                     <Table.Th>{translate("Issue Order Date", "تاريخ طلب الصرف")}</Table.Th>
-                    <Table.Th>{translate("Contract / Work Order", "العقد / أمر الشغل")}</Table.Th>
+                    <Table.Th>{translate("Contract review / Work Order", "مراجعة العقد / أمر الشغل")}</Table.Th>
                     <Table.Th>{translate("Entry Date", "تاريخ الإدخال")}</Table.Th>
                     <Table.Th>{translate("Notes", "الملاحظات")}</Table.Th>
                   </Table.Tr>

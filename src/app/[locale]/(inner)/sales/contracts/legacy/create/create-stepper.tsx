@@ -11,7 +11,7 @@ type CreateStepperProps = {
 const STEPS = [
   {
     icon: FileText,
-    label: { en: "Contract", ar: "العقد" },
+    label: { en: "Contract review", ar: "مراجعة العقد" },
     description: { en: "Customer and dates", ar: "العميل والتواريخ" },
   },
   {
@@ -36,7 +36,7 @@ export default function CreateStepper({ active, onStepClick }: CreateStepperProp
   const progress = STEPS.length <= 1 ? 0 : (active / (STEPS.length - 1)) * 100;
 
   return (
-    <nav aria-label={translate("Contract steps", "خطوات العقد")} className="rounded-xl bg-gray-50/80 px-3 py-8 sm:px-4">
+    <nav aria-label={translate("Contract review steps", "خطوات مراجعة العقد")} className="rounded-xl bg-gray-50/80 px-3 py-8 sm:px-4">
       <ol className="relative grid grid-cols-2 gap-y-4 sm:grid-cols-4 sm:gap-y-0">
         {/* Track sits on the icon vertical center, behind the step buttons */}
         <div

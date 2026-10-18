@@ -381,15 +381,15 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
   read_contracts: {
     value: "read_contracts",
     label: {
-      en: "Read Contracts",
-      ar: "عرض العقود",
+      en: "Read Contract Reviews",
+      ar: "عرض مراجعات العقود",
     },
   },
   add_legacy_contract: {
     value: "add_legacy_contract",
     label: {
-      en: "Add Legacy Contract",
-      ar: "إضافة عقد مرحلي",
+      en: "Add Legacy Contract Review",
+      ar: "إضافة مراجعة عقد مرحلية",
     },
   },
   read_complaints: {

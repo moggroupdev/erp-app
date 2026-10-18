@@ -72,7 +72,7 @@ function getSourceRows(
         ),
       },
       {
-        key: translate("Contract Number", "رقم العقد"),
+        key: translate("Contract review number", "رقم مراجعة العقد"),
         value: <span className="font-mono">{contract.code}</span>,
         copyText: contract.code,
       },

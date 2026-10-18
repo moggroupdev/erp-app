@@ -131,7 +131,7 @@ export default function LegacyIssuePermitUpdateModal({
         return setValidationError(translate("Please select a maintenance type.", "يرجى اختيار نوع الصيانة."));
       }
     } else if (!contractNumber.trim()) {
-      return setValidationError(translate("Contract number is required.", "رقم مراجعة العقد مطلوب."));
+      return setValidationError(translate("Contract review number is required.", "رقم مراجعة العقد مطلوب."));
     }
 
     mutation.mutate();
@@ -240,8 +240,8 @@ export default function LegacyIssuePermitUpdateModal({
               <TextInput
                 value={contractNumber}
                 onChange={(e) => setContractNumber(e.target.value)}
-                label={translate("Contract Number", "رقم مراجعة العقد")}
-                placeholder={translate("Enter contract number", "أدخل رقم مراجعة العقد")}
+                label={translate("Contract review number", "رقم مراجعة العقد")}
+                placeholder={translate("Enter contract review number", "أدخل رقم مراجعة العقد")}
                 required
                 radius="md"
               />

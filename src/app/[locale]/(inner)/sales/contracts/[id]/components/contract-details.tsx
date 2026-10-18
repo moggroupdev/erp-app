@@ -65,7 +65,7 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
     .join(", ");
 
   const rows: DetailRow[] = [
-    { key: translate("Contract code", "كود العقد"), value: contract.code, mono: true, copyText: contract.code },
+    { key: translate("Contract review code", "كود مراجعة العقد"), value: contract.code, mono: true, copyText: contract.code },
     {
       key: translate("Customer", "العميل"),
       value: (
