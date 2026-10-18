@@ -28,7 +28,6 @@ import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { ContractItem, ContractProductUnit } from "@/types/contract";
 import ContractDetails from "./components/contract-details";
-import { contractItemTitle } from "../helpers";
 
 const PAGE_TITLE = { en: "Contract Review Details", ar: "تفاصيل مراجعة العقد" };
 
@@ -208,7 +207,7 @@ function ContractItemCard({
   dimensionUnit: string;
 }) {
   const { translate } = useI18n();
-  const title = contractItemTitle(item);
+  const lineTitle = item.title?.trim() || "";
   const cancelled = !!item.cancelledAt;
   const lineAmount = item.quantity * item.unitPrice;
   const units = item.productUnits;
@@ -230,7 +229,7 @@ function ContractItemCard({
       >
         <h3
           className={[
-            "flex min-w-0 items-center gap-2 text-sm font-semibold",
+            "flex min-w-0 flex-wrap items-center gap-2 text-sm font-semibold",
             cancelled ? "text-gray-500" : "text-gray-900",
           ].join(" ")}
         >
@@ -242,7 +241,23 @@ function ContractItemCard({
           >
             {index + 1}
           </span>
-          <span className="truncate">{title}</span>
+          <ProtectedLink
+            permission={PERMISSIONS.READ_PRODUCTS}
+            href={`/products/${item.product.code}`}
+            className="min-w-0 leading-relaxed hover:underline"
+          >
+            {item.product.title}
+          </ProtectedLink>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gray-100 px-1.5 py-0.5">
+            <ProtectedLink
+              permission={PERMISSIONS.READ_PRODUCTS}
+              href={`/products/${item.product.code}`}
+              className="font-mono text-xs font-medium text-gray-700 hover:underline"
+            >
+              {item.product.code}
+            </ProtectedLink>
+            <CopyButton text={item.product.code} />
+          </span>
           {cancelled ? (
             <span className="bg-clay-100 text-clay-700 shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold">
               {translate("Cancelled", "ملغي")}
@@ -260,17 +275,9 @@ function ContractItemCard({
       </header>
 
       <div className="flex flex-col gap-3 p-4">
+        {lineTitle ? <p className="text-sm leading-relaxed text-gray-600">{lineTitle}</p> : null}
+
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-gray-600">
-          <div className="flex items-center gap-1.5">
-            <ProtectedLink
-              permission={PERMISSIONS.READ_PRODUCTS}
-              href={`/products/${item.product.code}`}
-              className="font-mono font-medium text-gray-800 hover:underline"
-            >
-              {item.product.code}
-            </ProtectedLink>
-            <CopyButton text={item.product.code} />
-          </div>
           <span>{formatDimensionLabel(item.productDimension, dimensionUnit)}</span>
           <span className="tabular-nums">
             {item.quantity} × {formatMoney(item.unitPrice)} {currency}
