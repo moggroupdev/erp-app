@@ -149,7 +149,7 @@ export default function UnitsStep({ items, setItems, clearStepError }: UnitsStep
                               const serialNumber = normalizeSerialDigits(event.currentTarget.value).slice(0, 12);
                               patchUnit(item.key, unit.key, { serialNumber });
                             }}
-                            placeholder="000000000000"
+                            placeholder={translate("12-digit unit serial", "رقم تسلسلي من 12 رقمًا")}
                             maxLength={12}
                             inputMode="numeric"
                             variant="unstyled"
@@ -168,6 +168,7 @@ export default function UnitsStep({ items, setItems, clearStepError }: UnitsStep
                           }}
                           aria-label={translate("Generate serial number", "توليد رقم تسلسلي")}
                           title={translate("Generate serial number", "توليد رقم تسلسلي")}
+                          px="sm"
                         >
                           <Dices size={14} />
                         </Button>
@@ -187,7 +188,7 @@ export default function UnitsStep({ items, setItems, clearStepError }: UnitsStep
                               const supplierSerialNumber = event.currentTarget.value;
                               patchUnit(item.key, unit.key, { supplierSerialNumber });
                             }}
-                            placeholder={translate("Supplier serial", "مسلسل المورد")}
+                            placeholder={translate("Serial number from the supplier", "الرقم التسلسلي كما هو لدى المورد")}
                             variant="unstyled"
                             required
                             classNames={{ input: FIELD_INPUT }}
@@ -203,7 +204,10 @@ export default function UnitsStep({ items, setItems, clearStepError }: UnitsStep
                       <DatePickerInput
                         value={unit.producedAt}
                         onChange={(value) => patchUnit(item.key, unit.key, { producedAt: value })}
-                        placeholder={translate("Optional", "اختياري")}
+                        placeholder={translate(
+                          "Leave empty if still in progress",
+                          "اتركه فارغًا إذا كان الإنتاج لا يزال جاريًا",
+                        )}
                         clearable
                       />
                     </label>
