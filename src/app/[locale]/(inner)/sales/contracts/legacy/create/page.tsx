@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Stepper } from "@mantine/core";
+import { Button } from "@mantine/core";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import type { SelectableProduct } from "@/components/global/selections/remote-based/select-product";
@@ -18,6 +18,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { CustomerAddress } from "@/types/customer";
+import CreateStepper from "./create-stepper";
 import ContractStep from "./steps/contract-step";
 import LinesStep from "./steps/lines-step";
 import ReviewStep from "./steps/review-step";
@@ -278,7 +279,7 @@ export default function Page() {
       }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <Stepper
+        <CreateStepper
           active={step}
           onStepClick={(next) => {
             if (next < step) {
@@ -286,27 +287,7 @@ export default function Page() {
               setStep(next);
             }
           }}
-          color="haze"
-          size="sm"
-          allowNextStepsSelect={false}
-        >
-          <Stepper.Step
-            label={translate("Contract", "العقد")}
-            description={translate("Customer and dates", "العميل والتواريخ")}
-          />
-          <Stepper.Step
-            label={translate("Lines", "البنود")}
-            description={translate("Products and prices", "المنتجات والأسعار")}
-          />
-          <Stepper.Step
-            label={translate("Units", "الوحدات")}
-            description={translate("Serial numbers", "الأرقام التسلسلية")}
-          />
-          <Stepper.Step
-            label={translate("Review", "المراجعة")}
-            description={translate("Confirm and save", "التأكيد والحفظ")}
-          />
-        </Stepper>
+        />
 
         {step === 0 ? (
           <ContractStep
@@ -329,7 +310,6 @@ export default function Page() {
             setPrefillAddress={setPrefillAddress}
             addresses={addresses}
             addressesLoading={addressesQuery.isFetching}
-            addressLabel={addressLabel}
             clearStepError={clearStepError}
           />
         ) : null}
