@@ -287,22 +287,17 @@ export default function ContractReviewPrintDocument({ contract, variant = "units
 
       <section className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3 [&>div>span:last-child]:text-[11px]">
         <PrintDetail label={translate("Customer", "العميل")} value={contract.customer.name} />
+        {contract.legacyNumber ? (
+          <PrintDetail
+            label={translate("Legacy number", "رقم مراجعة العقد")}
+            value={contract.legacyNumber || contract.code}
+            mono
+          />
+        ) : null}
         <PrintDetail
           label={translate("Contract review date", "تاريخ مراجعة العقد")}
           value={formatDateAndTime(contract.createdAt, locale)}
         />
-        {contract.startedAt ? (
-          <PrintDetail
-            label={translate("Work order start", "بداية أمر الشغل")}
-            value={formatDateAndTime(contract.startedAt, locale)}
-          />
-        ) : null}
-        {contract.legacyNumber ? (
-          <PrintDetail label={translate("Legacy number", "رقم مراجعة العقد")} value={contract.legacyNumber} mono />
-        ) : null}
-        {contract.legacyWorkOrderNumber ? (
-          <PrintDetail label={translate("Work order number", "رقم أمر الشغل")} value={contract.legacyWorkOrderNumber} mono />
-        ) : null}
         <PrintDetail label={translate("Delivery address", "عنوان التسليم")} value={deliveryAddressValue} />
         {contract.deliveryTime ? (
           <PrintDetail
@@ -365,6 +360,21 @@ export default function ContractReviewPrintDocument({ contract, variant = "units
           ))}
         </div>
       )}
+
+      <hr className="border-gray-300" />
+
+      <section className="grid grid-cols-2 gap-x-8 gap-y-2 sm:grid-cols-3 [&>div>span:last-child]:text-[11px]">
+        {contract.legacyWorkOrderNumber ? (
+          <PrintDetail label={translate("Work order number", "رقم أمر الشغل")} value={contract.legacyWorkOrderNumber} mono />
+        ) : null}
+        {contract.startedAt ? (
+          <PrintDetail
+            label={translate("Work order start", "بداية أمر الشغل")}
+            value={formatDateAndTime(contract.startedAt, locale)}
+          />
+        ) : null}
+        <PrintDetail label={translate("Printing date", "تاريخ الطباعة")} value={printedAt} />
+      </section>
     </div>
   );
 }
