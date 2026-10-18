@@ -131,9 +131,32 @@ export function validateContractStep(
   if (!input.customerId) return translate("Choose a customer.", "اختر عميلاً.");
   if (!input.legacyNumber.trim()) return translate("Enter the legacy contract number.", "أدخل رقم مراجعة العقد.");
   if (!input.legacyWorkOrderNumber.trim()) return translate("Enter the legacy work order number.", "أدخل رقم أمر الشغل.");
-  if (!dateOnlyToTwoPmIso(input.createdAt)) return translate("Choose the contract date.", "اختر تاريخ مراجعة العقد.");
-  if (!dateOnlyToTwoPmIso(input.startedAt)) return translate("Choose the work order start date.", "اختر تاريخ بداية أمر الشغل.");
-  if (!dateOnlyToTwoPmIso(input.deliveryTime)) return translate("Choose the delivery date.", "اختر تاريخ التسليم.");
+  const { createdAt, startedAt, deliveryTime } = input;
+
+  if (!createdAt || !dateOnlyToTwoPmIso(createdAt)) {
+    return translate("Choose the contract date.", "اختر تاريخ مراجعة العقد.");
+  }
+  if (!startedAt || !dateOnlyToTwoPmIso(startedAt)) {
+    return translate("Choose the work order start date.", "اختر تاريخ بداية أمر الشغل.");
+  }
+  if (!deliveryTime || !dateOnlyToTwoPmIso(deliveryTime)) {
+    return translate("Choose the delivery date.", "اختر تاريخ التسليم.");
+  }
+
+  // Order: contract date → work order start → delivery planned (same day allowed).
+  if (startedAt < createdAt) {
+    return translate(
+      "Work order start date cannot be earlier than the contract date.",
+      "لا يمكن أن يسبق تاريخ بدء أمر الشغل تاريخ مراجعة العقد.",
+    );
+  }
+  if (deliveryTime < startedAt) {
+    return translate(
+      "Delivery planned date cannot be earlier than the work order start date.",
+      "لا يمكن أن يسبق تاريخ التسليم المخطط تاريخ بدء أمر الشغل.",
+    );
+  }
+
   if (input.deliveryMode === "address" && !input.deliveryAddressId) {
     return translate("Choose a delivery address, or deliver at the factory.", "اختر عنوان تسليم، أو اختر التسليم في المصنع.");
   }

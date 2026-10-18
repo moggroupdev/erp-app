@@ -124,6 +124,7 @@ export default function ContractStep({
           }}
           label={translate("Contract date", "تاريخ مراجعة العقد")}
           placeholder={translate("Select a date", "اختر تاريخًا")}
+          maxDate={startedAt ?? deliveryTime ?? undefined}
           required
         />
         <DatePickerInput
@@ -134,6 +135,8 @@ export default function ContractStep({
           }}
           label={translate("Work order start date", "تاريخ بدء أمر الشغل")}
           placeholder={translate("Select a date", "اختر تاريخًا")}
+          minDate={createdAt ?? undefined}
+          maxDate={deliveryTime ?? undefined}
           required
         />
         <DatePickerInput
@@ -144,6 +147,7 @@ export default function ContractStep({
           }}
           label={translate("Delivery planned date", "تاريخ التسليم المخطط")}
           placeholder={translate("Select a date", "اختر تاريخًا")}
+          minDate={startedAt ?? createdAt ?? undefined}
           required
         />
       </section>
