@@ -139,9 +139,9 @@ export function validateContractStep(
   translate: Translate,
 ) {
   if (!input.customerId) return translate("Choose a customer.", "اختر عميلاً.");
-  if (!input.legacyNumber.trim()) return translate("Enter the legacy contract number.", "أدخل رقم العقد الورقي.");
-  if (!input.legacyWorkOrderNumber.trim()) return translate("Enter the legacy work order number.", "أدخل رقم أمر الشغل الورقي.");
-  if (!dateOnlyToTwoPmIso(input.createdAt)) return translate("Choose the contract date.", "اختر تاريخ العقد.");
+  if (!input.legacyNumber.trim()) return translate("Enter the legacy contract number.", "أدخل رقم مراجعة العقد.");
+  if (!input.legacyWorkOrderNumber.trim()) return translate("Enter the legacy work order number.", "أدخل رقم أمر الشغل.");
+  if (!dateOnlyToTwoPmIso(input.createdAt)) return translate("Choose the contract date.", "اختر تاريخ مراجعة العقد.");
   if (!dateOnlyToTwoPmIso(input.startedAt)) return translate("Choose the work order start date.", "اختر تاريخ بداية أمر الشغل.");
   if (!dateOnlyToTwoPmIso(input.deliveryTime)) return translate("Choose the delivery date.", "اختر تاريخ التسليم.");
   if (input.deliveryMode === "address" && !input.deliveryAddressId) {

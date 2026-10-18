@@ -308,9 +308,6 @@ export default function Page() {
           />
         </Stepper>
 
-        {stepError ? <ErrorAlert error={stepError} /> : null}
-        {apiError ? <ErrorAlert error={apiError} /> : null}
-
         {step === 0 ? (
           <ContractStep
             customerId={customerId}
@@ -375,6 +372,9 @@ export default function Page() {
             items={items}
           />
         ) : null}
+
+        {stepError ? <ErrorAlert error={stepError} /> : null}
+        {apiError ? <ErrorAlert error={apiError} /> : null}
 
         <div className="flex items-center justify-between gap-3 border-t border-gray-200 pt-4">
           {step > 0 ? (

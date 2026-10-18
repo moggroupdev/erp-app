@@ -81,7 +81,7 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
       ),
     },
     {
-      key: translate("Legacy number", "رقم العقد الورقي"),
+      key: translate("Legacy number", "رقم مراجعة العقد"),
       value: contract.legacyNumber ? <span className="font-mono">{contract.legacyNumber}</span> : <EmptyValue />,
       copyText: contract.legacyNumber || undefined,
     },

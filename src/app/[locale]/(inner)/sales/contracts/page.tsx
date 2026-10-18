@@ -184,7 +184,7 @@ export default function Page() {
                   <Table.Tr>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>{translate("Customer", "العميل")}</Table.Th>
-                    <Table.Th>{translate("Legacy number", "رقم العقد الورقي")}</Table.Th>
+                    <Table.Th>{translate("Legacy number", "رقم مراجعة العقد")}</Table.Th>
                     <Table.Th>{translate("Work order number", "رقم أمر الشغل")}</Table.Th>
                     <Table.Th>{translate("Status", "الحالة")}</Table.Th>
                     <Table.Th>{translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}</Table.Th>

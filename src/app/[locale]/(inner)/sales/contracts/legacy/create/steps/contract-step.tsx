@@ -80,8 +80,8 @@ export default function ContractStep({
           setLegacyNumber(event.currentTarget.value);
           clearStepError();
         }}
-        label={translate("Legacy contract number", "رقم العقد الورقي")}
-        placeholder={translate("Enter the paper contract number", "أدخل رقم العقد الورقي")}
+        label={translate("Legacy contract number", "رقم مراجعة العقد")}
+        placeholder={translate("Enter the paper contract number", "أدخل رقم مراجعة العقد")}
         required
         radius="md"
       />
@@ -91,8 +91,8 @@ export default function ContractStep({
           setLegacyWorkOrderNumber(event.currentTarget.value);
           clearStepError();
         }}
-        label={translate("Legacy work order number", "رقم أمر الشغل الورقي")}
-        placeholder={translate("Enter the paper work order number", "أدخل رقم أمر الشغل الورقي")}
+        label={translate("Legacy work order number", "رقم أمر الشغل")}
+        placeholder={translate("Enter the paper work order number", "أدخل رقم أمر الشغل")}
         required
         radius="md"
       />
@@ -103,7 +103,7 @@ export default function ContractStep({
           setCreatedAt(value);
           clearStepError();
         }}
-        label={translate("Contract date", "تاريخ العقد")}
+        label={translate("Contract date", "تاريخ مراجعة العقد")}
         placeholder={translate("Select a date", "اختر تاريخًا")}
         required
       />
