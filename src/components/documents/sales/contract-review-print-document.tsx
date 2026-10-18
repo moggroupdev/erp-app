@@ -174,9 +174,8 @@ function ContractItemsPrintTable({
 
   const headers = [
     "#",
-    translate("Description", "البيان"),
     translate("Product", "المنتج"),
-    translate("Dimension", "المقاس"),
+    translate("Description", "البيان"),
     translate("Quantity", "الكمية"),
     translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`),
     translate(`Line Total (${currency})`, `إجمالي البند (${currency})`),
@@ -184,8 +183,8 @@ function ContractItemsPrintTable({
   ];
 
   const columnWidths = showNotes
-    ? ["4%", "22%", "16%", "12%", "7%", "11%", "11%", "17%"]
-    : ["5%", "26%", "20%", "16%", "8%", "12%", "13%"];
+    ? ["4%", "20%", "26%", "7%", "11%", "11%", "21%"]
+    : ["4%", "24%", "31%", "8%", "16%", "17%"];
 
   const rows = items.map((item, index) => {
     const lineTitle = item.title?.trim() || "-";
@@ -199,21 +198,21 @@ function ContractItemsPrintTable({
 
     return [
       String(index + 1),
+      <span className="flex flex-col gap-0.5">
+        <span className="font-mono text-gray-600">{item.product.code}</span>
+        <span className="leading-relaxed">{item.product.title}</span>
+        <span className="text-gray-600">{formatDimensionLabelText(item.productDimension, dimensionUnit)}</span>
+      </span>,
       cancelled ? (
-        <span>
+        <span className="leading-relaxed">
           {lineTitle}{" "}
           <span className="text-[9px] font-semibold tracking-wide text-gray-500 uppercase">
             {translate("Cancelled", "ملغي")}
           </span>
         </span>
       ) : (
-        lineTitle
+        <span className="leading-relaxed">{lineTitle}</span>
       ),
-      <span className="flex flex-col gap-0.5">
-        <span>{item.product.title}</span>
-        <span className="font-mono text-gray-600">{item.product.code}</span>
-      </span>,
-      formatDimensionLabelText(item.productDimension, dimensionUnit),
       String(item.quantity),
       formatMoney(item.unitPrice),
       formatMoney(item.quantity * item.unitPrice),
@@ -227,7 +226,7 @@ function ContractItemsPrintTable({
     ];
   });
 
-  const lineTotalIndex = 6;
+  const lineTotalIndex = 5;
   const footer = headers.map(() => "");
   footer[1] = translate(`Total (${currency})`, `الإجمالي (${currency})`);
   footer[lineTotalIndex] = formatMoney(
@@ -240,8 +239,8 @@ function ContractItemsPrintTable({
       rows={rows}
       footerRow={footer}
       columnWidths={columnWidths}
-      noWrapIndexes={[0, 4, 5, 6]}
-      tableClassName="border border-gray-300 text-[9px] [&_td]:border [&_td]:border-gray-300 [&_td]:align-top [&_th]:border [&_th]:border-gray-300 [&_th]:text-[8px]"
+      noWrapIndexes={[0, 3, 4, 5]}
+      tableClassName="border-hidden text-[9px] [&_tr]:border-0 [&_td]:border [&_td]:border-gray-200 [&_td]:align-top [&_th]:border [&_th]:border-gray-200 [&_th]:text-[8px]"
       emptyLabel={translate("No items on this contract review", "لا توجد بنود في مراجعة العقد هذه")}
     />
   );
