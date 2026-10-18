@@ -99,8 +99,8 @@ export default function ContractStep({
             setLegacyNumber(event.currentTarget.value);
             clearStepError();
           }}
-          label={translate("Legacy contract number", "رقم مراجعة العقد")}
-          placeholder={translate("Enter the paper contract number", "أدخل رقم مراجعة العقد")}
+          label={translate("Legacy contract review number", "رقم مراجعة العقد")}
+          placeholder={translate("Enter the paper contract review number", "أدخل رقم مراجعة العقد")}
           required
           radius="md"
         />
@@ -122,7 +122,7 @@ export default function ContractStep({
             setCreatedAt(value);
             clearStepError();
           }}
-          label={translate("Contract date", "تاريخ مراجعة العقد")}
+          label={translate("Contract review date", "تاريخ مراجعة العقد")}
           placeholder={translate("Select a date", "اختر تاريخًا")}
           maxDate={startedAt ?? deliveryTime ?? undefined}
           required

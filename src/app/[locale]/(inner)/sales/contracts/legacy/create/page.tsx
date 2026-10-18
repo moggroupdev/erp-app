@@ -39,7 +39,7 @@ import {
   validateUnitsStep,
 } from "./form-state";
 
-const PAGE_TITLE = { en: "Add Legacy Contract", ar: "إضافة عقد مرحلي" };
+const PAGE_TITLE = { en: "Add Legacy Contract Review", ar: "إضافة مراجعة عقد مرحلية" };
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -417,7 +417,7 @@ export default function Page() {
               loading={mutation.isPending}
               onClick={createContract}
             >
-              {translate("Create legacy contract", "إنشاء العقد المرحلي")}
+              {translate("Create legacy contract review", "إنشاء مراجعة العقد المرحلية")}
             </Button>
           )}
         </div>

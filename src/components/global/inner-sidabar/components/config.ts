@@ -107,7 +107,7 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         requiredPermission: PERMISSIONS.READ_OFFERS,
       },
       {
-        label: { en: "Contracts", ar: "العقود" },
+        label: { en: "Contract Reviews", ar: "مراجعات العقود" },
         href: "/sales/contracts",
         icon: FileText,
         requiredPermission: PERMISSIONS.READ_CONTRACTS,

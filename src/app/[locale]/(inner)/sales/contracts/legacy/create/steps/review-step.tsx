@@ -45,9 +45,9 @@ export default function ReviewStep({
     <section className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 p-4 md:grid-cols-2">
         <SummaryItem label={translate("Customer", "العميل")} value={customerName ? `${customerName} - ${customerCode}` : ""} />
-        <SummaryItem label={translate("Legacy contract number", "رقم مراجعة العقد")} value={legacyNumber.trim()} />
+        <SummaryItem label={translate("Legacy contract review number", "رقم مراجعة العقد")} value={legacyNumber.trim()} />
         <SummaryItem label={translate("Legacy work order number", "رقم أمر الشغل")} value={legacyWorkOrderNumber.trim()} />
-        <SummaryItem label={translate("Contract date", "تاريخ مراجعة العقد")} value={formatPickerDate(createdAt, locale)} />
+        <SummaryItem label={translate("Contract review date", "تاريخ مراجعة العقد")} value={formatPickerDate(createdAt, locale)} />
         <SummaryItem label={translate("Work order start", "بداية أمر الشغل")} value={formatPickerDate(startedAt, locale)} />
         <SummaryItem label={translate("Delivery date", "تاريخ التسليم")} value={formatPickerDate(deliveryTime, locale)} />
         <SummaryItem

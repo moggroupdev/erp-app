@@ -33,7 +33,7 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { ContractListItem } from "@/types/contract";
 
-const PAGE_TITLE = { en: "Contracts", ar: "العقود" };
+const PAGE_TITLE = { en: "Contract Reviews", ar: "مراجعات العقود" };
 const PAGE_SIZE = 25;
 
 export default function Page() {
@@ -112,7 +112,7 @@ export default function Page() {
                   href={getLocalizedHref("/sales/contracts/legacy/create")}
                   leftSection={<Plus size={14} />}
                 >
-                  {translate("Add legacy contract", "إضافة عقد مرحلي")}
+                  {translate("Add legacy contract review", "إضافة مراجعة عقد مرحلية")}
                 </Menu.Item>
               )}
             </ActionsMenu>
@@ -139,10 +139,10 @@ export default function Page() {
       </div>
 
       {isFetching ? (
-        <LoadingSection message={translate("Loading contracts...", "جاري تحميل العقود...")} />
+        <LoadingSection message={translate("Loading contract reviews...", "جاري تحميل مراجعات العقود...")} />
       ) : errorMessage ? (
         <ErrorSection
-          errorTitle={translate("Error loading contracts", "خطأ في تحميل العقود")}
+          errorTitle={translate("Error loading contract reviews", "خطأ في تحميل مراجعات العقود")}
           errorMessage={errorMessage}
           button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
@@ -155,7 +155,7 @@ export default function Page() {
               button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
             />
           ) : (
-            <EmptySection useDefaultImg message={translate("No contracts found", "لا توجد عقود")} />
+            <EmptySection useDefaultImg message={translate("No contract reviews found", "لا توجد مراجعات عقود")} />
           )
         ) : (
           <>

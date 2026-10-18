@@ -49,7 +49,7 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
     ...(transaction.workOrderNumberType === LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
       ? [
           {
-            key: translate("Contract Number", "رقم مراجعة العقد"),
+            key: translate("Contract review number", "رقم مراجعة العقد"),
             value: transaction.contractNumber ? (
               <span className="font-mono">{transaction.contractNumber}</span>
             ) : (

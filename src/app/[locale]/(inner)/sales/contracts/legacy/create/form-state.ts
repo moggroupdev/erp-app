@@ -129,12 +129,12 @@ export function validateContractStep(
   translate: Translate,
 ) {
   if (!input.customerId) return translate("Choose a customer.", "اختر عميلاً.");
-  if (!input.legacyNumber.trim()) return translate("Enter the legacy contract number.", "أدخل رقم مراجعة العقد.");
+  if (!input.legacyNumber.trim()) return translate("Enter the legacy contract review number.", "أدخل رقم مراجعة العقد.");
   if (!input.legacyWorkOrderNumber.trim()) return translate("Enter the legacy work order number.", "أدخل رقم أمر الشغل.");
   const { createdAt, startedAt, deliveryTime } = input;
 
   if (!createdAt || !dateOnlyToTwoPmIso(createdAt)) {
-    return translate("Choose the contract date.", "اختر تاريخ مراجعة العقد.");
+    return translate("Choose the contract review date.", "اختر تاريخ مراجعة العقد.");
   }
   if (!startedAt || !dateOnlyToTwoPmIso(startedAt)) {
     return translate("Choose the work order start date.", "اختر تاريخ بداية أمر الشغل.");
@@ -143,10 +143,10 @@ export function validateContractStep(
     return translate("Choose the delivery date.", "اختر تاريخ التسليم.");
   }
 
-  // Order: contract date → work order start → delivery planned (same day allowed).
+  // Order: contract review date → work order start → delivery planned (same day allowed).
   if (startedAt < createdAt) {
     return translate(
-      "Work order start date cannot be earlier than the contract date.",
+      "Work order start date cannot be earlier than the contract review date.",
       "لا يمكن أن يسبق تاريخ بدء أمر الشغل تاريخ مراجعة العقد.",
     );
   }
@@ -164,7 +164,7 @@ export function validateContractStep(
 }
 
 export function validateItemsStep(items: ItemDraft[], translate: Translate) {
-  if (items.length === 0) return translate("Add at least one contract line.", "أضف بندًا واحدًا على الأقل.");
+  if (items.length === 0) return translate("Add at least one contract review line.", "أضف بندًا واحدًا على الأقل.");
 
   for (const [index, item] of items.entries()) {
     const line = index + 1;

@@ -27,7 +27,7 @@ import type { ContractItem, ContractProductUnit } from "@/types/contract";
 import ContractDetails from "./components/contract-details";
 import { contractItemTitle } from "../helpers";
 
-const PAGE_TITLE = { en: "Contract Details", ar: "تفاصيل العقد" };
+const PAGE_TITLE = { en: "Contract Review Details", ar: "تفاصيل مراجعة العقد" };
 
 type UnitColumnKey =
   | "supplierSerialNumber"
@@ -98,10 +98,10 @@ export default function Page() {
       }}
     >
       {isFetching ? (
-        <LoadingSection message={translate("Loading contract...", "جاري تحميل العقد...")} />
+        <LoadingSection message={translate("Loading contract review...", "جاري تحميل مراجعة العقد...")} />
       ) : error ? (
         <ErrorSection
-          errorTitle={translate("Error loading contract", "خطأ في تحميل العقد")}
+          errorTitle={translate("Error loading contract review", "خطأ في تحميل مراجعة العقد")}
           errorMessage={getErrorMessage(locale, error)}
           button={{ text: translate("Try again", "حاول مرة أخرى"), onClick: () => refetch() }}
         />
@@ -123,7 +123,7 @@ export default function Page() {
               </div>
 
               {contract.items.length === 0 ? (
-                <EmptySection message={translate("No items on this contract", "لا توجد بنود في هذا العقد")} />
+                <EmptySection message={translate("No items on this contract review", "لا توجد بنود في مراجعة العقد هذه")} />
               ) : (
                 <div className="flex flex-col gap-3">
                   {contract.items.map((item, index) => (
