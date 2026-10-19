@@ -72,13 +72,69 @@
 
     .slide.cover {
       background:
-        radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.18), transparent 55%),
-        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(5, 37, 101, 0.12), transparent 50%),
+        radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.14), transparent 55%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(5, 37, 101, 0.1), transparent 50%),
         linear-gradient(215deg, #f8fbfe 0%, #eef3f9 55%, #e6edf6 100%);
       justify-content: center;
+      align-items: center;
+      text-align: center;
     }
 
     .slide.cover::before { width: 12px; }
+
+    .cover-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      max-width: 640px;
+    }
+
+    .cover-logo {
+      width: min(280px, 42vw);
+      height: auto;
+      display: block;
+    }
+
+    .cover-divider {
+      width: 64px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #f7941d, var(--haze-600));
+    }
+
+    .cover-title {
+      font-size: clamp(1.55rem, 2.6vw, 2.1rem);
+      line-height: 1.35;
+      color: var(--navy);
+      font-weight: 800;
+      max-width: 18ch;
+    }
+
+    .cover-subtitle {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--muted);
+      font-weight: 500;
+      max-width: 36ch;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .cover-meta strong {
+      display: block;
+      color: var(--navy);
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
 
     .eyebrow {
       font-size: 13px;
@@ -94,6 +150,51 @@
       letter-spacing: 0.06em;
       color: var(--navy);
       margin-bottom: 20px;
+    }
+
+    .problem-intro {
+      font-size: 1.02rem;
+      line-height: 1.7;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 16px;
+      max-width: 62ch;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .problem-card {
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      border-right: 3px solid var(--haze-600);
+    }
+
+    .problem-card.accent {
+      border-right-color: #f7941d;
+      grid-column: 1 / -1;
+      background: linear-gradient(105deg, #fff8f0 0%, var(--bg) 55%);
+    }
+
+    .problem-card h3 {
+      font-size: 0.98rem;
+      color: var(--navy);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .problem-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 500;
     }
 
     h1 {
@@ -568,9 +669,19 @@
 
       .slide.cover {
         background:
-          radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.18), transparent 55%),
+          radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.14), transparent 55%),
           linear-gradient(215deg, #f8fbfe 0%, #eef3f9 55%, #e6edf6 100%) !important;
       }
+
+      .cover-logo {
+        width: 52mm !important;
+      }
+
+      .cover-inner { gap: 14px !important; }
+
+      .problem-grid { gap: 8px !important; }
+      .problem-card { padding: 10px 12px !important; }
+      .problem-card p { font-size: 0.8rem !important; }
     }
   </style>
 </head>
@@ -580,35 +691,55 @@
   <div class="deck" id="deck">
 
     <!-- 1 -->
-    <section class="slide cover active" data-title="العنوان">
-      <div class="brand">MOG ERP</div>
-      <h1>الوضع الحالي والخطوات القادمة</h1>
-      <p class="lede">
-        منصة واحدة لمشاريع معدات المطابخ التجارية: من أول تواصل مع العميل حتى الإنتاج والمشتريات والتسليم وما بعد البيع.
-      </p>
-      <div class="meta">
-        <div><strong>التركيز</strong>ما يعمل اليوم</div>
-        <div><strong>الفجوة</strong>ما صُمّم ولم يُطلَق بعد</div>
-        <div><strong>الخطة</strong>إصدارات على مراحل</div>
+    <section class="slide cover active" data-title="الغلاف">
+      <div class="cover-inner">
+        <img
+          class="cover-logo"
+          src="../images/logo.png"
+          alt="MOG 10th of Ramadan Catering Equipment"
+          width="560"
+          height="400"
+        />
+        <div class="cover-divider" aria-hidden="true"></div>
+        <h1 class="cover-title">نظام تخطيط موارد المؤسسة</h1>
+        <p class="cover-subtitle">
+          مراجعة الوضع الحالي والخطوات القادمة نحو منصة تشغيل موحّدة لمشاريع معدات المطابخ التجارية
+        </p>
+        <div class="cover-meta">
+          <div><strong>الوضع</strong>ما أُنجز حتى الآن</div>
+          <div><strong>الفجوات</strong>ما يتطلّب إكمالاً</div>
+          <div><strong>الخطة</strong>المراحل التالية</div>
+        </div>
       </div>
     </section>
 
     <!-- 2 -->
-    <section class="slide" data-title="لماذا">
-      <p class="eyebrow">السياق</p>
-      <h2>لماذا نبني هذا النظام؟</h2>
-      <div class="stack">
-        <div class="row">
-          <div class="label">المشكلة</div>
-          <div class="body">مشاريع معدات المطابخ تمر بالمبيعات والمكتب الفني والإنتاج والمخازن والمشتريات واللوجستيات والتركيب. الورق والجداول تُشتّت الحقيقة بين الفرق.</div>
+    <section class="slide" data-title="المشكلة">
+      <p class="eyebrow">تشخيص الواقع التشغيلي</p>
+      <h2>المشكلة التي نعالجها</h2>
+      <p class="problem-intro">
+        تعتمد العمليات اليومية حالياً على مستندات ورقية وجداول متفرقة، غير مرتبطة ببعضها بشكل يسهّل الوصول إلى المعلومة الصحيحة في الوقت المناسب. ينتج عن ذلك بطء في البحث، ضعف في التنسيق بين الأقسام، وصعوبة في تتبّع الحسابات والمعادلات والتقارير.
+      </p>
+      <div class="problem-grid">
+        <div class="problem-card">
+          <h3>تشتّت المستندات الورقية</h3>
+          <p>الاعتماد على الورق الموزَّع بين الإدارات يجعل الوصول إلى المستند المطلوب بطيئاً، والبحث فيه مرهقاً وغير موثوق عند الحاجة العاجلة.</p>
         </div>
-        <div class="row">
-          <div class="label">الهدف</div>
-          <div class="body">سجل مشترك لكل مشروع: نفس العملاء والمنتجات والخامات والاعتمادات وحركات المخزون لكل فريق.</div>
+        <div class="problem-card">
+          <h3>ضعف توافق الأقسام</h3>
+          <p>غياب مصدر واحد للحقيقة يخلق فجوات بين المبيعات والمكتب الفني والإنتاج والمخازن والمشتريات، فتختلف النسخ والقرارات من قسم إلى آخر.</p>
         </div>
-        <div class="row">
-          <div class="label">أسلوب البناء</div>
-          <div class="body">نصمّم دورة الحياة كاملة في نموذج البيانات أولاً، ثم نُطلق المسارات التشغيلية جاهزة، مع جسور مرحلية تسمح باستخدام النظام الآن.</div>
+        <div class="problem-card">
+          <h3>صعوبة تسجيل الحسابات والمعادلات</h3>
+          <p>كثير من العمليات تحتاج إلى كميات وأسعار وتحويلات وحدات وتكاليف؛ تسجيلها يدوياً عرضة للخطأ ويصعب مراجعتها أو إعادة استخدامها لاحقاً.</p>
+        </div>
+        <div class="problem-card">
+          <h3>مستندات غير منظمة وغير مترابطة</h3>
+          <p>العقود وطلبات الشراء والاستلامات والفواتير وغيرها غالباً ما تكون منفصلة، فلا يظهر الرابط التشغيلي بينها عند البحث عن معلومة مرتبطة بمشروع أو صنف.</p>
+        </div>
+        <div class="problem-card accent">
+          <h3>إعداد التقارير يدوياً بجهد كبير</h3>
+          <p>مثال عملي على أثر المشكلة: إعداد التقارير يتم يدوياً من مصادر متعددة، فيستهلك وقتاً طويلاً من الفرق الإدارية، ويزيد احتمال التعارض أو السهو، ويؤخّر اتخاذ القرار المبني على بيانات حديثة.</p>
         </div>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
