@@ -51,13 +51,17 @@
     }
 
     .slide {
+      /* Match landscape A4 (297 × 210 mm) */
+      --a4-w: 297;
+      --a4-h: 210;
       display: none;
-      width: min(1120px, 94vw);
-      height: min(630px, 88vh);
+      width: min(94vw, calc(88vh * var(--a4-w) / var(--a4-h)), 1122px);
+      aspect-ratio: var(--a4-w) / var(--a4-h);
+      height: auto;
       background: var(--white);
       border-radius: 18px;
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
-      padding: 48px 56px;
+      padding: 40px 48px;
       position: relative;
       overflow: hidden;
       flex-direction: column;
@@ -211,16 +215,16 @@
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 16px 16px 14px;
+      padding-inline-start: 52px;
       grid-column: span 3;
       overflow: hidden;
-      transition: none;
     }
 
     .problem-card::before {
       content: attr(data-num);
       position: absolute;
-      top: 12px;
-      left: 14px;
+      top: 14px;
+      inset-inline-start: 14px;
       width: 28px;
       height: 28px;
       border-radius: 9px;
@@ -236,21 +240,18 @@
       grid-column: span 6;
       background: linear-gradient(105deg, var(--haze-50) 0%, #fff 55%, var(--bg) 100%);
       border-color: var(--haze-100);
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 14px;
-      align-items: start;
       padding-top: 18px;
       padding-bottom: 18px;
+      padding-inline-start: 64px;
     }
 
     .problem-card.accent::before {
-      position: static;
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
       background: var(--haze-600);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
+      top: 18px;
     }
 
     .problem-card h3 {
@@ -258,12 +259,6 @@
       color: var(--navy);
       font-weight: 700;
       margin-bottom: 6px;
-      padding-left: 36px;
-    }
-
-    .problem-card.accent h3 {
-      padding-left: 0;
-      margin-bottom: 4px;
     }
 
     .problem-card p {
@@ -271,11 +266,6 @@
       color: var(--muted);
       line-height: 1.75;
       font-weight: 500;
-      padding-left: 36px;
-    }
-
-    .problem-card.accent p {
-      padding-left: 0;
     }
 
     .problem-card.accent .problem-card-body {
@@ -635,21 +625,33 @@
 
     .chrome button:hover { background: var(--haze-600); }
 
-    .chrome .print-btn {
-      width: auto;
-      height: 34px;
-      padding: 0 12px;
+    .chrome .count { min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+    .chrome .hint { opacity: 0.65; margin-inline-start: 6px; font-size: 12px; }
+
+    .print-fab {
+      position: fixed;
+      bottom: 18px;
+      left: 18px;
+      z-index: 30;
+      appearance: none;
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      height: 42px;
+      padding: 0 16px;
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       white-space: nowrap;
     }
 
-    .chrome .count { min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
-    .chrome .hint { opacity: 0.65; margin-inline-start: 6px; font-size: 12px; }
+    .print-fab:hover { background: var(--haze-600); border-color: transparent; }
 
     .legend {
       display: flex;
@@ -679,73 +681,76 @@
     .legend .x { background: #94a3b8; }
 
     @media (max-width: 820px) {
-      .slide { padding: 32px 28px; height: auto; min-height: 70vh; }
+      .slide { padding: 28px 24px; width: min(96vw, calc(78vh * 297 / 210)); }
       .grid-2, .grid-3, .ask-grid { grid-template-columns: 1fr; }
       .row { grid-template-columns: 1fr; }
       .footer-bar { left: 28px; right: 28px; }
       .chrome .hint { display: none; }
+      .print-fab { bottom: 14px; left: 14px; height: 38px; padding: 0 14px; font-size: 12px; }
     }
 
     @page {
       size: A4 landscape;
-      margin: 8mm;
+      margin: 0;
     }
 
     @media print {
+      /*
+        Keep the same visual layout as screen.
+        Print rules only pin page size + hide chrome.
+      */
       html, body {
+        width: 297mm !important;
         height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
         overflow: visible !important;
-        background: white !important;
+        background: #0b1220 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
 
       .progress,
-      .chrome {
+      .chrome,
+      .print-fab {
         display: none !important;
       }
 
       .deck {
         display: block !important;
+        width: 297mm !important;
         height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
         place-items: unset;
+        background: transparent !important;
       }
 
       .slide {
         display: flex !important;
-        width: 100% !important;
-        height: 190mm !important;
-        max-height: 190mm !important;
-        min-height: 0 !important;
+        box-sizing: border-box !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        min-width: 297mm !important;
+        min-height: 210mm !important;
+        max-width: 297mm !important;
+        max-height: 210mm !important;
+        aspect-ratio: unset !important;
         margin: 0 !important;
         border-radius: 0 !important;
         box-shadow: none !important;
+        /* Match on-screen padding proportions */
+        padding: 40px 48px !important;
+        overflow: hidden !important;
         page-break-after: always;
         break-after: page;
-        page-break-inside: avoid;
-        break-inside: avoid;
-        overflow: hidden !important;
-        padding: 14mm 16mm !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
 
       .slide:last-child {
-        page-break-after: auto;
-        break-after: auto;
-      }
-
-      .slide::before {
-        width: 5px !important;
-      }
-
-      .footer-bar {
-        left: 16mm !important;
-        right: 16mm !important;
-        bottom: 8mm !important;
-      }
-
-      .page-num {
-        bottom: 8mm !important;
-        color: #64748b !important;
+        page-break-after: avoid;
+        break-after: avoid;
       }
 
       .slide.cover {
@@ -754,18 +759,9 @@
           linear-gradient(160deg, #031a45 0%, #052565 45%, #0a3a7a 100%) !important;
       }
 
-      .cover-logo-badge {
-        width: 48mm !important;
-        height: 48mm !important;
-        padding: 4mm !important;
+      .slide.cover .page-num {
+        color: rgba(255, 255, 255, 0.55) !important;
       }
-
-      .cover-inner { gap: 10px !important; }
-
-      .problem-grid { gap: 6px !important; }
-      .problem-card { padding: 10px 12px !important; }
-      .problem-card p { font-size: 0.78rem !important; }
-      .problem-intro { margin-bottom: 10px !important; padding: 8px 12px !important; }
     }
   </style>
 </head>
@@ -1117,12 +1113,12 @@
 
   </div>
 
+  <button type="button" class="print-fab" id="printBtn" title="طباعة A4 أفقي">طباعة</button>
+
   <div class="chrome" aria-label="أدوات العرض">
-    <button type="button" id="nextBtn" title="التالي">‹</button>
+    <button type="button" id="prevBtn" title="السابق">‹</button>
     <div class="count"><span id="current">1</span> / <span id="total">13</span></div>
-    <button type="button" id="prevBtn" title="السابق">›</button>
-    <button type="button" class="print-btn" id="printBtn" title="طباعة A4 أفقي">طباعة</button>
-    <span class="hint">← → · مسافة · F · طباعة</span>
+    <button type="button" id="nextBtn" title="التالي">›</button>
   </div>
 
   <script>
