@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MOG ERP — Status & Next Steps</title>
+  <title>نظام موغ ERP — الوضع الحالي والخطوات القادمة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --navy: #052565;
@@ -23,13 +26,14 @@
       --line: #cbd5e1;
       --white: #ffffff;
       --bg: #f4f6f9;
+      --font: "Alexandria", "Segoe UI", Tahoma, sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       height: 100%;
-      font-family: "Segoe UI", "IBM Plex Sans", system-ui, sans-serif;
+      font-family: var(--font);
       background: #0b1220;
       color: var(--ink);
       overflow: hidden;
@@ -53,6 +57,7 @@
       position: relative;
       overflow: hidden;
       flex-direction: column;
+      text-align: right;
     }
 
     .slide.active { display: flex; }
@@ -60,16 +65,16 @@
     .slide::before {
       content: "";
       position: absolute;
-      inset: 0 auto 0 0;
+      inset: 0 0 0 auto;
       width: 8px;
       background: linear-gradient(180deg, var(--navy), var(--haze-600));
     }
 
     .slide.cover {
       background:
-        radial-gradient(ellipse 80% 60% at 100% 0%, rgba(36, 120, 181, 0.18), transparent 55%),
-        radial-gradient(ellipse 70% 50% at 0% 100%, rgba(5, 37, 101, 0.12), transparent 50%),
-        linear-gradient(145deg, #f8fbfe 0%, #eef3f9 55%, #e6edf6 100%);
+        radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.18), transparent 55%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(5, 37, 101, 0.12), transparent 50%),
+        linear-gradient(215deg, #f8fbfe 0%, #eef3f9 55%, #e6edf6 100%);
       justify-content: center;
     }
 
@@ -78,8 +83,7 @@
     .eyebrow {
       font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      letter-spacing: 0.04em;
       color: var(--haze-600);
       margin-bottom: 12px;
     }
@@ -87,42 +91,34 @@
     .brand {
       font-size: 14px;
       font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--navy);
       margin-bottom: 20px;
     }
 
     h1 {
-      font-size: clamp(2rem, 3.4vw, 2.75rem);
-      line-height: 1.15;
+      font-size: clamp(1.85rem, 3.2vw, 2.55rem);
+      line-height: 1.25;
       color: var(--navy);
-      font-weight: 750;
-      max-width: 18ch;
+      font-weight: 800;
+      max-width: 22ch;
       margin-bottom: 18px;
     }
 
     h2 {
-      font-size: clamp(1.55rem, 2.4vw, 2rem);
+      font-size: clamp(1.45rem, 2.3vw, 1.9rem);
       color: var(--navy);
       font-weight: 700;
-      margin-bottom: 8px;
-      line-height: 1.2;
-    }
-
-    .ar {
-      font-family: "Segoe UI", "Tahoma", sans-serif;
-      direction: rtl;
-      color: var(--muted);
-      font-size: 1.05rem;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
+      line-height: 1.3;
     }
 
     .lede {
-      font-size: 1.15rem;
-      line-height: 1.55;
+      font-size: 1.1rem;
+      line-height: 1.7;
       color: var(--muted);
-      max-width: 52ch;
+      max-width: 48ch;
+      font-weight: 500;
     }
 
     .meta {
@@ -134,7 +130,7 @@
       font-size: 0.95rem;
     }
 
-    .meta strong { color: var(--navy); font-weight: 650; }
+    .meta strong { color: var(--navy); font-weight: 700; display: block; margin-bottom: 4px; }
 
     .grid-2 {
       display: grid;
@@ -171,7 +167,8 @@
     .card p, .card li {
       font-size: 0.92rem;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.55;
+      font-weight: 500;
     }
 
     .card ul { padding-inline-start: 1.1rem; }
@@ -187,7 +184,7 @@
 
     .row {
       display: grid;
-      grid-template-columns: 160px 1fr;
+      grid-template-columns: 150px 1fr;
       gap: 16px;
       align-items: start;
       padding: 14px 16px;
@@ -205,7 +202,8 @@
     .row .body {
       color: var(--muted);
       font-size: 0.95rem;
-      line-height: 1.45;
+      line-height: 1.55;
+      font-weight: 500;
     }
 
     .pill {
@@ -216,7 +214,6 @@
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.02em;
     }
 
     .pill.green { background: var(--teal-50); color: var(--teal-600); }
@@ -234,7 +231,7 @@
     .flow .step {
       padding: 10px 12px;
       border-radius: 10px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 650;
       border: 1px solid transparent;
     }
@@ -246,7 +243,7 @@
 
     .phase {
       display: grid;
-      grid-template-columns: 88px 1fr;
+      grid-template-columns: 72px 1fr;
       gap: 14px;
       padding: 16px 18px;
       border-radius: 14px;
@@ -271,7 +268,8 @@
     .phase p {
       font-size: 0.9rem;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.55;
+      font-weight: 500;
     }
 
     .bullets {
@@ -282,20 +280,21 @@
 
     .bullets li {
       list-style: none;
-      padding: 12px 14px 12px 40px;
+      padding: 12px 40px 12px 14px;
       position: relative;
       background: var(--bg);
       border-radius: 12px;
       border: 1px solid var(--line);
       color: var(--muted);
       font-size: 0.98rem;
-      line-height: 1.4;
+      line-height: 1.55;
+      font-weight: 500;
     }
 
     .bullets li::before {
       content: "";
       position: absolute;
-      left: 16px;
+      right: 16px;
       top: 18px;
       width: 10px;
       height: 10px;
@@ -304,14 +303,15 @@
     }
 
     .quote {
-      margin-top: 18px;
+      margin-top: 4px;
       padding: 18px 20px;
-      border-left: 4px solid var(--haze-600);
+      border-right: 4px solid var(--haze-600);
+      border-left: 0;
       background: var(--haze-50);
-      border-radius: 0 12px 12px 0;
+      border-radius: 12px 0 0 12px;
       color: var(--navy);
-      font-size: 1.1rem;
-      line-height: 1.5;
+      font-size: 1.05rem;
+      line-height: 1.7;
       font-weight: 600;
     }
 
@@ -348,8 +348,8 @@
       font-size: 1rem;
     }
 
-    .demo-list strong { color: var(--navy); display: block; margin-bottom: 2px; }
-    .demo-list span { color: var(--muted); font-size: 0.92rem; }
+    .demo-list strong { color: var(--navy); display: block; margin-bottom: 2px; font-weight: 700; }
+    .demo-list span { color: var(--muted); font-size: 0.92rem; font-weight: 500; line-height: 1.5; }
 
     .ask-grid {
       display: grid;
@@ -372,6 +372,7 @@
       align-items: center;
       font-size: 12px;
       color: #94a3b8;
+      font-weight: 500;
     }
 
     .slide.cover .footer-bar { display: none; }
@@ -384,6 +385,7 @@
       height: 3px;
       background: rgba(255, 255, 255, 0.08);
       z-index: 20;
+      direction: rtl;
     }
 
     .progress > span {
@@ -391,6 +393,8 @@
       height: 100%;
       background: linear-gradient(90deg, var(--haze-600), #54b6e8);
       width: 0%;
+      margin-right: 0;
+      margin-left: auto;
       transition: width 0.25s ease;
     }
 
@@ -410,6 +414,7 @@
       padding: 8px 12px;
       color: #e2e8f0;
       font-size: 13px;
+      font-family: var(--font);
     }
 
     .chrome button {
@@ -423,9 +428,24 @@
       cursor: pointer;
       font-size: 16px;
       line-height: 1;
+      font-family: inherit;
     }
 
     .chrome button:hover { background: var(--haze-600); }
+
+    .chrome .print-btn {
+      width: auto;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
     .chrome .count { min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
     .chrome .hint { opacity: 0.65; margin-inline-start: 6px; font-size: 12px; }
 
@@ -433,7 +453,7 @@
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
-      margin: 8px 0 4px;
+      margin: 0 0 8px;
     }
 
     .legend span {
@@ -442,6 +462,7 @@
       gap: 8px;
       font-size: 0.85rem;
       color: var(--muted);
+      font-weight: 500;
     }
 
     .legend i {
@@ -462,6 +483,70 @@
       .footer-bar { left: 28px; right: 28px; }
       .chrome .hint { display: none; }
     }
+
+    @page {
+      size: A4 landscape;
+      margin: 8mm;
+    }
+
+    @media print {
+      html, body {
+        height: auto !important;
+        overflow: visible !important;
+        background: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .progress,
+      .chrome {
+        display: none !important;
+      }
+
+      .deck {
+        display: block !important;
+        height: auto !important;
+        place-items: unset;
+      }
+
+      .slide {
+        display: flex !important;
+        width: 100% !important;
+        height: 190mm !important;
+        max-height: 190mm !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        break-after: page;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        overflow: hidden !important;
+        padding: 14mm 16mm !important;
+      }
+
+      .slide:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      .slide::before {
+        width: 5px !important;
+      }
+
+      .footer-bar {
+        left: 16mm !important;
+        right: 16mm !important;
+        bottom: 8mm !important;
+      }
+
+      .slide.cover {
+        background:
+          radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.18), transparent 55%),
+          linear-gradient(215deg, #f8fbfe 0%, #eef3f9 55%, #e6edf6 100%) !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -470,347 +555,335 @@
   <div class="deck" id="deck">
 
     <!-- 1 -->
-    <section class="slide cover active" data-title="Title">
+    <section class="slide cover active" data-title="العنوان">
       <div class="brand">MOG ERP</div>
-      <h1>Status &amp; Next Steps</h1>
-      <p class="ar">الوضع الحالي والخطوات القادمة</p>
+      <h1>الوضع الحالي والخطوات القادمة</h1>
       <p class="lede">
-        One platform for commercial kitchen projects: from first contact through production, procurement, delivery, and after-sales.
+        منصة واحدة لمشاريع معدات المطابخ التجارية: من أول تواصل مع العميل حتى الإنتاج والمشتريات والتسليم وما بعد البيع.
       </p>
       <div class="meta">
-        <div><strong>Focus</strong><br />What works today</div>
-        <div><strong>Gap</strong><br />What is designed but not shipped</div>
-        <div><strong>Plan</strong><br />Phased next releases</div>
+        <div><strong>التركيز</strong>ما يعمل اليوم</div>
+        <div><strong>الفجوة</strong>ما صُمّم ولم يُطلَق بعد</div>
+        <div><strong>الخطة</strong>إصدارات على مراحل</div>
       </div>
     </section>
 
     <!-- 2 -->
-    <section class="slide" data-title="Why">
-      <p class="eyebrow">Context</p>
-      <h2>Why this system exists</h2>
-      <p class="ar">لماذا نبني هذا النظام</p>
+    <section class="slide" data-title="لماذا">
+      <p class="eyebrow">السياق</p>
+      <h2>لماذا نبني هذا النظام؟</h2>
       <div class="stack">
         <div class="row">
-          <div class="label">The problem</div>
-          <div class="body">Kitchen equipment projects span sales, technical office, production, warehouse, purchasing, logistics, and installation. Paper and spreadsheets fragment the truth.</div>
+          <div class="label">المشكلة</div>
+          <div class="body">مشاريع معدات المطابخ تمر بالمبيعات والمكتب الفني والإنتاج والمخازن والمشتريات واللوجستيات والتركيب. الورق والجداول تُشتّت الحقيقة بين الفرق.</div>
         </div>
         <div class="row">
-          <div class="label">The goal</div>
-          <div class="body">One shared record per project: same customers, products, materials, approvals, and stock movements for every team.</div>
+          <div class="label">الهدف</div>
+          <div class="body">سجل مشترك لكل مشروع: نفس العملاء والمنتجات والخامات والاعتمادات وحركات المخزون لكل فريق.</div>
         </div>
         <div class="row">
-          <div class="label">How we build</div>
-          <div class="body">Full lifecycle designed in the data model first. Workflows ship vertically when they are operationally ready, with legacy bridges so the company can start using the system now.</div>
+          <div class="label">أسلوب البناء</div>
+          <div class="body">نصمّم دورة الحياة كاملة في نموذج البيانات أولاً، ثم نُطلق المسارات التشغيلية جاهزة، مع جسور مرحلية تسمح باستخدام النظام الآن.</div>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 3 -->
-    <section class="slide" data-title="Narrative">
-      <p class="eyebrow">Headline</p>
-      <h2>Where we are</h2>
-      <p class="ar">أين نحن الآن</p>
+    <section class="slide" data-title="أين نحن">
+      <p class="eyebrow">الخلاصة</p>
+      <h2>أين نحن الآن</h2>
       <div class="quote">
-        We modeled the full project lifecycle. Today teams can run materials purchasing, masters, engineering, legacy contracts, and reports. Next releases close stock truth, then sales, production, fulfillment, and after-sales.
+        صمّمنا دورة حياة المشروع كاملة. اليوم يمكن تشغيل شراء الخامات والبيانات الأساسية والهندسة ومراجعات العقود المرحلية والتقارير. الإصدارات القادمة تُغلق حقيقة المخزون، ثم المبيعات والإنتاج، ثم التنفيذ الميداني وما بعد البيع.
       </div>
       <div class="grid-3" style="margin-top: 22px; flex: 0;">
         <div class="card">
-          <h3>Data model</h3>
-          <p>Full lifecycle covered in the database: inquiry through maintenance.</p>
+          <h3>نموذج البيانات</h3>
+          <p>دورة الحياة كاملة في قاعدة البيانات: من الاستفسار حتى الصيانة.</p>
         </div>
         <div class="card">
-          <h3>Usable software</h3>
-          <p>Org, masters, engineering, material buy cycle, warehouse docs, reports, legacy contracts.</p>
+          <h3>برمجيات جاهزة للاستخدام</h3>
+          <p>المؤسسة، البيانات الأساسية، الهندسة، مسار شراء الخامات، مستندات المخزن، التقارير، العقود المرحلية.</p>
         </div>
         <div class="card">
-          <h3>Still ahead</h3>
-          <p>Native sales pipeline, production plans, stock posting, field ops, after-sales workflows.</p>
+          <h3>ما زال أمامنا</h3>
+          <p>مسار المبيعات الأصلي، خطط الإنتاج، ترحيل المخزون، العمليات الميدانية، وما بعد البيع.</p>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 4 -->
-    <section class="slide" data-title="Platform">
-      <p class="eyebrow">Foundation</p>
-      <h2>Platform strengths</h2>
-      <p class="ar">أساس النظام</p>
+    <section class="slide" data-title="الأساس">
+      <p class="eyebrow">الأساس</p>
+      <h2>نقاط قوة المنصة</h2>
       <div class="grid-2">
         <div class="card">
-          <h3>Bilingual product</h3>
-          <p>Arabic-first with English. Locale-aware UI across screens and permissions.</p>
+          <h3>منتج ثنائي اللغة</h3>
+          <p>عربي أولاً مع الإنجليزية. واجهة وصلاحيات واعية باللغة في كل الشاشات.</p>
         </div>
         <div class="card">
-          <h3>Roles &amp; permissions</h3>
-          <p>Fine-grained RBAC. Users see only what their role allows. Admin override for IT.</p>
+          <h3>الأدوار والصلاحيات</h3>
+          <p>صلاحيات دقيقة. يرى المستخدم ما يسمح به دوره فقط. تجاوز إداري لفريق تقنية المعلومات.</p>
         </div>
         <div class="card">
-          <h3>Audit trail</h3>
-          <p>Database-level change history with a searchable audit log in the app.</p>
+          <h3>سجل التدقيق</h3>
+          <p>تاريخ تغييرات على مستوى قاعدة البيانات مع سجل قابل للبحث داخل التطبيق.</p>
         </div>
         <div class="card">
-          <h3>Approvals pattern</h3>
-          <p>Multi-party gates already live on material purchase requisitions (planning, inventory, manager).</p>
+          <h3>نمط الاعتمادات</h3>
+          <p>بوابات متعددة الأطراف تعمل اليوم على طلبات شراء الخامات (التخطيط، مراقبة المخزون، المدير).</p>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 5 -->
-    <section class="slide" data-title="Delivered 1">
-      <p class="eyebrow">Delivered</p>
-      <h2>What works today (1/2)</h2>
-      <p class="ar">ما يعمل اليوم</p>
+    <section class="slide" data-title="ما يعمل ١">
+      <p class="eyebrow">ما تم تسليمه</p>
+      <h2>ما يعمل اليوم (١ / ٢)</h2>
       <div class="stack">
         <div class="row">
-          <div class="label">Organization</div>
-          <div class="body">Users, roles, departments, production department managers, profile &amp; password, audit logs.</div>
+          <div class="label">المؤسسة</div>
+          <div class="body">المستخدمون، الأدوار، الأقسام، مسؤولو أقسام الإنتاج، الملف الشخصي وكلمة المرور، سجلات التدقيق.</div>
         </div>
         <div class="row">
-          <div class="label">Masters</div>
-          <div class="body">Customers, suppliers, materials (incl. manufactured material BOMs), product catalog with dimensions, routes, and standard BOMs. Unit conversion tool.</div>
+          <div class="label">البيانات الأساسية</div>
+          <div class="body">العملاء، الموردون، الخامات (بما فيها قوائم تصنيع المواد المصنّعة)، كتالوج المنتجات مع الأبعاد ومسارات الإنتاج وقوائم المواد القياسية، وأداة تحويل الوحدات.</div>
         </div>
         <div class="row">
-          <div class="label">Contracts bridge</div>
-          <div class="body">Contract review list &amp; detail. Legacy contract create for paper CR / work-order numbers, units, and serials.</div>
+          <div class="label">جسر العقود</div>
+          <div class="body">قائمة ومراجعة تفاصيل مراجعات العقود. إنشاء عقد مرحلي بأرقام الورق وأوامر التشغيل والوحدات والأرقام التسلسلية.</div>
         </div>
         <div class="row">
-          <div class="label">Reports</div>
-          <div class="body">Inventory summaries and purchasing analytics: spend, price history, category/supplier stats, invoice mismatches, requisition follow-up.</div>
+          <div class="label">التقارير</div>
+          <div class="body">ملخصات المخزون وتحليلات المشتريات: الإنفاق، تاريخ الأسعار، إحصاءات الفئات والموردين، فروقات الفواتير، ومتابعة طلبات الشراء.</div>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 6 -->
-    <section class="slide" data-title="Delivered 2">
-      <p class="eyebrow">Delivered</p>
-      <h2>Material procurement vertical</h2>
-      <p class="ar">مسار شراء الخامات</p>
-      <p class="lede" style="margin-bottom: 16px;">Strongest operational path in the product today.</p>
+    <section class="slide" data-title="المشتريات">
+      <p class="eyebrow">ما تم تسليمه</p>
+      <h2>مسار شراء الخامات</h2>
+      <p class="lede" style="margin-bottom: 16px;">أقوى مسار تشغيلي جاهز في المنتج اليوم.</p>
       <div class="flow">
-        <div class="step green">Requisition</div><span class="arrow">→</span>
-        <div class="step green">Approvals</div><span class="arrow">→</span>
-        <div class="step green">RFQ</div><span class="arrow">→</span>
-        <div class="step green">Purchase order</div><span class="arrow">→</span>
-        <div class="step green">Receipt / QC</div><span class="arrow">→</span>
-        <div class="step green">Supplier invoice</div>
+        <div class="step green">طلب شراء</div><span class="arrow">←</span>
+        <div class="step green">الاعتمادات</div><span class="arrow">←</span>
+        <div class="step green">طلب عرض سعر</div><span class="arrow">←</span>
+        <div class="step green">أمر توريد</div><span class="arrow">←</span>
+        <div class="step green">استلام / فحص</div><span class="arrow">←</span>
+        <div class="step green">فاتورة المورد</div>
       </div>
       <div class="grid-2" style="margin-top: 20px;">
         <div class="card">
-          <h3>Included</h3>
+          <h3>يشمل</h3>
           <ul>
-            <li>Parallel approval gates with reasons</li>
-            <li>Partial fulfillment across MPOs</li>
-            <li>Payment terms &amp; delivery window</li>
-            <li>Accept / reject on receipt</li>
-            <li>ETA PDF parse &amp; attach for invoices</li>
+            <li>بوابات اعتماد متوازية مع الأسباب</li>
+            <li>تغطية جزئية عبر أكثر من أمر توريد</li>
+            <li>شروط الدفع ونافذة التسليم</li>
+            <li>قبول / رفض عند الاستلام</li>
+            <li>قراءة وإرفاق PDF هيئة الضرائب للفواتير</li>
           </ul>
         </div>
         <div class="card">
-          <h3>Warehouse docs</h3>
+          <h3>مستندات المخزن</h3>
           <ul>
-            <li>Inventory transactions (receipt documents)</li>
-            <li>Legacy issue permits as an operational bridge</li>
-            <li>Stock quantity sync from receipts deferred until issue posting lands</li>
+            <li>حركات المخزون (مستندات استلام)</li>
+            <li>أذونات الصرف المرحلية كجسر تشغيلي</li>
+            <li>مزامنة كمية وسعر الوحدة من الاستلام مؤجلة حتى اكتمال ترحيل الصرف</li>
           </ul>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 7 -->
-    <section class="slide" data-title="Gap map">
-      <p class="eyebrow">Reality check</p>
-      <h2>End-to-end gap map</h2>
-      <p class="ar">خريطة الفجوات على مسار المشروع</p>
+    <section class="slide" data-title="خريطة الفجوات">
+      <p class="eyebrow">قراءة الواقع</p>
+      <h2>خريطة الفجوات على مسار المشروع</h2>
       <div class="legend">
-        <span><i class="g"></i> Usable now</span>
-        <span><i class="a"></i> Partial</span>
-        <span><i class="x"></i> Designed, not shipped</span>
+        <span><i class="g"></i> جاهز للاستخدام</span>
+        <span><i class="a"></i> جزئي</span>
+        <span><i class="x"></i> مصمَّم ولم يُطلَق</span>
       </div>
       <div class="flow" style="margin-top: 18px;">
-        <div class="step grey">Sales pipeline</div><span class="arrow">→</span>
-        <div class="step amber">Contract</div><span class="arrow">→</span>
-        <div class="step green">Engineering</div><span class="arrow">→</span>
-        <div class="step grey">Production</div><span class="arrow">→</span>
-        <div class="step green">Buy materials</div><span class="arrow">→</span>
-        <div class="step amber">Stock / issues</div><span class="arrow">→</span>
-        <div class="step grey">Delivery / install</div><span class="arrow">→</span>
-        <div class="step grey">Reception</div><span class="arrow">→</span>
-        <div class="step grey">Maintenance</div>
+        <div class="step grey">مسار المبيعات</div><span class="arrow">←</span>
+        <div class="step amber">العقد</div><span class="arrow">←</span>
+        <div class="step green">الهندسة</div><span class="arrow">←</span>
+        <div class="step grey">الإنتاج</div><span class="arrow">←</span>
+        <div class="step green">شراء الخامات</div><span class="arrow">←</span>
+        <div class="step amber">المخزون / الصرف</div><span class="arrow">←</span>
+        <div class="step grey">التسليم / التركيب</div><span class="arrow">←</span>
+        <div class="step grey">التسليم للعميل</div><span class="arrow">←</span>
+        <div class="step grey">الصيانة</div>
       </div>
       <div class="grid-3" style="margin-top: 22px; flex: 0;">
         <div class="card">
-          <span class="pill green">Green</span>
-          <h3 style="margin-top:10px;">Live for teams</h3>
-          <p>Masters, BOMs/routes, material buy cycle, reports, org, legacy contracts.</p>
+          <span class="pill green">أخضر</span>
+          <h3 style="margin-top:10px;">متاح للفرق</h3>
+          <p>البيانات الأساسية، قوائم المواد والمسارات، مسار شراء الخامات، التقارير، المؤسسة، العقود المرحلية.</p>
         </div>
         <div class="card">
-          <span class="pill amber">Amber</span>
-          <h3 style="margin-top:10px;">In progress / bridge</h3>
-          <p>Contracts without native inquiry→offer. Inventory docs without full stock posting.</p>
+          <span class="pill amber">كهرماني</span>
+          <h3 style="margin-top:10px;">جاري / جسر</h3>
+          <p>عقود بلا مسار استفسار ← عرض أصلي. مستندات مخزون بلا ترحيل كامل للكميات.</p>
         </div>
         <div class="card">
-          <span class="pill grey">Grey</span>
-          <h3 style="margin-top:10px;">Reserved in nav</h3>
-          <p>Inquiries, previews, offers, production plans, trips, deliveries, installations, maintenance.</p>
+          <span class="pill grey">رمادي</span>
+          <h3 style="margin-top:10px;">محجوز في القائمة</h3>
+          <p>الاستفسارات، المعاينات، العروض، خطط الإنتاج، المأموريات، النقل، التركيبات، الصيانة.</p>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 8 -->
-    <section class="slide" data-title="Bridge">
-      <p class="eyebrow">Go-live strategy</p>
-      <h2>Legacy bridges (intentional)</h2>
-      <p class="ar">الجسور المرحلية</p>
+    <section class="slide" data-title="الجسور">
+      <p class="eyebrow">استراتيجية الإطلاق</p>
+      <h2>الجسور المرحلية (مقصودة)</h2>
       <ul class="bullets">
-        <li><strong style="color:var(--navy)">Legacy contract reviews</strong> — enter paper CR / WO numbers, units, and serials without waiting for the full sales CRM.</li>
-        <li><strong style="color:var(--navy)">Legacy issue permits</strong> — warehouse can record issues while native inventory issue posting is finished.</li>
-        <li><strong style="color:var(--navy)">Data seeding</strong> — historical materials, products, BOMs, customers, and receipts imported so the system starts with real company data.</li>
+        <li><strong style="color:var(--navy)">مراجعات العقود المرحلية:</strong> إدخال أرقام الورق وأوامر التشغيل والوحدات والأرقام التسلسلية دون انتظار نظام مبيعات كامل.</li>
+        <li><strong style="color:var(--navy)">أذونات الصرف المرحلية:</strong> يمكن للمخزن تسجيل الصرف بينما يُستكمل ترحيل الصرف الأصلي في النظام.</li>
+        <li><strong style="color:var(--navy)">تهيئة البيانات:</strong> استيراد تاريخي للخامات والمنتجات وقوائم المواد والعملاء والاستلامات ليبدأ النظام ببيانات حقيقية.</li>
       </ul>
-      <p class="lede" style="margin-top:18px;">These are coexistence tools, not permanent shortcuts. Each bridge retires when the native workflow ships.</p>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <p class="lede" style="margin-top:18px;">أدوات تعايش، وليست اختصارات دائمة. كل جسر يُستغنى عنه عند إطلاق المسار الأصلي.</p>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 9 -->
-    <section class="slide" data-title="Demo">
-      <p class="eyebrow">Suggested demo</p>
-      <h2>Show value in four flows</h2>
-      <p class="ar">عرض عملي مختصر</p>
+    <section class="slide" data-title="العرض">
+      <p class="eyebrow">عرض مقترح</p>
+      <h2>إظهار القيمة في أربعة مسارات</h2>
       <ol class="demo-list">
         <li>
           <div>
-            <strong>Material purchase path</strong>
-            <span>Requisition → approvals → MPO → receipt → invoice (incl. ETA PDF if useful).</span>
+            <strong>مسار شراء الخامات</strong>
+            <span>طلب شراء ← اعتمادات ← أمر توريد ← استلام ← فاتورة (مع PDF هيئة الضرائب إن لزم).</span>
           </div>
         </li>
         <li>
           <div>
-            <strong>Engineering</strong>
-            <span>Product with dimensions, production route, and BOM.</span>
+            <strong>الهندسة</strong>
+            <span>منتج بأبعاد ومسار إنتاج وقائمة مواد.</span>
           </div>
         </li>
         <li>
           <div>
-            <strong>Management report</strong>
-            <span>Purchasing spend, price history, or invoice total mismatches.</span>
+            <strong>تقرير إداري</strong>
+            <span>إنفاق المشتريات، تاريخ الأسعار، أو فروقات إجمالي الفواتير.</span>
           </div>
         </li>
         <li>
           <div>
-            <strong>Legacy contract</strong>
-            <span>Show how existing paper orders enter the system today.</span>
+            <strong>عقد مرحلي</strong>
+            <span>كيف تدخل أوامر الورق الحالية إلى النظام اليوم.</span>
           </div>
         </li>
       </ol>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 10 -->
-    <section class="slide" data-title="Roadmap">
-      <p class="eyebrow">Roadmap</p>
-      <h2>Next steps in three phases</h2>
-      <p class="ar">الخطوات القادمة على ثلاث مراحل</p>
+    <section class="slide" data-title="الخارطة">
+      <p class="eyebrow">خارطة الطريق</p>
+      <h2>الخطوات القادمة على ثلاث مراحل</h2>
       <div class="phase">
-        <div class="num">A</div>
+        <div class="num">أ</div>
         <div>
-          <h3>Stock truth &amp; warehouse loop</h3>
-          <p>Inventory issues (and returns). Enable receipt quantity / unit-price sync. Retire reliance on legacy issue permits over time.</p>
+          <h3>حقيقة المخزون ودورة المخزن</h3>
+          <p>صرف المخزون (والمرتجعات). تفعيل مزامنة الكمية وسعر الوحدة من الاستلام. تقليل الاعتماد على أذونات الصرف المرحلية تدريجياً.</p>
         </div>
       </div>
       <div class="phase">
-        <div class="num">B</div>
+        <div class="num">ب</div>
         <div>
-          <h3>Sales + production execution</h3>
-          <p>Native inquiry → preview → offer → contract. Production plans and per-unit / department progress (routes already exist).</p>
+          <h3>المبيعات وتنفيذ الإنتاج</h3>
+          <p>مسار أصلي: استفسار ← معاينة ← عرض ← عقد. خطط الإنتاج وتقدّم الوحدة / قسم الإنتاج (المسارات موجودة أصلاً على المنتجات).</p>
         </div>
       </div>
       <div class="phase">
-        <div class="num">C</div>
+        <div class="num">ج</div>
         <div>
-          <h3>Field ops &amp; after-sales</h3>
-          <p>Deliveries, installations, trips, customer receptions (warranty). Then service agreements and maintenance orders. Outsourcing &amp; imported product purchasing as procurement completeness.</p>
+          <h3>العمل الميداني وما بعد البيع</h3>
+          <p>النقل والتشوين، التركيبات، المأموريات، التسليم للعميل (بدء الضمان). ثم عقود الصيانة وأوامر الصيانة. وإكمال المشتريات: التصنيع الخارجي وشراء المنتجات المستوردة.</p>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 11 -->
-    <section class="slide" data-title="Phase detail">
-      <p class="eyebrow">Phase A detail</p>
-      <h2>Why stock truth comes first</h2>
-      <p class="ar">لماذا نبدأ بحقيقة المخزون</p>
+    <section class="slide" data-title="المرحلة أ">
+      <p class="eyebrow">تفصيل المرحلة أ</p>
+      <h2>لماذا نبدأ بحقيقة المخزون؟</h2>
       <div class="grid-2">
         <div class="card">
-          <h3>Without it</h3>
+          <h3>بدونها</h3>
           <ul>
-            <li>Receipt documents exist, but material on-hand can stay out of sync</li>
-            <li>Production and maintenance consumption is hard to trust</li>
-            <li>Reports and buying decisions rest on incomplete stock</li>
+            <li>مستندات الاستلام موجودة، لكن الرصيد الفعلي قد يبقى غير متزامن</li>
+            <li>استهلاك الإنتاج والصيانة يصعب الوثوق به</li>
+            <li>التقارير وقرارات الشراء تعتمد على مخزون ناقص</li>
           </ul>
         </div>
         <div class="card">
-          <h3>With it</h3>
+          <h3>معها</h3>
           <ul>
-            <li>Requisition demand reflects real shortages</li>
-            <li>BOM issues link to real jobs</li>
-            <li>Legacy issue permits can wind down</li>
-            <li>Procurement vertical becomes a closed loop</li>
+            <li>طلبات الشراء تعكس النقص الحقيقي</li>
+            <li>صرف قوائم المواد يرتبط بأعمال حقيقية</li>
+            <li>يمكن تقليص أذونات الصرف المرحلية</li>
+            <li>مسار المشتريات يصبح حلقة مغلقة</li>
           </ul>
         </div>
       </div>
-      <p class="lede" style="margin-top:18px;">Phases B and C then attach the customer project path and field work onto a stock foundation that is already trustworthy.</p>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <p class="lede" style="margin-top:18px;">المرحلتان ب وج تربطان بعد ذلك مسار مشروع العميل والعمل الميداني على أساس مخزون يمكن الوثوق به.</p>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 12 -->
-    <section class="slide" data-title="Ask">
-      <p class="eyebrow">Decisions needed</p>
-      <h2>What we need from this room</h2>
-      <p class="ar">ما نحتاجه من هذا الاجتماع</p>
+    <section class="slide" data-title="القرارات">
+      <p class="eyebrow">قرارات مطلوبة</p>
+      <h2>ما نحتاجه من هذا الاجتماع</h2>
       <div class="ask-grid">
         <div class="card">
-          <h3>1. Priority</h3>
-          <p>Confirm Phase A (stock) before B/C, or adjust if a business deadline forces sales/production earlier.</p>
+          <h3>١. الأولوية</h3>
+          <p>تأكيد المرحلة أ (المخزون) قبل ب/ج، أو التعديل إذا فرض موعد أعمال تقديم المبيعات/الإنتاج.</p>
         </div>
         <div class="card">
-          <h3>2. Pilot owners</h3>
-          <p>Name department owners for purchasing, warehouse, and technical office for feedback and training.</p>
+          <h3>٢. مسؤولو التجربة</h3>
+          <p>تسمية مسؤولين من المشتريات والمخازن والمكتب الفني للتغذية الراجعة والتدريب.</p>
         </div>
         <div class="card">
-          <h3>3. Data readiness</h3>
-          <p>Agree cleanup rules for materials, suppliers, and open paper contracts still entering as legacy.</p>
+          <h3>٣. جاهزية البيانات</h3>
+          <p>الاتفاق على قواعد تنظيف الخامات والموردين والعقود الورقية التي ما زالت تُدخل مرحلياً.</p>
         </div>
       </div>
-      <div class="footer-bar"><span>MOG ERP</span><span>Status review</span></div>
+      <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
 
     <!-- 13 -->
-    <section class="slide cover" data-title="Close">
+    <section class="slide cover" data-title="الختام">
       <div class="brand">MOG ERP</div>
-      <h1>Same source of truth. Built in phases.</h1>
-      <p class="ar">مصدر واحد للحقيقة، على مراحل</p>
+      <h1>مصدر واحد للحقيقة، على مراحل</h1>
       <p class="lede">
-        Today: procurement, engineering, masters, reports, and legacy bridges.<br />
-        Next: stock posting, then sales &amp; production, then field &amp; after-sales.
+        اليوم: المشتريات، الهندسة، البيانات الأساسية، التقارير، والجسور المرحلية.<br />
+        التالي: ترحيل المخزون، ثم المبيعات والإنتاج، ثم الميدان وما بعد البيع.
       </p>
       <div class="meta">
-        <div><strong>Open the deck</strong><br />Browser → F11 fullscreen</div>
-        <div><strong>Navigate</strong><br />← → or Space</div>
-        <div><strong>Questions</strong><br />Discussion</div>
+        <div><strong>العرض</strong>المتصفح ← ملء الشاشة</div>
+        <div><strong>التنقل</strong>← → أو المسافة</div>
+        <div><strong>الأسئلة</strong>نقاش مفتوح</div>
       </div>
     </section>
 
   </div>
 
-  <div class="chrome" aria-label="Presentation controls">
-    <button type="button" id="prevBtn" title="Previous (←)">‹</button>
+  <div class="chrome" aria-label="أدوات العرض">
+    <button type="button" id="nextBtn" title="التالي">‹</button>
     <div class="count"><span id="current">1</span> / <span id="total">13</span></div>
-    <button type="button" id="nextBtn" title="Next (→)">›</button>
-    <span class="hint">← → · Space · F for fullscreen</span>
+    <button type="button" id="prevBtn" title="السابق">›</button>
+    <button type="button" class="print-btn" id="printBtn" title="طباعة A4 أفقي">طباعة</button>
+    <span class="hint">← → · مسافة · F · طباعة</span>
   </div>
 
   <script>
@@ -828,7 +901,7 @@
       slides.forEach((s, n) => s.classList.toggle("active", n === index));
       currentEl.textContent = String(index + 1);
       progressBar.style.width = ((index + 1) / total) * 100 + "%";
-      document.title = "MOG ERP — " + (slides[index].dataset.title || "Status");
+      document.title = "MOG ERP — " + (slides[index].dataset.title || "الوضع");
     }
 
     function next() { show(index + 1); }
@@ -836,12 +909,14 @@
 
     document.getElementById("nextBtn").addEventListener("click", next);
     document.getElementById("prevBtn").addEventListener("click", prev);
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+      // RTL: Left = next, Right = previous (natural reading direction)
+      if (e.key === "ArrowLeft" || e.key === " " || e.key === "PageDown") {
         e.preventDefault();
         next();
-      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+      } else if (e.key === "ArrowRight" || e.key === "PageUp") {
         e.preventDefault();
         prev();
       } else if (e.key === "Home") {
