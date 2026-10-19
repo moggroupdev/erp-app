@@ -7,7 +7,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { CustomerAddress } from "@/types/customer";
-import { lineTitle, selectedDimension, type DeliveryMode, type ItemDraft } from "../form-state";
+import { selectedDimension, type DeliveryMode, type ItemDraft } from "../form-state";
 
 type ReviewStepProps = {
   customerName: string;
@@ -65,7 +65,7 @@ export default function ReviewStep({
           <article key={item.key} className="rounded-xl border border-gray-200 p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="font-semibold text-gray-900">
-                {index + 1}. {lineTitle(item) || translate("Untitled line", "بند بدون عنوان")}
+                {index + 1}. {item.productTitle || translate("Untitled line", "بند بدون عنوان")}
               </h3>
               <span className="text-sm text-gray-600">{formatMoney(quantity * price)}</span>
             </div>
