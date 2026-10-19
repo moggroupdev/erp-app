@@ -10,9 +10,24 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsTotalAmountMismatchOrder } from "@/types/reports";
 import ReportCard from "../../components/report-card";
 
+function getMismatchPercentage(calculated: number, invoice: number, difference: number) {
+  const base = Math.max(Math.abs(calculated), Math.abs(invoice));
+  return base === 0 ? 0 : (difference / base) * 100;
+}
+
+function differenceToneClass(value: number) {
+  if (value > 0) return "text-teal-700";
+  if (value < 0) return "text-clay-700";
+  return "text-gray-800";
+}
+
 export default function MismatchesTable({ data }: { data: PurchasingMaterialsTotalAmountMismatchOrder[] }) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
   const totalCalculatedAmount = data.reduce((sum, row) => sum + row.calculatedTotalAmount, 0);
   const totalInvoicePurchases = data.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
   const totalDifference = data.reduce((sum, row) => sum + row.difference, 0);
@@ -50,74 +65,82 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                   {translate(`Invoice Purchases (${currency})`, `مشتريات الفاتورة (${currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate(`Difference (${currency})`, `الفرق (${currency})`)}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {data.map((row, index) => (
-                <Table.Tr key={row.orderId} className="text-gray-600">
-                  <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
-                  <Table.Td>
-                    <div className="flex items-center gap-1.5">
-                      <ProtectedLink
-                        permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
-                        href={`/procurement/material-orders/${row.orderId}`}
-                        className="font-mono font-medium text-gray-800 hover:underline"
-                      >
-                        {row.orderCode}
-                      </ProtectedLink>
-                      <CopyButton text={row.orderCode} />
-                    </div>
-                  </Table.Td>
-                  <Table.Td>
-                    {row.invoiceNumbers.length > 0 ? (
+              {data.map((row, index) => {
+                const percentage = getMismatchPercentage(
+                  row.calculatedTotalAmount,
+                  row.invoiceTotalPurchases,
+                  row.difference,
+                );
+
+                return (
+                  <Table.Tr key={row.orderId} className="text-gray-600">
+                    <Table.Td className="font-medium text-gray-400">{index + 1}</Table.Td>
+                    <Table.Td>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-gray-600">{row.invoiceNumbers.join(", ")}</span>
-                        <CopyButton text={row.invoiceNumbers.join(", ")} />
+                        <ProtectedLink
+                          permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+                          href={`/procurement/material-orders/${row.orderId}`}
+                          className="font-mono font-medium text-gray-800 hover:underline"
+                        >
+                          {row.orderCode}
+                        </ProtectedLink>
+                        <CopyButton text={row.orderCode} />
                       </div>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    <ProtectedLink
-                      permission={PERMISSIONS.READ_SUPPLIERS}
-                      href={`/procurement/suppliers/${row.supplierId}`}
-                      className="text-gray-800 hover:underline"
-                    >
-                      {row.supplierName}
-                    </ProtectedLink>
-                  </Table.Td>
-                  <Table.Td>
-                    {new Date(row.createdAt).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </Table.Td>
-                  <Table.Td>
-                    {row.completedAt ? (
-                      <span className="inline-flex gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
-                        <CheckCircle size={12} />
-                        {translate("Completed", "مكتمل")}
-                      </span>
-                    ) : (
-                      <span className="inline-flex gap-1 rounded-full bg-ochre-50 px-2 py-0.5 text-xs font-medium text-ochre-700">
-                        <Clock size={12} />
-                        {translate("Open", "مفتوح")}
-                      </span>
-                    )}
-                  </Table.Td>
-                  <Table.Td className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
-                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</Table.Td>
-                  <Table.Td
-                    className={`font-semibold ${
-                      row.difference > 0 ? "text-teal-700" : row.difference < 0 ? "text-clay-700" : "text-gray-800"
-                    }`}
-                  >
-                    {formatMoney(row.difference)}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
+                    </Table.Td>
+                    <Table.Td>
+                      {row.invoiceNumbers.length > 0 ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono text-gray-600">{row.invoiceNumbers.join(", ")}</span>
+                          <CopyButton text={row.invoiceNumbers.join(", ")} />
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_SUPPLIERS}
+                        href={`/procurement/suppliers/${row.supplierId}`}
+                        className="text-gray-800 hover:underline"
+                      >
+                        {row.supplierName}
+                      </ProtectedLink>
+                    </Table.Td>
+                    <Table.Td>
+                      {new Date(row.createdAt).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </Table.Td>
+                    <Table.Td>
+                      {row.completedAt ? (
+                        <span className="inline-flex gap-1 rounded-full bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">
+                          <CheckCircle size={12} />
+                          {translate("Completed", "مكتمل")}
+                        </span>
+                      ) : (
+                        <span className="inline-flex gap-1 rounded-full bg-ochre-50 px-2 py-0.5 text-xs font-medium text-ochre-700">
+                          <Clock size={12} />
+                          {translate("Open", "مفتوح")}
+                        </span>
+                      )}
+                    </Table.Td>
+                    <Table.Td className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</Table.Td>
+                    <Table.Td className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</Table.Td>
+                    <Table.Td className={`font-semibold ${differenceToneClass(row.difference)}`}>
+                      {formatMoney(row.difference)}
+                    </Table.Td>
+                    <Table.Td className={`font-semibold ${differenceToneClass(row.difference)}`}>
+                      {percentageFormatter.format(percentage)}%
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })}
             </Table.Tbody>
             <Table.Tfoot className="bg-gray-50">
               <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
@@ -129,17 +152,10 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                 <Table.Th />
                 <Table.Th className="font-semibold text-ochre-600">{formatMoney(totalCalculatedAmount)}</Table.Th>
                 <Table.Th className="font-semibold text-gray-800">{formatMoney(totalInvoicePurchases)}</Table.Th>
-                <Table.Th
-                  className={`font-semibold ${
-                    totalDifference > 0
-                      ? "text-teal-700"
-                      : totalDifference < 0
-                        ? "text-clay-700"
-                        : "text-gray-800"
-                  }`}
-                >
+                <Table.Th className={`font-semibold ${differenceToneClass(totalDifference)}`}>
                   {formatMoney(totalDifference)}
                 </Table.Th>
+                <Table.Th />
               </Table.Tr>
               <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
                 <Table.Th />
@@ -151,6 +167,7 @@ export default function MismatchesTable({ data }: { data: PurchasingMaterialsTot
                 <Table.Th />
                 <Table.Th />
                 <Table.Th className="font-semibold text-ochre-600">{formatMoney(totalAbsoluteDifference)}</Table.Th>
+                <Table.Th />
               </Table.Tr>
             </Table.Tfoot>
           </Table>
