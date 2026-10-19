@@ -231,7 +231,7 @@ export default function PaymentTermsEditor({
                           {...borderlessField}
                         />
                       ) : (
-                        <span className="text-sm text-gray-300">—</span>
+                        <span className="text-sm text-gray-300">-</span>
                       )}
                     </Table.Td>
                     <Table.Td>
@@ -282,7 +282,7 @@ export default function PaymentTermsEditor({
                           {formatMoney(coverage.remainder ?? 0, currency)}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-300">—</span>
+                        <span className="text-sm text-gray-300">-</span>
                       )}
                     </Table.Td>
                     <Table.Td className="text-center">

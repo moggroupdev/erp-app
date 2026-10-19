@@ -289,7 +289,7 @@ export default function BomItemModal({
               <Alert color="haze" variant="light" radius="md" icon={<Info size={16} />}>
                 <p className="text-sm leading-[1.75]">
                   {translate(
-                    "This manufactured material will be treated like a normal material in this BOM. Its recipe components will not be expanded, and raw-material costs from its bill of materials will not be included — only this material’s own unit price is counted.",
+                    "This manufactured material will be treated like a normal material in this BOM. Its recipe components will not be expanded, and raw-material costs from its bill of materials will not be included; only this material's own unit price is counted.",
                     "ستُعامل هذه المادة المصنّعة كأي مادة عادية في قائمة المواد هذه. لن يتم تفكيك مكوّنات وصفتها، ولن تُحتسب تكاليف المواد الأولية من قائمة موادها؛ يُحتسب سعر وحدتها فقط.",
                   )}
                 </p>

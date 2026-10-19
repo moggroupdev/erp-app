@@ -47,6 +47,17 @@ function visibleUnitColumns(units: ContractProductUnit[]) {
   return UNIT_COLUMNS.filter((column) => units.some((unit) => unitHasValue(unit, column.key)));
 }
 
+/** Shared % widths so unit tables align across contract lines (same column set). */
+function unitTableColumnWidths(columnCount: number): string[] {
+  if (columnCount <= 0) return [];
+  if (columnCount === 1) return ["100%"];
+
+  const serialPct = 14;
+  const remainingPct = 100 - serialPct;
+  const otherPct = remainingPct / (columnCount - 1);
+  return [`${serialPct}%`, ...Array.from({ length: columnCount - 1 }, () => `${otherPct}%`)];
+}
+
 function formatUnitCell(unit: ContractProductUnit, key: UnitColumnKey, locale: Locale) {
   const value = unit[key];
   if (key === "supplierSerialNumber" || key === "notes") {
@@ -74,6 +85,7 @@ function ContractItemPrintBlock({
   locale,
   currency,
   dimensionUnit,
+  unitColumns,
   translate,
 }: {
   item: ContractItem;
@@ -81,27 +93,28 @@ function ContractItemPrintBlock({
   locale: Locale;
   currency: string;
   dimensionUnit: string;
+  unitColumns: typeof UNIT_COLUMNS;
   translate: (en: string, ar: string) => string;
 }) {
   const lineTitle = item.title?.trim() || "";
   const cancelled = !!item.cancelledAt;
   const lineAmount = item.quantity * item.unitPrice;
   const units = item.productUnits;
-  const columns = visibleUnitColumns(units);
 
   const unitHeaders = [
     translate("Serial", "الرقم المسلسل"),
-    ...columns.map((column) => translate(column.label.en, column.label.ar)),
+    ...unitColumns.map((column) => translate(column.label.en, column.label.ar)),
   ];
+  const columnWidths = unitTableColumnWidths(unitHeaders.length);
 
   const unitRows = units.map((unit) => [
     unit.serialNumber,
-    ...columns.map((column) => formatUnitCell(unit, column.key, locale)),
+    ...unitColumns.map((column) => formatUnitCell(unit, column.key, locale)),
   ]);
 
   const monoColumnIndexes = [
     0,
-    ...columns.flatMap((column, columnIndex) => (column.key === "supplierSerialNumber" ? [columnIndex + 1] : [])),
+    ...unitColumns.flatMap((column, columnIndex) => (column.key === "supplierSerialNumber" ? [columnIndex + 1] : [])),
   ];
 
   return (
@@ -151,6 +164,7 @@ function ContractItemPrintBlock({
         <PrintTable
           headers={unitHeaders}
           rows={unitRows}
+          columnWidths={columnWidths}
           monoColumnIndexes={monoColumnIndexes}
           noWrapIndexes={unitHeaders.map((_, headerIndex) => headerIndex)}
           tableClassName="text-[8px] [&_td]:align-top [&_th]:text-[8px]"
@@ -272,6 +286,8 @@ export default function ContractReviewPrintDocument({ contract, variant = "units
     ? [address.addressLine, locationText].filter(Boolean).join(", ") || translate("Address on file", "عنوان مسجل")
     : translate("Factory", "المصنع");
 
+  const sharedUnitColumns = visibleUnitColumns(contract.items.flatMap((item) => item.productUnits));
+
   return (
     <div className="flex flex-col gap-5 text-xs text-gray-900">
       <header className="relative flex items-center justify-between gap-4 border-b border-gray-300 pb-2">
@@ -357,6 +373,7 @@ export default function ContractReviewPrintDocument({ contract, variant = "units
               locale={locale}
               currency={currency}
               dimensionUnit={dimensionUnit}
+              unitColumns={sharedUnitColumns}
               translate={translate}
             />
           ))}

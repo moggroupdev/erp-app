@@ -1,6 +1,10 @@
 import type { Locale, LocalizedEntity } from "@/lib/i18n/types";
 import { translate } from "@/lib/i18n/utils";
 
+/**
+ * Keep aligned with erp-server `src/utils/constants.ts` → `PERMISSION_VALUES`.
+ * Do not invent values here; planned sidebar-only gates go in `NAV_PLACEHOLDER_PERMISSION_VALUES`.
+ */
 export const PERMISSION_VALUES = [
   "add_user",
   "read_users",
@@ -24,21 +28,10 @@ export const PERMISSION_VALUES = [
   "add_customer",
   "read_customers",
   "update_customer",
-  "read_products",
-  "add_product",
-  "update_product",
-  "delete_product",
-  "print_products_list",
-  "read_product_pricing_factor",
-  "set_product_pricing_factor",
-  "add_product_bom",
-  "read_product_boms",
-  "update_product_bom",
-  "read_customers",
-  "add_customer",
-  "update_customer",
-  "read_materials",
+  "read_contracts",
+  "add_legacy_contract",
   "add_material",
+  "read_materials",
   "update_material",
   "set_material_market_price",
   "set_material_type",
@@ -48,19 +41,26 @@ export const PERMISSION_VALUES = [
   "read_manufactured_material_boms",
   "update_manufactured_material_bom",
   "delete_manufactured_material_bom",
-  "read_inquiries",
-  "read_previews",
-  "read_offers",
-  "read_contracts",
-  "add_legacy_contract",
-  "read_receptions",
-  "read_complaints",
-  "read_production_plans",
+  "read_material_inventory_summary_report",
+  "read_material_category_stats_report",
+  "read_material_purchasing_spending_summary_report",
+  "read_material_purchasing_price_history_report",
+  "read_material_purchasing_category_stats_report",
+  "read_material_purchasing_subcategory_stats_report",
+  "read_material_purchasing_supplier_stats_report",
+  "read_material_purchasing_total_amount_mismatches_report",
+  "read_material_purchasing_requisition_follow_up_report",
+  "add_product",
+  "read_products",
+  "update_product",
+  "print_products_list",
+  "read_product_pricing_factor",
+  "set_product_pricing_factor",
+  "add_product_bom",
+  "read_product_boms",
+  "update_product_bom",
   "read_inventory_transactions",
   "add_inventory_transaction",
-  "add_legacy_issue_permit",
-  "read_legacy_issue_permits",
-  "update_legacy_issue_permit",
   "read_material_purchase_orders",
   "add_material_purchase_order",
   "update_material_purchase_order",
@@ -77,28 +77,44 @@ export const PERMISSION_VALUES = [
   "add_request_for_quotation",
   "read_request_for_quotations",
   "update_request_for_quotation",
+  "add_legacy_issue_permit",
+  "read_legacy_issue_permits",
+  "update_legacy_issue_permit",
+  "read_audit_logs",
+  "show_analytics",
+] as const;
+
+/**
+ * App-only permissions used to gate planned sidebar entries before the matching
+ * APIs exist on erp-server. Not assignable via role APIs until the server adds them.
+ * Keep this list limited to `requiredPermission` values in
+ * `components/global/inner-sidabar/components/config.ts`.
+ */
+export const NAV_PLACEHOLDER_PERMISSION_VALUES = [
+  "read_inquiries",
+  "read_previews",
+  "read_offers",
+  "read_receptions",
+  "read_complaints",
+  "read_production_plans",
   "read_trips",
   "read_deliveries",
   "read_installations",
   "read_service_agreements",
   "read_maintenance_orders",
-  "show_analytics",
-  "read_material_inventory_summary_report",
-  "read_material_category_stats_report",
-  "read_material_purchasing_spending_summary_report",
-  "read_material_purchasing_price_history_report",
-  "read_material_purchasing_category_stats_report",
-  "read_material_purchasing_subcategory_stats_report",
-  "read_material_purchasing_supplier_stats_report",
-  "read_material_purchasing_total_amount_mismatches_report",
-  "read_material_purchasing_requisition_follow_up_report",
-  "read_audit_logs",
 ] as const;
 
-export type Permission = (typeof PERMISSION_VALUES)[number];
+/**
+ * Assignable permissions plus nav placeholders (app-wide permission union).
+ * Same idea as `ITEM_COSTING_METHOD_VALUES` extending `COSTING_METHOD_VALUES`.
+ */
+export const APP_PERMISSION_VALUES = [...PERMISSION_VALUES, ...NAV_PLACEHOLDER_PERMISSION_VALUES] as const;
+
+export type NavPlaceholderPermission = (typeof NAV_PLACEHOLDER_PERMISSION_VALUES)[number];
+export type Permission = (typeof APP_PERMISSION_VALUES)[number];
 
 export const PERMISSIONS = Object.fromEntries(
-  PERMISSION_VALUES.map((permission) => [permission.toUpperCase(), permission]),
+  APP_PERMISSION_VALUES.map((permission) => [permission.toUpperCase(), permission]),
 ) as {
   [K in Uppercase<Permission>]: Lowercase<K>;
 };
@@ -287,13 +303,6 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث المنتج",
     },
   },
-  delete_product: {
-    value: "delete_product",
-    label: {
-      en: "Delete Product",
-      ar: "حذف المنتج",
-    },
-  },
   print_products_list: {
     value: "print_products_list",
     label: {
@@ -392,18 +401,18 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "إضافة مراجعة عقد مرحلية",
     },
   },
-  read_complaints: {
-    value: "read_complaints",
-    label: {
-      en: "Read Complaints",
-      ar: "عرض الشكاوي",
-    },
-  },
   read_receptions: {
     value: "read_receptions",
     label: {
       en: "Read Receptions",
       ar: "عرض الاستلامات",
+    },
+  },
+  read_complaints: {
+    value: "read_complaints",
+    label: {
+      en: "Read Complaints",
+      ar: "عرض الشكاوي",
     },
   },
   read_production_plans: {
@@ -757,7 +766,7 @@ export function getPermissionLabel(permission: Permission, locale: Locale) {
 }
 
 export function isValidPermission(permission: string): permission is Permission {
-  return PERMISSION_VALUES.includes(permission as Permission);
+  return (APP_PERMISSION_VALUES as readonly string[]).includes(permission);
 }
 
 // ================ Domains ================
@@ -804,18 +813,8 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "sales",
     label: { en: "Sales & Customers", ar: "المبيعات والعملاء" },
-    permissions: [
-      "add_customer",
-      "read_customers",
-      "update_customer",
-      "read_inquiries",
-      "read_previews",
-      "read_offers",
-      "read_contracts",
-      "add_legacy_contract",
-      "read_receptions",
-      "read_complaints",
-    ],
+    // Nav placeholders (read_inquiries, read_previews, …) are omitted; not assignable via role APIs yet.
+    permissions: ["add_customer", "read_customers", "update_customer", "read_contracts", "add_legacy_contract"],
   },
   {
     domain: "engineering",
@@ -824,7 +823,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_products",
       "add_product",
       "update_product",
-      "delete_product",
       "print_products_list",
       "read_product_pricing_factor",
       "set_product_pricing_factor",
@@ -836,7 +834,8 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
   {
     domain: "production",
     label: { en: "Production", ar: "الإنتاج" },
-    permissions: ["read_production_plans", "read_production_department_managers", "update_production_department_managers"],
+    // read_production_plans is a nav placeholder only (not listed here until it is in PERMISSION_VALUES).
+    permissions: ["read_production_department_managers", "update_production_department_managers"],
   },
   {
     domain: "warehouse",
@@ -886,16 +885,6 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_supplier_invoice",
       "update_supplier_invoice",
     ],
-  },
-  {
-    domain: "fulfillment",
-    label: { en: "Delivery & Installation", ar: "التسليم والتركيب" },
-    permissions: ["read_trips", "read_deliveries", "read_installations"],
-  },
-  {
-    domain: "maintenance",
-    label: { en: "Maintenance & Service", ar: "الصيانة والخدمة" },
-    permissions: ["read_service_agreements", "read_maintenance_orders"],
   },
   {
     domain: "reports",

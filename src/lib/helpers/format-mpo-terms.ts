@@ -23,7 +23,7 @@ export function formatDeliveryPeriodLine(timing: MpoDeliveryTiming, days: number
   if (timing === MPO_DELIVERY_TIMINGS.IMMEDIATE) {
     return translate("Delivery period: immediately.", "مدة التوريد: فوراً.");
   }
-  return translate(`Delivery period: within ${days ?? "—"} days.`, `مدة التوريد: خلال ${days ?? "—"} يوم.`);
+  return translate(`Delivery period: within ${days ?? "-"} days.`, `مدة التوريد: خلال ${days ?? "-"} يوم.`);
 }
 
 export function formatPaymentTermLine(term: PaymentTermSlice, translate: Translate, currency?: string) {

@@ -104,8 +104,8 @@ export default function ProductionDepartmentManagerModal({
     <Modal opened={opened} onClose={handleClose} size="md">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {assignmentToUpdate && (
-          <div className="flex flex-col items-center gap-3 rounded-2xl bg-[#F6F7F9] px-4 py-5">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-col items-center gap-3 rounded-2xl bg-gray-50 px-4 py-5">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm">
               <ProductionDepartmentIcon department={assignmentToUpdate.department} className="h-10 w-10" />
             </div>
             <div className="flex flex-col items-center gap-1 text-center">
@@ -118,9 +118,9 @@ export default function ProductionDepartmentManagerModal({
         )}
 
         <div className="flex flex-col gap-3">
-          <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
             <div className="mb-2.5 flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#017E84]/10 text-[#017E84]">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
                 <UserRound size={16} />
               </span>
               <div className="flex flex-col">
@@ -140,9 +140,9 @@ export default function ProductionDepartmentManagerModal({
             />
           </div>
 
-          <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-sm">
             <div className="mb-2.5 flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F06A26]/10 text-[#F06A26]">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-ochre-50 text-ochre-600">
                 <UsersRound size={16} />
               </span>
               <div className="flex flex-col">

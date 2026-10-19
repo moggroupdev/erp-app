@@ -17,7 +17,7 @@ import type {
 import ReportCard from "../../components/report-card";
 
 function formatNullableMoney(value: number | null) {
-  if (value == null) return "—";
+  if (value == null) return "-";
   return formatMoney(value);
 }
 
@@ -107,7 +107,7 @@ export default function RequisitionFollowUpTable({
                       </div>
                     </Table.Td>
                     <Table.Td className="max-w-48 truncate text-gray-500" title={row.notes ?? undefined}>
-                      {row.notes || "—"}
+                      {row.notes || "-"}
                     </Table.Td>
                   </Table.Tr>
                 ))}

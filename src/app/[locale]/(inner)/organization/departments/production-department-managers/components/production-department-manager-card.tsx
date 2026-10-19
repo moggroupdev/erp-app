@@ -16,7 +16,7 @@ export default function ProductionDepartmentManagerCard({
   const label = getProductionSubDepartmentLabel(assignment.department, locale);
 
   const tile = (
-    <div className="flex aspect-square w-full items-center justify-center rounded-2xl bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] transition-shadow group-hover:shadow-[0_2px_6px_rgba(0,0,0,0.08),0_8px_20px_rgba(0,0,0,0.06)]">
+    <div className="flex aspect-square w-full items-center justify-center rounded-2xl border border-gray-100 bg-white p-5">
       <ProductionDepartmentIcon department={assignment.department} className="h-[62%] w-[62%]" />
     </div>
   );
@@ -27,7 +27,7 @@ export default function ProductionDepartmentManagerCard({
         <button
           type="button"
           onClick={openUpdateModal}
-          className="group w-full rounded-2xl p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-[#017E84]/40"
+          className="group w-full rounded-2xl p-0.5 outline-none focus-visible:ring-2 focus-visible:ring-teal-600/40"
           title={translate("Assign managers", "تعيين المدراء")}
           aria-label={translate(`Assign managers for ${label}`, `تعيين المدراء لـ ${label}`)}
         >
