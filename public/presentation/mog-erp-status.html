@@ -377,6 +377,26 @@
 
     .slide.cover .footer-bar { display: none; }
 
+    .page-num {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      font-size: 11px;
+      font-weight: 650;
+      font-variant-numeric: tabular-nums;
+      color: #94a3b8;
+      letter-spacing: 0.02em;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .slide.cover .page-num {
+      bottom: 28px;
+      color: #64748b;
+    }
+
     .progress {
       position: fixed;
       left: 0;
@@ -539,6 +559,11 @@
         left: 16mm !important;
         right: 16mm !important;
         bottom: 8mm !important;
+      }
+
+      .page-num {
+        bottom: 8mm !important;
+        color: #64748b !important;
       }
 
       .slide.cover {
@@ -895,6 +920,14 @@
     const totalEl = document.getElementById("total");
     const progressBar = document.getElementById("progressBar");
     totalEl.textContent = String(total);
+
+    slides.forEach((slide, n) => {
+      const el = document.createElement("div");
+      el.className = "page-num";
+      el.setAttribute("aria-hidden", "true");
+      el.textContent = (n + 1) + " / " + total;
+      slide.appendChild(el);
+    });
 
     function show(i) {
       index = Math.max(0, Math.min(total - 1, i));
