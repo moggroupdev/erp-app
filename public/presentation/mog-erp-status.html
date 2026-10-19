@@ -39,6 +39,10 @@
       overflow: hidden;
     }
 
+    p {
+      line-height: 1.8;
+    }
+
     .deck {
       height: 100%;
       display: grid;
@@ -73,7 +77,7 @@
     .slide.cover {
       background:
         radial-gradient(ellipse 90% 70% at 15% 10%, rgba(84, 182, 232, 0.22), transparent 50%),
-        radial-gradient(ellipse 80% 60% at 90% 90%, rgba(247, 148, 29, 0.12), transparent 45%),
+        radial-gradient(ellipse 80% 60% at 90% 90%, rgba(36, 120, 181, 0.18), transparent 45%),
         linear-gradient(160deg, #031a45 0%, var(--navy) 45%, #0a3a7a 100%);
       justify-content: center;
       align-items: center;
@@ -117,7 +121,7 @@
       width: 56px;
       height: 3px;
       border-radius: 999px;
-      background: linear-gradient(90deg, #f7941d, #54b6e8);
+      background: #54b6e8;
     }
 
     .cover-title {
@@ -130,7 +134,7 @@
 
     .cover-subtitle {
       font-size: 1.02rem;
-      line-height: 1.7;
+      line-height: 1.85;
       color: rgba(255, 255, 255, 0.78);
       font-weight: 500;
       max-width: 34ch;
@@ -182,11 +186,10 @@
 
     .problem-intro {
       font-size: 0.98rem;
-      line-height: 1.65;
+      line-height: 1.85;
       color: var(--muted);
       font-weight: 500;
       margin-bottom: 18px;
-      max-width: 48ch;
       padding: 12px 16px;
       background: var(--haze-50);
       border-radius: 12px;
@@ -231,8 +234,8 @@
 
     .problem-card.accent {
       grid-column: span 6;
-      background: linear-gradient(105deg, #fff8f0 0%, #fff 48%, var(--haze-50) 100%);
-      border-color: #f5d0a8;
+      background: linear-gradient(105deg, var(--haze-50) 0%, #fff 55%, var(--bg) 100%);
+      border-color: var(--haze-100);
       display: grid;
       grid-template-columns: auto 1fr;
       gap: 14px;
@@ -246,7 +249,7 @@
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      background: #f7941d;
+      background: var(--haze-600);
       font-size: 0.9rem;
     }
 
@@ -266,7 +269,7 @@
     .problem-card p {
       font-size: 0.86rem;
       color: var(--muted);
-      line-height: 1.5;
+      line-height: 1.75;
       font-weight: 500;
       padding-left: 36px;
     }
@@ -298,7 +301,7 @@
 
     .lede {
       font-size: 1.1rem;
-      line-height: 1.7;
+      line-height: 1.85;
       color: var(--muted);
       max-width: 48ch;
       font-weight: 500;
@@ -350,7 +353,7 @@
     .card p, .card li {
       font-size: 0.92rem;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.75;
       font-weight: 500;
     }
 
@@ -385,7 +388,7 @@
     .row .body {
       color: var(--muted);
       font-size: 0.95rem;
-      line-height: 1.55;
+      line-height: 1.75;
       font-weight: 500;
     }
 
@@ -451,7 +454,7 @@
     .phase p {
       font-size: 0.9rem;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.75;
       font-weight: 500;
     }
 
@@ -470,7 +473,7 @@
       border: 1px solid var(--line);
       color: var(--muted);
       font-size: 0.98rem;
-      line-height: 1.55;
+      line-height: 1.75;
       font-weight: 500;
     }
 
@@ -494,7 +497,7 @@
       border-radius: 12px 0 0 12px;
       color: var(--navy);
       font-size: 1.05rem;
-      line-height: 1.7;
+      line-height: 1.85;
       font-weight: 600;
     }
 
@@ -532,7 +535,7 @@
     }
 
     .demo-list strong { color: var(--navy); display: block; margin-bottom: 2px; font-weight: 700; }
-    .demo-list span { color: var(--muted); font-size: 0.92rem; font-weight: 500; line-height: 1.5; }
+    .demo-list span { color: var(--muted); font-size: 0.92rem; font-weight: 500; line-height: 1.75; }
 
     .ask-grid {
       display: grid;
@@ -784,16 +787,11 @@
           />
         </div>
         <div class="cover-divider" aria-hidden="true"></div>
-        <h1 class="cover-title">نظام تخطيط موارد المؤسسة</h1>
+        <h1 class="cover-title">MOG ERP</h1>
         <p class="cover-subtitle">
           مراجعة الوضع الحالي والخطوات القادمة نحو منصة تشغيل موحّدة
         </p>
-        <div class="cover-meta">
-          <div><strong>الوضع</strong>ما أُنجز حتى الآن</div>
-          <div><strong>الفجوات</strong>ما يتطلّب إكمالاً</div>
-          <div><strong>الخطة</strong>المراحل التالية</div>
-        </div>
-      </div>
+        
     </section>
 
     <!-- 2 -->
