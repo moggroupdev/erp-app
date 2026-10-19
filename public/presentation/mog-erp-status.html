@@ -97,7 +97,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 22px;
+      gap: 20px;
       max-width: 640px;
     }
 
@@ -119,13 +119,6 @@
       height: auto;
       display: block;
       object-fit: contain;
-    }
-
-    .cover-divider {
-      width: 56px;
-      height: 3px;
-      border-radius: 999px;
-      background: #54b6e8;
     }
 
     .cover-title {
@@ -184,92 +177,178 @@
 
     .slide.problem {
       background:
-        radial-gradient(ellipse 70% 50% at 100% 0%, rgba(36, 120, 181, 0.08), transparent 50%),
+        radial-gradient(ellipse 55% 45% at 0% 100%, rgba(17, 94, 89, 0.07), transparent 50%),
+        radial-gradient(ellipse 55% 45% at 100% 0%, rgba(36, 120, 181, 0.08), transparent 50%),
         #ffffff;
     }
 
-    .problem-intro {
-      font-size: 0.98rem;
-      line-height: 1.85;
-      color: var(--muted);
-      font-weight: 500;
-      margin-bottom: 18px;
-      padding: 12px 16px;
-      background: var(--haze-50);
-      border-radius: 12px;
-      border-right: 3px solid var(--haze-600);
+    .slide.problem h2 {
+      margin-bottom: 10px;
     }
 
-    .problem-grid {
+    .split-cols {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 12px;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
       flex: 1;
       min-height: 0;
-      align-content: start;
-    }
-
-    .problem-card {
+      margin-top: 2px;
+      padding-bottom: 28px;
       position: relative;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 16px 16px 14px;
-      padding-inline-start: 52px;
-      grid-column: span 3;
-      overflow: hidden;
     }
 
-    .problem-card::before {
-      content: attr(data-num);
+    .split-cols::before {
+      content: "";
       position: absolute;
-      top: 14px;
-      inset-inline-start: 14px;
-      width: 28px;
-      height: 28px;
-      border-radius: 9px;
-      background: var(--navy);
-      color: #fff;
-      font-size: 0.78rem;
-      font-weight: 750;
+      top: 8px;
+      bottom: 36px;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        var(--haze-100) 18%,
+        #c5ddd9 50%,
+        var(--haze-100) 82%,
+        transparent 100%
+      );
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    .split-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-radius: 18px;
+      padding: 18px 20px 16px;
+      background: transparent;
+    }
+
+    .split-panel.problem-side {
+      background: linear-gradient(165deg, var(--haze-50) 0%, rgba(228, 245, 253, 0.35) 42%, transparent 100%);
+    }
+
+    .split-panel.goal-side {
+      background: linear-gradient(165deg, var(--teal-50) 0%, rgba(226, 236, 235, 0.35) 42%, transparent 100%);
+    }
+
+    .split-panel-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .split-panel-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
       display: grid;
       place-items: center;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 6px 16px rgba(5, 37, 101, 0.18);
     }
 
-    .problem-card.accent {
-      grid-column: span 6;
-      background: linear-gradient(105deg, var(--haze-50) 0%, #fff 55%, var(--bg) 100%);
-      border-color: var(--haze-100);
-      padding-top: 18px;
-      padding-bottom: 18px;
-      padding-inline-start: 64px;
+    .problem-side .split-panel-badge { background: var(--navy); }
+    .goal-side .split-panel-badge {
+      background: var(--teal-600);
+      box-shadow: 0 6px 16px rgba(17, 94, 89, 0.2);
     }
 
-    .problem-card.accent::before {
-      width: 36px;
-      height: 36px;
-      border-radius: 11px;
-      background: var(--haze-600);
-      font-size: 0.88rem;
-      top: 18px;
-    }
-
-    .problem-card h3 {
-      font-size: 0.95rem;
+    .split-panel-head h3 {
+      font-size: 1.12rem;
+      font-weight: 800;
       color: var(--navy);
-      font-weight: 700;
-      margin-bottom: 6px;
+      margin: 0;
+      letter-spacing: -0.01em;
     }
 
-    .problem-card p {
-      font-size: 0.86rem;
-      color: var(--muted);
+    .goal-side .split-panel-head h3 { color: var(--teal-600); }
+
+    .split-brief {
+      font-size: 0.82rem;
       line-height: 1.75;
+      color: var(--muted);
       font-weight: 500;
+      margin: 0 0 12px;
+      padding-bottom: 10px;
+      position: relative;
     }
 
-    .problem-card.accent .problem-card-body {
+    .split-brief::after {
+      content: "";
+      position: absolute;
+      inset-inline-start: 0;
+      bottom: 0;
+      width: 36px;
+      height: 2px;
+      border-radius: 999px;
+    }
+
+    .problem-side .split-brief::after { background: var(--haze-600); }
+    .goal-side .split-brief::after { background: var(--teal-600); }
+
+    .split-panel-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .split-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 6px 0;
+    }
+
+    .split-item-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.68rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .problem-side .split-item-num {
+      background: rgba(5, 37, 101, 0.1);
+      color: var(--navy);
+    }
+
+    .goal-side .split-item-num {
+      background: rgba(17, 94, 89, 0.12);
+      color: var(--teal-600);
+    }
+
+    .split-item-text {
       min-width: 0;
+    }
+
+    .split-item-text strong {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 1px;
+      line-height: 1.4;
+    }
+
+    .split-item-text p {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 500;
+      margin: 0;
     }
 
     h1 {
@@ -791,33 +870,101 @@
     </section>
 
     <!-- 2 -->
-    <section class="slide problem" data-title="المشكلة">
+    <section class="slide problem" data-title="المشكلة والهدف">
       <p class="eyebrow">تشخيص الواقع التشغيلي</p>
-      <h2>المشكلة التي نعالجها</h2>
-      <p class="problem-intro">
-        العمليات اليوم مبعثرة بين ورق وجداول غير مترابطة، فيصعب الوصول السريع للمعلومة الصحيحة.
-      </p>
-      <div class="problem-grid">
-        <div class="problem-card" data-num="١">
-          <h3>تشتّت الورق</h3>
-          <p>مستندات موزَّعة يصعب الوصول إليها أو البحث فيها بسرعة.</p>
+      <h2>المشكلة والهدف</h2>
+      <div class="split-cols">
+        <div class="split-panel problem-side">
+          <div class="split-panel-head">
+            <span class="split-panel-badge">!</span>
+            <h3>المشكلة</h3>
+          </div>
+          <p class="split-brief">
+            العمليات اليوم مبعثرة بين ورق وجداول غير مترابطة، فيصعب الوصول السريع للمعلومة الصحيحة واتخاذ قرار موحّد.
+          </p>
+          <div class="split-panel-body">
+            <div class="split-item">
+              <span class="split-item-num">١</span>
+              <div class="split-item-text">
+                <strong>تشتّت الورق</strong>
+                <p>مستندات موزَّعة يصعب الوصول إليها أو البحث فيها بسرعة.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٢</span>
+              <div class="split-item-text">
+                <strong>ضعف توافق الأقسام</strong>
+                <p>غياب مصدر موحّد يخلق اختلافاً في النسخ والقرارات.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٣</span>
+              <div class="split-item-text">
+                <strong>الحسابات والمعادلات</strong>
+                <p>التسجيل اليدوي للكميات والأسعار عرضة للخطأ وصعب المراجعة.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٤</span>
+              <div class="split-item-text">
+                <strong>مستندات غير مترابطة</strong>
+                <p>العقود والمشتريات والاستلامات بلا مسار يربطها.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٥</span>
+              <div class="split-item-text">
+                <strong>التقارير تُعد يدوياً</strong>
+                <p>تجميع البيانات يستهلك وقتاً كبيراً ويؤخّر القرار.</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="problem-card" data-num="٢">
-          <h3>ضعف توافق الأقسام</h3>
-          <p>غياب مصدر موحّد يخلق اختلافاً في النسخ والقرارات بين الإدارات.</p>
-        </div>
-        <div class="problem-card" data-num="٣">
-          <h3>الحسابات والمعادلات</h3>
-          <p>تسجيل الكميات والأسعار والتحويلات يدوياً عرضة للخطأ وصعب المراجعة.</p>
-        </div>
-        <div class="problem-card" data-num="٤">
-          <h3>مستندات غير مترابطة</h3>
-          <p>العقود والمشتريات والاستلامات منفصلة بلا مسار واضح يربطها.</p>
-        </div>
-        <div class="problem-card accent" data-num="٥">
-          <div class="problem-card-body">
-            <h3>التقارير تُعد يدوياً</h3>
-            <p>تجميع البيانات من مصادر متعددة يستهلك وقتاً كبيراً ويؤخّر القرار.</p>
+
+        <div class="split-panel goal-side">
+          <div class="split-panel-head">
+            <span class="split-panel-badge">✓</span>
+            <h3>الهدف</h3>
+          </div>
+          <p class="split-brief">
+            بناء منصة تشغيلية موحّدة تربط الأقسام والمستندات والبيانات، وتُسرّع الوصول للمعلومة وتدعم القرار بدقة.
+          </p>
+          <div class="split-panel-body">
+            <div class="split-item">
+              <span class="split-item-num">١</span>
+              <div class="split-item-text">
+                <strong>أرشيف رقمي موحّد</strong>
+                <p>مستندات مركزية قابلة للبحث والوصول الفوري من أي قسم.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٢</span>
+              <div class="split-item-text">
+                <strong>مصدر حقيقة واحد</strong>
+                <p>بيانات مشتركة تضمن اتساق القرارات بين الإدارات.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٣</span>
+              <div class="split-item-text">
+                <strong>حسابات منظّمة داخل النظام</strong>
+                <p>كميات وأسعار وتحويلات وحدات تُدار آلياً بدقة قابلة للمراجعة.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٤</span>
+              <div class="split-item-text">
+                <strong>مسار تشغيلي مترابط</strong>
+                <p>ربط المستندات من الطلب حتى الاستلام والتقارير في سلسلة واضحة.</p>
+              </div>
+            </div>
+            <div class="split-item">
+              <span class="split-item-num">٥</span>
+              <div class="split-item-text">
+                <strong>تقارير فورية</strong>
+                <p>استخراج مباشر من النظام يقلّل الجهد ويسرّع اتخاذ القرار.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
