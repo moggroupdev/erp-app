@@ -30,6 +30,11 @@ import {
   Wrench,
 } from "lucide-react";
 
+/**
+ * Sidebar gates planned modules with `NAV_PLACEHOLDER_PERMISSION_VALUES` from
+ * `@/lib/constants/enums/permissions` until those permissions exist on erp-server.
+ */
+
 // =============== TYPES ===============
 
 export type SidebarLeafConfig = {

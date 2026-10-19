@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -41,7 +41,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
   const canAddRole = useHasPermission(PERMISSIONS.ADD_ROLE);
-  const { data: departments } = useDepartments();
+  const { helpers: departmentHelpers } = useDepartments();
 
   const {
     value: keyword,
@@ -72,14 +72,6 @@ export default function Page() {
   });
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
-
-  const departmentNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const department of departments) {
-      map.set(department.id, translate(department.nameEn, department.nameAr));
-    }
-    return map;
-  }, [departments, translate]);
 
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
@@ -168,13 +160,16 @@ export default function Page() {
       ) : (
         roles && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {roles.map((role) => (
-              <RoleCard
-                key={role.id}
-                role={role}
-                departmentName={role.departmentId ? departmentNameById.get(role.departmentId) : null}
-              />
-            ))}
+            {roles.map((role) => {
+              const department = role.departmentId ? departmentHelpers.getDepartmentById(role.departmentId) : null;
+              return (
+                <RoleCard
+                  key={role.id}
+                  role={role}
+                  departmentName={department ? translate(department.nameEn, department.nameAr) : null}
+                />
+              );
+            })}
           </div>
         )
       )}

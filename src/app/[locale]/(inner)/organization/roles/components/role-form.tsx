@@ -13,7 +13,7 @@ import { SALES_DEPARTMENT_ID, BASE_URL } from "@/lib/constants/global";
 import {
   PERMISSION_DOMAIN_GROUPS,
   PERMISSION_LABELS,
-  PERMISSION_LABELS_LIST,
+  PERMISSION_VALUES,
   type Permission,
 } from "@/lib/constants/enums/permissions";
 import { type CreateRoleDto } from "@/types/roles";
@@ -329,8 +329,8 @@ export default function RoleForm({
 
               <p className="mt-1 text-sm font-medium text-gray-600">
                 {translate(
-                  `${permissions.length} of ${PERMISSION_LABELS_LIST.length} selected`,
-                  `${permissions.length} من ${PERMISSION_LABELS_LIST.length} محددة`,
+                  `${permissions.length} of ${PERMISSION_VALUES.length} selected`,
+                  `${permissions.length} من ${PERMISSION_VALUES.length} محددة`,
                 )}
               </p>
             </header>

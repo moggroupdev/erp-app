@@ -11,7 +11,7 @@ import type {
 } from "@/types/reports";
 
 function formatNullableMoney(value: number | null, currency: string) {
-  if (value == null) return "—";
+  if (value == null) return "-";
   return formatMoney(value, currency);
 }
 
@@ -98,7 +98,7 @@ export default function PurchasingMaterialsRequisitionFollowUpPrintDocument({
             formatNullableMoney(row.lastPurchasePrice, currency),
             <span className="font-semibold">{formatNullableMoney(row.requestedValue, currency)}</span>,
             <span className="font-mono text-[10px]">{row.requisitionCode}</span>,
-            row.notes || "—",
+            row.notes || "-",
           ])}
           footerRows={[
             [

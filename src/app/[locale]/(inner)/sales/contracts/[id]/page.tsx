@@ -3,14 +3,17 @@
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "@mantine/core";
+import ActionsMenu from "@/components/ui/actions-menu";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
 import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
 import { EmptyValue } from "@/components/ui/entity-details";
+import ContractReviewPrintDocument from "@/components/documents/sales/contract-review-print-document";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import contractsApi from "@/lib/api/contracts";
@@ -25,7 +28,6 @@ import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { ContractItem, ContractProductUnit } from "@/types/contract";
 import ContractDetails from "./components/contract-details";
-import { contractItemTitle } from "../helpers";
 
 const PAGE_TITLE = { en: "Contract Review Details", ar: "تفاصيل مراجعة العقد" };
 
@@ -94,7 +96,47 @@ export default function Page() {
       header={{
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />,
+        sideElements: (
+          <div className="flex items-center gap-3">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <ActionsMenu>
+              {contract && (
+                <PrintDocument
+                  title={translate(
+                    `${PAGE_TITLE.en} - ${contract.code} - Items`,
+                    `${PAGE_TITLE.ar} - ${contract.code} - البنود`,
+                  )}
+                  buttonLabel={translate("Print contract review", "طباعة مراجعة العقد")}
+                  buttonType="menu"
+                  paperWidth={210}
+                  paperHeight={297}
+                  paperMarginX={12}
+                  paperMarginTop={12}
+                  paperMarginBottom={14}
+                >
+                  <ContractReviewPrintDocument contract={contract} variant="items" />
+                </PrintDocument>
+              )}
+              {contract && (
+                <PrintDocument
+                  title={translate(
+                    `${PAGE_TITLE.en} - ${contract.code} - Items with units`,
+                    `${PAGE_TITLE.ar} - ${contract.code} - البنود مع الوحدات`,
+                  )}
+                  buttonLabel={translate("Print detailed with units", "طباعة تفصيلي بالوحدات")}
+                  buttonType="menu"
+                  paperWidth={210}
+                  paperHeight={297}
+                  paperMarginX={12}
+                  paperMarginTop={12}
+                  paperMarginBottom={14}
+                >
+                  <ContractReviewPrintDocument contract={contract} variant="units" />
+                </PrintDocument>
+              )}
+            </ActionsMenu>
+          </div>
+        ),
       }}
     >
       {isFetching ? (
@@ -160,7 +202,7 @@ function ContractItemCard({
   dimensionUnit: string;
 }) {
   const { translate } = useI18n();
-  const title = contractItemTitle(item);
+  const lineTitle = item.title?.trim() || "";
   const cancelled = !!item.cancelledAt;
   const lineAmount = item.quantity * item.unitPrice;
   const units = item.productUnits;
@@ -182,7 +224,7 @@ function ContractItemCard({
       >
         <h3
           className={[
-            "flex min-w-0 items-center gap-2 text-sm font-semibold",
+            "flex min-w-0 flex-wrap items-center gap-2 text-sm font-semibold",
             cancelled ? "text-gray-500" : "text-gray-900",
           ].join(" ")}
         >
@@ -194,7 +236,23 @@ function ContractItemCard({
           >
             {index + 1}
           </span>
-          <span className="truncate">{title}</span>
+          <ProtectedLink
+            permission={PERMISSIONS.READ_PRODUCTS}
+            href={`/products/${item.product.code}`}
+            className="min-w-0 leading-relaxed hover:underline"
+          >
+            {item.product.title}
+          </ProtectedLink>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-gray-100 px-1.5 py-0.5">
+            <ProtectedLink
+              permission={PERMISSIONS.READ_PRODUCTS}
+              href={`/products/${item.product.code}`}
+              className="font-mono text-xs font-medium text-gray-700 hover:underline"
+            >
+              {item.product.code}
+            </ProtectedLink>
+            <CopyButton text={item.product.code} />
+          </span>
           {cancelled ? (
             <span className="bg-clay-100 text-clay-700 shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold">
               {translate("Cancelled", "ملغي")}
@@ -212,17 +270,9 @@ function ContractItemCard({
       </header>
 
       <div className="flex flex-col gap-3 p-4">
+        {lineTitle ? <p className="text-sm leading-relaxed text-gray-600">{lineTitle}</p> : null}
+
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-gray-600">
-          <div className="flex items-center gap-1.5">
-            <ProtectedLink
-              permission={PERMISSIONS.READ_PRODUCTS}
-              href={`/products/${item.product.code}`}
-              className="font-mono font-medium text-gray-800 hover:underline"
-            >
-              {item.product.code}
-            </ProtectedLink>
-            <CopyButton text={item.product.code} />
-          </div>
           <span>{formatDimensionLabel(item.productDimension, dimensionUnit)}</span>
           <span className="tabular-nums">
             {item.quantity} × {formatMoney(item.unitPrice)} {currency}

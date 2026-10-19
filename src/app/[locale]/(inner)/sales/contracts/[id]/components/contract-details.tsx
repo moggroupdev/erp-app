@@ -87,12 +87,24 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
           },
         ]
       : []),
+    {
+      key: translate("Contract review date", "تاريخ مراجعة العقد"),
+      value: formatDateAndTime(contract.createdAt, locale),
+    },
     ...(contract.legacyWorkOrderNumber
       ? [
           {
             key: translate("Work order number", "رقم أمر الشغل"),
             value: <span className="font-mono">{contract.legacyWorkOrderNumber}</span>,
             copyText: contract.legacyWorkOrderNumber,
+          },
+        ]
+      : []),
+    ...(contract.startedAt
+      ? [
+          {
+            key: translate("Work order start", "بداية أمر الشغل"),
+            value: formatDateAndTime(contract.startedAt, locale),
           },
         ]
       : []),
@@ -111,14 +123,6 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
           {
             key: translate("Delivery time", "موعد التسليم"),
             value: formatDateAndTime(contract.deliveryTime, locale),
-          },
-        ]
-      : []),
-    ...(contract.startedAt
-      ? [
-          {
-            key: translate("Work order start", "بداية أمر الشغل"),
-            value: formatDateAndTime(contract.startedAt, locale),
           },
         ]
       : []),
@@ -197,10 +201,6 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
     {
       key: translate("Created by", "أنشئ بواسطة"),
       value: <CreatorLink creator={contract.createdBy} />,
-    },
-    {
-      key: translate("Created at", "تاريخ الإنشاء"),
-      value: formatDateAndTime(contract.createdAt, locale),
     },
   ];
 

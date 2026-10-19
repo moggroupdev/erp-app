@@ -222,6 +222,8 @@ Reports differ from CRUD domains: response shapes are custom aggregates, not ent
 - Page access: layout-level `<PermissionGuard permission={…} isForPage>`.
 - Buttons/actions: wrap with `PermissionGuard` or gate with `useHasPermission`.
 - Admins (`user.isAdmin`) bypass permission checks.
+- **Backend sync:** `PERMISSION_VALUES` must match erp-server `PERMISSION_VALUES`. Role forms use only these (via `PERMISSION_DOMAIN_GROUPS`).
+- **Nav placeholders:** `NAV_PLACEHOLDER_PERMISSION_VALUES` are app-only strings used to gate planned sidebar entries in `components/global/inner-sidabar/components/config.ts` before the backend exposes them. Keep that list limited to sidebar `requiredPermission` values; do not add extras or duplicates. The app-wide union is `APP_PERMISSION_VALUES` (`PERMISSION_VALUES` + placeholders). When a feature ships on the backend, move the permission into `PERMISSION_VALUES` (and the matching server constants) and remove it from `NAV_PLACEHOLDER_PERMISSION_VALUES`.
 
 ---
 
