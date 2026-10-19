@@ -72,68 +72,90 @@
 
     .slide.cover {
       background:
-        radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.14), transparent 55%),
-        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(5, 37, 101, 0.1), transparent 50%),
-        linear-gradient(215deg, #f8fbfe 0%, #eef3f9 55%, #e6edf6 100%);
+        radial-gradient(ellipse 90% 70% at 15% 10%, rgba(84, 182, 232, 0.22), transparent 50%),
+        radial-gradient(ellipse 80% 60% at 90% 90%, rgba(247, 148, 29, 0.12), transparent 45%),
+        linear-gradient(160deg, #031a45 0%, var(--navy) 45%, #0a3a7a 100%);
       justify-content: center;
       align-items: center;
       text-align: center;
     }
 
-    .slide.cover::before { width: 12px; }
+    .slide.cover::before {
+      width: 0;
+      background: none;
+    }
 
     .cover-inner {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
+      gap: 22px;
       max-width: 640px;
     }
 
+    .cover-logo-badge {
+      width: min(220px, 34vw);
+      height: min(220px, 34vw);
+      border-radius: 50%;
+      background: #ffffff;
+      display: grid;
+      place-items: center;
+      box-shadow:
+        0 0 0 10px rgba(255, 255, 255, 0.12),
+        0 18px 50px rgba(0, 0, 0, 0.28);
+      padding: 18px;
+    }
+
     .cover-logo {
-      width: min(280px, 42vw);
+      width: 88%;
       height: auto;
       display: block;
+      object-fit: contain;
     }
 
     .cover-divider {
-      width: 64px;
+      width: 56px;
       height: 3px;
       border-radius: 999px;
-      background: linear-gradient(90deg, #f7941d, var(--haze-600));
+      background: linear-gradient(90deg, #f7941d, #54b6e8);
     }
 
     .cover-title {
-      font-size: clamp(1.55rem, 2.6vw, 2.1rem);
+      font-size: clamp(1.55rem, 2.6vw, 2.15rem);
       line-height: 1.35;
-      color: var(--navy);
+      color: #ffffff;
       font-weight: 800;
       max-width: 18ch;
     }
 
     .cover-subtitle {
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       line-height: 1.7;
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.78);
       font-weight: 500;
-      max-width: 36ch;
+      max-width: 34ch;
     }
 
     .cover-meta {
       display: flex;
-      gap: 28px;
+      gap: 22px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 0.9rem;
+      margin-top: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.88rem;
     }
 
     .cover-meta strong {
       display: block;
-      color: var(--navy);
+      color: #ffffff;
       font-weight: 700;
       margin-bottom: 2px;
+    }
+
+    .slide.cover .page-num {
+      bottom: 28px;
+      color: rgba(255, 255, 255, 0.55);
     }
 
     .eyebrow {
@@ -152,49 +174,109 @@
       margin-bottom: 20px;
     }
 
+    .slide.problem {
+      background:
+        radial-gradient(ellipse 70% 50% at 100% 0%, rgba(36, 120, 181, 0.08), transparent 50%),
+        #ffffff;
+    }
+
     .problem-intro {
-      font-size: 1.02rem;
-      line-height: 1.7;
+      font-size: 0.98rem;
+      line-height: 1.65;
       color: var(--muted);
       font-weight: 500;
-      margin-bottom: 16px;
-      max-width: 62ch;
+      margin-bottom: 18px;
+      max-width: 48ch;
+      padding: 12px 16px;
+      background: var(--haze-50);
+      border-radius: 12px;
+      border-right: 3px solid var(--haze-600);
     }
 
     .problem-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
       flex: 1;
       min-height: 0;
+      align-content: start;
     }
 
     .problem-card {
+      position: relative;
       background: var(--bg);
       border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 16px 18px;
-      border-right: 3px solid var(--haze-600);
+      border-radius: 16px;
+      padding: 16px 16px 14px;
+      grid-column: span 3;
+      overflow: hidden;
+      transition: none;
+    }
+
+    .problem-card::before {
+      content: attr(data-num);
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: var(--navy);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 750;
+      display: grid;
+      place-items: center;
     }
 
     .problem-card.accent {
-      border-right-color: #f7941d;
-      grid-column: 1 / -1;
-      background: linear-gradient(105deg, #fff8f0 0%, var(--bg) 55%);
+      grid-column: span 6;
+      background: linear-gradient(105deg, #fff8f0 0%, #fff 48%, var(--haze-50) 100%);
+      border-color: #f5d0a8;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: start;
+      padding-top: 18px;
+      padding-bottom: 18px;
+    }
+
+    .problem-card.accent::before {
+      position: static;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #f7941d;
+      font-size: 0.9rem;
     }
 
     .problem-card h3 {
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       color: var(--navy);
       font-weight: 700;
       margin-bottom: 6px;
+      padding-left: 36px;
+    }
+
+    .problem-card.accent h3 {
+      padding-left: 0;
+      margin-bottom: 4px;
     }
 
     .problem-card p {
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.5;
       font-weight: 500;
+      padding-left: 36px;
+    }
+
+    .problem-card.accent p {
+      padding-left: 0;
+    }
+
+    .problem-card.accent .problem-card-body {
+      min-width: 0;
     }
 
     h1 {
@@ -493,10 +575,6 @@
       user-select: none;
     }
 
-    .slide.cover .page-num {
-      bottom: 28px;
-      color: #64748b;
-    }
 
     .progress {
       position: fixed;
@@ -669,19 +747,22 @@
 
       .slide.cover {
         background:
-          radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 120, 181, 0.14), transparent 55%),
-          linear-gradient(215deg, #f8fbfe 0%, #eef3f9 55%, #e6edf6 100%) !important;
+          radial-gradient(ellipse 90% 70% at 15% 10%, rgba(84, 182, 232, 0.22), transparent 50%),
+          linear-gradient(160deg, #031a45 0%, #052565 45%, #0a3a7a 100%) !important;
       }
 
-      .cover-logo {
-        width: 52mm !important;
+      .cover-logo-badge {
+        width: 48mm !important;
+        height: 48mm !important;
+        padding: 4mm !important;
       }
 
-      .cover-inner { gap: 14px !important; }
+      .cover-inner { gap: 10px !important; }
 
-      .problem-grid { gap: 8px !important; }
+      .problem-grid { gap: 6px !important; }
       .problem-card { padding: 10px 12px !important; }
-      .problem-card p { font-size: 0.8rem !important; }
+      .problem-card p { font-size: 0.78rem !important; }
+      .problem-intro { margin-bottom: 10px !important; padding: 8px 12px !important; }
     }
   </style>
 </head>
@@ -693,17 +774,19 @@
     <!-- 1 -->
     <section class="slide cover active" data-title="الغلاف">
       <div class="cover-inner">
-        <img
-          class="cover-logo"
-          src="../images/logo.png"
-          alt="MOG 10th of Ramadan Catering Equipment"
-          width="560"
-          height="400"
-        />
+        <div class="cover-logo-badge">
+          <img
+            class="cover-logo"
+            src="../images/logo.png"
+            alt="MOG 10th of Ramadan Catering Equipment"
+            width="560"
+            height="400"
+          />
+        </div>
         <div class="cover-divider" aria-hidden="true"></div>
         <h1 class="cover-title">نظام تخطيط موارد المؤسسة</h1>
         <p class="cover-subtitle">
-          مراجعة الوضع الحالي والخطوات القادمة نحو منصة تشغيل موحّدة لمشاريع معدات المطابخ التجارية
+          مراجعة الوضع الحالي والخطوات القادمة نحو منصة تشغيل موحّدة
         </p>
         <div class="cover-meta">
           <div><strong>الوضع</strong>ما أُنجز حتى الآن</div>
@@ -714,32 +797,34 @@
     </section>
 
     <!-- 2 -->
-    <section class="slide" data-title="المشكلة">
+    <section class="slide problem" data-title="المشكلة">
       <p class="eyebrow">تشخيص الواقع التشغيلي</p>
       <h2>المشكلة التي نعالجها</h2>
       <p class="problem-intro">
-        تعتمد العمليات اليومية حالياً على مستندات ورقية وجداول متفرقة، غير مرتبطة ببعضها بشكل يسهّل الوصول إلى المعلومة الصحيحة في الوقت المناسب. ينتج عن ذلك بطء في البحث، ضعف في التنسيق بين الأقسام، وصعوبة في تتبّع الحسابات والمعادلات والتقارير.
+        العمليات اليوم مبعثرة بين ورق وجداول غير مترابطة، فيصعب الوصول السريع للمعلومة الصحيحة.
       </p>
       <div class="problem-grid">
-        <div class="problem-card">
-          <h3>تشتّت المستندات الورقية</h3>
-          <p>الاعتماد على الورق الموزَّع بين الإدارات يجعل الوصول إلى المستند المطلوب بطيئاً، والبحث فيه مرهقاً وغير موثوق عند الحاجة العاجلة.</p>
+        <div class="problem-card" data-num="١">
+          <h3>تشتّت الورق</h3>
+          <p>مستندات موزَّعة يصعب الوصول إليها أو البحث فيها بسرعة.</p>
         </div>
-        <div class="problem-card">
+        <div class="problem-card" data-num="٢">
           <h3>ضعف توافق الأقسام</h3>
-          <p>غياب مصدر واحد للحقيقة يخلق فجوات بين المبيعات والمكتب الفني والإنتاج والمخازن والمشتريات، فتختلف النسخ والقرارات من قسم إلى آخر.</p>
+          <p>غياب مصدر موحّد يخلق اختلافاً في النسخ والقرارات بين الإدارات.</p>
         </div>
-        <div class="problem-card">
-          <h3>صعوبة تسجيل الحسابات والمعادلات</h3>
-          <p>كثير من العمليات تحتاج إلى كميات وأسعار وتحويلات وحدات وتكاليف؛ تسجيلها يدوياً عرضة للخطأ ويصعب مراجعتها أو إعادة استخدامها لاحقاً.</p>
+        <div class="problem-card" data-num="٣">
+          <h3>الحسابات والمعادلات</h3>
+          <p>تسجيل الكميات والأسعار والتحويلات يدوياً عرضة للخطأ وصعب المراجعة.</p>
         </div>
-        <div class="problem-card">
-          <h3>مستندات غير منظمة وغير مترابطة</h3>
-          <p>العقود وطلبات الشراء والاستلامات والفواتير وغيرها غالباً ما تكون منفصلة، فلا يظهر الرابط التشغيلي بينها عند البحث عن معلومة مرتبطة بمشروع أو صنف.</p>
+        <div class="problem-card" data-num="٤">
+          <h3>مستندات غير مترابطة</h3>
+          <p>العقود والمشتريات والاستلامات منفصلة بلا مسار واضح يربطها.</p>
         </div>
-        <div class="problem-card accent">
-          <h3>إعداد التقارير يدوياً بجهد كبير</h3>
-          <p>مثال عملي على أثر المشكلة: إعداد التقارير يتم يدوياً من مصادر متعددة، فيستهلك وقتاً طويلاً من الفرق الإدارية، ويزيد احتمال التعارض أو السهو، ويؤخّر اتخاذ القرار المبني على بيانات حديثة.</p>
+        <div class="problem-card accent" data-num="٥">
+          <div class="problem-card-body">
+            <h3>التقارير تُعد يدوياً</h3>
+            <p>تجميع البيانات من مصادر متعددة يستهلك وقتاً كبيراً ويؤخّر القرار.</p>
+          </div>
         </div>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
