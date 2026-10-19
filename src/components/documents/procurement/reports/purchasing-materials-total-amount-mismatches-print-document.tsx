@@ -28,6 +28,21 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
   const totalNetDifference = orders.reduce((sum, row) => sum + row.difference, 0);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  const getMismatchPercentage = (calculated: number, invoice: number, difference: number) => {
+    const base = Math.max(Math.abs(calculated), Math.abs(invoice));
+    return base === 0 ? 0 : (difference / base) * 100;
+  };
+
+  const differenceToneClass = (value: number) => {
+    if (value > 0) return "text-teal-700";
+    if (value < 0) return "text-clay-700";
+    return "text-gray-800";
+  };
 
   return (
     <div className="flex flex-col gap-8 text-xs text-gray-900">
@@ -96,22 +111,27 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
             translate(`Calculated (${currency})`, `المحسوب (${currency})`),
             translate(`Invoice Purchases (${currency})`, `مشتريات الفاتورة (${currency})`),
             translate(`Difference (${currency})`, `الفرق (${currency})`),
+            translate("Percentage", "النسبة"),
           ]}
-          rows={orders.map((row, index) => [
-            String(index + 1),
-            row.invoiceNumbers.join(", ") || "-",
-            row.supplierName,
-            <span className="text-gray-500">{formatDate(row.createdAt, locale)}</span>,
-            <span className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</span>,
-            <span className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</span>,
-            <span
-              className={`font-semibold ${
-                row.difference > 0 ? "text-teal-700" : row.difference < 0 ? "text-clay-700" : "text-gray-800"
-              }`}
-            >
-              {formatMoney(row.difference)}
-            </span>,
-          ])}
+          rows={orders.map((row, index) => {
+            const percentage = getMismatchPercentage(
+              row.calculatedTotalAmount,
+              row.invoiceTotalPurchases,
+              row.difference,
+            );
+            const tone = differenceToneClass(row.difference);
+
+            return [
+              String(index + 1),
+              row.invoiceNumbers.join(", ") || "-",
+              row.supplierName,
+              <span className="text-gray-500">{formatDate(row.createdAt, locale)}</span>,
+              <span className="font-semibold text-ochre-600">{formatMoney(row.calculatedTotalAmount)}</span>,
+              <span className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</span>,
+              <span className={`font-semibold ${tone}`}>{formatMoney(row.difference)}</span>,
+              <span className={`font-semibold ${tone}`}>{percentageFormatter.format(percentage)}%</span>,
+            ];
+          })}
           footerRows={[
             [
               "",
@@ -120,13 +140,10 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
               "",
               <span className="font-semibold text-ochre-600">{formatMoney(overview.totalCalculatedAmount)}</span>,
               <span className="font-semibold text-gray-800">{formatMoney(overview.totalInvoicePurchases)}</span>,
-              <span
-                className={`font-semibold ${
-                  totalNetDifference > 0 ? "text-teal-700" : totalNetDifference < 0 ? "text-clay-700" : "text-gray-800"
-                }`}
-              >
+              <span className={`font-semibold ${differenceToneClass(totalNetDifference)}`}>
                 {formatMoney(totalNetDifference)}
               </span>,
+              "",
             ],
             [
               "",
@@ -136,6 +153,7 @@ export default function PurchasingMaterialsTotalAmountMismatchesPrintDocument({
               "",
               "",
               <span className="font-semibold text-ochre-600">{formatMoney(overview.totalDifference)}</span>,
+              "",
             ],
           ]}
           monoColumnIndexes={[1]}
