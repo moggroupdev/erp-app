@@ -469,6 +469,136 @@
     .live li::before { background: var(--teal-600); }
     .next li::before { background: var(--ochre-600); }
 
+    .slide.security {
+      background:
+        radial-gradient(ellipse 55% 45% at 100% 0%, rgba(36, 120, 181, 0.08), transparent 50%),
+        #ffffff;
+    }
+
+    .slide.security h2 {
+      margin-bottom: 8px;
+    }
+
+    .security-brief {
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--muted);
+      font-weight: 500;
+      max-width: 68ch;
+      margin-bottom: 8px;
+    }
+
+    .security-stages {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      flex: 1;
+      min-height: 0;
+      padding-top: 8px;
+      padding-bottom: 28px;
+    }
+
+    .security-stages::before {
+      content: "";
+      position: absolute;
+      top: 34px;
+      inset-inline: 16.6%;
+      height: 2px;
+      background: linear-gradient(
+        to left,
+        rgba(36, 120, 181, 0.15),
+        var(--haze-600) 50%,
+        rgba(36, 120, 181, 0.15)
+      );
+      pointer-events: none;
+    }
+
+    .sec-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      min-height: 0;
+    }
+
+    .sec-node-mark {
+      position: relative;
+      z-index: 1;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--navy);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      box-shadow:
+        0 0 0 7px var(--white),
+        0 0 0 9px var(--haze-100);
+    }
+
+    .sec-stage.roles .sec-node-mark { background: var(--haze-600); }
+    .sec-stage.audit .sec-node-mark { background: var(--haze-700); }
+
+    .sec-stage h3 {
+      margin: 12px 0 2px;
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    .sec-stage .sec-q {
+      font-size: 0.78rem;
+      color: var(--haze-700);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .sec-stage ul {
+      list-style: none;
+      width: 100%;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 14px 14px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--haze-50) 0%, rgba(228, 245, 253, 0.2) 100%);
+    }
+
+    .sec-stage.roles ul {
+      background: linear-gradient(180deg, #eef2f7 0%, rgba(210, 216, 226, 0.2) 100%);
+    }
+
+    .sec-stage.audit ul {
+      background: linear-gradient(180deg, var(--haze-50) 0%, rgba(228, 245, 253, 0.12) 100%);
+    }
+
+    .sec-stage li {
+      padding: 2px 0;
+    }
+
+    .sec-stage li strong {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 1px;
+      line-height: 1.4;
+    }
+
+    .sec-stage li p {
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 500;
+      margin: 0;
+    }
+
     h1 {
       font-size: clamp(1.85rem, 3.2vw, 2.55rem);
       line-height: 1.25;
@@ -1143,26 +1273,70 @@
     </section>
 
     <!-- 4 -->
-    <section class="slide" data-title="الأساس">
-      <p class="eyebrow">الأساس</p>
-      <h2>نقاط قوة المنصة</h2>
-      <div class="grid-2">
-        <div class="card">
-          <h3>منتج ثنائي اللغة</h3>
-          <p>عربي أولاً مع الإنجليزية. واجهة وصلاحيات واعية باللغة في كل الشاشات.</p>
-        </div>
-        <div class="card">
-          <h3>الأدوار والصلاحيات</h3>
-          <p>صلاحيات دقيقة. يرى المستخدم ما يسمح به دوره فقط. تجاوز إداري لفريق تقنية المعلومات.</p>
-        </div>
-        <div class="card">
-          <h3>سجل التدقيق</h3>
-          <p>تاريخ تغييرات على مستوى قاعدة البيانات مع سجل قابل للبحث داخل التطبيق.</p>
-        </div>
-        <div class="card">
-          <h3>نمط الاعتمادات</h3>
-          <p>بوابات متعددة الأطراف تعمل اليوم على طلبات شراء الخامات (التخطيط، مراقبة المخزون، المدير).</p>
-        </div>
+    <section class="slide security" data-title="الضوابط">
+      <p class="eyebrow">أمن الوصول</p>
+      <h2>الدخول والصلاحيات والتدقيق</h2>
+      <p class="security-brief">
+        لا يصل المستخدم إلا بهوية موثّقة، ولا ينفّذ إلا ما يسمح به دوره، ويُحفظ أثر كل تغيير في سجل لا يُعدَّل.
+      </p>
+      <div class="security-stages">
+        <article class="sec-stage auth">
+          <span class="sec-node-mark">١</span>
+          <h3>المصادقة</h3>
+          <p class="sec-q">من يدخل؟</p>
+          <ul>
+            <li>
+              <strong>وسائل الدخول</strong>
+              <p>البريد الإلكتروني أو رقم الهاتف.</p>
+            </li>
+            <li>
+              <strong>حماية الجلسة</strong>
+              <p>رموز وصول وتجديد، وكلمات مرور مشفّرة.</p>
+            </li>
+            <li>
+              <strong>إدارة الحساب</strong>
+              <p>الملف الشخصي من النظام، وسجلات بلا صلاحية دخول.</p>
+            </li>
+          </ul>
+        </article>
+        <article class="sec-stage roles">
+          <span class="sec-node-mark">٢</span>
+          <h3>الصلاحيات</h3>
+          <p class="sec-q">ماذا يُسمح له؟</p>
+          <ul>
+            <li>
+              <strong>أدوار دقيقة</strong>
+              <p>صلاحيات محددة لكل عملية، لا حزمة عامة.</p>
+            </li>
+            <li>
+              <strong>واجهة مقيّدة</strong>
+              <p>الشاشات والإجراءات وفق المسموح به فقط.</p>
+            </li>
+            <li>
+              <strong>ضابط موحّد</strong>
+              <p>القواعد نفسها على الخادم والواجهة.</p>
+            </li>
+          </ul>
+        </article>
+        <article class="sec-stage audit">
+          <span class="sec-node-mark">٣</span>
+          <h3>التدقيق</h3>
+          <p class="sec-q">ماذا تغيّر؟</p>
+          <ul>
+            <li>
+              <strong>لقطة كاملة</strong>
+              <p>حفظ الحالة قبل التغيير وبعده.</p>
+            </li>
+            <li>
+              <strong>قابلية المراجعة</strong>
+              <p>بحث حسب المستخدم أو السجل أو الفترة.</p>
+            </li>
+            <li>
+              <strong>سجل ثابت</strong>
+              <p>غير قابل للتعديل من داخل التطبيق.</p>
+            </li>
+          </ul>
+        </article>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
