@@ -584,6 +584,288 @@
       margin: 0;
     }
 
+    .slide.purchasing {
+      background: #ffffff;
+    }
+
+    .slide.purchasing .eyebrow {
+      margin-bottom: 8px;
+    }
+
+    .slide.purchasing h2 {
+      margin-bottom: 4px;
+    }
+
+    .purchasing-brief {
+      font-size: 0.82rem;
+      line-height: 1.75;
+      color: var(--muted);
+      font-weight: 500;
+      max-width: 72ch;
+      margin-bottom: 2px;
+    }
+
+    .pcycle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-height: 0;
+      padding-top: 2px;
+      padding-bottom: 28px;
+    }
+
+    .pcycle-head {
+      width: min(440px, 52%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .pcycle-reqs {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .pc-node {
+      text-align: center;
+      padding: 7px 14px 6px;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--haze-50) 48%, #ffffff);
+      flex-shrink: 0;
+    }
+
+    .pc-node strong {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .pc-node span {
+      display: block;
+      margin-top: 1px;
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .pc-node.pr {
+      border-radius: 999px;
+      padding: 8px 14px 7px;
+    }
+
+    .pc-node.rfq {
+      background: #ffffff;
+      border: 1.5px dashed color-mix(in srgb, var(--haze-600) 28%, var(--line));
+      padding: 7px 20px 8px;
+      min-width: 230px;
+    }
+
+    .pc-optional {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 0.62rem;
+      font-style: normal;
+      font-weight: 800;
+      color: var(--haze-700);
+      background: var(--haze-50);
+      padding: 1px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.01em;
+    }
+
+    .pc-node.po {
+      background: var(--navy);
+      border-radius: 999px;
+      min-width: 180px;
+      padding: 9px 26px 8px;
+    }
+
+    .pc-node.po strong { color: #ffffff; }
+    .pc-node.po span { color: rgba(255, 255, 255, 0.72); }
+
+    .pc-merge,
+    .pc-split {
+      position: relative;
+      flex-shrink: 0;
+      border: 2px solid var(--haze-100);
+      pointer-events: none;
+    }
+
+    .pc-merge {
+      width: calc(50% + 16px);
+      height: 14px;
+      margin-top: 2px;
+      margin-bottom: 8px;
+      border-top: 0;
+      border-radius: 0 0 14px 14px;
+    }
+
+    .pc-merge::after,
+    .pc-split::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      background: var(--haze-100);
+    }
+
+    .pc-merge::after {
+      top: 100%;
+      height: 8px;
+    }
+
+    .pc-line {
+      position: relative;
+      width: 2px;
+      height: 10px;
+      flex-shrink: 0;
+      margin: 3px 0 5px;
+      background: var(--haze-100);
+    }
+
+    .pc-arrow::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -1px;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-inline: 4px solid transparent;
+      border-top: 5px solid color-mix(in srgb, var(--haze-600) 55%, var(--haze-100));
+    }
+
+    .pcycle-tail {
+      width: min(88%, 780px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .pc-split {
+      width: calc(50% + 12px);
+      height: 14px;
+      margin-top: 8px;
+      margin-bottom: 0;
+      border-bottom: 0;
+      border-radius: 14px 14px 0 0;
+    }
+
+    .pc-split::before {
+      bottom: 100%;
+      height: 8px;
+    }
+
+    .pc-branches {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .pc-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      padding: 10px 14px 12px;
+      border-radius: 16px;
+      border: 1.5px dashed color-mix(in srgb, var(--haze-600) 26%, var(--line));
+      background: color-mix(in srgb, var(--haze-50) 36%, #ffffff);
+    }
+
+    .pc-branch.warehouse {
+      border-color: color-mix(in srgb, var(--teal-600) 26%, var(--line));
+      background: color-mix(in srgb, var(--teal-50) 42%, #ffffff);
+    }
+
+    .pc-branch-kicker {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--haze-700);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .pc-branch.warehouse .pc-branch-kicker {
+      color: var(--teal-600);
+    }
+
+    .pc-branch-hint {
+      margin-top: 8px;
+      font-size: 0.68rem;
+      line-height: 1.55;
+      color: var(--muted);
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .pc-invoices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 10px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .pc-invoices .pc-node {
+      background: #ffffff;
+      border-radius: 11px;
+      padding: 7px 10px;
+    }
+
+    .pc-invoices .pc-node.note {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: 72%;
+      background: #ffffff;
+      border: 1.5px dashed color-mix(in srgb, var(--haze-600) 22%, var(--line));
+    }
+
+    .pc-receipts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .receipt-pack {
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      border-radius: 11px;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--teal-600) 16%, var(--line));
+    }
+
+    .pc-mini {
+      padding: 5px 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--navy);
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .pc-mini + .pc-mini {
+      border-top: 1px solid color-mix(in srgb, var(--teal-600) 12%, var(--line));
+    }
+
     h1 {
       font-size: clamp(1.85rem, 3.2vw, 2.55rem);
       line-height: 1.25;
@@ -1327,25 +1609,70 @@
     </section>
 
     <!-- 5 -->
-    <section class="slide" data-title="ما يعمل ١">
-      <p class="eyebrow">ما تم تسليمه</p>
-      <h2>ما يعمل اليوم (١ / ٢)</h2>
-      <div class="stack">
-        <div class="row">
-          <div class="label">المؤسسة</div>
-          <div class="body">المستخدمون، الأدوار، الأقسام، مسؤولو أقسام الإنتاج، الملف الشخصي وكلمة المرور، سجلات التدقيق.</div>
+    <section class="slide purchasing" data-title="دورة المشتريات">
+      <p class="eyebrow">مسار تشغيلي</p>
+      <h2>دورة شراء الخامات</h2>
+      <p class="purchasing-brief">
+        من الطلبات المعتمدة إلى أمر التوريد، ثم يتفرع المسار إلى الفواتير وإلى الاستلام والفحص وإذن الإضافة.
+      </p>
+      <div class="pcycle">
+        <div class="pcycle-head">
+          <div class="pcycle-reqs">
+            <article class="pc-node pr">
+              <strong>طلب شراء ١</strong>
+              <span>تم اعتماده</span>
+            </article>
+            <article class="pc-node pr">
+              <strong>طلب شراء ٢</strong>
+              <span>تم اعتماده</span>
+            </article>
+          </div>
+          <div class="pc-merge" aria-hidden="true"></div>
+          <article class="pc-node rfq">
+            <strong>طلب عرض سعر من الموردين</strong>
+            <em class="pc-optional">اختياري</em>
+          </article>
+          <div class="pc-line pc-arrow" aria-hidden="true"></div>
+          <article class="pc-node po">
+            <strong>أمر توريد</strong>
+            <span>من مورد</span>
+          </article>
         </div>
-        <div class="row">
-          <div class="label">البيانات الأساسية</div>
-          <div class="body">العملاء، الموردون، الخامات (بما فيها قوائم تصنيع المواد المصنّعة)، كتالوج المنتجات مع الأبعاد ومسارات الإنتاج وقوائم المواد القياسية، وأداة تحويل الوحدات.</div>
-        </div>
-        <div class="row">
-          <div class="label">جسر العقود</div>
-          <div class="body">قائمة ومراجعة تفاصيل مراجعات العقود. إنشاء عقد مرحلي بأرقام الورق وأوامر التشغيل والوحدات والأرقام التسلسلية.</div>
-        </div>
-        <div class="row">
-          <div class="label">التقارير</div>
-          <div class="body">ملخصات المخزون وتحليلات المشتريات: الإنفاق، تاريخ الأسعار، إحصاءات الفئات والموردين، فروقات الفواتير، ومتابعة طلبات الشراء.</div>
+        <div class="pcycle-tail">
+          <div class="pc-split" aria-hidden="true"></div>
+          <div class="pc-branches">
+            <div class="pc-branch warehouse">
+              <div class="pc-branch-kicker">المخزن</div>
+              <div class="pc-receipts">
+                <div class="receipt-pack">
+                  <div class="pc-mini">استلام</div>
+                  <div class="pc-mini">فحص</div>
+                  <div class="pc-mini">إذن إضافة</div>
+                </div>
+                <div class="receipt-pack">
+                  <div class="pc-mini">استلام</div>
+                  <div class="pc-mini">فحص</div>
+                  <div class="pc-mini">إذن إضافة</div>
+                </div>
+              </div>
+              <p class="pc-branch-hint">أكثر من دفعة على الأمر نفسه</p>
+            </div>
+            <div class="pc-branch invoices">
+              <div class="pc-branch-kicker">الفواتير</div>
+              <div class="pc-invoices">
+                <article class="pc-node">
+                  <strong>فاتورة</strong>
+                </article>
+                <article class="pc-node">
+                  <strong>فاتورة</strong>
+                </article>
+                <article class="pc-node note">
+                  <strong>إشعار دائن / مدين</strong>
+                </article>
+              </div>
+              <p class="pc-branch-hint">أكثر من مستند على الأمر نفسه</p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
