@@ -470,9 +470,7 @@
     .next li::before { background: var(--ochre-600); }
 
     .slide.security {
-      background:
-        radial-gradient(ellipse 55% 45% at 100% 0%, rgba(36, 120, 181, 0.08), transparent 50%),
-        #ffffff;
+      background: #ffffff;
     }
 
     .slide.security h2 {
@@ -505,12 +503,7 @@
       top: 34px;
       inset-inline: 16.6%;
       height: 2px;
-      background: linear-gradient(
-        to left,
-        rgba(36, 120, 181, 0.15),
-        var(--haze-600) 50%,
-        rgba(36, 120, 181, 0.15)
-      );
+      background: var(--haze-100);
       pointer-events: none;
     }
 
@@ -564,22 +557,14 @@
       text-align: right;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 12px 14px 14px;
+      gap: 12px;
+      padding: 18px 18px 16px;
       border-radius: 16px;
-      background: linear-gradient(180deg, var(--haze-50) 0%, rgba(228, 245, 253, 0.2) 100%);
-    }
-
-    .sec-stage.roles ul {
-      background: linear-gradient(180deg, #eef2f7 0%, rgba(210, 216, 226, 0.2) 100%);
-    }
-
-    .sec-stage.audit ul {
-      background: linear-gradient(180deg, var(--haze-50) 0%, rgba(228, 245, 253, 0.12) 100%);
+      background: color-mix(in srgb, var(--haze-50) 42%, #ffffff);
     }
 
     .sec-stage li {
-      padding: 2px 0;
+      padding: 2px 2px;
     }
 
     .sec-stage li strong {
@@ -592,9 +577,9 @@
     }
 
     .sec-stage li p {
-      font-size: 0.74rem;
+      font-size: 0.76rem;
       color: var(--muted);
-      line-height: 1.7;
+      line-height: 1.8;
       font-weight: 500;
       margin: 0;
     }
@@ -1286,16 +1271,16 @@
           <p class="sec-q">من يدخل؟</p>
           <ul>
             <li>
-              <strong>وسائل الدخول</strong>
-              <p>البريد الإلكتروني أو رقم الهاتف.</p>
+              <strong>دخول بحساب شخصي</strong>
+              <p>يدخل كل مستخدم إلى النظام بحسابه عبر البريد الإلكتروني أو رقم الهاتف، دون الحاجة إلى أدوات خارجية.</p>
             </li>
             <li>
-              <strong>حماية الجلسة</strong>
-              <p>رموز وصول وتجديد، وكلمات مرور مشفّرة.</p>
+              <strong>حماية بيانات الدخول</strong>
+              <p>تُحفظ كلمة المرور بشكل آمن، وتنتهي صلاحية الجلسة وفق ضوابط تمنع بقاء الحساب مفتوحاً دون رقابة.</p>
             </li>
             <li>
-              <strong>إدارة الحساب</strong>
-              <p>الملف الشخصي من النظام، وسجلات بلا صلاحية دخول.</p>
+              <strong>تسجيل بلا صلاحية دخول</strong>
+              <p>يمكن إدراج بيانات الموظف لأغراض التشغيل، دون منحه حساباً يتيح فتح النظام أو الاطلاع على الشاشات.</p>
             </li>
           </ul>
         </article>
@@ -1305,16 +1290,16 @@
           <p class="sec-q">ماذا يُسمح له؟</p>
           <ul>
             <li>
-              <strong>أدوار دقيقة</strong>
-              <p>صلاحيات محددة لكل عملية، لا حزمة عامة.</p>
+              <strong>صلاحية حسب الدور</strong>
+              <p>يُمنح كل مستخدم صلاحيات مرتبطة بدوره الوظيفي، فيرى وينفّذ ما يخص عمله دون الوصول إلى بقية النظام.</p>
             </li>
             <li>
-              <strong>واجهة مقيّدة</strong>
-              <p>الشاشات والإجراءات وفق المسموح به فقط.</p>
+              <strong>شاشات محدودة بالمهمة</strong>
+              <p>تظهر القوائم والإجراءات لمن يملك صلاحيتها فقط، بما يقلّل الخطأ التشغيلي ويمنع الاطلاع غير المصرّح به.</p>
             </li>
             <li>
-              <strong>ضابط موحّد</strong>
-              <p>القواعد نفسها على الخادم والواجهة.</p>
+              <strong>تنفيذ محكوم بالصلاحية</strong>
+              <p>ما لا يُسمح به لا يمكن إتمامه داخل النظام، حتى إذا لم تظهر الشاشة للمستخدم أو حاوَل تجاوزها.</p>
             </li>
           </ul>
         </article>
@@ -1324,16 +1309,16 @@
           <p class="sec-q">ماذا تغيّر؟</p>
           <ul>
             <li>
-              <strong>لقطة كاملة</strong>
-              <p>حفظ الحالة قبل التغيير وبعده.</p>
+              <strong>توثيق كل تغيير</strong>
+              <p>يُسجَّل تلقائياً كل إضافة أو تعديل أو حذف فور حدوثه، دون الحاجة إلى توثيق يدوي لاحق.</p>
             </li>
             <li>
-              <strong>قابلية المراجعة</strong>
-              <p>بحث حسب المستخدم أو السجل أو الفترة.</p>
+              <strong>معرفة المسؤول والوقت</strong>
+              <p>يمكن للإدارة الرجوع إلى هوية من أجرى التغيير، ووقته، والسجل الذي تأثّر به، عند أي مراجعة.</p>
             </li>
             <li>
-              <strong>سجل ثابت</strong>
-              <p>غير قابل للتعديل من داخل التطبيق.</p>
+              <strong>سجل لا يُخفى</strong>
+              <p>سجل التدقيق محمي داخل النظام، فلا يمكن تعديله أو حذفه لإخفاء ما سبق تنفيذه.</p>
             </li>
           </ul>
         </article>
