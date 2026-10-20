@@ -351,6 +351,124 @@
       margin: 0;
     }
 
+    .slide.status {
+      background:
+        radial-gradient(ellipse 55% 45% at 100% 0%, rgba(36, 120, 181, 0.08), transparent 50%),
+        radial-gradient(ellipse 50% 40% at 0% 100%, rgba(17, 94, 89, 0.06), transparent 48%),
+        #ffffff;
+    }
+
+    .slide.status h2 {
+      margin-bottom: 8px;
+    }
+
+    .status-brief {
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    .status-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 28px;
+    }
+
+    .status-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+    }
+
+    .status-panel.designed {
+      background: linear-gradient(165deg, var(--haze-50) 0%, rgba(228, 245, 253, 0.28) 46%, transparent 100%);
+    }
+
+    .status-panel.live {
+      background: linear-gradient(165deg, var(--teal-50) 0%, rgba(226, 236, 235, 0.28) 46%, transparent 100%);
+    }
+
+    .status-panel.next {
+      background: linear-gradient(165deg, var(--ochre-50) 0%, rgba(247, 239, 225, 0.28) 46%, transparent 100%);
+    }
+
+    .status-kicker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .status-kicker span {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .designed .status-dot { background: var(--haze-600); }
+    .live .status-dot { background: var(--teal-600); }
+    .next .status-dot { background: var(--ochre-600); }
+
+    .designed .status-kicker span { color: var(--haze-700); }
+    .live .status-kicker span { color: var(--teal-600); }
+    .next .status-kicker span { color: var(--ochre-600); }
+
+    .status-panel h3 {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0 0 12px;
+      line-height: 1.35;
+      letter-spacing: -0.01em;
+    }
+
+    .live h3 { color: var(--teal-600); }
+    .next h3 { color: var(--ochre-600); }
+
+    .status-panel ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .status-panel li {
+      position: relative;
+      padding-inline-start: 14px;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .status-panel li::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: 0;
+      top: 0.62em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+
+    .designed li::before { background: var(--haze-600); }
+    .live li::before { background: var(--teal-600); }
+    .next li::before { background: var(--ochre-600); }
+
     h1 {
       font-size: clamp(1.85rem, 3.2vw, 2.55rem);
       line-height: 1.25;
@@ -972,24 +1090,53 @@
     </section>
 
     <!-- 3 -->
-    <section class="slide" data-title="أين نحن">
-      <p class="eyebrow">الخلاصة</p>
+    <section class="slide status" data-title="أين نحن">
+      <p class="eyebrow">الوضع الحالي</p>
       <h2>أين نحن الآن</h2>
-      <div class="quote">
-        صمّمنا دورة حياة المشروع كاملة. اليوم يمكن تشغيل شراء الخامات والبيانات الأساسية والهندسة ومراجعات العقود المرحلية والتقارير. الإصدارات القادمة تُغلق حقيقة المخزون، ثم المبيعات والإنتاج، ثم التنفيذ الميداني وما بعد البيع.
-      </div>
-      <div class="grid-3" style="margin-top: 22px; flex: 0;">
-        <div class="card">
-          <h3>نموذج البيانات</h3>
-          <p>دورة الحياة كاملة في قاعدة البيانات: من الاستفسار حتى الصيانة.</p>
+      <p class="status-brief">
+        نقرأ الوضع على ثلاثة مستويات: ما اكتمل في بنية البرنامج، وما دخل حيز الاستخدام، وما يُستكمل وفق أولوية تشغيلية.
+      </p>
+      <div class="status-cols">
+        <div class="status-panel designed">
+          <div class="status-kicker">
+            <span class="status-dot"></span>
+            <span>مصمَّم</span>
+          </div>
+          <h3>النموذج التشغيلي</h3>
+          <ul>
+            <li>دورة المشروع ممثَّلة من الاستفسار حتى الصيانة.</li>
+            <li>ربط واضح بين المستندات والحسابات والصلاحيات.</li>
+            <li>سجل تدقيق على مستوى قاعدة البيانات.</li>
+            <li>إطلاق المسارات يتم على مراحل دون إعادة بناء النموذج.</li>
+          </ul>
         </div>
-        <div class="card">
-          <h3>برمجيات جاهزة للاستخدام</h3>
-          <p>المؤسسة، البيانات الأساسية، الهندسة، مسار شراء الخامات، مستندات المخزن، التقارير، العقود المرحلية.</p>
+        <div class="status-panel live">
+          <div class="status-kicker">
+            <span class="status-dot"></span>
+            <span>قيد التشغيل</span>
+          </div>
+          <h3>ما يعمل اليوم</h3>
+          <ul>
+            <li>المستخدمون، الأدوار، الأقسام، والصلاحيات.</li>
+            <li>البيانات الأساسية للعملاء، الموردين، والخامات.</li>
+            <li>المنتجات، الأبعاد، قوائم المواد، ومسارات الإنتاج.</li>
+            <li>مسار شراء الخامات من الطلب حتى فاتورة المورد.</li>
+            <li>مستندات المخزن، والتقارير الإدارية.</li>
+          </ul>
         </div>
-        <div class="card">
-          <h3>ما زال أمامنا</h3>
-          <p>مسار المبيعات الأصلي، خطط الإنتاج، ترحيل المخزون، العمليات الميدانية، وما بعد البيع.</p>
+        <div class="status-panel next">
+          <div class="status-kicker">
+            <span class="status-dot"></span>
+            <span>قادم</span>
+          </div>
+          <h3>ما سيُستكمل</h3>
+          <ul>
+            <li>ترحيل الصرف وتثبيت الأرصدة الفعلية.</li>
+            <li>مسار المبيعات: استفسار، معاينة، عرض، ثم عقد.</li>
+            <li>خطط الإنتاج ومتابعة التنفيذ حسب القسم.</li>
+            <li>النقل والتركيب والتسليم للعميل.</li>
+            <li>عقود الصيانة وأوامر ما بعد البيع.</li>
+          </ul>
         </div>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
@@ -1093,7 +1240,7 @@
       <div class="flow" style="margin-top: 18px;">
         <div class="step grey">مسار المبيعات</div><span class="arrow">←</span>
         <div class="step amber">العقد</div><span class="arrow">←</span>
-        <div class="step green">الهندسة</div><span class="arrow">←</span>
+        <div class="step green">البيانات الفنية</div><span class="arrow">←</span>
         <div class="step grey">الإنتاج</div><span class="arrow">←</span>
         <div class="step green">شراء الخامات</div><span class="arrow">←</span>
         <div class="step amber">المخزون / الصرف</div><span class="arrow">←</span>
@@ -1147,7 +1294,7 @@
         </li>
         <li>
           <div>
-            <strong>الهندسة</strong>
+            <strong>البيانات الفنية</strong>
             <span>منتج بأبعاد ومسار إنتاج وقائمة مواد.</span>
           </div>
         </li>
@@ -1248,7 +1395,7 @@
       <div class="brand">MOG ERP</div>
       <h1>مصدر واحد للحقيقة، على مراحل</h1>
       <p class="lede">
-        اليوم: المشتريات، الهندسة، البيانات الأساسية، التقارير، والجسور المرحلية.<br />
+        اليوم: المشتريات، البيانات الفنية، البيانات الأساسية، التقارير، والجسور المرحلية.<br />
         التالي: ترحيل المخزون، ثم المبيعات والإنتاج، ثم الميدان وما بعد البيع.
       </p>
       <div class="meta">
