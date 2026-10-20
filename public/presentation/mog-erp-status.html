@@ -972,6 +972,495 @@
       margin: 0;
     }
 
+    .d-kicker {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--haze-700);
+      margin-bottom: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .d-title {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+
+    .d-point strong {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 1px;
+      line-height: 1.4;
+    }
+
+    .d-point p {
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.75;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    /* Slide 7: path + parallel gates */
+    .req-layout {
+      display: grid;
+      grid-template-columns: 1.12fr 0.88fr;
+      gap: 18px;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 28px;
+    }
+
+    .req-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .req-step {
+      flex: 1;
+      min-height: 0;
+      padding: 16px 18px 14px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--haze-50) 46%, #ffffff);
+    }
+
+    .req-points {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+    }
+
+    .req-gates {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+      padding: 16px 18px 14px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--navy) 5%, #ffffff);
+    }
+
+    .req-gates .d-title {
+      margin-bottom: 6px;
+    }
+
+    .req-gates-brief {
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.75;
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    .req-gate-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 4px 0 12px;
+    }
+
+    .req-gate {
+      text-align: center;
+      padding: 16px 8px;
+      border-radius: 12px;
+      background: color-mix(in srgb, var(--haze-50) 55%, #ffffff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 72px;
+    }
+
+    .req-gate strong {
+      display: block;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.45;
+    }
+
+    .req-reject {
+      margin-top: 10px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 500;
+    }
+
+    .req-reject strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    /* Slide 8: pair + comparison board */
+    .rfq-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 28px;
+    }
+
+    .rfq-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      flex: 1.25;
+      min-height: 0;
+    }
+
+    .rfq-card {
+      padding: 14px 16px 12px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--haze-50) 46%, #ffffff);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .rfq-card .req-points {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 14px;
+    }
+
+    .rfq-compare {
+      flex: 0.95;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px 10px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--haze-50) 32%, #ffffff);
+    }
+
+    .rfq-compare-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+
+    .rfq-compare-head h3 {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.35;
+    }
+
+    .rfq-compare-head p {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 500;
+      max-width: 48ch;
+    }
+
+    .rfq-suppliers {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .rfq-supplier {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .rfq-supplier.is-best {
+      background: color-mix(in srgb, var(--teal-50) 70%, #ffffff);
+    }
+
+    .rfq-supplier.is-best .d-kicker {
+      color: var(--teal-600);
+    }
+
+    .rfq-supplier .d-title {
+      margin-bottom: 4px;
+      font-size: 0.9rem;
+    }
+
+    /* Slide 9: purchase-order sheet */
+    .po-layout {
+      display: grid;
+      grid-template-columns: 1.28fr 0.72fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 28px;
+    }
+
+    .po-sheet {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-radius: 16px;
+      overflow: hidden;
+      background: color-mix(in srgb, var(--haze-50) 28%, #ffffff);
+    }
+
+    .po-sheet-head {
+      padding: 14px 20px 12px;
+      background: var(--navy);
+      color: #ffffff;
+    }
+
+    .po-sheet-head span {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      opacity: 0.72;
+      margin-bottom: 2px;
+    }
+
+    .po-sheet-head strong {
+      display: block;
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .po-sheet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 0;
+      padding: 6px 8px 8px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .po-field {
+      padding: 12px 12px 10px;
+    }
+
+    .po-field .d-kicker {
+      margin-bottom: 3px;
+    }
+
+    .po-side {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .po-note {
+      flex: 1;
+      min-height: 0;
+      padding: 16px 16px 14px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--haze-50) 46%, #ffffff);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Slide 10: stacked process rows */
+    .insp-layout {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 28px;
+      padding-inline-start: 18px;
+    }
+
+    .insp-layout::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: 5px;
+      top: 18px;
+      bottom: 46px;
+      width: 2px;
+      background: var(--haze-100);
+      pointer-events: none;
+    }
+
+    .insp-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .insp-row::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: -16px;
+      top: 18px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--navy);
+      box-shadow: 0 0 0 4px var(--white);
+    }
+
+    .insp-row:nth-child(2)::before { background: var(--haze-600); }
+    .insp-row:nth-child(3)::before { background: var(--haze-700); }
+
+    .insp-label {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .insp-label h3 {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.3;
+    }
+
+    .insp-facts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .insp-fact {
+      padding: 14px 16px 12px;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--haze-50) 46%, #ffffff);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .insp-row:nth-child(2) .insp-fact:first-child {
+      background: color-mix(in srgb, var(--teal-50) 62%, #ffffff);
+    }
+
+    .insp-row:nth-child(2) .insp-fact:first-child .d-kicker {
+      color: var(--teal-600);
+    }
+
+    /* Slide 11: extracted invoice + steps */
+    .inv-layout {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 16px;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 28px;
+    }
+
+    .inv-doc {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+      padding: 16px 18px 14px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--haze-50) 40%, #ffffff);
+    }
+
+    .inv-doc .d-title {
+      margin-bottom: 10px;
+    }
+
+    .inv-fields {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      align-content: start;
+      align-items: start;
+    }
+
+    .inv-fields li {
+      padding: 8px 10px 7px;
+      border-radius: 10px;
+      background: #ffffff;
+    }
+
+    .inv-fields li span {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--haze-700);
+      margin-bottom: 1px;
+    }
+
+    .inv-fields li strong {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.4;
+    }
+
+    .inv-fields li.wide {
+      grid-column: 1 / -1;
+    }
+
+    .inv-hint {
+      margin-top: 12px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 500;
+    }
+
+    .inv-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .inv-step {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px 12px 14px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--haze-50) 46%, #ffffff);
+    }
+
+    .inv-step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--navy);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .inv-step:nth-child(2) .inv-step-num { background: var(--haze-600); }
+    .inv-step:nth-child(3) .inv-step-num { background: var(--haze-700); }
+
+    .inv-step .d-title {
+      margin-bottom: 2px;
+      font-size: 0.92rem;
+    }
+
     .agenda-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1952,51 +2441,50 @@
       <p class="eyebrow">الخطوة ١ من ٦</p>
       <h2>طلبات شراء الخامات</h2>
       <p class="cycle-brief">
-        يبدأ المسار من المخزن: يُنشأ الطلب، تُقدَّر تكلفته من آخر شراء، ولا يُفتح الشراء إلا بعد ثلاثة اعتمادات متوازية.
+        يُنشأ الطلب من المخزن، تُقدَّر تكلفته من آخر شراء، ثم يمر بثلاثة اعتمادات متوازية.
       </p>
-      <div class="cycle-cols">
-        <article class="cycle-col">
-          <span class="cycle-mark">١</span>
-          <h3>الإنشاء</h3>
-          <ul>
-            <li>
-              <strong>أمين المخزن</strong>
-              <p>ينشئ طلب الشراء داخل النظام، ويربطه بقسم الإنتاج المعني بالصرف لاحقاً.</p>
-            </li>
-            <li>
-              <strong>احتياج التشغيل أو حد الطلب</strong>
-              <p>يُعد الطلب وفق احتياج أقسام الإنتاج، أو لتعويض رصيد المخزن عند بلوغ حد الطلب.</p>
-            </li>
-          </ul>
-        </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٢</span>
-          <h3>تقدير التكلفة</h3>
-          <ul>
-            <li>
-              <strong>آخر سعر شراء لكل صنف</strong>
-              <p>يظهر النظام آخر سعر شراء للمادة، مع تاريخه والمورد الذي تم الشراء منه.</p>
-            </li>
-            <li>
-              <strong>تقدير إجمالي الطلب</strong>
-              <p>يُحتسب تقدير لتكلفة البنود قبل الاعتماد، بما يوضح حجم الالتزام المتوقع.</p>
-            </li>
-          </ul>
-        </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٣</span>
-          <h3>الاعتمادات</h3>
-          <ul>
-            <li>
-              <strong>ثلاث جهات بالتوازي</strong>
-              <p>التخطيط والمتابعة، مراقبة المخزون، والمدير. يُعتمد الطلب بعد موافقة الجهات الثلاث.</p>
-            </li>
-            <li>
-              <strong>رفض مسبّب</strong>
-              <p>أي جهة قد ترفض مع بيان السبب، فيتوقف المسار إلى أن يُعالَج الطلب.</p>
-            </li>
-          </ul>
-        </article>
+      <div class="req-layout">
+        <div class="req-steps">
+          <article class="req-step">
+            <span class="d-kicker">الإنشاء</span>
+            <h3 class="d-title">أمين المخزن يعدّ الطلب</h3>
+            <div class="req-points">
+              <div class="d-point">
+                <strong>أمين المخزن</strong>
+                <p>ينشئ الطلب ويربطه بقسم الإنتاج المعني بالصرف.</p>
+              </div>
+              <div class="d-point">
+                <strong>احتياج أو حد الطلب</strong>
+                <p>وفق احتياج أقسام الإنتاج، أو لتعويض الرصيد عند حد الطلب.</p>
+              </div>
+            </div>
+          </article>
+          <article class="req-step">
+            <span class="d-kicker">تقدير التكلفة</span>
+            <h3 class="d-title">آخر شراء قبل الاعتماد</h3>
+            <div class="req-points">
+              <div class="d-point">
+                <strong>آخر سعر شراء</strong>
+                <p>آخر سعر للمادة، مع تاريخه والمورد.</p>
+              </div>
+              <div class="d-point">
+                <strong>تقدير إجمالي الطلب</strong>
+                <p>تقدير لتكلفة البنود يوضح حجم الالتزام قبل الاعتماد.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+        <aside class="req-gates">
+          <span class="d-kicker">الاعتماد</span>
+          <h3 class="d-title">ثلاث جهات بالتوازي</h3>
+          <p class="req-gates-brief">يُعتمد الطلب بعد موافقة الجهات الثلاث معاً.</p>
+          <div class="req-gate-row">
+            <article class="req-gate"><strong>التخطيط والمتابعة</strong></article>
+            <article class="req-gate"><strong>مراقبة المخزون</strong></article>
+            <article class="req-gate"><strong>المدير</strong></article>
+          </div>
+          <p class="req-reject"><strong>رفض مسبّب:</strong> أي جهة قد ترفض مع بيان السبب، فيتوقف المسار.</p>
+        </aside>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
@@ -2006,50 +2494,61 @@
       <p class="eyebrow">الخطوة ٢ من ٦ · اختياري</p>
       <h2>طلب عروض الأسعار والمقارنة</h2>
       <p class="cycle-brief">
-        يمكن لمندوب المشتريات جمع عروض الموردين على الأصناف نفسها، ومقارنة الأسعار وشروط السداد قبل إصدار أمر التوريد.
+        يجمع مندوب المشتريات عروض الموردين، ويقارن الأسعار وشروط السداد قبل إصدار الأمر.
       </p>
-      <div class="cycle-cols">
-        <article class="cycle-col">
-          <span class="cycle-mark">١</span>
-          <h3>طلب العروض</h3>
-          <ul>
-            <li>
-              <strong>قائمة أصناف وكميات</strong>
-              <p>يُصدَر طلب عرض سعر بالمواد والكميات المطلوبة، دون الالتزام بمورد في هذه المرحلة.</p>
-            </li>
-            <li>
-              <strong>خطوة غير ملزمة</strong>
-              <p>المسار يعمل بدونها. إن وُجدت، يمكن الرجوع إليها لاحقاً عند إنشاء أمر التوريد.</p>
-            </li>
-          </ul>
-        </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٢</span>
-          <h3>تسجيل العروض</h3>
-          <ul>
-            <li>
-              <strong>سعر كل صنف</strong>
-              <p>يُدخل عرض كل مورد بسعر الوحدة لكل بند، وفق الوحدة المستخدمة في الطلب.</p>
-            </li>
-            <li>
-              <strong>شروط السداد والتوريد</strong>
-              <p>يُحفظ مع العرض شروط السداد، ومدة التوريد، وشروط التسليم الخاصة بالمورد.</p>
-            </li>
-          </ul>
-        </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٣</span>
-          <h3>المقارنة</h3>
-          <ul>
-            <li>
-              <strong>عرض جنباً إلى جنب</strong>
-              <p>تظهر أسعار الموردين على الجدول نفسه لكل صنف، مع إجمالي تقديري لكل عرض.</p>
-            </li>
-            <li>
-              <strong>إبراز أقل سعر</strong>
-              <p>يُميَّز أقل سعر قابل للمقارنة، بما يسهّل اختيار المورد قبل إصدار الأمر.</p>
-            </li>
-          </ul>
+      <div class="rfq-layout">
+        <div class="rfq-pair">
+          <article class="rfq-card">
+            <span class="d-kicker">طلب العروض</span>
+            <h3 class="d-title">قائمة دون التزام بمورد</h3>
+            <div class="req-points">
+              <div class="d-point">
+                <strong>أصناف وكميات</strong>
+                <p>طلب بالمواد والكميات، دون الالتزام بمورد.</p>
+              </div>
+              <div class="d-point">
+                <strong>خطوة غير ملزمة</strong>
+                <p>المسار يعمل بدونها، ويمكن الرجوع إليها عند إصدار الأمر.</p>
+              </div>
+            </div>
+          </article>
+          <article class="rfq-card">
+            <span class="d-kicker">تسجيل العروض</span>
+            <h3 class="d-title">سعر وشروط كل مورد</h3>
+            <div class="req-points">
+              <div class="d-point">
+                <strong>سعر كل صنف</strong>
+                <p>سعر الوحدة لكل بند، وفق وحدة الطلب.</p>
+              </div>
+              <div class="d-point">
+                <strong>السداد والتوريد</strong>
+                <p>شروط السداد، ومدة التوريد، وشروط التسليم.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+        <article class="rfq-compare">
+          <div class="rfq-compare-head">
+            <h3>المقارنة جنباً إلى جنب</h3>
+            <p>أسعار الموردين على جدول واحد، مع إجمالي تقديري لكل عرض.</p>
+          </div>
+          <div class="rfq-suppliers">
+            <div class="rfq-supplier d-point">
+              <span class="d-kicker">عرض المورد</span>
+              <h3 class="d-title">سعر الوحدة</h3>
+              <p>وفق وحدة الطلب حتى تصح المقارنة.</p>
+            </div>
+            <div class="rfq-supplier is-best d-point">
+              <span class="d-kicker">أقل سعر</span>
+              <h3 class="d-title">يُبرَز على الجدول</h3>
+              <p>يُميَّز لتسهيل اختيار المورد قبل إصدار الأمر.</p>
+            </div>
+            <div class="rfq-supplier d-point">
+              <span class="d-kicker">مع السعر</span>
+              <h3 class="d-title">شروط السداد والتوريد</h3>
+              <p>المدة والتسليم تُعرض مع السعر.</p>
+            </div>
+          </div>
         </article>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
@@ -2060,51 +2559,49 @@
       <p class="eyebrow">الخطوة ٣ من ٦</p>
       <h2>أوامر التوريد</h2>
       <p class="cycle-brief">
-        يصدر مندوب المشتريات أمر التوريد إلى المورد بالأصناف المتفق عليها، وفق ما اعتُمد في طلبات الشراء.
+        يصدر مندوب المشتريات الأمر للمورد وفق ما اعتُمد في طلبات الشراء.
       </p>
-      <div class="cycle-cols">
-        <article class="cycle-col">
-          <span class="cycle-mark">١</span>
-          <h3>إصدار الأمر</h3>
-          <ul>
-            <li>
+      <div class="po-layout">
+        <article class="po-sheet">
+          <header class="po-sheet-head">
+            <span>أمر توريد لمورد واحد</span>
+            <strong>الأصناف والكميات والأسعار المتفق عليها</strong>
+          </header>
+          <div class="po-sheet-grid">
+            <div class="po-field d-point">
+              <span class="d-kicker">إصدار الأمر</span>
               <strong>مورد واحد لكل أمر</strong>
-              <p>يُحدَّد المورد عند الإنشاء، وتُدرج الأصناف والكميات والأسعار المتفق عليها.</p>
-            </li>
-            <li>
-              <strong>مرجع من عرض السعر</strong>
-              <p>يمكن ربط بند الأمر ببند من عرض مورّد مختار، فيُنقل السعر منه إلى الأمر.</p>
-            </li>
-          </ul>
+              <p>يُحدَّد المورد عند الإنشاء، مع الأصناف والأسعار.</p>
+            </div>
+            <div class="po-field d-point">
+              <span class="d-kicker">مرجع السعر</span>
+              <strong>من عرض مورّد مختار</strong>
+              <p>يمكن نقل السعر من عرض مورّد إلى الأمر.</p>
+            </div>
+            <div class="po-field d-point">
+              <span class="d-kicker">السداد</span>
+              <strong>شروط على الأمر نفسه</strong>
+              <p>تغطي كامل القيمة بما فيها الضريبة.</p>
+            </div>
+            <div class="po-field d-point">
+              <span class="d-kicker">التسليم</span>
+              <strong>المكان والمدة</strong>
+              <p>فوري، أو خلال عدد محدّد من الأيام.</p>
+            </div>
+          </div>
         </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٢</span>
-          <h3>تغطية الطلبات</h3>
-          <ul>
-            <li>
-              <strong>من الطلبات المعتمدة</strong>
-              <p>تُخصم الكميات من بنود طلبات الشراء المعتمدة، فلا يُشترى إلا ما اجتاز الاعتماد.</p>
-            </li>
-            <li>
-              <strong>تغطية جزئية</strong>
-              <p>يجوز توزيع كمية البند على أكثر من أمر توريد، ويبقى الرصيد المفتوح للمتابعة.</p>
-            </li>
-          </ul>
-        </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٣</span>
-          <h3>شروط التوريد</h3>
-          <ul>
-            <li>
-              <strong>السداد على الأمر</strong>
-              <p>تُثبت شروط السداد على الأمر نفسه، بحيث تغطي كامل القيمة بما فيها الضريبة.</p>
-            </li>
-            <li>
-              <strong>مكان ومدة التسليم</strong>
-              <p>يُسجَّل مكان التسليم، وما إذا كان فورياً أو خلال عدد محدّد من الأيام.</p>
-            </li>
-          </ul>
-        </article>
+        <div class="po-side">
+          <article class="po-note d-point">
+            <span class="d-kicker">تغطية الطلبات</span>
+            <h3 class="d-title">من الطلبات المعتمدة</h3>
+            <p>لا يُشترى إلا ما اجتاز الاعتماد.</p>
+          </article>
+          <article class="po-note d-point">
+            <span class="d-kicker">الرصيد المفتوح</span>
+            <h3 class="d-title">تغطية جزئية</h3>
+            <p>يجوز توزيع الكمية على أكثر من أمر، ويبقى الرصيد للمتابعة.</p>
+          </article>
+        </div>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
@@ -2114,50 +2611,57 @@
       <p class="eyebrow">الخطوة ٤ من ٦</p>
       <h2>الاستلام والفحص وإذن الإضافة</h2>
       <p class="cycle-brief">
-        عند وصول البضاعة تُسجَّل الدفعة ويُحرَّر محضر الفحص، ثم يُنشأ إذن إضافة للكميات المقبولة.
+        تُسجَّل الدفعة ويُحرَّر محضر الفحص، ثم يُضاف المقبول إلى المخزون.
       </p>
-      <div class="cycle-cols">
-        <article class="cycle-col">
-          <span class="cycle-mark">١</span>
-          <h3>الاستلام</h3>
-          <ul>
-            <li>
+      <div class="insp-layout">
+        <article class="insp-row">
+          <div class="insp-label">
+            <span class="d-kicker">الوصول</span>
+            <h3>الاستلام</h3>
+          </div>
+          <div class="insp-facts">
+            <div class="insp-fact d-point">
               <strong>دفعة مقابل الأمر</strong>
-              <p>يُنشأ سند استلام على أمر التوريد، بالكميات الواردة في هذه الدفعة.</p>
-            </li>
-            <li>
+              <p>سند استلام بالكميات الواردة في هذه الدفعة.</p>
+            </div>
+            <div class="insp-fact d-point">
               <strong>استلام على دفعات</strong>
-              <p>يجوز تجزئة الأمر على أكثر من استلام، ويُتابع المتبقي حتى اكتمال التغطية.</p>
-            </li>
-          </ul>
+              <p>يجوز تجزئة الأمر، ويُتابع المتبقي حتى الاكتمال.</p>
+            </div>
+          </div>
         </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٢</span>
-          <h3>محضر الفحص</h3>
-          <ul>
-            <li>
+        <article class="insp-row">
+          <div class="insp-label">
+            <span class="d-kicker">الجودة</span>
+            <h3>محضر الفحص</h3>
+          </div>
+          <div class="insp-facts">
+            <div class="insp-fact d-point">
+              <span class="d-kicker">مقبول</span>
               <strong>قبول ورفض لكل صنف</strong>
-              <p>تُفصل الكمية المقبولة عن المرفوضة على مستوى البند، مع ملاحظات الفحص.</p>
-            </li>
-            <li>
+              <p>كمية مقبولة ومرفوضة لكل بند، مع ملاحظات الفحص.</p>
+            </div>
+            <div class="insp-fact d-point">
               <strong>محضر قابل للمراجعة</strong>
-              <p>يُستخرج محضر الفحص من السند نفسه، دون إعادة إدخال النتائج في مستند منفصل.</p>
-            </li>
-          </ul>
+              <p>من السند نفسه، دون مستند منفصل.</p>
+            </div>
+          </div>
         </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٣</span>
-          <h3>إذن الإضافة</h3>
-          <ul>
-            <li>
+        <article class="insp-row">
+          <div class="insp-label">
+            <span class="d-kicker">المخزون</span>
+            <h3>إذن الإضافة</h3>
+          </div>
+          <div class="insp-facts">
+            <div class="insp-fact d-point">
               <strong>من المقبول فقط</strong>
-              <p>يُنشأ إذن إضافة للمخزون من الكميات المقبولة في سند الاستلام.</p>
-            </li>
-            <li>
+              <p>إذن إضافة للكميات المقبولة في سند الاستلام.</p>
+            </div>
+            <div class="insp-fact d-point">
               <strong>مستند مخزني مستقل</strong>
-              <p>الاستلام والفحص يثبتان الوصول والجودة، وإذن الإضافة هو قيد إدخال الرصيد.</p>
-            </li>
-          </ul>
+              <p>الاستلام يثبت الوصول، والإذن يُدخل الرصيد.</p>
+            </div>
+          </div>
         </article>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
@@ -2168,51 +2672,46 @@
       <p class="eyebrow">الخطوة ٥ من ٦</p>
       <h2>قراءة فاتورة المورد آلياً</h2>
       <p class="cycle-brief">
-        تُرفع فاتورة هيئة الضرائب على أمر التوريد، فيقرأها النظام ويستخرج بياناتها، ثم تُراجع وتُحفظ مع الملف.
+        يُرفع ملف هيئة الضرائب فيقرأه النظام، ثم تُراجع البيانات وتُحفظ.
       </p>
-      <div class="cycle-cols">
-        <article class="cycle-col">
-          <span class="cycle-mark">١</span>
-          <h3>رفع الملف</h3>
-          <ul>
-            <li>
-              <strong>ملف الفاتورة الإلكترونية</strong>
-              <p>يُرفق ملف PDF الصادر عن هيئة الضرائب مباشرة على أمر التوريد المعني.</p>
-            </li>
-            <li>
-              <strong>أكثر من فاتورة للأمر</strong>
-              <p>يجوز تسجيل عدة فواتير على الأمر نفسه إذا وردت على دفعات أو تسويات.</p>
-            </li>
+      <div class="inv-layout">
+        <article class="inv-doc">
+          <span class="d-kicker">من ملف الهيئة</span>
+          <h3 class="d-title">البيانات المستخرجة</h3>
+          <ul class="inv-fields">
+            <li><span>الرقم</span><strong>رقم الفاتورة</strong></li>
+            <li><span>التاريخ</span><strong>تاريخ الإصدار</strong></li>
+            <li><span>المبيعات</span><strong>إجمالي المبيعات</strong></li>
+            <li><span>التخفيض</span><strong>الخصم</strong></li>
+            <li><span>الضريبة</span><strong>ضريبة القيمة المضافة</strong></li>
+            <li><span>الخصم الضريبي</span><strong>تحت حساب الضريبة</strong></li>
+            <li class="wide"><span>المستحق</span><strong>إجمالي المبلغ</strong></li>
           </ul>
+          <p class="inv-hint">تُملأ الحقول من الملف، دون إعادة إدخال يدوي.</p>
         </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٢</span>
-          <h3>القراءة الآلية</h3>
-          <ul>
-            <li>
-              <strong>البيانات المستخرجة</strong>
-              <p>رقم الفاتورة، تاريخ الإصدار، إجمالي المبيعات، الخصم، ضريبة القيمة المضافة، والخصم تحت حساب الضريبة، ثم إجمالي المبلغ.</p>
-            </li>
-            <li>
-              <strong>بدون إعادة إدخال يدوي</strong>
-              <p>تُملأ الحقول من الملف نفسه، بما يقلّل الخطأ الناتج عن النسخ من الورق.</p>
-            </li>
-          </ul>
-        </article>
-        <article class="cycle-col">
-          <span class="cycle-mark">٣</span>
-          <h3>المراجعة والحفظ</h3>
-          <ul>
-            <li>
-              <strong>تأكيد قبل التسجيل</strong>
-              <p>تُعرض البيانات المستخرجة للمراجعة، ولا تُحفظ إلا بعد التأكيد.</p>
-            </li>
-            <li>
-              <strong>الملف مع السجل</strong>
-              <p>يُحفظ ملف الفاتورة مع البيانات، ويمكن الرجوع إليه عند أي مطابقة لاحقة.</p>
-            </li>
-          </ul>
-        </article>
+        <div class="inv-steps">
+          <article class="inv-step">
+            <span class="inv-step-num">١</span>
+            <div class="d-point">
+              <h3 class="d-title">رفع الملف</h3>
+              <p>ملف PDF على أمر التوريد. يجوز أكثر من فاتورة للأمر.</p>
+            </div>
+          </article>
+          <article class="inv-step">
+            <span class="inv-step-num">٢</span>
+            <div class="d-point">
+              <h3 class="d-title">القراءة الآلية</h3>
+              <p>يستخرج الرقم والتاريخ والمبالغ والضرائب.</p>
+            </div>
+          </article>
+          <article class="inv-step">
+            <span class="inv-step-num">٣</span>
+            <div class="d-point">
+              <h3 class="d-title">المراجعة والحفظ</h3>
+              <p>تأكيد قبل التسجيل، مع إبقاء الملف للمطابقة.</p>
+            </div>
+          </article>
+        </div>
       </div>
       <div class="footer-bar"><span>مراجعة الوضع</span><span>MOG ERP</span></div>
     </section>
@@ -2222,7 +2721,7 @@
       <p class="eyebrow">الخطوة ٦ من ٦</p>
       <h2>تقارير المشتريات</h2>
       <p class="cycle-brief">
-        تُقرأ الدورة من التقارير مباشرة: حجم الإنفاق، حركة الأسعار، تغطية الطلبات، وانحراف الفاتورة عن أمر التوريد.
+        تُقرأ الدورة من التقارير: الإنفاق، حركة الأسعار، تغطية الطلبات، وانحراف الفاتورة.
       </p>
       <div class="report-cols">
         <article class="report-col">
@@ -2230,15 +2729,15 @@
           <ul>
             <li>
               <strong>ملخص المشتريات</strong>
-              <p>نظرة شاملة حسب الفترة والمورد والمادة والفئة، مع حالات أوامر التوريد.</p>
+              <p>حسب الفترة والمورد والمادة والفئة، مع حالات الأوامر.</p>
             </li>
             <li>
               <strong>حسب الفئة والفئة الفرعية</strong>
-              <p>توزيع المشتريات داخل التصنيف: الموردون، المواد، وقيمة الفواتير.</p>
+              <p>توزيع المشتريات: الموردون، المواد، وقيمة الفواتير.</p>
             </li>
             <li>
               <strong>حسب المورد</strong>
-              <p>حجم التعامل مع مورد واحد: الاتجاه، الفئات، الأوامر، والمواد.</p>
+              <p>حجم التعامل: الاتجاه، الفئات، الأوامر، والمواد.</p>
             </li>
           </ul>
         </article>
@@ -2247,15 +2746,15 @@
           <ul>
             <li>
               <strong>تاريخ الأسعار</strong>
-              <p>تتبع سعر الوحدة لمادة محددة عبر أوامر التوريد بمرور الوقت.</p>
+              <p>سعر الوحدة لمادة عبر أوامر التوريد بمرور الوقت.</p>
             </li>
             <li>
               <strong>مرجع قرار الشراء</strong>
-              <p>يُستخدم لمقارنة العرض الحالي مع ما دُفع سابقاً للصنف نفسه.</p>
+              <p>مقارنة العرض الحالي مع ما دُفع سابقاً للصنف.</p>
             </li>
             <li>
               <strong>ارتباط بآخر شراء</strong>
-              <p>نفس المرجع الذي يظهر تقدير التكلفة على طلب الشراء قبل الاعتماد.</p>
+              <p>نفس المرجع المستخدم في تقدير تكلفة طلب الشراء.</p>
             </li>
           </ul>
         </article>
@@ -2264,15 +2763,15 @@
           <ul>
             <li>
               <strong>متابعة طلبات الشراء</strong>
-              <p>الكميات المطلوبة، وما صدر لها أمر توريد، وما استُلم، حسب قسم الإنتاج.</p>
+              <p>المطلوب، وما صدر له أمر، وما استُلم، حسب قسم الإنتاج.</p>
             </li>
             <li>
               <strong>انحراف إجمالي الفاتورة</strong>
-              <p>مقارنة إجمالي أصناف أمر التوريد مع إجمالي مشتريات فاتورة هيئة الضرائب.</p>
+              <p>مقارنة إجمالي الأمر مع إجمالي مشتريات فاتورة الهيئة.</p>
             </li>
             <li>
               <strong>أوامر مكتملة بلا إجمالي فاتورة</strong>
-              <p>رصد أوامر اكتمل استلامها دون قيمة إجمالي مشتريات على الفاتورة، لمتابعة النقص أو خطأ الرقم.</p>
+              <p>أوامر اكتمل استلامها دون قيمة إجمالي على الفاتورة.</p>
             </li>
           </ul>
         </article>
