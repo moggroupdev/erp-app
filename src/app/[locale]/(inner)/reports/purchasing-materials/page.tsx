@@ -98,6 +98,18 @@ export default function Page() {
               }}
             />
           </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_OUTLIERS_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Price Outliers", ar: "الأسعار الشاذة" },
+                description: {
+                  en: "Find purchase lines whose unit price diverges sharply from nearby purchases of the same material.",
+                  ar: "اكتشاف بنود الشراء التي يختلف سعر وحدتها بشكل حاد عن المشتريات المجاورة لنفس المادة.",
+                },
+                href: "/reports/purchasing-materials/price-outliers",
+              }}
+            />
+          </PermissionGuard>
           <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_TOTAL_AMOUNT_MISMATCHES_REPORT}>
             <ReportLinkCard
               report={{
