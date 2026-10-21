@@ -6,7 +6,8 @@ import { Table } from "@mantine/core";
 import { AlertTriangle, History } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
 import { useI18n } from "@/lib/i18n/hooks";
-import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
+import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { Locale } from "@/lib/i18n/types";
 import {
   getPriceOutlierCauseLabel,
   type PriceOutlierCause,
@@ -50,9 +51,6 @@ export default function PriceOutliersTable({
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Entered price (${currency})`, `السعر المدخل (${currency})`)}
-                </Table.Th>
-                <Table.Th className="text-gray-600">
-                  {translate(`Base unit price (${currency})`, `سعر الوحدة الأساسية (${currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Neighbour median (${currency})`, `وسيط الجوار (${currency})`)}
@@ -116,28 +114,13 @@ export default function PriceOutliersTable({
                     </ProtectedLink>
                   </Table.Td>
                   <Table.Td>
-                    {formatMoney(row.enteredUnitPrice)}
-                    <span className="ms-1 text-xs text-gray-400">
-                      / {getMaterialUnitLabel(row.enteredUnit, locale)}
-                    </span>
-                  </Table.Td>
-                  <Table.Td>
-                    {row.unitPrice == null ? (
-                      <span className="text-gray-400">-</span>
-                    ) : (
-                      <>
-                        {formatMoney(row.unitPrice)}
-                        <span className="ms-1 text-xs text-gray-400">
-                          / {getMaterialUnitLabel(row.unitOfMeasurement, locale)}
-                        </span>
-                      </>
-                    )}
+                    <PriceWithUnit amount={row.enteredUnitPrice} unit={row.enteredUnit} locale={locale} />
                   </Table.Td>
                   <Table.Td>
                     {row.referenceMedian == null ? (
                       <span className="text-gray-400">-</span>
                     ) : (
-                      formatMoney(row.referenceMedian)
+                      <PriceWithUnit amount={row.referenceMedian} unit={row.enteredUnit} locale={locale} />
                     )}
                   </Table.Td>
                   <Table.Td className="font-medium text-gray-800">{formatRatio(row.ratio)}</Table.Td>
@@ -151,6 +134,15 @@ export default function PriceOutliersTable({
         </div>
       )}
     </ReportCard>
+  );
+}
+
+function PriceWithUnit({ amount, unit, locale }: { amount: number; unit: MaterialUnit; locale: Locale }) {
+  return (
+    <>
+      {formatMoney(amount)}
+      <span className="ms-1 text-xs text-gray-400">/ {getMaterialUnitLabel(unit, locale)}</span>
+    </>
   );
 }
 

@@ -274,7 +274,6 @@ export type PurchasingMaterialsPriceOutlierRow = {
   itemId: string;
   materialCode: string;
   materialTitle: string;
-  unitOfMeasurement: MaterialUnit;
   orderId: string;
   orderCode: string;
   orderDate: string;
@@ -282,7 +281,6 @@ export type PurchasingMaterialsPriceOutlierRow = {
   supplierName: string;
   enteredUnit: MaterialUnit;
   enteredUnitPrice: number;
-  unitPrice: number | null;
   referenceMedian: number | null;
   ratio: number | null;
   cause: PriceOutlierCause;
