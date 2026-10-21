@@ -279,6 +279,7 @@ export type PurchasingMaterialsPriceOutlierRow = {
   orderDate: string;
   supplierId: string;
   supplierName: string;
+  invoiceNumbers: string[];
   enteredUnit: MaterialUnit;
   enteredUnitPrice: number;
   referenceMedian: number | null;
