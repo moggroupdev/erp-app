@@ -744,7 +744,7 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     value: "read_material_purchasing_price_outliers_report",
     label: {
       en: "Read Price Outliers Report",
-      ar: "عرض تقرير الأسعار الشاذة",
+      ar: "عرض تقرير انحراف أسعار الشراء",
     },
   },
   read_material_purchasing_requisition_follow_up_report: {

@@ -28,7 +28,7 @@ import PriceOutliersTable from "./components/price-outliers-table";
 
 const PAGE_TITLE = {
   en: "Price Outliers",
-  ar: "الأسعار الشاذة",
+  ar: "انحراف أسعار الشراء",
 };
 
 const PAGE_SUBTITLE = {
@@ -109,8 +109,8 @@ export default function Page() {
   }, [data, cause]);
 
   const emptyMessage = cause
-    ? translate("No outliers match the selected cause.", "لا توجد قيم شاذة تطابق السبب المحدد.")
-    : translate("No price outliers found for this period.", "لا توجد أسعار شاذة في هذه الفترة.");
+    ? translate("No outliers match the selected cause.", "لا توجد انحرافات تطابق السبب المحدد.")
+    : translate("No price outliers found for this period.", "لا يوجد انحراف في أسعار الشراء في هذه الفترة.");
 
   return (
     <div className="space-y-6">
