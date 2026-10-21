@@ -50,7 +50,7 @@ function CauseChip({ cause, count, label }: { cause: PriceOutlierCause; count: n
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${colors.surfaceClass} ${colors.textClass} ${colors.borderClass}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${colors.surfaceClass} ${colors.textClass}`}
     >
       <span>{label}</span>
       <span className="font-semibold tabular-nums">{count}</span>

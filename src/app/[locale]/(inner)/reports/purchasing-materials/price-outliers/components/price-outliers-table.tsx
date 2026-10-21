@@ -46,6 +46,7 @@ export default function PriceOutliersTable({
               <Table.Tr>
                 <Table.Th className="text-gray-600">#</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Material", "المادة")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("MPO Number", "رقم أمر التوريد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Date", "التاريخ")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
@@ -81,9 +82,13 @@ export default function PriceOutliersTable({
                       >
                         <History size={14} />
                       </ProtectedLink>
+                    </div>
+                  </Table.Td>
+                  <Table.Td>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-xs text-gray-500">{row.materialCode}</span>
                       <CopyButton text={row.materialCode} />
                     </div>
-                    <p className="mt-0.5 font-mono text-xs text-gray-400">{row.materialCode}</p>
                   </Table.Td>
                   <Table.Td>
                     <div className="flex items-center gap-1.5">
@@ -162,9 +167,7 @@ function CauseBadge({ cause, label }: { cause: PriceOutlierCause; label: string 
       : getSemanticStatusColors(cause === "spike" ? "warning" : "danger");
 
   return (
-    <span
-      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${colors.surfaceClass} ${colors.textClass} ${colors.borderClass}`}
-    >
+    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.surfaceClass} ${colors.textClass}`}>
       {label}
     </span>
   );
