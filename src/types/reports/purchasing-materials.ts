@@ -313,7 +313,6 @@ export type PurchasingMaterialsAveragePriceGapRow = {
   ratio: number;
   direction: AveragePriceGapDirection;
   lineCount: number;
-  excludedLineCount: number;
   totalQuantityPurchased: number;
   lastPurchaseDate: string | null;
   cause: AveragePriceGapCause;

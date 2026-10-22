@@ -59,7 +59,6 @@ export default function AveragePriceGapsTable({
                 <Table.Th className="text-gray-600">{translate("Ratio", "النسبة")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Direction", "الاتجاه")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Lines", "البنود")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Excluded", "مستبعد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Quantity purchased", "الكمية المشتراة")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Last purchase", "آخر شراء")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Likely cause", "السبب")}</Table.Th>
@@ -109,7 +108,6 @@ export default function AveragePriceGapsTable({
                     />
                   </Table.Td>
                   <Table.Td className="tabular-nums">{row.lineCount}</Table.Td>
-                  <Table.Td className="tabular-nums">{row.excludedLineCount}</Table.Td>
                   <Table.Td>
                     {formatQuantity(row.totalQuantityPurchased)}
                     <span className="ms-1 text-xs text-gray-400">{getMaterialUnitLabel(row.unitOfMeasurement, locale)}</span>

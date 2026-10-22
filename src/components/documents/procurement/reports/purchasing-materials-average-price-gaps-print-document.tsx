@@ -75,7 +75,7 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
         />
         <PrintTable
           tableClassName="text-[9px]"
-          columnWidths={["3%", "14%", "8%", "10%", "10%", "6%", "9%", "5%", "6%", "9%", "8%", "12%"]}
+          columnWidths={["3%", "15%", "8%", "11%", "11%", "6%", "10%", "6%", "10%", "8%", "12%"]}
           headers={[
             "#",
             translate("Material", "المادة"),
@@ -85,7 +85,6 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
             translate("Ratio", "النسبة"),
             translate("Direction", "الاتجاه"),
             translate("Lines", "البنود"),
-            translate("Excluded", "مستبعد"),
             translate("Quantity purchased", "الكمية المشتراة"),
             translate("Last purchase", "آخر شراء"),
             translate("Likely cause", "السبب"),
@@ -101,7 +100,6 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
             formatRatio(row.ratio),
             getAveragePriceGapDirectionLabel(row.direction, locale),
             String(row.lineCount),
-            String(row.excludedLineCount),
             `${formatQuantity(row.totalQuantityPurchased)} ${getMaterialUnitLabel(row.unitOfMeasurement, locale)}`,
             row.lastPurchaseDate ? formatDate(row.lastPurchaseDate, locale) : "-",
             getAveragePriceGapCauseLabel(row.cause, locale),
