@@ -1,10 +1,14 @@
+import { Info } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "../../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import { getAveragePriceGapCauseLabel, type AveragePriceGapCause } from "@/lib/constants/enums/derived/average-price-gap-causes";
+import {
+  getAveragePriceGapCauseLabel,
+  type AveragePriceGapCause,
+} from "@/lib/constants/enums/derived/average-price-gap-causes";
 import type { Locale } from "@/lib/i18n/types";
 import type { PurchasingMaterialsAveragePriceGapRow, PurchasingMaterialsAveragePriceGapSummary } from "@/types/reports";
 
@@ -45,6 +49,19 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
+      <aside className="bg-haze-50 flex items-start gap-2.5 rounded-md px-3 py-2.5">
+        <Info size={14} className="text-haze-600 mt-0.5 shrink-0" />
+        <div className="min-w-0">
+          <p className="text-haze-700 text-[10px] font-semibold tracking-wide uppercase">{translate("Note", "ملاحظة")}</p>
+          <p className="text-haze-800 text-[11px] leading-[1.75]">
+            {translate(
+              "The stored average is the unit price kept on the material record. The weighted purchase price is the average of purchase-order line prices, weighted by quantity in the material base unit. A material appears here when those two prices differ by at least the selected ratio.",
+              "السعر المتوسط المخزن هو سعر الوحدة المسجّل على بطاقة المادة. متوسط الشراء المرجح هو متوسط أسعار بنود أوامر التوريد، موزونًا بالكمية بالوحدة الأساسية للمادة. تظهر المادة هنا عندما يختلف الرقمان بنسبة لا تقل عن حد الحساسية المحدد.",
+            )}
+          </p>
+        </div>
+      </aside>
+
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-4">
         {startDate ? (
           <PrintDetail label={translate("Start Date", "تاريخ البداية")} value={formatDate(startDate, locale)} />
@@ -52,7 +69,10 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
         {endDate ? <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={formatDate(endDate, locale)} /> : null}
         <PrintDetail label={translate("Sensitivity", "الحساسية")} value={translate(`${threshold}x`, `${threshold}×`)} />
         {cause ? (
-          <PrintDetail label={translate("Likely cause", "السبب المحتمل")} value={getAveragePriceGapCauseLabel(cause, locale)} />
+          <PrintDetail
+            label={translate("Likely cause", "السبب المحتمل")}
+            value={getAveragePriceGapCauseLabel(cause, locale)}
+          />
         ) : null}
         <PrintDetail label={translate("Flagged materials", "المواد المعلمة")} value={String(summary.flaggedCount)} />
         <PrintDetail label={translate("Stored price higher", "السعر المخزن أعلى")} value={String(summary.aboveCount)} />

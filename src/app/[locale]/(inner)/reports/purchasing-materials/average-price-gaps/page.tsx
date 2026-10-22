@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Select } from "@mantine/core";
+import { Alert, Select } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -17,7 +17,7 @@ import {
   AVERAGE_PRICE_GAP_CAUSE_VALUES,
   type AveragePriceGapCause,
 } from "@/lib/constants/enums/derived/average-price-gap-causes";
-import { Scale } from "lucide-react";
+import { Info, Scale } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
 import PrintDocument from "@/components/ui/print-document";
@@ -37,6 +37,11 @@ const PAGE_TITLE = {
 const PAGE_SUBTITLE = {
   en: "Find materials whose stored average price differs sharply from their quantity-weighted purchase price.",
   ar: "اكتشاف المواد التي يختلف سعرها المتوسط المخزن بشكل حاد عن متوسط أسعار الشراء المرجح بالكمية.",
+};
+
+const PAGE_NOTE = {
+  en: "The stored average is the unit price kept on the material record. The weighted purchase price is the average of purchase-order line prices, weighted by quantity in the material base unit. A material appears here when those two prices differ by at least the selected ratio.",
+  ar: "السعر المتوسط المخزن هو سعر الوحدة المسجّل على بطاقة المادة. متوسط الشراء المرجح هو متوسط أسعار بنود أوامر التوريد، موزونًا بالكمية بالوحدة الأساسية للمادة. تظهر المادة هنا عندما يختلف الرقمان بنسبة لا تقل عن حد الحساسية المحدد.",
 };
 
 const THRESHOLD_OPTIONS = [2, 3, 5] as const;
@@ -155,6 +160,10 @@ export default function Page() {
           </div>
         }
       />
+
+      <Alert color="haze" variant="light" radius="lg" icon={<Info size={18} />}>
+        <p className="text-sm leading-[1.75]">{translate(PAGE_NOTE.en, PAGE_NOTE.ar)}</p>
+      </Alert>
 
       <DateRangeFilter
         from={from}
