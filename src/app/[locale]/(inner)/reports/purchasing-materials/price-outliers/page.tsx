@@ -20,7 +20,10 @@ import {
 import { AlertTriangle } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
+import PurchasingMaterialsPriceOutliersPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-price-outliers-print-document";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
 import PriceOutliersOverview from "./components/price-outliers-overview";
@@ -101,6 +104,15 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
   const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
+  const printDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
+  const printDateSuffix =
+    from && to
+      ? translate(
+          `from ${formatDate(from, locale)} to ${formatDate(to, locale)}`,
+          `من ${formatDate(from, locale)} إلى ${formatDate(to, locale)}`,
+        )
+      : printDate;
+  const printTitle = `${translate("Report", "تقرير")} - ${reportTitle} - ${printDateSuffix}`;
 
   const visibleRows = useMemo(() => {
     if (!data) return [];
@@ -124,7 +136,24 @@ export default function Page() {
         icon={AlertTriangle}
         title={reportTitle}
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
-        sideElement={<RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />}
+        sideElement={
+          <div className="flex items-center gap-3 sm:gap-4">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            {data && !isFetching && !errorMessage && (
+              <PrintDocument title={printTitle} buttonType="icon" paperWidth={297} paperHeight={210}>
+                <PurchasingMaterialsPriceOutliersPrintDocument
+                  title={reportTitle}
+                  startDate={from}
+                  endDate={to}
+                  threshold={threshold}
+                  cause={cause}
+                  summary={data.summary}
+                  rows={visibleRows}
+                />
+              </PrintDocument>
+            )}
+          </div>
+        }
       />
 
       <DateRangeFilter
@@ -156,10 +185,8 @@ export default function Page() {
           <div className="flex-1">
             <Select
               value={cause ?? "all"}
-              onChange={(value) =>
-                updateQuery({ cause: value && isValidPriceOutlierCause(value) ? value : null })
-              }
-              label={translate("Likely cause", "السبب المحتمل")}
+              onChange={(value) => updateQuery({ cause: value && isValidPriceOutlierCause(value) ? value : null })}
+              label={translate("Likely cause", "السبب")}
               data={[
                 { value: "all", label: translate("All causes", "كل الأسباب") },
                 ...PRICE_OUTLIER_CAUSE_VALUES.map((value) => ({

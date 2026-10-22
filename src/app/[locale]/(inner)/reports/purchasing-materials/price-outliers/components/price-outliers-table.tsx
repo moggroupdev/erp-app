@@ -8,10 +8,7 @@ import CopyButton from "@/components/ui/copy-button";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { Locale } from "@/lib/i18n/types";
-import {
-  getPriceOutlierCauseLabel,
-  type PriceOutlierCause,
-} from "@/lib/constants/enums/derived/price-outlier-causes";
+import { getPriceOutlierCauseLabel, type PriceOutlierCause } from "@/lib/constants/enums/derived/price-outlier-causes";
 import { getSemanticStatusColors } from "@/lib/constants/status-colors";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsPriceOutlierRow } from "@/types/reports";
@@ -58,7 +55,7 @@ export default function PriceOutliersTable({
                   {translate(`Neighbour median (${currency})`, `وسيط الجوار (${currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate("Ratio", "النسبة")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Likely cause", "السبب المحتمل")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Likely cause", "السبب")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -78,7 +75,7 @@ export default function PriceOutliersTable({
                       <ProtectedLink
                         permission={PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_HISTORY_REPORT}
                         href={`/reports/purchasing-materials/price-history?materialCode=${row.materialCode}`}
-                        className="shrink-0 text-gray-400 hover:text-haze-700"
+                        className="hover:text-haze-700 shrink-0 text-gray-400"
                         title={translate("Price history", "تاريخ الأسعار")}
                       >
                         <History size={14} />
@@ -178,7 +175,9 @@ function CauseBadge({ cause, label }: { cause: PriceOutlierCause; label: string 
       : getSemanticStatusColors(cause === "spike" ? "warning" : "danger");
 
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.surfaceClass} ${colors.textClass}`}>
+    <span
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.surfaceClass} ${colors.textClass}`}
+    >
       {label}
     </span>
   );
