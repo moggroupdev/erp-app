@@ -26,7 +26,7 @@ export default function PriceOutliersTable({
 
   return (
     <ReportCard
-      title={translate("Flagged purchase lines", "بنود الشراء المعلمة")}
+      title={translate("Outlier cases", "حالات الانحراف")}
       description={translate(
         "Each line is compared with the median of nearby purchases of the same material. Open the price history or the purchase order to review it.",
         "يُقارن كل بند بوسيط المشتريات المجاورة لنفس المادة. افتح تاريخ الأسعار أو أمر التوريد للمراجعة.",

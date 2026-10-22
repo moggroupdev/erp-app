@@ -18,7 +18,7 @@ export default function PriceOutliersOverview({ summary }: { summary: Purchasing
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <KpiCard
-          label={translate("Flagged lines", "البنود المعلمة")}
+          label={translate("Outlier cases", "حالات الانحراف")}
           value={summary.flaggedCount}
           hint={translate(
             "Purchase order lines whose unit price diverges from nearby purchases of the same material.",
@@ -30,7 +30,7 @@ export default function PriceOutliersOverview({ summary }: { summary: Purchasing
         <KpiCard
           label={translate("Materials affected", "المواد المتأثرة")}
           value={summary.materialsAffected}
-          hint={translate("Distinct materials with at least one flagged line.", "مواد مختلفة لها بند معلم واحد على الأقل.")}
+          hint={translate("Distinct materials with at least one outlier case.", "مواد مختلفة لها حالة انحراف واحدة على الأقل.")}
           icon={<Boxes size={20} />}
           valueClassName={summary.materialsAffected > 0 ? "text-ochre-700" : reportTheme.kpi.neutral}
         />

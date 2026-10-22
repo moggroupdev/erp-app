@@ -57,7 +57,7 @@ export default function PurchasingMaterialsPriceOutliersPrintDocument({
         {cause ? (
           <PrintDetail label={translate("Likely cause", "السبب المحتمل")} value={getPriceOutlierCauseLabel(cause, locale)} />
         ) : null}
-        <PrintDetail label={translate("Flagged lines", "البنود المعلمة")} value={String(summary.flaggedCount)} />
+        <PrintDetail label={translate("Outlier cases", "حالات الانحراف")} value={String(summary.flaggedCount)} />
         <PrintDetail label={translate("Materials affected", "المواد المتأثرة")} value={String(summary.materialsAffected)} />
       </section>
 
@@ -65,7 +65,7 @@ export default function PurchasingMaterialsPriceOutliersPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Flagged purchase lines", "بنود الشراء المعلمة")}
+          title={translate("Outlier cases", "حالات الانحراف")}
           subtitle={translate(
             "Each line is compared with the median of nearby purchases of the same material.",
             "يُقارن كل بند بوسيط المشتريات المجاورة لنفس المادة.",
