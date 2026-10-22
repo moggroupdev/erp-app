@@ -46,6 +46,7 @@ export default function PriceEntriesTable({
             <Table.Thead className="bg-gray-50">
               <Table.Tr>
                 <Table.Th className="text-gray-600">{translate("MPO Number", "رقم أمر التوريد")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Date", "التاريخ")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Unit of Measurement", "وحدة القياس")}</Table.Th>
@@ -69,6 +70,16 @@ export default function PriceEntriesTable({
                       </ProtectedLink>
                       <CopyButton text={row.orderCode} />
                     </div>
+                  </Table.Td>
+                  <Table.Td>
+                    {row.invoiceNumbers.length > 0 ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-gray-600">{row.invoiceNumbers.join(", ")}</span>
+                        <CopyButton text={row.invoiceNumbers.join(", ")} />
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </Table.Td>
                   <Table.Td>
                     {new Date(row.orderDate).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
