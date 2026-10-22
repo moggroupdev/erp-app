@@ -50,6 +50,7 @@ export const PERMISSION_VALUES = [
   "read_material_purchasing_supplier_stats_report",
   "read_material_purchasing_total_amount_mismatches_report",
   "read_material_purchasing_price_outliers_report",
+  "read_material_purchasing_average_price_gaps_report",
   "read_material_purchasing_requisition_follow_up_report",
   "add_product",
   "read_products",
@@ -135,6 +136,7 @@ export const MATERIAL_PURCHASING_REPORT_PERMISSIONS = [
   PERMISSIONS.READ_MATERIAL_PURCHASING_SUPPLIER_STATS_REPORT,
   PERMISSIONS.READ_MATERIAL_PURCHASING_TOTAL_AMOUNT_MISMATCHES_REPORT,
   PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_OUTLIERS_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_AVERAGE_PRICE_GAPS_REPORT,
   PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_FOLLOW_UP_REPORT,
 ] as const;
 
@@ -747,6 +749,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض تقرير انحراف أسعار الشراء",
     },
   },
+  read_material_purchasing_average_price_gaps_report: {
+    value: "read_material_purchasing_average_price_gaps_report",
+    label: {
+      en: "Read Average Price Gaps Report",
+      ar: "عرض تقرير فروقات السعر المتوسط",
+    },
+  },
   read_material_purchasing_requisition_follow_up_report: {
     value: "read_material_purchasing_requisition_follow_up_report",
     label: {
@@ -908,6 +917,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_material_purchasing_supplier_stats_report",
       "read_material_purchasing_total_amount_mismatches_report",
       "read_material_purchasing_price_outliers_report",
+      "read_material_purchasing_average_price_gaps_report",
       "read_material_purchasing_requisition_follow_up_report",
     ],
   },

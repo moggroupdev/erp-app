@@ -110,6 +110,18 @@ export default function Page() {
               }}
             />
           </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_AVERAGE_PRICE_GAPS_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Average Price Gaps", ar: "فروقات السعر المتوسط" },
+                description: {
+                  en: "Find materials whose stored average price differs sharply from their quantity-weighted purchase price.",
+                  ar: "اكتشاف المواد التي يختلف سعرها المتوسط المخزن بشكل حاد عن متوسط أسعار الشراء المرجح بالكمية.",
+                },
+                href: "/reports/purchasing-materials/average-price-gaps",
+              }}
+            />
+          </PermissionGuard>
           <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_TOTAL_AMOUNT_MISMATCHES_REPORT}>
             <ReportLinkCard
               report={{

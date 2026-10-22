@@ -1,4 +1,5 @@
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { AveragePriceGapCause, AveragePriceGapDirection } from "@/lib/constants/enums/derived/average-price-gap-causes";
 import type { PriceOutlierCause } from "@/lib/constants/enums/derived/price-outlier-causes";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 
@@ -290,4 +291,35 @@ export type PurchasingMaterialsPriceOutlierRow = {
 export type PurchasingMaterialsPriceOutliers = {
   summary: PurchasingMaterialsPriceOutlierSummary;
   rows: PurchasingMaterialsPriceOutlierRow[];
+};
+
+// ================ Average Price Gaps ================
+
+export type PurchasingMaterialsAveragePriceGapCauseCounts = Record<AveragePriceGapCause, number>;
+
+export type PurchasingMaterialsAveragePriceGapSummary = {
+  flaggedCount: number;
+  aboveCount: number;
+  belowCount: number;
+  byCause: PurchasingMaterialsAveragePriceGapCauseCounts;
+};
+
+export type PurchasingMaterialsAveragePriceGapRow = {
+  materialCode: string;
+  materialTitle: string;
+  unitOfMeasurement: MaterialUnit;
+  unitPrice: number;
+  weightedAveragePurchasePrice: number;
+  ratio: number;
+  direction: AveragePriceGapDirection;
+  lineCount: number;
+  excludedLineCount: number;
+  totalQuantityPurchased: number;
+  lastPurchaseDate: string | null;
+  cause: AveragePriceGapCause;
+};
+
+export type PurchasingMaterialsAveragePriceGaps = {
+  summary: PurchasingMaterialsAveragePriceGapSummary;
+  rows: PurchasingMaterialsAveragePriceGapRow[];
 };
