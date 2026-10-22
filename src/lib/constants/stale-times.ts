@@ -30,6 +30,7 @@ export const staleTimes = {
     purchasingMaterialsSubCategoryStats: 5 * MINUTE,
     purchasingMaterialsSupplierStats: 5 * MINUTE,
     purchasingMaterialsTotalAmountMismatches: 5 * MINUTE,
+    purchasingMaterialsPriceOutliers: 5 * MINUTE,
     purchasingMaterialsRequisitionFollowUp: 5 * MINUTE,
   },
   locations: Infinity,

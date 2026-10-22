@@ -1,4 +1,5 @@
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { PriceOutlierCause } from "@/lib/constants/enums/derived/price-outlier-causes";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 
 // ================ Spending Summary ================
@@ -257,4 +258,36 @@ export type PurchasingMaterialsRequisitionFollowUp = {
   items: PurchasingMaterialsRequisitionFollowUpItem[];
   totals: PurchasingMaterialsRequisitionFollowUpTotals;
   missingPriceCount: number;
+};
+
+// ================ Price Outliers ================
+
+export type PurchasingMaterialsPriceOutlierCauseCounts = Record<PriceOutlierCause, number>;
+
+export type PurchasingMaterialsPriceOutlierSummary = {
+  flaggedCount: number;
+  materialsAffected: number;
+  byCause: PurchasingMaterialsPriceOutlierCauseCounts;
+};
+
+export type PurchasingMaterialsPriceOutlierRow = {
+  itemId: string;
+  materialCode: string;
+  materialTitle: string;
+  orderId: string;
+  orderCode: string;
+  orderDate: string;
+  supplierId: string;
+  supplierName: string;
+  invoiceNumbers: string[];
+  enteredUnit: MaterialUnit;
+  enteredUnitPrice: number;
+  referenceMedian: number | null;
+  ratio: number | null;
+  cause: PriceOutlierCause;
+};
+
+export type PurchasingMaterialsPriceOutliers = {
+  summary: PurchasingMaterialsPriceOutlierSummary;
+  rows: PurchasingMaterialsPriceOutlierRow[];
 };

@@ -9,6 +9,7 @@ import type {
   PurchasingMaterialsSupplierStats,
   PurchasingMaterialsTotalAmountMismatches,
   PurchasingMaterialsRequisitionFollowUp,
+  PurchasingMaterialsPriceOutliers,
 } from "@/types/reports";
 
 const reportsApi = {
@@ -160,6 +161,26 @@ const reportsApi = {
       return await privateRequest<PurchasingMaterialsTotalAmountMismatches>({
         url: "reports/purchasing-materials/total-amount-mismatches",
         params: { from, to },
+        signal,
+      });
+    },
+
+    async getPriceOutliers({
+      privateRequest,
+      from,
+      to,
+      threshold,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      from?: string;
+      to?: string;
+      threshold?: number;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsPriceOutliers>({
+        url: "reports/purchasing-materials/price-outliers",
+        params: { from, to, threshold },
         signal,
       });
     },
