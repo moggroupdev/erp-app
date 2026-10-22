@@ -94,6 +94,7 @@ export default function PurchasingMaterialsPriceHistoryPrintDocument({
           headers={[
             "#",
             translate("MPO Number", "رقم أمر التوريد"),
+            translate("Invoice Number", "رقم الفاتورة"),
             translate("Date", "التاريخ"),
             translate("Supplier", "المورد"),
             translate("Unit of Measurement", "وحدة القياس"),
@@ -103,13 +104,14 @@ export default function PurchasingMaterialsPriceHistoryPrintDocument({
           rows={sortedEntries.map((row, index) => [
             String(index + 1),
             row.orderCode,
+            row.invoiceNumbers.join(", ") || "-",
             formatDate(row.orderDate, locale),
             row.supplierName,
             unitLabel,
             formatQuantity(row.quantityOrdered),
             formatMoney(row.unitPrice),
           ])}
-          monoColumnIndexes={[1]}
+          monoColumnIndexes={[1, 2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>

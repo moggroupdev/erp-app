@@ -92,6 +92,7 @@ export type PurchasingMaterialsPriceHistoryEntry = {
   orderDate: string;
   supplierId: string;
   supplierName: string;
+  invoiceNumbers: string[];
   unitPrice: number;
   quantityOrdered: number;
 };
