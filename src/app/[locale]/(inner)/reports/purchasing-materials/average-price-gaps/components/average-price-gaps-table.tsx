@@ -8,12 +8,7 @@ import CopyButton from "@/components/ui/copy-button";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { Locale } from "@/lib/i18n/types";
-import {
-  getAveragePriceGapCauseLabel,
-  getAveragePriceGapDirectionLabel,
-  type AveragePriceGapCause,
-  type AveragePriceGapDirection,
-} from "@/lib/constants/enums/derived/average-price-gap-causes";
+import { getAveragePriceGapCauseLabel, type AveragePriceGapCause } from "@/lib/constants/enums/derived/average-price-gap-causes";
 import { getSemanticStatusColors } from "@/lib/constants/status-colors";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -57,10 +52,8 @@ export default function AveragePriceGapsTable({
                   {translate(`Weighted purchase (${currency})`, `متوسط الشراء المرجح (${currency})`)}
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate("Ratio", "النسبة")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Direction", "الاتجاه")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Lines", "البنود")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Quantity purchased", "الكمية المشتراة")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Last purchase", "آخر شراء")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Likely cause", "السبب")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
@@ -101,25 +94,10 @@ export default function AveragePriceGapsTable({
                     <PriceWithUnit amount={row.weightedAveragePurchasePrice} unit={row.unitOfMeasurement} locale={locale} />
                   </Table.Td>
                   <Table.Td className="font-medium text-gray-800">{formatRatio(row.ratio)}</Table.Td>
-                  <Table.Td>
-                    <DirectionBadge
-                      direction={row.direction}
-                      label={getAveragePriceGapDirectionLabel(row.direction, locale)}
-                    />
-                  </Table.Td>
                   <Table.Td className="tabular-nums">{row.lineCount}</Table.Td>
                   <Table.Td>
                     {formatQuantity(row.totalQuantityPurchased)}
                     <span className="ms-1 text-xs text-gray-400">{getMaterialUnitLabel(row.unitOfMeasurement, locale)}</span>
-                  </Table.Td>
-                  <Table.Td>
-                    {row.lastPurchaseDate
-                      ? new Date(row.lastPurchaseDate).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
-                      : "-"}
                   </Table.Td>
                   <Table.Td>
                     <CauseBadge cause={row.cause} label={getAveragePriceGapCauseLabel(row.cause, locale)} />
@@ -154,18 +132,6 @@ function formatRatio(ratio: number | null) {
 
 function CauseBadge({ cause, label }: { cause: AveragePriceGapCause; label: string }) {
   const colors = getSemanticStatusColors(cause === "drift" ? "warning" : "danger");
-
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.surfaceClass} ${colors.textClass}`}
-    >
-      {label}
-    </span>
-  );
-}
-
-function DirectionBadge({ direction, label }: { direction: AveragePriceGapDirection; label: string }) {
-  const colors = getSemanticStatusColors(direction === "above" ? "danger" : "warning");
 
   return (
     <span

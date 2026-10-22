@@ -4,11 +4,7 @@ import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import {
-  getAveragePriceGapCauseLabel,
-  getAveragePriceGapDirectionLabel,
-  type AveragePriceGapCause,
-} from "@/lib/constants/enums/derived/average-price-gap-causes";
+import { getAveragePriceGapCauseLabel, type AveragePriceGapCause } from "@/lib/constants/enums/derived/average-price-gap-causes";
 import type { Locale } from "@/lib/i18n/types";
 import type { PurchasingMaterialsAveragePriceGapRow, PurchasingMaterialsAveragePriceGapSummary } from "@/types/reports";
 
@@ -75,7 +71,7 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
         />
         <PrintTable
           tableClassName="text-[9px]"
-          columnWidths={["3%", "15%", "8%", "11%", "11%", "6%", "10%", "6%", "10%", "8%", "12%"]}
+          columnWidths={["4%", "18%", "9%", "12%", "12%", "7%", "7%", "13%", "18%"]}
           headers={[
             "#",
             translate("Material", "المادة"),
@@ -83,10 +79,8 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
             translate(`Stored average (${currency})`, `السعر المتوسط (${currency})`),
             translate(`Weighted purchase (${currency})`, `متوسط الشراء المرجح (${currency})`),
             translate("Ratio", "النسبة"),
-            translate("Direction", "الاتجاه"),
             translate("Lines", "البنود"),
             translate("Quantity purchased", "الكمية المشتراة"),
-            translate("Last purchase", "آخر شراء"),
             translate("Likely cause", "السبب"),
           ]}
           rows={rows.map((row, index) => [
@@ -98,10 +92,8 @@ export default function PurchasingMaterialsAveragePriceGapsPrintDocument({
             formatPriceWithUnit(row.unitPrice, row.unitOfMeasurement, locale),
             formatPriceWithUnit(row.weightedAveragePurchasePrice, row.unitOfMeasurement, locale),
             formatRatio(row.ratio),
-            getAveragePriceGapDirectionLabel(row.direction, locale),
             String(row.lineCount),
             `${formatQuantity(row.totalQuantityPurchased)} ${getMaterialUnitLabel(row.unitOfMeasurement, locale)}`,
-            row.lastPurchaseDate ? formatDate(row.lastPurchaseDate, locale) : "-",
             getAveragePriceGapCauseLabel(row.cause, locale),
           ])}
           monoColumnIndexes={[2]}

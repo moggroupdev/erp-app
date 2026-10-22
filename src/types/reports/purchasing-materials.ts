@@ -1,5 +1,5 @@
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
-import type { AveragePriceGapCause, AveragePriceGapDirection } from "@/lib/constants/enums/derived/average-price-gap-causes";
+import type { AveragePriceGapCause } from "@/lib/constants/enums/derived/average-price-gap-causes";
 import type { PriceOutlierCause } from "@/lib/constants/enums/derived/price-outlier-causes";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 
@@ -311,10 +311,8 @@ export type PurchasingMaterialsAveragePriceGapRow = {
   unitPrice: number;
   weightedAveragePurchasePrice: number;
   ratio: number;
-  direction: AveragePriceGapDirection;
   lineCount: number;
   totalQuantityPurchased: number;
-  lastPurchaseDate: string | null;
   cause: AveragePriceGapCause;
 };
 
