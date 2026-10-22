@@ -26,6 +26,8 @@ import PurchasingMaterialsPriceOutliersPrintDocument from "@/components/document
 import { formatDate } from "@/lib/helpers/date-formaters";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
+import SensitivityFilter from "../components/sensitivity-filter";
+import { DEFAULT_SENSITIVITY, parseSensitivity } from "../components/sensitivity";
 import PriceOutliersOverview from "./components/price-outliers-overview";
 import PriceOutliersTable from "./components/price-outliers-table";
 
@@ -39,14 +41,6 @@ const PAGE_SUBTITLE = {
   ar: "اكتشاف بنود أوامر التوريد التي يختلف سعر وحدتها بشكل حاد عن المشتريات المجاورة لنفس المادة.",
 };
 
-const THRESHOLD_OPTIONS = [2, 3, 5] as const;
-const DEFAULT_THRESHOLD = 2;
-
-function parseThreshold(raw: string | null): number {
-  const n = Number(raw);
-  return THRESHOLD_OPTIONS.includes(n as (typeof THRESHOLD_OPTIONS)[number]) ? n : DEFAULT_THRESHOLD;
-}
-
 export default function Page() {
   const { locale, translate } = useI18n();
   const router = useRouter();
@@ -57,7 +51,7 @@ export default function Page() {
 
   const from = searchParams.get("from");
   const to = searchParams.get("to");
-  const threshold = parseThreshold(searchParams.get("threshold"));
+  const threshold = parseSensitivity(searchParams.get("threshold"));
   const rawCause = searchParams.get("cause");
   const cause = rawCause && isValidPriceOutlierCause(rawCause) ? rawCause : null;
 
@@ -78,7 +72,7 @@ export default function Page() {
       else params.delete("to");
     }
     if ("threshold" in patch) {
-      if (patch.threshold && patch.threshold !== DEFAULT_THRESHOLD) params.set("threshold", String(patch.threshold));
+      if (patch.threshold && patch.threshold !== DEFAULT_SENSITIVITY) params.set("threshold", String(patch.threshold));
       else params.delete("threshold");
     }
     if ("cause" in patch) {
@@ -166,20 +160,13 @@ export default function Page() {
       <section className="rounded-3xl bg-white px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
           <div className="flex-1">
-            <Select
-              value={String(threshold)}
-              onChange={(value) => updateQuery({ threshold: value ? Number(value) : DEFAULT_THRESHOLD })}
-              label={translate("Sensitivity", "الحساسية")}
+            <SensitivityFilter
+              value={threshold}
+              onChange={(next) => updateQuery({ threshold: next })}
               description={translate(
-                "Flag a line when its price is at least this many times the neighbour median (or the inverse).",
-                "علم البند عندما يكون سعره على الأقل هذا المضاعف لوسيط الجوار (أو عكسه).",
+                "Flag a line when its price is at least this many times the neighbour median (or the inverse). Minimum 1.05.",
+                "علم البند عندما يكون سعره على الأقل هذا المضاعف لوسيط الجوار (أو عكسه). الحد الأدنى 1.05.",
               )}
-              data={THRESHOLD_OPTIONS.map((option) => ({
-                value: String(option),
-                label: translate(`${option}x`, `${option}×`),
-              }))}
-              allowDeselect={false}
-              radius="md"
             />
           </div>
           <div className="flex-1">

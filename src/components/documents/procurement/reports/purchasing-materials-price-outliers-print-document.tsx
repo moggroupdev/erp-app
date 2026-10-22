@@ -10,6 +10,7 @@ import {
 } from "@/lib/constants/enums/derived/price-outlier-causes";
 import type { Locale } from "@/lib/i18n/types";
 import type { PurchasingMaterialsPriceOutlierRow, PurchasingMaterialsPriceOutlierSummary } from "@/types/reports";
+import { formatSensitivityLabel } from "@/app/[locale]/(inner)/reports/purchasing-materials/components/sensitivity";
 
 export default function PurchasingMaterialsPriceOutliersPrintDocument({
   title,
@@ -53,7 +54,7 @@ export default function PurchasingMaterialsPriceOutliersPrintDocument({
           <PrintDetail label={translate("Start Date", "تاريخ البداية")} value={formatDate(startDate, locale)} />
         ) : null}
         {endDate ? <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={formatDate(endDate, locale)} /> : null}
-        <PrintDetail label={translate("Sensitivity", "الحساسية")} value={translate(`${threshold}x`, `${threshold}×`)} />
+        <PrintDetail label={translate("Sensitivity", "الحساسية")} value={formatSensitivityLabel(threshold, locale)} />
         {cause ? (
           <PrintDetail label={translate("Likely cause", "السبب المحتمل")} value={getPriceOutlierCauseLabel(cause, locale)} />
         ) : null}
