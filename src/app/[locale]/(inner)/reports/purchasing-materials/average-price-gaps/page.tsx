@@ -26,6 +26,8 @@ import PurchasingMaterialsAveragePriceGapsPrintDocument from "@/components/docum
 import { formatDate } from "@/lib/helpers/date-formaters";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
+import SensitivityFilter from "../components/sensitivity-filter";
+import { DEFAULT_SENSITIVITY, parseSensitivity } from "../components/sensitivity";
 import AveragePriceGapsOverview from "./components/average-price-gaps-overview";
 import AveragePriceGapsTable from "./components/average-price-gaps-table";
 
@@ -44,14 +46,6 @@ const PAGE_NOTE = {
   ar: "السعر المتوسط المخزن هو سعر الوحدة المسجّل على بطاقة المادة. متوسط الشراء المرجح هو متوسط أسعار بنود أوامر التوريد، موزونًا بالكمية بالوحدة الأساسية للمادة. تظهر المادة هنا عندما يختلف الرقمان بنسبة لا تقل عن حد الحساسية المحدد.",
 };
 
-const THRESHOLD_OPTIONS = [2, 3, 5] as const;
-const DEFAULT_THRESHOLD = 2;
-
-function parseThreshold(raw: string | null): number {
-  const n = Number(raw);
-  return THRESHOLD_OPTIONS.includes(n as (typeof THRESHOLD_OPTIONS)[number]) ? n : DEFAULT_THRESHOLD;
-}
-
 export default function Page() {
   const { locale, translate } = useI18n();
   const router = useRouter();
@@ -62,7 +56,7 @@ export default function Page() {
 
   const from = searchParams.get("from");
   const to = searchParams.get("to");
-  const threshold = parseThreshold(searchParams.get("threshold"));
+  const threshold = parseSensitivity(searchParams.get("threshold"));
   const rawCause = searchParams.get("cause");
   const cause = rawCause && isValidAveragePriceGapCause(rawCause) ? rawCause : null;
 
@@ -83,7 +77,7 @@ export default function Page() {
       else params.delete("to");
     }
     if ("threshold" in patch) {
-      if (patch.threshold && patch.threshold !== DEFAULT_THRESHOLD) params.set("threshold", String(patch.threshold));
+      if (patch.threshold && patch.threshold !== DEFAULT_SENSITIVITY) params.set("threshold", String(patch.threshold));
       else params.delete("threshold");
     }
     if ("cause" in patch) {
@@ -175,20 +169,13 @@ export default function Page() {
       <section className="rounded-3xl bg-white px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
           <div className="flex-1">
-            <Select
-              value={String(threshold)}
-              onChange={(value) => updateQuery({ threshold: value ? Number(value) : DEFAULT_THRESHOLD })}
-              label={translate("Sensitivity", "الحساسية")}
+            <SensitivityFilter
+              value={threshold}
+              onChange={(next) => updateQuery({ threshold: next })}
               description={translate(
-                "Flag a material when its stored average price is at least this many times the weighted purchase price (or the inverse).",
-                "علم المادة عندما يكون سعرها المتوسط المخزن على الأقل هذا المضاعف لمتوسط أسعار الشراء المرجح (أو عكسه).",
+                "Flag a material when its stored average price is at least this many times the weighted purchase price (or the inverse). Minimum 1.05.",
+                "علم المادة عندما يكون سعرها المتوسط المخزن على الأقل هذا المضاعف لمتوسط أسعار الشراء المرجح (أو عكسه). الحد الأدنى 1.05.",
               )}
-              data={THRESHOLD_OPTIONS.map((option) => ({
-                value: String(option),
-                label: translate(`${option}x`, `${option}×`),
-              }))}
-              allowDeselect={false}
-              radius="md"
             />
           </div>
           <div className="flex-1">
