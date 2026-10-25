@@ -10,11 +10,15 @@ import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/productio
 import { getMmSourcingTypeLabel, isInternallyManufacturedMmSourcing } from "@/lib/constants/enums/mm-sourcing-types";
 import {
   getFlattenedRowLineCost,
+  getManufacturingRowCost,
+  getManufacturingUnitCost,
   getMaterialCostPrice,
   getRowCostingMethod,
+  getRowManufacturingCostingMethod,
   type FlattenedBomRow,
   type ManufacturingCostRow,
 } from "@/lib/helpers/bom-display";
+import type { ManufacturingCostingMethod } from "@/lib/constants/enums/derived/manufacturing-costing-methods";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -49,6 +53,7 @@ type BomPrintDocumentProps = {
   mainCategoryTitle: string | null;
   costingMethod: CostingMethod;
   itemCostingOverrides?: Record<string, ItemCostingMethod>;
+  manufacturingCostingOverrides?: Record<string, ManufacturingCostingMethod>;
   quantityMode?: "required" | "legacy";
 };
 
@@ -60,6 +65,7 @@ export default function BomPrintDocument({
   mainCategoryTitle,
   costingMethod,
   itemCostingOverrides,
+  manufacturingCostingOverrides,
   quantityMode = "required",
 }: BomPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
@@ -232,53 +238,44 @@ export default function BomPrintDocument({
               </tr>
             </thead>
             <tbody>
-              {manufacturingRows.map((row) => (
-                <tr key={row.id} className="border-b border-gray-200">
-                  <td className="font-mono text-gray-600">{row.materialCode}</td>
-                  <td className="font-medium whitespace-nowrap">{row.materialTitle}</td>
-                  <td className="text-gray-600">
-                    {row.sourceBomItem.mmSourcingType
-                      ? getMmSourcingTypeLabel(row.sourceBomItem.mmSourcingType, locale)
-                      : "-"}
-                  </td>
-                  <td className="text-gray-600">
-                    {row.productionSubDepartment
-                      ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
-                      : "-"}
-                  </td>
-                  <td>
-                    {quantityMode === "legacy" && row.legacyQuantity === null
-                      ? "-"
-                      : formatQuantity(row.quantityRequired)}
-                  </td>
-                  <td
-                    className={
-                      isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
-                        ? undefined
-                        : row.unitManufacturingCost === 0
-                          ? ZERO_VALUE_CLASS
-                          : undefined
-                    }
-                  >
-                    {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
-                      ? "-"
-                      : formatMoney(row.unitManufacturingCost)}
-                  </td>
-                  <td
-                    className={
-                      isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
-                        ? "font-medium"
-                        : row.totalManufacturingCost === 0
-                          ? `font-medium ${ZERO_VALUE_CLASS}`
-                          : "font-medium"
-                    }
-                  >
-                    {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
-                      ? "-"
-                      : formatMoney(row.totalManufacturingCost)}
-                  </td>
-                </tr>
-              ))}
+              {manufacturingRows.map((row) => {
+                const effectiveMethod = getRowManufacturingCostingMethod(row.id, manufacturingCostingOverrides);
+                const unitCost = getManufacturingUnitCost(row, effectiveMethod);
+                const lineCost = getManufacturingRowCost(row, effectiveMethod);
+                const isInternal = isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType);
+
+                return (
+                  <tr key={row.id} className="border-b border-gray-200">
+                    <td className="font-mono text-gray-600">{row.materialCode}</td>
+                    <td className="font-medium whitespace-nowrap">{row.materialTitle}</td>
+                    <td className="text-gray-600">
+                      {row.sourceBomItem.mmSourcingType
+                        ? getMmSourcingTypeLabel(row.sourceBomItem.mmSourcingType, locale)
+                        : "-"}
+                    </td>
+                    <td className="text-gray-600">
+                      {row.productionSubDepartment
+                        ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
+                        : "-"}
+                    </td>
+                    <td>
+                      {quantityMode === "legacy" && row.legacyQuantity === null
+                        ? "-"
+                        : formatQuantity(row.quantityRequired)}
+                    </td>
+                    <td className={isInternal ? undefined : unitCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                      {isInternal ? "-" : formatMoney(unitCost)}
+                    </td>
+                    <td
+                      className={
+                        isInternal ? "font-medium" : lineCost === 0 ? `font-medium ${ZERO_VALUE_CLASS}` : "font-medium"
+                      }
+                    >
+                      {isInternal ? "-" : formatMoney(lineCost)}
+                    </td>
+                  </tr>
+                );
+              })}
               <tr className="border-t border-gray-300 bg-gray-50 font-medium">
                 <td>{translate("Total", "الإجمالي")}</td>
                 <td colSpan={5} className="text-gray-600">

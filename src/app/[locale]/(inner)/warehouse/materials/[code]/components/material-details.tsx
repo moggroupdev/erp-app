@@ -65,6 +65,22 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
           },
         ]
       : []),
+    ...(material.marketManufacturingCost != null
+      ? [
+          {
+            key: translate("Market Manufacturing Cost", "تكلفة التصنيع السوقية"),
+            value: formatMoney(material.marketManufacturingCost, translation.currency),
+          },
+          {
+            key: translate("Market Manufacturing Cost Set At", "تاريخ تحديد تكلفة التصنيع السوقية"),
+            value: formatDateAndTime(material.marketManufacturingCostSetAt!, locale),
+          },
+          {
+            key: translate("Market Manufacturing Cost Set By", "حدد تكلفة التصنيع السوقية بواسطة"),
+            value: <CreatorLink creator={material.marketManufacturingCostSetBy} />,
+          },
+        ]
+      : []),
     {
       key: translate("Minimum Stock", "الحد الأدنى للمخزون"),
       value: material.minimumStock ?? <EmptyValue />,

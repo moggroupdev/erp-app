@@ -21,7 +21,6 @@ import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/fo
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import {
   getMmSourcingTypeLabel,
-  isInternallyManufacturedMmSourcing,
   isPurchasedMmSourcing,
 } from "@/lib/constants/enums/mm-sourcing-types";
 import {
@@ -33,8 +32,11 @@ import {
   getFlattenedMaterialRows,
   getFlattenedRowLineCost,
   getManufacturingCostRows,
+  getManufacturingRowCost,
+  getManufacturingUnitCost,
   getMaterialCostPrice,
   getRowCostingMethod,
+  getRowManufacturingCostingMethod,
   type FlattenedBomRow,
   type ManufacturingCostRow,
   UNCATEGORIZED_ID,
@@ -47,6 +49,10 @@ import {
   type CostingMethod,
   type ItemCostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
+import {
+  MANUFACTURING_COSTING_METHODS,
+  type ManufacturingCostingMethod,
+} from "@/lib/constants/enums/derived/manufacturing-costing-methods";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import type { BomItemWithMaterial } from "@/types/bom";
@@ -73,6 +79,8 @@ import Modal from "@/components/ui/modal";
 import CopyButton from "@/components/ui/copy-button";
 import BomItemUnitPrice from "./components/bom-item-unit-price";
 import BulkZeroCostingModal from "./components/bulk-zero-costing-modal";
+import BulkZeroManufacturingCostModal from "./components/bulk-zero-manufacturing-cost-modal";
+import ManufacturingUnitCost from "./components/manufacturing-unit-cost";
 import type { QuantityDisplayMode } from "@/lib/helpers/bom-display";
 
 const PAGE_TITLE = { en: "Bill of Materials", ar: "قائمة المواد" };
@@ -122,6 +130,8 @@ export default function Page() {
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [deleteAllOpened, { open: openDeleteAll, close: closeDeleteAll }] = useDisclosure(false);
   const [bulkZeroCostingOpened, { open: openBulkZeroCosting, close: closeBulkZeroCosting }] = useDisclosure(false);
+  const [bulkZeroManufacturingCostOpened, { open: openBulkZeroManufacturingCost, close: closeBulkZeroManufacturingCost }] =
+    useDisclosure(false);
   const [quantityModeOpened, { open: openQuantityModeModal, close: closeQuantityModeModal }] = useDisclosure(false);
   const [quantityMode, setQuantityMode] = useState<QuantityDisplayMode>("required");
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
@@ -129,6 +139,9 @@ export default function Page() {
   const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
   const [costingMethod, setCostingMethod] = useState<CostingMethod>(COSTING_METHODS.LAST_PURCHASE_PRICE);
   const [itemCostingOverrides, setItemCostingOverrides] = useState<Record<string, ItemCostingMethod>>({});
+  const [manufacturingCostingOverrides, setManufacturingCostingOverrides] = useState<
+    Record<string, ManufacturingCostingMethod>
+  >({});
   const [printVariant, setPrintVariant] = useState<BomPrintVariant>("full");
   const printHandlerRef = useRef<(() => void) | null>(null);
 
@@ -188,6 +201,18 @@ export default function Page() {
     });
   }
 
+  function handleManufacturingCostingMethodChange(rowId: string, method: ManufacturingCostingMethod) {
+    setManufacturingCostingOverrides((prev) => {
+      if (method === MANUFACTURING_COSTING_METHODS.LAST_OUTSOURCING_COST) {
+        if (!(rowId in prev)) return prev;
+        const next = { ...prev };
+        delete next[rowId];
+        return next;
+      }
+      return { ...prev, [rowId]: method };
+    });
+  }
+
   function handleOpenAppendModal() {
     setItemToUpdate(null);
     openModal();
@@ -220,8 +245,16 @@ export default function Page() {
       pricingFactor: bom?.product.pricingFactor,
       costingMethod,
       itemCostingOverrides,
+      manufacturingCostingOverrides,
     });
-  }, [materialRows, manufacturingRows, bom?.product.pricingFactor, costingMethod, itemCostingOverrides]);
+  }, [
+    materialRows,
+    manufacturingRows,
+    bom?.product.pricingFactor,
+    costingMethod,
+    itemCostingOverrides,
+    manufacturingCostingOverrides,
+  ]);
 
   const zeroPriceDepartmentBreakdown = useMemo((): Omit<DepartmentBreakdown, "totalCost" | "sharePercent">[] => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
@@ -271,6 +304,60 @@ export default function Page() {
       return getMaterialCostPrice(item.material, effectiveMethod) === 0;
     });
   }, [materialRows, costingMethod, itemCostingOverrides]);
+
+  const zeroEffectiveManufacturingCostItems = useMemo(() => {
+    return manufacturingRows.filter((row) => {
+      if (!row.isExternallyManufactured) return false;
+      const effectiveMethod = getRowManufacturingCostingMethod(row.id, manufacturingCostingOverrides);
+      return getManufacturingUnitCost(row, effectiveMethod) === 0;
+    });
+  }, [manufacturingRows, manufacturingCostingOverrides]);
+
+  function handleBulkZeroManufacturingCostApply(method: ManufacturingCostingMethod) {
+    const nextOverrides = { ...manufacturingCostingOverrides };
+    let updatedCount = 0;
+    let skippedCount = 0;
+
+    for (const item of zeroEffectiveManufacturingCostItems) {
+      const methodCost = getManufacturingUnitCost(item, method);
+      if (methodCost === 0) {
+        skippedCount += 1;
+        continue;
+      }
+
+      if (method === MANUFACTURING_COSTING_METHODS.LAST_OUTSOURCING_COST) {
+        delete nextOverrides[item.id];
+      } else {
+        nextOverrides[item.id] = method;
+      }
+      updatedCount += 1;
+    }
+
+    setManufacturingCostingOverrides(nextOverrides);
+
+    if (updatedCount > 0 && skippedCount > 0) {
+      toast.success(
+        translate(
+          `Updated manufacturing cost for ${updatedCount} items. Skipped ${skippedCount} with no cost for the selected source.`,
+          `تم تحديث تكلفة التصنيع لـ ${updatedCount} بند. تم تخطي ${skippedCount} لعدم وجود تكلفة للمصدر المحدد.`,
+        ),
+      );
+    } else if (updatedCount > 0) {
+      toast.success(
+        translate(
+          `Updated manufacturing cost for ${updatedCount} zero-cost items.`,
+          `تم تحديث تكلفة التصنيع لـ ${updatedCount} بند بدون تكلفة.`,
+        ),
+      );
+    } else {
+      toast.message(
+        translate(
+          "No items were updated for the selected manufacturing cost source.",
+          "لم يتم تحديث أي بنود لمصدر تكلفة التصنيع المحدد.",
+        ),
+      );
+    }
+  }
 
   function handleBulkZeroCostingApply(method: ItemCostingMethod) {
     const nextOverrides = { ...itemCostingOverrides };
@@ -538,6 +625,11 @@ export default function Page() {
                           {translate("Update Zero Prices", "تحديث الأسعار الصفرية")}
                         </Menu.Item>
                       )}
+                      {zeroEffectiveManufacturingCostItems.length > 0 && (
+                        <Menu.Item leftSection={<Factory size={14} />} onClick={openBulkZeroManufacturingCost}>
+                          {translate("Update Zero Manufacturing Costs", "تحديث تكاليف التصنيع الصفرية")}
+                        </Menu.Item>
+                      )}
                       {canManageBom && <Menu.Divider />}
                       {canAddBom && (
                         <>
@@ -592,6 +684,7 @@ export default function Page() {
                       mainCategoryTitle={productMainCategory?.title || null}
                       costingMethod={costingMethod}
                       itemCostingOverrides={itemCostingOverrides}
+                      manufacturingCostingOverrides={manufacturingCostingOverrides}
                       quantityMode={quantityMode}
                     />
                   ) : printVariant === "no-cost" ? (
@@ -609,7 +702,6 @@ export default function Page() {
                       departmentBreakdown={departmentBreakdown}
                       manufacturingRows={manufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
-                      totalManufacturingCost={totals.totalManufacturingCost}
                       manufacturingItemCount={totals.manufacturingItemCount}
                       itemCount={totals.itemCount}
                       quantityMode={quantityMode}
@@ -859,6 +951,8 @@ export default function Page() {
                     <ManufacturingCostsSection
                       rows={manufacturingRows}
                       totalManufacturingCost={totals.totalManufacturingCost}
+                      manufacturingCostingOverrides={manufacturingCostingOverrides}
+                      onSelectManufacturingCostMethod={handleManufacturingCostingMethodChange}
                       onEditItem={handleOpenUpdateModal}
                       onDeleteItem={(item) => {
                         deleteMutation.reset();
@@ -884,8 +978,8 @@ export default function Page() {
                     label={translate("Total Manufacturing Cost", "إجمالي تكلفة التصنيع")}
                     value={formatMoney(totals.totalManufacturingCost, currency)}
                     hint={translate(
-                      "Sum of quantity × last outsourcing manufacturing cost for externally manufactured materials",
-                      "مجموع الكمية × آخر تكلفة تصنيع للمواد المصنعة خارجيًا",
+                      "Sum of quantity × last outsourcing manufacturing cost for externally manufactured materials, or the market manufacturing cost when that last cost is missing",
+                      "مجموع الكمية × آخر تكلفة تصنيع للمواد المصنعة خارجيًا، أو تكلفة التصنيع السوقية عند غياب آخر تكلفة",
                     )}
                     icon={<Wallet size={18} />}
                   />
@@ -971,6 +1065,13 @@ export default function Page() {
                   items={zeroEffectivePriceItems}
                   bomCostingMethod={costingMethod}
                   onApply={handleBulkZeroCostingApply}
+                />
+
+                <BulkZeroManufacturingCostModal
+                  opened={bulkZeroManufacturingCostOpened}
+                  onClose={closeBulkZeroManufacturingCost}
+                  items={zeroEffectiveManufacturingCostItems}
+                  onApply={handleBulkZeroManufacturingCostApply}
                 />
 
                 <DeleteModal
@@ -1081,11 +1182,15 @@ function NoLongerUsedBadge() {
 function ManufacturingCostsSection({
   rows,
   totalManufacturingCost,
+  manufacturingCostingOverrides,
+  onSelectManufacturingCostMethod,
   onEditItem,
   onDeleteItem,
 }: {
   rows: ManufacturingCostRow[];
   totalManufacturingCost: number;
+  manufacturingCostingOverrides: Record<string, ManufacturingCostingMethod>;
+  onSelectManufacturingCostMethod: (rowId: string, method: ManufacturingCostingMethod) => void;
   onEditItem: (item: BomItemWithMaterial) => void;
   onDeleteItem: (item: BomItemWithMaterial) => void;
 }) {
@@ -1147,99 +1252,116 @@ function ManufacturingCostsSection({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {rows.map((row) => (
-              <Table.Tr key={row.id} className="text-gray-600">
-                <Table.Td>
-                  <div className="flex items-center gap-1.5">
-                    <ProtectedLink
-                      permission={PERMISSIONS.READ_MATERIALS}
-                      href={`/warehouse/materials/${row.materialCode}`}
-                      className="font-mono text-xs text-gray-500 hover:underline"
-                    >
-                      {row.materialCode}
-                    </ProtectedLink>
-                    <CopyButton text={row.materialCode} />
-                  </div>
-                </Table.Td>
-                <Table.Td>
-                  <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                    <ProtectedLink
-                      permission={PERMISSIONS.READ_MATERIALS}
-                      href={`/warehouse/materials/${row.materialCode}`}
-                      className="font-medium text-gray-800 hover:underline"
-                    >
-                      {row.materialTitle}
-                    </ProtectedLink>
-                    {row.sourceBomItem.noLongerUsed && <NoLongerUsedBadge />}
-                  </div>
-                </Table.Td>
-                <Table.Td>
-                  {row.sourceBomItem.mmSourcingType ? (
-                    <Badge size="xs" variant="light" color="gray" radius="sm">
-                      {getMmSourcingTypeLabel(row.sourceBomItem.mmSourcingType, locale)}
-                    </Badge>
-                  ) : (
-                    "-"
-                  )}
-                </Table.Td>
-                <Table.Td>
-                  <span className="text-sm text-gray-600">
-                    {row.productionSubDepartment
-                      ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
-                      : "-"}
-                  </span>
-                </Table.Td>
-                <Table.Td
-                  className={`font-medium ${
-                    row.sourceBomItem.noLongerUsed && row.quantityRequired === 0 ? "text-ochre-600" : "text-gray-800"
-                  }`}
-                >
-                  {formatQuantity(row.quantityRequired)}
-                </Table.Td>
-                <Table.Td>
-                  {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
-                    ? "-"
-                    : formatMoney(row.unitManufacturingCost)}
-                </Table.Td>
-                <Table.Td className="font-medium text-gray-800">
-                  {isInternallyManufacturedMmSourcing(row.sourceBomItem.mmSourcingType)
-                    ? "-"
-                    : formatMoney(row.totalManufacturingCost)}
-                </Table.Td>
-                <Table.Td className="text-gray-500">
-                  {row.notes ? <span className="truncate">{row.notes}</span> : "-"}
-                </Table.Td>
-                <Table.Td>
-                  <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
-                    <Menu position="bottom-end" withinPortal>
-                      <Menu.Target>
-                        <ActionIcon
-                          variant="subtle"
-                          color="gray"
-                          size="sm"
-                          radius="md"
-                          aria-label={translate("Item actions", "إجراءات البند")}
-                        >
-                          <EllipsisVertical size={14} />
-                        </ActionIcon>
-                      </Menu.Target>
-                      <Menu.Dropdown>
-                        <Menu.Item leftSection={<Pencil size={14} />} onClick={() => onEditItem(row.sourceBomItem)}>
-                          {translate("Edit", "تعديل")}
-                        </Menu.Item>
-                        <Menu.Item
-                          leftSection={<Trash2 size={14} />}
-                          color="clay"
-                          onClick={() => onDeleteItem(row.sourceBomItem)}
-                        >
-                          {translate("Delete", "حذف")}
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </PermissionGuard>
-                </Table.Td>
-              </Table.Tr>
-            ))}
+            {rows.map((row) => {
+              const effectiveMethod = getRowManufacturingCostingMethod(row.id, manufacturingCostingOverrides);
+              const lineCost = getManufacturingRowCost(row, effectiveMethod);
+              const canPickAlternative =
+                row.isExternallyManufactured &&
+                ((row.lastOutsourcingCost ?? 0) === 0 || row.id in manufacturingCostingOverrides);
+
+              return (
+                <Table.Tr key={row.id} className="text-gray-600">
+                  <Table.Td>
+                    <div className="flex items-center gap-1.5">
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_MATERIALS}
+                        href={`/warehouse/materials/${row.materialCode}`}
+                        className="font-mono text-xs text-gray-500 hover:underline"
+                      >
+                        {row.materialCode}
+                      </ProtectedLink>
+                      <CopyButton text={row.materialCode} />
+                    </div>
+                  </Table.Td>
+                  <Table.Td>
+                    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_MATERIALS}
+                        href={`/warehouse/materials/${row.materialCode}`}
+                        className="font-medium text-gray-800 hover:underline"
+                      >
+                        {row.materialTitle}
+                      </ProtectedLink>
+                      {row.sourceBomItem.noLongerUsed && <NoLongerUsedBadge />}
+                    </div>
+                  </Table.Td>
+                  <Table.Td>
+                    {row.sourceBomItem.mmSourcingType ? (
+                      <Badge size="xs" variant="light" color="gray" radius="sm">
+                        {getMmSourcingTypeLabel(row.sourceBomItem.mmSourcingType, locale)}
+                      </Badge>
+                    ) : (
+                      "-"
+                    )}
+                  </Table.Td>
+                  <Table.Td>
+                    <span className="text-sm text-gray-600">
+                      {row.productionSubDepartment
+                        ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
+                        : "-"}
+                    </span>
+                  </Table.Td>
+                  <Table.Td
+                    className={`font-medium ${
+                      row.sourceBomItem.noLongerUsed && row.quantityRequired === 0 ? "text-ochre-600" : "text-gray-800"
+                    }`}
+                  >
+                    {formatQuantity(row.quantityRequired)}
+                  </Table.Td>
+                  <Table.Td>
+                    {row.isExternallyManufactured ? (
+                      <ManufacturingUnitCost
+                        row={row}
+                        effectiveMethod={effectiveMethod}
+                        canPickAlternative={canPickAlternative}
+                        onSelectMethod={(method) => onSelectManufacturingCostMethod(row.id, method)}
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </Table.Td>
+                  <Table.Td
+                    className={`font-medium ${
+                      row.isExternallyManufactured ? (lineCost === 0 ? "text-ochre-600" : "text-gray-800") : "text-gray-800"
+                    }`}
+                  >
+                    {row.isExternallyManufactured ? formatMoney(lineCost) : "-"}
+                  </Table.Td>
+                  <Table.Td className="text-gray-500">
+                    {row.notes ? <span className="truncate">{row.notes}</span> : "-"}
+                  </Table.Td>
+                  <Table.Td>
+                    <PermissionGuard permission={PERMISSIONS.UPDATE_PRODUCT_BOM}>
+                      <Menu position="bottom-end" withinPortal>
+                        <Menu.Target>
+                          <ActionIcon
+                            variant="subtle"
+                            color="gray"
+                            size="sm"
+                            radius="md"
+                            aria-label={translate("Item actions", "إجراءات البند")}
+                          >
+                            <EllipsisVertical size={14} />
+                          </ActionIcon>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                          <Menu.Item leftSection={<Pencil size={14} />} onClick={() => onEditItem(row.sourceBomItem)}>
+                            {translate("Edit", "تعديل")}
+                          </Menu.Item>
+                          <Menu.Item
+                            leftSection={<Trash2 size={14} />}
+                            color="clay"
+                            onClick={() => onDeleteItem(row.sourceBomItem)}
+                          >
+                            {translate("Delete", "حذف")}
+                          </Menu.Item>
+                        </Menu.Dropdown>
+                      </Menu>
+                    </PermissionGuard>
+                  </Table.Td>
+                </Table.Tr>
+              );
+            })}
           </Table.Tbody>
           <Table.Tfoot className="bg-gray-50">
             <Table.Tr className="h-10 border-t border-b-0! border-gray-200 font-medium text-gray-800">
@@ -1247,7 +1369,9 @@ function ManufacturingCostsSection({
               <Table.Td colSpan={5} className="text-gray-500">
                 {rows.length} {translate("Items", "بند")}
               </Table.Td>
-              <Table.Td>{formatMoney(totalManufacturingCost)}</Table.Td>
+              <Table.Td className={totalManufacturingCost === 0 ? "text-ochre-600" : undefined}>
+                {formatMoney(totalManufacturingCost)}
+              </Table.Td>
               <Table.Td />
               <Table.Td />
             </Table.Tr>

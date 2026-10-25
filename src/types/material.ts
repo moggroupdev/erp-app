@@ -18,6 +18,9 @@ export type Material = {
   marketUnitPrice: number | null;
   marketUnitPriceSetAt: Date | null;
   marketUnitPriceSetBy: string | null;
+  marketManufacturingCost: number | null;
+  marketManufacturingCostSetAt: Date | null;
+  marketManufacturingCostSetBy: string | null;
   deletedAt: Date | null;
   createdAt: Date;
   createdBy: string;
@@ -34,9 +37,13 @@ export type MaterialUnitConversion = {
 
 export type MaterialUnitConversionSummary = Pick<MaterialUnitConversion, "id" | "unit" | "conversionFactorToBase">;
 
-export type MaterialWithCreator = Omit<Material, "createdBy" | "marketUnitPriceSetBy"> & {
+export type MaterialWithCreator = Omit<
+  Material,
+  "createdBy" | "marketUnitPriceSetBy" | "marketManufacturingCostSetBy"
+> & {
   createdBy: { id: string; name: string };
   marketUnitPriceSetBy: { id: string; name: string } | null;
+  marketManufacturingCostSetBy: { id: string; name: string } | null;
 };
 
 export type MaterialWithUnitConversions = Material & { unitConversions: MaterialUnitConversionSummary[] };
@@ -69,6 +76,10 @@ export type CreateMaterialUnitConversionDto = {
 
 export type SetMaterialMarketPriceDto = {
   marketUnitPrice: number;
+};
+
+export type SetMaterialMarketManufacturingCostDto = {
+  marketManufacturingCost: number;
 };
 
 export type SetMaterialTypeDto = {

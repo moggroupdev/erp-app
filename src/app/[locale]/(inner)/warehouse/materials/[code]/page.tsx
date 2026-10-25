@@ -15,7 +15,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { Menu } from "@mantine/core";
-import { Pencil, Repeat, Tag } from "lucide-react";
+import { Factory, Pencil, Repeat, Tag } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
@@ -23,6 +23,7 @@ import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialMarketPriceModal from "./components/material-market-price-modal";
+import MaterialMarketManufacturingCostModal from "./components/material-market-manufacturing-cost-modal";
 import MaterialTypeModal from "./components/material-type-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
@@ -77,6 +78,10 @@ export default function Page() {
 
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [marketPriceModalOpened, { open: openMarketPriceModal, close: closeMarketPriceModal }] = useDisclosure(false);
+  const [
+    marketManufacturingCostModalOpened,
+    { open: openMarketManufacturingCostModal, close: closeMarketManufacturingCostModal },
+  ] = useDisclosure(false);
   const [typeModalOpened, { open: openTypeModal, close: closeTypeModal }] = useDisclosure(false);
 
   return (
@@ -103,6 +108,11 @@ export default function Page() {
                 {canSetMarketPrice && (
                   <Menu.Item leftSection={<Tag size={14} />} onClick={openMarketPriceModal}>
                     {translate("Set Market Price", "تعيين سعر السوق")}
+                  </Menu.Item>
+                )}
+                {canSetMarketPrice && isManufacturedMaterial(material.materialType) && (
+                  <Menu.Item leftSection={<Factory size={14} />} onClick={openMarketManufacturingCostModal}>
+                    {translate("Set Market Manufacturing Cost", "تعيين تكلفة التصنيع السوقية")}
                   </Menu.Item>
                 )}
               </ActionsMenu>
@@ -138,6 +148,17 @@ export default function Page() {
               baseUnit={material.unitOfMeasurement}
               unitConversions={material.unitConversions}
             />
+
+            {isManufacturedMaterial(material.materialType) && (
+              <MaterialMarketManufacturingCostModal
+                opened={marketManufacturingCostModalOpened}
+                close={closeMarketManufacturingCostModal}
+                materialCode={code}
+                currentValue={material.marketManufacturingCost}
+                baseUnit={material.unitOfMeasurement}
+                unitConversions={material.unitConversions}
+              />
+            )}
 
             <MaterialTypeModal opened={typeModalOpened} close={closeTypeModal} material={material} />
 
