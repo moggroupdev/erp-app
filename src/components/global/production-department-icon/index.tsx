@@ -133,4 +133,12 @@ const ICONS: Record<ProductionSubDepartment, React.ReactNode> = {
       <rect x="38" y="12" width="8" height="18" rx="2" fill="#F06A26" />
     </>
   ),
+  turning: (
+    <>
+      <rect x="8" y="28" width="48" height="8" rx="4" fill="#017E84" />
+      <circle cx="16" cy="32" r="10" fill="#714B67" />
+      <circle cx="16" cy="32" r="4" fill="#F3CC45" />
+      <rect x="40" y="16" width="8" height="20" rx="2" fill="#F06A26" />
+    </>
+  ),
 };
