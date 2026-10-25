@@ -11,6 +11,9 @@ export const MATERIAL_UNIT_VALUES = [
   "square_meter",
   "cubic_meter",
   "liter",
+  "packet",
+  "box",
+  "roll",
 ] as const;
 
 export type MaterialUnit = (typeof MATERIAL_UNIT_VALUES)[number];
@@ -83,6 +86,27 @@ export const MATERIAL_UNIT_LABELS: LocalizedEntity<MaterialUnit> = {
     label: {
       en: "Liter",
       ar: "لتر",
+    },
+  },
+  packet: {
+    value: "packet",
+    label: {
+      en: "Packet",
+      ar: "باكيت",
+    },
+  },
+  box: {
+    value: "box",
+    label: {
+      en: "Box",
+      ar: "علبة",
+    },
+  },
+  roll: {
+    value: "roll",
+    label: {
+      en: "Roll",
+      ar: "لفة",
     },
   },
 };
