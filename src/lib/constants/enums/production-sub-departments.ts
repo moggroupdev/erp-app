@@ -15,6 +15,7 @@ export const PRODUCTION_SUB_DEPARTMENT_VALUES = [
   "kitchens",
   "paints",
   "blacksmithing",
+  "turning",
 ] as const;
 
 export type ProductionSubDepartment = (typeof PRODUCTION_SUB_DEPARTMENT_VALUES)[number];
@@ -119,6 +120,13 @@ export const PRODUCTION_SUB_DEPARTMENT_LABELS: LocalizedEntity<ProductionSubDepa
       ar: "قسم الحدادة",
     },
   },
+  turning: {
+    value: "turning",
+    label: {
+      en: "Turning Dep.",
+      ar: "قسم الخراطة",
+    },
+  },
 };
 
 export const PRODUCTION_SUB_DEPARTMENT_LABELS_LIST = Object.values(PRODUCTION_SUB_DEPARTMENT_LABELS);
@@ -128,6 +136,7 @@ export const PRODUCTION_SUB_DEPARTMENT_SORT_RANKS: Record<ProductionSubDepartmen
   cutting: 1,
   punch: 1,
   bending: 1,
+  turning: 1,
   sheet_metal_neutral: 2,
   sheet_metal_cold: 2,
   sheet_metal_hot: 2,
@@ -194,6 +203,7 @@ export const PRODUCTION_SUB_DEPARTMENT_KIND_BY_DEPARTMENT: Record<ProductionSubD
     cutting: "production",
     punch: "production",
     bending: "production",
+    turning: "production",
     refrigeration: "production",
     injection: "production",
     sheet_metal_neutral: "production",

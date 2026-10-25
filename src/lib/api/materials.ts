@@ -9,6 +9,7 @@ import type {
   UpdateMaterialDto,
   CreateMaterialUnitConversionDto,
   SetMaterialMarketPriceDto,
+  SetMaterialMarketManufacturingCostDto,
   SetMaterialTypeDto,
   MaterialTypeChangeImpact,
 } from "@/types/material";
@@ -71,6 +72,22 @@ const materialsApi = {
     dto: SetMaterialMarketPriceDto;
   }) {
     return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/market-price`, data: dto });
+  },
+
+  async setMarketManufacturingCost({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: SetMaterialMarketManufacturingCostDto;
+  }) {
+    return await privateRequest<Material>({
+      method: "PATCH",
+      url: `materials/${code}/market-manufacturing-cost`,
+      data: dto,
+    });
   },
 
   async previewTypeChange({

@@ -191,66 +191,82 @@ export default function MaterialPurchaseRequisitionPrintDocument({
     },
   ];
 
+  // thead repeats on each printed page. Column headers stay on the items table.
   return (
-    <div className="flex flex-col gap-5 text-xs text-gray-900">
-      <header className="grid grid-cols-3 items-center gap-4 border-b border-gray-300 pb-2">
-        <PrintOrgHeader />
-        <div className="flex flex-col items-center gap-1 text-center">
-          <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
-            {translate("Material Purchase Requisition", "طلب شراء خامات")}
-          </p>
-          <h1 className="font-mono text-2xl font-semibold">{requisition.code}</h1>
-        </div>
-        <div className="flex justify-end">
-          <img src={logoSrc} alt="" width={100} height={100} className="h-24 w-24 shrink-0 rounded object-contain" />
-        </div>
-      </header>
+    <table className="w-full border-collapse text-xs text-gray-900">
+      <thead className="table-header-group break-inside-avoid">
+        <tr>
+          <td className="pb-5">
+            <header className="grid grid-cols-3 items-center gap-4 border-b border-gray-300 bg-white pb-2">
+              <PrintOrgHeader />
+              <div className="flex flex-col items-center gap-1 text-center">
+                <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
+                  {translate("Material Purchase Requisition", "طلب شراء خامات")}
+                </p>
+                <h1 className="font-mono text-2xl font-semibold">{requisition.code}</h1>
+              </div>
+              <div className="flex justify-end">
+                <img src={logoSrc} alt="" width={100} height={100} className="h-24 w-24 shrink-0 rounded object-contain" />
+              </div>
+            </header>
+          </td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td className="align-top">
+            <div className="flex flex-col gap-5">
+              <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
+                <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
+                <PrintDetail
+                  label={translate("Requisition Date", "تاريخ طلب الشراء")}
+                  value={formatDateAndTime(requisition.createdAt, locale)}
+                />
+                <PrintDetail
+                  label={translate("Requesting Party", "جهة الطلب")}
+                  value={getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}
+                />
+                {requisition.notes ? (
+                  <PrintDetail label={translate("Notes", "الملاحظات")} value={requisition.notes} />
+                ) : null}
+              </section>
 
-      <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
-        <PrintDetail label={translate("Printing Date", "تاريخ الطباعة")} value={printedAt} />
-        <PrintDetail
-          label={translate("Requisition Date", "تاريخ طلب الشراء")}
-          value={formatDateAndTime(requisition.createdAt, locale)}
-        />
-        <PrintDetail
-          label={translate("Requesting Party", "جهة الطلب")}
-          value={getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}
-        />
-        {requisition.notes ? <PrintDetail label={translate("Notes", "الملاحظات")} value={requisition.notes} /> : null}
-      </section>
+              <hr className="border-gray-300" />
 
-      <hr className="border-gray-300" />
+              <section className="flex flex-col gap-2.5">
+                <PrintTable
+                  headers={itemHeaders}
+                  rows={itemRows}
+                  footerRows={itemFooterRows}
+                  monoColumnIndexes={[1]}
+                  noWrapIndexes={[1, 4, 5, 6, 7]}
+                  tableClassName="text-[8px] [&_td]:align-top [&_th]:text-[8px]"
+                  emptyLabel={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")}
+                />
+                {missingPriceCount > 0 ? (
+                  <p className="text-ochre-700 text-[9px] leading-relaxed">
+                    {translate(
+                      `${missingPriceCount} item(s) without a last purchase price were excluded from this total estimate.`,
+                      `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير الإجمالي.`,
+                    )}
+                  </p>
+                ) : null}
+              </section>
 
-      <section className="flex flex-col gap-2.5">
-        <PrintTable
-          headers={itemHeaders}
-          rows={itemRows}
-          footerRows={itemFooterRows}
-          monoColumnIndexes={[1]}
-          noWrapIndexes={[1, 4, 5, 6, 7]}
-          tableClassName="text-[8px] [&_td]:align-top [&_th]:text-[8px]"
-          emptyLabel={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")}
-        />
-        {missingPriceCount > 0 ? (
-          <p className="text-ochre-700 text-[9px] leading-relaxed">
-            {translate(
-              `${missingPriceCount} item(s) without a last purchase price were excluded from this total estimate.`,
-              `تم استبعاد ${missingPriceCount} بند/بنود بدون آخر سعر شراء من هذا التقدير الإجمالي.`,
-            )}
-          </p>
-        ) : null}
-      </section>
-
-      <section className="break-inside-avoid pt-2">
-        <div className="flex gap-6">
-          {signatureParties.map((party) => (
-            <ApprovalSignatureBlock key={party.title} title={party.title} name={party.name} />
-          ))}
-          {approvalGates.map((gate) => (
-            <ApprovalGateBlock key={gate.title} locale={locale} translate={translate} {...gate} />
-          ))}
-        </div>
-      </section>
-    </div>
+              <section className="break-inside-avoid pt-2">
+                <div className="flex gap-6">
+                  {signatureParties.map((party) => (
+                    <ApprovalSignatureBlock key={party.title} title={party.title} name={party.name} />
+                  ))}
+                  {approvalGates.map((gate) => (
+                    <ApprovalGateBlock key={gate.title} locale={locale} translate={translate} {...gate} />
+                  ))}
+                </div>
+              </section>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   );
 }

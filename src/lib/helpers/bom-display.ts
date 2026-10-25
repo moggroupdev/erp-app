@@ -10,6 +10,10 @@ import {
   type CostingMethod,
   type ItemCostingMethod,
 } from "@/lib/constants/enums/derived/costing-methods";
+import {
+  MANUFACTURING_COSTING_METHODS,
+  type ManufacturingCostingMethod,
+} from "@/lib/constants/enums/derived/manufacturing-costing-methods";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { BomItemWithMaterial, BomMmComponent } from "@/types/bom";
@@ -51,8 +55,12 @@ export type ManufacturingCostRow = {
   materialTitle: string;
   quantityRequired: number;
   legacyQuantity?: number | null;
-  unitManufacturingCost: number;
-  totalManufacturingCost: number;
+  lastOutsourcingCost: number | null;
+  lastOutsourcingDate: Date | null;
+  marketManufacturingCost: number | null;
+  marketManufacturingCostSetAt: Date | null;
+  baseQuantity: number;
+  isExternallyManufactured: boolean;
   productionSubDepartment: ProductionSubDepartment | null;
   notes: string | null;
   sourceBomItem: BomItemWithMaterial;
@@ -80,6 +88,29 @@ export function getRowCostingMethod(
   overrides: Record<string, ItemCostingMethod> | undefined,
 ): ItemCostingMethod {
   return overrides?.[rowId] ?? bomCostingMethod;
+}
+
+export function getRowManufacturingCostingMethod(
+  rowId: string,
+  overrides: Record<string, ManufacturingCostingMethod> | undefined,
+): ManufacturingCostingMethod {
+  return overrides?.[rowId] ?? MANUFACTURING_COSTING_METHODS.LAST_OUTSOURCING_COST;
+}
+
+export function getManufacturingUnitCost(
+  row: ManufacturingCostRow,
+  method: ManufacturingCostingMethod,
+): number {
+  if (!row.isExternallyManufactured) return 0;
+  if (method === MANUFACTURING_COSTING_METHODS.MARKET_MANUFACTURING_COST) return row.marketManufacturingCost ?? 0;
+  return row.lastOutsourcingCost ?? 0;
+}
+
+export function getManufacturingRowCost(
+  row: ManufacturingCostRow,
+  method: ManufacturingCostingMethod,
+): number {
+  return row.baseQuantity * getManufacturingUnitCost(row, method);
 }
 
 // Materials that were never purchased have no last purchase price, so they cost nothing under that method.
@@ -193,9 +224,7 @@ export function getManufacturingCostRows(
         isManufacturedMaterial(item.material.materialType) && usesMmRecipe(item.mmSourcingType),
     )
     .map((item) => {
-      const unitManufacturingCost = isExternallyManufacturedMmSourcing(item.mmSourcingType)
-        ? (item.material.lastOutsourcingCost ?? 0)
-        : 0;
+      const isExternallyManufactured = isExternallyManufacturedMmSourcing(item.mmSourcingType);
       const qty = quantityMode === "legacy" ? (item.legacyQuantity ?? 0) : item.quantityRequired;
       const baseQuantity = getEnteredQuantityInBaseUnit(
         qty,
@@ -209,8 +238,14 @@ export function getManufacturingCostRows(
         materialTitle: item.material.title,
         quantityRequired: qty,
         legacyQuantity: item.legacyQuantity,
-        unitManufacturingCost,
-        totalManufacturingCost: baseQuantity * unitManufacturingCost,
+        lastOutsourcingCost: isExternallyManufactured ? (item.material.lastOutsourcingCost ?? null) : null,
+        lastOutsourcingDate: isExternallyManufactured ? (item.material.lastOutsourcingDate ?? null) : null,
+        marketManufacturingCost: isExternallyManufactured ? (item.material.marketManufacturingCost ?? null) : null,
+        marketManufacturingCostSetAt: isExternallyManufactured
+          ? (item.material.marketManufacturingCostSetAt ?? null)
+          : null,
+        baseQuantity,
+        isExternallyManufactured,
         productionSubDepartment: item.productionSubDepartment,
         notes: item.notes,
         sourceBomItem: item,
@@ -240,12 +275,16 @@ export function getBomDisplayTotals(args: {
   pricingFactor: number | null | undefined;
   costingMethod: CostingMethod;
   itemCostingOverrides?: Record<string, ItemCostingMethod>;
+  manufacturingCostingOverrides?: Record<string, ManufacturingCostingMethod>;
 }): BomDisplayTotals {
   const totalMaterialCost = args.materialRows.reduce((sum, row) => {
     const method = getRowCostingMethod(row.id, args.costingMethod, args.itemCostingOverrides);
     return sum + getFlattenedRowLineCost(row, method);
   }, 0);
-  const totalManufacturingCost = args.manufacturingRows.reduce((sum, row) => sum + row.totalManufacturingCost, 0);
+  const totalManufacturingCost = args.manufacturingRows.reduce((sum, row) => {
+    const method = getRowManufacturingCostingMethod(row.id, args.manufacturingCostingOverrides);
+    return sum + getManufacturingRowCost(row, method);
+  }, 0);
   const grandTotalCost = totalMaterialCost + totalManufacturingCost;
   const pricingFactor = args.pricingFactor != null ? Number(args.pricingFactor) : null;
 
