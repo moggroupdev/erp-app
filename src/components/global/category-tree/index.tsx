@@ -1,7 +1,8 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useState, type ReactNode } from "react";
-import { Button, TextInput } from "@mantine/core";
+import Link from "next/link";
+import { Button, Menu, TextInput } from "@mantine/core";
 import { ChevronDown, ChevronRight, FolderTree, Search, X } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
@@ -9,8 +10,9 @@ import EmptySection from "@/components/ui/sections/empty";
 import ErrorSection from "@/components/ui/sections/error";
 import LoadingSection from "@/components/ui/sections/loading";
 import NoResultsSection from "@/components/ui/sections/no-results";
+import useHasPermission from "@/hooks/use-has-permission";
 import type { Permission } from "@/lib/constants/enums/permissions";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 
 export type CategoryTreeMain = {
   id: string;
@@ -28,18 +30,17 @@ type CategoryGroup = {
   totalSubCount: number;
 };
 
-export function CategoryTreeLink({ href, permission }: { href: string; permission: Permission }) {
+export function CategoryTreeMenuItem({ href, permission }: { href: string; permission: Permission }) {
   const { translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
+  const hasPermission = useHasPermission(permission);
+
+  if (!hasPermission) return null;
 
   return (
-    <ProtectedLink
-      permission={permission}
-      href={href}
-      className="inline-flex items-center gap-1.5 rounded-lg bg-plum-50 px-2.5 py-1.5 text-sm font-medium text-plum-700 hover:bg-plum-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum-600"
-    >
-      <FolderTree size={15} />
+    <Menu.Item component={Link} href={getLocalizedHref(href)} leftSection={<FolderTree size={14} />}>
       {translate("Category tree", "شجرة الفئات")}
-    </ProtectedLink>
+    </Menu.Item>
   );
 }
 
@@ -122,21 +123,15 @@ export default function CategoryTree({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-gray-600">
-        {translate(
-          `${groups.length} main categories, ${subCount} subcategories`,
-          `${groups.length} فئة رئيسية، ${subCount} فئة فرعية`,
-        )}
-      </p>
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+    <div className="overflow-hidden rounded-xl border border-gray-200">
+      <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 px-2 py-2">
         <TextInput
           value={keyword}
           onChange={(event) => setKeyword(event.currentTarget.value)}
           placeholder={translate("Search categories...", "ابحث في الفئات...")}
           leftSection={<Search size={15} />}
           radius="md"
+          size="sm"
           className="min-w-0 flex-1"
           aria-label={translate("Search categories", "البحث في الفئات")}
           rightSection={
@@ -147,12 +142,14 @@ export default function CategoryTree({
             ) : undefined
           }
         />
-
-        <div className="flex shrink-0 items-center gap-2">
-          <Button type="button" variant="light" color="dark" radius="md" onClick={expandAll}>
+        <span className="text-xs text-gray-500 tabular-nums">
+          {translate(`${groups.length} mains, ${subCount} subs`, `${groups.length} رئيسية، ${subCount} فرعية`)}
+        </span>
+        <div className="flex items-center gap-1">
+          <Button type="button" variant="subtle" color="dark" size="compact-sm" onClick={expandAll}>
             {translate("Expand all", "توسيع الكل")}
           </Button>
-          <Button type="button" variant="light" color="dark" radius="md" onClick={collapseAll}>
+          <Button type="button" variant="subtle" color="dark" size="compact-sm" onClick={collapseAll}>
             {translate("Collapse all", "طي الكل")}
           </Button>
         </div>
@@ -164,64 +161,81 @@ export default function CategoryTree({
           button={{ text: translate("Clear search", "مسح البحث"), onClick: () => setKeyword("") }}
         />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul>
           {visibleGroups.map((group) => {
             const expanded = !collapsedIds.has(group.main.id);
+            const canToggle = group.subs.length > 0;
             const panelId = `category-subs-${group.main.id}`;
             const listHref = `${listPath}?mainCategoryId=${encodeURIComponent(group.main.id)}`;
+            const expandLabel = expanded
+              ? translate(`Collapse ${group.main.title}`, `طي ${group.main.title}`)
+              : translate(`Expand ${group.main.title}`, `توسيع ${group.main.title}`);
 
             return (
-              <li key={group.main.id} className="border-s-2 border-plum-600 ps-3">
-                <div className="flex flex-col gap-1 py-1 sm:flex-row sm:items-center sm:gap-3">
-                  <button
-                    type="button"
-                    className="flex min-w-0 flex-1 items-center gap-2 rounded-md text-start text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum-600"
-                    aria-expanded={expanded}
-                    aria-controls={panelId}
-                    onClick={() => toggleMain(group.main.id)}
-                  >
-                    {expanded ? (
-                      <ChevronDown size={16} className="shrink-0 text-plum-600" />
-                    ) : (
-                      <ChevronRight size={16} className="shrink-0 text-plum-600 rtl:rotate-180" />
-                    )}
-                    <span className="min-w-0 font-semibold">
+              <li key={group.main.id} className="border-b border-gray-200 last:border-b-0">
+                <div className="border-plum-600 bg-plum-50 flex items-center gap-2 border-s-2 px-2 py-1.5">
+                  {canToggle ? (
+                    <button
+                      type="button"
+                      className="text-plum-700 hover:bg-plum-100 focus-visible:outline-plum-600 flex size-7 shrink-0 items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
+                      aria-expanded={expanded}
+                      aria-controls={panelId}
+                      aria-label={expandLabel}
+                      onClick={() => toggleMain(group.main.id)}
+                    >
+                      {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} className="rtl:rotate-180" />}
+                    </button>
+                  ) : (
+                    <span className="size-7 shrink-0" />
+                  )}
+
+                  <CodeWithCopy code={group.main.legacyCode} query={query} />
+
+                  {canToggle ? (
+                    <button
+                      type="button"
+                      className="focus-visible:outline-plum-600 min-w-0 flex-1 truncate text-start text-sm font-semibold text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2"
+                      aria-expanded={expanded}
+                      aria-controls={panelId}
+                      onClick={() => toggleMain(group.main.id)}
+                    >
+                      <HighlightedText text={group.main.title} query={query} />
+                    </button>
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">
                       <HighlightedText text={group.main.title} query={query} />
                     </span>
-                  </button>
+                  )}
 
-                  <div className="flex flex-wrap items-center gap-2 ps-6 sm:ps-0">
-                    <CodeWithCopy code={group.main.legacyCode} query={query} />
-                    <span
-                      className="rounded-md bg-plum-50 px-1.5 py-0.5 text-xs font-medium text-plum-700 tabular-nums"
-                      title={translate(
-                        `${group.totalSubCount} subcategories`,
-                        `${group.totalSubCount} فئات فرعية`,
-                      )}
-                    >
-                      {group.totalSubCount}
-                    </span>
-                    <ViewInListLink href={listHref} permission={listPermission} />
-                  </div>
+                  <span
+                    className="bg-plum-100 text-plum-700 shrink-0 rounded-md px-1.5 py-0.5 text-xs font-medium tabular-nums"
+                    title={translate(`${group.totalSubCount} subcategories`, `${group.totalSubCount} فئات فرعية`)}
+                  >
+                    {group.totalSubCount}
+                  </span>
+
+                  <ViewInListLink href={listHref} permission={listPermission} />
                 </div>
 
                 {expanded && group.subs.length > 0 && (
-                  <ul id={panelId} className="ms-2 mt-1 border-s border-plum-200">
+                  <ul id={panelId}>
                     {group.subs.map((sub) => {
                       const subHref = `${listPath}?mainCategoryId=${encodeURIComponent(group.main.id)}&subCategoryId=${encodeURIComponent(sub.id)}`;
 
                       return (
                         <li
                           key={sub.id}
-                          className="flex flex-col gap-1 px-4 py-1.5 sm:flex-row sm:items-center sm:gap-3"
+                          className="flex items-center gap-2 border-t border-gray-100 px-2 py-2.5 ps-11 hover:bg-gray-50"
                         >
-                          <span className="min-w-0 flex-1 text-sm text-gray-800">
+                          <span className="bg-plum-200 w-px self-stretch" aria-hidden />
+                          <CodeWithCopy code={sub.legacyCode} query={query} />
+                          <ProtectedLink
+                            permission={listPermission}
+                            href={subHref}
+                            className="min-w-0 flex-1 truncate text-sm text-gray-800 hover:underline"
+                          >
                             <HighlightedText text={sub.title} query={query} />
-                          </span>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <CodeWithCopy code={sub.legacyCode} query={query} />
-                            <ViewInListLink href={subHref} permission={listPermission} />
-                          </div>
+                          </ProtectedLink>
                         </li>
                       );
                     })}
@@ -286,7 +300,7 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
 
     if (matchAt > cursor) parts.push(text.slice(cursor, matchAt));
     parts.push(
-      <mark key={`${matchAt}-${index}`} className="rounded-sm bg-plum-50 text-inherit">
+      <mark key={`${matchAt}-${index}`} className="bg-plum-200 rounded-sm text-inherit">
         {text.slice(matchAt, matchAt + query.length)}
       </mark>,
     );
@@ -299,8 +313,10 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
 
 function CodeWithCopy({ code, query }: { code: string; query: string }) {
   return (
-    <span className="inline-flex items-center gap-1 font-mono text-sm text-gray-500">
-      <HighlightedText text={code} query={query} />
+    <span className="inline-flex w-19 shrink-0 items-center gap-1 font-mono text-xs text-gray-500">
+      <span className="min-w-0 truncate">
+        <HighlightedText text={code} query={query} />
+      </span>
       <CopyButton text={code} />
     </span>
   );
@@ -313,7 +329,7 @@ function ViewInListLink({ href, permission }: { href: string; permission: Permis
     <ProtectedLink
       permission={permission}
       href={href}
-      className="rounded-md text-sm font-medium text-plum-700 hover:text-plum-600 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plum-600"
+      className="text-plum-700 hover:text-plum-600 focus-visible:outline-plum-600 shrink-0 text-xs font-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
     >
       {translate("View in list", "عرض في القائمة")}
     </ProtectedLink>

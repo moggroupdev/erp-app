@@ -28,7 +28,7 @@ import { Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
-import { CategoryTreeLink } from "@/components/global/category-tree";
+import { CategoryTreeMenuItem } from "@/components/global/category-tree";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -164,7 +164,6 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <div className="flex items-center gap-3">
-            <CategoryTreeLink href="/warehouse/materials/categories" permission={PERMISSIONS.READ_MATERIALS} />
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canPrintMaterialsList && (
@@ -178,6 +177,8 @@ export default function Page() {
                   {translate("Add New Material", "إضافة مادة جديدة")}
                 </Menu.Item>
               )}
+              {(canPrintMaterialsList || canAddMaterial) && <Menu.Divider />}
+              <CategoryTreeMenuItem href="/warehouse/materials/categories" permission={PERMISSIONS.READ_MATERIALS} />
             </ActionsMenu>
           </div>
         ),
