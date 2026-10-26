@@ -26,6 +26,7 @@ import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Download, Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
+import { CategoryTreeLink } from "@/components/global/category-tree";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -172,6 +173,7 @@ export default function Page() {
         backLink: true,
         sideElements: (
           <div className="flex items-center gap-3">
+            <CategoryTreeLink href="/products/categories" permission={PERMISSIONS.READ_PRODUCTS} />
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canPrintProductsList && (
