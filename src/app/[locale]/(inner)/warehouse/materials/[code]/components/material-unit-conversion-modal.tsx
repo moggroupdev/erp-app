@@ -146,7 +146,12 @@ export default function MaterialUnitConversionModal({
   const selectedUnitLabel = unit ? getMaterialUnitLabel(unit as MaterialUnit, locale) : null;
   const leftUnitLabel = factorFromBase ? baseUnitLabel : (selectedUnitLabel ?? translate("unit", "وحدة"));
   const rightUnitLabel = factorFromBase ? (selectedUnitLabel ?? translate("unit", "وحدة")) : baseUnitLabel;
-  const knownFactor = unit ? getKnownConversionFactorToBase(unit as MaterialUnit, baseUnit, existingConversions) : null;
+  const conversionsForKnownFactor = existingConversion
+    ? existingConversions.filter((conversion) => conversion.id !== existingConversion.id)
+    : existingConversions;
+  const knownFactor = unit
+    ? getKnownConversionFactorToBase(unit as MaterialUnit, baseUnit, conversionsForKnownFactor)
+    : null;
 
   function applyKnownFactor() {
     if (knownFactor == null) return;

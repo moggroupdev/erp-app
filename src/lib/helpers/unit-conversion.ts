@@ -32,6 +32,7 @@ export function getKnownConversionFactorToBase(
   if (directFactor != null) return directFactor;
 
   for (const existing of existingConversions) {
+    if (existing.unit === unit) continue;
     const ratioToExisting = getGroupRatio(unit, existing.unit);
     if (ratioToExisting != null) return ratioToExisting * Number(existing.conversionFactorToBase);
   }
