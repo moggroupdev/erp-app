@@ -2,10 +2,11 @@
 
 import { useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Button, Menu, TextInput } from "@mantine/core";
-import { ChevronDown, ChevronRight, FolderTree, Search, X } from "lucide-react";
+import { ActionIcon, Button, Menu, TextInput } from "@mantine/core";
+import { ChevronDown, ChevronRight, EllipsisVertical, FolderTree, Pencil, Plus, Search, X } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
+import PermissionGuard from "@/components/guards/permission";
 import EmptySection from "@/components/ui/sections/empty";
 import ErrorSection from "@/components/ui/sections/error";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -30,6 +31,15 @@ type CategoryGroup = {
   totalSubCount: number;
 };
 
+export type CategoryTreeCrud = {
+  addPermission: Permission;
+  updatePermission: Permission;
+  onAddMain: () => void;
+  onAddSub: (mainId: string) => void;
+  onEditMain: (main: CategoryTreeMain) => void;
+  onEditSub: (sub: CategoryTreeSub) => void;
+};
+
 export function CategoryTreeMenuItem({ href, permission }: { href: string; permission: Permission }) {
   const { translate } = useI18n();
   const getLocalizedHref = useLocaleHref();
@@ -52,6 +62,7 @@ export default function CategoryTree({
   reload,
   listPath,
   listPermission,
+  crud,
 }: {
   mains: CategoryTreeMain[];
   subs: CategoryTreeSub[];
@@ -60,6 +71,7 @@ export default function CategoryTree({
   reload: () => void;
   listPath: string;
   listPermission: Permission;
+  crud?: CategoryTreeCrud;
 }) {
   const { translate } = useI18n();
   const [keyword, setKeyword] = useState("");
@@ -119,7 +131,17 @@ export default function CategoryTree({
   }
 
   if (groups.length === 0) {
-    return <EmptySection useDefaultImg message={translate("No categories found", "لا توجد فئات")} />;
+    return (
+      <EmptySection useDefaultImg message={translate("No categories found", "لا توجد فئات")}>
+        {crud && (
+          <PermissionGuard permission={crud.addPermission}>
+            <Button color="haze" radius="md" leftSection={<Plus size={16} />} onClick={crud.onAddMain}>
+              {translate("Add main category", "إضافة فئة رئيسية")}
+            </Button>
+          </PermissionGuard>
+        )}
+      </EmptySection>
+    );
   }
 
   return (
@@ -215,6 +237,7 @@ export default function CategoryTree({
                   </span>
 
                   <ViewInListLink href={listHref} permission={listPermission} />
+                  {crud && <MainRowMenu main={group.main} crud={crud} />}
                 </div>
 
                 {expanded && group.subs.length > 0 && (
@@ -236,6 +259,7 @@ export default function CategoryTree({
                           >
                             <HighlightedText text={sub.title} query={query} />
                           </ProtectedLink>
+                          {crud && <SubRowMenu sub={sub} crud={crud} />}
                         </li>
                       );
                     })}
@@ -333,5 +357,69 @@ function ViewInListLink({ href, permission }: { href: string; permission: Permis
     >
       {translate("View in list", "عرض في القائمة")}
     </ProtectedLink>
+  );
+}
+
+function MainRowMenu({ main, crud }: { main: CategoryTreeMain; crud: CategoryTreeCrud }) {
+  const { translate } = useI18n();
+  const canAdd = useHasPermission(crud.addPermission);
+  const canUpdate = useHasPermission(crud.updatePermission);
+  if (!canAdd && !canUpdate) return null;
+
+  return (
+    <Menu position="bottom-end" withinPortal>
+      <Menu.Target>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="sm"
+          radius="md"
+          aria-label={translate(`Actions for ${main.title}`, `إجراءات ${main.title}`)}
+        >
+          <EllipsisVertical size={14} />
+        </ActionIcon>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <PermissionGuard permission={crud.addPermission}>
+          <Menu.Item leftSection={<Plus size={14} />} onClick={() => crud.onAddSub(main.id)}>
+            {translate("Add subcategory", "إضافة فئة فرعية")}
+          </Menu.Item>
+        </PermissionGuard>
+        <PermissionGuard permission={crud.updatePermission}>
+          <Menu.Item leftSection={<Pencil size={14} />} onClick={() => crud.onEditMain(main)}>
+            {translate("Edit main category", "تعديل الفئة الرئيسية")}
+          </Menu.Item>
+        </PermissionGuard>
+      </Menu.Dropdown>
+    </Menu>
+  );
+}
+
+function SubRowMenu({ sub, crud }: { sub: CategoryTreeSub; crud: CategoryTreeCrud }) {
+  const { translate } = useI18n();
+  const canUpdate = useHasPermission(crud.updatePermission);
+  if (!canUpdate) return null;
+
+  return (
+    <Menu position="bottom-end" withinPortal>
+      <Menu.Target>
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          size="sm"
+          radius="md"
+          aria-label={translate(`Actions for ${sub.title}`, `إجراءات ${sub.title}`)}
+        >
+          <EllipsisVertical size={14} />
+        </ActionIcon>
+      </Menu.Target>
+      <Menu.Dropdown>
+        <PermissionGuard permission={crud.updatePermission}>
+          <Menu.Item leftSection={<Pencil size={14} />} onClick={() => crud.onEditSub(sub)}>
+            {translate("Edit subcategory", "تعديل الفئة الفرعية")}
+          </Menu.Item>
+        </PermissionGuard>
+      </Menu.Dropdown>
+    </Menu>
   );
 }
