@@ -74,6 +74,10 @@ export type CreateMaterialUnitConversionDto = {
   conversionFactorToBase: number;
 };
 
+export type UpdateMaterialUnitConversionDto = {
+  conversionFactorToBase: number;
+};
+
 export type SetMaterialMarketPriceDto = {
   marketUnitPrice: number;
 };

@@ -38,6 +38,8 @@ export const PERMISSION_VALUES = [
   "print_materials_list",
   "add_material_category",
   "update_material_category",
+  "add_material_unit_conversion",
+  "update_material_unit_conversion",
   "use_unit_conversion_tool",
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
@@ -500,6 +502,20 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث فئة مادة",
     },
   },
+  add_material_unit_conversion: {
+    value: "add_material_unit_conversion",
+    label: {
+      en: "Add Material Unit Conversion",
+      ar: "إضافة تحويل وحدة مادة",
+    },
+  },
+  update_material_unit_conversion: {
+    value: "update_material_unit_conversion",
+    label: {
+      en: "Update Material Unit Conversion",
+      ar: "تحديث تحويل وحدة مادة",
+    },
+  },
   use_unit_conversion_tool: {
     value: "use_unit_conversion_tool",
     label: {
@@ -901,6 +917,8 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "print_materials_list",
       "add_material_category",
       "update_material_category",
+      "add_material_unit_conversion",
+      "update_material_unit_conversion",
       "use_unit_conversion_tool",
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",

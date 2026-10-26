@@ -27,12 +27,14 @@ export default function MaterialUnitConversionModal({
   materialCode,
   baseUnit,
   existingConversions,
+  existingConversion,
 }: {
   opened: boolean;
   close: () => void;
   materialCode: string;
   baseUnit: MaterialUnit;
   existingConversions: MaterialUnitConversionSummary[];
+  existingConversion?: MaterialUnitConversionSummary | null;
 }) {
   const { locale, translate, translation } = useI18n();
   const queryClient = useQueryClient();
@@ -43,10 +45,13 @@ export default function MaterialUnitConversionModal({
   const [enteredFactor, setEnteredFactor] = useState<number | string>("");
   const [factorFromBase, setFactorFromBase] = useState(false);
 
+  const isUpdate = !!existingConversion;
   const existingUnits = existingConversions.map((conversion) => conversion.unit);
-  const unitOptions = MATERIAL_UNIT_LABELS_LIST.filter(
-    (item) => item.value !== baseUnit && !existingUnits.includes(item.value),
-  ).map((item) => ({ value: item.value, label: translate(item.label.en, item.label.ar) }));
+  const unitOptions = MATERIAL_UNIT_LABELS_LIST.filter((item) => {
+    if (item.value === baseUnit) return false;
+    if (existingConversion?.unit === item.value) return true;
+    return !existingUnits.includes(item.value);
+  }).map((item) => ({ value: item.value, label: translate(item.label.en, item.label.ar) }));
 
   function reset() {
     setUnit(null);
@@ -54,26 +59,55 @@ export default function MaterialUnitConversionModal({
     setFactorFromBase(false);
   }
 
+  function hydrateFromConversion(conversion: MaterialUnitConversionSummary) {
+    setUnit(conversion.unit);
+    const stored = Number(conversion.conversionFactorToBase);
+    if (stored > 0 && stored < 1) {
+      setFactorFromBase(true);
+      setEnteredFactor(1 / stored);
+      return;
+    }
+
+    setFactorFromBase(false);
+    setEnteredFactor(stored);
+  }
+
   useEffect(() => {
     if (!opened) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    reset();
-  }, [opened]);
+    if (existingConversion) hydrateFromConversion(existingConversion);
+    else reset();
+  }, [opened, existingConversion]);
 
   const mutation = useMutation({
     mutationFn: async () => {
+      const conversionFactorToBase = toStoredConversionFactorToBase(Number(enteredFactor), factorFromBase);
+
+      if (existingConversion) {
+        return await materialsApi.updateUnit({
+          privateRequest,
+          code: materialCode,
+          id: existingConversion.id,
+          dto: { conversionFactorToBase },
+        });
+      }
+
       return await materialsApi.addUnit({
         privateRequest,
         code: materialCode,
         dto: {
           unit: unit as MaterialUnit,
-          conversionFactorToBase: toStoredConversionFactorToBase(Number(enteredFactor), factorFromBase),
+          conversionFactorToBase,
         },
       });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.materials.all });
-      toast.success(translate("Alternate unit added successfully.", "تمت إضافة وحدة القياس البديلة بنجاح."));
+      toast.success(
+        isUpdate
+          ? translate("Alternate unit updated successfully.", "تم تحديث وحدة القياس البديلة بنجاح.")
+          : translate("Alternate unit added successfully.", "تمت إضافة وحدة القياس البديلة بنجاح."),
+      );
       handleClose();
     },
   });
@@ -128,7 +162,16 @@ export default function MaterialUnitConversionModal({
   }
 
   return (
-    <Modal opened={opened} onClose={handleClose} title={translate("Add Alternate Unit", "إضافة وحدة قياس بديلة")} size="md">
+    <Modal
+      opened={opened}
+      onClose={handleClose}
+      title={
+        isUpdate
+          ? translate("Update Alternate Unit", "تحديث وحدة قياس بديلة")
+          : translate("Add Alternate Unit", "إضافة وحدة قياس بديلة")
+      }
+      size="md"
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <DataSelect
           value={unit}
@@ -138,7 +181,9 @@ export default function MaterialUnitConversionModal({
           placeholder={translate("Select unit", "اختر الوحدة")}
           required
           searchable
-          clearable
+          clearable={!isUpdate}
+          disabled={isUpdate}
+          readOnly={isUpdate}
         />
 
         {unit && (
@@ -201,7 +246,7 @@ export default function MaterialUnitConversionModal({
             {translation.cancel}
           </Button>
           <Button type="submit" color="haze" loading={mutation.isPending} disabled={!isReadyToSubmit} radius="md" fullWidth>
-            {translate("Add Unit", "إضافة الوحدة")}
+            {isUpdate ? translate("Update Unit", "تحديث الوحدة") : translate("Add Unit", "إضافة الوحدة")}
           </Button>
         </div>
 
