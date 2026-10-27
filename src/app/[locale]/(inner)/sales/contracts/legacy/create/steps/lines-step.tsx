@@ -54,7 +54,7 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
             </header>
 
             <div className="flex flex-col lg:flex-row">
-              <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+              <div className="grid min-w-0 flex-1 grid-cols-1 items-start gap-3 p-4 sm:grid-cols-2">
                 <SelectProduct
                   value={item.productCode}
                   setValue={(next) => {
@@ -64,6 +64,7 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                   onProductSelect={(product) => applyProduct(item.key, product)}
                   label={translate("Product", "المنتج")}
                   placeholder={translate("Search products", "ابحث عن المنتجات")}
+                  withBrowseModal
                   required
                 />
                 <DataSelect
