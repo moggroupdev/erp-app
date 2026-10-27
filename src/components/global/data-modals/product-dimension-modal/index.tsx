@@ -19,6 +19,7 @@ export default function ProductDimensionModal({
   isFirstDimension,
   dimensionToUpdate = null,
   setDimensionToUpdate,
+  onCreated,
 }: {
   opened: boolean;
   close: () => void;
@@ -26,6 +27,7 @@ export default function ProductDimensionModal({
   isFirstDimension: boolean;
   dimensionToUpdate?: ProductDimension | null;
   setDimensionToUpdate?: (dimension: ProductDimension | null) => void;
+  onCreated?: (dimension: ProductDimension) => void;
 }) {
   const { locale, translate, translation } = useI18n();
 
@@ -90,10 +92,11 @@ export default function ProductDimensionModal({
         },
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (dimension) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(productCode) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.dimensions(productCode) });
       if (isFirstDimension || isDefault) await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
+      onCreated?.(dimension);
       handleClose();
     },
   });

@@ -3,8 +3,6 @@ import { PRODUCT_SOURCE_TYPES, type ProductSourceType } from "@/lib/constants/en
 import { dateOnlyToTwoPmIso } from "@/lib/helpers/datetime-picker";
 import type { CreateLegacyContractDto } from "@/types/contract";
 
-export type DeliveryMode = "factory" | "address";
-
 export type UnitDraft = {
   key: string;
   serialNumber: string;
@@ -87,10 +85,6 @@ export function isItemUntouched(item: ItemDraft) {
   );
 }
 
-export function defaultDimensionId(dimensions: ProductDimension[]) {
-  return dimensions.find((dimension) => dimension.isDefault)?.id ?? dimensions[0]?.id ?? null;
-}
-
 export function selectedDimension(item: ItemDraft) {
   return item.dimensions.find((dimension) => dimension.id === item.productDimensionId) ?? null;
 }
@@ -123,8 +117,6 @@ export function validateContractStep(
     createdAt: string | null;
     startedAt: string | null;
     deliveryTime: string | null;
-    deliveryMode: DeliveryMode;
-    deliveryAddressId: string | null;
   },
   translate: Translate,
 ) {
@@ -157,9 +149,6 @@ export function validateContractStep(
     );
   }
 
-  if (input.deliveryMode === "address" && !input.deliveryAddressId) {
-    return translate("Choose a delivery address, or deliver at the factory.", "اختر عنوان تسليم، أو اختر التسليم في المصنع.");
-  }
   return null;
 }
 
@@ -173,8 +162,11 @@ export function validateItemsStep(items: ItemDraft[], translate: Translate) {
       return translate(`Line ${line}: this product has no dimensions.`, `البند ${line}: هذا المنتج بلا مقاسات.`);
     }
     if (!item.productDimensionId) return translate(`Line ${line}: choose a dimension.`, `البند ${line}: اختر مقاسًا.`);
-    if (item.unitPrice === "" || !(Number(item.unitPrice) > 0)) {
-      return translate(`Line ${line}: enter a unit price.`, `البند ${line}: أدخل سعر الوحدة.`);
+    if (item.unitPrice !== "" && !(Number(item.unitPrice) > 0)) {
+      return translate(
+        `Line ${line}: unit price must be greater than 0 when entered.`,
+        `البند ${line}: يجب أن يكون سعر الوحدة أكبر من 0 عند إدخاله.`,
+      );
     }
     if (item.quantity === "" || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1) {
       return translate(`Line ${line}: enter a quantity of at least 1.`, `البند ${line}: أدخل كمية لا تقل عن 1.`);
@@ -231,6 +223,18 @@ export function validateUnitsStep(items: ItemDraft[], translate: Translate) {
   return null;
 }
 
+/** Highest step index the user may open: 0 until the previous step's data is complete. */
+export function getMaxReachableLegacyStep(
+  input: Parameters<typeof validateContractStep>[0],
+  items: ItemDraft[],
+) {
+  const silent: Translate = () => "";
+  if (validateContractStep(input, silent) !== null) return 0;
+  if (validateItemsStep(items, silent) !== null) return 1;
+  if (validateUnitsStep(items, silent) !== null) return 2;
+  return 3;
+}
+
 export function buildLegacyContractDto(input: {
   customerId: string;
   legacyNumber: string;
@@ -238,7 +242,6 @@ export function buildLegacyContractDto(input: {
   createdAt: string;
   startedAt: string;
   deliveryTime: string;
-  deliveryAddressId: string | null;
   items: ItemDraft[];
 }): CreateLegacyContractDto {
   return {
@@ -248,11 +251,10 @@ export function buildLegacyContractDto(input: {
     createdAt: dateOnlyToTwoPmIso(input.createdAt)!,
     startedAt: dateOnlyToTwoPmIso(input.startedAt)!,
     deliveryTime: dateOnlyToTwoPmIso(input.deliveryTime)!,
-    deliveryAddressId: input.deliveryAddressId,
     items: input.items.map((item) => ({
       productDimensionId: item.productDimensionId!,
       title: item.title.trim() || null,
-      unitPrice: Number(item.unitPrice),
+      unitPrice: item.unitPrice === "" ? null : Number(item.unitPrice),
       quantity: Number(item.quantity),
       notes: item.notes.trim() || null,
       units: item.units.map((unit) => ({

@@ -5,7 +5,7 @@ export type ContractListItem = {
   legacyWorkOrderNumber: string | null;
   customerId: string;
   deliveryTime: string | null;
-  totalAmount: number;
+  totalAmount: number | null;
   startedAt: string | null;
   completedAt: string | null;
   cancelledAt: string | null;
@@ -40,7 +40,7 @@ export type ContractItem = {
   id: string;
   title: string | null;
   notes: string | null;
-  unitPrice: number;
+  unitPrice: number | null;
   quantity: number;
   productCode: string;
   cancelledAt: string | null;
@@ -59,7 +59,7 @@ export type CreateLegacyContractUnitDto = {
 export type CreateLegacyContractItemDto = {
   productDimensionId: string;
   title: string | null;
-  unitPrice: number;
+  unitPrice: number | null;
   quantity: number;
   notes: string | null;
   units: CreateLegacyContractUnitDto[];
@@ -72,7 +72,6 @@ export type CreateLegacyContractDto = {
   createdAt: string;
   startedAt: string;
   deliveryTime: string;
-  deliveryAddressId: string | null;
   items: CreateLegacyContractItemDto[];
 };
 
@@ -97,7 +96,7 @@ export type ContractDetailed = {
   legacyNumber: string | null;
   legacyWorkOrderNumber: string | null;
   deliveryTime: string | null;
-  totalAmount: number;
+  totalAmount: number | null;
   discountPct: number | null;
   startedAt: string | null;
   completedAt: string | null;

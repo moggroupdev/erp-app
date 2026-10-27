@@ -201,7 +201,9 @@ export default function Page() {
                       <Table.Td className="font-mono">
                         {contract.legacyWorkOrderNumber ? contract.legacyWorkOrderNumber : <EmptyValue />}
                       </Table.Td>
-                      <Table.Td>{formatMoney(Number(contract.totalAmount))}</Table.Td>
+                      <Table.Td>
+                        {contract.totalAmount == null ? <EmptyValue /> : formatMoney(contract.totalAmount)}
+                      </Table.Td>
                       <Table.Td>{formatDateAndTime(contract.createdAt, locale)}</Table.Td>
                     </Table.Tr>
                   ))}

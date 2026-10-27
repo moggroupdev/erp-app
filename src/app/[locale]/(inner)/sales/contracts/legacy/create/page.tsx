@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@mantine/core";
 import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
@@ -10,15 +10,11 @@ import type { SelectableProduct } from "@/components/global/selections/remote-ba
 import useDocumentTitle from "@/hooks/use-document-title";
 import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
 import usePrivateRequest from "@/hooks/use-private-request";
-import useLocations from "@/hooks/reference/use-locations";
 import contractsApi from "@/lib/api/contracts";
-import customersApi from "@/lib/api/customers";
 import { queryKeys } from "@/lib/api/query-keys";
-import { staleTimes } from "@/lib/constants/stale-times";
 import { dateOnlyToTwoPmIso } from "@/lib/helpers/datetime-picker";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
-import type { CustomerAddress } from "@/types/customer";
 import CreateStepper from "./create-stepper";
 import ContractStep from "./steps/contract-step";
 import LinesStep from "./steps/lines-step";
@@ -27,11 +23,10 @@ import UnitsStep from "./steps/units-step";
 import {
   buildLegacyContractDto,
   createEmptyItem,
-  defaultDimensionId,
   droppedUnitsHaveContent,
+  getMaxReachableLegacyStep,
   isImportedSource,
   isItemUntouched,
-  type DeliveryMode,
   type ItemDraft,
   unitsForQuantity,
   validateContractStep,
@@ -47,7 +42,6 @@ export default function Page() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const privateRequest = usePrivateRequest();
-  const { helpers: locationHelpers } = useLocations();
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -64,25 +58,7 @@ export default function Page() {
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [startedAt, setStartedAt] = useState<string | null>(null);
   const [deliveryTime, setDeliveryTime] = useState<string | null>(null);
-  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("address");
-  const [deliveryAddressId, setDeliveryAddressId] = useState<string | null>(null);
-  const [prefillAddress, setPrefillAddress] = useState(false);
   const [items, setItems] = useState<ItemDraft[]>(() => [createEmptyItem()]);
-
-  const addressesQuery = useQuery({
-    queryKey: queryKeys.customers.addresses(customerId ?? "none"),
-    queryFn: ({ signal }) => customersApi.listAddresses({ privateRequest, id: customerId!, signal }),
-    enabled: !!customerId,
-    staleTime: staleTimes.customers,
-  });
-  const addresses = addressesQuery.data ?? [];
-
-  useEffect(() => {
-    if (!prefillAddress || deliveryMode !== "address" || !customerId || addressesQuery.isFetching) return;
-    const preferred = addresses.find((address) => address.isDefault) ?? addresses[0] ?? null;
-    setDeliveryAddressId(preferred?.id ?? null);
-    setPrefillAddress(false);
-  }, [prefillAddress, deliveryMode, customerId, addresses, addressesQuery.isFetching]);
 
   const isDirty = useMemo(() => {
     if (submitted) return false;
@@ -93,13 +69,30 @@ export default function Page() {
       !!createdAt ||
       !!startedAt ||
       !!deliveryTime ||
-      deliveryMode !== "address" ||
       items.length !== 1 ||
       items.some((item) => !isItemUntouched(item))
     );
-  }, [submitted, customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime, deliveryMode, items]);
+  }, [submitted, customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime, items]);
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
+
+  const contractInput = {
+    customerId,
+    legacyNumber,
+    legacyWorkOrderNumber,
+    createdAt,
+    startedAt,
+    deliveryTime,
+  };
+
+  const maxReachable = useMemo(
+    () =>
+      getMaxReachableLegacyStep(
+        { customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime },
+        items,
+      ),
+    [customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime, items],
+  );
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -110,7 +103,6 @@ export default function Page() {
         createdAt: createdAt!,
         startedAt: startedAt!,
         deliveryTime: deliveryTime!,
-        deliveryAddressId: deliveryMode === "address" ? deliveryAddressId : null,
         items,
       });
       return contractsApi.createLegacy({ privateRequest, dto });
@@ -136,58 +128,73 @@ export default function Page() {
       createdAt: dateOnlyToTwoPmIso(createdAt)!,
       startedAt: dateOnlyToTwoPmIso(startedAt)!,
       deliveryTime: dateOnlyToTwoPmIso(deliveryTime)!,
-      deliveryAddressId: deliveryMode === "address" ? deliveryAddressId : null,
     };
   }
 
-  async function goNext() {
-    if (stepValidating || mutation.isPending) return;
+  function clientErrorForStep(index: number) {
+    if (index === 0) return validateContractStep(contractInput, translate);
+    if (index === 1) return validateItemsStep(items, translate);
+    if (index === 2) return validateUnitsStep(items, translate);
+    return null;
+  }
 
-    const error =
-      step === 0
-        ? validateContractStep(
-            {
-              customerId,
-              legacyNumber,
-              legacyWorkOrderNumber,
-              createdAt,
-              startedAt,
-              deliveryTime,
-              deliveryMode,
-              deliveryAddressId,
-            },
-            translate,
-          )
-        : step === 1
-          ? validateItemsStep(items, translate)
-          : validateUnitsStep(items, translate);
-    if (error) {
-      setStepError(error);
+  async function apiValidateStep(index: number) {
+    if (index === 0) {
+      await contractsApi.validateLegacyContract({ privateRequest, dto: contractHeaderDto() });
+      return;
+    }
+    if (index === 1) {
+      await contractsApi.validateLegacyItems({
+        privateRequest,
+        dto: { items: items.map((item) => ({ productDimensionId: item.productDimensionId! })) },
+      });
+      return;
+    }
+    if (index === 2) {
+      await contractsApi.validateLegacyUnits({
+        privateRequest,
+        dto: { items: buildLegacyContractDto({ ...contractHeaderDto(), items }).items },
+      });
+    }
+  }
+
+  async function goToStep(target: number) {
+    if (stepValidating || mutation.isPending) return;
+    if (target === step || target < 0 || target > 3) return;
+    if (target > maxReachable) return;
+
+    if (target < step) {
+      setStepError(null);
+      setStep(target);
       return;
     }
 
     setStepError(null);
     setStepValidating(true);
     try {
-      if (step === 0) {
-        await contractsApi.validateLegacyContract({ privateRequest, dto: contractHeaderDto() });
-      } else if (step === 1) {
-        await contractsApi.validateLegacyItems({
-          privateRequest,
-          dto: { items: items.map((item) => ({ productDimensionId: item.productDimensionId! })) },
-        });
-      } else {
-        await contractsApi.validateLegacyUnits({
-          privateRequest,
-          dto: { items: buildLegacyContractDto({ ...contractHeaderDto(), items }).items },
-        });
+      for (let index = step; index < target; index++) {
+        const error = clientErrorForStep(index);
+        if (error) {
+          setStepError(error);
+          setStep(index);
+          return;
+        }
+        try {
+          await apiValidateStep(index);
+        } catch (apiError) {
+          setStepError(getErrorMessage(locale, apiError));
+          setStep(index);
+          return;
+        }
       }
-      setStep((current) => Math.min(current + 1, 3));
-    } catch (apiError) {
-      setStepError(getErrorMessage(locale, apiError));
+      setStep(target);
     } finally {
       setStepValidating(false);
     }
+  }
+
+  function goNext() {
+    void goToStep(step + 1);
   }
 
   function goBack() {
@@ -199,19 +206,7 @@ export default function Page() {
   function createContract() {
     if (stepValidating || mutation.isPending) return;
     const error =
-      validateContractStep(
-        {
-          customerId,
-          legacyNumber,
-          legacyWorkOrderNumber,
-          createdAt,
-          startedAt,
-          deliveryTime,
-          deliveryMode,
-          deliveryAddressId,
-        },
-        translate,
-      ) ||
+      validateContractStep(contractInput, translate) ||
       validateItemsStep(items, translate) ||
       validateUnitsStep(items, translate);
     if (error) {
@@ -233,8 +228,6 @@ export default function Page() {
     setCustomerId(customer?.id ?? null);
     setCustomerName(customer?.name ?? "");
     setCustomerCode(customer?.code ?? "");
-    setDeliveryAddressId(null);
-    setPrefillAddress(!!customer);
     clearStepError();
   }
 
@@ -259,7 +252,7 @@ export default function Page() {
           productTitle: product.title,
           sourceType: product.sourceType,
           dimensions: product.dimensions,
-          productDimensionId: defaultDimensionId(product.dimensions),
+          productDimensionId: null,
           title: keepTitle ? item.title : product.title,
           units: isImportedSource(product.sourceType)
             ? item.units
@@ -299,19 +292,12 @@ export default function Page() {
     clearStepError();
   }
 
-  function addressLabel(address: CustomerAddress) {
-    const city = locationHelpers.getCityById(address.cityId);
-    const cityName = city ? (locale === "ar" ? city.nameAr : city.nameEn) : "";
-    const line = address.addressLine?.trim() ?? "";
-    const label = [line, cityName].filter(Boolean).join(", ") || translate("Address", "عنوان");
-    return address.isDefault ? `${label} (${translate("Default", "افتراضي")})` : label;
-  }
-
-  const selectedAddress = addresses.find((address) => address.id === deliveryAddressId) ?? null;
-  const totalAmount = items.reduce((sum, item) => {
-    if (item.unitPrice === "" || item.quantity === "") return sum;
-    return sum + Number(item.unitPrice) * Number(item.quantity);
-  }, 0);
+  const totalAmount = items.some((item) => item.unitPrice === "")
+    ? null
+    : items.reduce((sum, item) => {
+        if (item.quantity === "") return sum;
+        return sum + Number(item.unitPrice) * Number(item.quantity);
+      }, 0);
 
   return (
     <LayoutBox
@@ -324,12 +310,9 @@ export default function Page() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <CreateStepper
           active={step}
-          onStepClick={(next) => {
-            if (next < step) {
-              setStepError(null);
-              setStep(next);
-            }
-          }}
+          maxReachable={maxReachable}
+          validating={stepValidating}
+          onStepClick={(next) => void goToStep(next)}
         />
 
         {step === 0 ? (
@@ -346,13 +329,6 @@ export default function Page() {
             setStartedAt={setStartedAt}
             deliveryTime={deliveryTime}
             setDeliveryTime={setDeliveryTime}
-            deliveryMode={deliveryMode}
-            setDeliveryMode={setDeliveryMode}
-            deliveryAddressId={deliveryAddressId}
-            setDeliveryAddressId={setDeliveryAddressId}
-            setPrefillAddress={setPrefillAddress}
-            addresses={addresses}
-            addressesLoading={addressesQuery.isFetching}
             clearStepError={clearStepError}
           />
         ) : null}
@@ -380,9 +356,6 @@ export default function Page() {
             createdAt={createdAt}
             startedAt={startedAt}
             deliveryTime={deliveryTime}
-            deliveryMode={deliveryMode}
-            selectedAddress={selectedAddress}
-            addressLabel={addressLabel}
             totalAmount={totalAmount}
             items={items}
           />

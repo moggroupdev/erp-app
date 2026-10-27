@@ -36,6 +36,10 @@ export const PERMISSION_VALUES = [
   "set_material_market_price",
   "set_material_type",
   "print_materials_list",
+  "add_material_category",
+  "update_material_category",
+  "add_material_unit_conversion",
+  "update_material_unit_conversion",
   "use_unit_conversion_tool",
   "add_manufactured_material_bom",
   "read_manufactured_material_boms",
@@ -56,6 +60,8 @@ export const PERMISSION_VALUES = [
   "read_products",
   "update_product",
   "print_products_list",
+  "add_product_category",
+  "update_product_category",
   "read_product_pricing_factor",
   "set_product_pricing_factor",
   "add_product_bom",
@@ -314,6 +320,20 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "طباعة قائمة المنتجات",
     },
   },
+  add_product_category: {
+    value: "add_product_category",
+    label: {
+      en: "Add Product Category",
+      ar: "إضافة فئة منتج",
+    },
+  },
+  update_product_category: {
+    value: "update_product_category",
+    label: {
+      en: "Update Product Category",
+      ar: "تحديث فئة منتج",
+    },
+  },
   read_product_pricing_factor: {
     value: "read_product_pricing_factor",
     label: {
@@ -466,6 +486,34 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Print Materials List",
       ar: "طباعة قائمة المواد",
+    },
+  },
+  add_material_category: {
+    value: "add_material_category",
+    label: {
+      en: "Add Material Category",
+      ar: "إضافة فئة مادة",
+    },
+  },
+  update_material_category: {
+    value: "update_material_category",
+    label: {
+      en: "Update Material Category",
+      ar: "تحديث فئة مادة",
+    },
+  },
+  add_material_unit_conversion: {
+    value: "add_material_unit_conversion",
+    label: {
+      en: "Add Material Unit Conversion",
+      ar: "إضافة تحويل وحدة مادة",
+    },
+  },
+  update_material_unit_conversion: {
+    value: "update_material_unit_conversion",
+    label: {
+      en: "Update Material Unit Conversion",
+      ar: "تحديث تحويل وحدة مادة",
     },
   },
   use_unit_conversion_tool: {
@@ -842,6 +890,8 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_product",
       "update_product",
       "print_products_list",
+      "add_product_category",
+      "update_product_category",
       "read_product_pricing_factor",
       "set_product_pricing_factor",
       "add_product_bom",
@@ -865,6 +915,10 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "set_material_market_price",
       "set_material_type",
       "print_materials_list",
+      "add_material_category",
+      "update_material_category",
+      "add_material_unit_conversion",
+      "update_material_unit_conversion",
       "use_unit_conversion_tool",
       "add_manufactured_material_bom",
       "read_manufactured_material_boms",

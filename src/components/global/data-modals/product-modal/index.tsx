@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Product, ProductWithCreator } from "@/types/product";
@@ -17,12 +17,20 @@ import SelectProductSourceType from "@/components/global/selections/enum-based/s
 
 type ProductFormEntity = Product | ProductWithCreator;
 
+export type ProductModalInitialValues = {
+  title?: string;
+  sourceType?: string | null;
+  mainCategoryId?: string | null;
+  subCategoryId?: string | null;
+};
+
 export default function ProductModal({
   opened,
   close,
   productToUpdate,
   setProductToUpdate,
   isForList = false,
+  initialValues,
   onSuccess,
 }: {
   opened: boolean;
@@ -30,7 +38,8 @@ export default function ProductModal({
   productToUpdate: ProductFormEntity | null;
   setProductToUpdate: React.Dispatch<React.SetStateAction<Product | null>>;
   isForList?: boolean;
-  onSuccess?: () => void;
+  initialValues?: ProductModalInitialValues;
+  onSuccess?: (product: Product) => void;
 }) {
   const { locale, translate, translation } = useI18n();
   const { helpers } = useProductCategories();
@@ -45,6 +54,7 @@ export default function ProductModal({
   const [subCategoryId, setSubCategoryId] = useState<string | null>(null);
   const [sourceType, setSourceType] = useState<string | null>(null);
   const [estimatedProductionTime, setEstimatedProductionTime] = useState<number | string>("");
+  const wasOpenRef = useRef(opened);
 
   function reset() {
     setTitle("");
@@ -56,6 +66,9 @@ export default function ProductModal({
   }
 
   useEffect(() => {
+    const justOpened = opened && !wasOpenRef.current;
+    wasOpenRef.current = opened;
+
     if (productToUpdate) {
       setTitle(productToUpdate.title);
       setDescription(productToUpdate.description || "");
@@ -64,8 +77,27 @@ export default function ProductModal({
       setMainCategoryId(sub?.mainCategoryId ?? null);
       setSourceType(productToUpdate.sourceType);
       setEstimatedProductionTime(productToUpdate.estimatedProductionTime ?? "");
-    } else reset();
-  }, [productToUpdate, helpers]);
+      return;
+    }
+
+    if (!justOpened) return;
+
+    const nextSub = initialValues?.subCategoryId ?? null;
+    let nextMain = initialValues?.mainCategoryId ?? null;
+    if (nextSub && !nextMain) {
+      nextMain = helpers.getProductCategorySubById(nextSub)?.mainCategoryId ?? null;
+    }
+
+    setTitle(initialValues?.title?.trim() ?? "");
+    setDescription("");
+    setMainCategoryId(nextMain);
+    setSubCategoryId(nextSub);
+    setSourceType(initialValues?.sourceType ?? null);
+    setEstimatedProductionTime("");
+    // Apply prefill only when the create modal opens; omit initialValues from deps so
+    // later parent re-renders do not overwrite fields the user has started editing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opened, productToUpdate, helpers]);
 
   useEffect(() => {
     if (!subCategoryId || !mainCategoryId) return;
@@ -93,9 +125,9 @@ export default function ProductModal({
         ? await productsApi.update({ privateRequest, code: productToUpdate.code, dto })
         : await productsApi.create({ privateRequest, dto });
     },
-    onSuccess: async () => {
+    onSuccess: async (product) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
-      onSuccess?.();
+      onSuccess?.(product);
       handleClose();
     },
   });

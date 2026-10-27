@@ -33,3 +33,18 @@ export type ProductCategories = {
   productCategoryMains: ProductCategoryMain[];
   productCategorySubs: ProductCategorySub[];
 };
+
+export type CategoryDomain = "material" | "product";
+
+export type CreateCategoryMainDto = {
+  legacyCode: string;
+  title: string;
+};
+
+export type UpdateCategoryMainDto = Partial<CreateCategoryMainDto>;
+
+export type CreateCategorySubDto = CreateCategoryMainDto & {
+  mainCategoryId: string;
+};
+
+export type UpdateCategorySubDto = Partial<CreateCategorySubDto>;

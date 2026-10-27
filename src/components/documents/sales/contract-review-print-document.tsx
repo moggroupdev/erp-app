@@ -98,7 +98,7 @@ function ContractItemPrintBlock({
 }) {
   const lineTitle = item.title?.trim() || "";
   const cancelled = !!item.cancelledAt;
-  const lineAmount = item.quantity * item.unitPrice;
+  const lineAmount = item.unitPrice == null ? null : item.quantity * item.unitPrice;
   const units = item.productUnits;
 
   const unitHeaders = [
@@ -148,11 +148,11 @@ function ContractItemPrintBlock({
         <PrintDetail label={translate("Quantity", "الكمية")} value={String(item.quantity)} />
         <PrintDetail
           label={translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`)}
-          value={formatMoney(item.unitPrice)}
+          value={item.unitPrice == null ? translate("Not priced", "غير مسعّر") : formatMoney(item.unitPrice)}
         />
         <PrintDetail
           label={translate(`Line Total (${currency})`, `إجمالي البند (${currency})`)}
-          value={formatMoney(lineAmount)}
+          value={lineAmount == null ? translate("Not priced", "غير مسعّر") : formatMoney(lineAmount)}
         />
         {item.notes?.trim() ? <PrintDetail label={translate("Notes", "الملاحظات")} value={item.notes.trim()} /> : null}
         {item.cancellationReason?.trim() ? (
@@ -230,8 +230,8 @@ function ContractItemsPrintTable({
         <span className="leading-relaxed">{lineTitle}</span>
       ),
       String(item.quantity),
-      formatMoney(item.unitPrice),
-      formatMoney(item.quantity * item.unitPrice),
+      item.unitPrice == null ? translate("Not priced", "غير مسعّر") : formatMoney(item.unitPrice),
+      item.unitPrice == null ? translate("Not priced", "غير مسعّر") : formatMoney(item.quantity * item.unitPrice),
       ...(showNotes
         ? [
             <span key="notes" className="whitespace-pre-line">
@@ -245,9 +245,12 @@ function ContractItemsPrintTable({
   const lineTotalIndex = 5;
   const footer = headers.map(() => "");
   footer[1] = translate(`Total (${currency})`, `الإجمالي (${currency})`);
-  footer[lineTotalIndex] = formatMoney(
-    items.reduce((sum, item) => (item.cancelledAt ? sum : sum + item.quantity * item.unitPrice), 0),
-  );
+  const pricedTotal = items.reduce<number | null>((sum, item) => {
+    if (item.cancelledAt) return sum;
+    if (sum == null || item.unitPrice == null) return null;
+    return sum + item.quantity * item.unitPrice;
+  }, 0);
+  footer[lineTotalIndex] = pricedTotal == null ? translate("Not priced", "غير مسعّر") : formatMoney(pricedTotal);
 
   return (
     <PrintTable
@@ -284,7 +287,9 @@ export default function ContractReviewPrintDocument({ contract, variant = "units
 
   const deliveryAddressValue = address
     ? [address.addressLine, locationText].filter(Boolean).join(", ") || translate("Address on file", "عنوان مسجل")
-    : translate("Factory", "المصنع");
+    : contract.legacyNumber
+      ? translate("Not recorded", "غير مسجل")
+      : translate("Factory", "المصنع");
 
   const sharedUnitColumns = visibleUnitColumns(contract.items.flatMap((item) => item.productUnits));
 
@@ -334,7 +339,7 @@ export default function ContractReviewPrintDocument({ contract, variant = "units
         ) : null}
         <PrintDetail
           label={translate(`Total (${currency})`, `الإجمالي (${currency})`)}
-          value={formatMoney(contract.totalAmount)}
+          value={contract.totalAmount == null ? translate("Not priced", "غير مسعّر") : formatMoney(contract.totalAmount)}
         />
         {contract.cancelledAt ? (
           <PrintDetail

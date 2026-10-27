@@ -28,6 +28,7 @@ import { Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
+import { CategoryTreeMenuItem } from "@/components/global/category-tree";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
@@ -176,6 +177,8 @@ export default function Page() {
                   {translate("Add New Material", "إضافة مادة جديدة")}
                 </Menu.Item>
               )}
+              {(canPrintMaterialsList || canAddMaterial) && <Menu.Divider />}
+              <CategoryTreeMenuItem href="/warehouse/materials/categories" permission={PERMISSIONS.READ_MATERIALS} />
             </ActionsMenu>
           </div>
         ),

@@ -2,8 +2,10 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { Button, TextInput } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { Dices } from "lucide-react";
 import DatePickerInput from "@/components/ui/date-picker-input";
+import Modal from "@/components/ui/modal";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { useI18n } from "@/lib/i18n/hooks";
 import {
@@ -34,7 +36,18 @@ function createRandomSerial(used: Set<string>) {
 
 export default function UnitsStep({ items, setItems, clearStepError }: UnitsStepProps) {
   const { translate, translation } = useI18n();
+  const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
   const dimensionUnit = translation.productDimensionUnit;
+  const unitTotal = items.reduce((sum, item) => sum + item.units.length, 0);
+  const filledTotal = items.reduce(
+    (sum, item) => sum + item.units.filter((unit) => unit.serialNumber.trim().length === 12).length,
+    0,
+  );
+  const existingTotal = items.reduce(
+    (sum, item) => sum + item.units.filter((unit) => unit.serialNumber.trim() !== "").length,
+    0,
+  );
+  const allFilled = unitTotal > 0 && filledTotal === unitTotal;
 
   function patchUnit(itemKey: string, unitKey: string, patch: Partial<UnitDraft>) {
     setItems((current) =>
@@ -62,8 +75,105 @@ export default function UnitsStep({ items, setItems, clearStepError }: UnitsStep
     return used;
   }
 
+  function fillAllSerialNumbers() {
+    setItems((current) => {
+      const used = new Set<string>();
+      return current.map((item) => ({
+        ...item,
+        units: item.units.map((unit) => {
+          const serialNumber = createRandomSerial(used);
+          used.add(serialNumber);
+          return { ...unit, serialNumber };
+        }),
+      }));
+    });
+    clearStepError();
+    closeConfirm();
+  }
+
   return (
     <section className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 px-4 py-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span
+            className={[
+              "shrink-0 rounded-md px-2 py-1 text-xs font-semibold tabular-nums",
+              allFilled ? "bg-teal-100 text-teal-700" : "bg-ochre-100 text-ochre-800",
+            ].join(" ")}
+          >
+            {filledTotal}/{unitTotal}
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-gray-900">
+              {translate("Fill all serial numbers", "تعبئة جميع الأرقام التسلسلية")}
+            </p>
+            <p className="text-xs text-gray-500">
+              {translate(
+                "Assigns a unique 12-digit serial to every unit. Existing values are replaced.",
+                "يعين رقمًا تسلسليًا فريدًا من 12 رقمًا لكل وحدة. تُستبدل القيم الحالية.",
+              )}
+            </p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="light"
+          color="haze"
+          leftSection={<Dices size={16} />}
+          onClick={openConfirm}
+          disabled={unitTotal === 0}
+          className="shrink-0"
+        >
+          {translate("Fill all", "تعبئة الكل")}
+        </Button>
+      </div>
+
+      <Modal
+        opened={confirmOpened}
+        onClose={closeConfirm}
+        title={translate("Fill all serial numbers?", "تعبئة جميع الأرقام التسلسلية؟")}
+        size="sm"
+      >
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-gray-600">
+            {translate(
+              "A random 12-digit serial will be assigned to every unit.",
+              "سيتم تعيين رقم تسلسلي عشوائي من 12 رقمًا لكل وحدة.",
+            )}
+          </p>
+
+          <div className="rounded-lg bg-gray-50 px-3 py-2.5">
+            <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">
+              {translate("Units to fill", "الوحدات المراد تعبئتها")}
+            </p>
+            <p className="mt-1 text-sm font-medium text-gray-800">
+              {translate(
+                `${unitTotal} units across ${items.length} lines`,
+                `${unitTotal} وحدة عبر ${items.length} بند`,
+              )}
+            </p>
+          </div>
+
+          {existingTotal > 0 ? (
+            <p className="bg-ochre-50 text-ochre-800 rounded-lg px-3 py-2 text-xs font-medium">
+              {translate(
+                `${existingTotal} existing serials will be overwritten.`,
+                `سيتم استبدال ${existingTotal} رقم تسلسلي موجود.`,
+              )}
+            </p>
+          ) : null}
+
+          <div className="flex gap-2">
+            <Button type="button" variant="light" color="dark" radius="md" onClick={closeConfirm} fullWidth>
+              {translation.cancel}
+            </Button>
+            <Button type="button" color="haze" radius="md" onClick={fillAllSerialNumbers} fullWidth>
+              {translate("Fill all", "تعبئة الكل")}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {items.map((item, index) => {
         const imported = isImportedSource(item.sourceType);
         const dimension = selectedDimension(item);
