@@ -87,10 +87,6 @@ export function isItemUntouched(item: ItemDraft) {
   );
 }
 
-export function defaultDimensionId(dimensions: ProductDimension[]) {
-  return dimensions.find((dimension) => dimension.isDefault)?.id ?? dimensions[0]?.id ?? null;
-}
-
 export function selectedDimension(item: ItemDraft) {
   return item.dimensions.find((dimension) => dimension.id === item.productDimensionId) ?? null;
 }

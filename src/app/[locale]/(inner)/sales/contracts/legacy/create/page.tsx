@@ -27,7 +27,6 @@ import UnitsStep from "./steps/units-step";
 import {
   buildLegacyContractDto,
   createEmptyItem,
-  defaultDimensionId,
   droppedUnitsHaveContent,
   isImportedSource,
   isItemUntouched,
@@ -259,7 +258,7 @@ export default function Page() {
           productTitle: product.title,
           sourceType: product.sourceType,
           dimensions: product.dimensions,
-          productDimensionId: defaultDimensionId(product.dimensions),
+          productDimensionId: null,
           title: keepTitle ? item.title : product.title,
           units: isImportedSource(product.sourceType)
             ? item.units

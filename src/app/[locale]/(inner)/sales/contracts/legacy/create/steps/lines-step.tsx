@@ -1,13 +1,18 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from "react";
-import { Button, NumberInput, Textarea } from "@mantine/core";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { ActionIcon, Button, NumberInput, Textarea, Tooltip } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import DataSelect from "@/components/ui/data-select";
+import ProductDimensionModal from "@/components/global/data-modals/product-dimension-modal";
 import SelectProduct, { type SelectableProduct } from "@/components/global/selections/remote-based/select-product";
+import useHasPermission from "@/hooks/use-has-permission";
+import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { useI18n } from "@/lib/i18n/hooks";
+import type { ProductDimension } from "@/types/product";
 import { createEmptyItem, type ItemDraft } from "../form-state";
 
 const ASIDE_INPUT =
@@ -23,12 +28,45 @@ type LinesStepProps = {
 
 export default function LinesStep({ items, setItems, applyProduct, updateQuantity, clearStepError }: LinesStepProps) {
   const { translate, translation } = useI18n();
+  const canUpdateProduct = useHasPermission(PERMISSIONS.UPDATE_PRODUCT);
+  const [dimensionModalOpened, { open: openDimensionModal, close: closeDimensionModal }] = useDisclosure(false);
+  const [dimensionLineKey, setDimensionLineKey] = useState<string | null>(null);
   const dimensionUnit = translation.productDimensionUnit;
   const currency = translation.currency;
   const totalAmount = items.reduce((sum, item) => sum + (lineAmount(item) ?? 0), 0);
+  const dimensionLine = items.find((item) => item.key === dimensionLineKey) ?? null;
+
+  function handleOpenDimensionModal(key: string) {
+    setDimensionLineKey(key);
+    openDimensionModal();
+  }
+
+  function handleCloseDimensionModal() {
+    closeDimensionModal();
+    setDimensionLineKey(null);
+  }
+
+  function handleDimensionCreated(dimension: ProductDimension) {
+    if (!dimensionLineKey) return;
+    setItems((current) =>
+      current.map((row) =>
+        row.key === dimensionLineKey
+          ? { ...row, dimensions: [...row.dimensions, dimension], productDimensionId: dimension.id }
+          : row,
+      ),
+    );
+    clearStepError();
+  }
 
   return (
     <section className="flex flex-col gap-3">
+      <ProductDimensionModal
+        opened={dimensionModalOpened}
+        close={handleCloseDimensionModal}
+        productCode={dimensionLine?.productCode ?? ""}
+        isFirstDimension={(dimensionLine?.dimensions.length ?? 0) === 0}
+        onCreated={handleDimensionCreated}
+      />
       {items.map((item, index) => {
         const amount = lineAmount(item);
         return (
@@ -68,28 +106,47 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                   withCreateInBrowse
                   required
                 />
-                <DataSelect
-                  value={item.productDimensionId}
-                  setValue={(next) => {
-                    const resolved = typeof next === "function" ? next(item.productDimensionId) : next;
-                    setItems((current) =>
-                      current.map((row) => (row.key === item.key ? { ...row, productDimensionId: resolved } : row)),
-                    );
-                    clearStepError();
-                  }}
-                  data={item.dimensions.map((option) => ({
-                    value: option.id,
-                    label: formatDimensionLabelText(option, dimensionUnit),
-                  }))}
-                  label={translate("Dimension", "المقاس")}
-                  placeholder={
-                    item.productCode
-                      ? translate("Choose a dimension", "اختر مقاسًا")
-                      : translate("Choose a product first", "اختر منتجًا أولاً")
-                  }
-                  disabled={!item.productCode || item.dimensions.length === 0}
-                  required
-                />
+                <div className="flex w-full min-w-0 items-end gap-2">
+                  <div className="min-w-0 flex-1">
+                    <DataSelect
+                      value={item.productDimensionId}
+                      setValue={(next) => {
+                        const resolved = typeof next === "function" ? next(item.productDimensionId) : next;
+                        setItems((current) =>
+                          current.map((row) => (row.key === item.key ? { ...row, productDimensionId: resolved } : row)),
+                        );
+                        clearStepError();
+                      }}
+                      data={item.dimensions.map((option) => ({
+                        value: option.id,
+                        label: formatDimensionLabelText(option, dimensionUnit),
+                      }))}
+                      label={translate("Dimension", "المقاس")}
+                      placeholder={
+                        item.productCode
+                          ? translate("Choose a dimension", "اختر مقاسًا")
+                          : translate("Choose a product first", "اختر منتجًا أولاً")
+                      }
+                      disabled={!item.productCode || item.dimensions.length === 0}
+                      required
+                    />
+                  </div>
+                  {canUpdateProduct && item.productCode && (
+                    <Tooltip label={translate("Add dimension", "إضافة مقاس")} withArrow>
+                      <ActionIcon
+                        type="button"
+                        size={36}
+                        variant="light"
+                        color="haze"
+                        className="shrink-0"
+                        aria-label={translate("Add dimension", "إضافة مقاس")}
+                        onClick={() => handleOpenDimensionModal(item.key)}
+                      >
+                        <Plus size={15} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                </div>
                 <Textarea
                   value={item.title}
                   onChange={(event) => {
