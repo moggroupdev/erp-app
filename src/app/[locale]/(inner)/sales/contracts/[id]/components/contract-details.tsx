@@ -114,6 +114,8 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
         <span className="font-normal">
           {[address.addressLine, locationText].filter(Boolean).join(", ") || translate("Address on file", "عنوان مسجل")}
         </span>
+      ) : contract.legacyNumber ? (
+        translate("Not recorded", "غير مسجل")
       ) : (
         translate("Factory", "المصنع")
       ),
@@ -164,7 +166,7 @@ export default function ContractDetails({ contract }: { contract: ContractDetail
       : []),
     {
       key: translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`),
-      value: formatMoney(contract.totalAmount),
+      value: contract.totalAmount == null ? translate("Not priced", "غير مسعّر") : formatMoney(contract.totalAmount),
     },
     ...(contract.inquiry
       ? [

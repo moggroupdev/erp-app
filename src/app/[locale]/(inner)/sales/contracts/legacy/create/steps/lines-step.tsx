@@ -33,7 +33,9 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
   const [dimensionLineKey, setDimensionLineKey] = useState<string | null>(null);
   const dimensionUnit = translation.productDimensionUnit;
   const currency = translation.currency;
-  const totalAmount = items.reduce((sum, item) => sum + (lineAmount(item) ?? 0), 0);
+  const totalAmount = items.some((item) => item.unitPrice === "")
+    ? null
+    : items.reduce((sum, item) => sum + (lineAmount(item) ?? 0), 0);
   const dimensionLine = items.find((item) => item.key === dimensionLineKey) ?? null;
 
   function handleOpenDimensionModal(key: string) {
@@ -185,10 +187,7 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                 <div className="flex flex-1 flex-col gap-3 p-4">
                   <label className="block">
                     <span className="mb-1.5 flex items-center justify-between gap-2 text-xs font-medium text-gray-600">
-                      <span>
-                        {translate("Unit price", "سعر الوحدة")}
-                        <span className="text-clay-600"> *</span>
-                      </span>
+                      <span>{translate("Unit price", "سعر الوحدة")}</span>
                       <span className="font-normal text-gray-400">{currency}</span>
                     </span>
                     <div className="focus-within:border-haze-600 focus-within:ring-haze-200 rounded-lg border border-gray-200 bg-white px-3 transition-colors focus-within:ring-1">
@@ -207,7 +206,6 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                         decimalScale={2}
                         allowNegative={false}
                         hideControls
-                        required
                         variant="unstyled"
                         classNames={{ input: ASIDE_INPUT }}
                       />
@@ -264,7 +262,7 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                       <p className="text-haze-600/80 text-xs">{currency}</p>
                     </div>
                     <p className="text-haze-700 mt-1 text-xl font-semibold tracking-tight tabular-nums">
-                      {amount == null ? "-" : formatMoney(amount)}
+                      {amount == null ? translate("Not priced", "غير مسعّر") : formatMoney(amount)}
                     </p>
                   </div>
                 </div>
@@ -286,7 +284,9 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
         </Button>
         <div className="text-end">
           <p className="text-xs text-gray-500">{translate(`Total (${currency})`, `الإجمالي (${currency})`)}</p>
-          <p className="text-haze-700 text-base font-semibold tabular-nums">{formatMoney(totalAmount)}</p>
+          <p className="text-haze-700 text-base font-semibold tabular-nums">
+            {totalAmount == null ? translate("Not priced", "غير مسعّر") : formatMoney(totalAmount)}
+          </p>
         </div>
       </div>
     </section>

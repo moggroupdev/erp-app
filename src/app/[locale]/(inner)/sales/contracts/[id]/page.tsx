@@ -159,7 +159,9 @@ export default function Page() {
                   <span className="text-xs font-medium text-gray-500 tabular-nums">
                     {translate(`${contract.items.length} lines`, `${contract.items.length} بنود`)}
                     {" · "}
-                    {formatMoney(Number(contract.totalAmount))} {translation.currency}
+                    {contract.totalAmount == null
+                      ? translate("Not priced", "غير مسعّر")
+                      : `${formatMoney(contract.totalAmount)} ${translation.currency}`}
                   </span>
                 ) : null}
               </div>
@@ -204,7 +206,7 @@ function ContractItemCard({
   const { translate } = useI18n();
   const lineTitle = item.title?.trim() || "";
   const cancelled = !!item.cancelledAt;
-  const lineAmount = item.quantity * item.unitPrice;
+  const lineAmount = item.unitPrice == null ? null : item.quantity * item.unitPrice;
   const units = item.productUnits;
   const columns = visibleUnitColumns(units);
   const serialWidth = columns.length === 0 ? "100%" : "18%";
@@ -265,7 +267,7 @@ function ContractItemCard({
             cancelled ? "text-gray-400 line-through" : "text-gray-900",
           ].join(" ")}
         >
-          {formatMoney(lineAmount)}
+          {lineAmount == null ? translate("Not priced", "غير مسعّر") : formatMoney(lineAmount)}
         </span>
       </header>
 
@@ -275,7 +277,9 @@ function ContractItemCard({
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-gray-600">
           <span>{formatDimensionLabel(item.productDimension, dimensionUnit)}</span>
           <span className="tabular-nums">
-            {item.quantity} × {formatMoney(item.unitPrice)} {currency}
+            {item.unitPrice == null
+              ? `${item.quantity} · ${translate("Not priced", "غير مسعّر")}`
+              : `${item.quantity} × ${formatMoney(item.unitPrice)} ${currency}`}
           </span>
           {units.length > 0 ? (
             <span className="text-xs font-medium text-gray-500 tabular-nums">
