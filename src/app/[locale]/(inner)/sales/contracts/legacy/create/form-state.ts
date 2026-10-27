@@ -223,6 +223,18 @@ export function validateUnitsStep(items: ItemDraft[], translate: Translate) {
   return null;
 }
 
+/** Highest step index the user may open: 0 until the previous step's data is complete. */
+export function getMaxReachableLegacyStep(
+  input: Parameters<typeof validateContractStep>[0],
+  items: ItemDraft[],
+) {
+  const silent: Translate = () => "";
+  if (validateContractStep(input, silent) !== null) return 0;
+  if (validateItemsStep(items, silent) !== null) return 1;
+  if (validateUnitsStep(items, silent) !== null) return 2;
+  return 3;
+}
+
 export function buildLegacyContractDto(input: {
   customerId: string;
   legacyNumber: string;

@@ -24,6 +24,7 @@ import {
   buildLegacyContractDto,
   createEmptyItem,
   droppedUnitsHaveContent,
+  getMaxReachableLegacyStep,
   isImportedSource,
   isItemUntouched,
   type ItemDraft,
@@ -75,6 +76,24 @@ export default function Page() {
 
   const confirmNavigation = useUnsavedChangesWarning(isDirty);
 
+  const contractInput = {
+    customerId,
+    legacyNumber,
+    legacyWorkOrderNumber,
+    createdAt,
+    startedAt,
+    deliveryTime,
+  };
+
+  const maxReachable = useMemo(
+    () =>
+      getMaxReachableLegacyStep(
+        { customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime },
+        items,
+      ),
+    [customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime, items],
+  );
+
   const mutation = useMutation({
     mutationFn: () => {
       const dto = buildLegacyContractDto({
@@ -112,52 +131,70 @@ export default function Page() {
     };
   }
 
-  async function goNext() {
-    if (stepValidating || mutation.isPending) return;
+  function clientErrorForStep(index: number) {
+    if (index === 0) return validateContractStep(contractInput, translate);
+    if (index === 1) return validateItemsStep(items, translate);
+    if (index === 2) return validateUnitsStep(items, translate);
+    return null;
+  }
 
-    const error =
-      step === 0
-        ? validateContractStep(
-            {
-              customerId,
-              legacyNumber,
-              legacyWorkOrderNumber,
-              createdAt,
-              startedAt,
-              deliveryTime,
-            },
-            translate,
-          )
-        : step === 1
-          ? validateItemsStep(items, translate)
-          : validateUnitsStep(items, translate);
-    if (error) {
-      setStepError(error);
+  async function apiValidateStep(index: number) {
+    if (index === 0) {
+      await contractsApi.validateLegacyContract({ privateRequest, dto: contractHeaderDto() });
+      return;
+    }
+    if (index === 1) {
+      await contractsApi.validateLegacyItems({
+        privateRequest,
+        dto: { items: items.map((item) => ({ productDimensionId: item.productDimensionId! })) },
+      });
+      return;
+    }
+    if (index === 2) {
+      await contractsApi.validateLegacyUnits({
+        privateRequest,
+        dto: { items: buildLegacyContractDto({ ...contractHeaderDto(), items }).items },
+      });
+    }
+  }
+
+  async function goToStep(target: number) {
+    if (stepValidating || mutation.isPending) return;
+    if (target === step || target < 0 || target > 3) return;
+    if (target > maxReachable) return;
+
+    if (target < step) {
+      setStepError(null);
+      setStep(target);
       return;
     }
 
     setStepError(null);
     setStepValidating(true);
     try {
-      if (step === 0) {
-        await contractsApi.validateLegacyContract({ privateRequest, dto: contractHeaderDto() });
-      } else if (step === 1) {
-        await contractsApi.validateLegacyItems({
-          privateRequest,
-          dto: { items: items.map((item) => ({ productDimensionId: item.productDimensionId! })) },
-        });
-      } else {
-        await contractsApi.validateLegacyUnits({
-          privateRequest,
-          dto: { items: buildLegacyContractDto({ ...contractHeaderDto(), items }).items },
-        });
+      for (let index = step; index < target; index++) {
+        const error = clientErrorForStep(index);
+        if (error) {
+          setStepError(error);
+          setStep(index);
+          return;
+        }
+        try {
+          await apiValidateStep(index);
+        } catch (apiError) {
+          setStepError(getErrorMessage(locale, apiError));
+          setStep(index);
+          return;
+        }
       }
-      setStep((current) => Math.min(current + 1, 3));
-    } catch (apiError) {
-      setStepError(getErrorMessage(locale, apiError));
+      setStep(target);
     } finally {
       setStepValidating(false);
     }
+  }
+
+  function goNext() {
+    void goToStep(step + 1);
   }
 
   function goBack() {
@@ -169,17 +206,7 @@ export default function Page() {
   function createContract() {
     if (stepValidating || mutation.isPending) return;
     const error =
-      validateContractStep(
-        {
-          customerId,
-          legacyNumber,
-          legacyWorkOrderNumber,
-          createdAt,
-          startedAt,
-          deliveryTime,
-        },
-        translate,
-      ) ||
+      validateContractStep(contractInput, translate) ||
       validateItemsStep(items, translate) ||
       validateUnitsStep(items, translate);
     if (error) {
@@ -283,12 +310,9 @@ export default function Page() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <CreateStepper
           active={step}
-          onStepClick={(next) => {
-            if (next < step) {
-              setStepError(null);
-              setStep(next);
-            }
-          }}
+          maxReachable={maxReachable}
+          validating={stepValidating}
+          onStepClick={(next) => void goToStep(next)}
         />
 
         {step === 0 ? (
