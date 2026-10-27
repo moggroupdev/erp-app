@@ -65,6 +65,7 @@ export default function LinesStep({ items, setItems, applyProduct, updateQuantit
                   label={translate("Product", "المنتج")}
                   placeholder={translate("Search products", "ابحث عن المنتجات")}
                   withBrowseModal
+                  withCreateInBrowse
                   required
                 />
                 <DataSelect

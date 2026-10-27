@@ -29,6 +29,8 @@ export type SelectProductProps = Omit<GenericDataSelectProps, "data" | "value" |
   onProductSelect?: (product: SelectableProduct | null) => void;
   /** Show a button that opens a browse modal for picking a product. */
   withBrowseModal?: boolean;
+  /** Inside the browse modal, show Add Product when the user has `ADD_PRODUCT`. */
+  withCreateInBrowse?: boolean;
 };
 
 function productLabel(product: Pick<SelectableProduct, "code" | "title">) {
@@ -40,6 +42,7 @@ export default function SelectProduct({
   setValue,
   onProductSelect,
   withBrowseModal = false,
+  withCreateInBrowse = false,
   searchable = true,
   clearable = true,
   ...props
@@ -241,6 +244,7 @@ export default function SelectProduct({
         close={handleCloseBrowse}
         onSelect={handleBrowseSelect}
         initialKeyword={browseKeyword}
+        withCreate={withCreateInBrowse}
       />
     </div>
   );
