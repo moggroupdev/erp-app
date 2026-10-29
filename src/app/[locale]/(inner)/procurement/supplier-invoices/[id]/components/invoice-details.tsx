@@ -146,6 +146,7 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
   const privateRequest = usePrivateRequest();
   const canUpdate = useHasPermission(PERMISSIONS.UPDATE_SUPPLIER_INVOICE);
   const resetFileRef = useRef<() => void>(null);
+  const openFilePickerRef = useRef<(() => void) | null>(null);
   const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [parsed, setParsed] = useState<ParsedSupplierInvoice | null>(null);
@@ -239,6 +240,15 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {canUpdate && (
+            // The input must stay mounted. The menu dropdown unmounts on close and would drop the selected file.
+            <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+              {(props) => {
+                openFilePickerRef.current = props.onClick;
+                return null;
+              }}
+            </FileButton>
+          )}
           <ActionsMenu>
             {hasPdf && (
               <Menu.Item
@@ -251,13 +261,13 @@ function InvoicePdfSection({ invoice }: { invoice: SupplierInvoiceDetailed }) {
             )}
             {hasPdf && canUpdate && <Menu.Divider />}
             {canUpdate && (
-              <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
-                {(props) => (
-                  <Menu.Item {...props} leftSection={<Upload size={14} />} disabled={isParsing}>
-                    {hasPdf ? translate("Replace PDF", "استبدال PDF") : translate("Upload PDF", "رفع PDF")}
-                  </Menu.Item>
-                )}
-              </FileButton>
+              <Menu.Item
+                leftSection={<Upload size={14} />}
+                disabled={isParsing}
+                onClick={() => openFilePickerRef.current?.()}
+              >
+                {hasPdf ? translate("Replace PDF", "استبدال PDF") : translate("Upload PDF", "رفع PDF")}
+              </Menu.Item>
             )}
           </ActionsMenu>
         </div>
