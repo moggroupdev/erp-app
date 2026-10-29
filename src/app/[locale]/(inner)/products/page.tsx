@@ -16,7 +16,6 @@ import productsApi from "@/lib/api/products";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import { formatDate } from "@/lib/helpers/date-formaters";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
@@ -24,7 +23,7 @@ import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { type Product, type ProductWithDimensions } from "@/types/product";
 import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Download, Pencil, Plus, Search, X } from "lucide-react";
+import { Download, Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import { CategoryTreeMenuItem } from "@/components/global/category-tree";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -35,13 +34,12 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
-import PrintDocument from "@/components/ui/print-document";
-import ProductsListPrintDocument from "@/components/documents/products/products-list-print-document";
 import ProductModal from "@/components/global/data-modals/product-modal";
 import SelectProductSourceType from "@/components/global/selections/enum-based/select-product-source-type";
 import SelectProductMain from "@/components/global/selections/reference-based/select-product-main";
 import SelectProductSub from "@/components/global/selections/reference-based/select-product-sub";
 import DownloadProductsExcelModal from "./components/download-excel-modal";
+import PrintProductsModal from "./components/print-products-modal";
 
 const PAGE_TITLE = { en: "Products Catalog", ar: "كتالوج المنتجات" };
 
@@ -49,7 +47,6 @@ const PRODUCTS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
-  const printDate = formatDate(new Date(), locale);
   const canPrintProductsList = useHasPermission(PERMISSIONS.PRINT_PRODUCTS_LIST);
   const canAddProduct = useHasPermission(PERMISSIONS.ADD_PRODUCT);
 
@@ -58,7 +55,7 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
-  const { data: categoriesData, helpers } = useProductCategories();
+  const { helpers } = useProductCategories();
 
   function getCategoryLabels(subCategoryId: string) {
     const sub = helpers.getProductCategorySubById(subCategoryId);
@@ -123,14 +120,6 @@ export default function Page() {
     placeholderData: keepPreviousData,
   });
 
-  // Only used for printing
-  const { data: allProducts, refetch: fetchAllProducts } = useQuery({
-    queryKey: queryKeys.products.list({ limit: "list-all-to-print" }),
-    queryFn: ({ signal }) => productsApi.listAllToPrint({ privateRequest, signal }),
-    staleTime: staleTimes.products,
-    enabled: false, // Disabled by default, will be enabled when the print button is clicked
-  });
-
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useEffect(() => {
@@ -158,6 +147,7 @@ export default function Page() {
   // ========================= MODALS =========================
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
+  const [printModalOpened, { open: openPrintModal, close: closePrintModal }] = useDisclosure(false);
   const [excelModalOpened, { open: openExcelModal, close: closeExcelModal }] = useDisclosure(false);
   const [productToUpdate, setProductToUpdate] = useState<Product | null>(null);
 
@@ -176,21 +166,9 @@ export default function Page() {
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canPrintProductsList && (
-                <PrintDocument
-                  buttonType="menu"
-                  title={translate(`Print Products List`, `طباعة قائمة المنتجات`)}
-                  onBeforePrint={async () => {
-                    if (!allProducts) await fetchAllProducts();
-                  }}
-                >
-                  {allProducts && categoriesData && (
-                    <ProductsListPrintDocument
-                      products={allProducts}
-                      mainCategories={categoriesData.productCategoryMains}
-                      getSubCategory={helpers.getProductCategorySubById}
-                    />
-                  )}
-                </PrintDocument>
+                <Menu.Item leftSection={<Printer size={14} />} onClick={openPrintModal}>
+                  {translate("Print Products List", "طباعة قائمة المنتجات")}
+                </Menu.Item>
               )}
               {canPrintProductsList && (
                 <Menu.Item leftSection={<Download size={14} />} onClick={openExcelModal}>
@@ -364,6 +342,8 @@ export default function Page() {
           </>
         ))
       )}
+
+      <PrintProductsModal opened={printModalOpened} close={closePrintModal} />
 
       <DownloadProductsExcelModal opened={excelModalOpened} close={closeExcelModal} />
 

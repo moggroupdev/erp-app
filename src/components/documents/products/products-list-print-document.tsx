@@ -19,10 +19,12 @@ export default function ProductsListPrintDocument({
   products,
   mainCategories,
   getSubCategory,
+  includeSubcategory = false,
 }: {
   products: ProductWithDimensions[];
   mainCategories: ProductCategoryMain[];
   getSubCategory: (id: string) => ProductCategorySub | null;
+  includeSubcategory?: boolean;
 }) {
   const { locale, translate, translation } = useI18n();
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
@@ -52,9 +54,13 @@ export default function ProductsListPrintDocument({
   const headers = [
     translate("Code", "الكود"),
     translate("Product Name", "اسم المنتج"),
+    ...(includeSubcategory ? [translate("Subcategory", "الفئة الفرعية")] : []),
     translate("Standard Dimensions", "الأبعاد النمطية") + ` (${translation.productDimensionUnit})`,
     translate("Source Type", "نوع المصدر"),
   ];
+
+  const columnWidths = includeSubcategory ? ["10%", "28%", "20%", "28%", "14%"] : ["12%", "44%", "28%", "16%"];
+  const sourceTypeColumnIndex = includeSubcategory ? 4 : 3;
 
   function renderDimensions(dimensions: ProductDimension[]): ReactNode {
     if (dimensions.length === 0) return "-";
@@ -68,10 +74,23 @@ export default function ProductsListPrintDocument({
     );
   }
 
+  function sortBySubcategoryThenName(list: ProductWithDimensions[]) {
+    if (!includeSubcategory) return list;
+
+    return [...list].sort((a, b) => {
+      const aSubTitle = getSubCategory(a.subCategoryId)?.title ?? "";
+      const bSubTitle = getSubCategory(b.subCategoryId)?.title ?? "";
+      const bySubcategory = aSubTitle.localeCompare(bSubTitle, locale);
+      if (bySubcategory !== 0) return bySubcategory;
+      return a.title.localeCompare(b.title, locale);
+    });
+  }
+
   function productRows(list: ProductWithDimensions[]): ReactNode[][] {
-    return list.map((p) => [
+    return sortBySubcategoryThenName(list).map((p) => [
       p.code,
       p.title,
+      ...(includeSubcategory ? [getSubCategory(p.subCategoryId)?.title ?? "-"] : []),
       renderDimensions(p.dimensions),
       getProductSourceTypeLabel(p.sourceType, locale),
     ]);
@@ -81,7 +100,13 @@ export default function ProductsListPrintDocument({
     const itemsCount = list.length;
     const dimensionsCount = countDimensions(list);
 
-    return ["", `${itemsCount} ${translate("items", "منتج")}`, `${dimensionsCount} ${translate("dimensions", "مقاس")}`, ""];
+    return [
+      "",
+      `${itemsCount} ${translate("items", "منتج")}`,
+      ...(includeSubcategory ? [""] : []),
+      `${dimensionsCount} ${translate("dimensions", "مقاس")}`,
+      "",
+    ];
   }
 
   function renderCategoryTable(list: ProductWithDimensions[]) {
@@ -90,9 +115,9 @@ export default function ProductsListPrintDocument({
         headers={headers}
         rows={productRows(list)}
         footerRow={categoryFooter(list)}
-        columnWidths={["12%", "44%", "28%", "16%"]}
+        columnWidths={columnWidths}
         monoColumnIndexes={[0]}
-        noWrapIndexes={[0, 3]}
+        noWrapIndexes={[0, sourceTypeColumnIndex]}
         tableClassName="break-before-avoid text-[9px] [&_td]:align-top"
         emptyLabel={translate("No products", "لا توجد منتجات")}
       />
