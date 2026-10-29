@@ -97,8 +97,14 @@ export function getRowManufacturingCostingMethod(
   return overrides?.[rowId] ?? MANUFACTURING_COSTING_METHODS.LAST_OUTSOURCING_COST;
 }
 
+export type ManufacturingCostPriceFields = {
+  isExternallyManufactured: boolean;
+  lastOutsourcingCost: number | null;
+  marketManufacturingCost: number | null;
+};
+
 export function getManufacturingUnitCost(
-  row: ManufacturingCostRow,
+  row: ManufacturingCostPriceFields,
   method: ManufacturingCostingMethod,
 ): number {
   if (!row.isExternallyManufactured) return 0;
@@ -296,6 +302,172 @@ export function getBomDisplayTotals(args: {
     itemCount: args.materialRows.length,
     manufacturingItemCount: args.manufacturingRows.length,
   };
+}
+
+export type BomQuantityComparisonRow = {
+  id: string;
+  materialCode: string;
+  newQuantity: number;
+  oldQuantity: number | null;
+  unitOfMeasurementSelected: MaterialUnit | null;
+  notes: string | null;
+  noLongerUsed: boolean;
+  material: BomItemWithMaterial["material"] | BomMmComponent["material"];
+  parentManufacturedMaterialTitle: string | null;
+  productionSubDepartment: ProductionSubDepartment | null;
+  manufacturedComponentContext?: {
+    parentNewQuantity: number;
+    parentOldQuantity: number | null;
+    parentUnit: MaterialUnit | null;
+    parentMaterial: UnitConvertibleMaterial;
+    componentQuantity: number;
+    componentUnit: MaterialUnit | null;
+  };
+};
+
+export type BomQuantityComparisonManufacturingRow = {
+  id: string;
+  materialCode: string;
+  materialTitle: string;
+  newQuantity: number;
+  oldQuantity: number | null;
+  newBaseQuantity: number;
+  oldBaseQuantity: number | null;
+  lastOutsourcingCost: number | null;
+  marketManufacturingCost: number | null;
+  isExternallyManufactured: boolean;
+  productionSubDepartment: ProductionSubDepartment | null;
+  notes: string | null;
+  sourceBomItem: BomItemWithMaterial;
+};
+
+export type QuantityComparisonSide = "old" | "new";
+
+/** Keeps both quantities on every BOM line, including retired and zero-required rows. */
+export function getQuantityComparisonMaterialRows(items: BomItemWithMaterial[]): BomQuantityComparisonRow[] {
+  const rows: BomQuantityComparisonRow[] = [];
+
+  for (const item of items) {
+    const expandRecipe =
+      isManufacturedMaterial(item.material.materialType) && usesMmRecipe(item.mmSourcingType);
+
+    if (expandRecipe) {
+      for (const component of item.material.manufacturedMaterialBoms ?? []) {
+        const componentUnit = component.unitOfMeasurementSelected ?? component.material.unitOfMeasurement;
+        const compQty = component.quantityRequired;
+        const scaledLegacyQuantity = item.legacyQuantity == null ? null : item.legacyQuantity * compQty;
+
+        rows.push({
+          id: `${item.id}:${component.id}`,
+          materialCode: component.materialCode,
+          newQuantity: item.quantityRequired * compQty,
+          oldQuantity: scaledLegacyQuantity,
+          unitOfMeasurementSelected: componentUnit,
+          notes: component.notes,
+          noLongerUsed: item.noLongerUsed,
+          material: component.material,
+          parentManufacturedMaterialTitle: item.material.title,
+          productionSubDepartment: item.productionSubDepartment,
+          manufacturedComponentContext: {
+            parentNewQuantity: item.quantityRequired,
+            parentOldQuantity: item.legacyQuantity,
+            parentUnit: item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
+            parentMaterial: item.material,
+            componentQuantity: compQty,
+            componentUnit,
+          },
+        });
+      }
+
+      continue;
+    }
+
+    rows.push({
+      id: item.id,
+      materialCode: item.materialCode,
+      newQuantity: item.quantityRequired,
+      oldQuantity: item.legacyQuantity,
+      unitOfMeasurementSelected: item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement,
+      notes: item.notes,
+      noLongerUsed: item.noLongerUsed,
+      material: item.material,
+      parentManufacturedMaterialTitle: null,
+      productionSubDepartment: item.productionSubDepartment,
+    });
+  }
+
+  return rows;
+}
+
+export function getQuantityComparisonManufacturingRows(
+  items: BomItemWithMaterial[],
+): BomQuantityComparisonManufacturingRow[] {
+  return items
+    .filter(
+      (item) => isManufacturedMaterial(item.material.materialType) && usesMmRecipe(item.mmSourcingType),
+    )
+    .map((item) => {
+      const isExternallyManufactured = isExternallyManufacturedMmSourcing(item.mmSourcingType);
+      const enteredUnit = item.unitOfMeasurementSelected ?? item.material.unitOfMeasurement;
+      const newBaseQuantity = getEnteredQuantityInBaseUnit(item.quantityRequired, enteredUnit, item.material);
+      const oldBaseQuantity =
+        item.legacyQuantity == null
+          ? null
+          : getEnteredQuantityInBaseUnit(item.legacyQuantity, enteredUnit, item.material);
+
+      return {
+        id: item.id,
+        materialCode: item.material.code,
+        materialTitle: item.material.title,
+        newQuantity: item.quantityRequired,
+        oldQuantity: item.legacyQuantity,
+        newBaseQuantity,
+        oldBaseQuantity,
+        lastOutsourcingCost: isExternallyManufactured ? (item.material.lastOutsourcingCost ?? null) : null,
+        marketManufacturingCost: isExternallyManufactured ? (item.material.marketManufacturingCost ?? null) : null,
+        isExternallyManufactured,
+        productionSubDepartment: item.productionSubDepartment,
+        notes: item.notes,
+        sourceBomItem: item,
+      };
+    });
+}
+
+export function getQuantityComparisonRowLineCost(
+  row: BomQuantityComparisonRow,
+  side: QuantityComparisonSide,
+  costingMethod: ItemCostingMethod,
+): number | null {
+  if (row.manufacturedComponentContext) {
+    const ctx = row.manufacturedComponentContext;
+    const parentQuantity = side === "old" ? ctx.parentOldQuantity : ctx.parentNewQuantity;
+    if (parentQuantity == null) return null;
+
+    const parentBaseQuantity = getEnteredQuantityInBaseUnit(parentQuantity, ctx.parentUnit, ctx.parentMaterial);
+    const componentBaseQuantity = getEnteredQuantityInBaseUnit(
+      ctx.componentQuantity,
+      ctx.componentUnit,
+      row.material,
+    );
+
+    return parentBaseQuantity * componentBaseQuantity * getMaterialCostPrice(row.material, costingMethod);
+  }
+
+  const quantity = side === "old" ? row.oldQuantity : row.newQuantity;
+  if (quantity == null) return null;
+
+  return getMaterialLineCost(quantity, row.unitOfMeasurementSelected, row.material, costingMethod);
+}
+
+export function getQuantityComparisonManufacturingRowCost(
+  row: BomQuantityComparisonManufacturingRow,
+  side: QuantityComparisonSide,
+  method: ManufacturingCostingMethod,
+): number | null {
+  const baseQuantity = side === "old" ? row.oldBaseQuantity : row.newBaseQuantity;
+  if (baseQuantity == null) return null;
+
+  return baseQuantity * getManufacturingUnitCost(row, method);
 }
 
 export function aggregateMmComponentRequirements(

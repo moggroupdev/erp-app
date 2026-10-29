@@ -1,0 +1,463 @@
+"use client";
+
+import { useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@mantine/core";
+import LayoutBox from "@/components/ui/layout-box";
+import ErrorAlert from "@/components/ui/error-alert";
+import type { SelectableProduct } from "@/components/global/selections/remote-based/select-product";
+import useDocumentTitle from "@/hooks/use-document-title";
+import useUnsavedChangesWarning from "@/hooks/use-unsaved-changes-warning";
+import usePrivateRequest from "@/hooks/use-private-request";
+import contractsApi from "@/lib/api/contracts";
+import { queryKeys } from "@/lib/api/query-keys";
+import { dateOnlyToTwoPmIso } from "@/lib/helpers/datetime-picker";
+import getErrorMessage from "@/lib/helpers/get-error-message";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
+import CreateStepper from "./create/create-stepper";
+import ContractStep from "./create/steps/contract-step";
+import LinesStep from "./create/steps/lines-step";
+import ReviewStep from "./create/steps/review-step";
+import UnitsStep from "./create/steps/units-step";
+import {
+  buildLegacyContractDto,
+  buildUpdateLegacyContractDto,
+  createEmptyItem,
+  droppedUnitsHaveContent,
+  getMaxReachableLegacyStep,
+  isImportedSource,
+  isItemUntouched,
+  legacyFormSnapshot,
+  type ItemDraft,
+  type LegacyFormInitial,
+  unitsForQuantity,
+  validateContractStep,
+  validateItemsStep,
+  validateUnitsStep,
+} from "./create/form-state";
+
+const CREATE_TITLE = { en: "Add Legacy Contract Review", ar: "إضافة مراجعة عقد مرحلية" };
+const EDIT_TITLE = { en: "Edit Legacy Contract Review", ar: "تعديل مراجعة عقد مرحلية" };
+
+type LegacyContractFormProps =
+  | { mode: "create" }
+  | { mode: "edit"; contractId: string; initial: LegacyFormInitial };
+
+export default function LegacyContractForm(props: LegacyContractFormProps) {
+  const { locale, translate } = useI18n();
+  const href = useLocaleHref();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const privateRequest = usePrivateRequest();
+  const isEdit = props.mode === "edit";
+  const pageTitle = isEdit ? EDIT_TITLE : CREATE_TITLE;
+  const initial = props.mode === "edit" ? props.initial : null;
+  const contractId = props.mode === "edit" ? props.contractId : undefined;
+  const initialSnapshot = useMemo(
+    () => (initial ? legacyFormSnapshot(initial) : null),
+    // Seed once when the edit form mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  useDocumentTitle(translate(pageTitle.en, pageTitle.ar), "dashboard");
+
+  const [step, setStep] = useState(0);
+  const [stepError, setStepError] = useState<string | null>(null);
+  const [stepValidating, setStepValidating] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const [customerId, setCustomerId] = useState<string | null>(initial?.customerId ?? null);
+  const [customerName, setCustomerName] = useState(initial?.customerName ?? "");
+  const [customerCode, setCustomerCode] = useState(initial?.customerCode ?? "");
+  const [legacyNumber, setLegacyNumber] = useState(initial?.legacyNumber ?? "");
+  const [legacyWorkOrderNumber, setLegacyWorkOrderNumber] = useState(initial?.legacyWorkOrderNumber ?? "");
+  const [createdAt, setCreatedAt] = useState<string | null>(initial?.createdAt ?? null);
+  const [startedAt, setStartedAt] = useState<string | null>(initial?.startedAt ?? null);
+  const [deliveryTime, setDeliveryTime] = useState<string | null>(initial?.deliveryTime ?? null);
+  const [items, setItems] = useState<ItemDraft[]>(() => initial?.items ?? [createEmptyItem()]);
+
+  const currentSnapshot = legacyFormSnapshot({
+    customerId,
+    legacyNumber,
+    legacyWorkOrderNumber,
+    createdAt,
+    startedAt,
+    deliveryTime,
+    items,
+  });
+
+  const isDirty = useMemo(() => {
+    if (submitted) return false;
+    if (isEdit) return currentSnapshot !== initialSnapshot;
+    return (
+      !!customerId ||
+      legacyNumber.trim() !== "" ||
+      legacyWorkOrderNumber.trim() !== "" ||
+      !!createdAt ||
+      !!startedAt ||
+      !!deliveryTime ||
+      items.length !== 1 ||
+      items.some((item) => !isItemUntouched(item))
+    );
+  }, [
+    submitted,
+    isEdit,
+    currentSnapshot,
+    initialSnapshot,
+    customerId,
+    legacyNumber,
+    legacyWorkOrderNumber,
+    createdAt,
+    startedAt,
+    deliveryTime,
+    items,
+  ]);
+
+  const confirmNavigation = useUnsavedChangesWarning(isDirty);
+
+  const contractInput = {
+    customerId,
+    legacyNumber,
+    legacyWorkOrderNumber,
+    createdAt,
+    startedAt,
+    deliveryTime,
+  };
+
+  const maxReachable = useMemo(
+    () =>
+      getMaxReachableLegacyStep(
+        { customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime },
+        items,
+      ),
+    [customerId, legacyNumber, legacyWorkOrderNumber, createdAt, startedAt, deliveryTime, items],
+  );
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      const payload = {
+        customerId: customerId!,
+        legacyNumber,
+        legacyWorkOrderNumber,
+        createdAt: createdAt!,
+        startedAt: startedAt!,
+        deliveryTime: deliveryTime!,
+        items,
+      };
+      if (isEdit && contractId) {
+        return contractsApi.updateLegacy({ privateRequest, id: contractId, dto: buildUpdateLegacyContractDto(payload) });
+      }
+      return contractsApi.createLegacy({ privateRequest, dto: buildLegacyContractDto(payload) });
+    },
+    onSuccess: async (saved) => {
+      setSubmitted(true);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.contracts.all });
+      router.push(href(`/sales/contracts/${saved.id}`));
+    },
+  });
+
+  const apiError = mutation.error ? getErrorMessage(locale, mutation.error) : "";
+
+  function clearStepError() {
+    setStepError(null);
+  }
+
+  function contractHeaderDto() {
+    return {
+      ...(contractId ? { contractId } : {}),
+      customerId: customerId!,
+      legacyNumber: legacyNumber.trim(),
+      legacyWorkOrderNumber: legacyWorkOrderNumber.trim(),
+      createdAt: dateOnlyToTwoPmIso(createdAt)!,
+      startedAt: dateOnlyToTwoPmIso(startedAt)!,
+      deliveryTime: dateOnlyToTwoPmIso(deliveryTime)!,
+    };
+  }
+
+  function clientErrorForStep(index: number) {
+    if (index === 0) return validateContractStep(contractInput, translate);
+    if (index === 1) return validateItemsStep(items, translate);
+    if (index === 2) return validateUnitsStep(items, translate);
+    return null;
+  }
+
+  async function apiValidateStep(index: number) {
+    if (index === 0) {
+      await contractsApi.validateLegacyContract({ privateRequest, dto: contractHeaderDto() });
+      return;
+    }
+    if (index === 1) {
+      await contractsApi.validateLegacyItems({
+        privateRequest,
+        contractId,
+        dto: { items: items.map((item) => ({ productDimensionId: item.productDimensionId! })) },
+      });
+      return;
+    }
+    if (index === 2) {
+      const unitsPayload = {
+        customerId: customerId!,
+        legacyNumber,
+        legacyWorkOrderNumber,
+        createdAt: createdAt!,
+        startedAt: startedAt!,
+        deliveryTime: deliveryTime!,
+        items,
+      };
+      await contractsApi.validateLegacyUnits({
+        privateRequest,
+        dto: {
+          ...(contractId ? { contractId } : {}),
+          items: isEdit
+            ? buildUpdateLegacyContractDto(unitsPayload).items
+            : buildLegacyContractDto(unitsPayload).items,
+        },
+      });
+    }
+  }
+
+  async function goToStep(target: number) {
+    if (stepValidating || mutation.isPending) return;
+    if (target === step || target < 0 || target > 3) return;
+    if (target > maxReachable) return;
+
+    if (target < step) {
+      setStepError(null);
+      setStep(target);
+      return;
+    }
+
+    setStepError(null);
+    setStepValidating(true);
+    try {
+      for (let index = step; index < target; index++) {
+        const error = clientErrorForStep(index);
+        if (error) {
+          setStepError(error);
+          setStep(index);
+          return;
+        }
+        try {
+          await apiValidateStep(index);
+        } catch (apiError) {
+          setStepError(getErrorMessage(locale, apiError));
+          setStep(index);
+          return;
+        }
+      }
+      setStep(target);
+    } finally {
+      setStepValidating(false);
+    }
+  }
+
+  function goNext() {
+    void goToStep(step + 1);
+  }
+
+  function goBack() {
+    if (stepValidating) return;
+    setStepError(null);
+    setStep((current) => Math.max(current - 1, 0));
+  }
+
+  function saveContract() {
+    if (stepValidating || mutation.isPending) return;
+    const error =
+      validateContractStep(contractInput, translate) ||
+      validateItemsStep(items, translate) ||
+      validateUnitsStep(items, translate);
+    if (error) {
+      setStepError(error);
+      return;
+    }
+    setStepError(null);
+    mutation.mutate();
+  }
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    // Enter in fields triggers implicit form submit. Advance earlier steps;
+    // never save from onSubmit (Next to save button swap can also fire this).
+    if (step < 3) void goNext();
+  }
+
+  function selectCustomer(customer: { id: string; name: string; code: string } | null) {
+    setCustomerId(customer?.id ?? null);
+    setCustomerName(customer?.name ?? "");
+    setCustomerCode(customer?.code ?? "");
+    clearStepError();
+  }
+
+  function applyProduct(key: string, product: SelectableProduct | null) {
+    setItems((current) =>
+      current.map((item) => {
+        if (item.key !== key) return item;
+        if (!product) {
+          return {
+            ...createEmptyItem(),
+            key: item.key,
+            id: item.id,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            notes: item.notes,
+            units: unitsForQuantity(item.units, typeof item.quantity === "number" ? item.quantity : item.units.length),
+          };
+        }
+        const keepTitle = item.title.trim() !== "" && item.title !== item.productTitle;
+        return {
+          ...item,
+          productCode: product.code,
+          productTitle: product.title,
+          sourceType: product.sourceType,
+          dimensions: product.dimensions,
+          productDimensionId: null,
+          title: keepTitle ? item.title : product.title,
+          units: isImportedSource(product.sourceType)
+            ? item.units
+            : item.units.map((unit) => ({ ...unit, supplierSerialNumber: "" })),
+        };
+      }),
+    );
+    clearStepError();
+  }
+
+  function updateQuantity(key: string, raw: number | string) {
+    const item = items.find((row) => row.key === key);
+    if (!item) return;
+    if (raw === "") {
+      setItems((current) => current.map((row) => (row.key === key ? { ...row, quantity: "" } : row)));
+      clearStepError();
+      return;
+    }
+    const quantity = Math.trunc(Number(raw));
+    if (!Number.isFinite(quantity) || quantity < 1) {
+      setItems((current) => current.map((row) => (row.key === key ? { ...row, quantity: "" } : row)));
+      clearStepError();
+      return;
+    }
+    if (droppedUnitsHaveContent(item.units, quantity)) {
+      const confirmed = window.confirm(
+        translate(
+          "Reducing the quantity will discard serial numbers already entered. Continue?",
+          "تقليل الكمية سيحذف الأرقام التسلسلية المدخلة. هل تريد المتابعة؟",
+        ),
+      );
+      if (!confirmed) return;
+    }
+    setItems((current) =>
+      current.map((row) => (row.key === key ? { ...row, quantity, units: unitsForQuantity(row.units, quantity) } : row)),
+    );
+    clearStepError();
+  }
+
+  const totalAmount = items.some((item) => item.unitPrice === "")
+    ? null
+    : items.reduce((sum, item) => {
+        if (item.quantity === "") return sum;
+        return sum + Number(item.unitPrice) * Number(item.quantity);
+      }, 0);
+
+  return (
+    <LayoutBox
+      header={{
+        title: translate(pageTitle.en, pageTitle.ar),
+        backLink: true,
+        confirmNavigate: confirmNavigation,
+      }}
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <CreateStepper
+          active={step}
+          maxReachable={maxReachable}
+          validating={stepValidating}
+          onStepClick={(next) => void goToStep(next)}
+        />
+
+        {step === 0 ? (
+          <ContractStep
+            customerId={customerId}
+            selectCustomer={selectCustomer}
+            legacyNumber={legacyNumber}
+            setLegacyNumber={setLegacyNumber}
+            legacyWorkOrderNumber={legacyWorkOrderNumber}
+            setLegacyWorkOrderNumber={setLegacyWorkOrderNumber}
+            createdAt={createdAt}
+            setCreatedAt={setCreatedAt}
+            startedAt={startedAt}
+            setStartedAt={setStartedAt}
+            deliveryTime={deliveryTime}
+            setDeliveryTime={setDeliveryTime}
+            clearStepError={clearStepError}
+          />
+        ) : null}
+
+        {step === 1 ? (
+          <LinesStep
+            items={items}
+            setItems={setItems}
+            applyProduct={applyProduct}
+            updateQuantity={updateQuantity}
+            clearStepError={clearStepError}
+          />
+        ) : null}
+
+        {step === 2 ? (
+          <UnitsStep items={items} setItems={setItems} clearStepError={clearStepError} />
+        ) : null}
+
+        {step === 3 ? (
+          <ReviewStep
+            customerName={customerName}
+            customerCode={customerCode}
+            legacyNumber={legacyNumber}
+            legacyWorkOrderNumber={legacyWorkOrderNumber}
+            createdAt={createdAt}
+            startedAt={startedAt}
+            deliveryTime={deliveryTime}
+            totalAmount={totalAmount}
+            items={items}
+          />
+        ) : null}
+
+        {stepError ? <ErrorAlert error={stepError} /> : null}
+        {apiError ? <ErrorAlert error={apiError} /> : null}
+
+        <div className="flex items-center justify-between gap-3 border-t border-gray-200 pt-4">
+          {step > 0 ? (
+            <Button type="button" variant="light" color="dark" disabled={stepValidating} onClick={goBack}>
+              {translate("Back", "رجوع")}
+            </Button>
+          ) : (
+            <span />
+          )}
+          {step < 3 ? (
+            <Button
+              key="next"
+              type="button"
+              color="haze"
+              loading={stepValidating}
+              onClick={() => void goNext()}
+            >
+              {translate("Next", "التالي")}
+            </Button>
+          ) : (
+            <Button
+              key="save"
+              type="button"
+              color="haze"
+              loading={mutation.isPending}
+              onClick={saveContract}
+            >
+              {isEdit
+                ? translate("Save changes", "حفظ التعديلات")
+                : translate("Create legacy contract review", "إنشاء مراجعة العقد المرحلية")}
+            </Button>
+          )}
+        </div>
+      </form>
+    </LayoutBox>
+  );
+}

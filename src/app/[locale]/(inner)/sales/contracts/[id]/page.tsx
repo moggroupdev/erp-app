@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Table } from "@mantine/core";
+import { Menu, Table } from "@mantine/core";
+import { Pencil } from "lucide-react";
 import ActionsMenu from "@/components/ui/actions-menu";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -15,6 +17,7 @@ import ProtectedLink from "@/components/ui/protected-link";
 import { EmptyValue } from "@/components/ui/entity-details";
 import ContractReviewPrintDocument from "@/components/documents/sales/contract-review-print-document";
 import useDocumentTitle from "@/hooks/use-document-title";
+import useHasPermission from "@/hooks/use-has-permission";
 import usePrivateRequest from "@/hooks/use-private-request";
 import contractsApi from "@/lib/api/contracts";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -24,9 +27,10 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { formatMoney } from "@/lib/helpers/format-money";
 import getErrorMessage from "@/lib/helpers/get-error-message";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
 import type { ContractItem, ContractProductUnit } from "@/types/contract";
+import { isOpenLegacyContract } from "../helpers";
 import ContractDetails from "./components/contract-details";
 
 const PAGE_TITLE = { en: "Contract Review Details", ar: "تفاصيل مراجعة العقد" };
@@ -70,6 +74,8 @@ function UnitDate({ value, locale }: { value: string | null; locale: Locale }) {
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
+  const href = useLocaleHref();
+  const canUpdateLegacyContract = useHasPermission(PERMISSIONS.UPDATE_LEGACY_CONTRACT);
   const { id } = useParams<{ id: string }>();
   const privateRequest = usePrivateRequest();
 
@@ -100,6 +106,15 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
+              {contract && canUpdateLegacyContract && isOpenLegacyContract(contract) && (
+                <Menu.Item
+                  component={Link}
+                  href={href(`/sales/contracts/legacy/${contract.id}/edit`)}
+                  leftSection={<Pencil size={14} />}
+                >
+                  {translate("Edit legacy contract review", "تعديل مراجعة العقد المرحلية")}
+                </Menu.Item>
+              )}
               {contract && (
                 <PrintDocument
                   title={translate(
