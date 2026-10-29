@@ -35,6 +35,8 @@ import {
   getManufacturingRowCost,
   getManufacturingUnitCost,
   getMaterialCostPrice,
+  getQuantityComparisonManufacturingRows,
+  getQuantityComparisonMaterialRows,
   getRowCostingMethod,
   getRowManufacturingCostingMethod,
   type FlattenedBomRow,
@@ -74,6 +76,7 @@ import BomPrintDocument from "@/components/documents/bom/bom-print-document";
 import BomNoCostPrintDocument from "@/components/documents/bom/bom-no-cost-print-document";
 import BomZeroPricePrintDocument from "@/components/documents/bom/bom-zero-price-print-document";
 import BomAllCostingPrintDocument from "@/components/documents/bom/bom-all-costing-print-document";
+import BomQuantityComparisonPrintDocument from "@/components/documents/bom/bom-quantity-comparison-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import Modal from "@/components/ui/modal";
 import CopyButton from "@/components/ui/copy-button";
@@ -95,7 +98,7 @@ type DepartmentBreakdown = {
   items: FlattenedBomRow[];
 };
 
-type BomPrintVariant = "full" | "no-cost" | "zero-price" | "all-costing";
+type BomPrintVariant = "full" | "no-cost" | "zero-price" | "all-costing" | "quantity-comparison";
 
 export default function Page() {
   const { locale, translate, translation } = useI18n();
@@ -444,6 +447,55 @@ export default function Page() {
     return rows;
   }, [materialRows, totals.totalMaterialCost, translate, locale, costingMethod, itemCostingOverrides]);
 
+  const comparisonMaterialRows = useMemo(() => getQuantityComparisonMaterialRows(bomItems), [bomItems]);
+  const comparisonManufacturingRows = useMemo(() => {
+    const rows = getQuantityComparisonManufacturingRows(bomItems);
+
+    return [...rows].sort(
+      (a, b) =>
+        compareProductionSubDepartments(a.productionSubDepartment, b.productionSubDepartment) ||
+        a.materialTitle.localeCompare(b.materialTitle, locale) ||
+        a.materialCode.localeCompare(b.materialCode, locale),
+    );
+  }, [bomItems, locale]);
+
+  const comparisonDepartmentBreakdown = useMemo(() => {
+    const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
+    const groups = new Map<string, { departmentId: string; title: string; itemCount: number; items: typeof comparisonMaterialRows }>();
+
+    for (const item of comparisonMaterialRows) {
+      const department = item.productionSubDepartment;
+      const departmentId = department ?? UNCATEGORIZED_ID;
+      const title = department ? getProductionSubDepartmentLabel(department, locale) : uncategorizedTitle;
+
+      const existing = groups.get(departmentId);
+      if (existing) {
+        existing.itemCount += 1;
+        existing.items.push(item);
+      } else {
+        groups.set(departmentId, {
+          departmentId,
+          title,
+          itemCount: 1,
+          items: [item],
+        });
+      }
+    }
+
+    const rows = Array.from(groups.values()).map((group) => ({
+      ...group,
+      items: [...group.items].sort(
+        (a, b) =>
+          Number(a.noLongerUsed) - Number(b.noLongerUsed) ||
+          a.material.title.localeCompare(b.material.title, locale) ||
+          a.material.code.localeCompare(b.material.code, locale),
+      ),
+    }));
+
+    rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
+    return rows;
+  }, [comparisonMaterialRows, translate, locale]);
+
   const currency = translation.currency;
 
   const productSubCategory = bom ? productCategoryHelpers.getProductCategorySubById(bom.product.subCategoryId) : null;
@@ -605,6 +657,14 @@ export default function Page() {
                       >
                         {translate("Print BOM with All Costing Methods", "طباعة قائمة المواد بكل أسس التكلفة")}
                       </Menu.Item>
+                      <Menu.Item
+                        leftSection={<Printer size={14} />}
+                        onClick={() => {
+                          void triggerPrint("quantity-comparison");
+                        }}
+                      >
+                        {translate("Print Quantity Comparison", "طباعة مقارنة الكميات")}
+                      </Menu.Item>
                       {zeroPriceItemCount > 0 && (
                         <Menu.Item
                           leftSection={<Printer size={14} />}
@@ -663,7 +723,9 @@ export default function Page() {
                         ? `${translate("BOM without Costs", "قائمة المواد بدون تكاليف")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                         : printVariant === "all-costing"
                           ? `${translate("BOM All Costing Methods", "قائمة المواد بكل أسس التكلفة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
-                          : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                          : printVariant === "quantity-comparison"
+                            ? `${translate("BOM Quantity Comparison", "مقارنة كميات قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                            : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                   }
                   renderTrigger={({ onClick }) => {
                     printHandlerRef.current = onClick;
@@ -672,8 +734,8 @@ export default function Page() {
                   onBeforePrint={async () => {
                     await new Promise((resolve) => setTimeout(resolve, 0));
                   }}
-                  paperWidth={printVariant === "all-costing" ? 297 : 210}
-                  paperHeight={printVariant === "all-costing" ? 210 : 297}
+                  paperWidth={printVariant === "all-costing" || printVariant === "quantity-comparison" ? 297 : 210}
+                  paperHeight={printVariant === "all-costing" || printVariant === "quantity-comparison" ? 210 : 297}
                 >
                   {printVariant === "full" ? (
                     <BomPrintDocument
@@ -705,6 +767,16 @@ export default function Page() {
                       manufacturingItemCount={totals.manufacturingItemCount}
                       itemCount={totals.itemCount}
                       quantityMode={quantityMode}
+                    />
+                  ) : printVariant === "quantity-comparison" ? (
+                    <BomQuantityComparisonPrintDocument
+                      bom={bom}
+                      departmentBreakdown={comparisonDepartmentBreakdown}
+                      manufacturingRows={comparisonManufacturingRows}
+                      mainCategoryTitle={productMainCategory?.title || null}
+                      costingMethod={costingMethod}
+                      itemCostingOverrides={itemCostingOverrides}
+                      manufacturingCostingOverrides={manufacturingCostingOverrides}
                     />
                   ) : (
                     <BomZeroPricePrintDocument
