@@ -141,4 +141,22 @@ const ICONS: Record<ProductionSubDepartment, React.ReactNode> = {
       <rect x="40" y="16" width="8" height="20" rx="2" fill="#F06A26" />
     </>
   ),
+  finishing: (
+    <>
+      <rect x="12" y="18" width="40" height="28" rx="4" fill="#017E84" />
+      <rect x="18" y="24" width="16" height="4" rx="1" fill="white" opacity="0.5" />
+      <rect x="18" y="32" width="24" height="4" rx="1" fill="white" opacity="0.35" />
+      <circle cx="44" cy="44" r="10" fill="#F3CC45" />
+      <path d="M40 44 L43 47 L50 38" stroke="#714B67" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  external_installations: (
+    <>
+      <rect x="10" y="28" width="20" height="24" rx="3" fill="#714B67" />
+      <rect x="34" y="16" width="20" height="36" rx="3" fill="#017E84" />
+      <rect x="14" y="18" width="12" height="8" rx="2" fill="#F06A26" />
+      <circle cx="20" cy="36" r="4" fill="#F3CC45" />
+      <circle cx="44" cy="28" r="4" fill="#F3CC45" />
+    </>
+  ),
 };

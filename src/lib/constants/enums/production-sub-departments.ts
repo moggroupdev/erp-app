@@ -16,6 +16,8 @@ export const PRODUCTION_SUB_DEPARTMENT_VALUES = [
   "paints",
   "blacksmithing",
   "turning",
+  "finishing",
+  "external_installations",
 ] as const;
 
 export type ProductionSubDepartment = (typeof PRODUCTION_SUB_DEPARTMENT_VALUES)[number];
@@ -127,6 +129,20 @@ export const PRODUCTION_SUB_DEPARTMENT_LABELS: LocalizedEntity<ProductionSubDepa
       ar: "قسم الخراطة",
     },
   },
+  finishing: {
+    value: "finishing",
+    label: {
+      en: "Finishing Dep.",
+      ar: "قسم التشطيب",
+    },
+  },
+  external_installations: {
+    value: "external_installations",
+    label: {
+      en: "External Installations Dep.",
+      ar: "قسم التركيبات الخارجية",
+    },
+  },
 };
 
 export const PRODUCTION_SUB_DEPARTMENT_LABELS_LIST = Object.values(PRODUCTION_SUB_DEPARTMENT_LABELS);
@@ -147,6 +163,8 @@ export const PRODUCTION_SUB_DEPARTMENT_SORT_RANKS: Record<ProductionSubDepartmen
   refrigeration: 5,
   paints: 6,
   blacksmithing: 6,
+  finishing: 7,
+  external_installations: 7,
 };
 
 const PRODUCTION_SUB_DEPARTMENT_SORT_INDEX: Record<ProductionSubDepartment, number> = Object.fromEntries(
@@ -214,6 +232,8 @@ export const PRODUCTION_SUB_DEPARTMENT_KIND_BY_DEPARTMENT: Record<ProductionSubD
     gas: "service",
     paints: "service",
     blacksmithing: "service",
+    finishing: "service",
+    external_installations: "service",
   };
 
 export const PRODUCTION_KIND_PRODUCTION_SUB_DEPARTMENT_VALUES = PRODUCTION_SUB_DEPARTMENT_VALUES.filter(

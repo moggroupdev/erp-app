@@ -95,6 +95,7 @@ export default function OrderInvoicesSection({
 }: OrderInvoicesSectionProps) {
   const { locale, translate, translation } = useI18n();
   const resetFileRef = useRef<() => void>(null);
+  const openFilePickerRef = useRef<(() => void) | null>(null);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [parsed, setParsed] = useState<ParsedSupplierInvoice | null>(null);
@@ -141,15 +142,24 @@ export default function OrderInvoicesSection({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h4 className="text-lg font-semibold text-gray-900">{translate("Invoices", "الفواتير")}</h4>
 
+        {showUpload && (
+          // The input must stay mounted. The menu dropdown unmounts on close and would drop the selected file.
+          <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
+            {(props) => {
+              openFilePickerRef.current = props.onClick;
+              return null;
+            }}
+          </FileButton>
+        )}
         <ActionsMenu>
           {showUpload && (
-            <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
-              {(props) => (
-                <Menu.Item {...props} leftSection={<Upload size={14} />} disabled={isParsing}>
-                  {translate("Upload invoice", "رفع فاتورة")}
-                </Menu.Item>
-              )}
-            </FileButton>
+            <Menu.Item
+              leftSection={<Upload size={14} />}
+              disabled={isParsing}
+              onClick={() => openFilePickerRef.current?.()}
+            >
+              {translate("Upload invoice", "رفع فاتورة")}
+            </Menu.Item>
           )}
         </ActionsMenu>
       </div>
