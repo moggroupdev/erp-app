@@ -30,6 +30,7 @@ export const PERMISSION_VALUES = [
   "update_customer",
   "read_contracts",
   "add_legacy_contract",
+  "update_legacy_contract",
   "add_material",
   "read_materials",
   "update_material",
@@ -423,6 +424,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Add Legacy Contract Review",
       ar: "إضافة مراجعة عقد مرحلية",
+    },
+  },
+  update_legacy_contract: {
+    value: "update_legacy_contract",
+    label: {
+      en: "Update Legacy Contract Review",
+      ar: "تعديل مراجعة عقد مرحلية",
     },
   },
   read_receptions: {
@@ -880,7 +888,14 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
     domain: "sales",
     label: { en: "Sales & Customers", ar: "المبيعات والعملاء" },
     // Nav placeholders (read_inquiries, read_previews, …) are omitted; not assignable via role APIs yet.
-    permissions: ["add_customer", "read_customers", "update_customer", "read_contracts", "add_legacy_contract"],
+    permissions: [
+      "add_customer",
+      "read_customers",
+      "update_customer",
+      "read_contracts",
+      "add_legacy_contract",
+      "update_legacy_contract",
+    ],
   },
   {
     domain: "engineering",

@@ -5,9 +5,11 @@ import type {
   ContractListItem,
   CreatedLegacyContract,
   CreateLegacyContractDto,
+  UpdateLegacyContractDto,
   ValidateLegacyContractDto,
   ValidateLegacyContractItemsDto,
   ValidateLegacyContractUnitsDto,
+  ValidateUpdateLegacyContractUnitsDto,
 } from "@/types/contract";
 
 const contractsApi = {
@@ -34,17 +36,26 @@ const contractsApi = {
     privateRequest: PrivateRequest;
     dto: ValidateLegacyContractDto;
   }) {
-    return await privateRequest<{ ok: true }>({ method: "POST", url: "contracts/legacy/validate-contract", data: dto });
+    const { contractId, ...body } = dto;
+    const url = contractId
+      ? `contracts/legacy/${contractId}/validate-contract`
+      : "contracts/legacy/validate-contract";
+    return await privateRequest<{ ok: true }>({ method: "POST", url, data: body });
   },
 
   async validateLegacyItems({
     privateRequest,
     dto,
+    contractId,
   }: {
     privateRequest: PrivateRequest;
     dto: ValidateLegacyContractItemsDto;
+    contractId?: string;
   }) {
-    return await privateRequest<{ ok: true }>({ method: "POST", url: "contracts/legacy/validate-items", data: dto });
+    const url = contractId
+      ? `contracts/legacy/${contractId}/validate-items`
+      : "contracts/legacy/validate-items";
+    return await privateRequest<{ ok: true }>({ method: "POST", url, data: dto });
   },
 
   async validateLegacyUnits({
@@ -52,13 +63,29 @@ const contractsApi = {
     dto,
   }: {
     privateRequest: PrivateRequest;
-    dto: ValidateLegacyContractUnitsDto;
+    dto: ValidateLegacyContractUnitsDto | ValidateUpdateLegacyContractUnitsDto;
   }) {
-    return await privateRequest<{ ok: true }>({ method: "POST", url: "contracts/legacy/validate-units", data: dto });
+    const { contractId, ...body } = dto;
+    const url = contractId
+      ? `contracts/legacy/${contractId}/validate-units`
+      : "contracts/legacy/validate-units";
+    return await privateRequest<{ ok: true }>({ method: "POST", url, data: body });
   },
 
   async createLegacy({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateLegacyContractDto }) {
     return await privateRequest<CreatedLegacyContract>({ method: "POST", url: "contracts/legacy", data: dto });
+  },
+
+  async updateLegacy({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: UpdateLegacyContractDto;
+  }) {
+    return await privateRequest<CreatedLegacyContract>({ method: "PATCH", url: `contracts/legacy/${id}`, data: dto });
   },
 };
 

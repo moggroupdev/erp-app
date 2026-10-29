@@ -1,10 +1,16 @@
 import type { ProductDimension } from "@/types/product";
 import { PRODUCT_SOURCE_TYPES, type ProductSourceType } from "@/lib/constants/enums/product-source-types";
-import { dateOnlyToTwoPmIso } from "@/lib/helpers/datetime-picker";
-import type { CreateLegacyContractDto } from "@/types/contract";
+import { dateOnlyToTwoPmIso, toDatePickerValue } from "@/lib/helpers/datetime-picker";
+import type {
+  ContractDetailed,
+  ContractItem,
+  CreateLegacyContractDto,
+  UpdateLegacyContractDto,
+} from "@/types/contract";
 
 export type UnitDraft = {
   key: string;
+  id?: string;
   serialNumber: string;
   supplierSerialNumber: string;
   producedAt: string | null;
@@ -12,6 +18,7 @@ export type UnitDraft = {
 
 export type ItemDraft = {
   key: string;
+  id?: string;
   productCode: string | null;
   productTitle: string;
   sourceType: ProductSourceType | null;
@@ -22,6 +29,18 @@ export type ItemDraft = {
   quantity: number | "";
   notes: string;
   units: UnitDraft[];
+};
+
+export type LegacyFormInitial = {
+  customerId: string;
+  customerName: string;
+  customerCode: string;
+  legacyNumber: string;
+  legacyWorkOrderNumber: string;
+  createdAt: string | null;
+  startedAt: string | null;
+  deliveryTime: string | null;
+  items: ItemDraft[];
 };
 
 type Translate = (en: string, ar: string) => string;
@@ -235,7 +254,7 @@ export function getMaxReachableLegacyStep(
   return 3;
 }
 
-export function buildLegacyContractDto(input: {
+type LegacyContractDtoInput = {
   customerId: string;
   legacyNumber: string;
   legacyWorkOrderNumber: string;
@@ -243,7 +262,9 @@ export function buildLegacyContractDto(input: {
   startedAt: string;
   deliveryTime: string;
   items: ItemDraft[];
-}): CreateLegacyContractDto {
+};
+
+function legacyContractHeader(input: LegacyContractDtoInput) {
   return {
     customerId: input.customerId,
     legacyNumber: input.legacyNumber.trim(),
@@ -251,6 +272,12 @@ export function buildLegacyContractDto(input: {
     createdAt: dateOnlyToTwoPmIso(input.createdAt)!,
     startedAt: dateOnlyToTwoPmIso(input.startedAt)!,
     deliveryTime: dateOnlyToTwoPmIso(input.deliveryTime)!,
+  };
+}
+
+export function buildLegacyContractDto(input: LegacyContractDtoInput): CreateLegacyContractDto {
+  return {
+    ...legacyContractHeader(input),
     items: input.items.map((item) => ({
       productDimensionId: item.productDimensionId!,
       title: item.title.trim() || null,
@@ -263,5 +290,124 @@ export function buildLegacyContractDto(input: {
         producedAt: dateOnlyToTwoPmIso(unit.producedAt),
       })),
     })),
+  };
+}
+
+export function buildUpdateLegacyContractDto(input: LegacyContractDtoInput): UpdateLegacyContractDto {
+  return {
+    ...legacyContractHeader(input),
+    items: input.items.map((item) => ({
+      ...(item.id ? { id: item.id } : {}),
+      productDimensionId: item.productDimensionId!,
+      title: item.title.trim() || null,
+      unitPrice: item.unitPrice === "" ? null : Number(item.unitPrice),
+      quantity: Number(item.quantity),
+      notes: item.notes.trim() || null,
+      units: item.units.map((unit) => ({
+        ...(unit.id ? { id: unit.id } : {}),
+        serialNumber: unit.serialNumber.trim(),
+        supplierSerialNumber: isImportedSource(item.sourceType) ? unit.supplierSerialNumber.trim() || null : null,
+        producedAt: dateOnlyToTwoPmIso(unit.producedAt),
+      })),
+    })),
+  };
+}
+
+export function legacyFormSnapshot(input: {
+  customerId: string | null;
+  legacyNumber: string;
+  legacyWorkOrderNumber: string;
+  createdAt: string | null;
+  startedAt: string | null;
+  deliveryTime: string | null;
+  items: ItemDraft[];
+}) {
+  return JSON.stringify({
+    customerId: input.customerId,
+    legacyNumber: input.legacyNumber.trim(),
+    legacyWorkOrderNumber: input.legacyWorkOrderNumber.trim(),
+    createdAt: input.createdAt,
+    startedAt: input.startedAt,
+    deliveryTime: input.deliveryTime,
+    items: input.items.map((item) => ({
+      id: item.id ?? null,
+      productCode: item.productCode,
+      productDimensionId: item.productDimensionId,
+      title: item.title.trim(),
+      unitPrice: item.unitPrice,
+      quantity: item.quantity,
+      notes: item.notes.trim(),
+      units: item.units.map((unit) => ({
+        id: unit.id ?? null,
+        serialNumber: unit.serialNumber.trim(),
+        supplierSerialNumber: unit.supplierSerialNumber.trim(),
+        producedAt: unit.producedAt,
+      })),
+    })),
+  });
+}
+
+export function toLegacyFormInitial(
+  contract: ContractDetailed,
+  productsByCode: Map<string, { title: string; sourceType: ProductSourceType; dimensions: ProductDimension[] }>,
+): LegacyFormInitial {
+  const activeItems = contract.items.filter((item) => !item.cancelledAt);
+  return {
+    customerId: contract.customer.id,
+    customerName: contract.customer.name,
+    customerCode: contract.customer.code,
+    legacyNumber: contract.legacyNumber ?? "",
+    legacyWorkOrderNumber: contract.legacyWorkOrderNumber ?? "",
+    createdAt: toDatePickerValue(contract.createdAt),
+    startedAt: contract.startedAt ? toDatePickerValue(contract.startedAt) : null,
+    deliveryTime: contract.deliveryTime ? toDatePickerValue(contract.deliveryTime) : null,
+    items: activeItems.length > 0 ? activeItems.map((item) => toItemDraftFromContract(item, productsByCode)) : [createEmptyItem()],
+  };
+}
+
+function toItemDraftFromContract(
+  item: ContractItem,
+  productsByCode: Map<string, { title: string; sourceType: ProductSourceType; dimensions: ProductDimension[] }>,
+): ItemDraft {
+  const product = productsByCode.get(item.productCode);
+  const dimensions = [...(product?.dimensions ?? [])];
+  if (!dimensions.some((dimension) => dimension.id === item.productDimension.id)) {
+    dimensions.push({
+      id: item.productDimension.id,
+      productCode: item.productCode,
+      length: item.productDimension.length,
+      depth: item.productDimension.depth,
+      diameter: item.productDimension.diameter,
+      height: item.productDimension.height,
+      isDefault: false,
+      notes: null,
+      createdAt: new Date(),
+      createdBy: "",
+    });
+  }
+
+  const units = item.productUnits.filter((unit) => !unit.cancelledAt);
+  return {
+    key: item.id,
+    id: item.id,
+    productCode: item.productCode,
+    productTitle: product?.title ?? item.product.title,
+    sourceType: product?.sourceType ?? null,
+    dimensions,
+    productDimensionId: item.productDimension.id,
+    title: item.title ?? "",
+    unitPrice: item.unitPrice ?? "",
+    quantity: item.quantity,
+    notes: item.notes ?? "",
+    units:
+      units.length > 0
+        ? units.map((unit) => ({
+            key: unit.id,
+            id: unit.id,
+            serialNumber: unit.serialNumber,
+            supplierSerialNumber: unit.supplierSerialNumber ?? "",
+            producedAt: unit.producedAt ? toDatePickerValue(unit.producedAt) : null,
+          }))
+        : unitsForQuantity([], item.quantity),
   };
 }

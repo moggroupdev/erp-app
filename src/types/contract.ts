@@ -75,14 +75,35 @@ export type CreateLegacyContractDto = {
   items: CreateLegacyContractItemDto[];
 };
 
-export type ValidateLegacyContractDto = Omit<CreateLegacyContractDto, "items">;
+export type UpdateLegacyContractUnitDto = CreateLegacyContractUnitDto & {
+  id?: string;
+};
+
+export type UpdateLegacyContractItemDto = Omit<CreateLegacyContractItemDto, "units"> & {
+  id?: string;
+  units: UpdateLegacyContractUnitDto[];
+};
+
+export type UpdateLegacyContractDto = Omit<CreateLegacyContractDto, "items"> & {
+  items: UpdateLegacyContractItemDto[];
+};
+
+export type ValidateLegacyContractDto = Omit<CreateLegacyContractDto, "items"> & {
+  contractId?: string;
+};
 
 export type ValidateLegacyContractItemsDto = {
   items: { productDimensionId: string }[];
 };
 
 export type ValidateLegacyContractUnitsDto = {
+  contractId?: string;
   items: CreateLegacyContractItemDto[];
+};
+
+export type ValidateUpdateLegacyContractUnitsDto = {
+  contractId?: string;
+  items: UpdateLegacyContractItemDto[];
 };
 
 export type CreatedLegacyContract = {
