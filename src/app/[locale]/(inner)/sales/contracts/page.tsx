@@ -27,7 +27,6 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { formatMoney } from "@/lib/helpers/format-money";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
@@ -37,7 +36,7 @@ const PAGE_TITLE = { en: "Contract Reviews", ar: "مراجعات العقود" }
 const PAGE_SIZE = 25;
 
 export default function Page() {
-  const { locale, translate, translation } = useI18n();
+  const { locale, translate } = useI18n();
   const canCreateLegacyContract = useHasPermission(PERMISSIONS.ADD_LEGACY_CONTRACT);
   const getLocalizedHref = useLocaleHref();
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
@@ -167,7 +166,6 @@ export default function Page() {
                     <Table.Th>{translate("Customer", "العميل")}</Table.Th>
                     <Table.Th>{translate("Legacy number", "رقم مراجعة العقد")}</Table.Th>
                     <Table.Th>{translate("Work order number", "رقم أمر الشغل")}</Table.Th>
-                    <Table.Th>{translate(`Total (${translation.currency})`, `الإجمالي (${translation.currency})`)}</Table.Th>
                     <Table.Th>{translate("Created at", "تاريخ الإنشاء")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -200,9 +198,6 @@ export default function Page() {
                       </Table.Td>
                       <Table.Td className="font-mono">
                         {contract.legacyWorkOrderNumber ? contract.legacyWorkOrderNumber : <EmptyValue />}
-                      </Table.Td>
-                      <Table.Td>
-                        {contract.totalAmount == null ? <EmptyValue /> : formatMoney(contract.totalAmount)}
                       </Table.Td>
                       <Table.Td>{formatDateAndTime(contract.createdAt, locale)}</Table.Td>
                     </Table.Tr>
