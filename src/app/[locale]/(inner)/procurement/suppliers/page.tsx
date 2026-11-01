@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -20,8 +20,7 @@ import { type Supplier } from "@/types/supplier";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Ban, Pencil, Plus, Search, Undo2, X } from "lucide-react";
-import BlacklistConfirmModal from "@/components/ui/blacklist-confirm-modal";
+import { Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -51,7 +50,6 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
-  const queryClient = useQueryClient();
   const canPrintSuppliersList = useHasPermission(PERMISSIONS.PRINT_SUPPLIERS_LIST);
   const canAddSupplier = useHasPermission(PERMISSIONS.ADD_SUPPLIER);
 
@@ -133,36 +131,11 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [supplierToUpdate, setSupplierToUpdate] = useState<Supplier | null>(null);
-  const [blacklistConfirmOpened, { open: openBlacklistConfirm, close: closeBlacklistConfirm }] = useDisclosure(false);
-  const [blacklistTarget, setBlacklistTarget] = useState<Supplier | null>(null);
 
   function handleOpenUpdateModal(supplier: Supplier) {
     setSupplierToUpdate(supplier);
     openModal();
   }
-
-  function handleOpenBlacklistConfirm(supplier: Supplier) {
-    blacklistMutation.reset();
-    setBlacklistTarget(supplier);
-    openBlacklistConfirm();
-  }
-
-  function handleCloseBlacklistConfirm() {
-    closeBlacklistConfirm();
-    setBlacklistTarget(null);
-    blacklistMutation.reset();
-  }
-
-  const blacklistMutation = useMutation({
-    mutationFn: ({ id, action }: { id: string; action: "add" | "remove" }) =>
-      action === "add"
-        ? suppliersApi.addToBlacklist({ privateRequest, id })
-        : suppliersApi.removeFromBlacklist({ privateRequest, id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.suppliers.all });
-      handleCloseBlacklistConfirm();
-    },
-  });
 
   return (
     <LayoutBox
@@ -190,6 +163,16 @@ export default function Page() {
                   {translate("Add New Supplier", "إضافة مورد جديد")}
                 </Menu.Item>
               )}
+              {(canPrintSuppliersList || canAddSupplier) && <Menu.Divider />}
+              <Menu.Item closeMenuOnClick={false} onClick={() => setBlacklistedFilter((current) => !current)}>
+                <Checkbox
+                  checked={blacklistedFilter}
+                  readOnly
+                  label={translate("Blacklisted", "القائمة السوداء")}
+                  radius="md"
+                  className="pointer-events-none"
+                />
+              </Menu.Item>
             </ActionsMenu>
           </div>
         ),
@@ -220,15 +203,6 @@ export default function Page() {
           searchable
           clearable
         />
-
-        <div className="col-span-1 flex items-center md:col-span-4">
-          <Checkbox
-            checked={blacklistedFilter}
-            onChange={(e) => setBlacklistedFilter(e.currentTarget.checked)}
-            label={translate("Blacklisted", "القائمة السوداء")}
-            radius="md"
-          />
-        </div>
       </div>
 
       {isFetching ? (
@@ -290,34 +264,18 @@ export default function Page() {
                       <Table.Td>{supplier.email || "-"}</Table.Td>
                       <Table.Td>{formatDateAndTime(supplier.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>
-                        <div className="flex items-center gap-1.5">
-                          {!blacklistedFilter && (
-                            <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
-                              <button
-                                type="button"
-                                onClick={() => handleOpenUpdateModal(supplier)}
-                                className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
-                                title={translate("Edit supplier", "تعديل المورد")}
-                              >
-                                <Pencil size={14} />
-                              </button>
-                            </PermissionGuard>
-                          )}
+                        {!blacklistedFilter && (
                           <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
                             <button
                               type="button"
-                              onClick={() => handleOpenBlacklistConfirm(supplier)}
+                              onClick={() => handleOpenUpdateModal(supplier)}
                               className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
-                              title={
-                                blacklistedFilter
-                                  ? translate("Remove from blacklist", "إزالة من القائمة السوداء")
-                                  : translate("Add to blacklist", "إضافة إلى القائمة السوداء")
-                              }
+                              title={translate("Edit supplier", "تعديل المورد")}
                             >
-                              {blacklistedFilter ? <Undo2 size={14} /> : <Ban size={14} />}
+                              <Pencil size={14} />
                             </button>
                           </PermissionGuard>
-                        </div>
+                        )}
                       </Table.Td>
                     </Table.Tr>
                   ))}
@@ -343,22 +301,6 @@ export default function Page() {
         onSuccess={() => {
           if (!supplierToUpdate && hasActiveFilters) resetAllFilters();
         }}
-      />
-
-      <BlacklistConfirmModal
-        opened={blacklistConfirmOpened}
-        onClose={handleCloseBlacklistConfirm}
-        action={blacklistedFilter ? "remove" : "add"}
-        name={blacklistTarget?.name || ""}
-        onConfirm={() => {
-          if (!blacklistTarget) return;
-          blacklistMutation.mutate({
-            id: blacklistTarget.id,
-            action: blacklistedFilter ? "remove" : "add",
-          });
-        }}
-        isPending={blacklistMutation.isPending}
-        error={blacklistMutation.error ? getErrorMessage(locale, blacklistMutation.error) : undefined}
       />
     </LayoutBox>
   );
