@@ -46,6 +46,14 @@ const suppliersApi = {
     return await privateRequest<Supplier>({ method: "PUT", url: `suppliers/${id}`, data: dto });
   },
 
+  async addToBlacklist({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<Supplier>({ method: "PUT", url: `suppliers/${id}/blacklist` });
+  },
+
+  async removeFromBlacklist({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<Supplier>({ method: "DELETE", url: `suppliers/${id}/blacklist` });
+  },
+
   // ========================= Addresses =========================
 
   async addAddress({

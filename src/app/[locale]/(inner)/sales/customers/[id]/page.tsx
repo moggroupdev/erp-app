@@ -13,7 +13,8 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Menu } from "@mantine/core";
-import { MapPin, Pencil, UserRound } from "lucide-react";
+import { Ban, MapPin, Pencil, Undo2, UserRound } from "lucide-react";
+import BlacklistConfirmModal from "@/components/ui/blacklist-confirm-modal";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
@@ -58,6 +59,8 @@ export default function Page() {
   const customer = customerQuery.data || null;
   const addresses = addressesQuery.data || [];
   const contactPersons = contactPersonsQuery.data || [];
+  const isBlacklisted = !!customer?.blacklistedAt;
+  const canEditCustomer = canUpdateCustomer && !isBlacklisted;
 
   const loading = customerQuery.isFetching || addressesQuery.isFetching || contactPersonsQuery.isFetching;
   const queryError = customerQuery.error || addressesQuery.error || contactPersonsQuery.error;
@@ -86,6 +89,28 @@ export default function Page() {
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] = useDisclosure(false);
   const [contactModalOpened, { open: openContactModal, close: closeContactModal }] = useDisclosure(false);
+  const [blacklistConfirmOpened, { open: openBlacklistConfirm, close: closeBlacklistConfirm }] = useDisclosure(false);
+
+  function handleOpenBlacklistConfirm() {
+    blacklistMutation.reset();
+    openBlacklistConfirm();
+  }
+
+  function handleCloseBlacklistConfirm() {
+    closeBlacklistConfirm();
+    blacklistMutation.reset();
+  }
+
+  const blacklistMutation = useMutation({
+    mutationFn: () =>
+      isBlacklisted
+        ? customersApi.removeFromBlacklist({ privateRequest, id })
+        : customersApi.addToBlacklist({ privateRequest, id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
+      handleCloseBlacklistConfirm();
+    },
+  });
 
   return (
     <LayoutBox
@@ -96,9 +121,20 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
             <ActionsMenu>
-              {customer && canUpdateCustomer && (
+              {customer && canEditCustomer && (
                 <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
                   {translate("Edit customer", "تعديل العميل")}
+                </Menu.Item>
+              )}
+              {customer && canUpdateCustomer && (
+                <Menu.Item
+                  color={isBlacklisted ? undefined : "clay"}
+                  leftSection={isBlacklisted ? <Undo2 size={14} /> : <Ban size={14} />}
+                  onClick={handleOpenBlacklistConfirm}
+                >
+                  {isBlacklisted
+                    ? translate("Remove from blacklist", "إزالة من القائمة السوداء")
+                    : translate("Add to blacklist", "إضافة إلى القائمة السوداء")}
                 </Menu.Item>
               )}
             </ActionsMenu>
@@ -140,7 +176,7 @@ export default function Page() {
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Addresses", "العناوين")}</h4>
 
                 <ActionsMenu>
-                  {canUpdateCustomer && (
+                  {canEditCustomer && (
                     <Menu.Item leftSection={<MapPin size={14} />} onClick={openAddressModal}>
                       {translate("Add new address", "إضافة عنوان جديد")}
                     </Menu.Item>
@@ -157,7 +193,7 @@ export default function Page() {
                       key={address.id}
                       address={address}
                       onSetDefault={
-                        canUpdateCustomer
+                        canEditCustomer
                           ? async (addressId) => {
                               await setDefaultAddressMutation.mutateAsync(addressId);
                             }
@@ -182,7 +218,7 @@ export default function Page() {
                 <h4 className="text-lg font-semibold text-gray-900">{translate("Contact Persons", "أشخاص الاتصال")}</h4>
 
                 <ActionsMenu>
-                  {canUpdateCustomer && (
+                  {canEditCustomer && (
                     <Menu.Item leftSection={<UserRound size={14} />} onClick={openContactModal}>
                       {translate("Add contact person", "إضافة شخص اتصال")}
                     </Menu.Item>
@@ -199,7 +235,7 @@ export default function Page() {
                       key={contactPerson.id}
                       contactPerson={contactPerson}
                       onSetPrimary={
-                        canUpdateCustomer
+                        canEditCustomer
                           ? async (contactPersonId) => {
                               await setPrimaryContactMutation.mutateAsync(contactPersonId);
                             }
@@ -212,6 +248,18 @@ export default function Page() {
             </section>
           </>
         )
+      )}
+
+      {customer && (
+        <BlacklistConfirmModal
+          opened={blacklistConfirmOpened}
+          onClose={handleCloseBlacklistConfirm}
+          action={isBlacklisted ? "remove" : "add"}
+          name={customer.name}
+          onConfirm={() => blacklistMutation.mutate()}
+          isPending={blacklistMutation.isPending}
+          error={blacklistMutation.error ? getErrorMessage(locale, blacklistMutation.error) : undefined}
+        />
       )}
     </LayoutBox>
   );

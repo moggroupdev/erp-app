@@ -3,7 +3,7 @@
 import ProtectedLink from "@/components/ui/protected-link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
 import { useI18n } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -19,9 +19,10 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Customer } from "@/types/customer";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { Menu, Table, TextInput } from "@mantine/core";
+import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Pencil, Plus, Search, X } from "lucide-react";
+import { Ban, Pencil, Plus, Search, Undo2, X } from "lucide-react";
+import BlacklistConfirmModal from "@/components/ui/blacklist-confirm-modal";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -47,6 +48,7 @@ export default function Page() {
   const router = useRouter();
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
+  const queryClient = useQueryClient();
   const canAddCustomer = useHasPermission(PERMISSIONS.ADD_CUSTOMER);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
@@ -59,26 +61,30 @@ export default function Page() {
   const [classificationFilter, setClassificationFilter] = useState<string | null>(
     urlSearchParams.get("classification") || null,
   );
+  const [blacklistedFilter, setBlacklistedFilter] = useState(urlSearchParams.get("blacklisted") === "true");
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
     classification: classificationFilter,
+    blacklisted: blacklistedFilter ? "true" : "",
   };
 
   const params = { limit: CUSTOMERS_PER_PAGE, ...removeEmptyParams(urlParams) };
 
-  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || classificationFilter);
+  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || classificationFilter || blacklistedFilter);
 
   const resetAllFilters = () => {
     setActivePage(1);
     setImmediateKeyword("");
     setClassificationFilter(null);
+    setBlacklistedFilter(false);
   };
 
   const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
     debouncedKeyword,
     classificationFilter,
+    blacklistedFilter,
   });
 
   const {
@@ -98,7 +104,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword, classificationFilter };
+    const newFilters = { debouncedKeyword, classificationFilter, blacklistedFilter };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -109,17 +115,42 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword, classificationFilter]);
+  }, [activePage, debouncedKeyword, classificationFilter, blacklistedFilter]);
 
   // ========================= MODALS =========================
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [customerToUpdate, setCustomerToUpdate] = useState<Customer | null>(null);
+  const [blacklistConfirmOpened, { open: openBlacklistConfirm, close: closeBlacklistConfirm }] = useDisclosure(false);
+  const [blacklistTarget, setBlacklistTarget] = useState<Customer | null>(null);
 
   function handleOpenUpdateModal(customer: Customer) {
     setCustomerToUpdate(customer);
     openModal();
   }
+
+  function handleOpenBlacklistConfirm(customer: Customer) {
+    blacklistMutation.reset();
+    setBlacklistTarget(customer);
+    openBlacklistConfirm();
+  }
+
+  function handleCloseBlacklistConfirm() {
+    closeBlacklistConfirm();
+    setBlacklistTarget(null);
+    blacklistMutation.reset();
+  }
+
+  const blacklistMutation = useMutation({
+    mutationFn: ({ id, action }: { id: string; action: "add" | "remove" }) =>
+      action === "add"
+        ? customersApi.addToBlacklist({ privateRequest, id })
+        : customersApi.removeFromBlacklist({ privateRequest, id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.customers.all });
+      handleCloseBlacklistConfirm();
+    },
+  });
 
   return (
     <LayoutBox
@@ -165,6 +196,15 @@ export default function Page() {
           searchable
           clearable
         />
+
+        <div className="col-span-1 flex items-center md:col-span-4">
+          <Checkbox
+            checked={blacklistedFilter}
+            onChange={(e) => setBlacklistedFilter(e.currentTarget.checked)}
+            label={translate("Blacklisted", "القائمة السوداء")}
+            radius="md"
+          />
+        </div>
       </div>
 
       {isFetching ? (
@@ -178,7 +218,7 @@ export default function Page() {
       ) : (
         paginatedCustomers &&
         (paginatedCustomers.data.length === 0 ? (
-          debouncedKeyword || classificationFilter ? (
+          debouncedKeyword || classificationFilter || blacklistedFilter ? (
             <NoResultsSection
               keyword={debouncedKeyword || translate("selected filters", "الفلاتر المحددة")}
               button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
@@ -222,14 +262,34 @@ export default function Page() {
                       <Table.Td>{customer.email || "-"}</Table.Td>
                       <Table.Td>{formatDateAndTime(customer.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>
-                        <PermissionGuard permission={PERMISSIONS.UPDATE_CUSTOMER}>
-                          <button
-                            onClick={() => handleOpenUpdateModal(customer)}
-                            className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                        </PermissionGuard>
+                        <div className="flex items-center gap-1.5">
+                          {!blacklistedFilter && (
+                            <PermissionGuard permission={PERMISSIONS.UPDATE_CUSTOMER}>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenUpdateModal(customer)}
+                                className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
+                                title={translate("Edit customer", "تعديل العميل")}
+                              >
+                                <Pencil size={14} />
+                              </button>
+                            </PermissionGuard>
+                          )}
+                          <PermissionGuard permission={PERMISSIONS.UPDATE_CUSTOMER}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenBlacklistConfirm(customer)}
+                              className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
+                              title={
+                                blacklistedFilter
+                                  ? translate("Remove from blacklist", "إزالة من القائمة السوداء")
+                                  : translate("Add to blacklist", "إضافة إلى القائمة السوداء")
+                              }
+                            >
+                              {blacklistedFilter ? <Undo2 size={14} /> : <Ban size={14} />}
+                            </button>
+                          </PermissionGuard>
+                        </div>
                       </Table.Td>
                     </Table.Tr>
                   ))}
@@ -255,6 +315,22 @@ export default function Page() {
         onSuccess={() => {
           if (!customerToUpdate && hasActiveFilters) resetAllFilters();
         }}
+      />
+
+      <BlacklistConfirmModal
+        opened={blacklistConfirmOpened}
+        onClose={handleCloseBlacklistConfirm}
+        action={blacklistedFilter ? "remove" : "add"}
+        name={blacklistTarget?.name || ""}
+        onConfirm={() => {
+          if (!blacklistTarget) return;
+          blacklistMutation.mutate({
+            id: blacklistTarget.id,
+            action: blacklistedFilter ? "remove" : "add",
+          });
+        }}
+        isPending={blacklistMutation.isPending}
+        error={blacklistMutation.error ? getErrorMessage(locale, blacklistMutation.error) : undefined}
       />
     </LayoutBox>
   );

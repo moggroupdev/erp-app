@@ -36,6 +36,14 @@ const customersApi = {
     return await privateRequest<Customer>({ method: "PUT", url: `customers/${id}`, data: dto });
   },
 
+  async addToBlacklist({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<Customer>({ method: "PUT", url: `customers/${id}/blacklist` });
+  },
+
+  async removeFromBlacklist({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<Customer>({ method: "DELETE", url: `customers/${id}/blacklist` });
+  },
+
   // ========================= Addresses =========================
 
   async addAddress({
