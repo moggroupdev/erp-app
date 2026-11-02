@@ -221,7 +221,6 @@ export default function LegacyContractForm(props: LegacyContractFormProps) {
   async function goToStep(target: number) {
     if (stepValidating || mutation.isPending) return;
     if (target === step || target < 0 || target > 3) return;
-    if (target > maxReachable) return;
 
     if (target < step) {
       setStepError(null);
