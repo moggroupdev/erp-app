@@ -23,6 +23,8 @@ type BomNoCostPrintDocumentProps = {
   mainCategoryTitle: string | null;
   totalItemCount: number;
   quantityMode?: "required" | "legacy";
+  departmentTitle?: string | null;
+  omitDepartmentSummary?: boolean;
 };
 
 export default function BomNoCostPrintDocument({
@@ -32,6 +34,8 @@ export default function BomNoCostPrintDocument({
   mainCategoryTitle,
   totalItemCount,
   quantityMode = "required",
+  departmentTitle = null,
+  omitDepartmentSummary = false,
 }: BomNoCostPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
 
@@ -47,6 +51,12 @@ export default function BomNoCostPrintDocument({
             <span>{translate("Bill of Materials", "قائمة المواد")}</span>
             <span> - </span>
             <span>{translate("Without Costs", "بدون تكاليف")}</span>
+            {departmentTitle ? (
+              <>
+                <span> - </span>
+                <span>{departmentTitle}</span>
+              </>
+            ) : null}
             {quantityMode === "legacy" && (
               <>
                 <span> - </span>
@@ -65,10 +75,14 @@ export default function BomNoCostPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-3">
         <PrintDetail label={translate("Dimension", "المقاس")} value={dimensionLabel} />
-        <PrintDetail
-          label={translate("Product Category", "فئة المنتج")}
-          value={mainCategoryTitle || translate("Uncategorized", "غير مصنف")}
-        />
+        {departmentTitle ? (
+          <PrintDetail label={translate("Production Department", "قسم الانتاج")} value={departmentTitle} />
+        ) : (
+          <PrintDetail
+            label={translate("Product Category", "فئة المنتج")}
+            value={mainCategoryTitle || translate("Uncategorized", "غير مصنف")}
+          />
+        )}
         <PrintDetail label={translate("Items Count", "عدد البنود")} value={String(totalItemCount)} />
       </section>
 
@@ -186,33 +200,35 @@ export default function BomNoCostPrintDocument({
         </section>
       )}
 
-      <section className="mt-8 flex flex-col gap-2.5">
-        <h2 className="text-base font-semibold">{translate("Departments Summary", "ملخص الأقسام")}</h2>
-        <table className="w-full border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
-          <thead>
-            <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
-              <th className="text-start whitespace-nowrap">
-                {translate("Production Department", "قسم الانتاج")}
-              </th>
-              <th className="text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {departmentBreakdown.map((group) => (
-              <tr key={group.departmentId} className="border-b border-gray-200">
-                <td className="font-medium">{group.title}</td>
-                <td>{group.itemCount}</td>
+      {!omitDepartmentSummary && (
+        <section className="mt-8 flex flex-col gap-2.5">
+          <h2 className="text-base font-semibold">{translate("Departments Summary", "ملخص الأقسام")}</h2>
+          <table className="w-full border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
+            <thead>
+              <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
+                <th className="text-start whitespace-nowrap">
+                  {translate("Production Department", "قسم الانتاج")}
+                </th>
+                <th className="text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
               </tr>
-            ))}
-            <tr className="border-t border-gray-300 bg-gray-50 font-medium">
-              <td>{translate("Total", "الإجمالي")}</td>
-              <td className="text-gray-600">
-                {totalItemCount} {translate("Items", "بند")}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {departmentBreakdown.map((group) => (
+                <tr key={group.departmentId} className="border-b border-gray-200">
+                  <td className="font-medium">{group.title}</td>
+                  <td>{group.itemCount}</td>
+                </tr>
+              ))}
+              <tr className="border-t border-gray-300 bg-gray-50 font-medium">
+                <td>{translate("Total", "الإجمالي")}</td>
+                <td className="text-gray-600">
+                  {totalItemCount} {translate("Items", "بند")}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      )}
 
       {bom.notes ? (
         <section className="flex flex-col gap-1.5">

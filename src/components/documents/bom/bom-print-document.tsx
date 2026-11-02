@@ -55,6 +55,8 @@ type BomPrintDocumentProps = {
   itemCostingOverrides?: Record<string, ItemCostingMethod>;
   manufacturingCostingOverrides?: Record<string, ManufacturingCostingMethod>;
   quantityMode?: "required" | "legacy";
+  departmentTitle?: string | null;
+  omitDepartmentSummary?: boolean;
 };
 
 export default function BomPrintDocument({
@@ -67,6 +69,8 @@ export default function BomPrintDocument({
   itemCostingOverrides,
   manufacturingCostingOverrides,
   quantityMode = "required",
+  departmentTitle = null,
+  omitDepartmentSummary = false,
 }: BomPrintDocumentProps) {
   const { locale, translate, translation } = useI18n();
 
@@ -80,6 +84,12 @@ export default function BomPrintDocument({
         <div className="flex flex-col gap-1">
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             <span>{translate("Bill of Materials", "قائمة المواد")}</span>
+            {departmentTitle ? (
+              <>
+                <span> - </span>
+                <span>{departmentTitle}</span>
+              </>
+            ) : null}
             {quantityMode === "legacy" && (
               <>
                 <span> - </span>
@@ -98,10 +108,14 @@ export default function BomPrintDocument({
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-4">
         <PrintDetail label={translate("Dimension", "المقاس")} value={dimensionLabel} />
-        <PrintDetail
-          label={translate("Product Category", "فئة المنتج")}
-          value={mainCategoryTitle || translate("Uncategorized", "غير مصنف")}
-        />
+        {departmentTitle ? (
+          <PrintDetail label={translate("Production Department", "قسم الانتاج")} value={departmentTitle} />
+        ) : (
+          <PrintDetail
+            label={translate("Product Category", "فئة المنتج")}
+            value={mainCategoryTitle || translate("Uncategorized", "غير مصنف")}
+          />
+        )}
         <PrintDetail
           label={translate("Grand Total Cost", "إجمالي التكلفة الكلية")}
           value={
@@ -290,41 +304,43 @@ export default function BomPrintDocument({
         </section>
       )}
 
-      <section className="mt-8 flex flex-col gap-2.5">
-        <h2 className="text-base font-semibold">{translate("Departments Summary", "ملخص الأقسام")}</h2>
-        <table className="w-full border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
-          <thead>
-            <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
-              <th className="text-start whitespace-nowrap">{translate("Production Department", "قسم الانتاج")}</th>
-              <th className="text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
-              <th className="text-start whitespace-nowrap">
-                {translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}
-              </th>
-              <th className="text-start whitespace-nowrap">{translate("Share", "الحصة")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {departmentBreakdown.map((group) => (
-              <tr key={group.departmentId} className="border-b border-gray-200">
-                <td className="font-medium">{group.title}</td>
-                <td>{group.itemCount}</td>
-                <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>{formatMoney(group.totalCost)}</td>
-                <ShareCell value={group.sharePercent} />
+      {!omitDepartmentSummary && (
+        <section className="mt-8 flex flex-col gap-2.5">
+          <h2 className="text-base font-semibold">{translate("Departments Summary", "ملخص الأقسام")}</h2>
+          <table className="w-full border-collapse text-[7.5px] [&_td]:px-1.5 [&_td]:py-1.5 [&_th]:px-1.5 [&_th]:py-1.5">
+            <thead>
+              <tr className="border-b border-gray-300 bg-gray-50 text-start text-[7px] font-medium tracking-wide text-gray-500 uppercase">
+                <th className="text-start whitespace-nowrap">{translate("Production Department", "قسم الانتاج")}</th>
+                <th className="text-start whitespace-nowrap">{translate("Items Count", "عدد البنود")}</th>
+                <th className="text-start whitespace-nowrap">
+                  {translate(`Total Price (${translation.currency})`, `السعر الإجمالي (${translation.currency})`)}
+                </th>
+                <th className="text-start whitespace-nowrap">{translate("Share", "الحصة")}</th>
               </tr>
-            ))}
-            <tr className="border-t border-gray-300 bg-gray-50 font-medium">
-              <td>{translate("Total", "الإجمالي")}</td>
-              <td className="text-gray-600">
-                {totals.itemCount} {translate("Items", "بند")}
-              </td>
-              <td className={totals.totalMaterialCost === 0 ? ZERO_VALUE_CLASS : undefined}>
-                {formatMoney(totals.totalMaterialCost)}
-              </td>
-              <ShareCell value={100} className="text-gray-800" />
-            </tr>
-          </tbody>
-        </table>
-      </section>
+            </thead>
+            <tbody>
+              {departmentBreakdown.map((group) => (
+                <tr key={group.departmentId} className="border-b border-gray-200">
+                  <td className="font-medium">{group.title}</td>
+                  <td>{group.itemCount}</td>
+                  <td className={group.totalCost === 0 ? ZERO_VALUE_CLASS : undefined}>{formatMoney(group.totalCost)}</td>
+                  <ShareCell value={group.sharePercent} />
+                </tr>
+              ))}
+              <tr className="border-t border-gray-300 bg-gray-50 font-medium">
+                <td>{translate("Total", "الإجمالي")}</td>
+                <td className="text-gray-600">
+                  {totals.itemCount} {translate("Items", "بند")}
+                </td>
+                <td className={totals.totalMaterialCost === 0 ? ZERO_VALUE_CLASS : undefined}>
+                  {formatMoney(totals.totalMaterialCost)}
+                </td>
+                <ShareCell value={100} className="text-gray-800" />
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      )}
 
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 border-y border-dashed border-gray-300 py-6 text-xs sm:grid-cols-3">
         <PrintDetail
