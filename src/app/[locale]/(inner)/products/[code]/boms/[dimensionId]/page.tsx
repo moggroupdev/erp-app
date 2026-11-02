@@ -19,10 +19,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import {
-  getMmSourcingTypeLabel,
-  isPurchasedMmSourcing,
-} from "@/lib/constants/enums/mm-sourcing-types";
+import { getMmSourcingTypeLabel, isPurchasedMmSourcing } from "@/lib/constants/enums/mm-sourcing-types";
 import {
   compareProductionSubDepartments,
   getProductionSubDepartmentLabel,
@@ -58,7 +55,19 @@ import {
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Button, Checkbox, Divider, Menu, Radio, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Checkbox,
+  Divider,
+  Menu,
+  Radio,
+  SegmentedControl,
+  Table,
+  TextInput,
+  Tooltip,
+} from "@mantine/core";
 import { Calculator, EllipsisVertical, Factory, Layers, Pencil, Plus, Printer, Replace, Trash2, Wallet } from "lucide-react";
 import { useUser } from "@/contexts/user/hook";
 import PermissionGuard from "@/components/guards/permission";
@@ -137,8 +146,7 @@ export default function Page() {
   const [bulkZeroManufacturingCostOpened, { open: openBulkZeroManufacturingCost, close: closeBulkZeroManufacturingCost }] =
     useDisclosure(false);
   const [quantityModeOpened, { open: openQuantityModeModal, close: closeQuantityModeModal }] = useDisclosure(false);
-  const [departmentPrintOpened, { open: openDepartmentPrintModal, close: closeDepartmentPrintModal }] =
-    useDisclosure(false);
+  const [departmentPrintOpened, { open: openDepartmentPrintModal, close: closeDepartmentPrintModal }] = useDisclosure(false);
   const [quantityMode, setQuantityMode] = useState<QuantityDisplayMode>("required");
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
@@ -468,7 +476,10 @@ export default function Page() {
 
   const comparisonDepartmentBreakdown = useMemo(() => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
-    const groups = new Map<string, { departmentId: string; title: string; itemCount: number; items: typeof comparisonMaterialRows }>();
+    const groups = new Map<
+      string,
+      { departmentId: string; title: string; itemCount: number; items: typeof comparisonMaterialRows }
+    >();
 
     for (const item of comparisonMaterialRows) {
       const department = item.productionSubDepartment;
@@ -735,7 +746,7 @@ export default function Page() {
                         {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
                       </Menu.Item>
                       <Menu.Item leftSection={<Printer size={14} />} onClick={handleOpenDepartmentPrint}>
-                        {translate("Print Department BOM", "طباعة قائمة مواد قسم")}
+                        {translate("Print Department BOM", "طباعة قائمة مواد قسم معين")}
                       </Menu.Item>
                       <Menu.Item
                         leftSection={<Printer size={14} />}
@@ -744,14 +755,6 @@ export default function Page() {
                         }}
                       >
                         {translate("Print BOM with All Costing Methods", "طباعة قائمة المواد بكل أسس التكلفة")}
-                      </Menu.Item>
-                      <Menu.Item
-                        leftSection={<Printer size={14} />}
-                        onClick={() => {
-                          void triggerPrint("quantity-comparison");
-                        }}
-                      >
-                        {translate("Print Quantity Comparison", "طباعة مقارنة الكميات")}
                       </Menu.Item>
                       {zeroPriceItemCount > 0 && (
                         <Menu.Item
@@ -763,6 +766,14 @@ export default function Page() {
                           {translate("Print Zero Price Items", "طباعة البنود التي بدون سعر")}
                         </Menu.Item>
                       )}
+                      <Menu.Item
+                        leftSection={<Printer size={14} />}
+                        onClick={() => {
+                          void triggerPrint("quantity-comparison");
+                        }}
+                      >
+                        {translate("Print Quantity Comparison", "طباعة مقارنة الكميات")}
+                      </Menu.Item>
 
                       <Menu.Divider />
                       <Menu.Item leftSection={<Calculator size={14} />} onClick={openQuantityModeModal}>
@@ -983,7 +994,7 @@ export default function Page() {
                                                 >
                                                   {translate("Purchased Manufactured Material", "مادة مصنّعة مشتراة")}
                                                 </Badge>
-                                                </Tooltip>
+                                              </Tooltip>
                                             )}
                                           {item.sourceBomItem?.noLongerUsed && <NoLongerUsedBadge />}
                                         </div>
