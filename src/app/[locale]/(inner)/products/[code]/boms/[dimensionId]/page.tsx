@@ -19,10 +19,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel, formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
-import {
-  getMmSourcingTypeLabel,
-  isPurchasedMmSourcing,
-} from "@/lib/constants/enums/mm-sourcing-types";
+import { getMmSourcingTypeLabel, isPurchasedMmSourcing } from "@/lib/constants/enums/mm-sourcing-types";
 import {
   compareProductionSubDepartments,
   getProductionSubDepartmentLabel,
@@ -58,7 +55,19 @@ import {
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatEnteredQuantityForDisplay, formatQuantity } from "@/lib/helpers/format-quantity";
 import type { BomItemWithMaterial } from "@/types/bom";
-import { ActionIcon, Badge, Button, Divider, Menu, Radio, SegmentedControl, Table, TextInput, Tooltip } from "@mantine/core";
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Checkbox,
+  Divider,
+  Menu,
+  Radio,
+  SegmentedControl,
+  Table,
+  TextInput,
+  Tooltip,
+} from "@mantine/core";
 import { Calculator, EllipsisVertical, Factory, Layers, Pencil, Plus, Printer, Replace, Trash2, Wallet } from "lucide-react";
 import { useUser } from "@/contexts/user/hook";
 import PermissionGuard from "@/components/guards/permission";
@@ -79,6 +88,7 @@ import BomAllCostingPrintDocument from "@/components/documents/bom/bom-all-costi
 import BomQuantityComparisonPrintDocument from "@/components/documents/bom/bom-quantity-comparison-print-document";
 import DeleteModal from "@/components/ui/delete-modal";
 import Modal from "@/components/ui/modal";
+import DataSelect from "@/components/ui/data-select";
 import CopyButton from "@/components/ui/copy-button";
 import BomItemUnitPrice from "./components/bom-item-unit-price";
 import BulkZeroCostingModal from "./components/bulk-zero-costing-modal";
@@ -136,6 +146,7 @@ export default function Page() {
   const [bulkZeroManufacturingCostOpened, { open: openBulkZeroManufacturingCost, close: closeBulkZeroManufacturingCost }] =
     useDisclosure(false);
   const [quantityModeOpened, { open: openQuantityModeModal, close: closeQuantityModeModal }] = useDisclosure(false);
+  const [departmentPrintOpened, { open: openDepartmentPrintModal, close: closeDepartmentPrintModal }] = useDisclosure(false);
   const [quantityMode, setQuantityMode] = useState<QuantityDisplayMode>("required");
   const [itemToUpdate, setItemToUpdate] = useState<BomItemWithMaterial | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BomItemWithMaterial | null>(null);
@@ -146,10 +157,14 @@ export default function Page() {
     Record<string, ManufacturingCostingMethod>
   >({});
   const [printVariant, setPrintVariant] = useState<BomPrintVariant>("full");
+  const [printDepartmentId, setPrintDepartmentId] = useState<string | null>(null);
+  const [departmentPrintDepartmentId, setDepartmentPrintDepartmentId] = useState<string | null>(null);
+  const [departmentPrintIncludePrices, setDepartmentPrintIncludePrices] = useState(true);
   const printHandlerRef = useRef<(() => void) | null>(null);
 
-  const triggerPrint = useCallback(async (variant: BomPrintVariant) => {
+  const triggerPrint = useCallback(async (variant: BomPrintVariant, departmentId: string | null = null) => {
     setPrintVariant(variant);
+    setPrintDepartmentId(departmentId);
     await new Promise((resolve) => setTimeout(resolve, 0));
     printHandlerRef.current?.();
   }, []);
@@ -461,7 +476,10 @@ export default function Page() {
 
   const comparisonDepartmentBreakdown = useMemo(() => {
     const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
-    const groups = new Map<string, { departmentId: string; title: string; itemCount: number; items: typeof comparisonMaterialRows }>();
+    const groups = new Map<
+      string,
+      { departmentId: string; title: string; itemCount: number; items: typeof comparisonMaterialRows }
+    >();
 
     for (const item of comparisonMaterialRows) {
       const department = item.productionSubDepartment;
@@ -495,6 +513,84 @@ export default function Page() {
     rows.sort((a, b) => compareProductionSubDepartments(a.departmentId, b.departmentId));
     return rows;
   }, [comparisonMaterialRows, translate, locale]);
+
+  const departmentPrintOptions = useMemo(() => {
+    const uncategorizedTitle = translate("Uncategorized", "غير مصنف");
+    const byId = new Map<string, string>();
+
+    for (const group of departmentBreakdown) {
+      byId.set(group.departmentId, group.title);
+    }
+
+    for (const row of manufacturingRows) {
+      const departmentId = row.productionSubDepartment ?? UNCATEGORIZED_ID;
+      if (byId.has(departmentId)) continue;
+      byId.set(
+        departmentId,
+        row.productionSubDepartment
+          ? getProductionSubDepartmentLabel(row.productionSubDepartment, locale)
+          : uncategorizedTitle,
+      );
+    }
+
+    return Array.from(byId.entries())
+      .sort(([a], [b]) => compareProductionSubDepartments(a, b))
+      .map(([value, label]) => ({ value, label }));
+  }, [departmentBreakdown, manufacturingRows, translate, locale]);
+
+  const printDepartmentBreakdown = useMemo(() => {
+    if (!printDepartmentId) return departmentBreakdown;
+    return departmentBreakdown.filter((group) => group.departmentId === printDepartmentId);
+  }, [departmentBreakdown, printDepartmentId]);
+
+  const printManufacturingRows = useMemo(() => {
+    if (!printDepartmentId) return manufacturingRows;
+    return manufacturingRows.filter((row) => (row.productionSubDepartment ?? UNCATEGORIZED_ID) === printDepartmentId);
+  }, [manufacturingRows, printDepartmentId]);
+
+  const printTotals = useMemo(() => {
+    if (!printDepartmentId) return totals;
+    return getBomDisplayTotals({
+      materialRows: printDepartmentBreakdown.flatMap((group) => group.items),
+      manufacturingRows: printManufacturingRows,
+      pricingFactor: bom?.product.pricingFactor,
+      costingMethod,
+      itemCostingOverrides,
+      manufacturingCostingOverrides,
+    });
+  }, [
+    printDepartmentId,
+    totals,
+    printDepartmentBreakdown,
+    printManufacturingRows,
+    bom?.product.pricingFactor,
+    costingMethod,
+    itemCostingOverrides,
+    manufacturingCostingOverrides,
+  ]);
+
+  const printDepartmentTitle = useMemo(() => {
+    if (!printDepartmentId) return null;
+    return departmentPrintOptions.find((option) => option.value === printDepartmentId)?.label ?? null;
+  }, [printDepartmentId, departmentPrintOptions]);
+
+  function handleOpenDepartmentPrint() {
+    setDepartmentPrintIncludePrices(true);
+    setDepartmentPrintDepartmentId(departmentPrintOptions.length === 1 ? departmentPrintOptions[0].value : null);
+    openDepartmentPrintModal();
+  }
+
+  function handleCloseDepartmentPrint() {
+    closeDepartmentPrintModal();
+    setDepartmentPrintDepartmentId(null);
+    setDepartmentPrintIncludePrices(true);
+  }
+
+  function handleConfirmDepartmentPrint() {
+    if (!departmentPrintDepartmentId) return;
+    void triggerPrint(departmentPrintIncludePrices ? "full" : "no-cost", departmentPrintDepartmentId);
+    handleCloseDepartmentPrint();
+  }
 
   const currency = translation.currency;
 
@@ -649,6 +745,9 @@ export default function Page() {
                       >
                         {translate("Print BOM without Costs", "طباعة قائمة المواد بدون تكاليف")}
                       </Menu.Item>
+                      <Menu.Item leftSection={<Printer size={14} />} onClick={handleOpenDepartmentPrint}>
+                        {translate("Print Department BOM", "طباعة قائمة مواد قسم معين")}
+                      </Menu.Item>
                       <Menu.Item
                         leftSection={<Printer size={14} />}
                         onClick={() => {
@@ -656,14 +755,6 @@ export default function Page() {
                         }}
                       >
                         {translate("Print BOM with All Costing Methods", "طباعة قائمة المواد بكل أسس التكلفة")}
-                      </Menu.Item>
-                      <Menu.Item
-                        leftSection={<Printer size={14} />}
-                        onClick={() => {
-                          void triggerPrint("quantity-comparison");
-                        }}
-                      >
-                        {translate("Print Quantity Comparison", "طباعة مقارنة الكميات")}
                       </Menu.Item>
                       {zeroPriceItemCount > 0 && (
                         <Menu.Item
@@ -675,6 +766,14 @@ export default function Page() {
                           {translate("Print Zero Price Items", "طباعة البنود التي بدون سعر")}
                         </Menu.Item>
                       )}
+                      <Menu.Item
+                        leftSection={<Printer size={14} />}
+                        onClick={() => {
+                          void triggerPrint("quantity-comparison");
+                        }}
+                      >
+                        {translate("Print Quantity Comparison", "طباعة مقارنة الكميات")}
+                      </Menu.Item>
 
                       <Menu.Divider />
                       <Menu.Item leftSection={<Calculator size={14} />} onClick={openQuantityModeModal}>
@@ -720,12 +819,12 @@ export default function Page() {
                     printVariant === "zero-price"
                       ? `${translate("Zero Unit Price Items", "بنود بدون سعر وحدة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                       : printVariant === "no-cost"
-                        ? `${translate("BOM without Costs", "قائمة المواد بدون تكاليف")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                        ? `${translate("BOM without Costs", "قائمة المواد بدون تكاليف")}${printDepartmentTitle ? ` - ${printDepartmentTitle}` : ""} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                         : printVariant === "all-costing"
                           ? `${translate("BOM All Costing Methods", "قائمة المواد بكل أسس التكلفة")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                           : printVariant === "quantity-comparison"
                             ? `${translate("BOM Quantity Comparison", "مقارنة كميات قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
-                            : `${translate("BOM", "قائمة المواد")} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
+                            : `${translate("BOM", "قائمة المواد")}${printDepartmentTitle ? ` - ${printDepartmentTitle}` : ""} - ${bom.product.title} - ${formatDimensionLabelText(bom, translation.productDimensionUnit)}`
                   }
                   renderTrigger={({ onClick }) => {
                     printHandlerRef.current = onClick;
@@ -740,23 +839,27 @@ export default function Page() {
                   {printVariant === "full" ? (
                     <BomPrintDocument
                       bom={bom}
-                      totals={totals}
-                      departmentBreakdown={departmentBreakdown}
-                      manufacturingRows={manufacturingRows}
+                      totals={printTotals}
+                      departmentBreakdown={printDepartmentBreakdown}
+                      manufacturingRows={printManufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
                       costingMethod={costingMethod}
                       itemCostingOverrides={itemCostingOverrides}
                       manufacturingCostingOverrides={manufacturingCostingOverrides}
                       quantityMode={quantityMode}
+                      departmentTitle={printDepartmentTitle}
+                      omitDepartmentSummary={!!printDepartmentId}
                     />
                   ) : printVariant === "no-cost" ? (
                     <BomNoCostPrintDocument
                       bom={bom}
-                      departmentBreakdown={departmentBreakdown}
-                      manufacturingRows={manufacturingRows}
+                      departmentBreakdown={printDepartmentBreakdown}
+                      manufacturingRows={printManufacturingRows}
                       mainCategoryTitle={productMainCategory?.title || null}
-                      totalItemCount={totals.itemCount}
+                      totalItemCount={printTotals.itemCount}
                       quantityMode={quantityMode}
+                      departmentTitle={printDepartmentTitle}
+                      omitDepartmentSummary={!!printDepartmentId}
                     />
                   ) : printVariant === "all-costing" ? (
                     <BomAllCostingPrintDocument
@@ -891,7 +994,7 @@ export default function Page() {
                                                 >
                                                   {translate("Purchased Manufactured Material", "مادة مصنّعة مشتراة")}
                                                 </Badge>
-                                                </Tooltip>
+                                              </Tooltip>
                                             )}
                                           {item.sourceBomItem?.noLongerUsed && <NoLongerUsedBadge />}
                                         </div>
@@ -1087,6 +1190,52 @@ export default function Page() {
                   setItemToUpdate={setItemToUpdate}
                   existingItems={bomItems}
                 />
+
+                <Modal
+                  opened={departmentPrintOpened}
+                  onClose={handleCloseDepartmentPrint}
+                  title={translate("Print Department BOM", "طباعة قائمة مواد قسم")}
+                >
+                  <div className="flex flex-col gap-4">
+                    <p className="text-sm text-gray-600">
+                      {translate(
+                        "Print the BOM lines for one production department. Prices and costs can be included or omitted.",
+                        "اطبع بنود قائمة المواد لقسم إنتاج واحد. يمكن تضمين الأسعار والتكاليف أو إخفاؤها.",
+                      )}
+                    </p>
+
+                    <DataSelect
+                      label={translate("Production Department", "قسم الانتاج")}
+                      placeholder={translate("Select a production department...", "اختر قسم إنتاج...")}
+                      value={departmentPrintDepartmentId}
+                      setValue={setDepartmentPrintDepartmentId}
+                      data={departmentPrintOptions}
+                      searchable
+                      nothingFoundMessage={translate("No departments found", "لا توجد أقسام")}
+                    />
+
+                    <Checkbox
+                      checked={departmentPrintIncludePrices}
+                      onChange={(event) => setDepartmentPrintIncludePrices(event.currentTarget.checked)}
+                      label={translate("Include prices and costs", "تضمين الأسعار والتكاليف")}
+                      radius="md"
+                    />
+
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button variant="default" radius="md" onClick={handleCloseDepartmentPrint}>
+                        {translate("Cancel", "إلغاء")}
+                      </Button>
+                      <Button
+                        color="haze"
+                        radius="md"
+                        disabled={!departmentPrintDepartmentId}
+                        onClick={handleConfirmDepartmentPrint}
+                      >
+                        {translate("Print", "طباعة")}
+                      </Button>
+                    </div>
+                  </div>
+                </Modal>
 
                 <Modal
                   opened={quantityModeOpened}

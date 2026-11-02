@@ -18,7 +18,7 @@ import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Supplier } from "@/types/supplier";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { Menu, Table, TextInput } from "@mantine/core";
+import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Pencil, Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -63,26 +63,30 @@ export default function Page() {
   const [classificationFilter, setClassificationFilter] = useState<string | null>(
     urlSearchParams.get("classification") || null,
   );
+  const [blacklistedFilter, setBlacklistedFilter] = useState(urlSearchParams.get("blacklisted") === "true");
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
     classification: classificationFilter,
+    blacklisted: blacklistedFilter ? "true" : "",
   };
 
   const params = { limit: SUPPLIERS_PER_PAGE, ...removeEmptyParams(urlParams) };
 
-  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || classificationFilter);
+  const hasActiveFilters: boolean = !!(activePage !== 1 || debouncedKeyword || classificationFilter || blacklistedFilter);
 
   const resetAllFilters = () => {
     setActivePage(1);
     setImmediateKeyword("");
     setClassificationFilter(null);
+    setBlacklistedFilter(false);
   };
 
   const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
     debouncedKeyword,
     classificationFilter,
+    blacklistedFilter,
   });
 
   const {
@@ -110,7 +114,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword, classificationFilter };
+    const newFilters = { debouncedKeyword, classificationFilter, blacklistedFilter };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -121,7 +125,7 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword, classificationFilter]);
+  }, [activePage, debouncedKeyword, classificationFilter, blacklistedFilter]);
 
   // ========================= MODALS =========================
 
@@ -159,6 +163,16 @@ export default function Page() {
                   {translate("Add New Supplier", "إضافة مورد جديد")}
                 </Menu.Item>
               )}
+              {(canPrintSuppliersList || canAddSupplier) && <Menu.Divider />}
+              <Menu.Item closeMenuOnClick={false} onClick={() => setBlacklistedFilter((current) => !current)}>
+                <Checkbox
+                  checked={blacklistedFilter}
+                  readOnly
+                  label={translate("Blacklisted", "القائمة السوداء")}
+                  radius="md"
+                  className="pointer-events-none"
+                />
+              </Menu.Item>
             </ActionsMenu>
           </div>
         ),
@@ -202,7 +216,7 @@ export default function Page() {
       ) : (
         paginatedSuppliers &&
         (paginatedSuppliers.data.length === 0 ? (
-          debouncedKeyword || classificationFilter ? (
+          debouncedKeyword || classificationFilter || blacklistedFilter ? (
             <NoResultsSection
               keyword={debouncedKeyword || translate("selected filters", "الفلاتر المحددة")}
               button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
@@ -250,14 +264,18 @@ export default function Page() {
                       <Table.Td>{supplier.email || "-"}</Table.Td>
                       <Table.Td>{formatDateAndTime(supplier.createdAt, locale)}</Table.Td>
                       <Table.Td w={0}>
-                        <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
-                          <button
-                            onClick={() => handleOpenUpdateModal(supplier)}
-                            className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
-                          >
-                            <Pencil size={14} />
-                          </button>
-                        </PermissionGuard>
+                        {!blacklistedFilter && (
+                          <PermissionGuard permission={PERMISSIONS.UPDATE_SUPPLIER}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenUpdateModal(supplier)}
+                              className="rounded-lg bg-gray-100 p-1.5 transition-colors hover:bg-gray-200"
+                              title={translate("Edit supplier", "تعديل المورد")}
+                            >
+                              <Pencil size={14} />
+                            </button>
+                          </PermissionGuard>
+                        )}
                       </Table.Td>
                     </Table.Tr>
                   ))}
