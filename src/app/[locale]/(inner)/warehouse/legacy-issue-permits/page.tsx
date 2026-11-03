@@ -217,7 +217,7 @@ export default function Page() {
                       </Table.Td>
                       <Table.Td>{formatDateAndTime(transaction.createdAt, locale)}</Table.Td>
                       <Table.Td className="max-w-xs truncate">
-                        {transaction.notes || <span className="text-gray-400">-</span>}
+                        {transaction.notes || <span className="text-gray-400"></span>}
                       </Table.Td>
                     </Table.Tr>
                   ))}
