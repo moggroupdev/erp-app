@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
 import { useDisclosure } from "@mantine/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -21,6 +21,7 @@ import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
+import PermissionGuard from "@/components/guards/permission";
 import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialMarketPriceModal from "./components/material-market-price-modal";
 import MaterialMarketManufacturingCostModal from "./components/material-market-manufacturing-cost-modal";
@@ -29,6 +30,7 @@ import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
 import MaterialBomUsagesSection from "./components/material-bom-usages-section";
 import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
+import MaterialChangeHistorySection from "./components/material-change-history-section";
 import MaterialQuickLinks from "./components/material-quick-links";
 
 const PAGE_TITLE = { en: "Material Details", ar: "تفاصيل المادة" };
@@ -40,6 +42,7 @@ export default function Page() {
   const queryClient = useQueryClient();
   const canReadBom = useHasPermission(PERMISSIONS.READ_MANUFACTURED_MATERIAL_BOMS);
   const canReadProductBoms = useHasPermission(PERMISSIONS.READ_PRODUCT_BOMS);
+  const canReadAuditLogs = useHasPermission(PERMISSIONS.READ_AUDIT_LOGS);
   const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
   const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
@@ -52,7 +55,6 @@ export default function Page() {
 
   const material = materialQuery.data || null;
   const shouldLoadBom = canReadBom && !!material && isManufacturedMaterial(material.materialType);
-
   const bomQuery = useQuery({
     queryKey: queryKeys.mmBoms.detail(code),
     queryFn: ({ signal }) => mmBomsApi.getByMaterial({ privateRequest, manufacturedMaterialCode: code, signal }),
@@ -60,7 +62,12 @@ export default function Page() {
     enabled: shouldLoadBom,
   });
 
-  const loading = materialQuery.isFetching || (shouldLoadBom && bomQuery.isFetching);
+  const changeHistoryFetching = useIsFetching({
+    queryKey: queryKeys.materials.changeHistories(code),
+  });
+
+  const loading =
+    materialQuery.isFetching || (shouldLoadBom && bomQuery.isFetching) || (canReadAuditLogs && changeHistoryFetching > 0);
   const queryError = materialQuery.error || (shouldLoadBom ? bomQuery.error : null);
   const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
   // Keep existing content mounted during refetch so nested usage queries are not unmounted mid-invalidate (which would refetch twice).
@@ -72,6 +79,7 @@ export default function Page() {
     materialQuery.refetch();
     if (shouldLoadBom) bomQuery.refetch();
     if (canReadProductBoms) queryClient.invalidateQueries({ queryKey: queryKeys.boms.usages(code) });
+    if (canReadAuditLogs) queryClient.invalidateQueries({ queryKey: queryKeys.materials.changeHistories(code) });
   }
 
   // ========================= MODALS =========================
@@ -171,6 +179,10 @@ export default function Page() {
             )}
 
             <MaterialBomUsagesSection material={material} />
+
+            <PermissionGuard permission={PERMISSIONS.READ_AUDIT_LOGS}>
+              <MaterialChangeHistorySection materialCode={code} />
+            </PermissionGuard>
 
             <MaterialQuickLinks materialCode={code} />
           </>
