@@ -1,0 +1,103 @@
+"use client";
+
+import { ArrowUp, Boxes, GitCompareArrows, PiggyBank, Scale } from "lucide-react";
+import { useI18n } from "@/lib/i18n/hooks";
+
+export default function ComparisonEmpty() {
+  const { translate } = useI18n();
+
+  const hints = [
+    {
+      icon: Scale,
+      label: translate("Side-by-side overview", "نظرة عامة جنباً إلى جنب"),
+      detail: translate(
+        "Spend, order count, and material count for each supplier",
+        "الإنفاق وعدد الأوامر وعدد المواد لكل مورد",
+      ),
+    },
+    {
+      icon: Boxes,
+      label: translate("Mutual materials", "المواد المشتركة"),
+      detail: translate("Only materials both suppliers have supplied", "فقط المواد التي وردها كلا الموردين"),
+    },
+    {
+      icon: GitCompareArrows,
+      label: translate("Price comparison", "مقارنة الأسعار"),
+      detail: translate(
+        "Average, last, and min/max unit prices in base units",
+        "متوسط وآخر وأدنى/أعلى أسعار الوحدة بالوحدة الأساسية",
+      ),
+    },
+    {
+      icon: PiggyBank,
+      label: translate("Potential savings", "التوفير المحتمل"),
+      detail: translate(
+        "Estimated savings if mutual items were bought from the cheaper supplier",
+        "تقدير التوفير إذا اشتريت المواد المشتركة من المورد الأرخص",
+      ),
+    },
+  ];
+
+  return (
+    <section className="overflow-hidden rounded-3xl bg-white">
+      <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="flex flex-col justify-center border-b border-dashed border-gray-200 px-6 py-8 sm:px-8 lg:border-e lg:border-b-0">
+          <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-medium tracking-wide text-gray-600 uppercase">
+            <ArrowUp size={12} className="opacity-70" />
+            {translate("Selection required", "مطلوب اختيار")}
+          </div>
+
+          <h2 className="text-lg font-semibold tracking-tight text-gray-800 sm:text-xl">
+            {translate("Select two suppliers to compare", "اختر موردين للمقارنة")}
+          </h2>
+          <p className="mt-2 text-xs leading-[1.75] text-gray-500">
+            {translate(
+              "Pick two different suppliers above. The report focuses on materials both have supplied.",
+              "اختر موردين مختلفين أعلاه. يركز التقرير على المواد التي وردها كلاهما.",
+            )}
+          </p>
+
+          <ul className="mt-8 space-y-6">
+            {hints.map(({ icon: Icon, label, detail }) => (
+              <li key={label} className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
+                  <Icon size={15} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-gray-800">{label}</span>
+                  <span className="mt-0.5 block text-xs leading-[1.75] text-gray-500">{detail}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="bg-gray-50/70 px-6 py-8 sm:px-8">
+          <p className="mb-4 text-[11px] font-semibold tracking-wide text-gray-400 uppercase">
+            {translate("What you will see", "ما ستراه")}
+          </p>
+
+          <div className="grid grid-cols-2 gap-2">
+            {[0, 1].map((i) => (
+              <div key={i} className="rounded-2xl border border-gray-200/80 bg-white p-3">
+                <div className="h-2 w-10 rounded bg-gray-200" />
+                <div className="mt-3 h-5 w-14 rounded bg-gray-100" />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-2 space-y-2">
+            {[88, 64, 48].map((width) => (
+              <div key={width} className="rounded-2xl border border-gray-200/80 bg-white p-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gray-200" />
+                  <div className="h-2 rounded bg-gray-100" style={{ width: `${width}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

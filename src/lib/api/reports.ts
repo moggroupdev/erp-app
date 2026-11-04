@@ -7,6 +7,7 @@ import type {
   PurchasingMaterialsPriceHistory,
   PurchasingMaterialsSubCategoryStats,
   PurchasingMaterialsSupplierStats,
+  PurchasingMaterialsSupplierComparison,
   PurchasingMaterialsTotalAmountMismatches,
   PurchasingMaterialsRequisitionFollowUp,
   PurchasingMaterialsPriceOutliers,
@@ -144,6 +145,28 @@ const reportsApi = {
       return await privateRequest<PurchasingMaterialsSupplierStats>({
         url: "reports/purchasing-materials/supplier-stats",
         params: { supplierId, from, to, groupBy },
+        signal,
+      });
+    },
+
+    async getSupplierComparison({
+      privateRequest,
+      supplierAId,
+      supplierBId,
+      from,
+      to,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      supplierAId: string;
+      supplierBId: string;
+      from?: string;
+      to?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsSupplierComparison>({
+        url: "reports/purchasing-materials/supplier-comparison",
+        params: { supplierAId, supplierBId, from, to },
         signal,
       });
     },
