@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Badge, Timeline } from "@mantine/core";
-import { ArrowRight, Circle, ExternalLink, History, Minus, Plus, UserRound } from "lucide-react";
+import { useDisclosure } from "@mantine/hooks";
+import { Badge, Collapse, Timeline } from "@mantine/core";
+import { ArrowRight, ChevronDown, Circle, ExternalLink, History, Minus, Plus, UserRound } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
@@ -50,6 +51,7 @@ export default function MaterialChangeHistorySection({ materialCode }: { materia
   const privateRequest = usePrivateRequest();
   const { helpers: categoryHelpers } = useMaterialCategories();
   const [page, setPage] = useState(1);
+  const [opened, { toggle }] = useDisclosure(false);
 
   const historyQuery = useQuery({
     queryKey: queryKeys.materials.changeHistory(materialCode, page),
@@ -62,6 +64,7 @@ export default function MaterialChangeHistorySection({ materialCode }: { materia
       }),
     staleTime: staleTimes.auditLogs,
     placeholderData: keepPreviousData,
+    enabled: opened,
   });
 
   const loading = historyQuery.isFetching;
@@ -79,84 +82,101 @@ export default function MaterialChangeHistorySection({ materialCode }: { materia
   }
 
   return (
-    <section className="mt-4 flex flex-col gap-3">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="bg-haze-50 text-haze-600 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
-            <History size={16} />
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <h4 className="text-lg font-semibold text-gray-900">{translate("Change History", "سجل التغييرات")}</h4>
-              {totalRecords > 0 && (
-                <Badge size="sm" variant="light" color="gray" radius="md">
-                  {totalRecords}
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-gray-500">
-              {translate(
-                "Profile, alternate units, and manufactured BOM. Stock quantity and cached unit price are omitted.",
-                "الملف والوحدات البديلة وقائمة مواد التصنيع. تُستبعد كمية المخزون وسعر الوحدة المخزّن.",
-              )}
-            </p>
-          </div>
+    <section className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-expanded={opened}
+        className={`flex w-full items-start gap-2.5 px-3 py-3 text-start transition-colors hover:bg-gray-50/80 sm:px-4 ${opened ? "border-b border-gray-200" : ""}`}
+      >
+        <div className="bg-haze-50 text-haze-600 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+          <History size={16} />
         </div>
-      </div>
-
-      {loading && !data ? (
-        <LoadingSection message={translate("Loading change history", "جاري تحميل سجل التغييرات")} />
-      ) : errorMessage ? (
-        <ErrorSection
-          errorTitle={translate("An error occurred while loading change history", "حدث خطأ أثناء تحميل سجل التغييرات")}
-          errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => historyQuery.refetch() }}
-        />
-      ) : events.length === 0 ? (
-        <EmptySection
-          className="p-6"
-          message={translate("No recorded changes for this material", "لا توجد تغييرات مسجّلة لهذه المادة")}
-        />
-      ) : (
-        <>
-          <div className={`rounded-xl border border-gray-200 bg-white px-3 py-3 sm:px-4 ${loading ? "opacity-70" : ""}`}>
-            <Timeline active={events.length} bulletSize={28} lineWidth={2} color="gray">
-              {events.map((event) => {
-                const status = getSemanticStatusColors(ACTION_STATUS[event.action]);
-                const BulletIcon = ACTION_ICON[event.action];
-
-                return (
-                  <Timeline.Item
-                    key={event.id}
-                    bullet={
-                      <span
-                        className={`flex h-7 w-7 items-center justify-center rounded-full border ${status.borderClass} ${status.surfaceClass} ${status.textClass}`}
-                      >
-                        <BulletIcon
-                          size={event.action === "update" ? 8 : 13}
-                          strokeWidth={2.5}
-                          fill={event.action === "update" ? "currentColor" : "none"}
-                        />
-                      </span>
-                    }
-                    title={<EventHeader event={event} locale={locale} translate={translate} formatUnit={formatUnit} />}
-                  >
-                    <EventBody
-                      event={event}
-                      locale={locale}
-                      currency={translation.currency}
-                      translate={translate}
-                      resolveSubCategoryTitle={resolveSubCategoryTitle}
-                    />
-                  </Timeline.Item>
-                );
-              })}
-            </Timeline>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="text-lg font-semibold text-gray-900">{translate("Change History", "سجل التغييرات")}</h4>
+            {totalRecords > 0 && (
+              <Badge size="sm" variant="light" color="gray" radius="md">
+                {totalRecords}
+              </Badge>
+            )}
           </div>
+          <p className="text-xs text-gray-500">
+            {translate(
+              "Profile, alternate units, and manufactured BOM. Stock quantity and cached unit price are omitted.",
+              "الملف والوحدات البديلة وقائمة مواد التصنيع. تُستبعد كمية المخزون وسعر الوحدة المخزّن.",
+            )}
+          </p>
+        </div>
+        <ChevronDown
+          size={18}
+          className={`mt-2 shrink-0 text-gray-400 transition-transform ${opened ? "rotate-180" : ""}`}
+          aria-hidden
+        />
+      </button>
 
-          {data && <PaginationHandler paginatedData={data} activePage={page} setActivePage={setPage} />}
-        </>
-      )}
+      <Collapse in={opened}>
+        <div className="flex flex-col gap-3 px-3 py-3 sm:px-4">
+          {loading && !data ? (
+            <LoadingSection message={translate("Loading change history", "جاري تحميل سجل التغييرات")} />
+          ) : errorMessage ? (
+            <ErrorSection
+              errorTitle={translate(
+                "An error occurred while loading change history",
+                "حدث خطأ أثناء تحميل سجل التغييرات",
+              )}
+              errorMessage={errorMessage}
+              button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => historyQuery.refetch() }}
+            />
+          ) : events.length === 0 ? (
+            <EmptySection
+              className="p-6"
+              message={translate("No recorded changes for this material", "لا توجد تغييرات مسجّلة لهذه المادة")}
+            />
+          ) : (
+            <>
+              <div className={loading ? "opacity-70" : ""}>
+                <Timeline active={events.length} bulletSize={28} lineWidth={2} color="gray">
+                  {events.map((event) => {
+                    const status = getSemanticStatusColors(ACTION_STATUS[event.action]);
+                    const BulletIcon = ACTION_ICON[event.action];
+
+                    return (
+                      <Timeline.Item
+                        key={event.id}
+                        bullet={
+                          <span
+                            className={`flex h-7 w-7 items-center justify-center rounded-full border ${status.borderClass} ${status.surfaceClass} ${status.textClass}`}
+                          >
+                            <BulletIcon
+                              size={event.action === "update" ? 8 : 13}
+                              strokeWidth={2.5}
+                              fill={event.action === "update" ? "currentColor" : "none"}
+                            />
+                          </span>
+                        }
+                        title={
+                          <EventHeader event={event} locale={locale} translate={translate} formatUnit={formatUnit} />
+                        }
+                      >
+                        <EventBody
+                          event={event}
+                          locale={locale}
+                          currency={translation.currency}
+                          translate={translate}
+                          resolveSubCategoryTitle={resolveSubCategoryTitle}
+                        />
+                      </Timeline.Item>
+                    );
+                  })}
+                </Timeline>
+              </div>
+
+              {data && <PaginationHandler paginatedData={data} activePage={page} setActivePage={setPage} />}
+            </>
+          )}
+        </div>
+      </Collapse>
     </section>
   );
 }
