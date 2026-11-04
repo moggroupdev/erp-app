@@ -5,6 +5,7 @@ import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import type { SupplierComparisonPriceBasis } from "@/lib/helpers/supplier-comparison-price-basis";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { Locale } from "@/lib/i18n/types";
 import type {
@@ -13,7 +14,8 @@ import type {
   PurchasingMaterialsSupplierComparisonMutualItem,
 } from "@/types/reports";
 
-const COLUMN_WIDTHS = ["3%", "14%", "5%", "5%", "6%", "7%", "8%", "5%", "6%", "7%", "8%", "8%", "5%", "7%"];
+const COLUMN_WIDTHS_LAST = ["3%", "16%", "6%", "7%", "8%", "9%", "7%", "8%", "9%", "9%", "6%", "8%"];
+const COLUMN_WIDTHS_AVG = ["3%", "14%", "5%", "5%", "6%", "7%", "8%", "5%", "6%", "7%", "8%", "8%", "5%", "7%"];
 
 const SIDE_EDGE = "border-s-[0.5px] border-gray-300";
 const SIDE_COL = "border-s-[0.5px] border-gray-200";
@@ -26,6 +28,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
   items,
   displayUnit,
   sortLabel,
+  priceBasis,
+  priceBasisLabel,
 }: {
   title: string;
   startDate?: string | null;
@@ -34,6 +38,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
   items: PurchasingMaterialsSupplierComparisonMutualItem[];
   displayUnit?: MaterialUnit | null;
   sortLabel: string;
+  priceBasis: SupplierComparisonPriceBasis;
+  priceBasisLabel: string;
 }) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
@@ -41,6 +47,10 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
   const printedAt = formatDateAndTime(new Date(), locale);
   const { a, b } = data.suppliers;
   const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
+  const showAvg = priceBasis === "avg";
+  const columnWidths = showAvg ? COLUMN_WIDTHS_AVG : COLUMN_WIDTHS_LAST;
+  const sideColSpan = showAvg ? 4 : 3;
+  const footerSpacerColSpan = showAvg ? 11 : 9;
 
   return (
     <div className="flex flex-col gap-8 text-xs text-gray-900">
@@ -131,8 +141,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
         <PrintSectionHeading
           title={translate("Mutual Materials", "المواد المشتركة")}
           subtitle={translate(
-            `Side-by-side prices from purchase-order lines in the material base unit. Sorted by: ${sortLabel}`,
-            `أسعار جنباً إلى جنب من بنود أوامر التوريد بوحدة المادة الأساسية. مرتّب حسب: ${sortLabel}`,
+            `Side-by-side prices from purchase-order lines in the material base unit. Price basis: ${priceBasisLabel}. Sorted by: ${sortLabel}`,
+            `أسعار جنباً إلى جنب من بنود أوامر التوريد بوحدة المادة الأساسية. أساس السعر: ${priceBasisLabel}. مرتّب حسب: ${sortLabel}`,
           )}
         />
 
@@ -143,7 +153,7 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
         ) : (
           <table className="w-full table-fixed border-collapse text-[8px]">
             <colgroup>
-              {COLUMN_WIDTHS.map((width, index) => (
+              {columnWidths.map((width, index) => (
                 <col key={index} style={{ width }} />
               ))}
             </colgroup>
@@ -158,13 +168,13 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 <th rowSpan={2} className="px-1.5 py-1.5 text-center align-bottom">
                   {translate("Unit", "الوحدة")}
                 </th>
-                <th colSpan={4} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
+                <th colSpan={sideColSpan} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
                   <span className="inline-flex items-center justify-center gap-1">
                     <span className="font-semibold text-gray-700">A</span>
                     <span className="max-w-28 truncate font-semibold text-gray-800 normal-case">{a.name}</span>
                   </span>
                 </th>
-                <th colSpan={4} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
+                <th colSpan={sideColSpan} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
                   <span className="inline-flex items-center justify-center gap-1">
                     <span className="font-semibold text-gray-700">B</span>
                     <span className="max-w-28 truncate font-semibold text-gray-800 normal-case">{b.name}</span>
@@ -181,8 +191,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 </th>
               </tr>
               <tr className="border-b border-gray-300 bg-gray-50 text-[7px] font-medium tracking-wide text-gray-500 uppercase">
-                <SideSubHeaders currency={currency} translate={translate} />
-                <SideSubHeaders currency={currency} translate={translate} />
+                <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
+                <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
               </tr>
             </thead>
             <tbody>
@@ -201,8 +211,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                       <span className="mt-0.5 block font-mono text-[7px] text-gray-400">{row.materialCode}</span>
                     </td>
                     <td className="px-1.5 py-1.5 text-center">{getMaterialUnitLabel(unit, locale)}</td>
-                    <SideCells side={row.a} factor={factor} locale={locale} />
-                    <SideCells side={row.b} factor={factor} locale={locale} />
+                    <SideCells side={row.a} factor={factor} locale={locale} showAvg={showAvg} />
+                    <SideCells side={row.b} factor={factor} locale={locale} showAvg={showAvg} />
                     <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center`}>
                       {cheaperLabel(row.cheaper, a.name, b.name, translate)}
                     </td>
@@ -214,7 +224,7 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
               <tr className="break-inside-avoid border-b border-gray-200 bg-gray-50 font-semibold text-gray-700">
                 <td className="px-1.5 py-1.5" />
                 <td className="px-1.5 py-1.5 text-start">{translate("Total", "الإجمالي")}</td>
-                <td colSpan={11} className="px-1.5 py-1.5" />
+                <td colSpan={footerSpacerColSpan} className="px-1.5 py-1.5" />
                 <td className="px-1.5 py-1.5 text-center">{formatMoney(totalSavings)}</td>
               </tr>
             </tbody>
@@ -254,11 +264,21 @@ function OverviewRow({
   );
 }
 
-function SideSubHeaders({ currency, translate }: { currency: string; translate: (en: string, ar: string) => string }) {
+function SideSubHeaders({
+  currency,
+  translate,
+  showAvg,
+}: {
+  currency: string;
+  translate: (en: string, ar: string) => string;
+  showAvg: boolean;
+}) {
   return (
     <>
       <th className={`${SIDE_EDGE} px-1.5 py-1 text-center`}>{translate("Qty", "الكمية")}</th>
-      <th className={`${SIDE_COL} px-1.5 py-1 text-center`}>{translate(`Avg (${currency})`, `المتوسط (${currency})`)}</th>
+      {showAvg && (
+        <th className={`${SIDE_COL} px-1.5 py-1 text-center`}>{translate(`Avg (${currency})`, `المتوسط (${currency})`)}</th>
+      )}
       <th className={`${SIDE_COL} px-1.5 py-1 text-center`}>{translate(`Last (${currency})`, `آخر سعر (${currency})`)}</th>
       <th className={`${SIDE_COL} px-1.5 py-1 text-center`}>
         {translate(`Min / Max (${currency})`, `أدنى / أعلى (${currency})`)}
@@ -271,17 +291,21 @@ function SideCells({
   side,
   factor,
   locale,
+  showAvg,
 }: {
   side: PurchasingMaterialsSupplierComparisonItemSide;
   factor: number;
   locale: Locale;
+  showAvg: boolean;
 }) {
   return (
     <>
       <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center`}>{formatBaseQuantityForDisplay(side.quantity, factor)}</td>
-      <td className={`${SIDE_COL} px-1.5 py-1.5 text-center`}>
-        {formatMoney(toDisplayUnitPrice(side.avgUnitPrice, factor))}
-      </td>
+      {showAvg && (
+        <td className={`${SIDE_COL} px-1.5 py-1.5 text-center`}>
+          {formatMoney(toDisplayUnitPrice(side.avgUnitPrice, factor))}
+        </td>
+      )}
       <td className={`${SIDE_COL} px-1.5 py-1.5 text-center`}>
         {side.lastUnitPrice == null ? (
           "-"

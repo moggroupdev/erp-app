@@ -11,6 +11,7 @@ import { getSemanticStatusColors } from "@/lib/constants/status-colors";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
+import type { SupplierComparisonPriceBasis } from "@/lib/helpers/supplier-comparison-price-basis";
 import { resolveDisplayUnit, toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import type { PurchasingMaterialsSupplierComparisonMutualItem } from "@/types/reports";
 import ReportCard from "../../components/report-card";
@@ -35,6 +36,8 @@ export default function MutualItemsTable({
   onSortChange,
   displayUnit,
   onDisplayUnitChange,
+  priceBasis,
+  onPriceBasisChange,
 }: {
   items: PurchasingMaterialsSupplierComparisonMutualItem[];
   supplierAName: string;
@@ -43,9 +46,14 @@ export default function MutualItemsTable({
   onSortChange: (sort: MutualItemsSort) => void;
   displayUnit: MaterialUnit | null;
   onDisplayUnitChange: (unit: MaterialUnit | null) => void;
+  priceBasis: SupplierComparisonPriceBasis;
+  onPriceBasisChange: (basis: SupplierComparisonPriceBasis) => void;
 }) {
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
+  const showAvg = priceBasis === "avg";
+  const sideColSpan = showAvg ? 4 : 3;
+  const footerSpacerColSpan = showAvg ? 11 : 9;
 
   const sortedItems = useMemo(() => sortMutualItems(items, sort), [items, sort]);
   const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
@@ -61,6 +69,26 @@ export default function MutualItemsTable({
       accent="sky"
       headerAction={
         <div className="flex w-full flex-wrap items-end gap-2 sm:w-auto sm:justify-end">
+          <Select
+            value={priceBasis}
+            onChange={(value) => {
+              if (value === "last" || value === "avg") onPriceBasisChange(value);
+            }}
+            label={translate("Price basis", "أساس السعر")}
+            data={[
+              {
+                value: "last",
+                label: translate("Last price", "آخر سعر"),
+              },
+              {
+                value: "avg",
+                label: translate("Average price", "متوسط السعر"),
+              },
+            ]}
+            allowDeselect={false}
+            radius="md"
+            className="min-w-40 flex-1 sm:w-[180px] sm:flex-none"
+          />
           <Select
             value={displayUnit ?? BASE_UNIT_VALUE}
             onChange={(value) => {
@@ -132,7 +160,7 @@ export default function MutualItemsTable({
                 <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
                   {translate("Unit", "الوحدة")}
                 </Table.Th>
-                <Table.Th colSpan={4} className="bg-gray-50 py-2.5 text-center!">
+                <Table.Th colSpan={sideColSpan} className="bg-gray-50 py-2.5 text-center!">
                   <div className="flex items-center justify-center gap-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded bg-gray-200/80 text-[10px] font-semibold text-gray-600">
                       A
@@ -142,7 +170,7 @@ export default function MutualItemsTable({
                     </span>
                   </div>
                 </Table.Th>
-                <Table.Th colSpan={4} className="bg-gray-50 py-2.5 text-center!">
+                <Table.Th colSpan={sideColSpan} className="bg-gray-50 py-2.5 text-center!">
                   <div className="flex items-center justify-center gap-2">
                     <span className="flex h-5 w-5 items-center justify-center rounded bg-gray-200/80 text-[10px] font-semibold text-gray-600">
                       B
@@ -163,8 +191,8 @@ export default function MutualItemsTable({
                 </Table.Th>
               </Table.Tr>
               <Table.Tr className="border-b border-gray-200">
-                <SideSubHeaders />
-                <SideSubHeaders />
+                <SideSubHeaders showAvg={showAvg} />
+                <SideSubHeaders showAvg={showAvg} />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -186,8 +214,8 @@ export default function MutualItemsTable({
                       <span className="mt-0.5 block font-mono text-xs text-gray-500">{row.materialCode}</span>
                     </Table.Td>
                     <Table.Td className="text-center">{getMaterialUnitLabel(unit, locale)}</Table.Td>
-                    <SideCells side={row.a} factor={factor} locale={locale} />
-                    <SideCells side={row.b} factor={factor} locale={locale} />
+                    <SideCells side={row.a} factor={factor} locale={locale} showAvg={showAvg} />
+                    <SideCells side={row.b} factor={factor} locale={locale} showAvg={showAvg} />
                     <Table.Td className="text-center">
                       <CheaperBadge cheaper={row.cheaper} supplierAName={supplierAName} supplierBName={supplierBName} />
                     </Table.Td>
@@ -203,7 +231,7 @@ export default function MutualItemsTable({
               <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
                 <Table.Th />
                 <Table.Th className="text-start">{translate("Total", "الإجمالي")}</Table.Th>
-                <Table.Th colSpan={11} />
+                <Table.Th colSpan={footerSpacerColSpan} />
                 <Table.Th className="text-center font-semibold text-teal-700">{formatMoney(totalSavings)}</Table.Th>
               </Table.Tr>
             </Table.Tfoot>
@@ -214,7 +242,7 @@ export default function MutualItemsTable({
   );
 }
 
-function SideSubHeaders() {
+function SideSubHeaders({ showAvg }: { showAvg: boolean }) {
   const { translate, translation } = useI18n();
   const currency = translation.currency;
 
@@ -223,9 +251,11 @@ function SideSubHeaders() {
       <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-gray-500">
         {translate("Qty", "الكمية")}
       </Table.Th>
-      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-gray-500">
-        {translate(`Avg (${currency})`, `المتوسط (${currency})`)}
-      </Table.Th>
+      {showAvg && (
+        <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-gray-500">
+          {translate(`Avg (${currency})`, `المتوسط (${currency})`)}
+        </Table.Th>
+      )}
       <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-gray-500">
         {translate(`Last (${currency})`, `آخر سعر (${currency})`)}
       </Table.Th>
@@ -240,15 +270,19 @@ function SideCells({
   side,
   factor,
   locale,
+  showAvg,
 }: {
   side: PurchasingMaterialsSupplierComparisonMutualItem["a"];
   factor: number;
   locale: "en" | "ar";
+  showAvg: boolean;
 }) {
   return (
     <>
       <Table.Td className="text-center">{formatBaseQuantityForDisplay(side.quantity, factor)}</Table.Td>
-      <Table.Td className="text-center">{formatMoney(toDisplayUnitPrice(side.avgUnitPrice, factor))}</Table.Td>
+      {showAvg && (
+        <Table.Td className="text-center">{formatMoney(toDisplayUnitPrice(side.avgUnitPrice, factor))}</Table.Td>
+      )}
       <Table.Td className="text-center">
         {side.lastUnitPrice == null ? (
           "-"

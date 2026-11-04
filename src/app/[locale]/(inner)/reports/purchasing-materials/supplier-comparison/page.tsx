@@ -11,6 +11,10 @@ import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { formatDate } from "@/lib/helpers/date-formaters";
+import {
+  applyPriceBasis,
+  type SupplierComparisonPriceBasis,
+} from "@/lib/helpers/supplier-comparison-price-basis";
 import { GitCompareArrows } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -47,6 +51,7 @@ export default function Page() {
 
   const [sort, setSort] = useState<MutualItemsSort>("gap-desc");
   const [displayUnit, setDisplayUnit] = useState<MaterialUnit | null>(null);
+  const [priceBasis, setPriceBasis] = useState<SupplierComparisonPriceBasis>("last");
 
   function updateQuery(patch: {
     supplierAId?: string | null;
@@ -113,11 +118,19 @@ export default function Page() {
       ? `${translate("Report", "تقرير")} - ${reportTitle} - ${data.suppliers.a.name} / ${data.suppliers.b.name} - ${printDateSuffix}`
       : `${translate("Report", "تقرير")} - ${reportTitle} - ${printDateSuffix}`;
 
+  const pricedMutualItems = useMemo(
+    () => (data ? applyPriceBasis(data.mutualItems, priceBasis) : []),
+    [data, priceBasis],
+  );
   const sortedMutualItems = useMemo(
-    () => (data ? sortMutualItems(data.mutualItems, sort) : []),
-    [data, sort],
+    () => sortMutualItems(pricedMutualItems, sort),
+    [pricedMutualItems, sort],
   );
   const sortLabel = getMutualItemsSortLabel(sort, translate);
+  const priceBasisLabel =
+    priceBasis === "avg"
+      ? translate("Average price", "متوسط السعر")
+      : translate("Last price", "آخر سعر");
 
   return (
     <div className="space-y-6">
@@ -145,6 +158,8 @@ export default function Page() {
                     items={sortedMutualItems}
                     displayUnit={displayUnit}
                     sortLabel={sortLabel}
+                    priceBasis={priceBasis}
+                    priceBasisLabel={priceBasisLabel}
                   />
                 </PrintDocument>
               )}
@@ -186,13 +201,15 @@ export default function Page() {
             <div className="flex flex-col gap-6">
               <ComparisonOverview data={data} />
               <MutualItemsTable
-                items={data.mutualItems}
+                items={pricedMutualItems}
                 supplierAName={data.suppliers.a.name}
                 supplierBName={data.suppliers.b.name}
                 sort={sort}
                 onSortChange={setSort}
                 displayUnit={displayUnit}
                 onDisplayUnitChange={setDisplayUnit}
+                priceBasis={priceBasis}
+                onPriceBasisChange={setPriceBasis}
               />
             </div>
           )

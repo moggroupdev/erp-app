@@ -24,16 +24,16 @@ export default function ComparisonEmpty() {
       icon: GitCompareArrows,
       label: translate("Price comparison", "مقارنة الأسعار"),
       detail: translate(
-        "Average, last, and min/max unit prices in base units",
-        "متوسط وآخر وأدنى/أعلى أسعار الوحدة بالوحدة الأساسية",
+        "Last and min/max unit prices by default; optionally include averages",
+        "آخر وأدنى/أعلى أسعار الوحدة افتراضياً؛ ويمكن تضمين المتوسط اختيارياً",
       ),
     },
     {
       icon: PiggyBank,
       label: translate("Potential savings", "التوفير المحتمل"),
       detail: translate(
-        "Estimated savings if mutual items were bought from the cheaper supplier",
-        "تقدير التوفير إذا اشتريت المواد المشتركة من المورد الأرخص",
+        "Estimated savings from last prices by default, or averages when selected",
+        "تقدير التوفير من آخر سعر افتراضياً، أو من المتوسط عند اختياره",
       ),
     },
   ];
