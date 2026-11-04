@@ -14,8 +14,8 @@ import type {
   PurchasingMaterialsSupplierComparisonMutualItem,
 } from "@/types/reports";
 
-const COLUMN_WIDTHS_LAST = ["3%", "16%", "6%", "7%", "8%", "9%", "7%", "8%", "9%", "9%", "6%", "8%"];
-const COLUMN_WIDTHS_AVG = ["3%", "14%", "5%", "5%", "6%", "7%", "8%", "5%", "6%", "7%", "8%", "8%", "5%", "7%"];
+const COLUMN_WIDTHS_LAST = ["3%", "18%", "6%", "8%", "10%", "8%", "10%", "9%", "7%", "9%", "12%"];
+const COLUMN_WIDTHS_AVG = ["3%", "15%", "5%", "6%", "7%", "8%", "6%", "7%", "8%", "8%", "6%", "8%", "13%"];
 
 const SIDE_EDGE = "border-s-[0.5px] border-gray-300";
 const SIDE_COL = "border-s-[0.5px] border-gray-200";
@@ -49,8 +49,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
   const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
   const showAvg = priceBasis === "avg";
   const columnWidths = showAvg ? COLUMN_WIDTHS_AVG : COLUMN_WIDTHS_LAST;
-  const sideColSpan = showAvg ? 4 : 3;
-  const footerSpacerColSpan = showAvg ? 11 : 9;
+  const sideColSpan = showAvg ? 3 : 2;
+  const footerSpacerColSpan = showAvg ? 10 : 8;
 
   return (
     <div className="flex flex-col gap-8 text-xs text-gray-900">
@@ -187,6 +187,9 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                   {translate("Gap %", "الفجوة %")}
                 </th>
                 <th rowSpan={2} className="px-1.5 py-1.5 text-center align-bottom">
+                  {translate(`Diff (${currency})`, `الفرق (${currency})`)}
+                </th>
+                <th rowSpan={2} className="px-1.5 py-1.5 text-center align-bottom">
                   {translate(`Savings (${currency})`, `التوفير (${currency})`)}
                 </th>
               </tr>
@@ -217,6 +220,9 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                       {cheaperLabel(row.cheaper, a.name, b.name, translate)}
                     </td>
                     <td className="px-1.5 py-1.5 text-center">{formatPercent(row.priceGapPercent)}</td>
+                    <td className="px-1.5 py-1.5 text-center">
+                      {formatMoney(toDisplayUnitPrice(row.priceDifference ?? 0, factor))}
+                    </td>
                     <td className="px-1.5 py-1.5 text-center font-semibold">{formatMoney(row.potentialSavings)}</td>
                   </tr>
                 );
@@ -280,9 +286,6 @@ function SideSubHeaders({
         <th className={`${SIDE_COL} px-1.5 py-1 text-center`}>{translate(`Avg (${currency})`, `المتوسط (${currency})`)}</th>
       )}
       <th className={`${SIDE_COL} px-1.5 py-1 text-center`}>{translate(`Last (${currency})`, `آخر سعر (${currency})`)}</th>
-      <th className={`${SIDE_COL} px-1.5 py-1 text-center`}>
-        {translate(`Min / Max (${currency})`, `أدنى / أعلى (${currency})`)}
-      </th>
     </>
   );
 }
@@ -317,11 +320,6 @@ function SideCells({
             ) : null}
           </span>
         )}
-      </td>
-      <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-nowrap`}>
-        {formatMoney(toDisplayUnitPrice(side.minUnitPrice, factor))}
-        {" / "}
-        {formatMoney(toDisplayUnitPrice(side.maxUnitPrice, factor))}
       </td>
     </>
   );

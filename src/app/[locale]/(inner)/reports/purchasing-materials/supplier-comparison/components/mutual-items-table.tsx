@@ -52,8 +52,8 @@ export default function MutualItemsTable({
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
   const showAvg = priceBasis === "avg";
-  const sideColSpan = showAvg ? 4 : 3;
-  const footerSpacerColSpan = showAvg ? 11 : 9;
+  const sideColSpan = showAvg ? 3 : 2;
+  const footerSpacerColSpan = showAvg ? 10 : 8;
 
   const sortedItems = useMemo(() => sortMutualItems(items, sort), [items, sort]);
   const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
@@ -187,6 +187,9 @@ export default function MutualItemsTable({
                   {translate("Gap %", "الفجوة %")}
                 </Table.Th>
                 <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
+                  {translate(`Diff (${currency})`, `الفرق (${currency})`)}
+                </Table.Th>
+                <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
                   {translate(`Savings (${currency})`, `التوفير (${currency})`)}
                 </Table.Th>
               </Table.Tr>
@@ -220,6 +223,9 @@ export default function MutualItemsTable({
                       <CheaperBadge cheaper={row.cheaper} supplierAName={supplierAName} supplierBName={supplierBName} />
                     </Table.Td>
                     <Table.Td className="text-center">{formatPercent(row.priceGapPercent)}</Table.Td>
+                    <Table.Td className="text-center">
+                      {formatMoney(toDisplayUnitPrice(row.priceDifference ?? 0, factor))}
+                    </Table.Td>
                     <Table.Td className="text-center font-semibold text-teal-700">
                       {formatMoney(row.potentialSavings)}
                     </Table.Td>
@@ -259,9 +265,6 @@ function SideSubHeaders({ showAvg }: { showAvg: boolean }) {
       <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-gray-500">
         {translate(`Last (${currency})`, `آخر سعر (${currency})`)}
       </Table.Th>
-      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-gray-500">
-        {translate(`Min / Max (${currency})`, `أدنى / أعلى (${currency})`)}
-      </Table.Th>
     </>
   );
 }
@@ -294,11 +297,6 @@ function SideCells({
             )}
           </div>
         )}
-      </Table.Td>
-      <Table.Td className="text-center">
-        {formatMoney(toDisplayUnitPrice(side.minUnitPrice, factor))}
-        {" / "}
-        {formatMoney(toDisplayUnitPrice(side.maxUnitPrice, factor))}
       </Table.Td>
     </>
   );

@@ -203,8 +203,6 @@ export type PurchasingMaterialsSupplierComparisonSide = {
 export type PurchasingMaterialsSupplierComparisonItemSide = {
   quantity: number;
   avgUnitPrice: number;
-  minUnitPrice: number;
-  maxUnitPrice: number;
   lastUnitPrice: number | null;
   lastPurchasedAt: string | null;
   orderCount: number;
@@ -219,6 +217,8 @@ export type PurchasingMaterialsSupplierComparisonMutualItem = {
   b: PurchasingMaterialsSupplierComparisonItemSide;
   cheaper: "a" | "b" | "equal";
   priceGapPercent: number;
+  /** Absolute unit-price difference |A - B| in the material base unit. Set client-side from price basis. */
+  priceDifference?: number;
   potentialSavings: number;
 };
 

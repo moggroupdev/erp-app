@@ -17,6 +17,7 @@ export function applyPriceBasis(
         ...item,
         cheaper: "equal",
         priceGapPercent: 0,
+        priceDifference: 0,
         potentialSavings: 0,
       };
     }
@@ -26,6 +27,7 @@ export function applyPriceBasis(
     const lower = Math.min(priceA, priceB);
     const higher = Math.max(priceA, priceB);
     const priceGapPercent = equal || lower === 0 ? 0 : ((higher - lower) / lower) * 100;
+    const priceDifference = equal ? 0 : higher - lower;
     const potentialSavings = equal
       ? 0
       : cheaper === "a"
@@ -36,6 +38,7 @@ export function applyPriceBasis(
       ...item,
       cheaper,
       priceGapPercent,
+      priceDifference,
       potentialSavings,
     };
   });

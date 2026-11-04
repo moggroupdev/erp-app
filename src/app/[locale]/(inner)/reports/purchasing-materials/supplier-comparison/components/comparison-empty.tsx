@@ -24,8 +24,8 @@ export default function ComparisonEmpty() {
       icon: GitCompareArrows,
       label: translate("Price comparison", "مقارنة الأسعار"),
       detail: translate(
-        "Last and min/max unit prices by default; optionally include averages",
-        "آخر وأدنى/أعلى أسعار الوحدة افتراضياً؛ ويمكن تضمين المتوسط اختيارياً",
+        "Last unit prices by default; optionally include averages",
+        "آخر أسعار الوحدة افتراضياً؛ ويمكن تضمين المتوسط اختيارياً",
       ),
     },
     {
