@@ -53,10 +53,18 @@ export default function MutualItemsTable({
   const currency = translation.currency;
   const showAvg = priceBasis === "avg";
   const sideColSpan = showAvg ? 3 : 2;
-  const footerSpacerColSpan = showAvg ? 10 : 8;
+  const footerSpacerColSpan = showAvg ? 9 : 7;
 
   const sortedItems = useMemo(() => sortMutualItems(items, sort), [items, sort]);
   const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
+  const totalPositiveDiff = items.reduce((sum, row) => {
+    const diff = row.priceDifference ?? 0;
+    return diff > 0 ? sum + diff : sum;
+  }, 0);
+  const totalNegativeDiff = items.reduce((sum, row) => {
+    const diff = row.priceDifference ?? 0;
+    return diff < 0 ? sum + diff : sum;
+  }, 0);
 
   return (
     <ReportCard
@@ -186,7 +194,7 @@ export default function MutualItemsTable({
                 <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
                   {translate("Gap %", "الفجوة %")}
                 </Table.Th>
-                <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
+                <Table.Th colSpan={2} className="bg-gray-50 py-2.5 text-center! text-xs font-semibold text-gray-500">
                   {translate(`Diff (${currency})`, `الفرق (${currency})`)}
                 </Table.Th>
                 <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
@@ -196,11 +204,15 @@ export default function MutualItemsTable({
               <Table.Tr className="border-b border-gray-200">
                 <SideSubHeaders showAvg={showAvg} />
                 <SideSubHeaders showAvg={showAvg} />
+                <DiffSubHeaders />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {sortedItems.map((row, index) => {
                 const { unit, factor } = resolveDisplayUnit(displayUnit, row.unitOfMeasurement, row.unitConversions ?? []);
+                const diff = row.priceDifference ?? 0;
+                const positiveDiff = diff > 0 ? diff : null;
+                const negativeDiff = diff < 0 ? diff : null;
 
                 return (
                   <Table.Tr key={row.materialCode} className="text-gray-600">
@@ -223,8 +235,11 @@ export default function MutualItemsTable({
                       <CheaperBadge cheaper={row.cheaper} supplierAName={supplierAName} supplierBName={supplierBName} />
                     </Table.Td>
                     <Table.Td className="text-center">{formatPercent(row.priceGapPercent)}</Table.Td>
-                    <Table.Td className="text-center">
-                      {formatMoney(toDisplayUnitPrice(row.priceDifference ?? 0, factor))}
+                    <Table.Td className="text-center text-teal-700">
+                      {positiveDiff == null ? "-" : formatMoney(toDisplayUnitPrice(positiveDiff, factor))}
+                    </Table.Td>
+                    <Table.Td className="text-center text-clay-700">
+                      {negativeDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeDiff, factor))}
                     </Table.Td>
                     <Table.Td className="text-center font-semibold text-teal-700">
                       {formatMoney(row.potentialSavings)}
@@ -238,6 +253,8 @@ export default function MutualItemsTable({
                 <Table.Th />
                 <Table.Th className="text-start">{translate("Total", "الإجمالي")}</Table.Th>
                 <Table.Th colSpan={footerSpacerColSpan} />
+                <Table.Th className="text-center font-semibold text-teal-700">{formatMoney(totalPositiveDiff)}</Table.Th>
+                <Table.Th className="text-center font-semibold text-clay-700">{formatMoney(totalNegativeDiff)}</Table.Th>
                 <Table.Th className="text-center font-semibold text-teal-700">{formatMoney(totalSavings)}</Table.Th>
               </Table.Tr>
             </Table.Tfoot>
@@ -264,6 +281,21 @@ function SideSubHeaders({ showAvg }: { showAvg: boolean }) {
       )}
       <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-gray-500">
         {translate(`Last (${currency})`, `آخر سعر (${currency})`)}
+      </Table.Th>
+    </>
+  );
+}
+
+function DiffSubHeaders() {
+  const { translate } = useI18n();
+
+  return (
+    <>
+      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-teal-700">
+        {translate("Positive", "موجب")}
+      </Table.Th>
+      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-clay-700">
+        {translate("Negative", "سالب")}
       </Table.Th>
     </>
   );

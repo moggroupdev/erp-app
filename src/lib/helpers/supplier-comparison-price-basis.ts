@@ -27,7 +27,8 @@ export function applyPriceBasis(
     const lower = Math.min(priceA, priceB);
     const higher = Math.max(priceA, priceB);
     const priceGapPercent = equal || lower === 0 ? 0 : ((higher - lower) / lower) * 100;
-    const priceDifference = equal ? 0 : higher - lower;
+    // Signed A − B so positive means A is higher and negative means B is higher.
+    const priceDifference = equal ? 0 : priceA - priceB;
     const potentialSavings = equal
       ? 0
       : cheaper === "a"

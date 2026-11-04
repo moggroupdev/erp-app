@@ -217,7 +217,7 @@ export type PurchasingMaterialsSupplierComparisonMutualItem = {
   b: PurchasingMaterialsSupplierComparisonItemSide;
   cheaper: "a" | "b" | "equal";
   priceGapPercent: number;
-  /** Absolute unit-price difference |A - B| in the material base unit. Set client-side from price basis. */
+  /** Signed unit-price difference (A − B) in the material base unit. Set client-side from price basis. */
   priceDifference?: number;
   potentialSavings: number;
 };
