@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -10,16 +10,19 @@ import reportsApi from "@/lib/api/reports";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import { GitCompareArrows } from "lucide-react";
 import ErrorSection from "@/components/ui/sections/error";
 import RefetchButton from "@/components/ui/refetch-button";
+import PrintDocument from "@/components/ui/print-document";
 import ReportPageHeader from "@/components/ui/report-page-header";
+import PurchasingMaterialsSupplierComparisonPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-supplier-comparison-print-document";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import DateRangeFilter from "../components/date-range-filter";
 import ReportSkeleton from "../components/report-skeleton";
 import ComparisonEmpty from "./components/comparison-empty";
 import ComparisonOverview from "./components/comparison-overview";
-import MutualItemsTable, { type MutualItemsSort } from "./components/mutual-items-table";
+import MutualItemsTable, { sortMutualItems, type MutualItemsSort } from "./components/mutual-items-table";
 import SupplierPickers from "./components/supplier-pickers";
 
 const PAGE_TITLE = { en: "Supplier Comparison", ar: "مقارنة الموردين" };
@@ -97,6 +100,24 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
   const reportTitle = translate(PAGE_TITLE.en, PAGE_TITLE.ar);
+  const printDate = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", { dateStyle: "long" });
+  const printDateSuffix =
+    from && to
+      ? translate(
+          `from ${formatDate(from, locale)} to ${formatDate(to, locale)}`,
+          `من ${formatDate(from, locale)} إلى ${formatDate(to, locale)}`,
+        )
+      : printDate;
+  const printTitle =
+    data?.suppliers.a.name && data?.suppliers.b.name
+      ? `${translate("Report", "تقرير")} - ${reportTitle} - ${data.suppliers.a.name} / ${data.suppliers.b.name} - ${printDateSuffix}`
+      : `${translate("Report", "تقرير")} - ${reportTitle} - ${printDateSuffix}`;
+
+  const sortedMutualItems = useMemo(
+    () => (data ? sortMutualItems(data.mutualItems, sort) : []),
+    [data, sort],
+  );
+  const sortLabel = getMutualItemsSortLabel(sort, translate);
 
   return (
     <div className="space-y-6">
@@ -110,7 +131,26 @@ export default function Page() {
         icon={GitCompareArrows}
         title={reportTitle}
         subtitle={translate(PAGE_SUBTITLE.en, PAGE_SUBTITLE.ar)}
-        sideElement={differentSuppliers ? <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} /> : undefined}
+        sideElement={
+          differentSuppliers ? (
+            <div className="flex items-center gap-3 sm:gap-4">
+              <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+              {data && !isFetching && !errorMessage && (
+                <PrintDocument title={printTitle} buttonType="icon" paperWidth={297} paperHeight={210}>
+                  <PurchasingMaterialsSupplierComparisonPrintDocument
+                    title={reportTitle}
+                    startDate={from}
+                    endDate={to}
+                    data={data}
+                    items={sortedMutualItems}
+                    displayUnit={displayUnit}
+                    sortLabel={sortLabel}
+                  />
+                </PrintDocument>
+              )}
+            </div>
+          ) : undefined
+        }
       />
 
       <SupplierPickers
@@ -160,4 +200,27 @@ export default function Page() {
       </main>
     </div>
   );
+}
+
+function getMutualItemsSortLabel(sort: MutualItemsSort, translate: (en: string, ar: string) => string) {
+  switch (sort) {
+    case "savings-desc":
+      return translate("Savings (high to low)", "التوفير (من الأعلى للأقل)");
+    case "savings-asc":
+      return translate("Savings (low to high)", "التوفير (من الأقل للأعلى)");
+    case "gap-desc":
+      return translate("Price gap % (high to low)", "فجوة السعر % (من الأعلى للأقل)");
+    case "gap-asc":
+      return translate("Price gap % (low to high)", "فجوة السعر % (من الأقل للأعلى)");
+    case "name-asc":
+      return translate("Name (A-Z)", "الاسم (أ-ي)");
+    case "name-desc":
+      return translate("Name (Z-A)", "الاسم (ي-أ)");
+    case "code-asc":
+      return translate("Code (A-Z)", "الكود (أ-ي)");
+    case "code-desc":
+      return translate("Code (Z-A)", "الكود (ي-أ)");
+    default:
+      return translate("Price gap % (high to low)", "فجوة السعر % (من الأعلى للأقل)");
+  }
 }
