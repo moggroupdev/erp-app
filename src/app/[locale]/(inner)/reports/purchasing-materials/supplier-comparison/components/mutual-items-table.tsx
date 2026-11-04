@@ -57,12 +57,20 @@ export default function MutualItemsTable({
 
   const sortedItems = useMemo(() => sortMutualItems(items, sort), [items, sort]);
   const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
-  const totalPositiveDiff = items.reduce((sum, row) => {
+  const totalPositiveUnitDiff = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
     return diff > 0 ? sum + diff : sum;
   }, 0);
-  const totalNegativeDiff = items.reduce((sum, row) => {
+  const totalNegativeUnitDiff = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
+    return diff < 0 ? sum + diff : sum;
+  }, 0);
+  const totalPositiveTotalDiff = items.reduce((sum, row) => {
+    const diff = row.totalDifference ?? 0;
+    return diff > 0 ? sum + diff : sum;
+  }, 0);
+  const totalNegativeTotalDiff = items.reduce((sum, row) => {
+    const diff = row.totalDifference ?? 0;
     return diff < 0 ? sum + diff : sum;
   }, 0);
 
@@ -195,7 +203,10 @@ export default function MutualItemsTable({
                   {translate("Gap %", "الفجوة %")}
                 </Table.Th>
                 <Table.Th colSpan={2} className="bg-gray-50 py-2.5 text-center! text-xs font-semibold text-gray-500">
-                  {translate(`Diff (${currency})`, `الفرق (${currency})`)}
+                  {translate(`Unit Diff (${currency})`, `فرق الوحدة (${currency})`)}
+                </Table.Th>
+                <Table.Th colSpan={2} className="bg-gray-50 py-2.5 text-center! text-xs font-semibold text-gray-500">
+                  {translate(`Total Diff (${currency})`, `فرق الإجمالي (${currency})`)}
                 </Table.Th>
                 <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
                   {translate(`Savings (${currency})`, `التوفير (${currency})`)}
@@ -205,14 +216,18 @@ export default function MutualItemsTable({
                 <SideSubHeaders showAvg={showAvg} />
                 <SideSubHeaders showAvg={showAvg} />
                 <DiffSubHeaders />
+                <DiffSubHeaders />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {sortedItems.map((row, index) => {
                 const { unit, factor } = resolveDisplayUnit(displayUnit, row.unitOfMeasurement, row.unitConversions ?? []);
-                const diff = row.priceDifference ?? 0;
-                const positiveDiff = diff > 0 ? diff : null;
-                const negativeDiff = diff < 0 ? diff : null;
+                const unitDiff = row.priceDifference ?? 0;
+                const positiveUnitDiff = unitDiff > 0 ? unitDiff : null;
+                const negativeUnitDiff = unitDiff < 0 ? unitDiff : null;
+                const totalDiff = row.totalDifference ?? 0;
+                const positiveTotalDiff = totalDiff > 0 ? totalDiff : null;
+                const negativeTotalDiff = totalDiff < 0 ? totalDiff : null;
 
                 return (
                   <Table.Tr key={row.materialCode} className="text-gray-600">
@@ -236,10 +251,16 @@ export default function MutualItemsTable({
                     </Table.Td>
                     <Table.Td className="text-center">{formatPercent(row.priceGapPercent)}</Table.Td>
                     <Table.Td className="text-center text-teal-700">
-                      {positiveDiff == null ? "-" : formatMoney(toDisplayUnitPrice(positiveDiff, factor))}
+                      {positiveUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(positiveUnitDiff, factor))}
                     </Table.Td>
                     <Table.Td className="text-center text-clay-700">
-                      {negativeDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeDiff, factor))}
+                      {negativeUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeUnitDiff, factor))}
+                    </Table.Td>
+                    <Table.Td className="text-center text-teal-700">
+                      {positiveTotalDiff == null ? "-" : formatMoney(positiveTotalDiff)}
+                    </Table.Td>
+                    <Table.Td className="text-center text-clay-700">
+                      {negativeTotalDiff == null ? "-" : formatMoney(negativeTotalDiff)}
                     </Table.Td>
                     <Table.Td className="text-center font-semibold text-teal-700">
                       {formatMoney(row.potentialSavings)}
@@ -253,9 +274,11 @@ export default function MutualItemsTable({
                 <Table.Th />
                 <Table.Th className="text-start">{translate("Total", "الإجمالي")}</Table.Th>
                 <Table.Th colSpan={footerSpacerColSpan} />
-                <Table.Th className="text-center font-semibold text-teal-700">{formatMoney(totalPositiveDiff)}</Table.Th>
-                <Table.Th className="text-center font-semibold text-clay-700">{formatMoney(totalNegativeDiff)}</Table.Th>
-                <Table.Th className="text-center font-semibold text-teal-700">{formatMoney(totalSavings)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalPositiveUnitDiff)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-clay-700">{formatMoney(totalNegativeUnitDiff)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalPositiveTotalDiff)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-clay-700">{formatMoney(totalNegativeTotalDiff)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalSavings)}</Table.Th>
               </Table.Tr>
             </Table.Tfoot>
           </Table>

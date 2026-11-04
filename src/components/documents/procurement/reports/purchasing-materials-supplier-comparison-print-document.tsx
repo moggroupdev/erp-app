@@ -14,8 +14,8 @@ import type {
   PurchasingMaterialsSupplierComparisonMutualItem,
 } from "@/types/reports";
 
-const COLUMN_WIDTHS_LAST = ["3%", "16%", "5%", "7%", "9%", "7%", "9%", "8%", "6%", "7%", "7%", "11%"];
-const COLUMN_WIDTHS_AVG = ["3%", "13%", "5%", "5%", "6%", "7%", "5%", "6%", "7%", "7%", "5%", "7%", "7%", "12%"];
+const COLUMN_WIDTHS_LAST = ["3%", "14%", "5%", "6%", "7%", "6%", "7%", "7%", "5%", "6%", "6%", "6%", "6%", "10%"];
+const COLUMN_WIDTHS_AVG = ["3%", "11%", "4%", "5%", "5%", "6%", "5%", "5%", "6%", "6%", "5%", "5%", "5%", "5%", "5%", "9%"];
 
 const SIDE_EDGE = "border-s-[0.5px] border-gray-300";
 const SIDE_COL = "border-s-[0.5px] border-gray-200";
@@ -47,12 +47,20 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
   const printedAt = formatDateAndTime(new Date(), locale);
   const { a, b } = data.suppliers;
   const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
-  const totalPositiveDiff = items.reduce((sum, row) => {
+  const totalPositiveUnitDiff = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
     return diff > 0 ? sum + diff : sum;
   }, 0);
-  const totalNegativeDiff = items.reduce((sum, row) => {
+  const totalNegativeUnitDiff = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
+    return diff < 0 ? sum + diff : sum;
+  }, 0);
+  const totalPositiveTotalDiff = items.reduce((sum, row) => {
+    const diff = row.totalDifference ?? 0;
+    return diff > 0 ? sum + diff : sum;
+  }, 0);
+  const totalNegativeTotalDiff = items.reduce((sum, row) => {
+    const diff = row.totalDifference ?? 0;
     return diff < 0 ? sum + diff : sum;
   }, 0);
   const showAvg = priceBasis === "avg";
@@ -191,19 +199,23 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 <th rowSpan={2} className={`${SIDE_EDGE} px-1.5 py-1.5 text-center align-bottom`}>
                   {translate("Cheaper", "الأرخص")}
                 </th>
-                <th rowSpan={2} className="px-1.5 py-1.5 text-center align-bottom">
+                <th rowSpan={2} className={`${SIDE_COL} px-1.5 py-1.5 text-center align-bottom`}>
                   {translate("Gap %", "الفجوة %")}
                 </th>
-                <th colSpan={2} className="border-b border-gray-200 px-1.5 py-1.5 text-center">
-                  {translate(`Diff (${currency})`, `الفرق (${currency})`)}
+                <th colSpan={2} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
+                  {translate(`Unit Diff (${currency})`, `فرق الوحدة (${currency})`)}
                 </th>
-                <th rowSpan={2} className="px-1.5 py-1.5 text-center align-bottom">
+                <th colSpan={2} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
+                  {translate(`Total Diff (${currency})`, `فرق الإجمالي (${currency})`)}
+                </th>
+                <th rowSpan={2} className={`${SIDE_EDGE} px-1.5 py-1.5 text-center align-bottom`}>
                   {translate(`Savings (${currency})`, `التوفير (${currency})`)}
                 </th>
               </tr>
               <tr className="border-b border-gray-300 bg-gray-50 text-[7px] font-medium tracking-wide text-gray-500 uppercase">
                 <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
                 <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
+                <DiffSubHeaders translate={translate} />
                 <DiffSubHeaders translate={translate} />
               </tr>
             </thead>
@@ -214,9 +226,12 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                   row.unitOfMeasurement,
                   row.unitConversions ?? [],
                 );
-                const diff = row.priceDifference ?? 0;
-                const positiveDiff = diff > 0 ? diff : null;
-                const negativeDiff = diff < 0 ? diff : null;
+                const unitDiff = row.priceDifference ?? 0;
+                const positiveUnitDiff = unitDiff > 0 ? unitDiff : null;
+                const negativeUnitDiff = unitDiff < 0 ? unitDiff : null;
+                const totalDiff = row.totalDifference ?? 0;
+                const positiveTotalDiff = totalDiff > 0 ? totalDiff : null;
+                const negativeTotalDiff = totalDiff < 0 ? totalDiff : null;
 
                 return (
                   <tr key={row.materialCode} className="break-inside-avoid border-b border-gray-200">
@@ -231,14 +246,22 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                     <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center`}>
                       {cheaperLabel(row.cheaper, a.name, b.name, translate)}
                     </td>
-                    <td className="px-1.5 py-1.5 text-center">{formatPercent(row.priceGapPercent)}</td>
-                    <td className="px-1.5 py-1.5 text-center text-teal-700">
-                      {positiveDiff == null ? "-" : formatMoney(toDisplayUnitPrice(positiveDiff, factor))}
+                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-center`}>{formatPercent(row.priceGapPercent)}</td>
+                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
+                      {positiveUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(positiveUnitDiff, factor))}
                     </td>
-                    <td className="px-1.5 py-1.5 text-center text-clay-700">
-                      {negativeDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeDiff, factor))}
+                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
+                      {negativeUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeUnitDiff, factor))}
                     </td>
-                    <td className="px-1.5 py-1.5 text-center font-semibold">{formatMoney(row.potentialSavings)}</td>
+                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
+                      {positiveTotalDiff == null ? "-" : formatMoney(positiveTotalDiff)}
+                    </td>
+                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
+                      {negativeTotalDiff == null ? "-" : formatMoney(negativeTotalDiff)}
+                    </td>
+                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center font-semibold`}>
+                      {formatMoney(row.potentialSavings)}
+                    </td>
                   </tr>
                 );
               })}
@@ -246,9 +269,19 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 <td className="px-1.5 py-1.5" />
                 <td className="px-1.5 py-1.5 text-start">{translate("Total", "الإجمالي")}</td>
                 <td colSpan={footerSpacerColSpan} className="px-1.5 py-1.5" />
-                <td className="px-1.5 py-1.5 text-center text-teal-700">{formatMoney(totalPositiveDiff)}</td>
-                <td className="px-1.5 py-1.5 text-center text-clay-700">{formatMoney(totalNegativeDiff)}</td>
-                <td className="px-1.5 py-1.5 text-center">{formatMoney(totalSavings)}</td>
+                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
+                  {formatMoney(totalPositiveUnitDiff)}
+                </td>
+                <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
+                  {formatMoney(totalNegativeUnitDiff)}
+                </td>
+                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
+                  {formatMoney(totalPositiveTotalDiff)}
+                </td>
+                <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
+                  {formatMoney(totalNegativeTotalDiff)}
+                </td>
+                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center`}>{formatMoney(totalSavings)}</td>
               </tr>
             </tbody>
           </table>
@@ -310,7 +343,7 @@ function SideSubHeaders({
 function DiffSubHeaders({ translate }: { translate: (en: string, ar: string) => string }) {
   return (
     <>
-      <th className={`${SIDE_COL} px-1.5 py-1 text-center text-teal-700`}>{translate("Positive", "موجب")}</th>
+      <th className={`${SIDE_EDGE} px-1.5 py-1 text-center text-teal-700`}>{translate("Positive", "موجب")}</th>
       <th className={`${SIDE_COL} px-1.5 py-1 text-center text-clay-700`}>{translate("Negative", "سالب")}</th>
     </>
   );
