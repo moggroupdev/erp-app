@@ -60,7 +60,10 @@ export default function MaterialBomSection({
   const deleteMutation = useMutation({
     mutationFn: (itemId: string) => mmBomsApi.deleteItem({ privateRequest, itemId }),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.mmBoms.detail(material.code) });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.mmBoms.detail(material.code) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.materials.changeHistories(material.code) }),
+      ]);
       toast.success(translate("BOM item deleted successfully.", "تم حذف بند قائمة المواد بنجاح."));
       setItemToDelete(null);
     },

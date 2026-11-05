@@ -189,6 +189,58 @@ export type PurchasingMaterialsSupplierStats = {
   materials: PurchasingMaterialsByMaterial[];
 };
 
+// ================ Supplier Comparison ================
+
+export type PurchasingMaterialsSupplierComparisonSide = {
+  id: string;
+  code: string;
+  name: string;
+  totalSpend: number;
+  orderCount: number;
+  materialCount: number;
+};
+
+export type PurchasingMaterialsSupplierComparisonItemSide = {
+  quantity: number;
+  avgUnitPrice: number;
+  lastUnitPrice: number | null;
+  lastPurchasedAt: string | null;
+  orderCount: number;
+};
+
+export type PurchasingMaterialsSupplierComparisonMutualItem = {
+  materialCode: string;
+  materialTitle: string;
+  unitOfMeasurement: MaterialUnit;
+  unitConversions: MaterialUnitConversionSummary[];
+  a: PurchasingMaterialsSupplierComparisonItemSide;
+  b: PurchasingMaterialsSupplierComparisonItemSide;
+  cheaper: "a" | "b" | "equal";
+  priceGapPercent: number;
+  /** Signed unit-price difference (A − B) in the material base unit. Set client-side from price basis. */
+  priceDifference?: number;
+  /** Potential savings if choosing supplier A (only when A is cheaper). Set client-side from price basis. */
+  potentialSavingsA?: number;
+  /** Potential savings if choosing supplier B (only when B is cheaper). Set client-side from price basis. */
+  potentialSavingsB?: number;
+  /** Combined potential savings (A + B directions). */
+  potentialSavings: number;
+};
+
+export type PurchasingMaterialsSupplierComparison = {
+  suppliers: {
+    a: PurchasingMaterialsSupplierComparisonSide;
+    b: PurchasingMaterialsSupplierComparisonSide;
+  };
+  counts: {
+    mutual: number;
+    onlyA: number;
+    onlyB: number;
+  };
+  totalPotentialSavings: number;
+  mutualItems: PurchasingMaterialsSupplierComparisonMutualItem[];
+};
+
 // ================ Total Amount Mismatches ================
 
 export type PurchasingMaterialsTotalAmountMismatchOverview = {

@@ -125,7 +125,10 @@ export default function MmBomItemModal({
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.mmBoms.detail(manufacturedMaterialCode) });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.mmBoms.detail(manufacturedMaterialCode) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.materials.changeHistories(manufacturedMaterialCode) }),
+      ]);
       toast.success(
         isUpdate
           ? translate("BOM item updated successfully.", "تم تحديث بند قائمة المواد بنجاح.")

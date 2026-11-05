@@ -28,17 +28,19 @@ export default function ReportCard({
   return (
     <article className={`overflow-hidden rounded-3xl bg-white ${className}`}>
       <header className="border-b border-dashed border-gray-200 px-5 py-5 sm:px-6">
-        <div className="flex items-start gap-3">
-          {Icon && (
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconStyles[accent]}`}>
-              <Icon size={18} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            {Icon && (
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconStyles[accent]}`}>
+                <Icon size={18} />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xs font-semibold text-gray-800 sm:text-sm">{title}</h3>
+              {description && <p className="mt-1 text-xs leading-[1.75] text-gray-500">{description}</p>}
             </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3 className="text-xs font-semibold text-gray-800 sm:text-sm">{title}</h3>
-            {description && <p className="mt-1 text-xs leading-[1.75] text-gray-500">{description}</p>}
           </div>
-          {headerAction && <div className="shrink-0">{headerAction}</div>}
+          {headerAction && <div className="w-full shrink-0 sm:w-auto">{headerAction}</div>}
         </div>
       </header>
 

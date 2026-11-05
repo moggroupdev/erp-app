@@ -98,6 +98,18 @@ export default function Page() {
               }}
             />
           </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_SUPPLIER_COMPARISON_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Supplier Comparison", ar: "مقارنة الموردين" },
+                description: {
+                  en: "Compare two suppliers on mutual materials: prices, volume, and potential savings.",
+                  ar: "قارن بين موردين على المواد المشتركة: الأسعار والكميات والتوفير المحتمل.",
+                },
+                href: "/reports/purchasing-materials/supplier-comparison",
+              }}
+            />
+          </PermissionGuard>
           <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_OUTLIERS_REPORT}>
             <ReportLinkCard
               report={{

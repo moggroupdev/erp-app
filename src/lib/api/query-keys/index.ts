@@ -86,6 +86,9 @@ export const queryKeys = {
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
     typeChangeImpact: (code: string, targetType: string | null) =>
       [...queryKeys.materials.detail(code), "type-change-impact", targetType] as const,
+    changeHistories: (code: string) => [...queryKeys.materials.detail(code), "change-history"] as const,
+    changeHistory: (code: string, page: number) =>
+      [...queryKeys.materials.changeHistories(code), page] as const,
   },
   mmBoms: {
     all: ["mm-boms"] as const,
@@ -177,6 +180,12 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "subcategory-stats", subCategoryId, filters] as const,
       supplierStats: (supplierId: string, filters?: { from?: string; to?: string; groupBy?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "supplier-stats", supplierId, filters] as const,
+      supplierComparison: (
+        supplierAId: string,
+        supplierBId: string,
+        filters?: { from?: string; to?: string },
+      ) =>
+        [...queryKeys.reports.purchasingMaterials.all, "supplier-comparison", supplierAId, supplierBId, filters] as const,
       totalAmountMismatches: (filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "total-amount-mismatches", filters] as const,
       priceOutliers: (filters?: { from?: string; to?: string; threshold?: number }) =>

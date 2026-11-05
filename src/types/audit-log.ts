@@ -28,3 +28,23 @@ export type AuditLogDetailed = AuditLog & {
   newRow: AuditLogSnapshot | null;
   actorUser: { id: string; name: string } | null;
 };
+
+/** Curated material change-history event from GET /audit-logs/materials/:code/timeline */
+export type MaterialChangeHistorySource = "material" | "unit_conversion" | "manufactured_bom";
+
+export type MaterialChangeHistoryChange = {
+  field: string;
+  oldValue: unknown;
+  newValue: unknown;
+};
+
+export type MaterialChangeHistoryEvent = {
+  id: string;
+  createdAt: Date;
+  action: AuditAction;
+  source: MaterialChangeHistorySource;
+  actorUserId: string | null;
+  actorName: string | null;
+  subject: string | null;
+  changes: MaterialChangeHistoryChange[];
+};
