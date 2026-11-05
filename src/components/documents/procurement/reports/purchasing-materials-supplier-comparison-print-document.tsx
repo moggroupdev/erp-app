@@ -14,8 +14,8 @@ import type {
   PurchasingMaterialsSupplierComparisonMutualItem,
 } from "@/types/reports";
 
-const COLUMN_WIDTHS_LAST = ["3%", "15%", "5%", "7%", "8%", "7%", "8%", "7%", "5%", "6%", "6%", "12%", "11%"];
-const COLUMN_WIDTHS_AVG = ["3%", "12%", "4%", "5%", "5%", "6%", "5%", "5%", "6%", "6%", "5%", "5%", "5%", "11%", "11%"];
+const COLUMN_WIDTHS_LAST = ["3%", "18%", "5%", "7%", "8%", "7%", "8%", "8%", "6%", "7%", "7%", "8%", "8%"];
+const COLUMN_WIDTHS_AVG = ["3%", "16%", "4%", "5%", "5%", "6%", "5%", "5%", "6%", "7%", "7%", "6%", "6%", "7%", "7%"];
 
 const SIDE_EDGE = "border-s-[0.5px] border-gray-300";
 const SIDE_COL = "border-s-[0.5px] border-gray-200";
@@ -87,8 +87,14 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
             value={endDate ? formatDate(endDate, locale) : "-"}
           />
           <CompactDetail label={translate("Mutual materials", "المواد المشتركة")} value={String(data.counts.mutual)} />
-          <CompactDetail label={translate("Only supplier A", "فقط المورد أ")} value={String(data.counts.onlyA)} />
-          <CompactDetail label={translate("Only supplier B", "فقط المورد ب")} value={String(data.counts.onlyB)} />
+          <CompactDetail
+            label={translate("Materials supplied by A only", "مواد وردها المورد أ فقط")}
+            value={String(data.counts.onlyA)}
+          />
+          <CompactDetail
+            label={translate("Materials supplied by B only", "مواد وردها المورد ب فقط")}
+            value={String(data.counts.onlyB)}
+          />
         </div>
 
         <table className="w-full table-fixed border-collapse overflow-hidden rounded border border-gray-200 text-[9px]">
@@ -171,10 +177,10 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 <th rowSpan={2} className="px-1.5 py-1.5 text-center align-bottom">
                   #
                 </th>
-                <th rowSpan={2} className="px-1.5 py-1.5 text-start align-bottom">
+                <th rowSpan={2} className={`${SIDE_COL} px-1.5 py-1.5 text-start align-bottom`}>
                   {translate("Material", "المادة")}
                 </th>
-                <th rowSpan={2} className="px-1.5 py-1.5 text-center align-bottom">
+                <th rowSpan={2} className={`${SIDE_COL} px-1.5 py-1.5 text-center align-bottom`}>
                   {translate("Unit", "الوحدة")}
                 </th>
                 <th colSpan={sideColSpan} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
@@ -225,11 +231,11 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 return (
                   <tr key={row.materialCode} className="break-inside-avoid border-b border-gray-200">
                     <td className="px-1.5 py-1.5 text-center text-gray-500">{index + 1}</td>
-                    <td className="px-1.5 py-1.5 text-start">
+                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-start`}>
                       <span className="block leading-snug font-medium text-gray-800">{row.materialTitle}</span>
                       <span className="mt-0.5 block font-mono text-[7px] text-gray-400">{row.materialCode}</span>
                     </td>
-                    <td className="px-1.5 py-1.5 text-center">{getMaterialUnitLabel(unit, locale)}</td>
+                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-center`}>{getMaterialUnitLabel(unit, locale)}</td>
                     <SideCells side={row.a} factor={factor} locale={locale} showAvg={showAvg} />
                     <SideCells side={row.b} factor={factor} locale={locale} showAvg={showAvg} />
                     <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center`}>
@@ -253,8 +259,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
               })}
               <tr className="break-inside-avoid border-b border-gray-200 bg-gray-50 font-semibold text-gray-700">
                 <td className="px-1.5 py-1.5" />
-                <td className="px-1.5 py-1.5 text-start">{translate("Total", "الإجمالي")}</td>
-                <td colSpan={footerSpacerColSpan} className="px-1.5 py-1.5" />
+                <td className={`${SIDE_COL} px-1.5 py-1.5 text-start`}>{translate("Total", "الإجمالي")}</td>
+                <td colSpan={footerSpacerColSpan} className={`${SIDE_COL} px-1.5 py-1.5`} />
                 <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-clay-700`}>
                   {formatMoney(totalUnitDiffA)}
                 </td>

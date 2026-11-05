@@ -42,15 +42,15 @@ export default function ComparisonOverview({ data }: { data: PurchasingMaterials
           icon={<Boxes size={18} />}
         />
         <KpiCard
-          label={translate("Only supplier A", "فقط المورد أ")}
+          label={translate("Materials supplied by A only", "مواد وردها المورد أ فقط")}
           value={data.counts.onlyA}
-          hint={translate("Not supplied by B in this period", "لم يوردها ب في هذه الفترة")}
+          hint={translate("Supplier B did not supply them in this period", "لم يوردها المورد ب في هذه الفترة")}
           icon={<ClipboardList size={18} />}
         />
         <KpiCard
-          label={translate("Only supplier B", "فقط المورد ب")}
+          label={translate("Materials supplied by B only", "مواد وردها المورد ب فقط")}
           value={data.counts.onlyB}
-          hint={translate("Not supplied by A in this period", "لم يوردها أ في هذه الفترة")}
+          hint={translate("Supplier A did not supply them in this period", "لم يوردها المورد أ في هذه الفترة")}
           icon={<ClipboardList size={18} />}
         />
       </div>
