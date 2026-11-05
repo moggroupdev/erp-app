@@ -3,8 +3,8 @@
 import { useMemo } from "react";
 import ProtectedLink from "@/components/ui/protected-link";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
-import { Select, Table } from "@mantine/core";
-import { Boxes } from "lucide-react";
+import { Select, Table, Tooltip } from "@mantine/core";
+import { Boxes, Info } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, MATERIAL_UNIT_LABELS_LIST, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { getSemanticStatusColors } from "@/lib/constants/status-colors";
@@ -199,7 +199,26 @@ export default function MutualItemsTable({
                   {translate(`Unit Diff (${currency})`, `فرق الوحدة (${currency})`)}
                 </Table.Th>
                 <Table.Th colSpan={2} className="bg-gray-50 py-2.5 text-center! text-xs font-semibold text-gray-500">
-                  {translate(`Savings (${currency})`, `التوفير (${currency})`)}
+                  <span className="inline-flex items-center justify-center gap-1">
+                    {translate(`Savings (${currency})`, `التوفير (${currency})`)}
+                    <Tooltip
+                      withArrow
+                      multiline
+                      maw={280}
+                      label={translate(
+                        "What you could save by buying from this cheaper supplier instead of the other one.",
+                        "ما يمكن توفيره بالشراء من هذا المورد الأرخص بدل المورد الآخر.",
+                      )}
+                    >
+                      <button
+                        type="button"
+                        className="inline-flex rounded-full text-gray-400 hover:text-gray-600"
+                        aria-label={translate("Savings explanation", "شرح التوفير")}
+                      >
+                        <Info size={13} strokeWidth={2} />
+                      </button>
+                    </Tooltip>
+                  </span>
                 </Table.Th>
               </Table.Tr>
               <Table.Tr className="border-b border-gray-200">
