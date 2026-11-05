@@ -46,13 +46,13 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
   const { a, b } = data.suppliers;
-  const totalPositiveUnitDiff = items.reduce((sum, row) => {
+  const totalUnitDiffA = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
     return diff > 0 ? sum + diff : sum;
   }, 0);
-  const totalNegativeUnitDiff = items.reduce((sum, row) => {
+  const totalUnitDiffB = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
-    return diff < 0 ? sum + diff : sum;
+    return diff < 0 ? sum + Math.abs(diff) : sum;
   }, 0);
   const totalSavingsA = items.reduce((sum, row) => sum + (row.potentialSavingsA ?? 0), 0);
   const totalSavingsB = items.reduce((sum, row) => sum + (row.potentialSavingsB ?? 0), 0);
@@ -205,8 +205,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
               <tr className="border-b border-gray-300 bg-gray-50 text-[7px] font-medium tracking-wide text-gray-500 uppercase">
                 <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
                 <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
-                <DiffSubHeaders translate={translate} />
-                <SavingsSubHeaders supplierAName={a.name} supplierBName={b.name} />
+                <SupplierSideSubHeaders supplierAName={a.name} supplierBName={b.name} tone="clay" />
+                <SupplierSideSubHeaders supplierAName={a.name} supplierBName={b.name} tone="teal" />
               </tr>
             </thead>
             <tbody>
@@ -217,8 +217,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                   row.unitConversions ?? [],
                 );
                 const unitDiff = row.priceDifference ?? 0;
-                const positiveUnitDiff = unitDiff > 0 ? unitDiff : null;
-                const negativeUnitDiff = unitDiff < 0 ? unitDiff : null;
+                const unitDiffA = unitDiff > 0 ? unitDiff : null;
+                const unitDiffB = unitDiff < 0 ? Math.abs(unitDiff) : null;
                 const savingsA = row.potentialSavingsA ?? 0;
                 const savingsB = row.potentialSavingsB ?? 0;
 
@@ -236,11 +236,11 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                       {cheaperLabel(row.cheaper, a.name, b.name, translate)}
                     </td>
                     <td className={`${SIDE_COL} px-1.5 py-1.5 text-center`}>{formatPercent(row.priceGapPercent)}</td>
-                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
-                      {positiveUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(positiveUnitDiff, factor))}
+                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-clay-700`}>
+                      {unitDiffA == null ? "-" : formatMoney(toDisplayUnitPrice(unitDiffA, factor))}
                     </td>
                     <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
-                      {negativeUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeUnitDiff, factor))}
+                      {unitDiffB == null ? "-" : formatMoney(toDisplayUnitPrice(unitDiffB, factor))}
                     </td>
                     <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center font-semibold text-teal-700`}>
                       {savingsA > 0 ? formatMoney(savingsA) : "-"}
@@ -255,11 +255,11 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 <td className="px-1.5 py-1.5" />
                 <td className="px-1.5 py-1.5 text-start">{translate("Total", "الإجمالي")}</td>
                 <td colSpan={footerSpacerColSpan} className="px-1.5 py-1.5" />
-                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
-                  {formatMoney(totalPositiveUnitDiff)}
+                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-clay-700`}>
+                  {formatMoney(totalUnitDiffA)}
                 </td>
                 <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
-                  {formatMoney(totalNegativeUnitDiff)}
+                  {formatMoney(totalUnitDiffB)}
                 </td>
                 <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
                   {formatMoney(totalSavingsA)}
@@ -325,25 +325,26 @@ function SideSubHeaders({
   );
 }
 
-function DiffSubHeaders({ translate }: { translate: (en: string, ar: string) => string }) {
-  return (
-    <>
-      <th className={`${SIDE_EDGE} px-1.5 py-1 text-center text-teal-700`}>{translate("Positive", "موجب")}</th>
-      <th className={`${SIDE_COL} px-1.5 py-1 text-center text-clay-700`}>{translate("Negative", "سالب")}</th>
-    </>
-  );
-}
+function SupplierSideSubHeaders({
+  supplierAName,
+  supplierBName,
+  tone,
+}: {
+  supplierAName: string;
+  supplierBName: string;
+  tone: "teal" | "clay";
+}) {
+  const toneClass = tone === "teal" ? "text-teal-700" : "text-clay-700";
 
-function SavingsSubHeaders({ supplierAName, supplierBName }: { supplierAName: string; supplierBName: string }) {
   return (
     <>
-      <th className={`${SIDE_EDGE} px-1.5 py-1 text-center text-teal-700 normal-case`} title={supplierAName}>
+      <th className={`${SIDE_EDGE} px-1.5 py-1 text-center ${toneClass} normal-case`} title={supplierAName}>
         <span className="inline-flex max-w-24 items-center justify-center gap-0.5 truncate">
           <span className="font-semibold text-gray-600">A</span>
           <span className="truncate">{supplierAName}</span>
         </span>
       </th>
-      <th className={`${SIDE_COL} px-1.5 py-1 text-center text-teal-700 normal-case`} title={supplierBName}>
+      <th className={`${SIDE_COL} px-1.5 py-1 text-center ${toneClass} normal-case`} title={supplierBName}>
         <span className="inline-flex max-w-24 items-center justify-center gap-0.5 truncate">
           <span className="font-semibold text-gray-600">B</span>
           <span className="truncate">{supplierBName}</span>

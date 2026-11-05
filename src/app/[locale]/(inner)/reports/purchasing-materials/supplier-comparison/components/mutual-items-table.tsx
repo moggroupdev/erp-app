@@ -56,13 +56,13 @@ export default function MutualItemsTable({
   const footerSpacerColSpan = showAvg ? 9 : 7;
 
   const sortedItems = useMemo(() => sortMutualItems(items, sort), [items, sort]);
-  const totalPositiveUnitDiff = items.reduce((sum, row) => {
+  const totalUnitDiffA = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
     return diff > 0 ? sum + diff : sum;
   }, 0);
-  const totalNegativeUnitDiff = items.reduce((sum, row) => {
+  const totalUnitDiffB = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
-    return diff < 0 ? sum + diff : sum;
+    return diff < 0 ? sum + Math.abs(diff) : sum;
   }, 0);
   const totalSavingsA = items.reduce((sum, row) => sum + (row.potentialSavingsA ?? 0), 0);
   const totalSavingsB = items.reduce((sum, row) => sum + (row.potentialSavingsB ?? 0), 0);
@@ -205,16 +205,16 @@ export default function MutualItemsTable({
               <Table.Tr className="border-b border-gray-200">
                 <SideSubHeaders showAvg={showAvg} />
                 <SideSubHeaders showAvg={showAvg} />
-                <DiffSubHeaders />
-                <SavingsSubHeaders supplierAName={supplierAName} supplierBName={supplierBName} />
+                <SupplierSideSubHeaders supplierAName={supplierAName} supplierBName={supplierBName} tone="clay" />
+                <SupplierSideSubHeaders supplierAName={supplierAName} supplierBName={supplierBName} tone="teal" />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {sortedItems.map((row, index) => {
                 const { unit, factor } = resolveDisplayUnit(displayUnit, row.unitOfMeasurement, row.unitConversions ?? []);
                 const unitDiff = row.priceDifference ?? 0;
-                const positiveUnitDiff = unitDiff > 0 ? unitDiff : null;
-                const negativeUnitDiff = unitDiff < 0 ? unitDiff : null;
+                const unitDiffA = unitDiff > 0 ? unitDiff : null;
+                const unitDiffB = unitDiff < 0 ? Math.abs(unitDiff) : null;
                 const savingsA = row.potentialSavingsA ?? 0;
                 const savingsB = row.potentialSavingsB ?? 0;
 
@@ -239,11 +239,11 @@ export default function MutualItemsTable({
                       <CheaperBadge cheaper={row.cheaper} supplierAName={supplierAName} supplierBName={supplierBName} />
                     </Table.Td>
                     <Table.Td className="text-center">{formatPercent(row.priceGapPercent)}</Table.Td>
-                    <Table.Td className="text-center text-teal-700">
-                      {positiveUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(positiveUnitDiff, factor))}
+                    <Table.Td className="text-center text-clay-700">
+                      {unitDiffA == null ? "-" : formatMoney(toDisplayUnitPrice(unitDiffA, factor))}
                     </Table.Td>
                     <Table.Td className="text-center text-clay-700">
-                      {negativeUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeUnitDiff, factor))}
+                      {unitDiffB == null ? "-" : formatMoney(toDisplayUnitPrice(unitDiffB, factor))}
                     </Table.Td>
                     <Table.Td className="text-center font-semibold text-teal-700">
                       {savingsA > 0 ? formatMoney(savingsA) : "-"}
@@ -260,8 +260,8 @@ export default function MutualItemsTable({
                 <Table.Th />
                 <Table.Th className="text-start">{translate("Total", "الإجمالي")}</Table.Th>
                 <Table.Th colSpan={footerSpacerColSpan} />
-                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalPositiveUnitDiff)}</Table.Th>
-                <Table.Th className="text-center! font-semibold text-clay-700">{formatMoney(totalNegativeUnitDiff)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-clay-700">{formatMoney(totalUnitDiffA)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-clay-700">{formatMoney(totalUnitDiffB)}</Table.Th>
                 <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalSavingsA)}</Table.Th>
                 <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalSavingsB)}</Table.Th>
               </Table.Tr>
@@ -294,25 +294,20 @@ function SideSubHeaders({ showAvg }: { showAvg: boolean }) {
   );
 }
 
-function DiffSubHeaders() {
-  const { translate } = useI18n();
+function SupplierSideSubHeaders({
+  supplierAName,
+  supplierBName,
+  tone,
+}: {
+  supplierAName: string;
+  supplierBName: string;
+  tone: "teal" | "clay";
+}) {
+  const toneClass = tone === "teal" ? "text-teal-700" : "text-clay-700";
 
   return (
     <>
-      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-teal-700">
-        {translate("Positive", "موجب")}
-      </Table.Th>
-      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-clay-700">
-        {translate("Negative", "سالب")}
-      </Table.Th>
-    </>
-  );
-}
-
-function SavingsSubHeaders({ supplierAName, supplierBName }: { supplierAName: string; supplierBName: string }) {
-  return (
-    <>
-      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-teal-700" title={supplierAName}>
+      <Table.Th className={`bg-gray-50 py-2 text-center! text-[11px] font-semibold ${toneClass}`} title={supplierAName}>
         <span className="inline-flex max-w-28 items-center justify-center gap-1 truncate">
           <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-gray-200/80 text-[9px] font-semibold text-gray-600">
             A
@@ -320,7 +315,7 @@ function SavingsSubHeaders({ supplierAName, supplierBName }: { supplierAName: st
           <span className="truncate">{supplierAName}</span>
         </span>
       </Table.Th>
-      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-teal-700" title={supplierBName}>
+      <Table.Th className={`bg-gray-50 py-2 text-center! text-[11px] font-semibold ${toneClass}`} title={supplierBName}>
         <span className="inline-flex max-w-28 items-center justify-center gap-1 truncate">
           <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-gray-200/80 text-[9px] font-semibold text-gray-600">
             B
