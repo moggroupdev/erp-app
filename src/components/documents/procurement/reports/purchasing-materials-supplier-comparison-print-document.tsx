@@ -14,8 +14,8 @@ import type {
   PurchasingMaterialsSupplierComparisonMutualItem,
 } from "@/types/reports";
 
-const COLUMN_WIDTHS_LAST = ["3%", "14%", "5%", "6%", "7%", "6%", "7%", "7%", "5%", "6%", "6%", "6%", "6%", "10%"];
-const COLUMN_WIDTHS_AVG = ["3%", "11%", "4%", "5%", "5%", "6%", "5%", "5%", "6%", "6%", "5%", "5%", "5%", "5%", "5%", "9%"];
+const COLUMN_WIDTHS_LAST = ["3%", "15%", "5%", "7%", "8%", "7%", "8%", "7%", "5%", "6%", "6%", "12%", "11%"];
+const COLUMN_WIDTHS_AVG = ["3%", "12%", "4%", "5%", "5%", "6%", "5%", "5%", "6%", "6%", "5%", "5%", "5%", "11%", "11%"];
 
 const SIDE_EDGE = "border-s-[0.5px] border-gray-300";
 const SIDE_COL = "border-s-[0.5px] border-gray-200";
@@ -46,7 +46,6 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
   const { a, b } = data.suppliers;
-  const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
   const totalPositiveUnitDiff = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
     return diff > 0 ? sum + diff : sum;
@@ -55,14 +54,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
     const diff = row.priceDifference ?? 0;
     return diff < 0 ? sum + diff : sum;
   }, 0);
-  const totalPositiveTotalDiff = items.reduce((sum, row) => {
-    const diff = row.totalDifference ?? 0;
-    return diff > 0 ? sum + diff : sum;
-  }, 0);
-  const totalNegativeTotalDiff = items.reduce((sum, row) => {
-    const diff = row.totalDifference ?? 0;
-    return diff < 0 ? sum + diff : sum;
-  }, 0);
+  const totalSavingsA = items.reduce((sum, row) => sum + (row.potentialSavingsA ?? 0), 0);
+  const totalSavingsB = items.reduce((sum, row) => sum + (row.potentialSavingsB ?? 0), 0);
   const showAvg = priceBasis === "avg";
   const columnWidths = showAvg ? COLUMN_WIDTHS_AVG : COLUMN_WIDTHS_LAST;
   const sideColSpan = showAvg ? 3 : 2;
@@ -206,9 +199,6 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                   {translate(`Unit Diff (${currency})`, `فرق الوحدة (${currency})`)}
                 </th>
                 <th colSpan={2} className={`${SIDE_EDGE} border-b border-gray-200 px-1.5 py-1.5 text-center`}>
-                  {translate(`Total Diff (${currency})`, `فرق الإجمالي (${currency})`)}
-                </th>
-                <th rowSpan={2} className={`${SIDE_EDGE} px-1.5 py-1.5 text-center align-bottom`}>
                   {translate(`Savings (${currency})`, `التوفير (${currency})`)}
                 </th>
               </tr>
@@ -216,7 +206,7 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
                 <SideSubHeaders currency={currency} translate={translate} showAvg={showAvg} />
                 <DiffSubHeaders translate={translate} />
-                <DiffSubHeaders translate={translate} />
+                <SavingsSubHeaders supplierAName={a.name} supplierBName={b.name} />
               </tr>
             </thead>
             <tbody>
@@ -229,9 +219,8 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 const unitDiff = row.priceDifference ?? 0;
                 const positiveUnitDiff = unitDiff > 0 ? unitDiff : null;
                 const negativeUnitDiff = unitDiff < 0 ? unitDiff : null;
-                const totalDiff = row.totalDifference ?? 0;
-                const positiveTotalDiff = totalDiff > 0 ? totalDiff : null;
-                const negativeTotalDiff = totalDiff < 0 ? totalDiff : null;
+                const savingsA = row.potentialSavingsA ?? 0;
+                const savingsB = row.potentialSavingsB ?? 0;
 
                 return (
                   <tr key={row.materialCode} className="break-inside-avoid border-b border-gray-200">
@@ -253,14 +242,11 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                     <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
                       {negativeUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeUnitDiff, factor))}
                     </td>
-                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
-                      {positiveTotalDiff == null ? "-" : formatMoney(positiveTotalDiff)}
+                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center font-semibold text-teal-700`}>
+                      {savingsA > 0 ? formatMoney(savingsA) : "-"}
                     </td>
-                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
-                      {negativeTotalDiff == null ? "-" : formatMoney(negativeTotalDiff)}
-                    </td>
-                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center font-semibold`}>
-                      {formatMoney(row.potentialSavings)}
+                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-center font-semibold text-teal-700`}>
+                      {savingsB > 0 ? formatMoney(savingsB) : "-"}
                     </td>
                   </tr>
                 );
@@ -276,12 +262,11 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                   {formatMoney(totalNegativeUnitDiff)}
                 </td>
                 <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
-                  {formatMoney(totalPositiveTotalDiff)}
+                  {formatMoney(totalSavingsA)}
                 </td>
-                <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
-                  {formatMoney(totalNegativeTotalDiff)}
+                <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-teal-700`}>
+                  {formatMoney(totalSavingsB)}
                 </td>
-                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center`}>{formatMoney(totalSavings)}</td>
               </tr>
             </tbody>
           </table>
@@ -345,6 +330,25 @@ function DiffSubHeaders({ translate }: { translate: (en: string, ar: string) => 
     <>
       <th className={`${SIDE_EDGE} px-1.5 py-1 text-center text-teal-700`}>{translate("Positive", "موجب")}</th>
       <th className={`${SIDE_COL} px-1.5 py-1 text-center text-clay-700`}>{translate("Negative", "سالب")}</th>
+    </>
+  );
+}
+
+function SavingsSubHeaders({ supplierAName, supplierBName }: { supplierAName: string; supplierBName: string }) {
+  return (
+    <>
+      <th className={`${SIDE_EDGE} px-1.5 py-1 text-center text-teal-700 normal-case`} title={supplierAName}>
+        <span className="inline-flex max-w-24 items-center justify-center gap-0.5 truncate">
+          <span className="font-semibold text-gray-600">A</span>
+          <span className="truncate">{supplierAName}</span>
+        </span>
+      </th>
+      <th className={`${SIDE_COL} px-1.5 py-1 text-center text-teal-700 normal-case`} title={supplierBName}>
+        <span className="inline-flex max-w-24 items-center justify-center gap-0.5 truncate">
+          <span className="font-semibold text-gray-600">B</span>
+          <span className="truncate">{supplierBName}</span>
+        </span>
+      </th>
     </>
   );
 }

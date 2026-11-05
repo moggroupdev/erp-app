@@ -219,8 +219,11 @@ export type PurchasingMaterialsSupplierComparisonMutualItem = {
   priceGapPercent: number;
   /** Signed unit-price difference (A − B) in the material base unit. Set client-side from price basis. */
   priceDifference?: number;
-  /** Signed total difference (qtyA×priceA − qtyB×priceB); 0 when unit prices are equal. Set client-side from price basis. */
-  totalDifference?: number;
+  /** Potential savings if choosing supplier A (only when A is cheaper). Set client-side from price basis. */
+  potentialSavingsA?: number;
+  /** Potential savings if choosing supplier B (only when B is cheaper). Set client-side from price basis. */
+  potentialSavingsB?: number;
+  /** Combined potential savings (A + B directions). */
   potentialSavings: number;
 };
 

@@ -56,7 +56,6 @@ export default function MutualItemsTable({
   const footerSpacerColSpan = showAvg ? 9 : 7;
 
   const sortedItems = useMemo(() => sortMutualItems(items, sort), [items, sort]);
-  const totalSavings = items.reduce((sum, row) => sum + row.potentialSavings, 0);
   const totalPositiveUnitDiff = items.reduce((sum, row) => {
     const diff = row.priceDifference ?? 0;
     return diff > 0 ? sum + diff : sum;
@@ -65,14 +64,8 @@ export default function MutualItemsTable({
     const diff = row.priceDifference ?? 0;
     return diff < 0 ? sum + diff : sum;
   }, 0);
-  const totalPositiveTotalDiff = items.reduce((sum, row) => {
-    const diff = row.totalDifference ?? 0;
-    return diff > 0 ? sum + diff : sum;
-  }, 0);
-  const totalNegativeTotalDiff = items.reduce((sum, row) => {
-    const diff = row.totalDifference ?? 0;
-    return diff < 0 ? sum + diff : sum;
-  }, 0);
+  const totalSavingsA = items.reduce((sum, row) => sum + (row.potentialSavingsA ?? 0), 0);
+  const totalSavingsB = items.reduce((sum, row) => sum + (row.potentialSavingsB ?? 0), 0);
 
   return (
     <ReportCard
@@ -206,9 +199,6 @@ export default function MutualItemsTable({
                   {translate(`Unit Diff (${currency})`, `فرق الوحدة (${currency})`)}
                 </Table.Th>
                 <Table.Th colSpan={2} className="bg-gray-50 py-2.5 text-center! text-xs font-semibold text-gray-500">
-                  {translate(`Total Diff (${currency})`, `فرق الإجمالي (${currency})`)}
-                </Table.Th>
-                <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
                   {translate(`Savings (${currency})`, `التوفير (${currency})`)}
                 </Table.Th>
               </Table.Tr>
@@ -216,7 +206,7 @@ export default function MutualItemsTable({
                 <SideSubHeaders showAvg={showAvg} />
                 <SideSubHeaders showAvg={showAvg} />
                 <DiffSubHeaders />
-                <DiffSubHeaders />
+                <SavingsSubHeaders supplierAName={supplierAName} supplierBName={supplierBName} />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -225,9 +215,8 @@ export default function MutualItemsTable({
                 const unitDiff = row.priceDifference ?? 0;
                 const positiveUnitDiff = unitDiff > 0 ? unitDiff : null;
                 const negativeUnitDiff = unitDiff < 0 ? unitDiff : null;
-                const totalDiff = row.totalDifference ?? 0;
-                const positiveTotalDiff = totalDiff > 0 ? totalDiff : null;
-                const negativeTotalDiff = totalDiff < 0 ? totalDiff : null;
+                const savingsA = row.potentialSavingsA ?? 0;
+                const savingsB = row.potentialSavingsB ?? 0;
 
                 return (
                   <Table.Tr key={row.materialCode} className="text-gray-600">
@@ -256,14 +245,11 @@ export default function MutualItemsTable({
                     <Table.Td className="text-center text-clay-700">
                       {negativeUnitDiff == null ? "-" : formatMoney(toDisplayUnitPrice(negativeUnitDiff, factor))}
                     </Table.Td>
-                    <Table.Td className="text-center text-teal-700">
-                      {positiveTotalDiff == null ? "-" : formatMoney(positiveTotalDiff)}
-                    </Table.Td>
-                    <Table.Td className="text-center text-clay-700">
-                      {negativeTotalDiff == null ? "-" : formatMoney(negativeTotalDiff)}
+                    <Table.Td className="text-center font-semibold text-teal-700">
+                      {savingsA > 0 ? formatMoney(savingsA) : "-"}
                     </Table.Td>
                     <Table.Td className="text-center font-semibold text-teal-700">
-                      {formatMoney(row.potentialSavings)}
+                      {savingsB > 0 ? formatMoney(savingsB) : "-"}
                     </Table.Td>
                   </Table.Tr>
                 );
@@ -276,9 +262,8 @@ export default function MutualItemsTable({
                 <Table.Th colSpan={footerSpacerColSpan} />
                 <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalPositiveUnitDiff)}</Table.Th>
                 <Table.Th className="text-center! font-semibold text-clay-700">{formatMoney(totalNegativeUnitDiff)}</Table.Th>
-                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalPositiveTotalDiff)}</Table.Th>
-                <Table.Th className="text-center! font-semibold text-clay-700">{formatMoney(totalNegativeTotalDiff)}</Table.Th>
-                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalSavings)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalSavingsA)}</Table.Th>
+                <Table.Th className="text-center! font-semibold text-teal-700">{formatMoney(totalSavingsB)}</Table.Th>
               </Table.Tr>
             </Table.Tfoot>
           </Table>
@@ -319,6 +304,29 @@ function DiffSubHeaders() {
       </Table.Th>
       <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-clay-700">
         {translate("Negative", "سالب")}
+      </Table.Th>
+    </>
+  );
+}
+
+function SavingsSubHeaders({ supplierAName, supplierBName }: { supplierAName: string; supplierBName: string }) {
+  return (
+    <>
+      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-teal-700" title={supplierAName}>
+        <span className="inline-flex max-w-28 items-center justify-center gap-1 truncate">
+          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-gray-200/80 text-[9px] font-semibold text-gray-600">
+            A
+          </span>
+          <span className="truncate">{supplierAName}</span>
+        </span>
+      </Table.Th>
+      <Table.Th className="bg-gray-50 py-2 text-center! text-[11px] font-semibold text-teal-700" title={supplierBName}>
+        <span className="inline-flex max-w-28 items-center justify-center gap-1 truncate">
+          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-gray-200/80 text-[9px] font-semibold text-gray-600">
+            B
+          </span>
+          <span className="truncate">{supplierBName}</span>
+        </span>
       </Table.Th>
     </>
   );

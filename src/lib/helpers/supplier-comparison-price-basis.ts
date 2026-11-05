@@ -18,7 +18,8 @@ export function applyPriceBasis(
         cheaper: "equal",
         priceGapPercent: 0,
         priceDifference: 0,
-        totalDifference: 0,
+        potentialSavingsA: 0,
+        potentialSavingsB: 0,
         potentialSavings: 0,
       };
     }
@@ -29,21 +30,20 @@ export function applyPriceBasis(
     const higher = Math.max(priceA, priceB);
     const priceGapPercent = equal || lower === 0 ? 0 : ((higher - lower) / lower) * 100;
     // Signed A − B so positive means A is higher and negative means B is higher.
-    // When unit prices are equal, both unit and total diffs stay empty (volume gaps are ignored).
+    // When unit prices are equal, unit diff and both savings directions stay empty.
     const priceDifference = equal ? 0 : priceA - priceB;
-    const totalDifference = equal ? 0 : item.a.quantity * priceA - item.b.quantity * priceB;
-    const potentialSavings = equal
-      ? 0
-      : cheaper === "a"
-        ? item.b.quantity * (priceB - priceA)
-        : item.a.quantity * (priceA - priceB);
+    // Savings attributed to the cheaper supplier (qty of the other × price gap).
+    const potentialSavingsA = cheaper === "a" ? item.b.quantity * (priceB - priceA) : 0;
+    const potentialSavingsB = cheaper === "b" ? item.a.quantity * (priceA - priceB) : 0;
+    const potentialSavings = potentialSavingsA + potentialSavingsB;
 
     return {
       ...item,
       cheaper,
       priceGapPercent,
       priceDifference,
-      totalDifference,
+      potentialSavingsA,
+      potentialSavingsB,
       potentialSavings,
     };
   });
