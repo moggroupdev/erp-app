@@ -69,10 +69,10 @@ export default function MutualItemsTable({
 
   return (
     <ReportCard
-      title={translate("Mutual Materials", "المواد المشتركة")}
+      title={translate("Mutual Materials", "الأصناف المشتركة")}
       description={translate(
         "Materials both suppliers have supplied in the selected period, with side-by-side prices.",
-        "المواد التي وردها كلا الموردين في الفترة المحددة، مع أسعار جنباً إلى جنب.",
+        "الأصناف التي وردها كلا الموردين في الفترة المحددة، مع أسعار جنباً إلى جنب.",
       )}
       icon={Boxes}
       accent="sky"
@@ -153,7 +153,7 @@ export default function MutualItemsTable({
     >
       {sortedItems.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">
-          {translate("No mutual materials in this period", "لا توجد مواد مشتركة في هذه الفترة")}
+          {translate("No mutual materials in this period", "لا توجد أصناف مشتركة في هذه الفترة")}
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-100">
@@ -164,7 +164,7 @@ export default function MutualItemsTable({
                   #
                 </Table.Th>
                 <Table.Th rowSpan={2} className="bg-gray-50 text-start! align-bottom text-xs font-semibold text-gray-500">
-                  {translate("Material", "المادة")}
+                  {translate("Material", "الصنف")}
                 </Table.Th>
                 <Table.Th rowSpan={2} className="bg-gray-50 text-center! align-bottom text-xs font-semibold text-gray-500">
                   {translate("Unit", "الوحدة")}

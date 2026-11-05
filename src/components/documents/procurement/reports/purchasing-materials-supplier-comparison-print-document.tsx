@@ -87,13 +87,13 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
             label={translate("End Date", "تاريخ النهاية")}
             value={endDate ? formatDate(endDate, locale) : "-"}
           />
-          <CompactDetail label={translate("Mutual materials", "المواد المشتركة")} value={String(data.counts.mutual)} />
+          <CompactDetail label={translate("Mutual materials", "الأصناف المشتركة")} value={String(data.counts.mutual)} />
           <CompactDetail
-            label={translate("Materials supplied by A only", "مواد وردها المورد أ فقط")}
+            label={translate("Materials supplied by A only", "أصناف وردها المورد أ فقط")}
             value={String(data.counts.onlyA)}
           />
           <CompactDetail
-            label={translate("Materials supplied by B only", "مواد وردها المورد ب فقط")}
+            label={translate("Materials supplied by B only", "أصناف وردها المورد ب فقط")}
             value={String(data.counts.onlyB)}
           />
         </div>
@@ -155,16 +155,16 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Mutual Materials", "المواد المشتركة")}
+          title={translate("Mutual Materials", "الأصناف المشتركة")}
           subtitle={translate(
             `Side-by-side prices from purchase-order lines in the material base unit. Price basis: ${priceBasisLabel}. Sorted by: ${sortLabel}`,
-            `أسعار جنباً إلى جنب من بنود أوامر التوريد بوحدة المادة الأساسية. أساس السعر: ${priceBasisLabel}. مرتّب حسب: ${sortLabel}`,
+            `أسعار جنباً إلى جنب من بنود أوامر التوريد بوحدة الصنف الأساسية. أساس السعر: ${priceBasisLabel}. مرتّب حسب: ${sortLabel}`,
           )}
         />
 
         {items.length === 0 ? (
           <p className="py-2 text-[10px] text-gray-500">
-            {translate("No mutual materials in this period", "لا توجد مواد مشتركة في هذه الفترة")}
+            {translate("No mutual materials in this period", "لا توجد أصناف مشتركة في هذه الفترة")}
           </p>
         ) : (
           <table className="w-full table-fixed border-collapse text-[8px]">
@@ -179,7 +179,7 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                   #
                 </th>
                 <th rowSpan={2} className={`${SIDE_COL} px-1.5 py-1.5 text-start align-bottom`}>
-                  {translate("Material", "المادة")}
+                  {translate("Material", "الصنف")}
                 </th>
                 <th rowSpan={2} className={`${SIDE_COL} px-1.5 py-1.5 text-center align-bottom`}>
                   {translate("Unit", "الوحدة")}

@@ -33,7 +33,7 @@ const PAGE_TITLE = { en: "Supplier Comparison", ar: "مقارنة الموردي
 
 const PAGE_SUBTITLE = {
   en: "Compare two suppliers on mutual materials: prices, volume, and potential savings.",
-  ar: "قارن بين موردين على المواد المشتركة: الأسعار والكميات والتوفير المحتمل.",
+  ar: "قارن بين موردين على الأصناف المشتركة: الأسعار والكميات والتوفير المحتمل.",
 };
 
 export default function Page() {

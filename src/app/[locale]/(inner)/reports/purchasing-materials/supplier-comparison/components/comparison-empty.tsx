@@ -12,13 +12,13 @@ export default function ComparisonEmpty() {
       label: translate("Side-by-side overview", "نظرة عامة جنباً إلى جنب"),
       detail: translate(
         "Spend, order count, and material count for each supplier",
-        "الإنفاق وعدد الأوامر وعدد المواد لكل مورد",
+        "الإنفاق وعدد الأوامر وعدد الأصناف لكل مورد",
       ),
     },
     {
       icon: Boxes,
-      label: translate("Mutual materials", "المواد المشتركة"),
-      detail: translate("Only materials both suppliers have supplied", "فقط المواد التي وردها كلا الموردين"),
+      label: translate("Mutual materials", "الأصناف المشتركة"),
+      detail: translate("Only materials both suppliers have supplied", "فقط الأصناف التي وردها كلا الموردين"),
     },
     {
       icon: GitCompareArrows,
@@ -53,7 +53,7 @@ export default function ComparisonEmpty() {
           <p className="mt-2 text-xs leading-[1.75] text-gray-500">
             {translate(
               "Pick two different suppliers above. The report focuses on materials both have supplied.",
-              "اختر موردين مختلفين أعلاه. يركز التقرير على المواد التي وردها كلاهما.",
+              "اختر موردين مختلفين أعلاه. يركز التقرير على الأصناف التي وردها كلاهما.",
             )}
           </p>
 
