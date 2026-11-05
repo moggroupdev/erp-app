@@ -23,7 +23,7 @@ import {
   LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
 } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
 import { type LegacyIssuePermit } from "@/types/legacy-issue-permit";
-import { Badge, Menu, Table, TextInput } from "@mantine/core";
+import { Badge, Menu, Select, Table, TextInput } from "@mantine/core";
 import { Plus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -38,6 +38,27 @@ import ActionsMenu from "@/components/ui/actions-menu";
 const PAGE_TITLE = { en: "Legacy Issue Permits", ar: "أذونات الصرف المرحلية" };
 
 const TRANSACTIONS_PER_PAGE = 25;
+
+const DEFAULT_SORT = "-issuePermitNumber";
+
+const SORT_OPTIONS = [
+  { value: "-issuePermitNumber", en: "Issue permit number (Z-A)", ar: "رقم إذن الصرف (ي-أ)" },
+  { value: "issuePermitNumber", en: "Issue permit number (A-Z)", ar: "رقم إذن الصرف (أ-ي)" },
+  { value: "-date", en: "Issue permit date (newest first)", ar: "تاريخ إذن الصرف (الأحدث أولاً)" },
+  { value: "date", en: "Issue permit date (oldest first)", ar: "تاريخ إذن الصرف (الأقدم أولاً)" },
+  { value: "-issueOrderNumber", en: "Issue order number (Z-A)", ar: "رقم طلب الصرف (ي-أ)" },
+  { value: "issueOrderNumber", en: "Issue order number (A-Z)", ar: "رقم طلب الصرف (أ-ي)" },
+  { value: "-issueOrderDate", en: "Issue order date (newest first)", ar: "تاريخ طلب الصرف (الأحدث أولاً)" },
+  { value: "issueOrderDate", en: "Issue order date (oldest first)", ar: "تاريخ طلب الصرف (الأقدم أولاً)" },
+  { value: "-createdAt", en: "Entry date (newest first)", ar: "تاريخ الإدخال (الأحدث أولاً)" },
+  { value: "createdAt", en: "Entry date (oldest first)", ar: "تاريخ الإدخال (الأقدم أولاً)" },
+] as const;
+
+type LegacyIssuePermitSort = (typeof SORT_OPTIONS)[number]["value"];
+
+function isLegacyIssuePermitSort(value: string | null): value is LegacyIssuePermitSort {
+  return SORT_OPTIONS.some((option) => option.value === value);
+}
 
 export default function Page() {
   const { locale, translate } = useI18n();
@@ -57,10 +78,15 @@ export default function Page() {
     setPendingValue: setPendingKeyword,
     setImmediateValue: setImmediateKeyword,
   } = useDebouncedState(urlSearchParams.get("keyword") || "");
+  const initialSort = urlSearchParams.get("sortBy");
+  const [sortBy, setSortBy] = useState<LegacyIssuePermitSort>(
+    isLegacyIssuePermitSort(initialSort) ? initialSort : DEFAULT_SORT,
+  );
 
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
+    sortBy,
   };
 
   const params = { limit: TRANSACTIONS_PER_PAGE, ...removeEmptyParams(urlParams) };
@@ -72,6 +98,7 @@ export default function Page() {
 
   const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({
     debouncedKeyword,
+    sortBy,
   });
 
   const {
@@ -91,7 +118,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword };
+    const newFilters = { debouncedKeyword, sortBy };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -102,7 +129,7 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword]);
+  }, [activePage, debouncedKeyword, sortBy]);
 
   return (
     <LayoutBox
@@ -127,20 +154,37 @@ export default function Page() {
         ),
       }}
     >
-      <TextInput
-        value={keyword}
-        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-        placeholder={translate("Search...", "ابحث...")}
-        leftSection={<Search size={15} />}
-        radius="md"
-        rightSection={
-          keyword ? (
-            <button type="button" onClick={() => setImmediateKeyword("")}>
-              <X size={15} />
-            </button>
-          ) : undefined
-        }
-      />
+      <div className="flex flex-wrap items-end gap-3">
+        <TextInput
+          value={keyword}
+          onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+          placeholder={translate("Search...", "ابحث...")}
+          leftSection={<Search size={15} />}
+          radius="md"
+          className="min-w-64 flex-1"
+          rightSection={
+            keyword ? (
+              <button type="button" onClick={() => setImmediateKeyword("")}>
+                <X size={15} />
+              </button>
+            ) : undefined
+          }
+        />
+        <Select
+          value={sortBy}
+          onChange={(value) => {
+            if (isLegacyIssuePermitSort(value)) setSortBy(value);
+          }}
+          label={translate("Sort by", "ترتيب حسب")}
+          data={SORT_OPTIONS.map((option) => ({
+            value: option.value,
+            label: translate(option.en, option.ar),
+          }))}
+          allowDeselect={false}
+          radius="md"
+          className="min-w-64 sm:w-72"
+        />
+      </div>
 
       {isFetching ? (
         <LoadingSection message={translate("Loading legacy issue permits...", "جاري تحميل أذونات الصرف المرحلية...")} />

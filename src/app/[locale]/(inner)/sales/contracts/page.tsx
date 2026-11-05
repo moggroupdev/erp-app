@@ -57,7 +57,7 @@ export default function Page() {
     page: activePage.toString(),
     keyword: debouncedKeyword,
   };
-  const params = { limit: PAGE_SIZE, ...removeEmptyParams(urlParams) };
+  const params = { limit: PAGE_SIZE, sortBy: "-code", ...removeEmptyParams(urlParams) };
 
   const resetAllFilters = () => {
     setActivePage(1);
@@ -166,7 +166,7 @@ export default function Page() {
                     <Table.Th>{translate("Customer", "العميل")}</Table.Th>
                     <Table.Th>{translate("Legacy number", "رقم مراجعة العقد")}</Table.Th>
                     <Table.Th>{translate("Work order number", "رقم أمر الشغل")}</Table.Th>
-                    <Table.Th>{translate("Created at", "تاريخ الإنشاء")}</Table.Th>
+                    <Table.Th>{translate("Contract date", "تاريخ العقد")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>

@@ -103,6 +103,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
     translate("Category", "الفئة"),
     translate("Unit", "الوحدة"),
     translate("Qty Requested", "الكمية المطلوبة"),
+    translate("Balance", "الرصيد"),
     translate(`Last Purchase Price (${currency})`, `آخر سعر شراء (${currency})`),
     translate(`Total (${currency})`, `الإجمالي (${currency})`),
     translate("Last Purchase Date", "تاريخ آخر شراء"),
@@ -120,6 +121,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
       getMainCategoryTitle(item.material.subCategoryId) || "",
       getMaterialUnitLabel(item.unitOfMeasurementSelected, locale),
       formatQuantity(item.quantityRequested),
+      "",
       displayLastPurchasePrice != null ? formatMoney(displayLastPurchasePrice) : "",
       lineTotal != null ? formatMoney(lineTotal) : "",
       item.lastPurchaseDate ? formatDate(item.lastPurchaseDate, locale) : "",
@@ -129,9 +131,10 @@ export default function MaterialPurchaseRequisitionPrintDocument({
   });
 
   const itemFooterRows = [
-    [translate(`Total (${currency})`, `الإجمالي (${currency})`), "", "", "", "", "", formatMoney(subtotal), "", "", ""],
+    [translate(`Total (${currency})`, `الإجمالي (${currency})`), "", "", "", "", "", "", formatMoney(subtotal), "", "", ""],
     [
       translate(`VAT (${VAT_PERCENT}%)`, `ضريبة القيمة المضافة (${VAT_PERCENT}%)`),
+      "",
       "",
       "",
       "",
@@ -144,6 +147,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
     ],
     [
       translate(`Grand Total (${currency})`, `الإجمالي الكلي (${currency})`),
+      "",
       "",
       "",
       "",
@@ -239,7 +243,7 @@ export default function MaterialPurchaseRequisitionPrintDocument({
                   rows={itemRows}
                   footerRows={itemFooterRows}
                   monoColumnIndexes={[1]}
-                  noWrapIndexes={[1, 4, 5, 6, 7]}
+                  noWrapIndexes={[1, 4, 5, 6, 7, 8]}
                   tableClassName="text-[8px] [&_td]:align-top [&_th]:text-[8px]"
                   emptyLabel={translate("No items in this requisition", "لا توجد بنود في هذا الطلب")}
                 />
