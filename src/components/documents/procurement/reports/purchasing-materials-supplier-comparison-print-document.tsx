@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Info } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintSectionHeading } from "../../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
@@ -242,10 +243,10 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                       {cheaperLabel(row.cheaper, a.name, b.name, translate)}
                     </td>
                     <td className={`${SIDE_COL} px-1.5 py-1.5 text-center`}>{formatPercent(row.priceGapPercent)}</td>
-                    <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-clay-700`}>
+                    <td className={`${SIDE_EDGE} text-clay-700 px-1.5 py-1.5 text-center`}>
                       {unitDiffA == null ? "-" : formatMoney(toDisplayUnitPrice(unitDiffA, factor))}
                     </td>
-                    <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
+                    <td className={`${SIDE_COL} text-clay-700 px-1.5 py-1.5 text-center`}>
                       {unitDiffB == null ? "-" : formatMoney(toDisplayUnitPrice(unitDiffB, factor))}
                     </td>
                     <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center font-semibold text-teal-700`}>
@@ -261,23 +262,30 @@ export default function PurchasingMaterialsSupplierComparisonPrintDocument({
                 <td className="px-1.5 py-1.5" />
                 <td className={`${SIDE_COL} px-1.5 py-1.5 text-start`}>{translate("Total", "الإجمالي")}</td>
                 <td colSpan={footerSpacerColSpan} className={`${SIDE_COL} px-1.5 py-1.5`} />
-                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-clay-700`}>
-                  {formatMoney(totalUnitDiffA)}
-                </td>
-                <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-clay-700`}>
-                  {formatMoney(totalUnitDiffB)}
-                </td>
-                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>
-                  {formatMoney(totalSavingsA)}
-                </td>
-                <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-teal-700`}>
-                  {formatMoney(totalSavingsB)}
-                </td>
+                <td className={`${SIDE_EDGE} text-clay-700 px-1.5 py-1.5 text-center`}>{formatMoney(totalUnitDiffA)}</td>
+                <td className={`${SIDE_COL} text-clay-700 px-1.5 py-1.5 text-center`}>{formatMoney(totalUnitDiffB)}</td>
+                <td className={`${SIDE_EDGE} px-1.5 py-1.5 text-center text-teal-700`}>{formatMoney(totalSavingsA)}</td>
+                <td className={`${SIDE_COL} px-1.5 py-1.5 text-center text-teal-700`}>{formatMoney(totalSavingsB)}</td>
               </tr>
             </tbody>
           </table>
         )}
       </section>
+
+      <aside className="flex break-inside-avoid items-start gap-2.5 rounded-lg bg-teal-50 px-3 py-2.5">
+        <Info size={14} className="mt-0.5 shrink-0 text-teal-600" />
+        <div className="min-w-0">
+          <p className="mb-1 text-[10px] font-semibold tracking-wide text-teal-700 uppercase">
+            {translate("Savings", "التوفير")}
+          </p>
+          <p className="text-[11px] leading-[1.75] text-teal-800">
+            {translate(
+              "What you could save by buying from this cheaper supplier instead of the other one. Each amount is shown under the cheaper supplier (A or B).",
+              "هو ما يمكن توفيره بالشراء من هذا المورد الأرخص بدل المورد الآخر. يُعرض كل مبلغ تحت المورد الأرخص (أ أو ب).",
+            )}
+          </p>
+        </div>
+      </aside>
     </div>
   );
 }
