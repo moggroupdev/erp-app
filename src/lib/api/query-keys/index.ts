@@ -167,6 +167,8 @@ export const queryKeys = {
       inventorySummary: () => [...queryKeys.reports.materials.all, "inventory-summary"] as const,
       categoryStats: (mainCategoryId: string) =>
         [...queryKeys.reports.materials.all, "category-stats", mainCategoryId] as const,
+      issuePermitHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.materials.all, "issue-permit-history", materialCode, filters] as const,
     },
     purchasingMaterials: {
       all: ["reports", "purchasing-materials"] as const,

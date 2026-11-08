@@ -2,6 +2,7 @@ import type { PrivateRequest } from "@/types/api";
 import type {
   MaterialsCategoryStats,
   MaterialsInventorySummary,
+  MaterialsIssuePermitHistory,
   PurchasingMaterialsCategoryStats,
   PurchasingMaterialsSpendingSummary,
   PurchasingMaterialsPriceHistory,
@@ -42,6 +43,26 @@ const reportsApi = {
       return await privateRequest<MaterialsCategoryStats>({
         url: "reports/materials/category-stats",
         params: { mainCategoryId },
+        signal,
+      });
+    },
+
+    async getIssuePermitHistory({
+      privateRequest,
+      materialCode,
+      from,
+      to,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      materialCode: string;
+      from?: string;
+      to?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<MaterialsIssuePermitHistory>({
+        url: "reports/materials/issue-permit-history",
+        params: { materialCode, from, to },
         signal,
       });
     },
