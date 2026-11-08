@@ -1,6 +1,10 @@
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { StockStatus } from "@/lib/constants/enums/derived/stock-statuses";
+import type { LegacyIssuePermitMaintenanceOrderType } from "@/lib/constants/enums/legacy-issue-permit-maintenance-order-types";
+import type { LegacyIssuePermitType } from "@/lib/constants/enums/legacy-issue-permit-types";
+import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
+import type { MaterialUnitConversionSummary } from "@/types/material";
 
 export type MaterialsInventoryOverview = {
   totalMaterials: number;
@@ -76,4 +80,48 @@ export type MaterialsCategoryStats = {
   topMaterialsByValue: MaterialsInventoryTopMaterial[];
   topMaterialsByQuantity: MaterialsInventoryTopMaterial[];
   lowStockMaterials: MaterialsInventoryLowStockMaterial[];
+};
+
+// ================ Issue Permit History ================
+
+export type MaterialsIssuePermitHistoryStatus = "issued" | "cancelled";
+
+export type MaterialsIssuePermitHistoryEntry = {
+  issuePermitItemId: string;
+  issuePermitId: string;
+  issuePermitNumber: string;
+  date: string;
+  productionSubDepartment: ProductionSubDepartment | null;
+  creatorId: string;
+  creatorName: string;
+  permitType: LegacyIssuePermitType;
+  contractNumber: string | null;
+  maintenanceOrderNumber: string | null;
+  maintenanceOrderType: LegacyIssuePermitMaintenanceOrderType | null;
+  hasMultipleCustomers: boolean;
+  unitOfMeasurementSelected: MaterialUnit | null;
+  quantity: number | null;
+  quantityInBase: number | null;
+  isCancelled: boolean;
+  status: MaterialsIssuePermitHistoryStatus;
+  notes: string | null;
+};
+
+export type MaterialsIssuePermitHistorySummary = {
+  lineCount: number;
+  permitCount: number;
+  issuedQuantity: number;
+  cancelledQuantity: number;
+  missingConversionCount: number;
+};
+
+export type MaterialsIssuePermitHistory = {
+  material: {
+    code: string;
+    title: string;
+    unitOfMeasurement: MaterialUnit;
+    unitConversions: MaterialUnitConversionSummary[];
+  };
+  entries: MaterialsIssuePermitHistoryEntry[];
+  summary: MaterialsIssuePermitHistorySummary;
 };

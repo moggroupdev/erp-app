@@ -24,6 +24,7 @@ export const staleTimes = {
   reports: {
     materialsInventorySummary: 5 * MINUTE,
     materialsCategoryStats: 5 * MINUTE,
+    materialsIssuePermitHistory: 5 * MINUTE,
     purchasingMaterialsSpendingSummary: 5 * MINUTE,
     purchasingMaterialsPriceHistory: 5 * MINUTE,
     purchasingMaterialsCategoryStats: 5 * MINUTE,
@@ -34,6 +35,7 @@ export const staleTimes = {
     purchasingMaterialsPriceOutliers: 5 * MINUTE,
     purchasingMaterialsAveragePriceGaps: 5 * MINUTE,
     purchasingMaterialsRequisitionFollowUp: 5 * MINUTE,
+    purchasingMaterialsRequisitionHistory: 5 * MINUTE,
   },
   locations: Infinity,
   departments: Infinity,

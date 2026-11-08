@@ -8,18 +8,18 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import {
-  LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
-  type LegacyIssuePermitWorkOrderType,
-} from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import { LEGACY_ISSUE_PERMIT_TYPES, type LegacyIssuePermitType } from "@/lib/constants/enums/legacy-issue-permit-types";
+import type { LegacyIssuePermitMaintenanceOrderType } from "@/lib/constants/enums/legacy-issue-permit-maintenance-order-types";
 import { type ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
 import { Button, Checkbox, TextInput, Textarea } from "@mantine/core";
 import ErrorAlert from "@/components/ui/error-alert";
 import Modal from "@/components/ui/modal";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
+import SelectCustomer from "@/components/global/selections/remote-based/select-customer";
 import SelectProductionSubDepartment from "@/components/global/selections/enum-based/select-production-sub-department";
-import SelectLegacyIssuePermitWorkOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-work-order-type";
+import SelectLegacyIssuePermitType from "@/components/global/selections/enum-based/select-legacy-issue-permit-type";
+import SelectLegacyIssuePermitMaintenanceOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-maintenance-order-type";
 import DatePickerInput from "@/components/ui/date-picker-input";
 import { dateTimePickerValueToIso, toDatePickerValue } from "@/lib/helpers/datetime-picker";
 
@@ -43,37 +43,57 @@ export default function LegacyIssuePermitUpdateModal({
   const [date, setDate] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState<string | null>(null);
   const [productionSubDepartment, setProductionSubDepartment] = useState<string | null>(null);
+  const [permitType, setPermitType] = useState<string | null>(null);
   const [contractNumber, setContractNumber] = useState("");
-  const [workOrderNumber, setWorkOrderNumber] = useState("");
-  const [isMaintenance, setIsMaintenance] = useState(false);
-  const [maintenanceWorkOrderType, setMaintenanceWorkOrderType] = useState<string | null>(null);
+  const [maintenanceOrderNumber, setMaintenanceOrderNumber] = useState("");
+  const [maintenanceOrderType, setMaintenanceOrderType] = useState<string | null>(null);
+  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [hasMultipleCustomers, setHasMultipleCustomers] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [notes, setNotes] = useState("");
+
+  const isContractReview = permitType === LEGACY_ISSUE_PERMIT_TYPES.CONTRACT_REVIEW;
+  const isMaintenanceOrder = permitType === LEGACY_ISSUE_PERMIT_TYPES.MAINTENANCE_ORDER;
+  const isProductionDepartment = permitType === LEGACY_ISSUE_PERMIT_TYPES.PRODUCTION_DEPARTMENT;
+  const showsCustomerFields = isContractReview || isMaintenanceOrder;
+
+  function handlePermitTypeChange(nextType: React.SetStateAction<string | null>) {
+    const resolved = typeof nextType === "function" ? nextType(permitType) : nextType;
+    setPermitType(resolved);
+    setContractNumber("");
+    setMaintenanceOrderNumber("");
+    setMaintenanceOrderType(null);
+    setCustomerId(null);
+    setHasMultipleCustomers(false);
+  }
+
+  function handleMultipleCustomersChange(checked: boolean) {
+    setHasMultipleCustomers(checked);
+    if (checked) {
+      setCustomerId(null);
+      setContractNumber("");
+      setMaintenanceOrderNumber("");
+    }
+  }
 
   useEffect(() => {
     if (!opened) return;
     setIssuePermitNumber(transaction.issuePermitNumber);
-    setIssueOrderNumber(transaction.issueOrderNumber);
-    setIssueOrderDate(toDatePickerValue(transaction.issueOrderDate));
+    setIssueOrderNumber(transaction.issueOrderNumber || "");
+    setIssueOrderDate(transaction.issueOrderDate ? toDatePickerValue(transaction.issueOrderDate) : null);
     setDate(toDatePickerValue(transaction.date));
     setCreatorId(transaction.creator.id);
     setProductionSubDepartment(transaction.productionSubDepartment);
+    setPermitType(transaction.permitType);
     setContractNumber(transaction.contractNumber || "");
-    setWorkOrderNumber(transaction.workOrderNumber || "");
-    setIsMaintenance(transaction.workOrderNumberType !== LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT);
-    setMaintenanceWorkOrderType(
-      transaction.workOrderNumberType !== LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
-        ? transaction.workOrderNumberType
-        : null,
-    );
+    setMaintenanceOrderNumber(transaction.maintenanceOrderNumber || "");
+    setMaintenanceOrderType(transaction.maintenanceOrderType);
+    setCustomerId(transaction.customer?.id ?? null);
+    setHasMultipleCustomers(transaction.hasMultipleCustomers);
     setIsCancelled(transaction.isCancelled);
     setNotes(transaction.notes || "");
     setValidationError("");
   }, [opened, transaction]);
-
-  const resolvedWorkOrderNumberType = isMaintenance
-    ? (maintenanceWorkOrderType as LegacyIssuePermitWorkOrderType)
-    : LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT;
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -82,14 +102,19 @@ export default function LegacyIssuePermitUpdateModal({
         id: transaction.id,
         dto: {
           issuePermitNumber: issuePermitNumber.trim(),
-          issueOrderNumber: issueOrderNumber.trim(),
-          issueOrderDate: dateTimePickerValueToIso(issueOrderDate)!,
+          issueOrderNumber: issueOrderNumber.trim() || null,
+          issueOrderDate: dateTimePickerValueToIso(issueOrderDate),
           date: dateTimePickerValueToIso(date)!,
           creatorId: creatorId!,
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
-          contractNumber: isMaintenance ? null : contractNumber.trim() || null,
-          workOrderNumber: isMaintenance ? workOrderNumber.trim() || null : null,
-          workOrderNumberType: resolvedWorkOrderNumberType,
+          permitType: permitType as LegacyIssuePermitType,
+          contractNumber: isContractReview && !hasMultipleCustomers ? contractNumber.trim() || null : null,
+          maintenanceOrderNumber: isMaintenanceOrder && !hasMultipleCustomers ? maintenanceOrderNumber.trim() || null : null,
+          maintenanceOrderType: isMaintenanceOrder
+            ? (maintenanceOrderType as LegacyIssuePermitMaintenanceOrderType | null)
+            : null,
+          customerId: showsCustomerFields && !hasMultipleCustomers ? customerId : null,
+          hasMultipleCustomers: showsCustomerFields ? hasMultipleCustomers : false,
           isCancelled,
           notes: notes.trim() || null,
         },
@@ -111,27 +136,29 @@ export default function LegacyIssuePermitUpdateModal({
     if (!issuePermitNumber.trim()) {
       return setValidationError(translate("Issue permit number is required.", "رقم إذن الصرف مطلوب."));
     }
-    if (!issueOrderNumber.trim()) {
-      return setValidationError(translate("Issue order number is required.", "رقم طلب الصرف مطلوب."));
+
+    const hasIssueOrderNumber = issueOrderNumber.trim() !== "";
+    const hasIssueOrderDate = dateTimePickerValueToIso(issueOrderDate) !== null;
+    if (hasIssueOrderNumber !== hasIssueOrderDate) {
+      return setValidationError(
+        translate(
+          "Issue order number and issue order date must both be provided or both omitted.",
+          "يجب إدخال رقم طلب الصرف وتاريخه معاً أو تركهما فارغين معاً.",
+        ),
+      );
     }
-    if (!dateTimePickerValueToIso(issueOrderDate)) {
-      return setValidationError(translate("Issue order date must be valid.", "يجب أن يكون تاريخ طلب الصرف صالحاً."));
-    }
+
     if (!dateTimePickerValueToIso(date)) {
       return setValidationError(translate("Date must be valid.", "يجب أن يكون التاريخ صالحاً."));
     }
     if (!creatorId) {
       return setValidationError(translate("Please select a creator.", "يرجى اختيار المحرر."));
     }
-    if (isMaintenance) {
-      if (!workOrderNumber.trim()) {
-        return setValidationError(translate("Work order number is required.", "رقم أمر الشغل مطلوب."));
-      }
-      if (!maintenanceWorkOrderType) {
-        return setValidationError(translate("Please select a maintenance type.", "يرجى اختيار نوع الصيانة."));
-      }
-    } else if (!contractNumber.trim()) {
-      return setValidationError(translate("Contract review number is required.", "رقم مراجعة العقد مطلوب."));
+    if (!permitType) {
+      return setValidationError(translate("Please select a permit type.", "يرجى اختيار نوع الإذن."));
+    }
+    if (isProductionDepartment && !productionSubDepartment) {
+      return setValidationError(translate("Please select a production department.", "يرجى اختيار قسم الانتاج."));
     }
 
     mutation.mutate();
@@ -147,24 +174,28 @@ export default function LegacyIssuePermitUpdateModal({
 
   const isDataChanged =
     issuePermitNumber.trim() !== transaction.issuePermitNumber ||
-    issueOrderNumber.trim() !== transaction.issueOrderNumber ||
-    dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate)) !== dateTimePickerValueToIso(issueOrderDate) ||
+    (issueOrderNumber.trim() || null) !== (transaction.issueOrderNumber || null) ||
+    (transaction.issueOrderDate ? dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate)) : null) !==
+      dateTimePickerValueToIso(issueOrderDate) ||
     dateTimePickerValueToIso(toDatePickerValue(transaction.date)) !== dateTimePickerValueToIso(date) ||
     creatorId !== transaction.creator.id ||
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
+    permitType !== transaction.permitType ||
     (contractNumber.trim() || null) !== transaction.contractNumber ||
-    (workOrderNumber.trim() || null) !== transaction.workOrderNumber ||
-    resolvedWorkOrderNumberType !== transaction.workOrderNumberType ||
+    (maintenanceOrderNumber.trim() || null) !== transaction.maintenanceOrderNumber ||
+    (maintenanceOrderType || null) !== (transaction.maintenanceOrderType || null) ||
+    (customerId || null) !== (transaction.customer?.id || null) ||
+    hasMultipleCustomers !== transaction.hasMultipleCustomers ||
     isCancelled !== transaction.isCancelled ||
     (notes.trim() || null) !== transaction.notes;
 
   const isReadyToSubmit =
     !!issuePermitNumber.trim() &&
-    !!issueOrderNumber.trim() &&
-    !!dateTimePickerValueToIso(issueOrderDate) &&
     !!dateTimePickerValueToIso(date) &&
     !!creatorId &&
-    (isMaintenance ? !!workOrderNumber.trim() && !!maintenanceWorkOrderType : !!contractNumber.trim()) &&
+    !!permitType &&
+    (!isProductionDepartment || !!productionSubDepartment) &&
+    (issueOrderNumber.trim() !== "") === (dateTimePickerValueToIso(issueOrderDate) !== null) &&
     isDataChanged;
 
   return (
@@ -191,7 +222,6 @@ export default function LegacyIssuePermitUpdateModal({
             onChange={(e) => setIssueOrderNumber(e.target.value)}
             label={translate("Issue Order Number", "رقم طلب الصرف")}
             placeholder={translate("Enter issue order number", "أدخل رقم طلب الصرف")}
-            required
             radius="md"
           />
           <DatePickerInput
@@ -199,7 +229,16 @@ export default function LegacyIssuePermitUpdateModal({
             onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}
             placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
-            required
+            clearable
+          />
+          <SelectProductionSubDepartment
+            value={productionSubDepartment}
+            setValue={setProductionSubDepartment}
+            label={translate("Production Department", "قسم الانتاج")}
+            placeholder={translate("Select department...", "اختر القسم...")}
+            required={isProductionDepartment}
+            clearable={!isProductionDepartment}
+            radius="md"
           />
           <SelectUser
             value={creatorId}
@@ -211,62 +250,63 @@ export default function LegacyIssuePermitUpdateModal({
             required
             radius="md"
           />
-          <SelectProductionSubDepartment
-            value={productionSubDepartment}
-            setValue={setProductionSubDepartment}
-            label={translate("Production Department", "قسم الانتاج")}
-            placeholder={translate("Select department...", "اختر القسم...")}
-            clearable
+          <SelectLegacyIssuePermitType
+            value={permitType}
+            setValue={handlePermitTypeChange}
+            label={translate("Permit Type", "نوع الإذن")}
+            placeholder={translate("Select type...", "اختر النوع...")}
+            required
             radius="md"
           />
-          <div className="col-span-2 flex flex-col gap-2">
-            <Checkbox
-              checked={isMaintenance}
-              onChange={(e) => {
-                const checked = e.currentTarget.checked;
-                setIsMaintenance(checked);
-                if (checked) {
-                  setContractNumber("");
-                } else {
-                  setWorkOrderNumber("");
-                  setMaintenanceWorkOrderType(null);
-                }
-              }}
-              label={translate("Maintenance", "صيانة")}
-            />
-          </div>
-          <div className="col-span-2 grid grid-cols-2 gap-2">
-            {!isMaintenance ? (
-              <TextInput
-                value={contractNumber}
-                onChange={(e) => setContractNumber(e.target.value)}
-                label={translate("Contract review number", "رقم مراجعة العقد")}
-                placeholder={translate("Enter contract review number", "أدخل رقم مراجعة العقد")}
-                required
-                radius="md"
+          {showsCustomerFields && (
+            <div className="col-span-2 flex flex-col gap-3">
+              <Checkbox
+                checked={hasMultipleCustomers}
+                onChange={(e) => handleMultipleCustomersChange(e.currentTarget.checked)}
+                label={translate("Multiple customers", "عملاء متعددون")}
               />
-            ) : (
-              <>
-                <TextInput
-                  value={workOrderNumber}
-                  onChange={(e) => setWorkOrderNumber(e.target.value)}
-                  label={translate("Work Order Number", "رقم أمر الشغل")}
-                  placeholder={translate("Enter work order number", "أدخل رقم أمر الشغل")}
-                  required
-                  radius="md"
-                />
-                <SelectLegacyIssuePermitWorkOrderType
-                  value={maintenanceWorkOrderType}
-                  setValue={setMaintenanceWorkOrderType}
-                  label={translate("Maintenance Type", "نوع الصيانة")}
-                  placeholder={translate("Select type...", "اختر النوع...")}
-                  excludeValues={[LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT]}
-                  required
-                  radius="md"
-                />
-              </>
-            )}
-          </div>
+              {!hasMultipleCustomers && (
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  {isContractReview && (
+                    <TextInput
+                      value={contractNumber}
+                      onChange={(e) => setContractNumber(e.target.value)}
+                      label={translate("Contract review number", "رقم مراجعة العقد")}
+                      placeholder={translate("Enter contract review number", "أدخل رقم مراجعة العقد")}
+                      radius="md"
+                    />
+                  )}
+                  {isMaintenanceOrder && (
+                    <>
+                      <TextInput
+                        value={maintenanceOrderNumber}
+                        onChange={(e) => setMaintenanceOrderNumber(e.target.value)}
+                        label={translate("Maintenance Order Number", "رقم أمر الشغل")}
+                        placeholder={translate("Enter maintenance order number", "أدخل رقم أمر الشغل")}
+                        radius="md"
+                      />
+                      <SelectLegacyIssuePermitMaintenanceOrderType
+                        value={maintenanceOrderType}
+                        setValue={setMaintenanceOrderType}
+                        label={translate("Maintenance Type", "نوع الصيانة")}
+                        placeholder={translate("Select type...", "اختر النوع...")}
+                        clearable
+                        radius="md"
+                      />
+                    </>
+                  )}
+                  <SelectCustomer
+                    value={customerId}
+                    setValue={setCustomerId}
+                    label={translate("Customer", "العميل")}
+                    placeholder={translate("Search customers...", "ابحث عن عميل...")}
+                    clearable
+                    radius="md"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <div className="col-span-2">
             <Textarea
               value={notes}

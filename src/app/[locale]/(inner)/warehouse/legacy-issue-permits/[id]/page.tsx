@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { Menu } from "@mantine/core";
-import { Pencil, Plus } from "lucide-react";
-import { useI18n } from "@/lib/i18n/hooks";
+import { Button, Menu } from "@mantine/core";
+import { ChevronLeft, ChevronRight, Pencil, Plus } from "lucide-react";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
 import useHasPermission from "@/hooks/use-has-permission";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
@@ -29,13 +30,21 @@ import LegacyIssueItemModal from "./components/legacy-issue-item-modal";
 import LegacyIssueItemsTable from "./components/legacy-issue-items-table";
 
 const PAGE_TITLE = { en: "Legacy Transaction Details", ar: "تفاصيل إذن صرف مرحلي" };
+const DEFAULT_SORT = "-issuePermitNumber";
 
 export default function Page() {
   const { locale, translate } = useI18n();
   const canUpdatePermit = useHasPermission(PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT);
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
   const { helpers } = useMaterialCategories();
+
+  const sortBy = searchParams.get("sortBy") || DEFAULT_SORT;
+  const keyword = searchParams.get("keyword") || "";
+  const neighborParams = removeEmptyParams({ sortBy, keyword });
 
   const [headerModalOpened, { open: openHeaderModal, close: closeHeaderModal }] = useDisclosure(false);
   const [itemModalOpened, { open: openItemModal, close: closeItemModal }] = useDisclosure(false);
@@ -59,6 +68,17 @@ export default function Page() {
     staleTime: staleTimes.legacyIssuePermits,
   });
 
+  const {
+    data: neighbors,
+    isFetching: isNeighborsFetching,
+    refetch: refetchNeighbors,
+  } = useQuery({
+    queryKey: queryKeys.legacyIssuePermits.neighbors(id, neighborParams),
+    queryFn: ({ signal }) =>
+      legacyIssuePermitsApi.getNeighbors({ privateRequest, id, params: neighborParams, signal }),
+    staleTime: staleTimes.legacyIssuePermits,
+  });
+
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useDocumentTitle(
@@ -75,6 +95,20 @@ export default function Page() {
     openItemModal();
   }
 
+  function navigateToNeighbor(neighborId: string) {
+    const query = new URLSearchParams(neighborParams).toString();
+    const path = `/warehouse/legacy-issue-permits/${neighborId}${query ? `?${query}` : ""}`;
+    router.replace(getLocalizedHref(path));
+  }
+
+  function handleRefetch() {
+    void refetch();
+    void refetchNeighbors();
+  }
+
+  const previous = neighbors?.previous ?? null;
+  const next = neighbors?.next ?? null;
+
   return (
     <LayoutBox
       header={{
@@ -82,7 +116,7 @@ export default function Page() {
         backLink: true,
         sideElements: (
           <div className="flex gap-3">
-            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
+            <RefetchButton isFetching={isFetching || isNeighborsFetching} onRefetch={handleRefetch} />
             <ActionsMenu>
               {transaction && canUpdatePermit && (
                 <Menu.Item leftSection={<Pencil size={14} />} onClick={openHeaderModal}>
@@ -100,12 +134,50 @@ export default function Page() {
         <ErrorSection
           errorTitle={translate("An error occurred while loading transaction data", "حدث خطأ أثناء تحميل بيانات الحركة")}
           errorMessage={errorMessage}
-          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: () => refetch() }}
+          button={{ text: translate("Retry", "إعادة المحاولة"), onClick: handleRefetch }}
         />
       ) : (
         transaction && (
           <>
-            <TransactionDetails transaction={transaction} />
+            <TransactionDetails
+              transaction={transaction}
+              headerEnd={
+                <div className="flex items-center gap-1 self-center">
+                  <Button
+                    className="inline-flex! size-10! shrink-0 items-center justify-center p-0! max-sm:size-[34px]! max-sm:[&_svg]:size-4!"
+                    variant="light"
+                    color="dark"
+                    radius={20}
+                    p={0}
+                    disabled={isNeighborsFetching || !previous}
+                    title={
+                      previous
+                        ? translate(`Previous: ${previous.issuePermitNumber}`, `السابق: ${previous.issuePermitNumber}`)
+                        : translate("Previous permit", "الإذن السابق")
+                    }
+                    onClick={() => previous && navigateToNeighbor(previous.id)}
+                  >
+                    <ChevronLeft size={18} className="rtl:rotate-180" />
+                  </Button>
+                  <Button
+                    className="inline-flex! size-10! shrink-0 items-center justify-center p-0! max-sm:size-[34px]! max-sm:[&_svg]:size-4!"
+                    variant="light"
+                    color="dark"
+                    radius={20}
+                    p={0}
+                    disabled={isNeighborsFetching || !next}
+                    title={
+                      next
+                        ? translate(`Next: ${next.issuePermitNumber}`, `التالي: ${next.issuePermitNumber}`)
+                        : translate("Next permit", "الإذن التالي")
+                    }
+                    onClick={() => next && navigateToNeighbor(next.id)}
+                  >
+                    <ChevronRight size={18} className="rtl:rotate-180" />
+                  </Button>
+                </div>
+              }
+            />
 
             <section className="mt-4 flex flex-col gap-4">
               <div className="flex items-center justify-between gap-3">

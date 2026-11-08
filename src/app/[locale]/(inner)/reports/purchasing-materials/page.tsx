@@ -43,22 +43,22 @@ export default function Page() {
               report={{
                 label: { en: "Purchases Summary", ar: "ملخص المشتريات" },
                 description: {
-                  en: "Overview by period, supplier, and material with order status breakdown.",
-                  ar: "نظرة شاملة حسب الفترة والمورد والمادة مع تفصيل حالات أوامر الشراء.",
+                  en: "A consolidated overview of purchasing activity by period, supplier, and material, including order status distribution.",
+                  ar: "نظرة شاملة على نشاط المشتريات حسب الفترة والمورد والمادة، مع توزيع حالات أوامر الشراء.",
                 },
                 href: "/reports/purchasing-materials/spending-summary",
               }}
             />
           </PermissionGuard>
-          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_HISTORY_REPORT}>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_FOLLOW_UP_REPORT}>
             <ReportLinkCard
               report={{
-                label: { en: "Price History", ar: "تاريخ الأسعار" },
+                label: { en: "Purchase Requisition Follow-up", ar: "متابعة طلبات الشراء" },
                 description: {
-                  en: "Track unit price changes for a specific material over time across purchase orders.",
-                  ar: "تتبع تغيرات سعر الوحدة لمادة محددة عبر أوامر التوريد بمرور الوقت.",
+                  en: "Monitors approved requisition lines by production department across requested, ordered, and received quantities and values.",
+                  ar: "متابعة بنود طلبات الشراء المعتمدة حسب قسم الإنتاج عبر الكميات والقيم المطلوبة والمدرجة في أوامر التوريد والمستلمة.",
                 },
-                href: "/reports/purchasing-materials/price-history",
+                href: "/reports/purchasing-materials/requisition-follow-up",
               }}
             />
           </PermissionGuard>
@@ -67,8 +67,8 @@ export default function Page() {
               report={{
                 label: { en: "Purchasing by Category", ar: "المشتريات حسب الفئة" },
                 description: {
-                  en: "Purchase stats for one main category: suppliers, invoices, and top materials.",
-                  ar: "إحصائيات المشتريات لفئة رئيسية واحدة: الموردون والفواتير وأعلى المواد.",
+                  en: "Purchase statistics for a selected main category, covering suppliers, invoices, and leading materials.",
+                  ar: "إحصائيات المشتريات لفئة رئيسية محددة، وتشمل الموردين والفواتير وأبرز المواد.",
                 },
                 href: "/reports/purchasing-materials/category-stats",
               }}
@@ -79,8 +79,8 @@ export default function Page() {
               report={{
                 label: { en: "Purchasing by Subcategory", ar: "المشتريات حسب الفئة الفرعية" },
                 description: {
-                  en: "Purchase stats for one subcategory: suppliers, invoices, and materials.",
-                  ar: "إحصائيات المشتريات لفئة فرعية واحدة: الموردون والفواتير والمواد.",
+                  en: "Purchase statistics for a selected subcategory, covering suppliers, invoices, and materials.",
+                  ar: "إحصائيات المشتريات لفئة فرعية محددة، وتشمل الموردين والفواتير والمواد.",
                 },
                 href: "/reports/purchasing-materials/subcategory-stats",
               }}
@@ -91,8 +91,8 @@ export default function Page() {
               report={{
                 label: { en: "Purchasing by Supplier", ar: "المشتريات حسب المورد" },
                 description: {
-                  en: "Purchase stats for one supplier: value trend, categories, orders, and materials.",
-                  ar: "إحصائيات المشتريات لمورد واحد: اتجاه القيمة والفئات وأوامر التوريد والمواد.",
+                  en: "Purchase statistics for a selected supplier, covering value trends, categories, orders, and materials.",
+                  ar: "إحصائيات المشتريات لمورد محدد، وتشمل اتجاه القيمة والفئات وأوامر التوريد والمواد.",
                 },
                 href: "/reports/purchasing-materials/supplier-stats",
               }}
@@ -103,22 +103,34 @@ export default function Page() {
               report={{
                 label: { en: "Supplier Comparison", ar: "مقارنة الموردين" },
                 description: {
-                  en: "Compare two suppliers on mutual materials: prices, volume, and potential savings.",
-                  ar: "قارن بين موردين على المواد المشتركة: الأسعار والكميات والتوفير المحتمل.",
+                  en: "Compares two suppliers on shared materials in terms of prices, volumes, and potential savings.",
+                  ar: "مقارنة بين موردين على المواد المشتركة من حيث الأسعار والكميات والتوفير المحتمل.",
                 },
                 href: "/reports/purchasing-materials/supplier-comparison",
               }}
             />
           </PermissionGuard>
-          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_OUTLIERS_REPORT}>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_HISTORY_REPORT}>
             <ReportLinkCard
               report={{
-                label: { en: "Price Outliers", ar: "انحراف أسعار الشراء" },
+                label: { en: "Material Price History", ar: "تاريخ أسعار المادة" },
                 description: {
-                  en: "Find purchase lines whose unit price diverges sharply from nearby purchases of the same material.",
-                  ar: "اكتشاف بنود الشراء التي يختلف سعر وحدتها بشكل حاد عن المشتريات المجاورة لنفس المادة.",
+                  en: "Tracks unit price changes for a selected material over time across purchase orders.",
+                  ar: "تتبع تغيرات سعر الوحدة لمادة محددة عبر أوامر التوريد بمرور الوقت.",
                 },
-                href: "/reports/purchasing-materials/price-outliers",
+                href: "/reports/purchasing-materials/price-history",
+              }}
+            />
+          </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_HISTORY_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Material Requisition History", ar: "تاريخ طلبات شراء المادة" },
+                description: {
+                  en: "Tracks purchase requisitions for a selected material over time across production departments.",
+                  ar: "تتبع طلبات شراء مادة محددة عبر أقسام الإنتاج بمرور الوقت.",
+                },
+                href: "/reports/purchasing-materials/requisition-history",
               }}
             />
           </PermissionGuard>
@@ -127,10 +139,22 @@ export default function Page() {
               report={{
                 label: { en: "Average Price Gaps", ar: "فروقات السعر المتوسط" },
                 description: {
-                  en: "Find materials whose stored average price differs sharply from their quantity-weighted purchase price.",
-                  ar: "اكتشاف المواد التي يختلف سعرها المتوسط المخزن بشكل حاد عن متوسط أسعار الشراء المرجح بالكمية.",
+                  en: "Identifies materials whose stored average price differs sharply from the quantity-weighted purchase price.",
+                  ar: "تحديد المواد التي يختلف سعرها المتوسط المخزن بشكل حاد عن متوسط أسعار الشراء المرجح بالكمية.",
                 },
                 href: "/reports/purchasing-materials/average-price-gaps",
+              }}
+            />
+          </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_OUTLIERS_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Price Outliers", ar: "انحراف أسعار الشراء" },
+                description: {
+                  en: "Identifies purchase lines whose unit price diverges sharply from nearby purchases of the same material.",
+                  ar: "تحديد بنود الشراء التي يختلف سعر وحدتها بشكل حاد عن المشتريات المجاورة لنفس المادة.",
+                },
+                href: "/reports/purchasing-materials/price-outliers",
               }}
             />
           </PermissionGuard>
@@ -139,22 +163,10 @@ export default function Page() {
               report={{
                 label: { en: "Invoice Total Variance", ar: "انحراف إجمالي الفاتورة" },
                 description: {
-                  en: "Compare calculated order totals against invoice total purchases.",
+                  en: "Compares calculated purchase order totals with invoice total purchases.",
                   ar: "مقارنة الإجمالي المحسوب لأوامر التوريد مع إجمالي مشتريات الفاتورة.",
                 },
                 href: "/reports/purchasing-materials/total-amount-mismatches",
-              }}
-            />
-          </PermissionGuard>
-          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_FOLLOW_UP_REPORT}>
-            <ReportLinkCard
-              report={{
-                label: { en: "Purchase Requisition Follow-up", ar: "متابعة طلبات الشراء" },
-                description: {
-                  en: "Track approved requisition lines by production department: requested, ordered, and received quantities with values.",
-                  ar: "متابعة بنود طلبات الشراء المعتمدة حسب قسم الإنتاج: الكميات المطلوبة والمطلوبة في أوامر التوريد والمستلمة مع القيم.",
-                },
-                href: "/reports/purchasing-materials/requisition-follow-up",
               }}
             />
           </PermissionGuard>

@@ -114,6 +114,8 @@ export const queryKeys = {
     list: (filters: ListFilters) => [...queryKeys.legacyIssuePermits.lists(), filters] as const,
     details: () => [...queryKeys.legacyIssuePermits.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.legacyIssuePermits.details(), id] as const,
+    neighbors: (id: string, filters: ListFilters) =>
+      [...queryKeys.legacyIssuePermits.detail(id), "neighbors", filters] as const,
   },
   materialPurchaseOrders: {
     all: ["material-purchase-orders"] as const,
@@ -167,6 +169,8 @@ export const queryKeys = {
       inventorySummary: () => [...queryKeys.reports.materials.all, "inventory-summary"] as const,
       categoryStats: (mainCategoryId: string) =>
         [...queryKeys.reports.materials.all, "category-stats", mainCategoryId] as const,
+      issuePermitHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.materials.all, "issue-permit-history", materialCode, filters] as const,
     },
     purchasingMaterials: {
       all: ["reports", "purchasing-materials"] as const,
@@ -197,6 +201,8 @@ export const queryKeys = {
         filters?: { from?: string; to?: string },
       ) =>
         [...queryKeys.reports.purchasingMaterials.all, "requisition-follow-up", productionSubDepartment, filters] as const,
+      requisitionHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "requisition-history", materialCode, filters] as const,
     },
   },
   dashboard: {

@@ -62,6 +62,21 @@ export default function Page() {
               }}
             />
           </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_LEGACY_ISSUE_PERMIT_HISTORY_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: {
+                  en: "Legacy Material Issue Permit History",
+                  ar: "تاريخ أذونات الصرف المرحلية للمادة",
+                },
+                description: {
+                  en: "Tracks interim legacy issue permits for a selected material over time across production departments. This is not the final issue-permit report.",
+                  ar: "تتبع أذونات الصرف المرحلية لمادة محددة عبر أقسام الإنتاج بمرور الوقت. هذه ليست النسخة النهائية من تقرير أذونات الصرف.",
+                },
+                href: "/reports/materials/issue-permit-history",
+              }}
+            />
+          </PermissionGuard>
         </div>
       </main>
     </div>

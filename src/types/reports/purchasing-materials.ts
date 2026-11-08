@@ -282,6 +282,47 @@ export type PurchasingMaterialsTotalAmountMismatches = {
   completedWithoutInvoiceTotal: PurchasingMaterialsCompletedWithoutInvoiceTotalOrder[];
 };
 
+// ================ Requisition History ================
+
+export type PurchasingMaterialsRequisitionHistoryStatus = "rejected" | "approved" | "pending";
+
+export type PurchasingMaterialsRequisitionHistoryEntry = {
+  requisitionItemId: string;
+  requisitionId: string;
+  requisitionCode: string;
+  createdAt: string;
+  productionSubDepartment: string;
+  managerId: string | null;
+  managerName: string | null;
+  createdById: string;
+  createdByName: string;
+  unitOfMeasurementSelected: MaterialUnit;
+  quantityRequested: number;
+  quantityRequestedInBase: number | null;
+  status: PurchasingMaterialsRequisitionHistoryStatus;
+  notes: string | null;
+};
+
+export type PurchasingMaterialsRequisitionHistorySummary = {
+  requisitionCount: number;
+  totalQuantity: number;
+  approvedQuantity: number;
+  pendingQuantity: number;
+  rejectedQuantity: number;
+  missingConversionCount: number;
+};
+
+export type PurchasingMaterialsRequisitionHistory = {
+  material: {
+    code: string;
+    title: string;
+    unitOfMeasurement: MaterialUnit;
+    unitConversions: MaterialUnitConversionSummary[];
+  };
+  entries: PurchasingMaterialsRequisitionHistoryEntry[];
+  summary: PurchasingMaterialsRequisitionHistorySummary;
+};
+
 // ================ Requisition Follow-up ================
 
 export type PurchasingMaterialsRequisitionFollowUpItem = {
