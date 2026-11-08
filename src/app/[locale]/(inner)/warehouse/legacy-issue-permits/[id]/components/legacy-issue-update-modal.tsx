@@ -8,10 +8,7 @@ import usePrivateRequest from "@/hooks/use-private-request";
 import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import {
-  LEGACY_ISSUE_PERMIT_TYPES,
-  type LegacyIssuePermitType,
-} from "@/lib/constants/enums/legacy-issue-permit-types";
+import { LEGACY_ISSUE_PERMIT_TYPES, type LegacyIssuePermitType } from "@/lib/constants/enums/legacy-issue-permit-types";
 import type { LegacyIssuePermitMaintenanceOrderType } from "@/lib/constants/enums/legacy-issue-permit-maintenance-order-types";
 import { type ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
@@ -112,8 +109,7 @@ export default function LegacyIssuePermitUpdateModal({
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           permitType: permitType as LegacyIssuePermitType,
           contractNumber: isContractReview && !hasMultipleCustomers ? contractNumber.trim() || null : null,
-          maintenanceOrderNumber:
-            isMaintenanceOrder && !hasMultipleCustomers ? maintenanceOrderNumber.trim() || null : null,
+          maintenanceOrderNumber: isMaintenanceOrder && !hasMultipleCustomers ? maintenanceOrderNumber.trim() || null : null,
           maintenanceOrderType: isMaintenanceOrder
             ? (maintenanceOrderType as LegacyIssuePermitMaintenanceOrderType | null)
             : null,
@@ -162,9 +158,7 @@ export default function LegacyIssuePermitUpdateModal({
       return setValidationError(translate("Please select a permit type.", "يرجى اختيار نوع الإذن."));
     }
     if (isProductionDepartment && !productionSubDepartment) {
-      return setValidationError(
-        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
-      );
+      return setValidationError(translate("Please select a production department.", "يرجى اختيار قسم الانتاج."));
     }
 
     mutation.mutate();
@@ -181,9 +175,8 @@ export default function LegacyIssuePermitUpdateModal({
   const isDataChanged =
     issuePermitNumber.trim() !== transaction.issuePermitNumber ||
     (issueOrderNumber.trim() || null) !== (transaction.issueOrderNumber || null) ||
-    (transaction.issueOrderDate
-      ? dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate))
-      : null) !== dateTimePickerValueToIso(issueOrderDate) ||
+    (transaction.issueOrderDate ? dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate)) : null) !==
+      dateTimePickerValueToIso(issueOrderDate) ||
     dateTimePickerValueToIso(toDatePickerValue(transaction.date)) !== dateTimePickerValueToIso(date) ||
     creatorId !== transaction.creator.id ||
     (productionSubDepartment || null) !== (transaction.productionSubDepartment || null) ||
@@ -202,7 +195,7 @@ export default function LegacyIssuePermitUpdateModal({
     !!creatorId &&
     !!permitType &&
     (!isProductionDepartment || !!productionSubDepartment) &&
-    issueOrderNumber.trim() !== "" === (dateTimePickerValueToIso(issueOrderDate) !== null) &&
+    (issueOrderNumber.trim() !== "") === (dateTimePickerValueToIso(issueOrderDate) !== null) &&
     isDataChanged;
 
   return (
@@ -228,15 +221,24 @@ export default function LegacyIssuePermitUpdateModal({
             value={issueOrderNumber}
             onChange={(e) => setIssueOrderNumber(e.target.value)}
             label={translate("Issue Order Number", "رقم طلب الصرف")}
-            placeholder={translate("Optional", "اختياري")}
+            placeholder={translate("Enter issue order number", "أدخل رقم طلب الصرف")}
             radius="md"
           />
           <DatePickerInput
             value={issueOrderDate}
             onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}
-            placeholder={translate("Optional", "اختياري")}
+            placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
             clearable
+          />
+          <SelectProductionSubDepartment
+            value={productionSubDepartment}
+            setValue={setProductionSubDepartment}
+            label={translate("Production Department", "قسم الانتاج")}
+            placeholder={translate("Select department...", "اختر القسم...")}
+            required={isProductionDepartment}
+            clearable={!isProductionDepartment}
+            radius="md"
           />
           <SelectUser
             value={creatorId}
@@ -256,15 +258,6 @@ export default function LegacyIssuePermitUpdateModal({
             required
             radius="md"
           />
-          <SelectProductionSubDepartment
-            value={productionSubDepartment}
-            setValue={setProductionSubDepartment}
-            label={translate("Production Department", "قسم الانتاج")}
-            placeholder={translate("Select department...", "اختر القسم...")}
-            required={isProductionDepartment}
-            clearable={!isProductionDepartment}
-            radius="md"
-          />
           {showsCustomerFields && (
             <div className="col-span-2 flex flex-col gap-3">
               <Checkbox
@@ -279,7 +272,7 @@ export default function LegacyIssuePermitUpdateModal({
                       value={contractNumber}
                       onChange={(e) => setContractNumber(e.target.value)}
                       label={translate("Contract review number", "رقم مراجعة العقد")}
-                      placeholder={translate("Optional", "اختياري")}
+                      placeholder={translate("Enter contract review number", "أدخل رقم مراجعة العقد")}
                       radius="md"
                     />
                   )}
@@ -289,7 +282,7 @@ export default function LegacyIssuePermitUpdateModal({
                         value={maintenanceOrderNumber}
                         onChange={(e) => setMaintenanceOrderNumber(e.target.value)}
                         label={translate("Maintenance Order Number", "رقم أمر الشغل")}
-                        placeholder={translate("Optional", "اختياري")}
+                        placeholder={translate("Enter maintenance order number", "أدخل رقم أمر الشغل")}
                         radius="md"
                       />
                       <SelectLegacyIssuePermitMaintenanceOrderType

@@ -30,10 +30,7 @@ import legacyIssuePermitsApi from "@/lib/api/legacy-issue-permits";
 import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
-import {
-  LEGACY_ISSUE_PERMIT_TYPES,
-  type LegacyIssuePermitType,
-} from "@/lib/constants/enums/legacy-issue-permit-types";
+import { LEGACY_ISSUE_PERMIT_TYPES, type LegacyIssuePermitType } from "@/lib/constants/enums/legacy-issue-permit-types";
 import type { LegacyIssuePermitMaintenanceOrderType } from "@/lib/constants/enums/legacy-issue-permit-maintenance-order-types";
 import { supportsUnitConversions, type MaterialType } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel, getMaterialUnitSelectOptions, type MaterialUnit } from "@/lib/constants/enums/material-units";
@@ -306,8 +303,7 @@ export default function Page() {
           productionSubDepartment: (productionSubDepartment as ProductionSubDepartment) || null,
           permitType: permitType as LegacyIssuePermitType,
           contractNumber: isContractReview && !hasMultipleCustomers ? contractNumber.trim() || null : null,
-          maintenanceOrderNumber:
-            isMaintenanceOrder && !hasMultipleCustomers ? maintenanceOrderNumber.trim() || null : null,
+          maintenanceOrderNumber: isMaintenanceOrder && !hasMultipleCustomers ? maintenanceOrderNumber.trim() || null : null,
           maintenanceOrderType: isMaintenanceOrder
             ? (maintenanceOrderType as LegacyIssuePermitMaintenanceOrderType | null)
             : null,
@@ -474,9 +470,7 @@ export default function Page() {
     }
 
     if (isProductionDepartment && !productionSubDepartment) {
-      return setValidationError(
-        translate("Please select a production department.", "يرجى اختيار قسم الانتاج."),
-      );
+      return setValidationError(translate("Please select a production department.", "يرجى اختيار قسم الانتاج."));
     }
 
     for (let index = 0; index < rows.length; index++) {
@@ -514,10 +508,7 @@ export default function Page() {
                 `${rowLabel}: quantity for material ${materialName} must be greater than zero.`,
                 `${rowLabel}: يجب أن تكون كمية المادة ${materialName} أكبر من صفر.`,
               )
-            : translate(
-                `${rowLabel}: quantity must be greater than zero.`,
-                `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`,
-              ),
+            : translate(`${rowLabel}: quantity must be greater than zero.`, `${rowLabel}: يجب أن تكون الكمية أكبر من صفر.`),
         );
       }
     }
@@ -554,15 +545,24 @@ export default function Page() {
             value={issueOrderNumber}
             onChange={(e) => setIssueOrderNumber(e.target.value)}
             label={translate("Issue Order Number", "رقم طلب الصرف")}
-            placeholder={translate("Optional", "اختياري")}
+            placeholder={translate("Enter issue order number", "أدخل رقم طلب الصرف")}
             radius="md"
           />
           <DatePickerInput
             value={issueOrderDate}
             onChange={setIssueOrderDate}
             label={translate("Issue Order Date", "تاريخ طلب الصرف")}
-            placeholder={translate("Optional", "اختياري")}
+            placeholder={translate("Select issue order date", "اختر تاريخ طلب الصرف")}
             clearable
+          />
+          <SelectProductionSubDepartment
+            value={productionSubDepartment}
+            setValue={setProductionSubDepartment}
+            label={translate("Production Department", "قسم الانتاج")}
+            placeholder={translate("Select department...", "اختر القسم...")}
+            required={isProductionDepartment}
+            clearable={!isProductionDepartment}
+            radius="md"
           />
           <SelectUser
             value={creatorId}
@@ -581,15 +581,6 @@ export default function Page() {
             required
             radius="md"
           />
-          <SelectProductionSubDepartment
-            value={productionSubDepartment}
-            setValue={setProductionSubDepartment}
-            label={translate("Production Department", "قسم الانتاج")}
-            placeholder={translate("Select department...", "اختر القسم...")}
-            required={isProductionDepartment}
-            clearable={!isProductionDepartment}
-            radius="md"
-          />
           {showsCustomerFields && (
             <div className="col-span-2 flex flex-col gap-3">
               <Checkbox
@@ -604,7 +595,7 @@ export default function Page() {
                       value={contractNumber}
                       onChange={(e) => setContractNumber(e.target.value)}
                       label={translate("Contract review number", "رقم مراجعة العقد")}
-                      placeholder={translate("Optional", "اختياري")}
+                      placeholder={translate("Enter contract review number", "أدخل رقم مراجعة العقد")}
                       radius="md"
                     />
                   )}
@@ -614,7 +605,7 @@ export default function Page() {
                         value={maintenanceOrderNumber}
                         onChange={(e) => setMaintenanceOrderNumber(e.target.value)}
                         label={translate("Maintenance Order Number", "رقم أمر الشغل")}
-                        placeholder={translate("Optional", "اختياري")}
+                        placeholder={translate("Enter maintenance order number", "أدخل رقم أمر الشغل")}
                         radius="md"
                       />
                       <SelectLegacyIssuePermitMaintenanceOrderType
