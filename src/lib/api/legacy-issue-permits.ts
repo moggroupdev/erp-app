@@ -127,6 +127,21 @@ const legacyIssuePermitsApi = {
       data: dto,
     });
   },
+
+  async deleteItem({
+    privateRequest,
+    id,
+    itemId,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    itemId: string;
+  }) {
+    return await privateRequest<LegacyIssuePermitItem>({
+      method: "DELETE",
+      url: `legacy-issue-permits/${id}/items/${itemId}`,
+    });
+  },
 };
 
 export default legacyIssuePermitsApi;

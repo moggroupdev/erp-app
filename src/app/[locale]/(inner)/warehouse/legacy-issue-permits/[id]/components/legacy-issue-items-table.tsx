@@ -24,8 +24,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
-import { Badge, Button, Table } from "@mantine/core";
-import { GripVertical, Pencil } from "lucide-react";
+import { ActionIcon, Badge, Button, Menu, Table } from "@mantine/core";
+import { EllipsisVertical, GripVertical, Pencil, Trash2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import usePrivateRequest from "@/hooks/use-private-request";
 import { useUser } from "@/contexts/user/hook";
@@ -40,6 +40,7 @@ import PermissionGuard from "@/components/guards/permission";
 import ErrorAlert from "@/components/ui/error-alert";
 import { EmptyValue } from "@/components/ui/entity-details";
 import CopyButton from "@/components/ui/copy-button";
+import DeleteModal from "@/components/ui/delete-modal";
 
 function restrictToVerticalAxis({ transform }: Parameters<Modifier>[0]) {
   return { ...transform, x: 0 };
@@ -58,6 +59,7 @@ function ItemRowCells({
   isDragging,
   getMainCategoryTitle,
   onEdit,
+  onDelete,
   dragHandleProps,
 }: {
   item: LegacyIssuePermitItemDetailed;
@@ -66,6 +68,7 @@ function ItemRowCells({
   isDragging?: boolean;
   getMainCategoryTitle: (subCategoryId: string | undefined) => string | null;
   onEdit?: (item: LegacyIssuePermitItemDetailed) => void;
+  onDelete?: (item: LegacyIssuePermitItemDetailed) => void;
   dragHandleProps?: Record<string, unknown>;
 }) {
   const { locale, translate } = useI18n();
@@ -134,19 +137,29 @@ function ItemRowCells({
       <Table.Td>{item.quantity == null ? <EmptyValue /> : formatQuantity(item.quantity)}</Table.Td>
       <Table.Td className="max-w-xs truncate">{item.notes || <EmptyValue />}</Table.Td>
       <Table.Td className="w-10">
-        {onEdit && (
+        {onEdit && onDelete && (
           <PermissionGuard permission={PERMISSIONS.UPDATE_LEGACY_ISSUE_PERMIT}>
-            <Button
-              variant="light"
-              color="dark"
-              size="xs"
-              radius="md"
-              p={6}
-              onClick={() => onEdit(item)}
-              title={translate("Edit item", "تعديل البند")}
-            >
-              <Pencil size={12} />
-            </Button>
+            <Menu position="bottom-end" withinPortal>
+              <Menu.Target>
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
+                  size="sm"
+                  radius="md"
+                  aria-label={translate("Item actions", "إجراءات البند")}
+                >
+                  <EllipsisVertical size={16} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item leftSection={<Pencil size={14} />} onClick={() => onEdit(item)}>
+                  {translate("Edit", "تعديل")}
+                </Menu.Item>
+                <Menu.Item leftSection={<Trash2 size={14} />} color="clay" onClick={() => onDelete(item)}>
+                  {translate("Delete", "حذف")}
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </PermissionGuard>
         )}
       </Table.Td>
@@ -160,12 +173,14 @@ function SortableItemRow({
   canReorder,
   getMainCategoryTitle,
   onEdit,
+  onDelete,
 }: {
   item: LegacyIssuePermitItemDetailed;
   index: number;
   canReorder: boolean;
   getMainCategoryTitle: (subCategoryId: string | undefined) => string | null;
   onEdit: (item: LegacyIssuePermitItemDetailed) => void;
+  onDelete: (item: LegacyIssuePermitItemDetailed) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -186,6 +201,7 @@ function SortableItemRow({
         isDragging={isDragging}
         getMainCategoryTitle={getMainCategoryTitle}
         onEdit={onEdit}
+        onDelete={onDelete}
         dragHandleProps={canReorder ? { ...attributes, ...listeners } : undefined}
       />
     </Table.Tr>
@@ -241,6 +257,7 @@ export default function LegacyIssueItemsTable({
   const [orderedItems, setOrderedItems] = useState(items);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overlayMetrics, setOverlayMetrics] = useState<{ tableWidth: number; columnWidths: number[] } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<LegacyIssuePermitItemDetailed | null>(null);
 
   const canUpdate = canUpdatePermit(user);
   const canReorder = canUpdate && orderedItems.length > 1;
@@ -312,7 +329,34 @@ export default function LegacyIssueItemsTable({
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (itemId: string) =>
+      legacyIssuePermitsApi.deleteItem({ privateRequest, id: transactionId, itemId }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.legacyIssuePermits.detail(transactionId) });
+      toast.success(translate("Permit item deleted successfully.", "تم حذف بند إذن الصرف بنجاح."));
+      setItemToDelete(null);
+    },
+  });
+
+  function handleDelete(item: LegacyIssuePermitItemDetailed) {
+    deleteMutation.reset();
+    setItemToDelete(item);
+  }
+
   const errorMessage = reorderMutation.error ? getErrorMessage(locale, reorderMutation.error) : "";
+  const deleteError = deleteMutation.error ? getErrorMessage(locale, deleteMutation.error) : "";
+  const deleteSubTitle = itemToDelete
+    ? itemToDelete.material
+      ? translate(
+          `You're about to delete "${itemToDelete.material.title}" from this permit.`,
+          `أنت على وشك حذف "${itemToDelete.material.title}" من هذا الإذن.`,
+        )
+      : translate(
+          "You're about to delete this item from the permit.",
+          "أنت على وشك حذف هذا البند من الإذن.",
+        )
+    : "";
 
   return (
     <div className="flex flex-col gap-3">
@@ -348,6 +392,7 @@ export default function LegacyIssueItemsTable({
                     canReorder={canReorder}
                     getMainCategoryTitle={getMainCategoryTitle}
                     onEdit={onEdit}
+                    onDelete={handleDelete}
                   />
                 ))}
               </Table.Tbody>
@@ -389,6 +434,22 @@ export default function LegacyIssueItemsTable({
           </Button>
         </div>
       )}
+
+      <DeleteModal
+        opened={!!itemToDelete}
+        onClose={() => {
+          setItemToDelete(null);
+          deleteMutation.reset();
+        }}
+        title={translate("Delete item?", "حذف البند؟")}
+        subTitle={deleteSubTitle}
+        warning={translate("This action cannot be undone.", "هذا الإجراء لا يمكن التراجع عنه.")}
+        action={() => {
+          if (itemToDelete) deleteMutation.mutate(itemToDelete.id);
+        }}
+        loading={deleteMutation.isPending}
+        error={deleteError}
+      />
     </div>
   );
 }
