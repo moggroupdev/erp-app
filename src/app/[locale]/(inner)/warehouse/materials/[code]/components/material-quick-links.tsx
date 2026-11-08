@@ -86,12 +86,12 @@ export default function MaterialQuickLinks({ materialCode }: { materialCode: str
               </div>
               <div className="flex flex-col gap-1.5">
                 <span className="text-sm font-semibold text-gray-900 group-hover:text-haze-800">
-                  {translate("Issue Permit History", "تاريخ أذونات الصرف")}
+                  {translate("Legacy Issue Permit History", "تاريخ أذونات الصرف المرحلية")}
                 </span>
                 <span className="text-xs text-gray-500">
                   {translate(
-                    "View legacy issue permit history for this material",
-                    "عرض تاريخ أذونات الصرف لهذه المادة",
+                    "View interim legacy issue permit history for this material",
+                    "عرض تاريخ أذونات الصرف المرحلية لهذه المادة",
                   )}
                 </span>
               </div>

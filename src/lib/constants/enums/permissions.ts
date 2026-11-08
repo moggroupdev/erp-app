@@ -765,8 +765,8 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
   read_material_legacy_issue_permit_history_report: {
     value: "read_material_legacy_issue_permit_history_report",
     label: {
-      en: "Read Material Issue Permit History Report",
-      ar: "عرض تقرير تاريخ أذونات صرف المادة",
+      en: "Read Legacy Material Issue Permit History Report",
+      ar: "عرض تقرير تاريخ أذونات الصرف المرحلية للمادة",
     },
   },
   read_material_purchasing_spending_summary_report: {

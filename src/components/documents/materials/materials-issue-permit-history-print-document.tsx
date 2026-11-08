@@ -88,10 +88,10 @@ export default function MaterialsIssuePermitHistoryPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Issue Permit History", "سجل أذونات الصرف")}
+          title={translate("Legacy Issue Permit History", "سجل أذونات الصرف المرحلية")}
           subtitle={translate(
-            "Individual issue permit lines for this material (newest first).",
-            "بنود أذونات الصرف الفردية لهذه المادة (الأحدث أولاً).",
+            "Individual interim legacy issue permit lines for this material (newest first).",
+            "بنود أذونات الصرف المرحلية الفردية لهذه المادة (الأحدث أولاً).",
           )}
         />
         <PrintTable

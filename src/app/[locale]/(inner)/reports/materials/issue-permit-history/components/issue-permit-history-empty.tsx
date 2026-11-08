@@ -47,8 +47,8 @@ export default function IssuePermitHistoryEmpty() {
           </h2>
           <p className="mt-2 text-xs leading-[1.75] text-gray-500">
             {translate(
-              "Pick a material in the field above. The report will load its issue permit history.",
-              "اختر مادة من الحقل أعلاه. سيُحمَّل تاريخ أذونات الصرف الخاصة بها.",
+              "Pick a material in the field above. The report will load its interim legacy issue permit history.",
+              "اختر مادة من الحقل أعلاه. سيُحمَّل تاريخ أذونات الصرف المرحلية الخاصة بها.",
             )}
           </p>
 

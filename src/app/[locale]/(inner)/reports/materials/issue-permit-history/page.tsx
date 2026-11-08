@@ -29,11 +29,14 @@ import IssuePermitChart from "./components/issue-permit-chart";
 import IssuePermitEntriesTable from "./components/issue-permit-entries-table";
 import IssuePermitSummary from "./components/issue-permit-summary";
 
-const PAGE_TITLE = { en: "Material Issue Permit History", ar: "تاريخ أذونات صرف المادة" };
+const PAGE_TITLE = {
+  en: "Legacy Material Issue Permit History",
+  ar: "تاريخ أذونات الصرف المرحلية للمادة",
+};
 
 const PAGE_SUBTITLE = {
-  en: "Track legacy issue permits for a specific material over time across production departments.",
-  ar: "تتبع أذونات صرف مادة محددة عبر أقسام الإنتاج بمرور الوقت.",
+  en: "Tracks interim legacy issue permits for a selected material over time across production departments. This is not the final issue-permit report.",
+  ar: "تتبع أذونات الصرف المرحلية لمادة محددة عبر أقسام الإنتاج بمرور الوقت. هذه ليست النسخة النهائية من تقرير أذونات الصرف.",
 };
 
 export default function Page() {
