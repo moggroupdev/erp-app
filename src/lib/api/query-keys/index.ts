@@ -197,6 +197,8 @@ export const queryKeys = {
         filters?: { from?: string; to?: string },
       ) =>
         [...queryKeys.reports.purchasingMaterials.all, "requisition-follow-up", productionSubDepartment, filters] as const,
+      requisitionHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.purchasingMaterials.all, "requisition-history", materialCode, filters] as const,
     },
   },
   dashboard: {

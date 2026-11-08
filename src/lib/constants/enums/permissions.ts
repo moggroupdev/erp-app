@@ -58,6 +58,7 @@ export const PERMISSION_VALUES = [
   "read_material_purchasing_price_outliers_report",
   "read_material_purchasing_average_price_gaps_report",
   "read_material_purchasing_requisition_follow_up_report",
+  "read_material_purchasing_requisition_history_report",
   "add_product",
   "read_products",
   "update_product",
@@ -147,6 +148,7 @@ export const MATERIAL_PURCHASING_REPORT_PERMISSIONS = [
   PERMISSIONS.READ_MATERIAL_PURCHASING_PRICE_OUTLIERS_REPORT,
   PERMISSIONS.READ_MATERIAL_PURCHASING_AVERAGE_PRICE_GAPS_REPORT,
   PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_FOLLOW_UP_REPORT,
+  PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_HISTORY_REPORT,
 ] as const;
 
 /** All report permissions — /reports index visible if user has any. */
@@ -828,6 +830,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض تقرير متابعة طلبات الشراء",
     },
   },
+  read_material_purchasing_requisition_history_report: {
+    value: "read_material_purchasing_requisition_history_report",
+    label: {
+      en: "Read Material Requisition History Report",
+      ar: "عرض تقرير تاريخ طلبات شراء المادة",
+    },
+  },
   read_audit_logs: {
     value: "read_audit_logs",
     label: {
@@ -998,6 +1007,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_material_purchasing_price_outliers_report",
       "read_material_purchasing_average_price_gaps_report",
       "read_material_purchasing_requisition_follow_up_report",
+      "read_material_purchasing_requisition_history_report",
     ],
   },
   {

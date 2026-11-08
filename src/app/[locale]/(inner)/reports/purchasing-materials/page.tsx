@@ -158,6 +158,18 @@ export default function Page() {
               }}
             />
           </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_HISTORY_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Material Requisition History", ar: "تاريخ طلبات شراء المادة" },
+                description: {
+                  en: "Track purchase requisitions for a specific material over time across production departments.",
+                  ar: "تتبع طلبات شراء مادة محددة عبر أقسام الإنتاج بمرور الوقت.",
+                },
+                href: "/reports/purchasing-materials/requisition-history",
+              }}
+            />
+          </PermissionGuard>
         </div>
       </main>
     </div>

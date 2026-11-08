@@ -34,6 +34,7 @@ export const staleTimes = {
     purchasingMaterialsPriceOutliers: 5 * MINUTE,
     purchasingMaterialsAveragePriceGaps: 5 * MINUTE,
     purchasingMaterialsRequisitionFollowUp: 5 * MINUTE,
+    purchasingMaterialsRequisitionHistory: 5 * MINUTE,
   },
   locations: Infinity,
   departments: Infinity,

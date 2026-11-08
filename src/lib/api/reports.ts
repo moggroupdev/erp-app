@@ -10,6 +10,7 @@ import type {
   PurchasingMaterialsSupplierComparison,
   PurchasingMaterialsTotalAmountMismatches,
   PurchasingMaterialsRequisitionFollowUp,
+  PurchasingMaterialsRequisitionHistory,
   PurchasingMaterialsPriceOutliers,
   PurchasingMaterialsAveragePriceGaps,
 } from "@/types/reports";
@@ -245,6 +246,26 @@ const reportsApi = {
       return await privateRequest<PurchasingMaterialsRequisitionFollowUp>({
         url: "reports/purchasing-materials/requisition-follow-up",
         params: { productionSubDepartment, from, to },
+        signal,
+      });
+    },
+
+    async getRequisitionHistory({
+      privateRequest,
+      materialCode,
+      from,
+      to,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      materialCode: string;
+      from?: string;
+      to?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<PurchasingMaterialsRequisitionHistory>({
+        url: "reports/purchasing-materials/requisition-history",
+        params: { materialCode, from, to },
         signal,
       });
     },
