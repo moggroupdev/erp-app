@@ -227,7 +227,9 @@ export default function Page() {
                         <div className="flex items-center gap-1.5">
                           <ProtectedLink
                             permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
-                            href={`/warehouse/legacy-issue-permits/${transaction.id}`}
+                            href={`/warehouse/legacy-issue-permits/${transaction.id}?${new URLSearchParams(
+                              removeEmptyParams({ sortBy, keyword: debouncedKeyword }),
+                            )}`}
                             className="font-mono hover:underline"
                           >
                             {transaction.issuePermitNumber}

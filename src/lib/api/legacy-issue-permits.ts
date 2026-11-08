@@ -6,6 +6,7 @@ import type {
   LegacyIssuePermit,
   LegacyIssuePermitDetailed,
   LegacyIssuePermitItem,
+  LegacyIssuePermitNeighbors,
   ReorderLegacyIssuePermitItemsDto,
   UpdateLegacyIssuePermitDto,
   UpdateLegacyIssuePermitItemDto,
@@ -39,6 +40,24 @@ const legacyIssuePermitsApi = {
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {
     return await privateRequest<LegacyIssuePermitDetailed>({
       url: `legacy-issue-permits/${id}`,
+      signal,
+    });
+  },
+
+  async getNeighbors({
+    privateRequest,
+    id,
+    params,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    params: Dictionary;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<LegacyIssuePermitNeighbors>({
+      url: `legacy-issue-permits/${id}/neighbors`,
+      params,
       signal,
     });
   },

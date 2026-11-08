@@ -46,6 +46,16 @@ export type LegacyIssuePermitDetailed = Omit<LegacyIssuePermit, "creatorId" | "c
   items: LegacyIssuePermitItemDetailed[];
 };
 
+export type LegacyIssuePermitNeighbor = {
+  id: string;
+  issuePermitNumber: string;
+};
+
+export type LegacyIssuePermitNeighbors = {
+  previous: LegacyIssuePermitNeighbor | null;
+  next: LegacyIssuePermitNeighbor | null;
+};
+
 // ==================== DTOs ====================
 
 export type CreateLegacyIssuePermitItemDto = {

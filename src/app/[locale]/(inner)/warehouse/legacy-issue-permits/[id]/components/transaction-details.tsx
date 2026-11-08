@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import {
@@ -10,7 +11,13 @@ import { Badge } from "@mantine/core";
 import { History } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
-export default function TransactionDetails({ transaction }: { transaction: LegacyIssuePermitDetailed }) {
+export default function TransactionDetails({
+  transaction,
+  headerEnd,
+}: {
+  transaction: LegacyIssuePermitDetailed;
+  headerEnd?: ReactNode;
+}) {
   const { locale, translate } = useI18n();
 
   const rows: DetailRow[] = [
@@ -99,5 +106,7 @@ export default function TransactionDetails({ transaction }: { transaction: Legac
     },
   ];
 
-  return <EntityDetails title={transaction.issuePermitNumber} icon={History} rows={rows} />;
+  return (
+    <EntityDetails title={transaction.issuePermitNumber} icon={History} headerEnd={headerEnd} rows={rows} />
+  );
 }

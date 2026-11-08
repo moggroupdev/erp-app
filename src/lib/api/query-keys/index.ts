@@ -114,6 +114,8 @@ export const queryKeys = {
     list: (filters: ListFilters) => [...queryKeys.legacyIssuePermits.lists(), filters] as const,
     details: () => [...queryKeys.legacyIssuePermits.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.legacyIssuePermits.details(), id] as const,
+    neighbors: (id: string, filters: ListFilters) =>
+      [...queryKeys.legacyIssuePermits.detail(id), "neighbors", filters] as const,
   },
   materialPurchaseOrders: {
     all: ["material-purchase-orders"] as const,

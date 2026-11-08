@@ -78,6 +78,8 @@ type EntityDetailsProps = {
   title: ReactNode;
   icon?: LucideIcon;
   titleAside?: ReactNode;
+  /** Trailing controls in the title header (e.g. previous / next). */
+  headerEnd?: ReactNode;
   deletedAt?: number | string | Date | null;
   inactiveLabel?: string;
   rows: DetailRow[];
@@ -89,6 +91,7 @@ export default function EntityDetails({
   title,
   icon: Icon,
   titleAside,
+  headerEnd,
   deletedAt,
   inactiveLabel,
   rows,
@@ -140,6 +143,8 @@ export default function EntityDetails({
               )}
             </div>
           </div>
+
+          {headerEnd}
         </div>
       </header>
 
