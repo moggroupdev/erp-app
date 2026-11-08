@@ -30,7 +30,7 @@ export default function MaterialQuickLinks({ materialCode }: { materialCode: str
               </div>
               <div className="flex flex-col gap-1.5">
                 <span className="text-sm font-semibold text-gray-900 group-hover:text-haze-800">
-                  {translate("Price History", "تاريخ الأسعار")}
+                  {translate("Material Price History", "تاريخ أسعار المادة")}
                 </span>
                 <span className="text-xs text-gray-500">
                   {translate("View purchase price history for this material", "عرض تاريخ أسعار الشراء لهذه المادة")}
