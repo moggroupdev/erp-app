@@ -22,6 +22,7 @@ import ReportPageHeader from "@/components/ui/report-page-header";
 import PurchasingMaterialsRequisitionHistoryPrintDocument from "@/components/documents/procurement/reports/purchasing-materials-requisition-history-print-document";
 import ReportSkeleton from "../components/report-skeleton";
 import DateRangeFilter from "../components/date-range-filter";
+import ReportMaterialIdentity from "../components/report-material-identity";
 import MaterialPicker from "./components/material-picker";
 import RequisitionHistoryEmpty from "./components/requisition-history-empty";
 import RequisitionChart from "./components/requisition-chart";
@@ -197,20 +198,16 @@ export default function Page() {
         ) : (
           displayData && (
             <div className="flex flex-col gap-6">
-              <section className="rounded-3xl bg-white px-5 py-4 sm:px-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-800">
-                      {displayData.material.title}
-                      <span className="ms-2 font-mono text-xs font-normal text-gray-500">{displayData.material.code}</span>
-                    </p>
-                    <p className="mt-1 text-xs leading-[1.75] text-gray-500">
-                      {translate(
-                        `Base unit: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. Quantities use the selected display unit when a conversion exists.`,
-                        `الوحدة الأساسية: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. الكميات حسب وحدة العرض المحددة عند وجود تحويل.`,
-                      )}
-                    </p>
-                  </div>
+              <section className="rounded-3xl bg-white px-5 py-5 sm:px-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-8">
+                  <ReportMaterialIdentity
+                    title={displayData.material.title}
+                    code={displayData.material.code}
+                    hint={translate(
+                      `Base unit: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. Quantities use the selected display unit when a conversion exists.`,
+                      `الوحدة الأساسية: ${getMaterialUnitLabel(displayData.material.unitOfMeasurement, locale)}. الكميات حسب وحدة العرض المحددة عند وجود تحويل.`,
+                    )}
+                  />
 
                   <div className="w-full sm:max-w-xs">
                     <Select
