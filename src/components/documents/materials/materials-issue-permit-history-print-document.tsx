@@ -7,7 +7,10 @@ import {
   getProductionSubDepartmentLabel,
   isValidProductionSubDepartment,
 } from "@/lib/constants/enums/production-sub-departments";
-import { LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import {
+  getLegacyIssuePermitTypeLabel,
+  LEGACY_ISSUE_PERMIT_TYPES,
+} from "@/lib/constants/enums/legacy-issue-permit-types";
 import type {
   MaterialsIssuePermitHistoryEntry,
   MaterialsIssuePermitHistorySummary,
@@ -113,10 +116,13 @@ export default function MaterialsIssuePermitHistoryPrintDocument({
                 : row.productionSubDepartment || translate("Unassigned", "غير محدد");
             const quantity = row.displayQuantity != null ? row.displayQuantity : row.quantity;
             const rowUnitLabel = getMaterialUnitLabel(row.displayUnit, locale);
-            const reference =
-              row.workOrderNumberType === LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
+            const reference = row.hasMultipleCustomers
+              ? translate("Multiple customers", "عملاء متعددون")
+              : row.permitType === LEGACY_ISSUE_PERMIT_TYPES.CONTRACT_REVIEW
                 ? row.contractNumber
-                : row.workOrderNumber;
+                : row.permitType === LEGACY_ISSUE_PERMIT_TYPES.MAINTENANCE_ORDER
+                  ? row.maintenanceOrderNumber
+                  : getLegacyIssuePermitTypeLabel(row.permitType, locale);
             const permitNumber = row.isCancelled
               ? `${row.issuePermitNumber} (${translate("Cancelled", "ملغي")})`
               : row.issuePermitNumber;

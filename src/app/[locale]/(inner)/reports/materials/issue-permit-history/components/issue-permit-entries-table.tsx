@@ -12,7 +12,10 @@ import {
   getProductionSubDepartmentLabel,
   isValidProductionSubDepartment,
 } from "@/lib/constants/enums/production-sub-departments";
-import { LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import {
+  getLegacyIssuePermitTypeLabel,
+  LEGACY_ISSUE_PERMIT_TYPES,
+} from "@/lib/constants/enums/legacy-issue-permit-types";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import type { MaterialsIssuePermitHistoryEntry } from "@/types/reports";
 import ReportCard from "../../components/report-card";
@@ -65,10 +68,13 @@ export default function IssuePermitEntriesTable({ data }: { data: TableEntry[] }
                     : row.productionSubDepartment || translate("Unassigned", "غير محدد");
                 const quantity = row.displayQuantity != null ? row.displayQuantity : row.quantity;
                 const unitLabel = getMaterialUnitLabel(row.displayUnit, locale);
-                const reference =
-                  row.workOrderNumberType === LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
+                const reference = row.hasMultipleCustomers
+                  ? translate("Multiple customers", "عملاء متعددون")
+                  : row.permitType === LEGACY_ISSUE_PERMIT_TYPES.CONTRACT_REVIEW
                     ? row.contractNumber
-                    : row.workOrderNumber;
+                    : row.permitType === LEGACY_ISSUE_PERMIT_TYPES.MAINTENANCE_ORDER
+                      ? row.maintenanceOrderNumber
+                      : getLegacyIssuePermitTypeLabel(row.permitType, locale);
 
                 return (
                   <Table.Tr key={row.issuePermitItemId} className="text-gray-600">

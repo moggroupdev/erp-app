@@ -1,7 +1,8 @@
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 import type { MaterialUnit } from "@/lib/constants/enums/material-units";
 import type { StockStatus } from "@/lib/constants/enums/derived/stock-statuses";
-import type { LegacyIssuePermitWorkOrderType } from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+import type { LegacyIssuePermitMaintenanceOrderType } from "@/lib/constants/enums/legacy-issue-permit-maintenance-order-types";
+import type { LegacyIssuePermitType } from "@/lib/constants/enums/legacy-issue-permit-types";
 import type { ProductionSubDepartment } from "@/lib/constants/enums/production-sub-departments";
 import type { MaterialUnitConversionSummary } from "@/types/material";
 
@@ -93,9 +94,11 @@ export type MaterialsIssuePermitHistoryEntry = {
   productionSubDepartment: ProductionSubDepartment | null;
   creatorId: string;
   creatorName: string;
-  workOrderNumberType: LegacyIssuePermitWorkOrderType;
+  permitType: LegacyIssuePermitType;
   contractNumber: string | null;
-  workOrderNumber: string | null;
+  maintenanceOrderNumber: string | null;
+  maintenanceOrderType: LegacyIssuePermitMaintenanceOrderType | null;
+  hasMultipleCustomers: boolean;
   unitOfMeasurementSelected: MaterialUnit | null;
   quantity: number | null;
   quantityInBase: number | null;

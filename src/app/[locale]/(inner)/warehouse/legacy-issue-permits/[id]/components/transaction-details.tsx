@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import {
-  getLegacyIssuePermitWorkOrderTypeLabel,
-  LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES,
-} from "@/lib/constants/enums/legacy-issue-permit-work-order-types";
+  getLegacyIssuePermitTypeLabel,
+  LEGACY_ISSUE_PERMIT_TYPES,
+} from "@/lib/constants/enums/legacy-issue-permit-types";
+import { getLegacyIssuePermitMaintenanceOrderTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-maintenance-order-types";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { type LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
 import { Badge } from "@mantine/core";
@@ -33,13 +34,13 @@ export default function TransactionDetails({
     },
     {
       key: translate("Issue Order Number", "رقم طلب الصرف"),
-      value: transaction.issueOrderNumber,
-      mono: true,
-      copyText: transaction.issueOrderNumber,
+      value: transaction.issueOrderNumber || <EmptyValue />,
+      mono: !!transaction.issueOrderNumber,
+      copyText: transaction.issueOrderNumber || undefined,
     },
     {
       key: translate("Issue Order Date", "تاريخ طلب الصرف"),
-      value: formatDate(transaction.issueOrderDate, locale),
+      value: transaction.issueOrderDate ? formatDate(transaction.issueOrderDate, locale) : <EmptyValue />,
     },
     {
       key: translate("Creator", "المحرر"),
@@ -53,7 +54,11 @@ export default function TransactionDetails({
         <EmptyValue />
       ),
     },
-    ...(transaction.workOrderNumberType === LEGACY_ISSUE_PERMIT_WORK_ORDER_TYPES.BASE_CONTRACT
+    {
+      key: translate("Permit Type", "نوع الإذن"),
+      value: getLegacyIssuePermitTypeLabel(transaction.permitType, locale),
+    },
+    ...(transaction.permitType === LEGACY_ISSUE_PERMIT_TYPES.CONTRACT_REVIEW
       ? [
           {
             key: translate("Contract review number", "رقم مراجعة العقد"),
@@ -65,21 +70,46 @@ export default function TransactionDetails({
             copyText: transaction.contractNumber || undefined,
           },
         ]
-      : [
+      : []),
+    ...(transaction.permitType === LEGACY_ISSUE_PERMIT_TYPES.MAINTENANCE_ORDER
+      ? [
           {
-            key: translate("Work Order Number", "رقم أمر الشغل"),
-            value: transaction.workOrderNumber ? (
-              <span className="font-mono">{transaction.workOrderNumber}</span>
+            key: translate("Maintenance Order Number", "رقم أمر الشغل"),
+            value: transaction.maintenanceOrderNumber ? (
+              <span className="font-mono">{transaction.maintenanceOrderNumber}</span>
             ) : (
               <EmptyValue />
             ),
-            copyText: transaction.workOrderNumber || undefined,
+            copyText: transaction.maintenanceOrderNumber || undefined,
           },
           {
             key: translate("Maintenance Type", "نوع الصيانة"),
-            value: getLegacyIssuePermitWorkOrderTypeLabel(transaction.workOrderNumberType, locale),
+            value: transaction.maintenanceOrderType ? (
+              getLegacyIssuePermitMaintenanceOrderTypeLabel(transaction.maintenanceOrderType, locale)
+            ) : (
+              <EmptyValue />
+            ),
           },
-        ]),
+        ]
+      : []),
+    ...(transaction.permitType === LEGACY_ISSUE_PERMIT_TYPES.CONTRACT_REVIEW ||
+    transaction.permitType === LEGACY_ISSUE_PERMIT_TYPES.MAINTENANCE_ORDER
+      ? [
+          {
+            key: translate("Customer", "العميل"),
+            value: transaction.hasMultipleCustomers ? (
+              translate("Multiple customers", "عملاء متعددون")
+            ) : transaction.customer ? (
+              <span>
+                {transaction.customer.name}{" "}
+                <span className="font-mono text-gray-500">({transaction.customer.code})</span>
+              </span>
+            ) : (
+              <EmptyValue />
+            ),
+          },
+        ]
+      : []),
     ...(transaction.isCancelled
       ? [
           {
