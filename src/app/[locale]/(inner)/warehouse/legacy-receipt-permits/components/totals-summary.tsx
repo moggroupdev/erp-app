@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert } from "@mantine/core";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Calculator } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 
@@ -22,39 +22,58 @@ export default function TotalsSummary({ itemsTotal, invoicePurchases }: TotalsSu
   const mismatch = invoicePurchases != null && hasMismatch(invoicePurchases, itemsTotal);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <span className="text-gray-600">
-          {translate(
-            `Items total (${translation.currency})`,
-            `إجمالي الأصناف (${translation.currency})`,
-          )}
+    <section className="overflow-hidden rounded-2xl bg-white">
+      <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
+        <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+          <Calculator size={18} />
         </span>
-        <span className={`font-semibold ${mismatch ? "text-ochre-600" : "text-gray-900"}`}>
-          {formatMoney(itemsTotal)}
-        </span>
+        <div>
+          <h4 className="text-base font-semibold text-gray-950">
+            {translate("Totals check", "مراجعة الإجماليات")}
+          </h4>
+          <p className="text-sm text-gray-500">
+            {translate(
+              "Compare items total with invoice purchases total.",
+              "قارن إجمالي الأصناف بإجمالي مشتريات الفاتورة.",
+            )}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <span className="text-gray-600">
-          {translate(
-            `Invoice purchases (${translation.currency})`,
-            `إجمالي مشتريات الفاتورة (${translation.currency})`,
-          )}
-        </span>
-        <span className={`font-semibold ${mismatch ? "text-ochre-600" : "text-gray-900"}`}>
-          {invoicePurchases != null ? formatMoney(invoicePurchases) : <span className="text-gray-400">-</span>}
-        </span>
-      </div>
+      <div className="flex flex-col gap-3 px-5 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <span className="text-gray-600">
+            {translate(
+              `Items total (${translation.currency})`,
+              `إجمالي الأصناف (${translation.currency})`,
+            )}
+          </span>
+          <span className={`font-semibold ${mismatch ? "text-ochre-600" : "text-gray-900"}`}>
+            {formatMoney(itemsTotal)}
+          </span>
+        </div>
 
-      {mismatch && (
-        <Alert color="ochre" radius="md" icon={<AlertCircle size={15} />}>
-          {translate(
-            "Invoice purchases and items total differ by 1% or more. You can still submit.",
-            "إجمالي مشتريات الفاتورة وإجمالي الأصناف يختلفان بنسبة 1% أو أكثر. ما زال بإمكانك الإرسال.",
-          )}
-        </Alert>
-      )}
-    </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <span className="text-gray-600">
+            {translate(
+              `Invoice purchases (${translation.currency})`,
+              `إجمالي مشتريات الفاتورة (${translation.currency})`,
+            )}
+          </span>
+          <span className={`font-semibold ${mismatch ? "text-ochre-600" : "text-gray-900"}`}>
+            {invoicePurchases != null ? formatMoney(invoicePurchases) : <span className="text-gray-400">-</span>}
+          </span>
+        </div>
+
+        {mismatch && (
+          <Alert color="ochre" radius="md" icon={<AlertCircle size={15} />}>
+            {translate(
+              "Invoice purchases and items total differ by 1% or more. You can still submit.",
+              "إجمالي مشتريات الفاتورة وإجمالي الأصناف يختلفان بنسبة 1% أو أكثر. ما زال بإمكانك الإرسال.",
+            )}
+          </Alert>
+        )}
+      </div>
+    </section>
   );
 }

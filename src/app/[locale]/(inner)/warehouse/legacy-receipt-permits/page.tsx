@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Alert, Button } from "@mantine/core";
-import { CheckCircle2, Plus } from "lucide-react";
+import { Button } from "@mantine/core";
+import { ArrowLeft, Building2, CheckCircle2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -17,7 +18,6 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
 import type { LegacyReceiptPermitCreateResult } from "@/types/legacy-receipt-permit";
-import LayoutBox from "@/components/ui/layout-box";
 import ErrorAlert from "@/components/ui/error-alert";
 import ProtectedLink from "@/components/ui/protected-link";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
@@ -35,9 +35,34 @@ import TotalsSummary from "./components/totals-summary";
 
 const PAGE_TITLE = { en: "Legacy Receipt Permits", ar: "أذونات الإضافة المرحلية" };
 
+function PageHeading({ onBack, title }: { onBack: () => void; title: { en: string; ar: string } }) {
+  const { translate, translation } = useI18n();
+
+  return (
+    <header className="flex items-center gap-3">
+      <Button
+        type="button"
+        onClick={onBack}
+        title={translation.back}
+        aria-label={translation.back}
+        variant="light"
+        color="dark"
+        radius={20}
+        p={0}
+        h={40}
+        w={40}
+      >
+        <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0deg", "180deg")})` }} />
+      </Button>
+      <h1>{translate(title.en, title.ar)}</h1>
+    </header>
+  );
+}
+
 export default function Page() {
-  const { locale, translate } = useI18n();
+  const { locale, translate, translation } = useI18n();
   const getLocalizedHref = useLocaleHref();
+  const router = useRouter();
   const privateRequest = usePrivateRequest();
   const queryClient = useQueryClient();
 
@@ -61,7 +86,7 @@ export default function Page() {
         permit.items.some((item) => !!item.materialCode || item.quantity !== "" || item.unitPrice !== ""),
     );
 
-  useUnsavedChangesWarning(isDirty && !result);
+  const confirmNavigation = useUnsavedChangesWarning(isDirty && !result);
 
   const itemsTotal = useMemo(() => {
     return permits.reduce((sum, permit) => {
@@ -299,93 +324,91 @@ export default function Page() {
 
   if (result) {
     return (
-      <LayoutBox
-        header={{
-          backLink: true,
-          title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        }}
-      >
-        <div className="flex flex-col gap-4 rounded-xl border border-teal-200 bg-teal-50/50 p-5">
-          <div className="flex items-center gap-2 text-teal-800">
-            <CheckCircle2 size={20} />
-            <h2 className="text-lg font-semibold">
-              {translate("Entry saved", "تم الحفظ")}
-            </h2>
-          </div>
-
-          <div className="flex flex-col gap-2 text-sm text-gray-800">
-            <div>
-              {translate("Purchase order", "أمر التوريد")}:{" "}
-              <ProtectedLink
-                permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
-                href={`/procurement/material-orders/${result.materialPurchaseOrder.id}`}
-                className="font-mono font-semibold text-haze-700 hover:underline"
-              >
-                {result.materialPurchaseOrder.code}
-              </ProtectedLink>
+      <div className="flex min-h-full flex-col gap-5">
+        <PageHeading title={PAGE_TITLE} onBack={() => router.back()} />
+        <section className="overflow-hidden rounded-2xl bg-white">
+          <div className="flex flex-col gap-4 px-5 py-5">
+            <div className="flex items-center gap-2 text-teal-800">
+              <CheckCircle2 size={20} />
+              <h2 className="text-lg font-semibold">{translate("Entry saved", "تم الحفظ")}</h2>
             </div>
-            <div>
-              {translate("Supplier invoice", "فاتورة المورد")}:{" "}
-              <ProtectedLink
-                permission={PERMISSIONS.READ_SUPPLIER_INVOICES}
-                href={`/procurement/supplier-invoices/${result.supplierInvoice.id}`}
-                className="font-mono font-semibold text-haze-700 hover:underline"
-              >
-                {result.supplierInvoice.invoiceNumber}
-              </ProtectedLink>
-            </div>
-            <div className="mt-1 font-medium">{translate("Addition permits", "أذون الإضافة")}:</div>
-            <ul className="list-inside list-disc space-y-1">
-              {result.permits.map((permit) => (
-                <li key={permit.inventoryTransaction.id}>
-                  <span className="font-mono">{permit.legacyNumber}</span>
-                  {" → "}
-                  <ProtectedLink
-                    permission={PERMISSIONS.READ_INVENTORY_TRANSACTIONS}
-                    href={`/warehouse/transactions/${permit.inventoryTransaction.id}`}
-                    className="font-mono text-haze-700 hover:underline"
-                  >
-                    {permit.inventoryTransaction.code}
-                  </ProtectedLink>
-                  <span className="text-gray-500"> ({permit.receipt.code})</span>
-                </li>
-              ))}
-            </ul>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button color="haze" radius="md" onClick={resetForm}>
-              {translate("New entry", "إدخال جديد")}
-            </Button>
-            <Button
-              variant="light"
-              color="dark"
-              radius="md"
-              component={Link}
-              href={getLocalizedHref("/warehouse/transactions")}
-            >
-              {translate("Back to transactions", "العودة إلى حركات المخزون")}
-            </Button>
+            <div className="flex flex-col gap-2 text-sm text-gray-800">
+              <div>
+                {translate("Purchase order", "أمر التوريد")}:{" "}
+                <ProtectedLink
+                  permission={PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS}
+                  href={`/procurement/material-orders/${result.materialPurchaseOrder.id}`}
+                  className="font-mono font-semibold text-haze-700 hover:underline"
+                >
+                  {result.materialPurchaseOrder.code}
+                </ProtectedLink>
+              </div>
+              <div>
+                {translate("Supplier invoice", "فاتورة المورد")}:{" "}
+                <ProtectedLink
+                  permission={PERMISSIONS.READ_SUPPLIER_INVOICES}
+                  href={`/procurement/supplier-invoices/${result.supplierInvoice.id}`}
+                  className="font-mono font-semibold text-haze-700 hover:underline"
+                >
+                  {result.supplierInvoice.invoiceNumber}
+                </ProtectedLink>
+              </div>
+              <div className="mt-1 font-medium">{translate("Addition permits", "أذون الإضافة")}:</div>
+              <ul className="list-inside list-disc space-y-1">
+                {result.permits.map((permit) => (
+                  <li key={permit.inventoryTransaction.id}>
+                    <span className="font-mono">{permit.legacyNumber}</span>
+                    {" → "}
+                    <ProtectedLink
+                      permission={PERMISSIONS.READ_INVENTORY_TRANSACTIONS}
+                      href={`/warehouse/transactions/${permit.inventoryTransaction.id}`}
+                      className="font-mono text-haze-700 hover:underline"
+                    >
+                      {permit.inventoryTransaction.code}
+                    </ProtectedLink>
+                    <span className="text-gray-500"> ({permit.receipt.code})</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button color="haze" radius="md" onClick={resetForm}>
+                {translate("New entry", "إدخال جديد")}
+              </Button>
+              <Button
+                variant="light"
+                color="dark"
+                radius="md"
+                component={Link}
+                href={getLocalizedHref("/warehouse/transactions")}
+              >
+                {translate("Back to transactions", "العودة إلى حركات المخزون")}
+              </Button>
+            </div>
           </div>
-        </div>
-      </LayoutBox>
+        </section>
+      </div>
     );
   }
 
   return (
-    <LayoutBox
-      header={{
-        backLink: true,
-        title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-      }}
-    >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <Alert color="haze" radius="md">
+    <div className="flex min-h-full flex-col gap-5">
+      <PageHeading
+        title={PAGE_TITLE}
+        onBack={() => {
+          if (confirmNavigation()) router.back();
+        }}
+      />
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <div className="rounded-xl bg-haze-50 px-4 py-3 text-sm text-haze-800">
           {translate(
             "Temporary reverse entry: upload the supplier invoice PDF and enter one or more addition permits. The system creates the purchase order, receipts, inventory transactions, and invoice together.",
             "إدخال عكسي مؤقت: ارفع ملف PDF لفاتورة المورد وأدخل إذن إضافة واحدًا أو أكثر. ينشئ النظام أمر التوريد وسندات الاستلام وحركات المخزون والفاتورة معًا.",
           )}
-        </Alert>
+        </div>
 
         <InvoicePdfSection
           file={pdfFile}
@@ -394,44 +417,65 @@ export default function Page() {
           onInvoiceChange={handleInvoiceChange}
         />
 
-        <SelectSupplier
-          value={supplierId}
-          setValue={setSupplierId}
-          label={translate("Supplier", "المورد")}
-          placeholder={translate("Search suppliers...", "ابحث عن مورد...")}
-          withBrowseModal
-          required
-          radius="md"
-        />
-
-        <div className="flex flex-col gap-4">
-          {permits.map((permit) => (
-            <PermitBlock
-              key={permit.key}
-              permit={permit}
-              locale={locale}
-              canRemove={permits.length > 1}
-              onUpdate={updatePermit}
-              onRemove={removePermit}
-              onAddItem={addItem}
-              onUpdateItem={updateItem}
-              onRemoveItem={removeItem}
-              onMaterialSelect={handleMaterialSelect}
-            />
-          ))}
-
-          <div>
-            <Button
-              type="button"
-              variant="light"
-              color="haze"
-              radius="md"
-              leftSection={<Plus size={15} />}
-              onClick={addPermit}
-            >
-              {translate("Add another permit", "إضافة إذن آخر")}
-            </Button>
+        <section className="overflow-hidden rounded-2xl bg-white">
+          <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
+            <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+              <Building2 size={18} />
+            </span>
+            <div>
+              <h4 className="text-base font-semibold text-gray-950">
+                {translate("Supplier", "المورد")}
+              </h4>
+              <p className="text-sm text-gray-500">
+                {translate(
+                  "Select the supplier shown on the invoice.",
+                  "اختر المورد الظاهر في الفاتورة.",
+                )}
+              </p>
+            </div>
           </div>
+          <div className="px-5 py-5">
+            <div className="w-[500px] max-w-full">
+              <SelectSupplier
+                value={supplierId}
+                setValue={setSupplierId}
+                label={translate("Supplier", "المورد")}
+                placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
+                withBrowseModal
+                required
+                radius="md"
+              />
+            </div>
+          </div>
+        </section>
+
+        {permits.map((permit, index) => (
+          <PermitBlock
+            key={permit.key}
+            permit={permit}
+            index={index}
+            locale={locale}
+            canRemove={permits.length > 1}
+            onUpdate={updatePermit}
+            onRemove={removePermit}
+            onAddItem={addItem}
+            onUpdateItem={updateItem}
+            onRemoveItem={removeItem}
+            onMaterialSelect={handleMaterialSelect}
+          />
+        ))}
+
+        <div>
+          <Button
+            type="button"
+            variant="light"
+            color="haze"
+            radius="md"
+            leftSection={<Plus size={15} />}
+            onClick={addPermit}
+          >
+            {translate("Add another permit", "إضافة إذن آخر")}
+          </Button>
         </div>
 
         <TotalsSummary itemsTotal={itemsTotal} invoicePurchases={invoicePurchases} />
@@ -440,12 +484,23 @@ export default function Page() {
           <ErrorAlert error={validationError || getErrorMessage(locale, mutation.error)} />
         )}
 
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="light"
+            color="dark"
+            radius="md"
+            onClick={() => {
+              if (confirmNavigation()) router.push(getLocalizedHref("/warehouse/transactions"));
+            }}
+          >
+            {translation.cancel}
+          </Button>
           <Button type="submit" color="haze" radius="md" loading={mutation.isPending}>
             {translate("Save reverse entry", "حفظ الإدخال العكسي")}
           </Button>
         </div>
       </form>
-    </LayoutBox>
+    </div>
   );
 }
