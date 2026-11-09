@@ -1,15 +1,17 @@
 "use client";
 
 import ProtectedLink from "@/components/ui/protected-link";
+import Link from "next/link";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
 import usePrivateRequest from "@/hooks/use-private-request";
+import useHasPermission from "@/hooks/use-has-permission";
 import inventoryTransactionsApi from "@/lib/api/inventory-transactions";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -17,8 +19,8 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { type InventoryTransaction } from "@/types/inventory-transaction";
-import { Table, TextInput } from "@mantine/core";
-import { Search, X } from "lucide-react";
+import { Menu, Table, TextInput } from "@mantine/core";
+import { PackagePlus, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -27,6 +29,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
 import InventoryTransactionTypeLabel from "@/components/ui/inventory-transaction-type-label";
 import SelectInventoryTransactionType from "@/components/global/selections/enum-based/select-inventory-transaction-type";
 
@@ -36,6 +39,8 @@ const TRANSACTIONS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translate } = useI18n();
+  const getLocalizedHref = useLocaleHref();
+  const canAddLegacyReceipt = useHasPermission(PERMISSIONS.ADD_LEGACY_RECEIPT_PERMIT);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -108,7 +113,22 @@ export default function Page() {
       header={{
         backLink: true,
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="light" />,
+        sideElements: (
+          <div className="flex gap-3">
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="light" />
+            <ActionsMenu>
+              {canAddLegacyReceipt && (
+                <Menu.Item
+                  component={Link}
+                  href={getLocalizedHref("/warehouse/legacy-receipt-permits")}
+                  leftSection={<PackagePlus size={14} />}
+                >
+                  {translate("Legacy receipt permits", "أذونات الإضافة المرحلية")}
+                </Menu.Item>
+              )}
+            </ActionsMenu>
+          </div>
+        ),
       }}
     >
       <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">
