@@ -1,6 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import type { Locale } from "@/lib/i18n/types";
-import { PrintDetail, PrintTable } from "../components";
+import { PrintDetail, PrintSectionHeading, PrintTable } from "../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -200,27 +200,38 @@ export default function InventoryTransactionPrintDocument({
               </section>
 
               {purchaseOrderCode || supplierName || invoices.length > 0 ? (
-                <section className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
-                  {purchaseOrderCode ? (
-                    <PrintDetail
-                      label={translate("Purchase Order Number", "رقم أمر التوريد")}
-                      value={purchaseOrderCode}
-                      mono
-                    />
+                <section className="mt-1.5 flex break-inside-avoid flex-col gap-4">
+                  {(purchaseOrderCode || supplierName) && (
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-xs sm:grid-cols-4">
+                      {purchaseOrderCode ? (
+                        <PrintDetail
+                          label={translate("Purchase Order Number", "رقم أمر التوريد")}
+                          value={purchaseOrderCode}
+                          mono
+                        />
+                      ) : null}
+                      {supplierName ? <PrintDetail label={translate("Supplier", "المورد")} value={supplierName} /> : null}
+                    </div>
+                  )}
+
+                  {invoices.length > 0 ? (
+                    <div className="flex flex-col gap-1.5">
+                      <PrintTable
+                        headers={[translate("Invoice Number", "رقم الفاتورة"), translate("Invoice Date", "تاريخ الفاتورة")]}
+                        rows={invoices.map((invoice) => [
+                          <span key={`${invoice.id}-number`} className="font-mono">
+                            {invoice.invoiceNumber}
+                          </span>,
+                          invoice.issuedAt ? formatDate(invoice.issuedAt, locale) : "-",
+                        ])}
+                        monoColumnIndexes={[]}
+                        noWrapIndexes={[0, 1]}
+                        tableClassName="text-[9px] [&_td]:align-top [&_th]:text-[9px]"
+                        columnWidths={["50%", "50%"]}
+                        emptyLabel={translate("No invoices", "لا توجد فواتير")}
+                      />
+                    </div>
                   ) : null}
-                  {supplierName ? <PrintDetail label={translate("Supplier", "المورد")} value={supplierName} /> : null}
-                  {invoices.map((invoice) => (
-                    <PrintDetail
-                      key={invoice.id}
-                      label={translate("Invoice", "الفاتورة")}
-                      value={
-                        <>
-                          <span className="font-mono">{invoice.invoiceNumber}</span>
-                          {invoice.issuedAt ? ` (${formatDate(invoice.issuedAt, locale)})` : ""}
-                        </>
-                      }
-                    />
-                  ))}
                 </section>
               ) : null}
             </div>
