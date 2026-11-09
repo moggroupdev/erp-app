@@ -22,11 +22,15 @@ import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import LayoutBox from "@/components/ui/layout-box";
 import UnitToggle from "@/components/ui/unit-toggle";
 import RefetchButton from "@/components/ui/refetch-button";
+import ActionsMenu from "@/components/ui/actions-menu";
+import PrintDocument from "@/components/ui/print-document";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import OrderInvoicesSection from "@/components/global/sections/order-invoices";
+import InventoryTransactionPrintDocument from "@/components/documents/warehouse/inventory-transaction-print-document";
+import { getInventoryTransactionTypeLabel } from "@/lib/constants/enums/inventory-transaction-types";
 import TransactionDetails from "./components/transaction-details";
 
 const PAGE_TITLE = { en: "Transaction Details", ar: "تفاصيل الإذن" };
@@ -40,10 +44,11 @@ export default function Page() {
   const { helpers } = useMaterialCategories();
   const canReadSupplierInvoices = useHasPermission(PERMISSIONS.READ_SUPPLIER_INVOICES);
 
-  function getMainCategoryTitle(subCategoryId: string) {
+  function getMainCategoryTitle(subCategoryId: string | undefined) {
+    if (!subCategoryId) return null;
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
     const main = sub ? helpers.getMaterialCategoryMainById(sub.mainCategoryId) : null;
-    return main?.title || "-";
+    return main?.title || null;
   }
 
   const {
@@ -95,7 +100,30 @@ export default function Page() {
       header={{
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         backLink: true,
-        sideElements: <RefetchButton isFetching={isFetching} onRefetch={refetch} variant="light" />,
+        sideElements: (
+          <div className="flex items-center gap-3">
+            <RefetchButton isFetching={isFetching} onRefetch={refetch} variant="light" />
+            <ActionsMenu>
+              {transaction && (
+                <PrintDocument
+                  title={`${getInventoryTransactionTypeLabel(transaction.transactionType, locale)} - ${transaction.code}`}
+                  buttonLabel={translate("Print transaction", "طباعة الإذن")}
+                  buttonType="menu"
+                  paperWidth={210}
+                  paperHeight={297}
+                  paperMarginX={12}
+                  paperMarginTop={12}
+                  paperMarginBottom={14}
+                >
+                  <InventoryTransactionPrintDocument
+                    transaction={transaction}
+                    getMainCategoryTitle={getMainCategoryTitle}
+                  />
+                </PrintDocument>
+              )}
+            </ActionsMenu>
+          </div>
+        ),
       }}
     >
       {isTransactionFetching ? (
@@ -160,7 +188,7 @@ export default function Page() {
                                     <CopyButton text={item.material.code} />
                                   </div>
                                 </Table.Td>
-                                <Table.Td>{getMainCategoryTitle(item.material.subCategoryId)}</Table.Td>
+                                <Table.Td>{getMainCategoryTitle(item.material.subCategoryId) || "-"}</Table.Td>
                                 <Table.Td>
                                   <div className="flex items-center gap-1">
                                     {getMaterialUnitLabel(unit, locale)}
