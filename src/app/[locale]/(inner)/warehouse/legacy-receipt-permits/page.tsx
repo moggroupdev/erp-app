@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
 import { ActionIcon, Button, Tooltip } from "@mantine/core";
 import { ArrowLeft, Building2, CheckCircle2, Info, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -17,7 +18,10 @@ import { dateOnlyToTwoPmIso } from "@/lib/helpers/datetime-picker";
 import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import type { MaterialWithUnitConversionsSelection } from "@/types/material";
-import type { LegacyReceiptPermitCreateResult } from "@/types/legacy-receipt-permit";
+import type {
+  LegacyReceiptPermitCreatePayload,
+  LegacyReceiptPermitCreateResult,
+} from "@/types/legacy-receipt-permit";
 import ErrorAlert from "@/components/ui/error-alert";
 import ProtectedLink from "@/components/ui/protected-link";
 import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
@@ -32,6 +36,7 @@ import PermitBlock, {
   type PermitItemDraft,
 } from "./components/permit-block";
 import TotalsSummary from "./components/totals-summary";
+import ConfirmSubmitModal from "./components/confirm-submit-modal";
 
 const PAGE_TITLE = { en: "Legacy Receipt Permits", ar: "أذونات الإضافة المرحلية" };
 
@@ -87,10 +92,13 @@ export default function Page() {
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [supplierId, setSupplierId] = useState<string | null>(null);
+  const [supplierName, setSupplierName] = useState("");
   const [invoice, setInvoice] = useState<InvoiceFormState>(emptyInvoice);
   const [permits, setPermits] = useState<PermitDraft[]>([createEmptyPermit()]);
   const [validationError, setValidationError] = useState("");
+  const [confirmError, setConfirmError] = useState("");
   const [result, setResult] = useState<LegacyReceiptPermitCreateResult | null>(null);
+  const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -122,117 +130,136 @@ export default function Page() {
 
   const invoicePurchases = typeof invoice.totalPurchases === "number" ? invoice.totalPurchases : null;
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      if (!pdfFile) throw new Error(translate("Invoice PDF is required.", "ملف PDF للفاتورة مطلوب."));
-      if (!supplierId) throw new Error(translate("Supplier is required.", "المورد مطلوب."));
-      if (!invoice.invoiceNumber.trim()) {
-        throw new Error(translate("Invoice number is required.", "رقم الفاتورة مطلوب."));
+  const permitSummaries = useMemo(
+    () =>
+      permits.map((permit) => ({
+        legacyNumber: permit.legacyNumber.trim() || "-",
+        receivedAt: permit.receivedAt,
+        itemCount: permit.items.filter((item) => item.materialCode).length,
+        itemsTotal: permit.items.reduce((sum, item) => {
+          const qty = typeof item.quantity === "number" ? item.quantity : 0;
+          const price = typeof item.unitPrice === "number" ? item.unitPrice : 0;
+          return sum + qty * price;
+        }, 0),
+      })),
+    [permits],
+  );
+
+  function buildPayload(): { file: File; payload: LegacyReceiptPermitCreatePayload } {
+    if (!pdfFile) throw new Error(translate("Invoice PDF is required.", "ملف PDF للفاتورة مطلوب."));
+    if (!supplierId) throw new Error(translate("Supplier is required.", "المورد مطلوب."));
+    if (!invoice.invoiceNumber.trim()) {
+      throw new Error(translate("Invoice number is required.", "رقم الفاتورة مطلوب."));
+    }
+    if (!invoice.issuedAt) {
+      throw new Error(translate("Invoice issue date is required.", "تاريخ إصدار الفاتورة مطلوب."));
+    }
+
+    const issuedAtIso = dateOnlyToTwoPmIso(invoice.issuedAt);
+    if (!issuedAtIso) {
+      throw new Error(translate("Invalid invoice issue date.", "تاريخ إصدار الفاتورة غير صالح."));
+    }
+
+    const payloadPermits = permits.map((permit) => {
+      const legacyNumber = permit.legacyNumber.trim();
+      if (!legacyNumber) {
+        throw new Error(translate("Each permit needs a number.", "كل إذن إضافة يحتاج رقمًا."));
       }
-      if (!invoice.issuedAt) {
-        throw new Error(translate("Invoice issue date is required.", "تاريخ إصدار الفاتورة مطلوب."));
-      }
-
-      const issuedAtIso = dateOnlyToTwoPmIso(invoice.issuedAt);
-      if (!issuedAtIso) {
-        throw new Error(translate("Invalid invoice issue date.", "تاريخ إصدار الفاتورة غير صالح."));
-      }
-
-      const payloadPermits = permits.map((permit) => {
-        const legacyNumber = permit.legacyNumber.trim();
-        if (!legacyNumber) {
-          throw new Error(translate("Each permit needs a number.", "كل إذن إضافة يحتاج رقمًا."));
-        }
-        if (!permit.receivedAt) {
-          throw new Error(
-            translate(
-              `Permit \`${legacyNumber}\` needs a date.`,
-              `إذن الإضافة \`${legacyNumber}\` يحتاج تاريخًا.`,
-            ),
-          );
-        }
-        const receivedAtIso = dateOnlyToTwoPmIso(permit.receivedAt);
-        if (!receivedAtIso) {
-          throw new Error(
-            translate(
-              `Invalid date for permit \`${legacyNumber}\`.`,
-              `تاريخ إذن الإضافة \`${legacyNumber}\` غير صالح.`,
-            ),
-          );
-        }
-
-        const items = permit.items
-          .filter((item) => item.materialCode)
-          .map((item) => {
-            if (!item.materialCode || !item.unitOfMeasurementSelected) {
-              throw new Error(
-                translate(
-                  `Complete all material rows in permit \`${legacyNumber}\`.`,
-                  `أكمل كل بنود المواد في إذن الإضافة \`${legacyNumber}\`.`,
-                ),
-              );
-            }
-            if (typeof item.quantity !== "number" || item.quantity <= 0) {
-              throw new Error(
-                translate(
-                  `Quantity must be positive in permit \`${legacyNumber}\`.`,
-                  `يجب أن تكون الكمية موجبة في إذن الإضافة \`${legacyNumber}\`.`,
-                ),
-              );
-            }
-            if (typeof item.unitPrice !== "number" || item.unitPrice <= 0) {
-              throw new Error(
-                translate(
-                  `Unit price must be positive in permit \`${legacyNumber}\`.`,
-                  `يجب أن يكون سعر الوحدة موجبًا في إذن الإضافة \`${legacyNumber}\`.`,
-                ),
-              );
-            }
-            return {
-              materialCode: item.materialCode,
-              unitOfMeasurementSelected: item.unitOfMeasurementSelected,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-            };
-          });
-
-        if (items.length === 0) {
-          throw new Error(
-            translate(
-              `Permit \`${legacyNumber}\` needs at least one item.`,
-              `إذن الإضافة \`${legacyNumber}\` يحتاج بندًا واحدًا على الأقل.`,
-            ),
-          );
-        }
-
-        return { legacyNumber, receivedAt: receivedAtIso, items };
-      });
-
-      const legacyNumbers = payloadPermits.map((permit) => permit.legacyNumber);
-      if (new Set(legacyNumbers).size !== legacyNumbers.length) {
+      if (!permit.receivedAt) {
         throw new Error(
-          translate("Addition permit numbers must be unique.", "أرقام أذون الإضافة يجب أن تكون فريدة."),
+          translate(
+            `Permit \`${legacyNumber}\` needs a date.`,
+            `إذن الإضافة \`${legacyNumber}\` يحتاج تاريخًا.`,
+          ),
+        );
+      }
+      const receivedAtIso = dateOnlyToTwoPmIso(permit.receivedAt);
+      if (!receivedAtIso) {
+        throw new Error(
+          translate(
+            `Invalid date for permit \`${legacyNumber}\`.`,
+            `تاريخ إذن الإضافة \`${legacyNumber}\` غير صالح.`,
+          ),
         );
       }
 
-      return await legacyReceiptPermitsApi.create({
-        privateRequest,
-        file: pdfFile,
-        payload: {
-          supplierId,
-          invoice: {
-            invoiceNumber: invoice.invoiceNumber.trim(),
-            issuedAt: issuedAtIso,
-            totalPurchases: typeof invoice.totalPurchases === "number" ? invoice.totalPurchases : null,
-            totalDiscount: typeof invoice.totalDiscount === "number" ? invoice.totalDiscount : null,
-            vatAmount: typeof invoice.vatAmount === "number" ? invoice.vatAmount : null,
-            withholdingTaxAmount:
-              typeof invoice.withholdingTaxAmount === "number" ? invoice.withholdingTaxAmount : null,
-            totalAmount: typeof invoice.totalAmount === "number" ? invoice.totalAmount : null,
-          },
-          permits: payloadPermits,
+      const items = permit.items
+        .filter((item) => item.materialCode)
+        .map((item) => {
+          if (!item.materialCode || !item.unitOfMeasurementSelected) {
+            throw new Error(
+              translate(
+                `Complete all material rows in permit \`${legacyNumber}\`.`,
+                `أكمل كل بنود المواد في إذن الإضافة \`${legacyNumber}\`.`,
+              ),
+            );
+          }
+          if (typeof item.quantity !== "number" || item.quantity <= 0) {
+            throw new Error(
+              translate(
+                `Quantity must be positive in permit \`${legacyNumber}\`.`,
+                `يجب أن تكون الكمية موجبة في إذن الإضافة \`${legacyNumber}\`.`,
+              ),
+            );
+          }
+          if (typeof item.unitPrice !== "number" || item.unitPrice <= 0) {
+            throw new Error(
+              translate(
+                `Unit price must be positive in permit \`${legacyNumber}\`.`,
+                `يجب أن يكون سعر الوحدة موجبًا في إذن الإضافة \`${legacyNumber}\`.`,
+              ),
+            );
+          }
+          return {
+            materialCode: item.materialCode,
+            unitOfMeasurementSelected: item.unitOfMeasurementSelected,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+          };
+        });
+
+      if (items.length === 0) {
+        throw new Error(
+          translate(
+            `Permit \`${legacyNumber}\` needs at least one item.`,
+            `إذن الإضافة \`${legacyNumber}\` يحتاج بندًا واحدًا على الأقل.`,
+          ),
+        );
+      }
+
+      return { legacyNumber, receivedAt: receivedAtIso, items };
+    });
+
+    const legacyNumbers = payloadPermits.map((permit) => permit.legacyNumber);
+    if (new Set(legacyNumbers).size !== legacyNumbers.length) {
+      throw new Error(
+        translate("Addition permit numbers must be unique.", "أرقام أذون الإضافة يجب أن تكون فريدة."),
+      );
+    }
+
+    return {
+      file: pdfFile,
+      payload: {
+        supplierId,
+        invoice: {
+          invoiceNumber: invoice.invoiceNumber.trim(),
+          issuedAt: issuedAtIso,
+          totalPurchases: typeof invoice.totalPurchases === "number" ? invoice.totalPurchases : null,
+          totalDiscount: typeof invoice.totalDiscount === "number" ? invoice.totalDiscount : null,
+          vatAmount: typeof invoice.vatAmount === "number" ? invoice.vatAmount : null,
+          withholdingTaxAmount:
+            typeof invoice.withholdingTaxAmount === "number" ? invoice.withholdingTaxAmount : null,
+          totalAmount: typeof invoice.totalAmount === "number" ? invoice.totalAmount : null,
         },
-      });
+        permits: payloadPermits,
+      },
+    };
+  }
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const { file, payload } = buildPayload();
+      return await legacyReceiptPermitsApi.create({ privateRequest, file, payload });
     },
     onSuccess: async (data) => {
       await Promise.all([
@@ -240,6 +267,8 @@ export default function Page() {
         queryClient.invalidateQueries({ queryKey: queryKeys.supplierInvoices.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.inventoryTransactions.all }),
       ]);
+      closeConfirm();
+      setConfirmError("");
       setResult(data);
       setValidationError("");
       toast.success(
@@ -251,10 +280,13 @@ export default function Page() {
   function resetForm() {
     setPdfFile(null);
     setSupplierId(null);
+    setSupplierName("");
     setInvoice(emptyInvoice());
     setPermits([createEmptyPermit()]);
     setValidationError("");
+    setConfirmError("");
     setResult(null);
+    closeConfirm();
     mutation.reset();
   }
 
@@ -334,9 +366,22 @@ export default function Page() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidationError("");
+    setConfirmError("");
+    mutation.reset();
+
+    try {
+      buildPayload();
+      openConfirm();
+    } catch (err) {
+      setValidationError(err instanceof Error ? err.message : getErrorMessage(locale, err));
+    }
+  }
+
+  function handleConfirmSave() {
+    setConfirmError("");
     mutation.mutate(undefined, {
       onError: (err) => {
-        setValidationError(getErrorMessage(locale, err));
+        setConfirmError(getErrorMessage(locale, err));
       },
     });
   }
@@ -451,6 +496,7 @@ export default function Page() {
               <SelectSupplier
                 value={supplierId}
                 setValue={setSupplierId}
+                onSupplierSelect={(supplier) => setSupplierName(supplier?.name ?? "")}
                 label={translate("Supplier", "المورد")}
                 placeholder={translate("Search by name or code...", "ابحث بالاسم أو الكود...")}
                 withBrowseModal
@@ -492,9 +538,7 @@ export default function Page() {
 
         <TotalsSummary itemsTotal={itemsTotal} invoicePurchases={invoicePurchases} />
 
-        {(validationError || mutation.error) && (
-          <ErrorAlert error={validationError || getErrorMessage(locale, mutation.error)} />
-        )}
+        {validationError && !confirmOpened && <ErrorAlert error={validationError} />}
 
         <div className="flex justify-end gap-2">
           <Button
@@ -508,11 +552,31 @@ export default function Page() {
           >
             {translation.cancel}
           </Button>
-          <Button type="submit" color="haze" radius="md" loading={mutation.isPending}>
+          <Button type="submit" color="haze" radius="md" disabled={mutation.isPending}>
             {translate("Save reverse entry", "حفظ الإدخال العكسي")}
           </Button>
         </div>
       </form>
+
+      <ConfirmSubmitModal
+        opened={confirmOpened}
+        onClose={() => {
+          if (!mutation.isPending) {
+            closeConfirm();
+            setConfirmError("");
+            mutation.reset();
+          }
+        }}
+        onConfirm={handleConfirmSave}
+        loading={mutation.isPending}
+        error={confirmError}
+        invoiceNumber={invoice.invoiceNumber.trim()}
+        issuedAt={invoice.issuedAt}
+        supplierName={supplierName}
+        invoicePurchases={invoicePurchases}
+        itemsTotal={itemsTotal}
+        permits={permitSummaries}
+      />
     </div>
   );
 }
