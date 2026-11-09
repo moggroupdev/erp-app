@@ -97,9 +97,7 @@ export default function InvoicePdfSection({ file, onFileChange, invoice, onInvoi
       onInvoiceChange(invoiceFormFromParsed(parsed));
       setMissingFields(parsed.missingFields);
     } catch (err) {
-      setParseError(
-        getErrorMessage(locale, err) || translate("Failed to read the PDF file.", "فشل قراءة ملف PDF."),
-      );
+      setParseError(getErrorMessage(locale, err) || translate("Failed to read the PDF file.", "فشل قراءة ملف PDF."));
       onFileChange(null);
       onInvoiceChange(emptyInvoice());
       resetFileRef.current?.();
@@ -130,7 +128,7 @@ export default function InvoicePdfSection({ file, onFileChange, invoice, onInvoi
     <section className="overflow-hidden rounded-2xl bg-white">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
         <div className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-haze-600 text-white">
+          <span className="bg-haze-600 flex size-10 items-center justify-center rounded-2xl text-white">
             <FileText size={18} />
           </span>
           <div>
@@ -148,10 +146,15 @@ export default function InvoicePdfSection({ file, onFileChange, invoice, onInvoi
         <div className="flex flex-wrap items-center gap-2">
           <FileButton resetRef={resetFileRef} onChange={handleFileSelect} accept="application/pdf,.pdf">
             {(props) => (
-              <Button {...props} color="haze" radius="md" leftSection={<Upload size={15} />} loading={isParsing}>
-                {file
-                  ? translate("Replace PDF", "استبدال PDF")
-                  : translate("Upload invoice PDF", "رفع ملف PDF للفاتورة")}
+              <Button
+                {...props}
+                variant="light"
+                color="haze"
+                radius="md"
+                leftSection={<Upload size={15} />}
+                loading={isParsing}
+              >
+                {file ? translate("Replace PDF", "استبدال PDF") : translate("Upload invoice PDF", "رفع ملف PDF للفاتورة")}
               </Button>
             )}
           </FileButton>
@@ -181,23 +184,16 @@ export default function InvoicePdfSection({ file, onFileChange, invoice, onInvoi
             )}
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              <div className="flex min-h-0 flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <FileText size={15} className="text-haze-700" />
-                  <span className="truncate">{file.name}</span>
-                </div>
-                {pdfObjectUrl && (
-                  <div className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
-                    <iframe
-                      title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
-                      src={pdfObjectUrl}
-                      className="h-[min(52vh,520px)] w-full bg-white"
-                    />
-                  </div>
-                )}
-              </div>
-
               <div className="rounded-xl border border-gray-100 px-4 py-1">
+                <FieldRow
+                  label={translate("File name", "اسم الملف")}
+                  value={
+                    <span className="inline-flex max-w-full items-center gap-1.5">
+                      <FileText size={14} className="text-haze-700 shrink-0" />
+                      <span className="truncate">{file.name}</span>
+                    </span>
+                  }
+                />
                 <FieldRow
                   label={translate("Invoice Number", "رقم الفاتورة")}
                   value={invoice.invoiceNumber || <EmptyValue />}
@@ -218,17 +214,11 @@ export default function InvoicePdfSection({ file, onFileChange, invoice, onInvoi
                   value={moneyOrEmpty(invoice.totalDiscount)}
                 />
                 <FieldRow
-                  label={translate(
-                    `VAT (${translation.currency})`,
-                    `ضريبة القيمة المضافة (${translation.currency})`,
-                  )}
+                  label={translate(`VAT (${translation.currency})`, `ضريبة القيمة المضافة (${translation.currency})`)}
                   value={moneyOrEmpty(invoice.vatAmount)}
                 />
                 <FieldRow
-                  label={translate(
-                    `Withholding Tax (${translation.currency})`,
-                    `ضريبة الخصم (${translation.currency})`,
-                  )}
+                  label={translate(`Withholding Tax (${translation.currency})`, `ضريبة الخصم (${translation.currency})`)}
                   value={moneyOrEmpty(invoice.withholdingTaxAmount)}
                 />
                 <FieldRow
@@ -236,11 +226,21 @@ export default function InvoicePdfSection({ file, onFileChange, invoice, onInvoi
                   value={moneyOrEmpty(invoice.totalAmount)}
                 />
               </div>
+
+              {pdfObjectUrl && (
+                <div className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+                  <iframe
+                    title={translate("Invoice PDF preview", "معاينة ملف PDF للفاتورة")}
+                    src={pdfObjectUrl}
+                    className="h-[min(52vh,520px)] w-full bg-white"
+                  />
+                </div>
+              )}
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-haze-50 px-6 py-12 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-haze-100 text-haze-700">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-gray-50 px-6 py-12 text-center">
+            <div className="bg-haze-100 text-haze-700 flex h-14 w-14 items-center justify-center rounded-2xl">
               <Upload size={26} strokeWidth={1.75} />
             </div>
             <div className="flex max-w-md flex-col gap-1.5">

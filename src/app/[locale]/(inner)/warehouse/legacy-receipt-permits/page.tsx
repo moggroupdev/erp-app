@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@mantine/core";
-import { ArrowLeft, Building2, CheckCircle2, Plus } from "lucide-react";
+import { ActionIcon, Button, Tooltip } from "@mantine/core";
+import { ArrowLeft, Building2, CheckCircle2, Info, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
@@ -55,6 +55,25 @@ function PageHeading({ onBack, title }: { onBack: () => void; title: { en: strin
         <ArrowLeft size={18} style={{ transform: `rotateY(${translate("0deg", "180deg")})` }} />
       </Button>
       <h1>{translate(title.en, title.ar)}</h1>
+      <Tooltip
+        withArrow
+        multiline
+        maw={320}
+        label={translate(
+          "Temporary reverse entry: upload the supplier invoice PDF and enter one or more addition permits. The system creates the purchase order, receipts, inventory transactions, and invoice together.",
+          "إدخال عكسي مؤقت: ارفع ملف PDF لفاتورة المورد وأدخل إذن إضافة واحدًا أو أكثر. ينشئ النظام أمر التوريد وسندات الاستلام وحركات المخزون والفاتورة معًا.",
+        )}
+      >
+        <ActionIcon
+          variant="subtle"
+          color="haze"
+          radius="xl"
+          size="sm"
+          aria-label={translate("About this page", "حول هذه الصفحة")}
+        >
+          <Info size={16} />
+        </ActionIcon>
+      </Tooltip>
     </header>
   );
 }
@@ -403,13 +422,6 @@ export default function Page() {
       />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <div className="rounded-xl bg-haze-50 px-4 py-3 text-sm text-haze-800">
-          {translate(
-            "Temporary reverse entry: upload the supplier invoice PDF and enter one or more addition permits. The system creates the purchase order, receipts, inventory transactions, and invoice together.",
-            "إدخال عكسي مؤقت: ارفع ملف PDF لفاتورة المورد وأدخل إذن إضافة واحدًا أو أكثر. ينشئ النظام أمر التوريد وسندات الاستلام وحركات المخزون والفاتورة معًا.",
-          )}
-        </div>
-
         <InvoicePdfSection
           file={pdfFile}
           onFileChange={setPdfFile}
