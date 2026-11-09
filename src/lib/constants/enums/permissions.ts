@@ -92,6 +92,7 @@ export const PERMISSION_VALUES = [
   "add_legacy_issue_permit",
   "read_legacy_issue_permits",
   "update_legacy_issue_permit",
+  "add_legacy_receipt_permit",
   "read_audit_logs",
   "show_analytics",
 ] as const;
@@ -601,6 +602,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث إذن صرف مرحلي",
     },
   },
+  add_legacy_receipt_permit: {
+    value: "add_legacy_receipt_permit",
+    label: {
+      en: "Add Legacy Receipt Permit",
+      ar: "إنشاء إذن إضافة مرحلي",
+    },
+  },
   read_material_purchase_orders: {
     value: "read_material_purchase_orders",
     label: {
@@ -971,6 +979,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_legacy_issue_permit",
       "read_legacy_issue_permits",
       "update_legacy_issue_permit",
+      "add_legacy_receipt_permit",
     ],
   },
   {
