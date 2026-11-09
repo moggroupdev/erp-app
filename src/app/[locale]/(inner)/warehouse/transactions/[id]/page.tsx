@@ -29,8 +29,9 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import CopyButton from "@/components/ui/copy-button";
 import OrderInvoicesSection from "@/components/global/sections/order-invoices";
-import InventoryTransactionPrintDocument from "@/components/documents/warehouse/inventory-transaction-print-document";
-import { getInventoryTransactionTypeLabel } from "@/lib/constants/enums/inventory-transaction-types";
+import InventoryTransactionPrintDocument, {
+  getInventoryTransactionPermitTitle,
+} from "@/components/documents/warehouse/inventory-transaction-print-document";
 import TransactionDetails from "./components/transaction-details";
 
 const PAGE_TITLE = { en: "Transaction Details", ar: "تفاصيل الإذن" };
@@ -81,8 +82,7 @@ export default function Page() {
     enabled: canReadSupplierInvoices && !!materialPurchaseOrderId,
   });
 
-  const isFetching =
-    isTransactionFetching || (canReadSupplierInvoices && !!materialPurchaseOrderId && isInvoicesFetching);
+  const isFetching = isTransactionFetching || (canReadSupplierInvoices && !!materialPurchaseOrderId && isInvoicesFetching);
 
   function refetch() {
     refetchTransaction();
@@ -102,11 +102,11 @@ export default function Page() {
         backLink: true,
         sideElements: (
           <div className="flex items-center gap-3">
-            <RefetchButton isFetching={isFetching} onRefetch={refetch} variant="light" />
+            <RefetchButton isFetching={isFetching} onRefetch={refetch} variant="default" />
             <ActionsMenu>
               {transaction && (
                 <PrintDocument
-                  title={`${getInventoryTransactionTypeLabel(transaction.transactionType, locale)} - ${transaction.code}`}
+                  title={`${getInventoryTransactionPermitTitle(transaction.transactionType, translate)} - ${transaction.legacyNumber || transaction.code}`}
                   buttonLabel={translate("Print transaction", "طباعة الإذن")}
                   buttonType="menu"
                   paperWidth={210}
@@ -118,6 +118,7 @@ export default function Page() {
                   <InventoryTransactionPrintDocument
                     transaction={transaction}
                     getMainCategoryTitle={getMainCategoryTitle}
+                    invoices={paginatedInvoices?.data}
                   />
                 </PrintDocument>
               )}
