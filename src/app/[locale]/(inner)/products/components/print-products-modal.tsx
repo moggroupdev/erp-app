@@ -10,10 +10,7 @@ import useProductCategories from "@/hooks/reference/use-product-categories";
 import productsApi, { type ProductsPrintFilters } from "@/lib/api/products";
 import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
-import {
-  getProductSourceTypeLabel,
-  type ProductSourceType,
-} from "@/lib/constants/enums/product-source-types";
+import { getProductSourceTypeLabel, type ProductSourceType } from "@/lib/constants/enums/product-source-types";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { formatDate } from "@/lib/helpers/date-formaters";
 import Modal from "@/components/ui/modal";
@@ -42,6 +39,7 @@ export default function PrintProductsModal({
   const printDate = formatDate(new Date(), locale);
 
   const [includeSubcategory, setIncludeSubcategory] = useState(true);
+  const [ignoreFilters, setIgnoreFilters] = useState(false);
 
   const appliedFilters = removeEmptyParams({
     keyword: filters.keyword,
@@ -50,12 +48,14 @@ export default function PrintProductsModal({
     sourceType: filters.sourceType,
   });
   const hasFilters = Object.keys(appliedFilters).length > 0;
-  const printQueryParams = { limit: "list-all-to-print", ...appliedFilters };
+  const printFilters = ignoreFilters ? {} : filters;
+  const printQueryParams = {
+    limit: "list-all-to-print",
+    ...(ignoreFilters ? {} : appliedFilters),
+  };
 
   const filterItems: FilterItem[] = [
-    filters.keyword
-      ? { key: "keyword", label: translate("Search", "البحث"), value: filters.keyword, Icon: Search }
-      : null,
+    filters.keyword ? { key: "keyword", label: translate("Search", "البحث"), value: filters.keyword, Icon: Search } : null,
     filters.mainCategoryId
       ? {
           key: "mainCategoryId",
@@ -84,21 +84,24 @@ export default function PrintProductsModal({
 
   const { data: productsToPrint, refetch: fetchProductsToPrint } = useQuery({
     queryKey: queryKeys.products.list(printQueryParams),
-    queryFn: ({ signal }) => productsApi.listAllToPrint({ privateRequest, signal, filters }),
+    queryFn: ({ signal }) => productsApi.listAllToPrint({ privateRequest, signal, filters: printFilters }),
     staleTime: staleTimes.products,
     enabled: false,
   });
 
   function handleClose() {
     close();
-    setTimeout(() => setIncludeSubcategory(true), 250);
+    setTimeout(() => {
+      setIncludeSubcategory(true);
+      setIgnoreFilters(false);
+    }, 250);
   }
 
   return (
     <Modal opened={opened} onClose={handleClose} title={translate("Print Products List", "طباعة قائمة المنتجات")}>
       <div className="flex flex-col gap-3">
         <p className="-mt-1 text-sm text-gray-500">
-          {hasFilters
+          {hasFilters && !ignoreFilters
             ? translate(
                 "The printed list will match the filters below. Optionally show subcategory on each row.",
                 "ستطابق القائمة المطبوعة الفلاتر أدناه. يمكنك اختيار عرض الفئة الفرعية في كل صف.",
@@ -112,32 +115,51 @@ export default function PrintProductsModal({
         {hasFilters && (
           <section className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between gap-2 border-b border-gray-200 bg-white px-3 py-2">
-              <div className="flex min-w-0 items-center gap-2 text-haze-700">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-haze-100 bg-haze-50">
+              <div className="text-haze-700 flex min-w-0 items-center gap-2">
+                <span className="border-haze-100 bg-haze-50 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border">
                   <ListFilter size={14} />
                 </span>
                 <span className="text-sm font-semibold text-gray-900">
                   {translate("Applied filters", "الفلاتر المطبقة")}
                 </span>
               </div>
-              <span className="shrink-0 rounded-md bg-haze-50 px-2 py-0.5 text-xs font-medium text-haze-700">
+              <span
+                className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-medium ${
+                  ignoreFilters ? "bg-gray-100 text-gray-500 line-through" : "bg-haze-50 text-haze-700"
+                }`}
+              >
                 {translate(`${filterItems.length} active`, `${filterItems.length} نشط`)}
               </span>
             </div>
 
-            <dl className="divide-y divide-gray-200">
+            <dl className={`divide-y divide-gray-200 ${ignoreFilters ? "opacity-50" : ""}`}>
               {filterItems.map(({ key, label, value, Icon }) => (
-                <div key={key} className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] items-start gap-2 px-3 py-2 sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]">
+                <div
+                  key={key}
+                  className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] items-start gap-2 px-3 py-2 sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)]"
+                >
                   <dt className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
-                    <Icon size={13} className="shrink-0 text-haze-600" aria-hidden />
+                    <Icon size={13} className="text-haze-600 shrink-0" aria-hidden />
                     <span className="truncate">{label}</span>
                   </dt>
-                  <dd className="min-w-0 text-sm font-semibold break-words text-gray-900" title={value}>
+                  <dd
+                    className={`min-w-0 text-sm font-semibold wrap-break-word text-gray-900 ${ignoreFilters ? "line-through" : ""}`}
+                    title={value}
+                  >
                     {value}
                   </dd>
                 </div>
               ))}
             </dl>
+
+            <div className="border-t border-gray-200 bg-white px-3 py-2.5">
+              <Checkbox
+                checked={ignoreFilters}
+                onChange={(e) => setIgnoreFilters(e.currentTarget.checked)}
+                label={translate("Ignore applied filters and print all products", "تجاهل الفلاتر المطبقة وطباعة كل المنتجات")}
+                radius="md"
+              />
+            </div>
           </section>
         )}
 
@@ -157,7 +179,15 @@ export default function PrintProductsModal({
             await fetchProductsToPrint();
           }}
           renderTrigger={({ onClick, loading, label, icon }) => (
-            <Button onClick={onClick} leftSection={icon} color="dark" variant="light" radius="md" fullWidth disabled={loading}>
+            <Button
+              onClick={onClick}
+              leftSection={icon}
+              color="dark"
+              variant="light"
+              radius="md"
+              fullWidth
+              disabled={loading}
+            >
               {label}
             </Button>
           )}
@@ -168,7 +198,9 @@ export default function PrintProductsModal({
               mainCategories={categoriesData.productCategoryMains}
               getSubCategory={helpers.getProductCategorySubById}
               includeSubcategory={includeSubcategory}
-              appliedFilters={filterItems.map(({ label, value }) => ({ label, value }))}
+              appliedFilters={
+                ignoreFilters ? [] : filterItems.map(({ label, value }) => ({ label, value }))
+              }
             />
           )}
         </PrintDocument>
