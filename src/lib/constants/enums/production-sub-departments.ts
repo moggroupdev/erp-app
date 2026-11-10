@@ -104,8 +104,8 @@ export const PRODUCTION_SUB_DEPARTMENT_LABELS: LocalizedEntity<ProductionSubDepa
   kitchens: {
     value: "kitchens",
     label: {
-      en: "Kitchens Dep.",
-      ar: "قسم المطابخ",
+      en: "Home Kitchens Dep.",
+      ar: "قسم المطابخ المنزلية",
     },
   },
   paints: {
@@ -178,7 +178,11 @@ const UNRANKED_PRODUCTION_SUB_DEPARTMENT_SORT_VALUE = Number.POSITIVE_INFINITY;
 
 // ================ Groups ================
 
-export const METAL_FORMING_PRODUCTION_SUB_DEPARTMENT_VALUES = ["cutting", "punch", "bending"] as const satisfies readonly ProductionSubDepartment[];
+export const METAL_FORMING_PRODUCTION_SUB_DEPARTMENT_VALUES = [
+  "cutting",
+  "punch",
+  "bending",
+] as const satisfies readonly ProductionSubDepartment[];
 
 export type MetalFormingProductionSubDepartment = (typeof METAL_FORMING_PRODUCTION_SUB_DEPARTMENT_VALUES)[number];
 
@@ -216,25 +220,24 @@ export const PRODUCTION_SUB_DEPARTMENT_KIND_LABELS: LocalizedEntity<ProductionSu
   },
 };
 
-export const PRODUCTION_SUB_DEPARTMENT_KIND_BY_DEPARTMENT: Record<ProductionSubDepartment, ProductionSubDepartmentKind> =
-  {
-    cutting: "production",
-    punch: "production",
-    bending: "production",
-    turning: "production",
-    refrigeration: "production",
-    injection: "production",
-    sheet_metal_neutral: "production",
-    sheet_metal_cold: "production",
-    sheet_metal_hot: "production",
-    kitchens: "production",
-    electricity: "service",
-    gas: "service",
-    paints: "service",
-    blacksmithing: "service",
-    finishing: "service",
-    external_installations: "service",
-  };
+export const PRODUCTION_SUB_DEPARTMENT_KIND_BY_DEPARTMENT: Record<ProductionSubDepartment, ProductionSubDepartmentKind> = {
+  cutting: "service",
+  punch: "service",
+  bending: "service",
+  turning: "service",
+  refrigeration: "service",
+  injection: "service",
+  sheet_metal_neutral: "production",
+  sheet_metal_cold: "production",
+  sheet_metal_hot: "production",
+  kitchens: "production",
+  electricity: "service",
+  gas: "service",
+  paints: "service",
+  blacksmithing: "service",
+  finishing: "service",
+  external_installations: "service",
+};
 
 export const PRODUCTION_KIND_PRODUCTION_SUB_DEPARTMENT_VALUES = PRODUCTION_SUB_DEPARTMENT_VALUES.filter(
   (department) => PRODUCTION_SUB_DEPARTMENT_KIND_BY_DEPARTMENT[department] === "production",
@@ -271,10 +274,7 @@ export function getProductionSubDepartmentSortRank(productionSubDepartment: stri
   return PRODUCTION_SUB_DEPARTMENT_SORT_RANKS[productionSubDepartment];
 }
 
-export function compareProductionSubDepartments(
-  a: string | null | undefined,
-  b: string | null | undefined,
-) {
+export function compareProductionSubDepartments(a: string | null | undefined, b: string | null | undefined) {
   const rankDiff = getProductionSubDepartmentSortRank(a) - getProductionSubDepartmentSortRank(b);
   if (rankDiff !== 0) return rankDiff;
 

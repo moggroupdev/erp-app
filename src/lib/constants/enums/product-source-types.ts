@@ -25,7 +25,7 @@ export const PRODUCT_SOURCE_TYPE_LABELS: LocalizedEntity<ProductSourceType> = {
     value: "imported",
     label: {
       en: "Imported",
-      ar: "مستورد",
+      ar: "موّرد",
     },
   },
 };
