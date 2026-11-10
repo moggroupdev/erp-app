@@ -1,7 +1,7 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading } from "../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
-import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
+import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import {
   getProductionSubDepartmentLabel,
   type ProductionSubDepartment,
@@ -90,14 +90,11 @@ export default function DepartmentProductsPrintDocument({
     translate("Product", "المنتج"),
     ...(includeSubcategory ? [translate("Subcategory", "الفئة الفرعية")] : []),
     translate("Dimensions", "الأبعاد") + ` (${translation.productDimensionUnit})`,
-    translate("Workers", "عدد العمال"),
     translate("Production time", "زمن الانتاج"),
   ];
   const lastColIndex = headers.length - 1;
 
-  const columnWidths = includeSubcategory
-    ? ["34%", "14%", "18%", "17%", "17%"]
-    : ["42%", "20%", "19%", "19%"];
+  const columnWidths = includeSubcategory ? ["40%", "16%", "22%", "22%"] : ["48%", "26%", "26%"];
 
   function sortBySubcategoryThenName(list: ProductWithDimensions[]) {
     if (!includeSubcategory) return list;
@@ -122,7 +119,7 @@ export default function DepartmentProductsPrintDocument({
           dimensions.length > 0
             ? dimensions.map((dimension) => ({
                 key: `${product.code}-${dimension.id}`,
-                label: formatDimensionLabel(dimension),
+                label: formatDimensionLabelText(dimension),
               }))
             : [{ key: product.code, label: "-" }],
       };
@@ -188,12 +185,7 @@ export default function DepartmentProductsPrintDocument({
                   <td className={`${cellBorder({ isLastCol: false, isLastRow: false, bottomTone })} py-1.5`}>
                     {dimension.label}
                   </td>
-                  <td className={`${cellBorder({ isLastCol: false, isLastRow: false, bottomTone })} py-1.5`}>
-                    &nbsp;
-                  </td>
-                  <td className={`${cellBorder({ isLastCol: true, isLastRow: false, bottomTone })} py-1.5`}>
-                    &nbsp;
-                  </td>
+                  <td className={`${cellBorder({ isLastCol: true, isLastRow: false, bottomTone })} py-1.5`}>&nbsp;</td>
                 </tr>
               );
             });
@@ -202,13 +194,10 @@ export default function DepartmentProductsPrintDocument({
             <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`}>
               {list.length} {translate("items", "منتج")}
             </td>
-            {includeSubcategory && (
-              <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`} />
-            )}
+            {includeSubcategory && <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`} />}
             <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`}>
               {countDimensions(list)} {translate("dimensions", "مقاس")}
             </td>
-            <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`} />
             <td className={`${cellBorder({ isLastCol: true, isLastRow: true })} py-1.5`} />
           </tr>
         </tbody>
@@ -225,12 +214,14 @@ export default function DepartmentProductsPrintDocument({
           </p>
           <h1 className="text-2xl font-semibold">{departmentLabel}</h1>
           <p className="text-[10px] text-gray-500">
-            {hasFilters
-              ? translate("Selected Products", "المنتجات المحددة")
-              : translate("All Products", "جميع المنتجات")}
+            {hasFilters ? translate("Selected Products", "المنتجات المحددة") : translate("All Products", "جميع المنتجات")}
             {" · "}
             {printedAt}
           </p>
+          <div className="mt-2 flex max-w-xs items-end gap-2">
+            <span className="shrink-0 text-[10px] text-gray-500">{translate("Workers", "عدد العمال")}</span>
+            <span className="min-h-4 min-w-24 flex-1 border-b border-gray-400" />
+          </div>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>

@@ -115,12 +115,12 @@ export default function PrintDepartmentProductsModal({
         <p className="-mt-1 text-sm text-gray-500">
           {hasFilters && !ignoreFilters
             ? translate(
-                "Select a production department. The sheet will match the filters below, grouped by category, with blank columns for workers and production time.",
-                "اختر قسم إنتاج. ستطابق الورقة الفلاتر أدناه، مجمّعة حسب الفئة، مع أعمدة فارغة لعدد العمال وزمن الإنتاج.",
+                "Select a production department. The sheet will match the filters below, grouped by category, with a blank workers field for the department and a blank production-time column.",
+                "اختر قسم إنتاج. ستطابق الورقة الفلاتر أدناه، مجمّعة حسب الفئة، مع حقل فارغ لعدد العمال للقسم وعمود فارغ لزمن الإنتاج.",
               )
             : translate(
-                "Select a production department. Products are grouped by category, with blank columns for workers and production time.",
-                "اختر قسم إنتاج. تُجمّع المنتجات حسب الفئة، مع أعمدة فارغة لعدد العمال وزمن الإنتاج.",
+                "Select a production department. Products are grouped by category, with a blank workers field for the department and a blank production-time column.",
+                "اختر قسم إنتاج. تُجمّع المنتجات حسب الفئة، مع حقل فارغ لعدد العمال للقسم وعمود فارغ لزمن الإنتاج.",
               )}
         </p>
 
