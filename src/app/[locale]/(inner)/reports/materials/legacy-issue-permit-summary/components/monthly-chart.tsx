@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { TrendingUp } from "lucide-react";
 import { localeDirections } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -44,36 +44,47 @@ export default function MonthlyChart({ data }: { data: LegacyIssuePermitSummaryB
     name: formatMonthLabel(row.month, locale),
     permits: row.permitCount,
     cancelled: row.cancelledCount,
-    items: row.itemCount,
   }));
 
   return (
     <ReportCard
       title={translate("Monthly Trend", "الاتجاه الشهري")}
-      description={translate(
-        "Permit count, cancelled permits, and line items by month.",
-        "عدد الأذونات والملغاة والبنود حسب الشهر.",
-      )}
+      description={translate("Permit count and cancelled permits by month.", "عدد الأذونات والملغاة حسب الشهر.")}
       icon={TrendingUp}
       accent="teal"
     >
-      <div className="h-72 w-full" dir="ltr">
+      <div className="h-72 w-full" dir={dir}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <LineChart data={chartData} style={{ direction: "ltr" }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="name" tick={{ fontSize: 11 }} reversed={isRtl} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(value) => formatCompactNumber(Number(value))} />
-            <Tooltip />
+            <YAxis
+              tick={{ fontSize: 11 }}
+              orientation={isRtl ? "right" : "left"}
+              tickFormatter={(value) => formatCompactNumber(Number(value))}
+              width={48}
+            />
+            <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid #e5e7eb", direction: dir }} />
             <Legend />
-            <Bar dataKey="permits" name={translate("Permits", "الأذونات")} fill={reportTheme.chart.permits} radius={4} />
-            <Bar
+            <Line
+              type="monotone"
+              dataKey="permits"
+              name={translate("Permits", "الأذونات")}
+              stroke={reportTheme.chart.permits}
+              strokeWidth={2}
+              dot={{ r: 4, fill: reportTheme.chart.permits }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              type="monotone"
               dataKey="cancelled"
               name={translate("Cancelled", "ملغاة")}
-              fill={reportTheme.chart.cancelled}
-              radius={4}
+              stroke={reportTheme.chart.cancelled}
+              strokeWidth={2}
+              dot={{ r: 4, fill: reportTheme.chart.cancelled }}
+              activeDot={{ r: 6 }}
             />
-            <Bar dataKey="items" name={translate("Items", "البنود")} fill={reportTheme.chart.items} radius={4} />
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </ReportCard>
