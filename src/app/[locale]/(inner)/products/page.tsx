@@ -40,6 +40,7 @@ import SelectProductMain from "@/components/global/selections/reference-based/se
 import SelectProductSub from "@/components/global/selections/reference-based/select-product-sub";
 import DownloadProductsExcelModal from "./components/download-excel-modal";
 import PrintProductsModal from "./components/print-products-modal";
+import PrintDepartmentProductsModal from "./components/print-department-products-modal";
 
 const PAGE_TITLE = { en: "Products Catalog", ar: "كتالوج المنتجات" };
 
@@ -148,6 +149,8 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [printModalOpened, { open: openPrintModal, close: closePrintModal }] = useDisclosure(false);
+  const [departmentPrintModalOpened, { open: openDepartmentPrintModal, close: closeDepartmentPrintModal }] =
+    useDisclosure(false);
   const [excelModalOpened, { open: openExcelModal, close: closeExcelModal }] = useDisclosure(false);
   const [productToUpdate, setProductToUpdate] = useState<Product | null>(null);
 
@@ -168,6 +171,11 @@ export default function Page() {
               {canPrintProductsList && (
                 <Menu.Item leftSection={<Printer size={14} />} onClick={openPrintModal}>
                   {translate("Print Products List", "طباعة قائمة المنتجات")}
+                </Menu.Item>
+              )}
+              {canPrintProductsList && (
+                <Menu.Item leftSection={<Printer size={14} />} onClick={openDepartmentPrintModal}>
+                  {translate("Print Department Sheet", "طباعة ورقة القسم")}
                 </Menu.Item>
               )}
               {canPrintProductsList && (
@@ -346,6 +354,17 @@ export default function Page() {
       <PrintProductsModal
         opened={printModalOpened}
         close={closePrintModal}
+        filters={{
+          keyword: debouncedKeyword,
+          mainCategoryId: mainCategoryFilter,
+          subCategoryId: subCategoryFilter,
+          sourceType: sourceTypeFilter,
+        }}
+      />
+
+      <PrintDepartmentProductsModal
+        opened={departmentPrintModalOpened}
+        close={closeDepartmentPrintModal}
         filters={{
           keyword: debouncedKeyword,
           mainCategoryId: mainCategoryFilter,
