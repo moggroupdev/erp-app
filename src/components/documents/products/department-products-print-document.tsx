@@ -18,7 +18,8 @@ function sortDimensions(dimensions: ProductDimension[]) {
 }
 
 /**
- * Inner grid only. Uses logical inline-end so vertical rules stay between columns in RTL.
+ * Cell borders for the inner grid. Outer box comes from the table `border` class.
+ * Uses logical inline-end so vertical rules stay between columns in RTL.
  * `bottomTone`: "strong" for product/header separators, "light" between dimensions of one product.
  */
 function cellBorder({
@@ -31,7 +32,7 @@ function cellBorder({
   bottomTone?: "strong" | "light";
 }) {
   return [
-    "px-2 align-top",
+    "px-1 align-top",
     isLastCol ? "" : "border-e border-gray-300",
     isLastRow ? "" : bottomTone === "light" ? "border-b border-gray-200" : "border-b border-gray-300",
   ]
@@ -45,6 +46,29 @@ type ProductBlock = {
   subcategory: string;
   dimensions: { key: string; label: string }[];
 };
+
+/** Split blocks into two columns with roughly equal dimension-row heights. */
+function splitBlocksForColumns(blocks: ProductBlock[]): [ProductBlock[], ProductBlock[]] {
+  if (blocks.length <= 1) return [blocks, []];
+
+  const totalRows = blocks.reduce((sum, block) => sum + block.dimensions.length, 0);
+  const target = totalRows / 2;
+  let leftRows = 0;
+  let splitIndex = 0;
+
+  for (let i = 0; i < blocks.length; i++) {
+    const next = leftRows + blocks[i].dimensions.length;
+    if (i > 0 && Math.abs(next - target) > Math.abs(leftRows - target)) break;
+    leftRows = next;
+    splitIndex = i + 1;
+    if (leftRows >= target) break;
+  }
+
+  if (splitIndex === 0) splitIndex = 1;
+  if (splitIndex >= blocks.length) splitIndex = Math.ceil(blocks.length / 2);
+
+  return [blocks.slice(0, splitIndex), blocks.slice(splitIndex)];
+}
 
 export default function DepartmentProductsPrintDocument({
   products,
@@ -94,7 +118,7 @@ export default function DepartmentProductsPrintDocument({
   ];
   const lastColIndex = headers.length - 1;
 
-  const columnWidths = includeSubcategory ? ["40%", "16%", "22%", "22%"] : ["48%", "26%", "26%"];
+  const columnWidths = includeSubcategory ? ["34%", "18%", "26%", "22%"] : ["42%", "30%", "28%"];
 
   function sortBySubcategoryThenName(list: ProductWithDimensions[]) {
     if (!includeSubcategory) return list;
@@ -126,26 +150,22 @@ export default function DepartmentProductsPrintDocument({
     });
   }
 
-  function renderCategoryTable(list: ProductWithDimensions[]) {
-    const blocks = buildBlocks(list);
-
-    if (blocks.length === 0) {
-      return <p className="py-2 text-[10px] text-gray-500">{translate("No products", "لا توجد منتجات")}</p>;
-    }
+  function renderHalfTable(blocks: ProductBlock[]) {
+    if (blocks.length === 0) return null;
 
     return (
-      <table className="w-full table-fixed border-collapse break-before-avoid text-[9px]">
+      <table className="w-full table-fixed border-collapse border border-gray-300 break-before-avoid text-[8px]">
         <colgroup>
           {columnWidths.map((width, index) => (
             <col key={index} style={{ width }} />
           ))}
         </colgroup>
         <thead className="break-inside-avoid break-after-avoid">
-          <tr className="bg-gray-50 text-[9px] font-medium tracking-wide text-gray-500 uppercase">
+          <tr className="bg-gray-50 text-[8px] font-medium tracking-wide text-gray-500 uppercase">
             {headers.map((header, headerIndex) => (
               <th
                 key={header}
-                className={`${cellBorder({ isLastCol: headerIndex === lastColIndex, isLastRow: false })} py-1.5 text-start text-nowrap`}
+                className={`${cellBorder({ isLastCol: headerIndex === lastColIndex, isLastRow: false })} py-1 text-start text-nowrap`}
               >
                 {header}
               </th>
@@ -153,12 +173,14 @@ export default function DepartmentProductsPrintDocument({
           </tr>
         </thead>
         <tbody>
-          {blocks.map((block) => {
+          {blocks.map((block, blockIndex) => {
             const rowSpan = block.dimensions.length;
+            const isLastProduct = blockIndex === blocks.length - 1;
 
             return block.dimensions.map((dimension, dimensionIndex) => {
               const isFirstDimension = dimensionIndex === 0;
               const isLastDimensionOfProduct = dimensionIndex === rowSpan - 1;
+              const isLastRow = isLastProduct && isLastDimensionOfProduct;
               const bottomTone = isLastDimensionOfProduct ? "strong" : "light";
 
               return (
@@ -166,42 +188,58 @@ export default function DepartmentProductsPrintDocument({
                   {isFirstDimension && (
                     <td
                       rowSpan={rowSpan}
-                      className={`${cellBorder({ isLastCol: false, isLastRow: false, bottomTone: "strong" })} py-1.5`}
+                      className={`${cellBorder({
+                        isLastCol: false,
+                        isLastRow,
+                        bottomTone: "strong",
+                      })} py-1`}
                     >
                       <div className="flex flex-col gap-0.5">
                         <span className="inline-block leading-snug text-gray-900">{block.title}</span>
-                        <span className="font-mono text-[8px] leading-tight text-gray-400">{block.code}</span>
+                        <span className="font-mono text-[7px] leading-tight text-gray-400">{block.code}</span>
                       </div>
                     </td>
                   )}
                   {isFirstDimension && includeSubcategory && (
                     <td
                       rowSpan={rowSpan}
-                      className={`${cellBorder({ isLastCol: false, isLastRow: false, bottomTone: "strong" })} py-1.5`}
+                      className={`${cellBorder({
+                        isLastCol: false,
+                        isLastRow,
+                        bottomTone: "strong",
+                      })} py-1`}
                     >
                       {block.subcategory}
                     </td>
                   )}
-                  <td className={`${cellBorder({ isLastCol: false, isLastRow: false, bottomTone })} py-1.5`}>
+                  <td className={`${cellBorder({ isLastCol: false, isLastRow, bottomTone })} py-1`}>
                     {dimension.label}
                   </td>
-                  <td className={`${cellBorder({ isLastCol: true, isLastRow: false, bottomTone })} py-1.5`}>&nbsp;</td>
+                  <td className={`${cellBorder({ isLastCol: true, isLastRow, bottomTone })} py-1`}>&nbsp;</td>
                 </tr>
               );
             });
           })}
-          <tr className="break-inside-avoid bg-gray-50 font-semibold text-gray-700">
-            <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`}>
-              {list.length} {translate("items", "منتج")}
-            </td>
-            {includeSubcategory && <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`} />}
-            <td className={`${cellBorder({ isLastCol: false, isLastRow: true })} py-1.5`}>
-              {countDimensions(list)} {translate("dimensions", "مقاس")}
-            </td>
-            <td className={`${cellBorder({ isLastCol: true, isLastRow: true })} py-1.5`} />
-          </tr>
         </tbody>
       </table>
+    );
+  }
+
+  function renderCategoryTables(list: ProductWithDimensions[]) {
+    const blocks = buildBlocks(list);
+
+    if (blocks.length === 0) {
+      return <p className="py-2 text-[10px] text-gray-500">{translate("No products", "لا توجد منتجات")}</p>;
+    }
+
+    const [leftBlocks, rightBlocks] = splitBlocksForColumns(blocks);
+    const useDualColumns = rightBlocks.length > 0;
+
+    return (
+      <div className={useDualColumns ? "grid grid-cols-2 items-start gap-x-3" : undefined}>
+        {renderHalfTable(leftBlocks)}
+        {useDualColumns ? renderHalfTable(rightBlocks) : null}
+      </div>
     );
   }
 
@@ -255,7 +293,7 @@ export default function DepartmentProductsPrintDocument({
           <div className="w-full break-after-avoid rounded-md bg-gray-100 px-3 py-2 text-center">
             <h2 className="text-sm font-semibold text-gray-900">{group.mainCategory.title}</h2>
           </div>
-          {renderCategoryTable(group.products)}
+          {renderCategoryTables(group.products)}
         </section>
       ))}
 
@@ -264,7 +302,7 @@ export default function DepartmentProductsPrintDocument({
           <div className="break-after-avoid">
             <PrintSectionHeading title={translate("Uncategorized", "غير مصنف")} />
           </div>
-          {renderCategoryTable(uncategorized)}
+          {renderCategoryTables(uncategorized)}
         </section>
       )}
 
