@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintSectionHeading, PrintTable } from "../components";
+import { PrintDetail, PrintSectionHeading, PrintTable } from "../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
@@ -20,12 +20,15 @@ export default function ProductsListPrintDocument({
   mainCategories,
   getSubCategory,
   includeSubcategory = false,
+  appliedFilters = [],
 }: {
   products: ProductWithDimensions[];
   mainCategories: ProductCategoryMain[];
   getSubCategory: (id: string) => ProductCategorySub | null;
   includeSubcategory?: boolean;
+  appliedFilters?: { label: string; value: string }[];
 }) {
+  const hasFilters = appliedFilters.length > 0;
   const { locale, translate, translation } = useI18n();
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
@@ -59,7 +62,7 @@ export default function ProductsListPrintDocument({
     translate("Source Type", "نوع المصدر"),
   ];
 
-  const columnWidths = includeSubcategory ? ["10%", "28%", "20%", "28%", "14%"] : ["12%", "44%", "28%", "16%"];
+  const columnWidths = includeSubcategory ? ["10%", "38%", "18%", "20%", "14%"] : ["12%", "54%", "20%", "14%"];
   const sourceTypeColumnIndex = includeSubcategory ? 4 : 3;
 
   function renderDimensions(dimensions: ProductDimension[]): ReactNode {
@@ -89,7 +92,7 @@ export default function ProductsListPrintDocument({
   function productRows(list: ProductWithDimensions[]): ReactNode[][] {
     return sortBySubcategoryThenName(list).map((p) => [
       p.code,
-      p.title,
+      <span className="inline-block leading-relaxed">{p.title}</span>,
       ...(includeSubcategory ? [getSubCategory(p.subCategoryId)?.title ?? "-"] : []),
       renderDimensions(p.dimensions),
       getProductSourceTypeLabel(p.sourceType, locale),
@@ -131,11 +134,37 @@ export default function ProductsListPrintDocument({
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             {translate("Products List", "قائمة المنتجات")}
           </p>
-          <h1 className="text-2xl font-semibold">{translate("All Products", "جميع المنتجات")}</h1>
+          <h1 className="text-2xl font-semibold">
+            {hasFilters ? translate("Selected Products", "المنتجات المحددة") : translate("All Products", "جميع المنتجات")}
+          </h1>
           <p className="text-[10px] text-gray-500">{printedAt}</p>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
+
+      {hasFilters && (
+        <>
+          <section className="flex break-inside-avoid flex-col gap-2.5">
+            <p className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
+              {translate("Applied filters", "الفلاتر المطبقة")}
+            </p>
+            <div
+              className={`grid gap-x-6 gap-y-3 ${
+                appliedFilters.length === 1
+                  ? "grid-cols-1"
+                  : appliedFilters.length === 2
+                    ? "grid-cols-2"
+                    : "grid-cols-2 sm:grid-cols-4"
+              }`}
+            >
+              {appliedFilters.map((filter) => (
+                <PrintDetail key={`${filter.label}-${filter.value}`} label={filter.label} value={filter.value} />
+              ))}
+            </div>
+          </section>
+          <hr className="border-gray-300" />
+        </>
+      )}
 
       {groups.map((group) => (
         <section key={group.mainCategory.id} className="mb-6 space-y-2.5">

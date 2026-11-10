@@ -13,6 +13,7 @@ import type {
   SetProductProductionRoutesDto,
   SetProductPricingFactorDto,
 } from "@/types/product";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 
 export type ProductExcelColumnOptions = {
   reviewEstimate?: boolean;
@@ -20,6 +21,13 @@ export type ProductExcelColumnOptions = {
   design?: boolean;
   completionDate?: boolean;
   notes?: boolean;
+};
+
+export type ProductsPrintFilters = {
+  keyword?: string;
+  mainCategoryId?: string | null;
+  subCategoryId?: string | null;
+  sourceType?: string | null;
 };
 
 const productsApi = {
@@ -39,10 +47,27 @@ const productsApi = {
     return await privateRequest<PaginatedData<ProductWithDimensions>>({ url: "products", params, signal });
   },
 
-  async listAllToPrint({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
+  async listAllToPrint({
+    privateRequest,
+    signal,
+    filters = {},
+  }: {
+    privateRequest: PrivateRequest;
+    signal?: AbortSignal;
+    filters?: ProductsPrintFilters;
+  }) {
     const result = await privateRequest<PaginatedData<ProductWithDimensions>>({
       url: "products",
-      params: { limit: Infinity, sort: "title" },
+      params: {
+        limit: Infinity,
+        sort: "title",
+        ...removeEmptyParams({
+          keyword: filters.keyword,
+          mainCategoryId: filters.mainCategoryId,
+          subCategoryId: filters.subCategoryId,
+          sourceType: filters.sourceType,
+        }),
+      },
       signal,
     });
 
