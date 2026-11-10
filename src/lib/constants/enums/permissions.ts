@@ -48,6 +48,7 @@ export const PERMISSION_VALUES = [
   "delete_manufactured_material_bom",
   "read_material_inventory_summary_report",
   "read_material_category_stats_report",
+  "read_legacy_issue_permit_summary_report",
   "read_material_legacy_issue_permit_history_report",
   "read_material_purchasing_spending_summary_report",
   "read_material_purchasing_price_history_report",
@@ -136,6 +137,7 @@ export const PERMISSIONS = Object.fromEntries(
 export const MATERIAL_REPORT_PERMISSIONS = [
   PERMISSIONS.READ_MATERIAL_INVENTORY_SUMMARY_REPORT,
   PERMISSIONS.READ_MATERIAL_CATEGORY_STATS_REPORT,
+  PERMISSIONS.READ_LEGACY_ISSUE_PERMIT_SUMMARY_REPORT,
   PERMISSIONS.READ_MATERIAL_LEGACY_ISSUE_PERMIT_HISTORY_REPORT,
 ] as const;
 
@@ -770,6 +772,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض تقرير إحصائيات فئة المخزون",
     },
   },
+  read_legacy_issue_permit_summary_report: {
+    value: "read_legacy_issue_permit_summary_report",
+    label: {
+      en: "Read Legacy Issue Permit Summary Report",
+      ar: "عرض تقرير ملخص أذونات الصرف المرحلية",
+    },
+  },
   read_material_legacy_issue_permit_history_report: {
     value: "read_material_legacy_issue_permit_history_report",
     label: {
@@ -1015,6 +1024,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
     permissions: [
       "read_material_inventory_summary_report",
       "read_material_category_stats_report",
+      "read_legacy_issue_permit_summary_report",
       "read_material_legacy_issue_permit_history_report",
       "read_material_purchasing_spending_summary_report",
       "read_material_purchasing_price_history_report",

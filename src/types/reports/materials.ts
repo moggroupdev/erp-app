@@ -82,6 +82,125 @@ export type MaterialsCategoryStats = {
   lowStockMaterials: MaterialsInventoryLowStockMaterial[];
 };
 
+// ================ Legacy Issue Permit Summary ================
+
+export type LegacyIssuePermitSummaryOverview = {
+  permitCount: number;
+  activePermitCount: number;
+  cancelledPermitCount: number;
+  itemCount: number;
+  materialLineCount: number;
+  noteOnlyLineCount: number;
+  emptyPermitCount: number;
+  permitsWithIssueOrder: number;
+  multipleCustomerPermitCount: number;
+  distinctMaterialCount: number;
+  distinctCustomerCount: number;
+  distinctCreatorCount: number;
+  minDate: string | null;
+  maxDate: string | null;
+  headerNoteCount: number;
+  lineNoteCount: number;
+};
+
+export type LegacyIssuePermitSummaryByPermitType = {
+  permitType: LegacyIssuePermitType;
+  permitCount: number;
+  cancelledCount: number;
+  itemCount: number;
+  headerNoteCount: number;
+};
+
+export type LegacyIssuePermitSummaryByProductionSubDepartment = {
+  productionSubDepartment: ProductionSubDepartment | null;
+  permitCount: number;
+  cancelledCount: number;
+  itemCount: number;
+  headerNoteCount: number;
+};
+
+export type LegacyIssuePermitSummaryByMaintenanceOrderType = {
+  maintenanceOrderType: LegacyIssuePermitMaintenanceOrderType | null;
+  permitCount: number;
+  cancelledCount: number;
+  itemCount: number;
+  headerNoteCount: number;
+};
+
+export type LegacyIssuePermitSummaryByMonth = {
+  month: string;
+  permitCount: number;
+  cancelledCount: number;
+  itemCount: number;
+};
+
+export type LegacyIssuePermitSummaryTopMaterial = {
+  materialCode: string;
+  materialTitle: string;
+  unitOfMeasurement: MaterialUnit;
+  unitConversions: MaterialUnitConversionSummary[];
+  lineCount: number;
+  issuedQuantityInBase: number;
+  cancelledQuantityInBase: number;
+  missingConversionCount: number;
+};
+
+export type LegacyIssuePermitSummaryTopCustomer = {
+  customerId: string;
+  customerName: string;
+  permitCount: number;
+};
+
+export type LegacyIssuePermitSummaryTopCreator = {
+  creatorId: string;
+  creatorName: string;
+  permitCount: number;
+};
+
+export type LegacyIssuePermitSummaryDataQualityCode =
+  | "contract_review_missing_contract_number"
+  | "maintenance_order_missing_order_number"
+  | "maintenance_order_missing_order_type"
+  | "customer_scoped_missing_customer"
+  | "material_lines_missing_conversion";
+
+export type LegacyIssuePermitSummaryDataQualityNote = {
+  code: LegacyIssuePermitSummaryDataQualityCode;
+  count: number;
+  caption: { en: string; ar: string };
+};
+
+export type LegacyIssuePermitSummaryHeaderNote = {
+  id: string;
+  issuePermitNumber: string;
+  date: string;
+  permitType: LegacyIssuePermitType;
+  notes: string;
+};
+
+export type LegacyIssuePermitSummaryLineNote = {
+  itemId: string;
+  issuePermitId: string;
+  issuePermitNumber: string;
+  date: string;
+  materialCode: string | null;
+  notes: string;
+};
+
+export type LegacyIssuePermitSummary = {
+  overview: LegacyIssuePermitSummaryOverview;
+  byPermitType: LegacyIssuePermitSummaryByPermitType[];
+  byProductionSubDepartment: LegacyIssuePermitSummaryByProductionSubDepartment[];
+  byMaintenanceOrderType: LegacyIssuePermitSummaryByMaintenanceOrderType[];
+  byMonth: LegacyIssuePermitSummaryByMonth[];
+  topMaterials: LegacyIssuePermitSummaryTopMaterial[];
+  topCustomers: LegacyIssuePermitSummaryTopCustomer[];
+  topCreators: LegacyIssuePermitSummaryTopCreator[];
+  dataQuality: LegacyIssuePermitSummaryDataQualityNote[];
+  headerNotes: LegacyIssuePermitSummaryHeaderNote[];
+  lineNotes: LegacyIssuePermitSummaryLineNote[];
+};
+
 // ================ Issue Permit History ================
 
 export type MaterialsIssuePermitHistoryStatus = "issued" | "cancelled";

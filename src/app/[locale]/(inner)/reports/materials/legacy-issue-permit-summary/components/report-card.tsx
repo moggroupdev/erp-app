@@ -1,0 +1,51 @@
+import type { LucideIcon } from "lucide-react";
+
+const iconStyles = {
+  teal: "bg-teal-100 text-teal-700",
+  amber: "bg-ochre-100 text-ochre-700",
+  gray: "bg-gray-100 text-gray-600",
+  sky: "bg-haze-100 text-haze-700",
+  rose: "bg-clay-100 text-clay-700",
+  plum: "bg-plum-100 text-plum-700",
+};
+
+export default function ReportCard({
+  title,
+  description,
+  icon: Icon,
+  children,
+  className = "",
+  accent = "gray",
+  headerAction,
+}: {
+  title: string;
+  description?: string;
+  icon?: LucideIcon;
+  children: React.ReactNode;
+  className?: string;
+  accent?: keyof typeof iconStyles;
+  headerAction?: React.ReactNode;
+}) {
+  return (
+    <article className={`overflow-hidden rounded-3xl bg-white ${className}`}>
+      <header className="border-b border-dashed border-gray-200 px-5 py-5 sm:px-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            {Icon && (
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconStyles[accent]}`}>
+                <Icon size={18} />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xs font-semibold text-gray-800 sm:text-sm">{title}</h3>
+              {description && <p className="mt-1 text-xs leading-[1.75] text-gray-500">{description}</p>}
+            </div>
+          </div>
+          {headerAction && <div className="w-full shrink-0 sm:w-auto">{headerAction}</div>}
+        </div>
+      </header>
+
+      <div className="px-5 py-5 sm:px-6">{children}</div>
+    </article>
+  );
+}

@@ -24,6 +24,7 @@ export const staleTimes = {
   reports: {
     materialsInventorySummary: 5 * MINUTE,
     materialsCategoryStats: 5 * MINUTE,
+    materialsLegacyIssuePermitSummary: 5 * MINUTE,
     materialsIssuePermitHistory: 5 * MINUTE,
     purchasingMaterialsSpendingSummary: 5 * MINUTE,
     purchasingMaterialsPriceHistory: 5 * MINUTE,
