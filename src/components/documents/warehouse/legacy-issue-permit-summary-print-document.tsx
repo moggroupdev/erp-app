@@ -20,11 +20,6 @@ export default function LegacyIssuePermitSummaryPrintDocument({
   const printedAt = formatDateAndTime(new Date(), locale);
   const { overview } = data;
 
-  const dateSpan =
-    overview.minDate && overview.maxDate
-      ? `${formatDate(overview.minDate, locale)} - ${formatDate(overview.maxDate, locale)}`
-      : translate("No permits", "لا توجد أذونات");
-
   return (
     <div className="flex flex-col gap-5 text-xs text-gray-900">
       <header className="flex items-start justify-between gap-4 border-b border-gray-300 pb-4">
@@ -56,7 +51,6 @@ export default function LegacyIssuePermitSummaryPrintDocument({
         <PrintDetail label={translate("Distinct Creators", "منشئون مميزون")} value={overview.distinctCreatorCount} />
         <PrintDetail label={translate("Header Notes", "ملاحظات الرأس")} value={overview.headerNoteCount} />
         <PrintDetail label={translate("Line Notes", "ملاحظات البنود")} value={overview.lineNoteCount} />
-        <PrintDetail label={translate("Date Span", "نطاق التواريخ")} value={dateSpan} />
       </section>
 
       <section>

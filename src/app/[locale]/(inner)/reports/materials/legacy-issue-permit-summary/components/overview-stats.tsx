@@ -8,23 +8,16 @@ import {
   Package,
   StickyNote,
   Users,
-  UserSquare2,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
-import { formatDate } from "@/lib/helpers/date-formaters";
 import type { LegacyIssuePermitSummaryOverview } from "@/types/reports";
 import { reportTheme } from "./report-theme";
 
 export default function OverviewStats({ overview }: { overview: LegacyIssuePermitSummaryOverview }) {
-  const { locale, translate } = useI18n();
-
-  const dateRangeLabel =
-    overview.minDate && overview.maxDate
-      ? `${formatDate(overview.minDate, locale)} - ${formatDate(overview.maxDate, locale)}`
-      : translate("No permits in range", "لا توجد أذونات في النطاق");
+  const { translate } = useI18n();
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
       <KpiCard
         label={translate("Total Permits", "إجمالي الأذونات")}
         value={overview.permitCount}
@@ -94,12 +87,6 @@ export default function OverviewStats({ overview }: { overview: LegacyIssuePermi
         value={overview.lineNoteCount}
         hint={translate("Line items with non-empty notes.", "بنود بملاحظات غير فارغة.")}
         icon={<StickyNote size={20} />}
-      />
-      <KpiCard
-        label={translate("Date Span", "نطاق التواريخ")}
-        value={<span className="text-base sm:text-lg">{dateRangeLabel}</span>}
-        hint={translate("Earliest to latest permit date in range.", "من أقدم إلى أحدث تاريخ إذن في النطاق.")}
-        icon={<UserSquare2 size={20} />}
       />
     </div>
   );
