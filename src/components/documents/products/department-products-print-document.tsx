@@ -121,13 +121,14 @@ export default function DepartmentProductsPrintDocument({
   const columnWidths = includeSubcategory ? ["34%", "18%", "26%", "22%"] : ["42%", "30%", "28%"];
 
   function sortBySubcategoryThenName(list: ProductWithDimensions[]) {
-    if (!includeSubcategory) return list;
-
     return [...list].sort((a, b) => {
-      const aSubTitle = getSubCategory(a.subCategoryId)?.title ?? "";
-      const bSubTitle = getSubCategory(b.subCategoryId)?.title ?? "";
-      const bySubcategory = aSubTitle.localeCompare(bSubTitle, locale);
-      if (bySubcategory !== 0) return bySubcategory;
+      if (includeSubcategory) {
+        const aSubTitle = getSubCategory(a.subCategoryId)?.title ?? "";
+        const bSubTitle = getSubCategory(b.subCategoryId)?.title ?? "";
+        const bySubcategory = aSubTitle.localeCompare(bSubTitle, locale);
+        if (bySubcategory !== 0) return bySubcategory;
+      }
+
       return a.title.localeCompare(b.title, locale);
     });
   }
