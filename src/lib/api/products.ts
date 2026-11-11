@@ -77,13 +77,23 @@ const productsApi = {
   async downloadExcel({
     privateRequest,
     columns = {},
+    filters = {},
   }: {
     privateRequest: PrivateRequest;
     columns?: ProductExcelColumnOptions;
+    filters?: ProductsPrintFilters;
   }) {
     return await privateRequest<null>({
       url: "products/excel",
-      params: removeEmptyColumnFlags(columns),
+      params: {
+        ...removeEmptyColumnFlags(columns),
+        ...removeEmptyParams({
+          keyword: filters.keyword,
+          mainCategoryId: filters.mainCategoryId,
+          subCategoryId: filters.subCategoryId,
+          sourceType: filters.sourceType,
+        }),
+      },
       download: true,
       filename: "products-catalog.xlsx",
     });

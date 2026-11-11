@@ -373,7 +373,16 @@ export default function Page() {
         }}
       />
 
-      <DownloadProductsExcelModal opened={excelModalOpened} close={closeExcelModal} />
+      <DownloadProductsExcelModal
+        opened={excelModalOpened}
+        close={closeExcelModal}
+        filters={{
+          keyword: debouncedKeyword,
+          mainCategoryId: mainCategoryFilter,
+          subCategoryId: subCategoryFilter,
+          sourceType: sourceTypeFilter,
+        }}
+      />
 
       <ProductModal
         opened={modalOpened}
