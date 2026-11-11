@@ -83,29 +83,29 @@ export const PRODUCTION_SUB_DEPARTMENT_LABELS: LocalizedEntity<ProductionSubDepa
   sheet_metal_neutral: {
     value: "sheet_metal_neutral",
     label: {
-      en: "Sheet Metal Neutral Dep.",
-      ar: "قسم سمكرة المتعادل",
+      en: "Neutral Assembly Dep.",
+      ar: "خط تجميع المتعادل",
     },
   },
   sheet_metal_cold: {
     value: "sheet_metal_cold",
     label: {
-      en: "Sheet Metal Cold Dep.",
-      ar: "قسم سمكرة البارد",
+      en: "Cold Assembly Dep.",
+      ar: "خط تجميع البارد",
     },
   },
   sheet_metal_hot: {
     value: "sheet_metal_hot",
     label: {
-      en: "Sheet Metal Hot Dep.",
-      ar: "قسم سمكرة الساخن",
+      en: "Hot Assembly Dep.",
+      ar: "خط تجميع الساخن",
     },
   },
   kitchens: {
     value: "kitchens",
     label: {
       en: "Home Kitchens Dep.",
-      ar: "قسم المطابخ المنزلية",
+      ar: "خط المطابخ المنزلية",
     },
   },
   paints: {
