@@ -150,10 +150,10 @@ function SpendingTrendPrintChart({
   const plotHeight = 168;
   const plotBottom = plotTop + plotHeight;
   const height = plotBottom + 46;
-  const axisWidth = 50;
-  const edgePad = 36;
-  const plotLeft = isRtl ? edgePad : axisWidth;
-  const plotRight = isRtl ? width - axisWidth : width - edgePad;
+  const yAxisWidth = 40;
+  const plotInset = 4;
+  const plotLeft = isRtl ? plotInset : yAxisWidth;
+  const plotRight = isRtl ? width - yAxisWidth : width - plotInset;
   const plotWidth = plotRight - plotLeft;
 
   const ticks = niceAxisTicks(Math.max(...data.map((row) => row.totalSpend), 0));
@@ -179,9 +179,9 @@ function SpendingTrendPrintChart({
             <g key={tick}>
               <line x1={plotLeft} x2={plotRight} y1={y} y2={y} stroke={chartNeutralColors[2]} strokeDasharray="3 3" />
               <text
-                x={isRtl ? plotRight + 8 : plotLeft - 8}
+                x={isRtl ? width - 2 : 2}
                 y={y}
-                textAnchor={isRtl ? "start" : "end"}
+                textAnchor={isRtl ? "end" : "start"}
                 dominantBaseline="middle"
                 fontSize={11}
                 fill={chartNeutralColors[0]}
@@ -198,7 +198,13 @@ function SpendingTrendPrintChart({
           <g key={index}>
             <circle cx={point.x} cy={point.y} r={4} fill={lineColor} />
             {point.showLabel && (
-              <text x={point.x} y={plotBottom + 16} textAnchor="middle" fontSize={9} fill={chartNeutralColors[0]}>
+              <text
+                x={point.x}
+                y={plotBottom + 16}
+                textAnchor={point.x - plotLeft <= 8 ? "start" : plotRight - point.x <= 8 ? "end" : "middle"}
+                fontSize={9}
+                fill={chartNeutralColors[0]}
+              >
                 <tspan x={point.x} dy={0}>
                   {point.caption.primary}
                 </tspan>
