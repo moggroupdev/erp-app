@@ -81,6 +81,12 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
     maximumFractionDigits: 2,
   });
   const totalCategorySpend = byMainCategory.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalSupplierSpend = bySupplier.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalSupplierOrders = bySupplier.reduce((sum, row) => sum + row.orderCount, 0);
+
+  function formatShare(value: number, ofTotal: number) {
+    return `${percentageFormatter.format(ofTotal === 0 ? 0 : (value / ofTotal) * 100)}%`;
+  }
 
   return (
     <div className="flex flex-col gap-8 text-xs text-gray-900">
@@ -156,6 +162,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate("Code", "الكود"),
             translate("Orders", "أوامر الشراء"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Share", "الحصة"),
             translate(`Avg Order (${currency})`, `متوسط أمر الشراء (${currency})`),
           ]}
           rows={bySupplier.map((row, index) => [
@@ -164,8 +171,22 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             row.supplierCode,
             String(row.orderCount),
             formatMoney(row.totalSpend),
+            formatShare(row.totalSpend, totalSupplierSpend),
             formatMoney(row.avgOrderValue),
           ])}
+          footerRow={
+            bySupplier.length === 0
+              ? undefined
+              : [
+                  "",
+                  translate("Total", "الإجمالي"),
+                  "",
+                  String(totalSupplierOrders),
+                  formatMoney(totalSupplierSpend),
+                  `${percentageFormatter.format(100)}%`,
+                  formatMoney(totalSupplierOrders > 0 ? totalSupplierSpend / totalSupplierOrders : 0),
+                ]
+          }
           monoColumnIndexes={[2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
@@ -222,7 +243,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             String(index + 1),
             row.mainCategoryTitle,
             formatMoney(row.totalSpend),
-            `${percentageFormatter.format(totalCategorySpend === 0 ? 0 : (row.totalSpend / totalCategorySpend) * 100)}%`,
+            formatShare(row.totalSpend, totalCategorySpend),
           ])}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
