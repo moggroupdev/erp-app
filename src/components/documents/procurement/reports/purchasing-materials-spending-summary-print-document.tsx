@@ -2,8 +2,10 @@ import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "../../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { formatCompactNumber } from "@/lib/helpers/format-compact-number";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
+import { chartNeutralColors, semanticPalette } from "@/lib/constants/color-palette";
 import { mapBaseQuantityMaterialRowForDisplay } from "@/lib/helpers/unit-conversion";
 import type {
   PurchasingMaterialsByMainCategory,
@@ -45,6 +47,173 @@ function formatPeriodLabel(period: string, locale: string, groupBy: GroupBy): st
 
   const date = new Date(Date.UTC(year, month - 1, 1));
   return date.toLocaleDateString(localeTag, { year: "numeric", month: "short", timeZone: "UTC" });
+}
+
+/** Even steps that stay at or above `maxValue`, matching a compact chart axis. */
+function niceAxisTicks(maxValue: number): number[] {
+  if (!(maxValue > 0)) return [0, 1];
+
+  const rough = maxValue / 4;
+  const magnitude = 10 ** Math.floor(Math.log10(rough));
+  const normalized = rough / magnitude;
+  const nice = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 2.5 ? 2.5 : normalized <= 5 ? 5 : 10;
+  const step = nice * magnitude;
+  const count = Math.ceil(maxValue / step - 1e-9);
+  return Array.from({ length: count + 1 }, (_, index) => step * index);
+}
+
+function monotoneLinePath(points: { x: number; y: number }[]): string {
+  if (points.length < 2) return "";
+
+  const slopes: number[] = [];
+  const widths: number[] = [];
+  for (let index = 0; index < points.length - 1; index++) {
+    widths[index] = points[index + 1].x - points[index].x;
+    slopes[index] = widths[index] === 0 ? 0 : (points[index + 1].y - points[index].y) / widths[index];
+  }
+
+  const tangents = points.map((_, index) => {
+    if (index === 0) return slopes[0];
+    if (index === points.length - 1) return slopes[slopes.length - 1];
+    if (slopes[index - 1] * slopes[index] <= 0) return 0;
+    return (slopes[index - 1] + slopes[index]) / 2;
+  });
+
+  for (let index = 0; index < slopes.length; index++) {
+    if (Math.abs(slopes[index]) < 1e-6) {
+      tangents[index] = 0;
+      tangents[index + 1] = 0;
+      continue;
+    }
+    const start = tangents[index] / slopes[index];
+    const end = tangents[index + 1] / slopes[index];
+    const magnitude = start * start + end * end;
+    if (magnitude > 9) {
+      const scale = 3 / Math.sqrt(magnitude);
+      tangents[index] = scale * start * slopes[index];
+      tangents[index + 1] = scale * end * slopes[index];
+    }
+  }
+
+  let path = `M ${points[0].x} ${points[0].y}`;
+  for (let index = 0; index < points.length - 1; index++) {
+    const width = widths[index];
+    const controlStartX = points[index].x + width / 3;
+    const controlStartY = points[index].y + (tangents[index] * width) / 3;
+    const controlEndX = points[index + 1].x - width / 3;
+    const controlEndY = points[index + 1].y - (tangents[index + 1] * width) / 3;
+    path += ` C ${controlStartX} ${controlStartY}, ${controlEndX} ${controlEndY}, ${points[index + 1].x} ${points[index + 1].y}`;
+  }
+  return path;
+}
+
+function axisCaption(period: string, locale: string, groupBy: GroupBy): { primary: string; secondary?: string } {
+  const parts = parsePeriodParts(period);
+  if (!parts) return { primary: period };
+
+  const { year, month } = parts;
+  const localeTag = locale === "ar" ? "ar-EG" : "en-US";
+  const date = new Date(Date.UTC(year, month - 1, 1));
+  const yearLabel = date.toLocaleDateString(localeTag, { year: "numeric", timeZone: "UTC" });
+
+  if (groupBy === "year") return { primary: yearLabel };
+
+  if (groupBy === "quarter") {
+    const quarter = Math.ceil(month / 3) as 1 | 2 | 3 | 4;
+    return {
+      primary: locale === "ar" ? ARABIC_QUARTER_LABELS[quarter] : `Q${quarter}`,
+      secondary: yearLabel,
+    };
+  }
+
+  return {
+    primary: date.toLocaleDateString(localeTag, { month: "short", timeZone: "UTC" }),
+    secondary: yearLabel,
+  };
+}
+
+function SpendingTrendPrintChart({
+  data,
+  groupBy,
+  locale,
+}: {
+  data: PurchasingMaterialsByPeriod[];
+  groupBy: GroupBy;
+  locale: string;
+}) {
+  if (data.length === 0) return null;
+
+  const isRtl = locale === "ar";
+  const width = 720;
+  const labelStep = data.length <= 14 ? 1 : data.length <= 28 ? 2 : Math.ceil(data.length / 14);
+  const plotTop = 16;
+  const plotHeight = 168;
+  const plotBottom = plotTop + plotHeight;
+  const height = plotBottom + 46;
+  const axisWidth = 50;
+  const edgePad = 36;
+  const plotLeft = isRtl ? edgePad : axisWidth;
+  const plotRight = isRtl ? width - axisWidth : width - edgePad;
+  const plotWidth = plotRight - plotLeft;
+
+  const ticks = niceAxisTicks(Math.max(...data.map((row) => row.totalSpend), 0));
+  const yMax = ticks[ticks.length - 1] || 1;
+  const lineColor = semanticPalette.haze[600];
+  const points = data.map((row, index) => {
+    const slot = data.length === 1 ? 0.5 : index / (data.length - 1);
+    const visualSlot = isRtl ? 1 - slot : slot;
+    return {
+      x: plotLeft + visualSlot * plotWidth,
+      y: plotBottom - (row.totalSpend / yMax) * plotHeight,
+      caption: axisCaption(row.period, locale, groupBy),
+      showLabel: index === 0 || index === data.length - 1 || index % labelStep === 0,
+    };
+  });
+
+  return (
+    <figure className="break-inside-avoid">
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" style={{ direction: "ltr" }}>
+        {ticks.map((tick) => {
+          const y = plotBottom - (tick / yMax) * plotHeight;
+          return (
+            <g key={tick}>
+              <line x1={plotLeft} x2={plotRight} y1={y} y2={y} stroke={chartNeutralColors[2]} strokeDasharray="3 3" />
+              <text
+                x={isRtl ? plotRight + 8 : plotLeft - 8}
+                y={y}
+                textAnchor={isRtl ? "start" : "end"}
+                dominantBaseline="middle"
+                fontSize={11}
+                fill={chartNeutralColors[0]}
+                direction="ltr"
+              >
+                {formatCompactNumber(tick)}
+              </text>
+            </g>
+          );
+        })}
+        <line x1={plotLeft} x2={plotRight} y1={plotBottom} y2={plotBottom} stroke={chartNeutralColors[1]} />
+        <path d={monotoneLinePath(points)} fill="none" stroke={lineColor} strokeWidth={2} strokeLinejoin="round" />
+        {points.map((point, index) => (
+          <g key={index}>
+            <circle cx={point.x} cy={point.y} r={4} fill={lineColor} />
+            {point.showLabel && (
+              <text x={point.x} y={plotBottom + 16} textAnchor="middle" fontSize={9} fill={chartNeutralColors[0]}>
+                <tspan x={point.x} dy={0}>
+                  {point.caption.primary}
+                </tspan>
+                {point.caption.secondary && (
+                  <tspan x={point.x} dy={12}>
+                    {point.caption.secondary}
+                  </tspan>
+                )}
+              </text>
+            )}
+          </g>
+        ))}
+      </svg>
+    </figure>
+  );
 }
 
 export default function PurchasingMaterialsSpendingSummaryPrintDocument({
@@ -126,12 +295,10 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Value by Period", "القيمة حسب الفترة")}
-          subtitle={translate(
-            "Total value, order count, and average order value per period.",
-            "إجمالي القيمة وعدد أوامر الشراء ومتوسط قيمة أمر الشراء لكل فترة.",
-          )}
+          title={translate("Value Trend", "اتجاه القيمة")}
+          subtitle={translate("Total value per period across purchase orders.", "إجمالي القيمة لكل فترة عبر أوامر الشراء.")}
         />
+        <SpendingTrendPrintChart data={byPeriod} groupBy={groupBy} locale={locale} />
         <PrintTable
           headers={[
             translate("Period", "الفترة"),
@@ -281,7 +448,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate("Material", "المادة"),
             translate("Code", "الكود"),
             translate("Unit", "الوحدة"),
-            translate("Qty Ordered", "الكمية المطلوبة"),
+            translate("Qty Ordered", "الكمية"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
             translate("Share", "الحصة"),
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
