@@ -149,6 +149,31 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
+          title={translate("Value by Category", "القيمة حسب الفئة")}
+          subtitle={translate(
+            "Purchase value grouped by main material category, sorted from highest to lowest.",
+            "قيمة المشتريات مجمّعة حسب الفئة الرئيسية للمواد، مرتبة من الأعلى إلى الأدنى.",
+          )}
+        />
+        <PrintTable
+          headers={[
+            "#",
+            translate("Main Category", "الفئة الرئيسية"),
+            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Share", "الحصة"),
+          ]}
+          rows={byMainCategory.map((row, index) => [
+            String(index + 1),
+            row.mainCategoryTitle,
+            formatMoney(row.totalSpend),
+            formatShare(row.totalSpend, totalCategorySpend),
+          ])}
+          emptyLabel={translate("No data available", "لا توجد بيانات")}
+        />
+      </section>
+
+      <section className="flex flex-col gap-2.5">
+        <PrintSectionHeading
           title={translate("Suppliers by Value", "الموردون حسب القيمة")}
           subtitle={translate(
             "Suppliers ranked by total purchase order value.",
@@ -220,31 +245,6 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             formatMoney(row.invoiceTotalPurchases),
           ])}
           monoColumnIndexes={[1, 2]}
-          emptyLabel={translate("No data available", "لا توجد بيانات")}
-        />
-      </section>
-
-      <section className="flex flex-col gap-2.5">
-        <PrintSectionHeading
-          title={translate("Value by Category", "القيمة حسب الفئة")}
-          subtitle={translate(
-            "Purchase value grouped by main material category, sorted from highest to lowest.",
-            "قيمة المشتريات مجمّعة حسب الفئة الرئيسية للمواد، مرتبة من الأعلى إلى الأدنى.",
-          )}
-        />
-        <PrintTable
-          headers={[
-            "#",
-            translate("Main Category", "الفئة الرئيسية"),
-            translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Percentage", "النسبة"),
-          ]}
-          rows={byMainCategory.map((row, index) => [
-            String(index + 1),
-            row.mainCategoryTitle,
-            formatMoney(row.totalSpend),
-            formatShare(row.totalSpend, totalCategorySpend),
-          ])}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>
