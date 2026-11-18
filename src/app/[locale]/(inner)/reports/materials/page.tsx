@@ -62,6 +62,21 @@ export default function Page() {
               }}
             />
           </PermissionGuard>
+          <PermissionGuard permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMIT_SUMMARY_REPORT}>
+            <ReportLinkCard
+              report={{
+                label: {
+                  en: "Legacy Issue Permit Summary",
+                  ar: "ملخص أذونات الصرف المرحلية",
+                },
+                description: {
+                  en: "Permit-wide volume, breakdowns, data-quality gaps, and recent notes across legacy issue permits.",
+                  ar: "حجم أذونات الصرف المرحلية وتفصيلاتها وفجوات جودة البيانات وأحدث الملاحظات.",
+                },
+                href: "/reports/materials/legacy-issue-permit-summary",
+              }}
+            />
+          </PermissionGuard>
           <PermissionGuard permission={PERMISSIONS.READ_MATERIAL_LEGACY_ISSUE_PERMIT_HISTORY_REPORT}>
             <ReportLinkCard
               report={{

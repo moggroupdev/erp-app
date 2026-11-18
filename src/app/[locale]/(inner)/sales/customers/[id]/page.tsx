@@ -27,6 +27,7 @@ import AddressCard from "@/components/global/address-card";
 import ContactPersonModal from "@/components/global/data-modals/contact-person-modal";
 import ContactPersonCard from "@/components/global/contact-person-card";
 import CustomerDetails from "./components/customer-details";
+import CustomerContractReviews from "./components/contract-reviews";
 
 const PAGE_TITLE = { en: "Customer Data", ar: "ملف العميل" };
 
@@ -37,6 +38,7 @@ export default function Page() {
   const queryClient = useQueryClient();
 
   const canUpdateCustomer = useHasPermission(PERMISSIONS.UPDATE_CUSTOMER);
+  const canReadContracts = useHasPermission(PERMISSIONS.READ_CONTRACTS);
 
   const customerQuery = useQuery({
     queryKey: queryKeys.customers.detail(id),
@@ -82,6 +84,9 @@ export default function Page() {
     customerQuery.refetch();
     addressesQuery.refetch();
     contactPersonsQuery.refetch();
+    if (canReadContracts) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.contracts.lists() });
+    }
   }
 
   // ========================= MODALS =========================
@@ -246,6 +251,8 @@ export default function Page() {
                 </div>
               )}
             </section>
+
+            {canReadContracts && <CustomerContractReviews customerId={customer.id} />}
           </>
         )
       )}

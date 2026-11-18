@@ -3,6 +3,7 @@ import type {
   MaterialsCategoryStats,
   MaterialsInventorySummary,
   MaterialsIssuePermitHistory,
+  LegacyIssuePermitSummary,
   PurchasingMaterialsCategoryStats,
   PurchasingMaterialsSpendingSummary,
   PurchasingMaterialsPriceHistory,
@@ -18,13 +19,7 @@ import type {
 
 const reportsApi = {
   materials: {
-    async getInventorySummary({
-      privateRequest,
-      signal,
-    }: {
-      privateRequest: PrivateRequest;
-      signal?: AbortSignal;
-    }) {
+    async getInventorySummary({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
       return await privateRequest<MaterialsInventorySummary>({
         url: "reports/materials/inventory-summary",
         signal,
@@ -43,6 +38,24 @@ const reportsApi = {
       return await privateRequest<MaterialsCategoryStats>({
         url: "reports/materials/category-stats",
         params: { mainCategoryId },
+        signal,
+      });
+    },
+
+    async getLegacyIssuePermitSummary({
+      privateRequest,
+      from,
+      to,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      from?: string;
+      to?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<LegacyIssuePermitSummary>({
+        url: "reports/materials/legacy-issue-permit-summary",
+        params: { from, to },
         signal,
       });
     },

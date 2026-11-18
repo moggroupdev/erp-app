@@ -87,8 +87,7 @@ export const queryKeys = {
     typeChangeImpact: (code: string, targetType: string | null) =>
       [...queryKeys.materials.detail(code), "type-change-impact", targetType] as const,
     changeHistories: (code: string) => [...queryKeys.materials.detail(code), "change-history"] as const,
-    changeHistory: (code: string, page: number) =>
-      [...queryKeys.materials.changeHistories(code), page] as const,
+    changeHistory: (code: string, page: number) => [...queryKeys.materials.changeHistories(code), page] as const,
   },
   mmBoms: {
     all: ["mm-boms"] as const,
@@ -169,6 +168,8 @@ export const queryKeys = {
       inventorySummary: () => [...queryKeys.reports.materials.all, "inventory-summary"] as const,
       categoryStats: (mainCategoryId: string) =>
         [...queryKeys.reports.materials.all, "category-stats", mainCategoryId] as const,
+      legacyIssuePermitSummary: (filters?: { from?: string; to?: string }) =>
+        [...queryKeys.reports.materials.all, "legacy-issue-permit-summary", filters] as const,
       issuePermitHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.materials.all, "issue-permit-history", materialCode, filters] as const,
     },
@@ -184,11 +185,7 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "subcategory-stats", subCategoryId, filters] as const,
       supplierStats: (supplierId: string, filters?: { from?: string; to?: string; groupBy?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "supplier-stats", supplierId, filters] as const,
-      supplierComparison: (
-        supplierAId: string,
-        supplierBId: string,
-        filters?: { from?: string; to?: string },
-      ) =>
+      supplierComparison: (supplierAId: string, supplierBId: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "supplier-comparison", supplierAId, supplierBId, filters] as const,
       totalAmountMismatches: (filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "total-amount-mismatches", filters] as const,
@@ -196,10 +193,7 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "price-outliers", filters] as const,
       averagePriceGaps: (filters?: { from?: string; to?: string; threshold?: number }) =>
         [...queryKeys.reports.purchasingMaterials.all, "average-price-gaps", filters] as const,
-      requisitionFollowUp: (
-        productionSubDepartment: string,
-        filters?: { from?: string; to?: string },
-      ) =>
+      requisitionFollowUp: (productionSubDepartment: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "requisition-follow-up", productionSubDepartment, filters] as const,
       requisitionHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "requisition-history", materialCode, filters] as const,

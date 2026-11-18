@@ -10,8 +10,17 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import type { PurchasingMaterialsTopOrder } from "@/types/reports";
 import ReportCard from "./report-card";
 
-export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopOrder[] }) {
+export default function TopOrdersTable({ data, grandTotal }: { data: PurchasingMaterialsTopOrder[]; grandTotal: number }) {
   const { locale, translate, translation } = useI18n();
+  const totalAmount = data.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  function formatShare(value: number) {
+    return `${percentageFormatter.format(grandTotal === 0 ? 0 : (value / grandTotal) * 100)}%`;
+  }
 
   return (
     <ReportCard
@@ -39,6 +48,7 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
                 <Table.Th className="text-gray-600">
                   {translate(`Amount (${translation.currency})`, `المبلغ (${translation.currency})`)}
                 </Table.Th>
+                <Table.Th className="text-gray-600">{translate("Share", "الحصة")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -97,9 +107,22 @@ export default function TopOrdersTable({ data }: { data: PurchasingMaterialsTopO
                     )}
                   </Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.invoiceTotalPurchases)}</Table.Td>
+                  <Table.Td>{formatShare(row.invoiceTotalPurchases)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th>{formatMoney(totalAmount)}</Table.Th>
+                <Table.Th>{formatShare(totalAmount)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}

@@ -13,9 +13,20 @@ import ReportCard from "./report-card";
 export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsBySupplier[] }) {
   const { translate, translation } = useI18n();
 
+  const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalOrders = data.reduce((sum, row) => sum + row.orderCount, 0);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  function formatShare(value: number) {
+    return `${percentageFormatter.format(totalSpend === 0 ? 0 : (value / totalSpend) * 100)}%`;
+  }
+
   return (
     <ReportCard
-      title={translate("Top Suppliers by Value", "أعلى الموردين قيمة")}
+      title={translate("Suppliers by Value", "الموردون حسب القيمة")}
       description={translate(
         "Suppliers ranked by total purchase order value.",
         "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
@@ -37,6 +48,7 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
                 <Table.Th className="text-gray-600">
                   {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
+                <Table.Th className="text-gray-600">{translate("Share", "الحصة")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Avg Order (${translation.currency})`, `متوسط أمر الشراء (${translation.currency})`)}
                 </Table.Th>
@@ -63,10 +75,22 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
                   </Table.Td>
                   <Table.Td>{row.orderCount}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
+                  <Table.Td>{formatShare(row.totalSpend)}</Table.Td>
                   <Table.Td>{formatMoney(row.avgOrderValue)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th>{totalOrders}</Table.Th>
+                <Table.Th>{formatMoney(totalSpend)}</Table.Th>
+                <Table.Th>{percentageFormatter.format(100)}%</Table.Th>
+                <Table.Th>{formatMoney(totalOrders > 0 ? totalSpend / totalOrders : 0)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}
