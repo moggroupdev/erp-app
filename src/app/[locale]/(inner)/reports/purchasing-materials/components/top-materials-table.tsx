@@ -21,14 +21,25 @@ const BASE_UNIT_VALUE = "__base__";
 
 export default function TopMaterialsTable({
   data,
+  grandTotal,
   displayUnit,
   onDisplayUnitChange,
 }: {
   data: PurchasingMaterialsByMaterial[];
+  grandTotal: number;
   displayUnit: MaterialUnit | null;
   onDisplayUnitChange: (unit: MaterialUnit | null) => void;
 }) {
   const { locale, translate, translation } = useI18n();
+  const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  function formatShare(value: number) {
+    return `${percentageFormatter.format(grandTotal === 0 ? 0 : (value / grandTotal) * 100)}%`;
+  }
 
   return (
     <ReportCard
@@ -75,6 +86,7 @@ export default function TopMaterialsTable({
                 <Table.Th className="text-gray-600">
                   {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
+                <Table.Th className="text-gray-600">{translate("Share", "الحصة")}</Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Avg Unit Price (${translation.currency})`, `متوسط سعر الوحدة (${translation.currency})`)}
                 </Table.Th>
@@ -106,11 +118,24 @@ export default function TopMaterialsTable({
                     <Table.Td>{getMaterialUnitLabel(unit, locale)}</Table.Td>
                     <Table.Td>{formatBaseQuantityForDisplay(row.totalQuantity, factor)}</Table.Td>
                     <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
+                    <Table.Td>{formatShare(row.totalSpend)}</Table.Td>
                     <Table.Td>{formatMoney(displayAvgUnitPrice)}</Table.Td>
                   </Table.Tr>
                 );
               })}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th>{formatMoney(totalSpend)}</Table.Th>
+                <Table.Th>{formatShare(totalSpend)}</Table.Th>
+                <Table.Th />
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}

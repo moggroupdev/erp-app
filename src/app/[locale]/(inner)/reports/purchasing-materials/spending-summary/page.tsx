@@ -158,9 +158,10 @@ export default function Page() {
               <SpendingTrendChart data={data.byPeriod} groupBy={groupBy} />
               <SpendingByMainCategoryTable data={data.byMainCategory} />
               <TopSuppliersTable data={data.bySupplier} />
-              <TopOrdersTable data={data.topOrders} />
+              <TopOrdersTable data={data.topOrders} grandTotal={data.overview.totalSpend} />
               <TopMaterialsTable
                 data={data.byMaterial}
+                grandTotal={data.overview.totalSpend}
                 displayUnit={materialsDisplayUnit}
                 onDisplayUnitChange={setMaterialsDisplayUnit}
               />

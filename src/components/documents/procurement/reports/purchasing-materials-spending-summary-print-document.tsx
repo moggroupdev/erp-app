@@ -83,6 +83,8 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
   const totalCategorySpend = byMainCategory.reduce((sum, row) => sum + row.totalSpend, 0);
   const totalSupplierSpend = bySupplier.reduce((sum, row) => sum + row.totalSpend, 0);
   const totalSupplierOrders = bySupplier.reduce((sum, row) => sum + row.orderCount, 0);
+  const totalTopOrderAmount = topOrders.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
+  const totalMaterialSpend = byMaterial.reduce((sum, row) => sum + row.totalSpend, 0);
 
   function formatShare(value: number, ofTotal: number) {
     return `${percentageFormatter.format(ofTotal === 0 ? 0 : (value / ofTotal) * 100)}%`;
@@ -234,6 +236,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate("Date", "التاريخ"),
             translate("Status", "الحالة"),
             translate(`Amount (${currency})`, `المبلغ (${currency})`),
+            translate("Share", "الحصة"),
           ]}
           rows={topOrders.map((row, index) => [
             String(index + 1),
@@ -243,7 +246,22 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             formatDate(row.createdAt, locale),
             row.completedAt ? translate("Completed", "مكتمل") : translate("Open", "مفتوح"),
             formatMoney(row.invoiceTotalPurchases),
+            formatShare(row.invoiceTotalPurchases, overview.totalSpend),
           ])}
+          footerRow={
+            topOrders.length === 0
+              ? undefined
+              : [
+                  "",
+                  translate("Total", "الإجمالي"),
+                  "",
+                  "",
+                  "",
+                  "",
+                  formatMoney(totalTopOrderAmount),
+                  formatShare(totalTopOrderAmount, overview.totalSpend),
+                ]
+          }
           monoColumnIndexes={[1, 2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
@@ -265,6 +283,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate("Unit", "الوحدة"),
             translate("Qty Ordered", "الكمية المطلوبة"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Share", "الحصة"),
             translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
           ]}
           rows={byMaterial.map((row, index) => {
@@ -277,9 +296,24 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
               getMaterialUnitLabel(unit, locale),
               formatBaseQuantityForDisplay(row.totalQuantity, factor),
               formatMoney(row.totalSpend),
+              formatShare(row.totalSpend, overview.totalSpend),
               formatMoney(displayAvgUnitPrice),
             ];
           })}
+          footerRow={
+            byMaterial.length === 0
+              ? undefined
+              : [
+                  "",
+                  translate("Total", "الإجمالي"),
+                  "",
+                  "",
+                  "",
+                  formatMoney(totalMaterialSpend),
+                  formatShare(totalMaterialSpend, overview.totalSpend),
+                  "",
+                ]
+          }
           monoColumnIndexes={[2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
