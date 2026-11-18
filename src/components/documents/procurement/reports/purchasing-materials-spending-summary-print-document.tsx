@@ -143,7 +143,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
 
       <section className="flex flex-col gap-2.5">
         <PrintSectionHeading
-          title={translate("Top Suppliers by Value", "أعلى الموردين قيمة")}
+          title={translate("Suppliers by Value", "الموردون حسب القيمة")}
           subtitle={translate(
             "Suppliers ranked by total purchase order value.",
             "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",

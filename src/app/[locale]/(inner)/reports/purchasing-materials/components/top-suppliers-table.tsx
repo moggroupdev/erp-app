@@ -15,7 +15,7 @@ export default function TopSuppliersTable({ data }: { data: PurchasingMaterialsB
 
   return (
     <ReportCard
-      title={translate("Top Suppliers by Value", "أعلى الموردين قيمة")}
+      title={translate("Suppliers by Value", "الموردون حسب القيمة")}
       description={translate(
         "Suppliers ranked by total purchase order value.",
         "الموردون مرتبون حسب إجمالي قيمة أوامر الشراء.",
