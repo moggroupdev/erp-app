@@ -1,6 +1,7 @@
 "use client";
 
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Table } from "@mantine/core";
 import { TrendingUp } from "lucide-react";
 import { localeDirections } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -27,6 +28,16 @@ export default function AmountTrendChart({
     name: formatPeriodLabel(row.period, locale, groupBy),
     totalAmount: row.totalAmount,
   }));
+  const totalInvoices = data.reduce((sum, row) => sum + row.invoiceCount, 0);
+  const totalAmount = data.reduce((sum, row) => sum + row.totalAmount, 0);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  function formatShare(value: number) {
+    return `${percentageFormatter.format(totalAmount === 0 ? 0 : (value / totalAmount) * 100)}%`;
+  }
 
   return (
     <ReportCard
@@ -66,6 +77,38 @@ export default function AmountTrendChart({
               />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      )}
+      {chartData.length > 0 && (
+        <div className="mt-6 overflow-x-auto rounded-xl">
+          <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
+            <Table.Thead className="bg-gray-50">
+              <Table.Tr>
+                <Table.Th className="text-gray-600">{translate("Period", "الفترة")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Invoices", "الفواتير")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate(`Total (${currency})`, `الإجمالي (${currency})`)}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {data.map((row) => (
+                <Table.Tr key={row.period} className="text-gray-600">
+                  <Table.Td className="font-medium text-gray-800">{formatPeriodLabel(row.period, locale, groupBy)}</Table.Td>
+                  <Table.Td>{row.invoiceCount}</Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalAmount)}</Table.Td>
+                  <Table.Td>{formatShare(row.totalAmount)}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th>{totalInvoices}</Table.Th>
+                <Table.Th>{formatMoney(totalAmount)}</Table.Th>
+                <Table.Th>{formatShare(totalAmount)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
+          </Table>
         </div>
       )}
     </ReportCard>

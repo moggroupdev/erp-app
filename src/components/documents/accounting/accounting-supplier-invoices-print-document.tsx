@@ -54,6 +54,17 @@ export default function AccountingSupplierInvoicesPrintDocument({
     });
   }
 
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const totalPeriodInvoices = byPeriod.reduce((sum, row) => sum + row.invoiceCount, 0);
+  const totalPeriodAmount = byPeriod.reduce((sum, row) => sum + row.totalAmount, 0);
+
+  function formatShare(value: number) {
+    return `${percentageFormatter.format(totalPeriodAmount === 0 ? 0 : (value / totalPeriodAmount) * 100)}%`;
+  }
+
   const invoiceTotals = invoices.reduce(
     (acc, row) => ({
       totalPurchases: acc.totalPurchases + (row.totalPurchases ?? 0),
@@ -164,17 +175,20 @@ export default function AccountingSupplierInvoicesPrintDocument({
             translate("Period", "الفترة"),
             translate("Invoices", "الفواتير"),
             translate(`Total (${currency})`, `الإجمالي (${currency})`),
+            translate("Percentage", "النسبة"),
           ]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
           rows={byPeriod.map((row) => [
             formatPeriodLabel(row.period, locale, groupBy),
             String(row.invoiceCount),
             formatMoney(row.totalAmount),
+            formatShare(row.totalAmount),
           ])}
           footerRow={[
             translate("Total", "الإجمالي"),
-            String(byPeriod.reduce((sum, row) => sum + row.invoiceCount, 0)),
-            formatMoney(byPeriod.reduce((sum, row) => sum + row.totalAmount, 0)),
+            String(totalPeriodInvoices),
+            formatMoney(totalPeriodAmount),
+            formatShare(totalPeriodAmount),
           ]}
         />
       </section>
