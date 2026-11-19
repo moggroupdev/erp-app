@@ -13,7 +13,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Menu } from "@mantine/core";
-import { Ban, MapPin, Pencil, Undo2, UserRound } from "lucide-react";
+import { Ban, MapPin, Merge, Pencil, Undo2, UserRound } from "lucide-react";
 import BlacklistConfirmModal from "@/components/ui/blacklist-confirm-modal";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
@@ -28,6 +28,7 @@ import ContactPersonModal from "@/components/global/data-modals/contact-person-m
 import ContactPersonCard from "@/components/global/contact-person-card";
 import CustomerDetails from "./components/customer-details";
 import CustomerContractReviews from "./components/contract-reviews";
+import MergeCustomerModal from "./components/merge-customer-modal";
 
 const PAGE_TITLE = { en: "Customer Data", ar: "ملف العميل" };
 
@@ -38,6 +39,7 @@ export default function Page() {
   const queryClient = useQueryClient();
 
   const canUpdateCustomer = useHasPermission(PERMISSIONS.UPDATE_CUSTOMER);
+  const canMergeCustomers = useHasPermission(PERMISSIONS.MERGE_CUSTOMERS);
   const canReadContracts = useHasPermission(PERMISSIONS.READ_CONTRACTS);
 
   const customerQuery = useQuery({
@@ -94,6 +96,7 @@ export default function Page() {
   const [updateModalOpened, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
   const [addressModalOpened, { open: openAddressModal, close: closeAddressModal }] = useDisclosure(false);
   const [contactModalOpened, { open: openContactModal, close: closeContactModal }] = useDisclosure(false);
+  const [mergeModalOpened, { open: openMergeModal, close: closeMergeModal }] = useDisclosure(false);
   const [blacklistConfirmOpened, { open: openBlacklistConfirm, close: closeBlacklistConfirm }] = useDisclosure(false);
 
   function handleOpenBlacklistConfirm() {
@@ -129,6 +132,11 @@ export default function Page() {
               {customer && canEditCustomer && (
                 <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
                   {translate("Edit customer", "تعديل العميل")}
+                </Menu.Item>
+              )}
+              {customer && canMergeCustomers && (
+                <Menu.Item leftSection={<Merge size={14} />} onClick={openMergeModal}>
+                  {translate("Merge duplicate into this customer", "دمج عميل مكرر في هذا العميل")}
                 </Menu.Item>
               )}
               {customer && canUpdateCustomer && (
@@ -258,15 +266,18 @@ export default function Page() {
       )}
 
       {customer && (
-        <BlacklistConfirmModal
-          opened={blacklistConfirmOpened}
-          onClose={handleCloseBlacklistConfirm}
-          action={isBlacklisted ? "remove" : "add"}
-          name={customer.name}
-          onConfirm={() => blacklistMutation.mutate()}
-          isPending={blacklistMutation.isPending}
-          error={blacklistMutation.error ? getErrorMessage(locale, blacklistMutation.error) : undefined}
-        />
+        <>
+          <MergeCustomerModal opened={mergeModalOpened} close={closeMergeModal} customer={customer} />
+          <BlacklistConfirmModal
+            opened={blacklistConfirmOpened}
+            onClose={handleCloseBlacklistConfirm}
+            action={isBlacklisted ? "remove" : "add"}
+            name={customer.name}
+            onConfirm={() => blacklistMutation.mutate()}
+            isPending={blacklistMutation.isPending}
+            error={blacklistMutation.error ? getErrorMessage(locale, blacklistMutation.error) : undefined}
+          />
+        </>
       )}
     </LayoutBox>
   );

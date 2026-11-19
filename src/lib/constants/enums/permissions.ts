@@ -28,6 +28,7 @@ export const PERMISSION_VALUES = [
   "add_customer",
   "read_customers",
   "update_customer",
+  "merge_customers",
   "read_contracts",
   "add_legacy_contract",
   "update_legacy_contract",
@@ -410,6 +411,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Customer",
       ar: "تحديث العميل",
+    },
+  },
+  merge_customers: {
+    value: "merge_customers",
+    label: {
+      en: "Merge Customers",
+      ar: "دمج العملاء",
     },
   },
   read_inquiries: {
@@ -983,6 +991,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_customer",
       "read_customers",
       "update_customer",
+      "merge_customers",
       "read_contracts",
       "add_legacy_contract",
       "update_legacy_contract",

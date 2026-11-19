@@ -9,6 +9,8 @@ import type {
   UpdateCustomerDto,
   CreateCustomerAddressDto,
   CreateCustomerContactPersonDto,
+  CustomerMergePreview,
+  MergeCustomerDto,
 } from "@/types/customer";
 
 const customersApi = {
@@ -120,6 +122,38 @@ const customersApi = {
       method: "PUT",
       url: `customers/${id}/contact-persons/${contactPersonId}/primary`,
     });
+  },
+
+  // ========================= Merge =========================
+
+  async previewMerge({
+    privateRequest,
+    id,
+    removeId,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    removeId: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<CustomerMergePreview>({
+      url: `customers/${id}/merge-preview`,
+      params: { removeId },
+      signal,
+    });
+  },
+
+  async merge({
+    privateRequest,
+    id,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    id: string;
+    dto: MergeCustomerDto;
+  }) {
+    return await privateRequest<Customer>({ method: "POST", url: `customers/${id}/merge`, data: dto });
   },
 };
 

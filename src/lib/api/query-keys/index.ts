@@ -61,6 +61,8 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.customers.details(), id] as const,
     addresses: (id: string) => [...queryKeys.customers.detail(id), "addresses"] as const,
     contactPersons: (id: string) => [...queryKeys.customers.detail(id), "contact-persons"] as const,
+    mergePreview: (id: string, removeId: string | null) =>
+      [...queryKeys.customers.detail(id), "merge-preview", removeId] as const,
   },
   contracts: {
     all: ["contracts"] as const,
