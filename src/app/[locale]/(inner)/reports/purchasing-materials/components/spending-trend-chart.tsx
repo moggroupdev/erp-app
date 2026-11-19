@@ -1,6 +1,7 @@
 "use client";
 
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Table } from "@mantine/core";
 import { TrendingUp } from "lucide-react";
 import { localeDirections } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/hooks";
@@ -45,7 +46,15 @@ function formatPeriodLabel(period: string, locale: string, groupBy: GroupBy): st
   return date.toLocaleDateString(localeTag, { year: "numeric", month: "short", timeZone: "UTC" });
 }
 
-export default function SpendingTrendChart({ data, groupBy }: { data: PurchasingMaterialsByPeriod[]; groupBy: GroupBy }) {
+export default function SpendingTrendChart({
+  data,
+  groupBy,
+  showTable = false,
+}: {
+  data: PurchasingMaterialsByPeriod[];
+  groupBy: GroupBy;
+  showTable?: boolean;
+}) {
   const { locale, translate, translation } = useI18n();
   const dir = localeDirections[locale];
   const isRtl = dir === "rtl";
@@ -71,6 +80,16 @@ export default function SpendingTrendChart({ data, groupBy }: { data: Purchasing
     totalSpend: d.totalSpend,
     orderCount: d.orderCount,
   }));
+  const totalSpend = data.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalOrders = data.reduce((sum, row) => sum + row.orderCount, 0);
+  const percentageFormatter = new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  function formatPercentage(value: number) {
+    return `${percentageFormatter.format(totalSpend === 0 ? 0 : (value / totalSpend) * 100)}%`;
+  }
 
   return (
     <ReportCard
@@ -108,6 +127,45 @@ export default function SpendingTrendChart({ data, groupBy }: { data: Purchasing
           </LineChart>
         </ResponsiveContainer>
       </div>
+      {showTable && (
+        <div className="mt-6 overflow-x-auto rounded-xl">
+          <Table className="text-nowrap" verticalSpacing="sm" highlightOnHover>
+            <Table.Thead className="bg-gray-50">
+              <Table.Tr>
+                <Table.Th className="text-gray-600">{translate("Period", "الفترة")}</Table.Th>
+                <Table.Th className="text-gray-600">
+                  {translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`)}
+                </Table.Th>
+                <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Orders", "أوامر الشراء")}</Table.Th>
+                <Table.Th className="text-gray-600">
+                  {translate(`Avg Order (${currency})`, `متوسط أمر الشراء (${currency})`)}
+                </Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {data.map((row) => (
+                <Table.Tr key={row.period} className="text-gray-600">
+                  <Table.Td className="font-medium text-gray-800">{formatPeriodLabel(row.period, locale, groupBy)}</Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">{formatMoney(row.totalSpend)}</Table.Td>
+                  <Table.Td>{formatPercentage(row.totalSpend)}</Table.Td>
+                  <Table.Td>{row.orderCount}</Table.Td>
+                  <Table.Td>{formatMoney(row.avgOrderValue)}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th>{formatMoney(totalSpend)}</Table.Th>
+                <Table.Th>{percentageFormatter.format(100)}%</Table.Th>
+                <Table.Th>{totalOrders}</Table.Th>
+                <Table.Th>{formatMoney(totalOrders > 0 ? totalSpend / totalOrders : 0)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
+          </Table>
+        </div>
+      )}
     </ReportCard>
   );
 }

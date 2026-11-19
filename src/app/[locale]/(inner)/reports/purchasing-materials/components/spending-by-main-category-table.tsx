@@ -40,7 +40,7 @@ export default function SpendingByMainCategoryTable({ data }: { data: Purchasing
                 <Table.Th className="text-gray-600">
                   {translate(`Total Value (${translation.currency})`, `إجمالي القيمة (${translation.currency})`)}
                 </Table.Th>
-                <Table.Th className="text-gray-600">{translate("Share", "الحصة")}</Table.Th>
+                <Table.Th className="text-gray-600">{translate("Percentage", "النسبة")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>

@@ -155,7 +155,7 @@ export default function Page() {
           data && (
             <div className="flex flex-col gap-6">
               <OverviewStats overview={data.overview} />
-              <SpendingTrendChart data={data.byPeriod} groupBy={groupBy} />
+              <SpendingTrendChart data={data.byPeriod} groupBy={groupBy} showTable />
               <SpendingByMainCategoryTable data={data.byMainCategory} />
               <TopSuppliersTable data={data.bySupplier} />
               <TopOrdersTable data={data.topOrders} grandTotal={data.overview.totalSpend} />

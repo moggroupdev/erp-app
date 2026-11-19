@@ -311,12 +311,14 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
           headers={[
             translate("Period", "الفترة"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
+            translate("Percentage", "النسبة"),
             translate("Orders", "أوامر الشراء"),
             translate(`Avg Order (${currency})`, `متوسط أمر الشراء (${currency})`),
           ]}
           rows={byPeriod.map((row) => [
             formatPeriodLabel(row.period, locale, groupBy),
             formatMoney(row.totalSpend),
+            formatShare(row.totalSpend, totalPeriodSpend),
             String(row.orderCount),
             formatMoney(row.avgOrderValue),
           ])}
@@ -326,6 +328,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
               : [
                   translate("Total", "الإجمالي"),
                   formatMoney(totalPeriodSpend),
+                  `${percentageFormatter.format(100)}%`,
                   String(totalPeriodOrders),
                   formatMoney(totalPeriodOrders > 0 ? totalPeriodSpend / totalPeriodOrders : 0),
                 ]
@@ -347,7 +350,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             "#",
             translate("Main Category", "الفئة الرئيسية"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Share", "الحصة"),
+            translate("Percentage", "النسبة"),
           ]}
           rows={byMainCategory.map((row, index) => [
             String(index + 1),
@@ -379,7 +382,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate("Code", "الكود"),
             translate("Orders", "أوامر الشراء"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Share", "الحصة"),
+            translate("Percentage", "النسبة"),
             translate(`Avg Order (${currency})`, `متوسط أمر الشراء (${currency})`),
           ]}
           rows={bySupplier.map((row, index) => [
@@ -426,7 +429,7 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate("Date", "التاريخ"),
             translate("Status", "الحالة"),
             translate(`Amount (${currency})`, `المبلغ (${currency})`),
-            translate("Share", "الحصة"),
+            translate("Percentage", "النسبة"),
           ]}
           rows={topOrders.map((row, index) => [
             String(index + 1),
@@ -473,8 +476,8 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             translate("Unit", "الوحدة"),
             translate("Qty Ordered", "الكمية"),
             translate(`Total Value (${currency})`, `إجمالي القيمة (${currency})`),
-            translate("Share", "الحصة"),
-            translate(`Avg Unit Price (${currency})`, `متوسط سعر الوحدة (${currency})`),
+            translate("Percentage", "النسبة"),
+            translate(`Avg Unit Price (${currency})`, `متوسط السعر (${currency})`),
           ]}
           rows={byMaterial.map((row, index) => {
             const { unit, factor, displayAvgUnitPrice } = mapBaseQuantityMaterialRowForDisplay(row, materialsDisplayUnit);
