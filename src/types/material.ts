@@ -54,6 +54,12 @@ export type MaterialWithCreatorAndUnitConversions = MaterialWithCreator & {
   unitConversions: MaterialUnitConversionSummary[];
 };
 
+export type DeletedMaterial = MaterialWithUnitConversions & {
+  deletedAt: string;
+  deletedBy: string;
+  deletedByName: string | null;
+};
+
 /** List rows or detail fetches in material selection flows. */
 export type MaterialWithUnitConversionsSelection = MaterialWithUnitConversions | MaterialWithCreatorAndUnitConversions;
 

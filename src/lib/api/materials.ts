@@ -5,6 +5,7 @@ import type {
   MaterialUnitConversion,
   MaterialWithUnitConversions,
   MaterialWithCreatorAndUnitConversions,
+  DeletedMaterial,
   CreateMaterialDto,
   UpdateMaterialDto,
   CreateMaterialUnitConversionDto,
@@ -33,6 +34,18 @@ const materialsApi = {
     signal: AbortSignal;
   }) {
     return await privateRequest<PaginatedData<MaterialWithUnitConversions>>({ url: "materials", params, signal });
+  },
+
+  async listDeleted({
+    privateRequest,
+    params,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    params: Dictionary;
+    signal: AbortSignal;
+  }) {
+    return await privateRequest<PaginatedData<DeletedMaterial>>({ url: "materials/deleted", params, signal });
   },
 
   async listAllToPrint({
@@ -148,6 +161,10 @@ const materialsApi = {
     dto: DeleteMaterialDto;
   }) {
     return await privateRequest<void>({ method: "DELETE", url: `materials/${code}`, data: dto });
+  },
+
+  async restore({ privateRequest, code }: { privateRequest: PrivateRequest; code: string }) {
+    return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/restore` });
   },
 
   // ==================== UNITS ====================

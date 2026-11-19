@@ -82,6 +82,8 @@ export const queryKeys = {
     all: ["materials"] as const,
     lists: () => [...queryKeys.materials.all, "list"] as const,
     list: (filters: ListFilters) => [...queryKeys.materials.lists(), filters] as const,
+    deletedLists: () => [...queryKeys.materials.all, "deleted-list"] as const,
+    deletedList: (filters: ListFilters) => [...queryKeys.materials.deletedLists(), filters] as const,
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
     typeChangeImpact: (code: string, targetType: string | null) =>

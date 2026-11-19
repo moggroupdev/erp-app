@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import ProtectedLink from "@/components/ui/protected-link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useDisclosure } from "@mantine/hooks";
-import { useI18n } from "@/lib/i18n/hooks";
+import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
 import useHandlePreviousFilters from "@/hooks/use-handle-previous-filters";
@@ -26,7 +27,7 @@ import { toDisplayUnitPrice } from "@/lib/helpers/unit-conversion";
 import { type Material, type MaterialWithUnitConversions } from "@/types/material";
 import { Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Pencil, Plus, Printer, Search, X } from "lucide-react";
+import { Archive, Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import { CategoryTreeMenuItem } from "@/components/global/category-tree";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -50,8 +51,10 @@ const MATERIALS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translation, translate } = useI18n();
+  const href = useLocaleHref();
   const canPrintMaterialsList = useHasPermission(PERMISSIONS.PRINT_MATERIALS_LIST);
   const canAddMaterial = useHasPermission(PERMISSIONS.ADD_MATERIAL);
+  const canReadDeletedMaterials = useHasPermission(PERMISSIONS.READ_DELETED_MATERIALS);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -177,7 +180,16 @@ export default function Page() {
                   {translate("Add New Material", "إضافة مادة جديدة")}
                 </Menu.Item>
               )}
-              {(canPrintMaterialsList || canAddMaterial) && <Menu.Divider />}
+              {canReadDeletedMaterials && (
+                <Menu.Item
+                  component={Link}
+                  href={href("/warehouse/materials/deleted")}
+                  leftSection={<Archive size={14} />}
+                >
+                  {translate("Deleted items", "الأصناف المحذوفة")}
+                </Menu.Item>
+              )}
+              {(canPrintMaterialsList || canAddMaterial || canReadDeletedMaterials) && <Menu.Divider />}
               <CategoryTreeMenuItem href="/warehouse/materials/categories" permission={PERMISSIONS.READ_MATERIALS} />
             </ActionsMenu>
           </div>
