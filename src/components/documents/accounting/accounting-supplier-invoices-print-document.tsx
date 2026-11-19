@@ -46,6 +46,14 @@ export default function AccountingSupplierInvoicesPrintDocument({
     return formatMoney(value);
   }
 
+  function formatCompactDate(value: string) {
+    return new Date(value).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+
   const invoiceTotals = invoices.reduce(
     (acc, row) => ({
       totalPurchases: acc.totalPurchases + (row.totalPurchases ?? 0),
@@ -163,6 +171,11 @@ export default function AccountingSupplierInvoicesPrintDocument({
             String(row.invoiceCount),
             formatMoney(row.totalAmount),
           ])}
+          footerRow={[
+            translate("Total", "الإجمالي"),
+            String(byPeriod.reduce((sum, row) => sum + row.invoiceCount, 0)),
+            formatMoney(byPeriod.reduce((sum, row) => sum + row.totalAmount, 0)),
+          ]}
         />
       </section>
 
@@ -172,12 +185,14 @@ export default function AccountingSupplierInvoicesPrintDocument({
         <PrintSectionHeading
           title={translate("Invoices", "الفواتير")}
           subtitle={translate(
-            "All supplier invoices for the selected supplier and date range.",
-            "جميع فواتير المورد للمورد والنطاق الزمني المحددين.",
+            `All supplier invoices for the selected supplier and date range. Sorted by: ${invoicesSortLabel}.`,
+            `جميع فواتير المورد للمورد والنطاق الزمني المحددين. مرتبة حسب: ${invoicesSortLabel}.`,
           )}
         />
         <PrintTable
-          tableClassName="text-[9px]"
+          tableClassName="text-[8px] [&_th]:text-[6.5px] [&_th]:px-1.5 [&_th]:py-1.5 [&_td]:px-1.5 [&_td]:py-1.5 [&_td]:text-nowrap"
+          columnWidths={["3%", "8%", "9%", "13%", "11%", "11%", "8%", "11%", "15%", "11%"]}
+          noWrapIndexes={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
           headers={[
             "#",
             translate("Invoice Number", "رقم الفاتورة"),
@@ -186,8 +201,8 @@ export default function AccountingSupplierInvoicesPrintDocument({
             translate("Order Code", "كود الأمر"),
             translate(`Purchases (${currency})`, `المشتريات (${currency})`),
             translate(`Discount (${currency})`, `الخصم (${currency})`),
-            translate(`VAT (${currency})`, `ضريبة القيمة المضافة (${currency})`),
-            translate(`Tax withholding deduction (${currency})`, `الخصم تحت حساب الضريبة (${currency})`),
+            translate(`VAT (${currency})`, `ض.ق.م. (${currency})`),
+            translate(`Tax withholding (${currency})`, `خصم ضريبة (${currency})`),
             translate(`Total (${currency})`, `الإجمالي (${currency})`),
           ]}
           monoColumnIndexes={[1, 4]}
@@ -195,7 +210,7 @@ export default function AccountingSupplierInvoicesPrintDocument({
           rows={invoices.map((row, index) => [
             String(index + 1),
             row.invoiceNumber,
-            row.issuedAt ? formatDate(row.issuedAt, locale) : "",
+            row.issuedAt ? formatCompactDate(row.issuedAt) : "",
             getOrderTypeLabel(row.order.type, translate),
             row.order.code,
             formatMoneyOrBlank(row.totalPurchases),
