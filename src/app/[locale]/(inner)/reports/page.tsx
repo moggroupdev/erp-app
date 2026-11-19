@@ -7,6 +7,7 @@ import { ChartNoAxesCombined } from "lucide-react";
 import ReportLinkCard from "./components/report-link-card";
 import PermissionGuard from "@/components/guards/permission";
 import {
+  ACCOUNTING_REPORT_PERMISSIONS,
   MATERIAL_PURCHASING_REPORT_PERMISSIONS,
   MATERIAL_REPORT_PERMISSIONS,
 } from "@/lib/constants/enums/permissions";
@@ -55,6 +56,18 @@ export default function Page() {
                   ar: "تحليلات الإنفاق على المشتريات، تشمل اتجاهات التكلفة وترتيب الموردين وتاريخ الأسعار.",
                 },
                 href: "/reports/purchasing-materials",
+              }}
+            />
+          </PermissionGuard>
+          <PermissionGuard permission={ACCOUNTING_REPORT_PERMISSIONS}>
+            <ReportLinkCard
+              report={{
+                label: { en: "Accounting Reports", ar: "تقارير الحسابات" },
+                description: {
+                  en: "Invoice and financial reports for accounting, starting with supplier invoice detail by supplier.",
+                  ar: "تقارير الفواتير والمالية للحسابات، بدءاً بتفاصيل فواتير المورد حسب المورد.",
+                },
+                href: "/reports/accounting",
               }}
             />
           </PermissionGuard>

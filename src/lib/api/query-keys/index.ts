@@ -61,6 +61,8 @@ export const queryKeys = {
     detail: (id: string) => [...queryKeys.customers.details(), id] as const,
     addresses: (id: string) => [...queryKeys.customers.detail(id), "addresses"] as const,
     contactPersons: (id: string) => [...queryKeys.customers.detail(id), "contact-persons"] as const,
+    mergePreview: (id: string, removeId: string | null) =>
+      [...queryKeys.customers.detail(id), "merge-preview", removeId] as const,
   },
   contracts: {
     all: ["contracts"] as const,
@@ -82,10 +84,15 @@ export const queryKeys = {
     all: ["materials"] as const,
     lists: () => [...queryKeys.materials.all, "list"] as const,
     list: (filters: ListFilters) => [...queryKeys.materials.lists(), filters] as const,
+    deletedLists: () => [...queryKeys.materials.all, "deleted-list"] as const,
+    deletedList: (filters: ListFilters) => [...queryKeys.materials.deletedLists(), filters] as const,
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
     typeChangeImpact: (code: string, targetType: string | null) =>
       [...queryKeys.materials.detail(code), "type-change-impact", targetType] as const,
+    deleteImpact: (code: string) => [...queryKeys.materials.detail(code), "delete-impact"] as const,
+    mergePreview: (code: string, removeCode: string | null) =>
+      [...queryKeys.materials.detail(code), "merge-preview", removeCode] as const,
     changeHistories: (code: string) => [...queryKeys.materials.detail(code), "change-history"] as const,
     changeHistory: (code: string, page: number) => [...queryKeys.materials.changeHistories(code), page] as const,
   },
@@ -197,6 +204,11 @@ export const queryKeys = {
         [...queryKeys.reports.purchasingMaterials.all, "requisition-follow-up", productionSubDepartment, filters] as const,
       requisitionHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "requisition-history", materialCode, filters] as const,
+    },
+    accounting: {
+      all: ["reports", "accounting"] as const,
+      supplierInvoices: (supplierId: string, filters?: { from?: string; to?: string; groupBy?: string }) =>
+        [...queryKeys.reports.accounting.all, "supplier-invoices", supplierId, filters] as const,
     },
   },
   dashboard: {

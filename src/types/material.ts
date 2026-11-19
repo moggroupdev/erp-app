@@ -22,6 +22,7 @@ export type Material = {
   marketManufacturingCostSetAt: Date | null;
   marketManufacturingCostSetBy: string | null;
   deletedAt: Date | null;
+  deletedBy: string | null;
   createdAt: Date;
   createdBy: string;
 };
@@ -39,17 +40,24 @@ export type MaterialUnitConversionSummary = Pick<MaterialUnitConversion, "id" | 
 
 export type MaterialWithCreator = Omit<
   Material,
-  "createdBy" | "marketUnitPriceSetBy" | "marketManufacturingCostSetBy"
+  "createdBy" | "marketUnitPriceSetBy" | "marketManufacturingCostSetBy" | "deletedBy"
 > & {
   createdBy: { id: string; name: string };
   marketUnitPriceSetBy: { id: string; name: string } | null;
   marketManufacturingCostSetBy: { id: string; name: string } | null;
+  deletedBy: { id: string; name: string } | null;
 };
 
 export type MaterialWithUnitConversions = Material & { unitConversions: MaterialUnitConversionSummary[] };
 
 export type MaterialWithCreatorAndUnitConversions = MaterialWithCreator & {
   unitConversions: MaterialUnitConversionSummary[];
+};
+
+export type DeletedMaterial = MaterialWithUnitConversions & {
+  deletedAt: string;
+  deletedBy: string;
+  deletedByName: string | null;
 };
 
 /** List rows or detail fetches in material selection flows. */
@@ -103,4 +111,97 @@ export type MaterialTypeChangeImpact = {
     productCode: string;
     productTitle: string;
   }[];
+};
+
+export type MaterialDeleteReferenceGroupKey =
+  | "unitConversions"
+  | "ownMmBomLines"
+  | "componentOfMmBoms"
+  | "productBomLines"
+  | "purchaseRequisitions"
+  | "purchaseOrders"
+  | "inventoryTransactions"
+  | "legacyIssuePermits"
+  | "maintenanceOrders"
+  | "outsourcingOrders"
+  | "requestForQuotations"
+  | "supplierQuotations";
+
+export type MaterialDeleteReferenceGroup = {
+  key: MaterialDeleteReferenceGroupKey;
+  count: number;
+  samples: string[];
+};
+
+export type MaterialDeleteImpact = {
+  code: string;
+  title: string;
+  materialType: MaterialType;
+  alreadyDeleted: boolean;
+  canHardDelete: boolean;
+  totalReferenceCount: number;
+  groups: MaterialDeleteReferenceGroup[];
+};
+
+export type DeleteMaterialDto = {
+  confirmationCode: string;
+  permanent?: boolean;
+};
+
+export type MaterialMergeFigures = {
+  quantity: number;
+  unitPrice: number;
+  openingQuantity: number | null;
+  openingUnitPrice: number | null;
+  minimumStock: number | null;
+  marketUnitPrice: number | null;
+  marketManufacturingCost: number | null;
+};
+
+export type MaterialMergeConversionDrop = {
+  kind: "drop";
+  id: string;
+  unit: string;
+  reason: string;
+};
+
+export type MaterialMergeConversionRepoint = {
+  kind: "repoint";
+  id: string;
+  unit: string;
+  oldFactor: number;
+  newFactor: number;
+};
+
+export type MaterialMergeConversionAction = MaterialMergeConversionDrop | MaterialMergeConversionRepoint;
+
+export type MaterialMergeSummary = {
+  code: string;
+  title: string;
+  legacyCode: string | null;
+  materialType: MaterialType;
+  unitOfMeasurement: MaterialUnit;
+  deletedAt: string | null;
+  conversions: { id: string; unit: MaterialUnit; conversionFactorToBase: number }[];
+};
+
+export type MaterialMergePreview = {
+  kept: MaterialMergeSummary;
+  removed: MaterialMergeSummary;
+  factor: number | null;
+  conversionPlan: {
+    actions: MaterialMergeConversionAction[];
+    addRemovedBase: boolean;
+  } | null;
+  referenceCounts: { key: MaterialDeleteReferenceGroupKey; count: number }[];
+  figuresBefore: MaterialMergeFigures | null;
+  figuresAfter: MaterialMergeFigures | null;
+  legacyCodeWarning: string | null;
+  blockers: string[];
+  canMerge: boolean;
+};
+
+export type MergeMaterialDto = {
+  removeCode: string;
+  confirmationCode: string;
 };

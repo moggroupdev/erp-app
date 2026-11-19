@@ -28,12 +28,17 @@ export const PERMISSION_VALUES = [
   "add_customer",
   "read_customers",
   "update_customer",
+  "merge_customers",
   "read_contracts",
   "add_legacy_contract",
   "update_legacy_contract",
   "add_material",
   "read_materials",
   "update_material",
+  "delete_material",
+  "read_deleted_materials",
+  "restore_material",
+  "merge_materials",
   "set_material_market_price",
   "set_material_type",
   "print_materials_list",
@@ -61,6 +66,7 @@ export const PERMISSION_VALUES = [
   "read_material_purchasing_average_price_gaps_report",
   "read_material_purchasing_requisition_follow_up_report",
   "read_material_purchasing_requisition_history_report",
+  "read_accounting_supplier_invoices_report",
   "add_product",
   "read_products",
   "update_product",
@@ -156,8 +162,15 @@ export const MATERIAL_PURCHASING_REPORT_PERMISSIONS = [
   PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_HISTORY_REPORT,
 ] as const;
 
+/** Accounting report permissions — hub/sidebar visible if user has any. */
+export const ACCOUNTING_REPORT_PERMISSIONS = [PERMISSIONS.READ_ACCOUNTING_SUPPLIER_INVOICES_REPORT] as const;
+
 /** All report permissions — /reports index visible if user has any. */
-export const ALL_REPORT_PERMISSIONS = [...MATERIAL_REPORT_PERMISSIONS, ...MATERIAL_PURCHASING_REPORT_PERMISSIONS] as const;
+export const ALL_REPORT_PERMISSIONS = [
+  ...MATERIAL_REPORT_PERMISSIONS,
+  ...MATERIAL_PURCHASING_REPORT_PERMISSIONS,
+  ...ACCOUNTING_REPORT_PERMISSIONS,
+] as const;
 
 // ================ Labels ================
 
@@ -400,6 +413,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "تحديث العميل",
     },
   },
+  merge_customers: {
+    value: "merge_customers",
+    label: {
+      en: "Merge Customers",
+      ar: "دمج العملاء",
+    },
+  },
   read_inquiries: {
     value: "read_inquiries",
     label: {
@@ -482,6 +502,34 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Material",
       ar: "تحديث المادة",
+    },
+  },
+  delete_material: {
+    value: "delete_material",
+    label: {
+      en: "Delete Material",
+      ar: "حذف المادة",
+    },
+  },
+  read_deleted_materials: {
+    value: "read_deleted_materials",
+    label: {
+      en: "View Deleted Materials",
+      ar: "عرض الأصناف المحذوفة",
+    },
+  },
+  restore_material: {
+    value: "restore_material",
+    label: {
+      en: "Restore Material",
+      ar: "استعادة الصنف",
+    },
+  },
+  merge_materials: {
+    value: "merge_materials",
+    label: {
+      en: "Merge Materials",
+      ar: "دمج المواد",
     },
   },
   set_material_market_price: {
@@ -863,6 +911,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض تقرير تاريخ طلبات شراء المادة",
     },
   },
+  read_accounting_supplier_invoices_report: {
+    value: "read_accounting_supplier_invoices_report",
+    label: {
+      en: "Read Accounting Supplier Invoices Report",
+      ar: "عرض تقرير فواتير الموردين للحسابات",
+    },
+  },
   read_audit_logs: {
     value: "read_audit_logs",
     label: {
@@ -936,6 +991,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_customer",
       "read_customers",
       "update_customer",
+      "merge_customers",
       "read_contracts",
       "add_legacy_contract",
       "update_legacy_contract",
@@ -971,6 +1027,10 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_materials",
       "add_material",
       "update_material",
+      "delete_material",
+      "read_deleted_materials",
+      "restore_material",
+      "merge_materials",
       "set_material_market_price",
       "set_material_type",
       "print_materials_list",
@@ -1037,6 +1097,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_material_purchasing_average_price_gaps_report",
       "read_material_purchasing_requisition_follow_up_report",
       "read_material_purchasing_requisition_history_report",
+      "read_accounting_supplier_invoices_report",
     ],
   },
   {

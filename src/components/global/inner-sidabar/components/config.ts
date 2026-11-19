@@ -4,6 +4,7 @@ import {
   PERMISSIONS,
   MATERIAL_REPORT_PERMISSIONS,
   MATERIAL_PURCHASING_REPORT_PERMISSIONS,
+  ACCOUNTING_REPORT_PERMISSIONS,
   type Permission,
 } from "@/lib/constants/enums/permissions";
 import {
@@ -19,6 +20,7 @@ import {
   Hammer,
   History,
   Home,
+  Landmark,
   PackagePlus,
   PackageSearch,
   ReceiptText,
@@ -81,6 +83,12 @@ export const sidebarConfig: SidebarEntryConfig[] = [
         href: "/reports/purchasing-materials",
         icon: ShoppingCart,
         requiredPermission: MATERIAL_PURCHASING_REPORT_PERMISSIONS,
+      },
+      {
+        label: { en: "Accounting", ar: "الحسابات" },
+        href: "/reports/accounting",
+        icon: Landmark,
+        requiredPermission: ACCOUNTING_REPORT_PERMISSIONS,
       },
     ],
   },

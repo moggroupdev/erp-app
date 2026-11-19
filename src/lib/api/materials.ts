@@ -5,6 +5,7 @@ import type {
   MaterialUnitConversion,
   MaterialWithUnitConversions,
   MaterialWithCreatorAndUnitConversions,
+  DeletedMaterial,
   CreateMaterialDto,
   UpdateMaterialDto,
   CreateMaterialUnitConversionDto,
@@ -13,6 +14,10 @@ import type {
   SetMaterialMarketManufacturingCostDto,
   SetMaterialTypeDto,
   MaterialTypeChangeImpact,
+  MaterialDeleteImpact,
+  DeleteMaterialDto,
+  MaterialMergePreview,
+  MergeMaterialDto,
 } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 
@@ -31,6 +36,18 @@ const materialsApi = {
     signal: AbortSignal;
   }) {
     return await privateRequest<PaginatedData<MaterialWithUnitConversions>>({ url: "materials", params, signal });
+  },
+
+  async listDeleted({
+    privateRequest,
+    params,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    params: Dictionary;
+    signal: AbortSignal;
+  }) {
+    return await privateRequest<PaginatedData<DeletedMaterial>>({ url: "materials/deleted", params, signal });
   },
 
   async listAllToPrint({
@@ -119,6 +136,67 @@ const materialsApi = {
     dto: SetMaterialTypeDto;
   }) {
     return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/material-type`, data: dto });
+  },
+
+  async getDeleteImpact({
+    privateRequest,
+    code,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialDeleteImpact>({
+      url: `materials/${code}/delete-impact`,
+      signal,
+    });
+  },
+
+  async delete({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: DeleteMaterialDto;
+  }) {
+    return await privateRequest<void>({ method: "DELETE", url: `materials/${code}`, data: dto });
+  },
+
+  async restore({ privateRequest, code }: { privateRequest: PrivateRequest; code: string }) {
+    return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/restore` });
+  },
+
+  async previewMerge({
+    privateRequest,
+    code,
+    removeCode,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    removeCode: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialMergePreview>({
+      url: `materials/${code}/merge-preview`,
+      params: { removeCode },
+      signal,
+    });
+  },
+
+  async merge({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: MergeMaterialDto;
+  }) {
+    return await privateRequest<Material>({ method: "POST", url: `materials/${code}/merge`, data: dto });
   },
 
   // ==================== UNITS ====================
