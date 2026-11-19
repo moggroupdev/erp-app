@@ -40,13 +40,28 @@ export default function AccountingSupplierInvoicesPrintDocument({
   const currency = translation.currency;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
-  const pdfCoverage =
-    overview.invoiceCount > 0 ? Math.round((overview.withPdfCount / overview.invoiceCount) * 100) : 0;
 
   function formatMoneyOrBlank(value: number | null) {
     if (value == null) return "";
-    return formatMoney(value, currency);
+    return formatMoney(value);
   }
+
+  const invoiceTotals = invoices.reduce(
+    (acc, row) => ({
+      totalPurchases: acc.totalPurchases + (row.totalPurchases ?? 0),
+      totalDiscount: acc.totalDiscount + (row.totalDiscount ?? 0),
+      vatAmount: acc.vatAmount + (row.vatAmount ?? 0),
+      withholdingTaxAmount: acc.withholdingTaxAmount + (row.withholdingTaxAmount ?? 0),
+      totalAmount: acc.totalAmount + (row.totalAmount ?? 0),
+    }),
+    {
+      totalPurchases: 0,
+      totalDiscount: 0,
+      vatAmount: 0,
+      withholdingTaxAmount: 0,
+      totalAmount: 0,
+    },
+  );
 
   return (
     <div className="flex flex-col gap-8 text-xs text-gray-900">
@@ -70,17 +85,6 @@ export default function AccountingSupplierInvoicesPrintDocument({
           value={startDate ? formatDate(startDate, locale) : "-"}
         />
         <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={endDate ? formatDate(endDate, locale) : "-"} />
-        <PrintDetail
-          label={translate("Group by", "تجميع حسب")}
-          value={
-            groupBy === "year"
-              ? translate("Year", "سنة")
-              : groupBy === "quarter"
-                ? translate("Quarter", "ربع سنة")
-                : translate("Month", "شهر")
-          }
-        />
-        <PrintDetail label={translate("Sort", "الترتيب")} value={invoicesSortLabel} />
         <PrintDetail label={translate("Invoice Count", "عدد الفواتير")} value={String(overview.invoiceCount)} />
         <PrintDetail
           label={translate("Total Purchases", "إجمالي المشتريات")}
@@ -95,20 +99,12 @@ export default function AccountingSupplierInvoicesPrintDocument({
           value={formatMoney(overview.vatAmount, currency)}
         />
         <PrintDetail
-          label={translate("Withholding Tax", "ضريبة الاستقطاع")}
+          label={translate("Tax withholding deduction", "الخصم تحت حساب الضريبة")}
           value={formatMoney(overview.withholdingTaxAmount, currency)}
         />
         <PrintDetail
           label={translate("Invoice Total", "إجمالي الفاتورة")}
           value={formatMoney(overview.totalAmount, currency)}
-        />
-        <PrintDetail
-          label={translate("Average Invoice Total", "متوسط إجمالي الفاتورة")}
-          value={formatMoney(overview.avgTotalAmount, currency)}
-        />
-        <PrintDetail
-          label={translate("PDF Coverage", "تغطية ملفات PDF")}
-          value={`${overview.withPdfCount}/${overview.invoiceCount} (${pdfCoverage}%)`}
         />
       </section>
 
@@ -129,18 +125,18 @@ export default function AccountingSupplierInvoicesPrintDocument({
             translate(`Purchases (${currency})`, `المشتريات (${currency})`),
             translate(`Discount (${currency})`, `الخصم (${currency})`),
             translate(`VAT (${currency})`, `ضريبة القيمة المضافة (${currency})`),
-            translate(`Withholding (${currency})`, `الاستقطاع (${currency})`),
+            translate(`Tax withholding deduction (${currency})`, `الخصم تحت حساب الضريبة (${currency})`),
             translate(`Total (${currency})`, `الإجمالي (${currency})`),
           ]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
           rows={byOrderType.map((row) => [
             getOrderTypeLabel(row.orderType, translate),
             String(row.invoiceCount),
-            formatMoney(row.totalPurchases, currency),
-            formatMoney(row.totalDiscount, currency),
-            formatMoney(row.vatAmount, currency),
-            formatMoney(row.withholdingTaxAmount, currency),
-            formatMoney(row.totalAmount, currency),
+            formatMoney(row.totalPurchases),
+            formatMoney(row.totalDiscount),
+            formatMoney(row.vatAmount),
+            formatMoney(row.withholdingTaxAmount),
+            formatMoney(row.totalAmount),
           ])}
         />
       </section>
@@ -165,7 +161,7 @@ export default function AccountingSupplierInvoicesPrintDocument({
           rows={byPeriod.map((row) => [
             formatPeriodLabel(row.period, locale, groupBy),
             String(row.invoiceCount),
-            formatMoney(row.totalAmount, currency),
+            formatMoney(row.totalAmount),
           ])}
         />
       </section>
@@ -191,11 +187,8 @@ export default function AccountingSupplierInvoicesPrintDocument({
             translate(`Purchases (${currency})`, `المشتريات (${currency})`),
             translate(`Discount (${currency})`, `الخصم (${currency})`),
             translate(`VAT (${currency})`, `ضريبة القيمة المضافة (${currency})`),
-            translate(`Withholding (${currency})`, `الاستقطاع (${currency})`),
+            translate(`Tax withholding deduction (${currency})`, `الخصم تحت حساب الضريبة (${currency})`),
             translate(`Total (${currency})`, `الإجمالي (${currency})`),
-            "PDF",
-            translate("Created At", "تاريخ الإنشاء"),
-            translate("Created By", "أنشئ بواسطة"),
           ]}
           monoColumnIndexes={[1, 4]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
@@ -210,10 +203,19 @@ export default function AccountingSupplierInvoicesPrintDocument({
             formatMoneyOrBlank(row.vatAmount),
             formatMoneyOrBlank(row.withholdingTaxAmount),
             formatMoneyOrBlank(row.totalAmount),
-            row.hasPdf ? translate("Yes", "نعم") : translate("No", "لا"),
-            formatDateAndTime(row.createdAt, locale),
-            row.createdBy.name,
           ])}
+          footerRow={[
+            "",
+            translate("Total", "الإجمالي"),
+            "",
+            "",
+            "",
+            formatMoney(invoiceTotals.totalPurchases),
+            formatMoney(invoiceTotals.totalDiscount),
+            formatMoney(invoiceTotals.vatAmount),
+            formatMoney(invoiceTotals.withholdingTaxAmount),
+            formatMoney(invoiceTotals.totalAmount),
+          ]}
         />
       </section>
     </div>

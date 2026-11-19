@@ -7,7 +7,7 @@ export function getOrderTypeLabel(
 ) {
   if (orderType === "material") return translate("Material purchase order", "أمر توريد خامات");
   if (orderType === "product") return translate("Product purchase order", "أمر توريد منتجات");
-  return translate("Outsourcing order", "أمر تعهيد");
+  return translate("Outsourcing order", "تشغيل لدى الغير");
 }
 
 export function getOrderLink(

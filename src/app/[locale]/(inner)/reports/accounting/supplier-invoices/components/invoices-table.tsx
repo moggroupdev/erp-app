@@ -6,7 +6,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { Select, Table } from "@mantine/core";
 import { FileText } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
-import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDate } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { AccountingSupplierInvoiceRow } from "@/types/reports";
 import ReportCard from "../../components/report-card";
@@ -27,8 +27,25 @@ export default function InvoicesTable({
 
   function formatMoneyOrBlank(value: number | null) {
     if (value == null) return "";
-    return formatMoney(value, currency);
+    return formatMoney(value);
   }
+
+  const totals = data.reduce(
+    (acc, row) => ({
+      totalPurchases: acc.totalPurchases + (row.totalPurchases ?? 0),
+      totalDiscount: acc.totalDiscount + (row.totalDiscount ?? 0),
+      vatAmount: acc.vatAmount + (row.vatAmount ?? 0),
+      withholdingTaxAmount: acc.withholdingTaxAmount + (row.withholdingTaxAmount ?? 0),
+      totalAmount: acc.totalAmount + (row.totalAmount ?? 0),
+    }),
+    {
+      totalPurchases: 0,
+      totalDiscount: 0,
+      vatAmount: 0,
+      withholdingTaxAmount: 0,
+      totalAmount: 0,
+    },
+  );
 
   return (
     <ReportCard
@@ -106,14 +123,14 @@ export default function InvoicesTable({
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate(`VAT (${currency})`, `ضريبة القيمة المضافة (${currency})`)}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Withholding (${currency})`, `الاستقطاع (${currency})`)}
+                  {translate(
+                    `Tax withholding deduction (${currency})`,
+                    `الخصم تحت حساب الضريبة (${currency})`,
+                  )}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Total (${currency})`, `الإجمالي (${currency})`)}
                 </Table.Th>
-                <Table.Th className="text-center text-gray-600">PDF</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Created At", "تاريخ الإنشاء")}</Table.Th>
-                <Table.Th className="text-gray-600">{translate("Created By", "أنشئ بواسطة")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -161,15 +178,24 @@ export default function InvoicesTable({
                     <Table.Td>{formatMoneyOrBlank(row.vatAmount)}</Table.Td>
                     <Table.Td>{formatMoneyOrBlank(row.withholdingTaxAmount)}</Table.Td>
                     <Table.Td className="font-medium text-gray-800">{formatMoneyOrBlank(row.totalAmount)}</Table.Td>
-                    <Table.Td className="text-center">
-                      {row.hasPdf ? translate("Yes", "نعم") : translate("No", "لا")}
-                    </Table.Td>
-                    <Table.Td>{formatDateAndTime(row.createdAt, locale)}</Table.Td>
-                    <Table.Td>{row.createdBy.name}</Table.Td>
                   </Table.Tr>
                 );
               })}
             </Table.Tbody>
+            <Table.Tfoot className="bg-gray-50">
+              <Table.Tr className="h-10 border-t border-b-0! border-gray-200 text-gray-700">
+                <Table.Th />
+                <Table.Th>{translate("Total", "الإجمالي")}</Table.Th>
+                <Table.Th />
+                <Table.Th />
+                <Table.Th />
+                <Table.Th>{formatMoney(totals.totalPurchases)}</Table.Th>
+                <Table.Th>{formatMoney(totals.totalDiscount)}</Table.Th>
+                <Table.Th>{formatMoney(totals.vatAmount)}</Table.Th>
+                <Table.Th>{formatMoney(totals.withholdingTaxAmount)}</Table.Th>
+                <Table.Th>{formatMoney(totals.totalAmount)}</Table.Th>
+              </Table.Tr>
+            </Table.Tfoot>
           </Table>
         </div>
       )}

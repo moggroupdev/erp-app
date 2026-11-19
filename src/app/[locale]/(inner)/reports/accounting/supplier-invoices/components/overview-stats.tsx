@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Percent, ReceiptText, ShoppingCart, TrendingUp } from "lucide-react";
+import { FileText, Percent, ReceiptText, ShoppingCart } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { formatMoney } from "@/lib/helpers/format-money";
 import type { AccountingSupplierInvoicesOverview } from "@/types/reports";
@@ -9,11 +9,9 @@ import { reportTheme } from "../../components/report-theme";
 export default function OverviewStats({ overview }: { overview: AccountingSupplierInvoicesOverview }) {
   const { translate, translation } = useI18n();
   const currency = translation.currency;
-  const pdfCoverage =
-    overview.invoiceCount > 0 ? Math.round((overview.withPdfCount / overview.invoiceCount) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       <KpiCard
         label={translate("Invoice Count", "عدد الفواتير")}
         value={overview.invoiceCount}
@@ -40,9 +38,9 @@ export default function OverviewStats({ overview }: { overview: AccountingSuppli
         icon={<ReceiptText size={20} />}
       />
       <KpiCard
-        label={translate("Withholding Tax", "ضريبة الاستقطاع")}
+        label={translate("Tax withholding deduction", "الخصم تحت حساب الضريبة")}
         value={formatMoney(overview.withholdingTaxAmount, currency)}
-        hint={translate("Sum of withholding tax amounts", "مجموع مبالغ ضريبة الاستقطاع")}
+        hint={translate("Sum of tax withholding deductions", "مجموع مبالغ الخصم تحت حساب الضريبة")}
         icon={<Percent size={20} />}
       />
       <KpiCard
@@ -58,18 +56,6 @@ export default function OverviewStats({ overview }: { overview: AccountingSuppli
         }
         icon={<ReceiptText size={20} />}
         valueClassName={reportTheme.kpi.value}
-      />
-      <KpiCard
-        label={translate("Average Invoice Total", "متوسط إجمالي الفاتورة")}
-        value={formatMoney(overview.avgTotalAmount, currency)}
-        hint={translate("Invoice total divided by invoice count", "إجمالي الفاتورة مقسوماً على عدد الفواتير")}
-        icon={<TrendingUp size={20} />}
-      />
-      <KpiCard
-        label={translate("PDF Coverage", "تغطية ملفات PDF")}
-        value={`${overview.withPdfCount}/${overview.invoiceCount} (${pdfCoverage}%)`}
-        hint={translate("Invoices that have an uploaded PDF", "الفواتير التي لديها ملف PDF مرفوع")}
-        icon={<FileText size={20} />}
       />
     </div>
   );

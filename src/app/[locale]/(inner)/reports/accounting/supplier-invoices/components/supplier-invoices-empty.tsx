@@ -11,8 +11,8 @@ export default function SupplierInvoicesEmpty() {
       icon: ReceiptText,
       label: translate("Invoice totals", "إجماليات الفواتير"),
       detail: translate(
-        "Purchases, discount, VAT, withholding, and invoice total",
-        "المشتريات والخصم وضريبة القيمة المضافة والاستقطاع وإجمالي الفاتورة",
+        "Purchases, discount, VAT, tax withholding deduction, and invoice total",
+        "المشتريات والخصم وضريبة القيمة المضافة والخصم تحت حساب الضريبة وإجمالي الفاتورة",
       ),
     },
     {

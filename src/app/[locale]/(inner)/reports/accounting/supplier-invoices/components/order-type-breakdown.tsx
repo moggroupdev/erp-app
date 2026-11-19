@@ -40,7 +40,10 @@ export default function OrderTypeBreakdown({ data }: { data: AccountingSupplierI
                 </Table.Th>
                 <Table.Th className="text-gray-600">{translate(`VAT (${currency})`, `ضريبة القيمة المضافة (${currency})`)}</Table.Th>
                 <Table.Th className="text-gray-600">
-                  {translate(`Withholding (${currency})`, `الاستقطاع (${currency})`)}
+                  {translate(
+                    `Tax withholding deduction (${currency})`,
+                    `الخصم تحت حساب الضريبة (${currency})`,
+                  )}
                 </Table.Th>
                 <Table.Th className="text-gray-600">
                   {translate(`Total (${currency})`, `الإجمالي (${currency})`)}
@@ -52,11 +55,11 @@ export default function OrderTypeBreakdown({ data }: { data: AccountingSupplierI
                 <Table.Tr key={row.orderType} className="text-gray-600">
                   <Table.Td className="font-medium text-gray-800">{getOrderTypeLabel(row.orderType, translate)}</Table.Td>
                   <Table.Td>{row.invoiceCount}</Table.Td>
-                  <Table.Td>{formatMoney(row.totalPurchases, currency)}</Table.Td>
-                  <Table.Td>{formatMoney(row.totalDiscount, currency)}</Table.Td>
-                  <Table.Td>{formatMoney(row.vatAmount, currency)}</Table.Td>
-                  <Table.Td>{formatMoney(row.withholdingTaxAmount, currency)}</Table.Td>
-                  <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalAmount, currency)}</Table.Td>
+                  <Table.Td>{formatMoney(row.totalPurchases)}</Table.Td>
+                  <Table.Td>{formatMoney(row.totalDiscount)}</Table.Td>
+                  <Table.Td>{formatMoney(row.vatAmount)}</Table.Td>
+                  <Table.Td>{formatMoney(row.withholdingTaxAmount)}</Table.Td>
+                  <Table.Td className="font-medium text-gray-800">{formatMoney(row.totalAmount)}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
