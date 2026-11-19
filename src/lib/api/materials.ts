@@ -13,6 +13,8 @@ import type {
   SetMaterialMarketManufacturingCostDto,
   SetMaterialTypeDto,
   MaterialTypeChangeImpact,
+  MaterialDeleteImpact,
+  DeleteMaterialDto,
 } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 
@@ -119,6 +121,33 @@ const materialsApi = {
     dto: SetMaterialTypeDto;
   }) {
     return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/material-type`, data: dto });
+  },
+
+  async getDeleteImpact({
+    privateRequest,
+    code,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialDeleteImpact>({
+      url: `materials/${code}/delete-impact`,
+      signal,
+    });
+  },
+
+  async delete({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: DeleteMaterialDto;
+  }) {
+    return await privateRequest<void>({ method: "DELETE", url: `materials/${code}`, data: dto });
   },
 
   // ==================== UNITS ====================

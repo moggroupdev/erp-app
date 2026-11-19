@@ -15,7 +15,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { Menu } from "@mantine/core";
-import { Factory, Pencil, Repeat, Tag } from "lucide-react";
+import { Factory, Pencil, Repeat, Tag, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
@@ -26,6 +26,7 @@ import MaterialModal from "@/components/global/data-modals/material-modal";
 import MaterialMarketPriceModal from "./components/material-market-price-modal";
 import MaterialMarketManufacturingCostModal from "./components/material-market-manufacturing-cost-modal";
 import MaterialTypeModal from "./components/material-type-modal";
+import DeleteMaterialModal from "./components/delete-material-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
 import MaterialBomUsagesSection from "./components/material-bom-usages-section";
@@ -44,6 +45,7 @@ export default function Page() {
   const canReadProductBoms = useHasPermission(PERMISSIONS.READ_PRODUCT_BOMS);
   const canReadAuditLogs = useHasPermission(PERMISSIONS.READ_AUDIT_LOGS);
   const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
+  const canDeleteMaterial = useHasPermission(PERMISSIONS.DELETE_MATERIAL);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
   const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
 
@@ -91,6 +93,10 @@ export default function Page() {
     { open: openMarketManufacturingCostModal, close: closeMarketManufacturingCostModal },
   ] = useDisclosure(false);
   const [typeModalOpened, { open: openTypeModal, close: closeTypeModal }] = useDisclosure(false);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+
+  const showActionsMenu =
+    canUpdateMaterial || canDeleteMaterial || canSetMaterialType || canSetMarketPrice;
 
   return (
     <LayoutBox
@@ -100,28 +106,40 @@ export default function Page() {
         sideElements: (
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={loading} onRefetch={handleRetry} />
-            {material && (
+            {material && showActionsMenu && (
               <ActionsMenu>
                 {canUpdateMaterial && (
                   <Menu.Item leftSection={<Pencil size={14} />} onClick={openUpdateModal}>
                     {translate("Edit material", "تعديل المادة")}
                   </Menu.Item>
                 )}
-                {canUpdateMaterial && (canSetMaterialType || canSetMarketPrice) && <Menu.Divider />}
-                {canSetMaterialType && (
-                  <Menu.Item leftSection={<Repeat size={14} />} onClick={openTypeModal}>
-                    {translate("Change Material Type", "تغيير نوع المادة")}
-                  </Menu.Item>
+                {(canSetMaterialType || canSetMarketPrice) && (
+                  <>
+                    {canUpdateMaterial && <Menu.Divider />}
+                    {canSetMaterialType && (
+                      <Menu.Item leftSection={<Repeat size={14} />} onClick={openTypeModal}>
+                        {translate("Change Material Type", "تغيير نوع المادة")}
+                      </Menu.Item>
+                    )}
+                    {canSetMarketPrice && (
+                      <Menu.Item leftSection={<Tag size={14} />} onClick={openMarketPriceModal}>
+                        {translate("Set Market Price", "تعيين سعر السوق")}
+                      </Menu.Item>
+                    )}
+                    {canSetMarketPrice && isManufacturedMaterial(material.materialType) && (
+                      <Menu.Item leftSection={<Factory size={14} />} onClick={openMarketManufacturingCostModal}>
+                        {translate("Set Market Manufacturing Cost", "تعيين تكلفة التصنيع السوقية")}
+                      </Menu.Item>
+                    )}
+                  </>
                 )}
-                {canSetMarketPrice && (
-                  <Menu.Item leftSection={<Tag size={14} />} onClick={openMarketPriceModal}>
-                    {translate("Set Market Price", "تعيين سعر السوق")}
-                  </Menu.Item>
-                )}
-                {canSetMarketPrice && isManufacturedMaterial(material.materialType) && (
-                  <Menu.Item leftSection={<Factory size={14} />} onClick={openMarketManufacturingCostModal}>
-                    {translate("Set Market Manufacturing Cost", "تعيين تكلفة التصنيع السوقية")}
-                  </Menu.Item>
+                {canDeleteMaterial && (
+                  <>
+                    {(canUpdateMaterial || canSetMaterialType || canSetMarketPrice) && <Menu.Divider />}
+                    <Menu.Item color="clay" leftSection={<Trash2 size={14} />} onClick={openDeleteModal}>
+                      {translate("Delete item", "حذف الصنف")}
+                    </Menu.Item>
+                  </>
                 )}
               </ActionsMenu>
             )}
@@ -169,6 +187,8 @@ export default function Page() {
             )}
 
             <MaterialTypeModal opened={typeModalOpened} close={closeTypeModal} material={material} />
+
+            <DeleteMaterialModal opened={deleteModalOpened} close={closeDeleteModal} material={material} />
 
             <MaterialDetails material={material} />
 

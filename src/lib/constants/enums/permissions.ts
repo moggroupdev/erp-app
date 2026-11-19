@@ -34,6 +34,7 @@ export const PERMISSION_VALUES = [
   "add_material",
   "read_materials",
   "update_material",
+  "delete_material",
   "set_material_market_price",
   "set_material_type",
   "print_materials_list",
@@ -490,6 +491,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Material",
       ar: "تحديث المادة",
+    },
+  },
+  delete_material: {
+    value: "delete_material",
+    label: {
+      en: "Delete Material",
+      ar: "حذف المادة",
     },
   },
   set_material_market_price: {
@@ -986,6 +994,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_materials",
       "add_material",
       "update_material",
+      "delete_material",
       "set_material_market_price",
       "set_material_type",
       "print_materials_list",
