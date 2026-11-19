@@ -16,6 +16,8 @@ import type {
   MaterialTypeChangeImpact,
   MaterialDeleteImpact,
   DeleteMaterialDto,
+  MaterialMergePreview,
+  MergeMaterialDto,
 } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
 
@@ -165,6 +167,36 @@ const materialsApi = {
 
   async restore({ privateRequest, code }: { privateRequest: PrivateRequest; code: string }) {
     return await privateRequest<Material>({ method: "PATCH", url: `materials/${code}/restore` });
+  },
+
+  async previewMerge({
+    privateRequest,
+    code,
+    removeCode,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    removeCode: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialMergePreview>({
+      url: `materials/${code}/merge-preview`,
+      params: { removeCode },
+      signal,
+    });
+  },
+
+  async merge({
+    privateRequest,
+    code,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    dto: MergeMaterialDto;
+  }) {
+    return await privateRequest<Material>({ method: "POST", url: `materials/${code}/merge`, data: dto });
   },
 
   // ==================== UNITS ====================

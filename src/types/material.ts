@@ -147,3 +147,61 @@ export type DeleteMaterialDto = {
   confirmationCode: string;
   permanent?: boolean;
 };
+
+export type MaterialMergeFigures = {
+  quantity: number;
+  unitPrice: number;
+  openingQuantity: number | null;
+  openingUnitPrice: number | null;
+  minimumStock: number | null;
+  marketUnitPrice: number | null;
+  marketManufacturingCost: number | null;
+};
+
+export type MaterialMergeConversionDrop = {
+  kind: "drop";
+  id: string;
+  unit: string;
+  reason: string;
+};
+
+export type MaterialMergeConversionRepoint = {
+  kind: "repoint";
+  id: string;
+  unit: string;
+  oldFactor: number;
+  newFactor: number;
+};
+
+export type MaterialMergeConversionAction = MaterialMergeConversionDrop | MaterialMergeConversionRepoint;
+
+export type MaterialMergeSummary = {
+  code: string;
+  title: string;
+  legacyCode: string | null;
+  materialType: MaterialType;
+  unitOfMeasurement: MaterialUnit;
+  deletedAt: string | null;
+  conversions: { id: string; unit: MaterialUnit; conversionFactorToBase: number }[];
+};
+
+export type MaterialMergePreview = {
+  kept: MaterialMergeSummary;
+  removed: MaterialMergeSummary;
+  factor: number | null;
+  conversionPlan: {
+    actions: MaterialMergeConversionAction[];
+    addRemovedBase: boolean;
+  } | null;
+  referenceCounts: { key: MaterialDeleteReferenceGroupKey; count: number }[];
+  figuresBefore: MaterialMergeFigures | null;
+  figuresAfter: MaterialMergeFigures | null;
+  legacyCodeWarning: string | null;
+  blockers: string[];
+  canMerge: boolean;
+};
+
+export type MergeMaterialDto = {
+  removeCode: string;
+  confirmationCode: string;
+};

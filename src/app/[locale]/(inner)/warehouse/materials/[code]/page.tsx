@@ -15,7 +15,7 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { isManufacturedMaterial, supportsUnitConversions } from "@/lib/constants/enums/material-types";
 import { Menu } from "@mantine/core";
-import { ArchiveRestore, Factory, Pencil, Repeat, Tag, Trash2 } from "lucide-react";
+import { ArchiveRestore, Factory, Merge, Pencil, Repeat, Tag, Trash2 } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
@@ -27,6 +27,7 @@ import MaterialMarketPriceModal from "./components/material-market-price-modal";
 import MaterialMarketManufacturingCostModal from "./components/material-market-manufacturing-cost-modal";
 import MaterialTypeModal from "./components/material-type-modal";
 import DeleteMaterialModal from "./components/delete-material-modal";
+import MergeMaterialModal from "./components/merge-material-modal";
 import RestoreMaterialModal from "../components/restore-material-modal";
 import MaterialDetails from "./components/material-details";
 import MaterialBomSection from "./components/material-bom-section";
@@ -48,6 +49,7 @@ export default function Page() {
   const canUpdateMaterial = useHasPermission(PERMISSIONS.UPDATE_MATERIAL);
   const canDeleteMaterial = useHasPermission(PERMISSIONS.DELETE_MATERIAL);
   const canRestoreMaterial = useHasPermission(PERMISSIONS.RESTORE_MATERIAL);
+  const canMergeMaterials = useHasPermission(PERMISSIONS.MERGE_MATERIALS);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
   const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
 
@@ -97,10 +99,12 @@ export default function Page() {
   ] = useDisclosure(false);
   const [typeModalOpened, { open: openTypeModal, close: closeTypeModal }] = useDisclosure(false);
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [mergeModalOpened, { open: openMergeModal, close: closeMergeModal }] = useDisclosure(false);
   const [restoreModalOpened, { open: openRestoreModal, close: closeRestoreModal }] = useDisclosure(false);
 
   const showActiveActionsMenu =
-    !isDeleted && (canUpdateMaterial || canDeleteMaterial || canSetMaterialType || canSetMarketPrice);
+    !isDeleted &&
+    (canUpdateMaterial || canDeleteMaterial || canMergeMaterials || canSetMaterialType || canSetMarketPrice);
   const showDeletedActionsMenu = isDeleted && canRestoreMaterial;
   const showActionsMenu = showActiveActionsMenu || showDeletedActionsMenu;
 
@@ -147,9 +151,19 @@ export default function Page() {
                         )}
                       </>
                     )}
-                    {canDeleteMaterial && (
+                    {canMergeMaterials && (
                       <>
                         {(canUpdateMaterial || canSetMaterialType || canSetMarketPrice) && <Menu.Divider />}
+                        <Menu.Item leftSection={<Merge size={14} />} onClick={openMergeModal}>
+                          {translate("Merge duplicate into this item", "دمج صنف مكرر في هذا الصنف")}
+                        </Menu.Item>
+                      </>
+                    )}
+                    {canDeleteMaterial && (
+                      <>
+                        {(canUpdateMaterial || canSetMaterialType || canSetMarketPrice || canMergeMaterials) && (
+                          <Menu.Divider />
+                        )}
                         <Menu.Item color="clay" leftSection={<Trash2 size={14} />} onClick={openDeleteModal}>
                           {translate("Delete item", "حذف الصنف")}
                         </Menu.Item>
@@ -205,6 +219,8 @@ export default function Page() {
             <MaterialTypeModal opened={typeModalOpened} close={closeTypeModal} material={material} />
 
             <DeleteMaterialModal opened={deleteModalOpened} close={closeDeleteModal} material={material} />
+
+            <MergeMaterialModal opened={mergeModalOpened} close={closeMergeModal} material={material} />
 
             <RestoreMaterialModal
               opened={restoreModalOpened}

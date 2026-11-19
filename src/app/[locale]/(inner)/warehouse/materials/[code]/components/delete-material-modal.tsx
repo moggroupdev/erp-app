@@ -12,9 +12,10 @@ import materialsApi from "@/lib/api/materials";
 import getErrorMessage from "@/lib/helpers/get-error-message";
 import { queryKeys } from "@/lib/api/query-keys";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
-import type { MaterialDeleteReferenceGroupKey, MaterialWithCreatorAndUnitConversions } from "@/types/material";
+import type { MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
+import { getMaterialReferenceGroupLabel } from "./material-reference-group-label";
 
 type ConfirmStep = "review" | "references" | "final";
 
@@ -25,35 +26,6 @@ function SummaryRow({ label, value }: { label: string; value: React.ReactNode })
       <span className="text-end font-medium text-gray-900">{value}</span>
     </div>
   );
-}
-
-function getGroupLabel(key: MaterialDeleteReferenceGroupKey, translate: (en: string, ar: string) => string) {
-  switch (key) {
-    case "unitConversions":
-      return translate("Extra units", "وحدات إضافية");
-    case "ownMmBomLines":
-      return translate("Components in this item's recipe", "مكونات في وصفة هذا الصنف");
-    case "componentOfMmBoms":
-      return translate("Used inside other item recipes", "مستخدم داخل وصفات أصناف أخرى");
-    case "productBomLines":
-      return translate("Used in product recipes", "مستخدم في وصفات المنتجات");
-    case "purchaseRequisitions":
-      return translate("Purchase requests", "طلبات الشراء");
-    case "purchaseOrders":
-      return translate("Purchase orders", "أوامر التوريد");
-    case "inventoryTransactions":
-      return translate("Stock movements", "حركات المخزون");
-    case "legacyIssuePermits":
-      return translate("Old issue permits", "أذون الصرف القديمة");
-    case "maintenanceOrders":
-      return translate("Maintenance orders", "أوامر الصيانة");
-    case "outsourcingOrders":
-      return translate("Outsourcing orders", "أوامر التصنيع الخارجي");
-    case "requestForQuotations":
-      return translate("Quotation requests", "طلبات عروض الأسعار");
-    case "supplierQuotations":
-      return translate("Supplier quotations", "عروض أسعار الموردين");
-  }
 }
 
 export default function DeleteMaterialModal({
@@ -249,7 +221,7 @@ export default function DeleteMaterialModal({
                     {impact.groups.map((group) => (
                       <div key={group.key} className="text-sm">
                         <p className="font-medium text-gray-900">
-                          {getGroupLabel(group.key, translate)}
+                          {getMaterialReferenceGroupLabel(group.key, translate)}
                           <span className="ms-2 text-gray-500">({group.count})</span>
                         </p>
                         <p className="mt-1 font-mono text-xs break-all text-gray-600">

@@ -89,6 +89,8 @@ export const queryKeys = {
     typeChangeImpact: (code: string, targetType: string | null) =>
       [...queryKeys.materials.detail(code), "type-change-impact", targetType] as const,
     deleteImpact: (code: string) => [...queryKeys.materials.detail(code), "delete-impact"] as const,
+    mergePreview: (code: string, removeCode: string | null) =>
+      [...queryKeys.materials.detail(code), "merge-preview", removeCode] as const,
     changeHistories: (code: string) => [...queryKeys.materials.detail(code), "change-history"] as const,
     changeHistory: (code: string, page: number) => [...queryKeys.materials.changeHistories(code), page] as const,
   },

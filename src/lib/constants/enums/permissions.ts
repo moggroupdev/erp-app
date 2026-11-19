@@ -37,6 +37,7 @@ export const PERMISSION_VALUES = [
   "delete_material",
   "read_deleted_materials",
   "restore_material",
+  "merge_materials",
   "set_material_market_price",
   "set_material_type",
   "print_materials_list",
@@ -514,6 +515,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Restore Material",
       ar: "استعادة الصنف",
+    },
+  },
+  merge_materials: {
+    value: "merge_materials",
+    label: {
+      en: "Merge Materials",
+      ar: "دمج المواد",
     },
   },
   set_material_market_price: {
@@ -1013,6 +1021,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "delete_material",
       "read_deleted_materials",
       "restore_material",
+      "merge_materials",
       "set_material_market_price",
       "set_material_type",
       "print_materials_list",
