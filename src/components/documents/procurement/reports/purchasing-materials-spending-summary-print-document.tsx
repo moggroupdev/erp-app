@@ -256,6 +256,8 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
     maximumFractionDigits: 2,
   });
   const totalCategorySpend = byMainCategory.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalPeriodSpend = byPeriod.reduce((sum, row) => sum + row.totalSpend, 0);
+  const totalPeriodOrders = byPeriod.reduce((sum, row) => sum + row.orderCount, 0);
   const totalSupplierSpend = bySupplier.reduce((sum, row) => sum + row.totalSpend, 0);
   const totalSupplierOrders = bySupplier.reduce((sum, row) => sum + row.orderCount, 0);
   const totalTopOrderAmount = topOrders.reduce((sum, row) => sum + row.invoiceTotalPurchases, 0);
@@ -318,6 +320,16 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             String(row.orderCount),
             formatMoney(row.avgOrderValue),
           ])}
+          footerRow={
+            byPeriod.length === 0
+              ? undefined
+              : [
+                  translate("Total", "الإجمالي"),
+                  formatMoney(totalPeriodSpend),
+                  String(totalPeriodOrders),
+                  formatMoney(totalPeriodOrders > 0 ? totalPeriodSpend / totalPeriodOrders : 0),
+                ]
+          }
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>
@@ -343,6 +355,11 @@ export default function PurchasingMaterialsSpendingSummaryPrintDocument({
             formatMoney(row.totalSpend),
             formatShare(row.totalSpend, totalCategorySpend),
           ])}
+          footerRow={
+            byMainCategory.length === 0
+              ? undefined
+              : ["", translate("Total", "الإجمالي"), formatMoney(totalCategorySpend), `${percentageFormatter.format(100)}%`]
+          }
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>
