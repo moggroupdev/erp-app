@@ -1,5 +1,6 @@
 import type { PrivateRequest } from "@/types/api";
 import type {
+  AccountingSupplierInvoicesReport,
   MaterialsCategoryStats,
   MaterialsInventorySummary,
   MaterialsIssuePermitHistory,
@@ -300,6 +301,30 @@ const reportsApi = {
       return await privateRequest<PurchasingMaterialsRequisitionHistory>({
         url: "reports/purchasing-materials/requisition-history",
         params: { materialCode, from, to },
+        signal,
+      });
+    },
+  },
+
+  accounting: {
+    async getSupplierInvoices({
+      privateRequest,
+      supplierId,
+      from,
+      to,
+      groupBy,
+      signal,
+    }: {
+      privateRequest: PrivateRequest;
+      supplierId: string;
+      from?: string;
+      to?: string;
+      groupBy?: string;
+      signal?: AbortSignal;
+    }) {
+      return await privateRequest<AccountingSupplierInvoicesReport>({
+        url: "reports/accounting/supplier-invoices",
+        params: { supplierId, from, to, groupBy },
         signal,
       });
     },

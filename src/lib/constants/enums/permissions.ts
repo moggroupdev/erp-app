@@ -61,6 +61,7 @@ export const PERMISSION_VALUES = [
   "read_material_purchasing_average_price_gaps_report",
   "read_material_purchasing_requisition_follow_up_report",
   "read_material_purchasing_requisition_history_report",
+  "read_accounting_supplier_invoices_report",
   "add_product",
   "read_products",
   "update_product",
@@ -156,8 +157,15 @@ export const MATERIAL_PURCHASING_REPORT_PERMISSIONS = [
   PERMISSIONS.READ_MATERIAL_PURCHASING_REQUISITION_HISTORY_REPORT,
 ] as const;
 
+/** Accounting report permissions — hub/sidebar visible if user has any. */
+export const ACCOUNTING_REPORT_PERMISSIONS = [PERMISSIONS.READ_ACCOUNTING_SUPPLIER_INVOICES_REPORT] as const;
+
 /** All report permissions — /reports index visible if user has any. */
-export const ALL_REPORT_PERMISSIONS = [...MATERIAL_REPORT_PERMISSIONS, ...MATERIAL_PURCHASING_REPORT_PERMISSIONS] as const;
+export const ALL_REPORT_PERMISSIONS = [
+  ...MATERIAL_REPORT_PERMISSIONS,
+  ...MATERIAL_PURCHASING_REPORT_PERMISSIONS,
+  ...ACCOUNTING_REPORT_PERMISSIONS,
+] as const;
 
 // ================ Labels ================
 
@@ -863,6 +871,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض تقرير تاريخ طلبات شراء المادة",
     },
   },
+  read_accounting_supplier_invoices_report: {
+    value: "read_accounting_supplier_invoices_report",
+    label: {
+      en: "Read Accounting Supplier Invoices Report",
+      ar: "عرض تقرير فواتير الموردين للحسابات",
+    },
+  },
   read_audit_logs: {
     value: "read_audit_logs",
     label: {
@@ -1037,6 +1052,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_material_purchasing_average_price_gaps_report",
       "read_material_purchasing_requisition_follow_up_report",
       "read_material_purchasing_requisition_history_report",
+      "read_accounting_supplier_invoices_report",
     ],
   },
   {

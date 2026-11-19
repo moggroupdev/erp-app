@@ -198,6 +198,11 @@ export const queryKeys = {
       requisitionHistory: (materialCode: string, filters?: { from?: string; to?: string }) =>
         [...queryKeys.reports.purchasingMaterials.all, "requisition-history", materialCode, filters] as const,
     },
+    accounting: {
+      all: ["reports", "accounting"] as const,
+      supplierInvoices: (supplierId: string, filters?: { from?: string; to?: string; groupBy?: string }) =>
+        [...queryKeys.reports.accounting.all, "supplier-invoices", supplierId, filters] as const,
+    },
   },
   dashboard: {
     all: ["dashboard"] as const,
