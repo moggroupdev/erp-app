@@ -69,7 +69,7 @@ export default function Page() {
     keyword: debouncedKeyword,
   };
 
-  const params = { limit: ORDERS_PER_PAGE, ...removeEmptyParams(urlParams) };
+  const params = { limit: ORDERS_PER_PAGE, sortBy: "-createdAt,-code", ...removeEmptyParams(urlParams) };
 
   const resetAllFilters = () => {
     setActivePage(1);
