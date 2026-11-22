@@ -116,6 +116,7 @@ export default function Page() {
         approvedQuantity: toDisplayQuantity(data.summary.approvedQuantity, factor),
         pendingQuantity: toDisplayQuantity(data.summary.pendingQuantity, factor),
         rejectedQuantity: toDisplayQuantity(data.summary.rejectedQuantity, factor),
+        preGoLiveQuantity: toDisplayQuantity(data.summary.preGoLiveQuantity, factor),
         missingConversionCount: data.summary.missingConversionCount,
       },
       material: data.material,

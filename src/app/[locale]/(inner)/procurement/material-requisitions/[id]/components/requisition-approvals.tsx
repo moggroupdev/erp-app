@@ -194,6 +194,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
   const [rejectValidationError, setRejectValidationError] = useState("");
 
   const terminal = isRequisitionTerminal(requisition);
+  const preGoLive = requisition.isPreGoLive;
   const overallStatus = getRequisitionStatusLabel(getRequisitionStatus(requisition), translate);
 
   const approveMutation = useMutation({
@@ -363,6 +364,15 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
           </div>
         </header>
 
+        {preGoLive ? (
+          <p className="border-b border-gray-200 bg-white px-5 py-3 text-sm text-gray-600">
+            {translate(
+              "This requisition is from the pre-go-live period. Approvals cannot be recorded.",
+              "طلب الشراء هذا من فترة ما قبل التشغيل. لا يمكن تسجيل الاعتمادات.",
+            )}
+          </p>
+        ) : null}
+
         <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-stretch">
           {gates.map((gate, index) => (
             <ApprovalGateCard
@@ -374,7 +384,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
               decidedAt={gate.decidedAt}
               decidedBy={gate.decidedBy}
               reason={gate.reason}
-              canAct={!terminal}
+              canAct={!terminal && !preGoLive}
               hidePendingState={terminal && gate.decision === APPROVAL_DECISIONS.PENDING}
               permission={gate.permission}
               onApprove={() => openConfirm(gate.id, "approve")}

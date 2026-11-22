@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, ClipboardList, Clock3, Package } from "lucide-react";
+import { Archive, CheckCircle2, ClipboardList, Clock3, Package } from "lucide-react";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
@@ -18,7 +18,7 @@ export default function RequisitionSummary({
   const unitLabel = getMaterialUnitLabel(unitOfMeasurement, locale);
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
       <KpiCard
         label={translate("Requisitions", "الطلبات")}
         value={summary.requisitionCount}
@@ -52,6 +52,16 @@ export default function RequisitionSummary({
         hint={translate("Requested quantity still awaiting approval.", "الكمية المطلوبة التي ما زالت بانتظار الاعتماد.")}
         icon={<Clock3 size={20} />}
         valueClassName="text-ochre-700"
+      />
+      <KpiCard
+        label={translate(`Pre-go-live Qty (${unitLabel})`, `كمية ما قبل التشغيل (${unitLabel})`)}
+        value={formatQuantity(summary.preGoLiveQuantity)}
+        hint={translate(
+          "Requested quantity on pre-go-live requisitions (excluded from live demand).",
+          "الكمية المطلوبة على طلبات ما قبل التشغيل (مستبعدة من الطلب الحي).",
+        )}
+        icon={<Archive size={20} />}
+        valueClassName="text-gray-700"
       />
     </div>
   );

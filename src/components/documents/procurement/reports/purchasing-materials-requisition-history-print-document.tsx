@@ -73,7 +73,7 @@ export default function PurchasingMaterialsRequisitionHistoryPrintDocument({
 
       <hr className="border-gray-300" />
 
-      <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:grid-cols-5">
         <PrintDetail label={translate("Requisitions", "الطلبات")} value={String(summary.requisitionCount)} />
         <PrintDetail
           label={translate(`Total Qty (${unitLabel})`, `إجمالي الكمية (${unitLabel})`)}
@@ -86,6 +86,10 @@ export default function PurchasingMaterialsRequisitionHistoryPrintDocument({
         <PrintDetail
           label={translate(`Pending Qty (${unitLabel})`, `الكمية قيد الانتظار (${unitLabel})`)}
           value={formatQuantity(summary.pendingQuantity)}
+        />
+        <PrintDetail
+          label={translate(`Pre-go-live Qty (${unitLabel})`, `كمية ما قبل التشغيل (${unitLabel})`)}
+          value={formatQuantity(summary.preGoLiveQuantity)}
         />
       </section>
 
@@ -118,6 +122,9 @@ export default function PurchasingMaterialsRequisitionHistoryPrintDocument({
               : row.productionSubDepartment;
             const quantity = row.displayQuantity != null ? row.displayQuantity : row.quantityRequested;
             const rowUnitLabel = getMaterialUnitLabel(row.displayUnit, locale);
+            const statusLabel = row.isPreGoLive
+              ? `${status.label} (${translate("Pre-go-live", "قبل التشغيل")})`
+              : status.label;
 
             return [
               String(index + 1),
@@ -127,7 +134,7 @@ export default function PurchasingMaterialsRequisitionHistoryPrintDocument({
               row.createdByName,
               rowUnitLabel,
               formatQuantity(quantity),
-              status.label,
+              statusLabel,
               row.notes?.trim() || "-",
             ];
           })}

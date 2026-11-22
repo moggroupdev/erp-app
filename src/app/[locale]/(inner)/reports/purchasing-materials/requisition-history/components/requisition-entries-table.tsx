@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { Badge, Table } from "@mantine/core";
 import { Table2 } from "lucide-react";
 import CopyButton from "@/components/ui/copy-button";
+import PreGoLiveBadge from "@/components/global/pre-go-live-badge";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import {
@@ -79,6 +80,7 @@ export default function RequisitionEntriesTable({ data }: { data: TableEntry[] }
                           {row.requisitionCode}
                         </ProtectedLink>
                         <CopyButton text={row.requisitionCode} />
+                        {row.isPreGoLive ? <PreGoLiveBadge size="xs" /> : null}
                       </div>
                     </Table.Td>
                     <Table.Td>

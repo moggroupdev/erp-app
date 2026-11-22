@@ -8,9 +8,11 @@ export type RequisitionLockFields = {
   planningDecision: ApprovalDecision;
   inventoryControlDecision: ApprovalDecision;
   managerDecision: ApprovalDecision;
+  isPreGoLive?: boolean;
 };
 
 export function isRequisitionEditable(r: RequisitionLockFields) {
+  if (r.isPreGoLive) return false;
   return (
     r.planningDecision === APPROVAL_DECISIONS.PENDING &&
     r.inventoryControlDecision === APPROVAL_DECISIONS.PENDING &&
