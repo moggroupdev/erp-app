@@ -31,6 +31,7 @@ import NoResultsSection from "@/components/ui/sections/no-results";
 import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
+import SelectSupplier from "@/components/global/selections/remote-based/select-supplier";
 
 const PAGE_TITLE = { en: "Material Purchase Orders", ar: "أوامر توريد الخامات" };
 
@@ -57,6 +58,7 @@ export default function Page() {
   const canAddOrder = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_ORDER);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
+  const [supplierId, setSupplierId] = useState<string | null>(urlSearchParams.get("supplierId") || null);
   const {
     value: keyword,
     debouncedValue: debouncedKeyword,
@@ -67,6 +69,7 @@ export default function Page() {
   const urlParams = {
     page: activePage.toString(),
     keyword: debouncedKeyword,
+    supplierId: supplierId || "",
   };
 
   const params = { limit: ORDERS_PER_PAGE, sortBy: "-createdAt,-code", ...removeEmptyParams(urlParams) };
@@ -74,9 +77,10 @@ export default function Page() {
   const resetAllFilters = () => {
     setActivePage(1);
     setImmediateKeyword("");
+    setSupplierId(null);
   };
 
-  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword });
+  const { filtersChanged, updatePreviousFilters } = useHandlePreviousFilters({ debouncedKeyword, supplierId });
 
   const {
     data: paginatedOrders,
@@ -95,7 +99,7 @@ export default function Page() {
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
-    const newFilters = { debouncedKeyword };
+    const newFilters = { debouncedKeyword, supplierId };
     if (filtersChanged(newFilters)) {
       updatePreviousFilters(newFilters);
       if (activePage !== 1) {
@@ -106,7 +110,7 @@ export default function Page() {
 
     window.scrollTo({ top: 0, behavior: "instant" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, debouncedKeyword]);
+  }, [activePage, debouncedKeyword, supplierId]);
 
   return (
     <LayoutBox
@@ -131,20 +135,32 @@ export default function Page() {
         ),
       }}
     >
-      <TextInput
-        value={keyword}
-        onChange={(e) => setPendingKeyword(e.currentTarget.value)}
-        placeholder={translate("Search...", "ابحث...")}
-        leftSection={<Search size={15} />}
-        radius="md"
-        rightSection={
-          keyword ? (
-            <button type="button" onClick={() => setImmediateKeyword("")}>
-              <X size={15} />
-            </button>
-          ) : undefined
-        }
-      />
+      <div className="grid grid-cols-1 gap-2.5 md:grid-cols-4">
+        <div className="col-span-1 md:col-span-3">
+          <TextInput
+            value={keyword}
+            onChange={(e) => setPendingKeyword(e.currentTarget.value)}
+            placeholder={translate("Search...", "ابحث...")}
+            leftSection={<Search size={15} />}
+            radius="md"
+            rightSection={
+              keyword ? (
+                <button type="button" onClick={() => setImmediateKeyword("")}>
+                  <X size={15} />
+                </button>
+              ) : undefined
+            }
+          />
+        </div>
+
+        <SelectSupplier
+          value={supplierId}
+          setValue={setSupplierId}
+          placeholder={translate("Filter by supplier", "تصفية بالمورد")}
+          searchable
+          clearable
+        />
+      </div>
 
       {isFetching ? (
         <LoadingSection message={translate("Loading material purchase orders...", "جاري تحميل أوامر توريد الخامات...")} />
@@ -157,9 +173,9 @@ export default function Page() {
       ) : (
         paginatedOrders &&
         (paginatedOrders.data.length === 0 ? (
-          debouncedKeyword ? (
+          debouncedKeyword || supplierId ? (
             <NoResultsSection
-              keyword={debouncedKeyword}
+              keyword={debouncedKeyword || translate("selected filters", "الفلاتر المحددة")}
               button={{ text: translate("View All", "عرض الكل"), onClick: resetAllFilters }}
             />
           ) : (
