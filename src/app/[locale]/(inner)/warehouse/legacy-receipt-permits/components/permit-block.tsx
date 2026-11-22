@@ -319,7 +319,9 @@ export default function PermitBlock({
                       <NumberInput
                         value={item.quantity}
                         onChange={(value) =>
-                          onUpdateItem(permit.key, item.key, { quantity: typeof value === "number" ? value : "" })
+                          onUpdateItem(permit.key, item.key, {
+                            quantity: value === "" ? "" : Number(value),
+                          })
                         }
                         min={0}
                         allowNegative={false}
