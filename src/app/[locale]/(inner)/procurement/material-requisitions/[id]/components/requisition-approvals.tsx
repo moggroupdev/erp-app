@@ -16,6 +16,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS, type Permission } from "@/lib/constants/enums/permissions";
 import { type MaterialPurchaseRequisitionDetailed } from "@/types/material-purchase-requisition";
 import { CreatorLink } from "@/components/ui/entity-details";
+import PreGoLiveBadge from "@/components/global/pre-go-live-badge";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
 import { getSemanticStatusColors } from "@/lib/constants/status-colors";
@@ -355,12 +356,18 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-gray-500">
-              {translate(`${approvedCount} of 3 approved`, `${approvedCount} من 3 معتمد`)}
-            </span>
-            <Badge size="md" variant="light" color={overallStatus.color} radius="sm">
-              {overallStatus.label}
-            </Badge>
+            {preGoLive ? (
+              <PreGoLiveBadge size="sm" />
+            ) : (
+              <>
+                <span className="text-sm text-gray-500">
+                  {translate(`${approvedCount} of 3 approved`, `${approvedCount} من 3 معتمد`)}
+                </span>
+                <Badge size="md" variant="light" color={overallStatus.color} radius="sm">
+                  {overallStatus.label}
+                </Badge>
+              </>
+            )}
           </div>
         </header>
 

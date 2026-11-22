@@ -80,7 +80,6 @@ export default function RequisitionEntriesTable({ data }: { data: TableEntry[] }
                           {row.requisitionCode}
                         </ProtectedLink>
                         <CopyButton text={row.requisitionCode} />
-                        {row.isPreGoLive ? <PreGoLiveBadge size="xs" /> : null}
                       </div>
                     </Table.Td>
                     <Table.Td>
@@ -103,9 +102,13 @@ export default function RequisitionEntriesTable({ data }: { data: TableEntry[] }
                     <Table.Td>{unitLabel}</Table.Td>
                     <Table.Td>{formatQuantity(quantity)}</Table.Td>
                     <Table.Td>
-                      <Badge size="sm" variant="light" color={status.color} radius="sm">
-                        {status.label}
-                      </Badge>
+                      {row.isPreGoLive ? (
+                        <PreGoLiveBadge size="xs" />
+                      ) : (
+                        <Badge size="sm" variant="light" color={status.color} radius="sm">
+                          {status.label}
+                        </Badge>
+                      )}
                     </Table.Td>
                     <Table.Td className="max-w-xs truncate text-wrap">
                       {row.notes?.trim() ? row.notes : <span className="text-gray-400">-</span>}

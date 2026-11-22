@@ -27,7 +27,9 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
     },
     {
       key: translate("Status", "الحالة"),
-      value: (
+      value: requisition.isPreGoLive ? (
+        <PreGoLiveBadge size="sm" />
+      ) : (
         <Badge size="sm" variant="light" color={status.color} radius="md">
           {status.label}
         </Badge>
@@ -62,12 +64,13 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
       title={requisition.code}
       icon={ClipboardList}
       titleAside={
-        <div className="flex flex-wrap items-center gap-2">
-          {requisition.isPreGoLive ? <PreGoLiveBadge size="md" /> : null}
+        requisition.isPreGoLive ? (
+          <PreGoLiveBadge size="md" />
+        ) : (
           <Badge size="lg" variant="light" color={status.color} radius="md">
             {status.label}
           </Badge>
-        </div>
+        )
       }
       rows={rows}
     />

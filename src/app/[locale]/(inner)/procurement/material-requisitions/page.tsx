@@ -193,12 +193,15 @@ export default function Page() {
                               {requisition.code}
                             </ProtectedLink>
                             <CopyButton text={requisition.code} />
-                            {requisition.isPreGoLive ? <PreGoLiveBadge size="xs" /> : null}
                           </div>
                         </Table.Td>
                         <Table.Td>{getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}</Table.Td>
                         <Table.Td>
-                          <span className={status.className}>{status.label}</span>
+                          {requisition.isPreGoLive ? (
+                            <PreGoLiveBadge size="xs" />
+                          ) : (
+                            <span className={status.className}>{status.label}</span>
+                          )}
                         </Table.Td>
 
                         <Table.Td>

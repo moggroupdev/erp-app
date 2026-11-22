@@ -123,7 +123,7 @@ export default function PurchasingMaterialsRequisitionHistoryPrintDocument({
             const quantity = row.displayQuantity != null ? row.displayQuantity : row.quantityRequested;
             const rowUnitLabel = getMaterialUnitLabel(row.displayUnit, locale);
             const statusLabel = row.isPreGoLive
-              ? `${status.label} (${translate("Pre-go-live", "قبل التشغيل")})`
+              ? translate("Pre-go-live", "قبل التشغيل")
               : status.label;
 
             return [
