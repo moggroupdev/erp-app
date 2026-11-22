@@ -65,7 +65,7 @@ export default function Page() {
     transactionType: transactionTypeFilter,
   };
 
-  const params = { limit: TRANSACTIONS_PER_PAGE, ...removeEmptyParams(urlParams) };
+  const params = { limit: TRANSACTIONS_PER_PAGE, sortBy: "-createdAt,-code", ...removeEmptyParams(urlParams) };
 
   const resetAllFilters = () => {
     setActivePage(1);
