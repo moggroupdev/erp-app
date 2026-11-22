@@ -335,11 +335,13 @@ export default function PermitBlock({
                       <NumberInput
                         value={item.unitPrice}
                         onChange={(value) =>
-                          onUpdateItem(permit.key, item.key, { unitPrice: typeof value === "number" ? value : "" })
+                          onUpdateItem(permit.key, item.key, {
+                            unitPrice: value === "" ? "" : Number(value),
+                          })
                         }
                         min={0}
                         allowNegative={false}
-                        decimalScale={5}
+                        decimalScale={2}
                         hideControls
                         variant="unstyled"
                         radius={0}
