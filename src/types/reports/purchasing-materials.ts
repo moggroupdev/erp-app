@@ -300,6 +300,7 @@ export type PurchasingMaterialsRequisitionHistoryEntry = {
   quantityRequested: number;
   quantityRequestedInBase: number | null;
   status: PurchasingMaterialsRequisitionHistoryStatus;
+  isPreGoLive: boolean;
   notes: string | null;
 };
 
@@ -309,6 +310,7 @@ export type PurchasingMaterialsRequisitionHistorySummary = {
   approvedQuantity: number;
   pendingQuantity: number;
   rejectedQuantity: number;
+  preGoLiveQuantity: number;
   missingConversionCount: number;
 };
 

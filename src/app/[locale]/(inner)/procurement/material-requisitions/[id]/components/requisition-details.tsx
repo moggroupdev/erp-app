@@ -7,6 +7,7 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { type MaterialPurchaseRequisitionDetailed } from "@/types/material-purchase-requisition";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import PreGoLiveBadge from "@/components/global/pre-go-live-badge";
 import { getRequisitionStatus, getRequisitionStatusLabel } from "../../helpers";
 
 export default function RequisitionDetails({ requisition }: { requisition: MaterialPurchaseRequisitionDetailed }) {
@@ -26,7 +27,9 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
     },
     {
       key: translate("Status", "الحالة"),
-      value: (
+      value: requisition.isPreGoLive ? (
+        <PreGoLiveBadge size="sm" />
+      ) : (
         <Badge size="sm" variant="light" color={status.color} radius="md">
           {status.label}
         </Badge>
@@ -61,9 +64,13 @@ export default function RequisitionDetails({ requisition }: { requisition: Mater
       title={requisition.code}
       icon={ClipboardList}
       titleAside={
-        <Badge size="lg" variant="light" color={status.color} radius="md">
-          {status.label}
-        </Badge>
+        requisition.isPreGoLive ? (
+          <PreGoLiveBadge size="md" />
+        ) : (
+          <Badge size="lg" variant="light" color={status.color} radius="md">
+            {status.label}
+          </Badge>
+        )
       }
       rows={rows}
     />

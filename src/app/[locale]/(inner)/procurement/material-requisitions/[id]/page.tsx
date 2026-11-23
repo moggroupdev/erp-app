@@ -70,6 +70,7 @@ export default function Page() {
   const editable = requisition ? isRequisitionEditable(requisition) : false;
   const canCreateOrder =
     !!requisition &&
+    !requisition.isPreGoLive &&
     getRequisitionStatus(requisition) === "approved" &&
     requisition.items.some((item) => Number(item.quantityRemaining ?? 0) > 1e-9);
 

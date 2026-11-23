@@ -33,6 +33,8 @@ export type MaterialPurchaseRequisition = {
   productionSubDepartment: ProductionSubDepartment;
   productionSubDepartmentManagerId: string | null;
   notes: string | null;
+  /** Historical requisition from before go-live; read-only and excluded from live demand. */
+  isPreGoLive: boolean;
   createdAt: Date;
   createdBy: string;
 } & ApprovalGateFields<"planning"> &

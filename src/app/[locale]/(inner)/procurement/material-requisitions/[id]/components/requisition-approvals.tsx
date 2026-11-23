@@ -16,6 +16,7 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { PERMISSIONS, type Permission } from "@/lib/constants/enums/permissions";
 import { type MaterialPurchaseRequisitionDetailed } from "@/types/material-purchase-requisition";
 import { CreatorLink } from "@/components/ui/entity-details";
+import PreGoLiveBadge from "@/components/global/pre-go-live-badge";
 import Modal from "@/components/ui/modal";
 import ErrorAlert from "@/components/ui/error-alert";
 import { getSemanticStatusColors } from "@/lib/constants/status-colors";
@@ -194,6 +195,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
   const [rejectValidationError, setRejectValidationError] = useState("");
 
   const terminal = isRequisitionTerminal(requisition);
+  const preGoLive = requisition.isPreGoLive;
   const overallStatus = getRequisitionStatusLabel(getRequisitionStatus(requisition), translate);
 
   const approveMutation = useMutation({
@@ -354,14 +356,29 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-gray-500">
-              {translate(`${approvedCount} of 3 approved`, `${approvedCount} من 3 معتمد`)}
-            </span>
-            <Badge size="md" variant="light" color={overallStatus.color} radius="sm">
-              {overallStatus.label}
-            </Badge>
+            {preGoLive ? (
+              <PreGoLiveBadge size="sm" />
+            ) : (
+              <>
+                <span className="text-sm text-gray-500">
+                  {translate(`${approvedCount} of 3 approved`, `${approvedCount} من 3 معتمد`)}
+                </span>
+                <Badge size="md" variant="light" color={overallStatus.color} radius="sm">
+                  {overallStatus.label}
+                </Badge>
+              </>
+            )}
           </div>
         </header>
+
+        {preGoLive ? (
+          <p className="border-b border-gray-200 bg-white px-5 py-3 text-sm text-gray-600">
+            {translate(
+              "This requisition is from the pre-go-live period. Approvals cannot be recorded.",
+              "طلب الشراء هذا من فترة ما قبل التشغيل. لا يمكن تسجيل الاعتمادات.",
+            )}
+          </p>
+        ) : null}
 
         <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-stretch">
           {gates.map((gate, index) => (
@@ -374,7 +391,7 @@ export default function RequisitionApprovals({ requisition }: { requisition: Mat
               decidedAt={gate.decidedAt}
               decidedBy={gate.decidedBy}
               reason={gate.reason}
-              canAct={!terminal}
+              canAct={!terminal && !preGoLive}
               hidePendingState={terminal && gate.decision === APPROVAL_DECISIONS.PENDING}
               permission={gate.permission}
               onApprove={() => openConfirm(gate.id, "approve")}

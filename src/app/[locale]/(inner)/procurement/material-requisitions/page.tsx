@@ -32,6 +32,7 @@ import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
 import { EmptyValue } from "@/components/ui/entity-details";
+import PreGoLiveBadge from "@/components/global/pre-go-live-badge";
 import { getRequisitionStatus, getRequisitionStatusLabel } from "./helpers";
 
 const PAGE_TITLE = { en: "Material Purchase Requisitions", ar: "طلبات شراء الخامات" };
@@ -196,7 +197,11 @@ export default function Page() {
                         </Table.Td>
                         <Table.Td>{getProductionSubDepartmentLabel(requisition.productionSubDepartment, locale)}</Table.Td>
                         <Table.Td>
-                          <span className={status.className}>{status.label}</span>
+                          {requisition.isPreGoLive ? (
+                            <PreGoLiveBadge size="xs" />
+                          ) : (
+                            <span className={status.className}>{status.label}</span>
+                          )}
                         </Table.Td>
 
                         <Table.Td>

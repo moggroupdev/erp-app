@@ -65,7 +65,7 @@ export default function Page() {
     transactionType: transactionTypeFilter,
   };
 
-  const params = { limit: TRANSACTIONS_PER_PAGE, ...removeEmptyParams(urlParams) };
+  const params = { limit: TRANSACTIONS_PER_PAGE, sortBy: "-createdAt,-code", ...removeEmptyParams(urlParams) };
 
   const resetAllFilters = () => {
     setActivePage(1);
@@ -115,7 +115,7 @@ export default function Page() {
         title: translate(PAGE_TITLE.en, PAGE_TITLE.ar),
         sideElements: (
           <div className="flex gap-3">
-            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} variant="light" />
+            <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canAddLegacyReceipt && (
                 <Menu.Item
