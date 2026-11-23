@@ -1,7 +1,13 @@
 import type { Locale, LocalizedEntity } from "@/lib/i18n/types";
 import { translate } from "@/lib/i18n/utils";
 
-export const MATERIAL_TYPE_VALUES = ["raw_materials", "spare_parts", "manufactured_material"] as const;
+export const MATERIAL_TYPE_VALUES = [
+  "raw_materials",
+  "manufactured_material",
+  "spare_parts",
+  "tools_and_equipment",
+  "supplied_products",
+] as const;
 
 export type MaterialType = (typeof MATERIAL_TYPE_VALUES)[number];
 
@@ -19,6 +25,13 @@ export const MATERIAL_TYPE_LABELS: LocalizedEntity<MaterialType> = {
       ar: "مواد خام",
     },
   },
+  manufactured_material: {
+    value: "manufactured_material",
+    label: {
+      en: "Manufactured Materials",
+      ar: "مواد مصنعة",
+    },
+  },
   spare_parts: {
     value: "spare_parts",
     label: {
@@ -26,11 +39,18 @@ export const MATERIAL_TYPE_LABELS: LocalizedEntity<MaterialType> = {
       ar: "قطع غيار",
     },
   },
-  manufactured_material: {
-    value: "manufactured_material",
+  tools_and_equipment: {
+    value: "tools_and_equipment",
     label: {
-      en: "Manufactured Material",
-      ar: "مادة مصنعة",
+      en: "Tools and Equipment",
+      ar: "عدد وأدوات",
+    },
+  },
+  supplied_products: {
+    value: "supplied_products",
+    label: {
+      en: "Supplied Products",
+      ar: "منتجات موردة",
     },
   },
 };
@@ -63,7 +83,20 @@ export function isManufacturedMaterial(materialType: MaterialType) {
   return materialType === MATERIAL_TYPES.MANUFACTURED_MATERIAL;
 }
 
-/** Spare parts stay on their base unit. Raw and manufactured materials can define alternate units. */
+export function isToolsAndEquipment(materialType: MaterialType) {
+  return materialType === MATERIAL_TYPES.TOOLS_AND_EQUIPMENT;
+}
+
+export function isSuppliedProduct(materialType: MaterialType) {
+  return materialType === MATERIAL_TYPES.SUPPLIED_PRODUCTS;
+}
+
+/** Spare parts, tools and equipment, and supplied products stay on count. */
+export function isUnitLockedToCount(materialType: MaterialType) {
+  return isSparePart(materialType) || isToolsAndEquipment(materialType) || isSuppliedProduct(materialType);
+}
+
+/** Types locked to count have no alternate units. Raw and manufactured materials can define them. */
 export function supportsUnitConversions(materialType: MaterialType) {
   return isRawMaterial(materialType) || isManufacturedMaterial(materialType);
 }
