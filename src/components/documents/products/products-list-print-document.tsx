@@ -58,7 +58,7 @@ export default function ProductsListPrintDocument({
     translate("Code", "الكود"),
     translate("Product Name", "اسم المنتج"),
     ...(includeSubcategory ? [translate("Subcategory", "الفئة الفرعية")] : []),
-    translate("Standard Dimensions", "الأبعاد النمطية") + ` (${translation.productDimensionUnit})`,
+    translate("Dimensions", "الأبعاد") + ` (${translation.productDimensionUnit})`,
     translate("Source Type", "نوع المصدر"),
   ];
 
@@ -71,7 +71,14 @@ export default function ProductsListPrintDocument({
     return (
       <div className="flex flex-col gap-1">
         {sortDimensions(dimensions).map((dimension) => (
-          <span key={dimension.id}>{formatDimensionLabel(dimension)}</span>
+          <span key={dimension.id} className="inline-flex items-center gap-1.5">
+            <span>{formatDimensionLabel(dimension)}</span>
+            {dimension.isStandard && (
+              <span className="rounded bg-haze-50 px-1 py-0.5 text-[9px] font-medium text-haze-700">
+                {translate("Standard", "نمطي")}
+              </span>
+            )}
+          </span>
         ))}
       </div>
     );

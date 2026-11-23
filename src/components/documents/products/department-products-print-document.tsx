@@ -44,7 +44,7 @@ type ProductBlock = {
   code: string;
   title: string;
   subcategory: string;
-  dimensions: { key: string; label: string }[];
+  dimensions: { key: string; label: string; isStandard: boolean }[];
 };
 
 /** Split blocks into two columns with roughly equal dimension-row heights. */
@@ -145,8 +145,9 @@ export default function DepartmentProductsPrintDocument({
             ? dimensions.map((dimension) => ({
                 key: `${product.code}-${dimension.id}`,
                 label: formatDimensionLabelText(dimension),
+                isStandard: dimension.isStandard,
               }))
-            : [{ key: product.code, label: "-" }],
+            : [{ key: product.code, label: "-", isStandard: false }],
       };
     });
   }
@@ -214,7 +215,14 @@ export default function DepartmentProductsPrintDocument({
                     </td>
                   )}
                   <td className={`${cellBorder({ isLastCol: false, isLastRow, bottomTone })} py-1`}>
-                    {dimension.label}
+                    <span className="inline-flex items-center gap-1">
+                      <span>{dimension.label}</span>
+                      {dimension.isStandard && (
+                        <span className="rounded bg-haze-50 px-1 py-0.5 text-[7px] font-medium text-haze-700">
+                          {translate("Standard", "نمطي")}
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className={`${cellBorder({ isLastCol: true, isLastRow, bottomTone })} py-1`}>&nbsp;</td>
                 </tr>
