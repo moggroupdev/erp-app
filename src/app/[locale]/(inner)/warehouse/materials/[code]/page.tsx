@@ -52,6 +52,7 @@ export default function Page() {
   const canMergeMaterials = useHasPermission(PERMISSIONS.MERGE_MATERIALS);
   const canSetMarketPrice = useHasPermission(PERMISSIONS.SET_MATERIAL_MARKET_PRICE);
   const canSetMaterialType = useHasPermission(PERMISSIONS.SET_MATERIAL_TYPE);
+  const canReadLastPurchasePrice = useHasPermission(PERMISSIONS.READ_MATERIAL_PURCHASE_ORDERS);
 
   const materialQuery = useQuery({
     queryKey: queryKeys.materials.detail(code),
@@ -69,12 +70,22 @@ export default function Page() {
     enabled: shouldLoadBom,
   });
 
+  const lastPurchasePriceQuery = useQuery({
+    queryKey: queryKeys.materials.lastPurchasePrice(code),
+    queryFn: ({ signal }) => materialsApi.getLastPurchasePrice({ privateRequest, code, signal }),
+    staleTime: staleTimes.materials,
+    enabled: canReadLastPurchasePrice,
+  });
+
   const changeHistoryFetching = useIsFetching({
     queryKey: queryKeys.materials.changeHistories(code),
   });
 
   const loading =
-    materialQuery.isFetching || (shouldLoadBom && bomQuery.isFetching) || (canReadAuditLogs && changeHistoryFetching > 0);
+    materialQuery.isFetching ||
+    (shouldLoadBom && bomQuery.isFetching) ||
+    (canReadLastPurchasePrice && lastPurchasePriceQuery.isFetching) ||
+    (canReadAuditLogs && changeHistoryFetching > 0);
   const queryError = materialQuery.error || (shouldLoadBom ? bomQuery.error : null);
   const errorMessage = queryError ? getErrorMessage(locale, queryError) : "";
   // Keep existing content mounted during refetch so nested usage queries are not unmounted mid-invalidate (which would refetch twice).
@@ -85,6 +96,7 @@ export default function Page() {
   function handleRetry() {
     materialQuery.refetch();
     if (shouldLoadBom) bomQuery.refetch();
+    if (canReadLastPurchasePrice) lastPurchasePriceQuery.refetch();
     if (canReadProductBoms) queryClient.invalidateQueries({ queryKey: queryKeys.boms.usages(code) });
     if (canReadAuditLogs) queryClient.invalidateQueries({ queryKey: queryKeys.materials.changeHistories(code) });
   }
@@ -228,7 +240,10 @@ export default function Page() {
               material={{ code: material.code, title: material.title }}
             />
 
-            <MaterialDetails material={material} />
+            <MaterialDetails
+              material={material}
+              lastPurchasePrice={canReadLastPurchasePrice ? (lastPurchasePriceQuery.data ?? null) : undefined}
+            />
 
             {supportsUnitConversions(material.materialType) && <MaterialUnitConversionsSection material={material} />}
 

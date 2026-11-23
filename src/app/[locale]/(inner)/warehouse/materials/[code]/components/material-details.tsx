@@ -4,22 +4,30 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import useMaterialCategories from "@/hooks/reference/use-material-categories";
-import { type MaterialWithCreatorAndUnitConversions } from "@/types/material";
+import { type MaterialLastPurchasePrice, type MaterialWithCreatorAndUnitConversions } from "@/types/material";
 import { PackageSearch } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
 
-export default function MaterialDetails({ material }: { material: MaterialWithCreatorAndUnitConversions }) {
+export default function MaterialDetails({
+  material,
+  lastPurchasePrice,
+}: {
+  material: MaterialWithCreatorAndUnitConversions;
+  /** `undefined` when the user lacks permission; `null` while loading or on empty snapshot. */
+  lastPurchasePrice?: MaterialLastPurchasePrice | null;
+}) {
   const { locale, translate, translation } = useI18n();
   const { helpers } = useMaterialCategories();
 
   const isDeleted = !!material.deletedAt;
   const subCategory = helpers.getMaterialCategorySubById(material.subCategoryId);
   const mainCategory = subCategory ? helpers.getMaterialCategoryMainById(subCategory.mainCategoryId) : null;
+  const hasLastPurchase = lastPurchasePrice != null && lastPurchasePrice.unitPrice != null;
 
   const rows: DetailRow[] = [
     { key: translate("Code", "الكود"), value: material.code, mono: true, copyText: material.code },
     {
-      key: translate("Legacy Code", "الكود القديم"),
+      key: translate("Legacy Code", "الكود السابق"),
       value: material.legacyCode ? <span className="font-mono">{material.legacyCode}</span> : <EmptyValue />,
       copyText: material.legacyCode || undefined,
     },
@@ -49,6 +57,30 @@ export default function MaterialDetails({ material }: { material: MaterialWithCr
     },
     { key: translate("Quantity", "الكمية"), value: material.quantity },
     { key: translate("Unit Price", "سعر الوحدة"), value: formatMoney(material.unitPrice, translation.currency) },
+    ...(lastPurchasePrice !== undefined
+      ? [
+          {
+            key: translate("Last Purchase Price", "آخر سعر شراء"),
+            value: hasLastPurchase ? (
+              formatMoney(lastPurchasePrice!.unitPrice!, translation.currency)
+            ) : (
+              <EmptyValue />
+            ),
+          },
+          ...(hasLastPurchase
+            ? [
+                {
+                  key: translate("Last Purchase Date", "تاريخ آخر شراء"),
+                  value: formatDateAndTime(lastPurchasePrice!.purchasedAt!, locale),
+                },
+                {
+                  key: translate("Last Purchase Supplier", "مورد آخر شراء"),
+                  value: lastPurchasePrice!.supplierName || <EmptyValue />,
+                },
+              ]
+            : []),
+        ]
+      : []),
     ...(material.marketUnitPrice != null
       ? [
           {

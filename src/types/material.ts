@@ -54,6 +54,13 @@ export type MaterialWithCreatorAndUnitConversions = MaterialWithCreator & {
   unitConversions: MaterialUnitConversionSummary[];
 };
 
+/** Snapshot from `GET /materials/:code/last-purchase-price` (base-unit price). */
+export type MaterialLastPurchasePrice = {
+  unitPrice: number | null;
+  purchasedAt: Date | null;
+  supplierName: string | null;
+};
+
 export type DeletedMaterial = MaterialWithUnitConversions & {
   deletedAt: string;
   deletedBy: string;

@@ -88,6 +88,7 @@ export const queryKeys = {
     deletedList: (filters: ListFilters) => [...queryKeys.materials.deletedLists(), filters] as const,
     details: () => [...queryKeys.materials.all, "detail"] as const,
     detail: (code: string) => [...queryKeys.materials.details(), code] as const,
+    lastPurchasePrice: (code: string) => [...queryKeys.materials.detail(code), "last-purchase-price"] as const,
     typeChangeImpact: (code: string, targetType: string | null) =>
       [...queryKeys.materials.detail(code), "type-change-impact", targetType] as const,
     deleteImpact: (code: string) => [...queryKeys.materials.detail(code), "delete-impact"] as const,

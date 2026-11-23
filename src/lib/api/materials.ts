@@ -5,6 +5,7 @@ import type {
   MaterialUnitConversion,
   MaterialWithUnitConversions,
   MaterialWithCreatorAndUnitConversions,
+  MaterialLastPurchasePrice,
   DeletedMaterial,
   CreateMaterialDto,
   UpdateMaterialDto,
@@ -74,6 +75,18 @@ const materialsApi = {
 
   async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
     return await privateRequest<MaterialWithCreatorAndUnitConversions>({ url: `materials/${code}`, signal });
+  },
+
+  async getLastPurchasePrice({
+    privateRequest,
+    code,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialLastPurchasePrice>({ url: `materials/${code}/last-purchase-price`, signal });
   },
 
   async update({ privateRequest, code, dto }: { privateRequest: PrivateRequest; code: string; dto: UpdateMaterialDto }) {
