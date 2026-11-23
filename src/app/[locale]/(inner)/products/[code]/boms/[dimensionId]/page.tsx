@@ -612,10 +612,10 @@ export default function Page() {
           value: formatDimensionLabel(bom, translation.productDimensionUnit),
         },
         {
-          key: translate("Default Dimension", "المقاس الافتراضي"),
-          value: bom.isDefault ? (
+          key: translate("Standard dimension", "مقاس نمطي"),
+          value: bom.isStandard ? (
             <Badge size="sm" variant="light" color="teal" radius="md">
-              {translate("Default", "افتراضي")}
+              {translate("Standard", "نمطي")}
             </Badge>
           ) : (
             <EmptyValue />

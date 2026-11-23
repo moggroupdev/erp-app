@@ -291,8 +291,8 @@ export default function Page() {
                   {paginatedProducts.data.map((product) => {
                     const categories = getCategoryLabels(product.subCategoryId);
                     const dimensions = showAllDimensions
-                      ? [...product.dimensions].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
-                      : product.dimensions.filter((dimension) => dimension.isDefault);
+                      ? [...product.dimensions].sort((a, b) => Number(b.isStandard) - Number(a.isStandard))
+                      : product.dimensions.filter((dimension) => dimension.isStandard);
                     return (
                       <Table.Tr key={product.code} className="text-gray-600">
                         <Table.Td className="align-top font-semibold text-gray-800">

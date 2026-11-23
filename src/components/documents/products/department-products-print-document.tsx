@@ -14,7 +14,7 @@ function countDimensions(list: ProductWithDimensions[]) {
 }
 
 function sortDimensions(dimensions: ProductDimension[]) {
-  return [...dimensions].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+  return [...dimensions].sort((a, b) => Number(b.isStandard) - Number(a.isStandard));
 }
 
 /**

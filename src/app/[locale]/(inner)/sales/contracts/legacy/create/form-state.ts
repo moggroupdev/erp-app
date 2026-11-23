@@ -379,7 +379,7 @@ function toItemDraftFromContract(
       depth: item.productDimension.depth,
       diameter: item.productDimension.diameter,
       height: item.productDimension.height,
-      isDefault: false,
+      isStandard: false,
       notes: null,
       createdAt: new Date(),
       createdBy: "",

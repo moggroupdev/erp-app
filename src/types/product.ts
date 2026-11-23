@@ -23,7 +23,7 @@ export type ProductDimension = {
   depth: number | null;
   diameter: number | null;
   height: number;
-  isDefault: boolean;
+  isStandard: boolean;
   notes: string | null;
   createdAt: Date;
   createdBy: string;
@@ -60,11 +60,12 @@ export type CreateProductDimensionDto = {
   depth: number | null;
   diameter: number | null;
   height: number;
-  isDefault: boolean | null;
+  isStandard: boolean | null;
   notes: string | null;
 };
 
 export type UpdateProductDimensionDto = {
+  isStandard: boolean | null;
   notes: string | null;
 };
 
