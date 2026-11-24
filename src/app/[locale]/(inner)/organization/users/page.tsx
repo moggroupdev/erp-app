@@ -23,7 +23,7 @@ import { type User } from "@/types/user";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Badge, Menu, Skeleton, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Pencil, Plus, Search, X } from "lucide-react";
+import { Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -37,6 +37,7 @@ import ActionsMenu from "@/components/ui/actions-menu";
 import SelectDepartment from "@/components/global/selections/reference-based/select-department";
 import SelectRole from "@/components/global/selections/reference-based/select-role";
 import UserModal from "@/components/global/data-modals/user-modal";
+import PrintUsersModal from "./components/print-users-modal";
 
 const PAGE_TITLE = { en: "Users", ar: "المستخدمون" };
 
@@ -51,6 +52,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
   const canAddUser = useHasPermission(PERMISSIONS.ADD_USER);
+  const canPrintUsersList = useHasPermission(PERMISSIONS.PRINT_USERS_LIST);
 
   const { helpers: departmentHelpers, loading: departmentsLoading } = useDepartments();
   const { helpers: roleHelpers, loading: rolesLoading } = useRoles();
@@ -139,6 +141,7 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [userToUpdate, setUserToUpdate] = useState<User | null>(null);
+  const [printModalOpened, { open: openPrintModal, close: closePrintModal }] = useDisclosure(false);
 
   function handleOpenUpdateModal(user: User) {
     setUserToUpdate(user);
@@ -158,6 +161,12 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
+              {canPrintUsersList && (
+                <Menu.Item leftSection={<Printer size={14} />} onClick={openPrintModal}>
+                  {translate("Print Users List", "طباعة قائمة المستخدمين")}
+                </Menu.Item>
+              )}
+              {canPrintUsersList && canAddUser && <Menu.Divider />}
               {canAddUser && (
                 <Menu.Item onClick={openModal} leftSection={<Plus size={14} />}>
                   {translate("Add User", "إضافة مستخدم")}
@@ -319,6 +328,16 @@ export default function Page() {
           </>
         ))
       )}
+
+      <PrintUsersModal
+        opened={printModalOpened}
+        close={closePrintModal}
+        filters={{
+          keyword: debouncedKeyword,
+          departmentId: departmentFilter,
+          roleId: roleFilter,
+        }}
+      />
 
       <UserModal
         opened={modalOpened}

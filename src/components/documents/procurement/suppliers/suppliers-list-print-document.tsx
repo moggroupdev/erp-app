@@ -1,10 +1,17 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintTable } from "../../components";
+import { PrintAppliedFilters, PrintTable } from "../../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import type { Supplier } from "@/types/supplier";
 import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";
 
-export default function SuppliersListPrintDocument({ suppliers }: { suppliers: Supplier[] }) {
+export default function SuppliersListPrintDocument({
+  suppliers,
+  appliedFilters = [],
+}: {
+  suppliers: Supplier[];
+  appliedFilters?: { label: string; value: string }[];
+}) {
+  const hasFilters = appliedFilters.length > 0;
   const { locale, translate } = useI18n();
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
@@ -34,11 +41,17 @@ export default function SuppliersListPrintDocument({ suppliers }: { suppliers: S
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             {translate("Suppliers List", "قائمة الموردين")}
           </p>
-          <h1 className="text-2xl font-semibold">{translate("All Suppliers", "جميع الموردين")}</h1>
+          <h1 className="text-2xl font-semibold">
+            {hasFilters
+              ? translate("Selected Suppliers", "الموردون المحددون")
+              : translate("All Suppliers", "جميع الموردين")}
+          </h1>
           <p className="text-[10px] text-gray-500">{printedAt}</p>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
+
+      <PrintAppliedFilters filters={appliedFilters} />
 
       <PrintTable
         headers={headers}

@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading, PrintTable } from "../components";
+import { PrintAppliedFilters, PrintSectionHeading, PrintTable } from "../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
@@ -149,29 +149,7 @@ export default function ProductsListPrintDocument({
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
-      {hasFilters && (
-        <>
-          <section className="flex break-inside-avoid flex-col gap-2.5">
-            <p className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
-              {translate("Applied filters", "الفلاتر المطبقة")}
-            </p>
-            <div
-              className={`grid gap-x-6 gap-y-3 ${
-                appliedFilters.length === 1
-                  ? "grid-cols-1"
-                  : appliedFilters.length === 2
-                    ? "grid-cols-2"
-                    : "grid-cols-2 sm:grid-cols-4"
-              }`}
-            >
-              {appliedFilters.map((filter) => (
-                <PrintDetail key={`${filter.label}-${filter.value}`} label={filter.label} value={filter.value} />
-              ))}
-            </div>
-          </section>
-          <hr className="border-gray-300" />
-        </>
-      )}
+      <PrintAppliedFilters filters={appliedFilters} />
 
       {groups.map((group) => (
         <section key={group.mainCategory.id} className="mb-6 space-y-2.5">

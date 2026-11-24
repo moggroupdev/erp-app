@@ -21,7 +21,7 @@ import { type Customer } from "@/types/customer";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Pencil, Plus, Search, X } from "lucide-react";
+import { Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -34,6 +34,7 @@ import ActionsMenu from "@/components/ui/actions-menu";
 import CustomerModal from "@/components/global/data-modals/customer-modal";
 import SelectCustomerClassification from "@/components/global/selections/enum-based/select-customer-classification";
 import { getCustomerClassificationLabel } from "@/lib/constants/enums/customer-classifications";
+import PrintCustomersModal from "./components/print-customers-modal";
 
 const PAGE_TITLE = { en: "Customers", ar: "العملاء" };
 
@@ -48,6 +49,7 @@ export default function Page() {
   const urlSearchParams = useSearchParams();
   const privateRequest = usePrivateRequest();
   const canAddCustomer = useHasPermission(PERMISSIONS.ADD_CUSTOMER);
+  const canPrintCustomersList = useHasPermission(PERMISSIONS.PRINT_CUSTOMERS_LIST);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
@@ -119,6 +121,7 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [customerToUpdate, setCustomerToUpdate] = useState<Customer | null>(null);
+  const [printModalOpened, { open: openPrintModal, close: closePrintModal }] = useDisclosure(false);
 
   function handleOpenUpdateModal(customer: Customer) {
     setCustomerToUpdate(customer);
@@ -134,12 +137,18 @@ export default function Page() {
           <div className="flex items-center gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
+              {canPrintCustomersList && (
+                <Menu.Item leftSection={<Printer size={14} />} onClick={openPrintModal}>
+                  {translate("Print Customers List", "طباعة قائمة العملاء")}
+                </Menu.Item>
+              )}
+              {canPrintCustomersList && canAddCustomer && <Menu.Divider />}
               {canAddCustomer && (
                 <Menu.Item onClick={openModal} leftSection={<Plus size={14} />}>
                   {translate("Add New Customer", "إضافة عميل جديد")}
                 </Menu.Item>
               )}
-              {canAddCustomer && <Menu.Divider />}
+              {(canPrintCustomersList || canAddCustomer) && <Menu.Divider />}
               <Menu.Item closeMenuOnClick={false} onClick={() => setBlacklistedFilter((current) => !current)}>
                 <Checkbox
                   checked={blacklistedFilter}
@@ -263,6 +272,16 @@ export default function Page() {
           </>
         ))
       )}
+
+      <PrintCustomersModal
+        opened={printModalOpened}
+        close={closePrintModal}
+        filters={{
+          keyword: debouncedKeyword,
+          classification: classificationFilter,
+          blacklisted: blacklistedFilter,
+        }}
+      />
 
       <CustomerModal
         opened={modalOpened}

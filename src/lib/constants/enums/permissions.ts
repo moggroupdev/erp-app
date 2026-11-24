@@ -9,6 +9,7 @@ export const PERMISSION_VALUES = [
   "add_user",
   "read_users",
   "lookup_users",
+  "print_users_list",
   "update_user",
   "delete_user",
   "add_role",
@@ -29,6 +30,7 @@ export const PERMISSION_VALUES = [
   "read_customers",
   "update_customer",
   "merge_customers",
+  "print_customers_list",
   "read_contracts",
   "add_legacy_contract",
   "update_legacy_contract",
@@ -194,6 +196,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Lookup Users",
       ar: "البحث عن المستخدمين",
+    },
+  },
+  print_users_list: {
+    value: "print_users_list",
+    label: {
+      en: "Print Users List",
+      ar: "طباعة قائمة المستخدمين",
     },
   },
   update_user: {
@@ -418,6 +427,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Merge Customers",
       ar: "دمج العملاء",
+    },
+  },
+  print_customers_list: {
+    value: "print_customers_list",
+    label: {
+      en: "Print Customers List",
+      ar: "طباعة قائمة العملاء",
     },
   },
   read_inquiries: {
@@ -971,6 +987,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_user",
       "read_users",
       "lookup_users",
+      "print_users_list",
       "update_user",
       "delete_user",
       "add_role",
@@ -992,6 +1009,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_customers",
       "update_customer",
       "merge_customers",
+      "print_customers_list",
       "read_contracts",
       "add_legacy_contract",
       "update_legacy_contract",

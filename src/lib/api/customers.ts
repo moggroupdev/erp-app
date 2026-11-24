@@ -12,6 +12,13 @@ import type {
   CustomerMergePreview,
   MergeCustomerDto,
 } from "@/types/customer";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
+
+export type CustomersPrintFilters = {
+  keyword?: string;
+  classification?: string | null;
+  blacklisted?: boolean;
+};
 
 const customersApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateCustomerDto }) {
@@ -28,6 +35,32 @@ const customersApi = {
     signal: AbortSignal;
   }) {
     return await privateRequest<PaginatedData<Customer>>({ url: "customers", params, signal });
+  },
+
+  async listAllToPrint({
+    privateRequest,
+    signal,
+    filters = {},
+  }: {
+    privateRequest: PrivateRequest;
+    signal?: AbortSignal;
+    filters?: CustomersPrintFilters;
+  }) {
+    const result = await privateRequest<PaginatedData<Customer>>({
+      url: "customers",
+      params: {
+        limit: Infinity,
+        sort: "name",
+        ...removeEmptyParams({
+          keyword: filters.keyword,
+          classification: filters.classification,
+          blacklisted: filters.blacklisted ? "true" : "",
+        }),
+      },
+      signal,
+    });
+
+    return result.data;
   },
 
   async get({ privateRequest, id, signal }: { privateRequest: PrivateRequest; id: string; signal?: AbortSignal }) {

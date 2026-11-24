@@ -356,7 +356,16 @@ export default function Page() {
         }}
       />
 
-      <PrintMaterialsModal opened={printModalOpened} close={closePrintModal} />
+      <PrintMaterialsModal
+        opened={printModalOpened}
+        close={closePrintModal}
+        filters={{
+          keyword: debouncedKeyword,
+          materialType: materialTypeFilter,
+          mainCategoryId: mainCategoryFilter,
+          subCategoryId: subCategoryFilter,
+        }}
+      />
     </LayoutBox>
   );
 }

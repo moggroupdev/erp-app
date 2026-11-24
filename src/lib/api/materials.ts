@@ -21,6 +21,14 @@ import type {
   MergeMaterialDto,
 } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
+
+export type MaterialsPrintFilters = {
+  keyword?: string;
+  materialType?: string | null;
+  mainCategoryId?: string | null;
+  subCategoryId?: string | null;
+};
 
 const materialsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateMaterialDto }) {
@@ -54,18 +62,23 @@ const materialsApi = {
   async listAllToPrint({
     privateRequest,
     signal,
-    mainCategoryId,
+    filters = {},
   }: {
     privateRequest: PrivateRequest;
     signal?: AbortSignal;
-    mainCategoryId?: string;
+    filters?: MaterialsPrintFilters;
   }) {
     const result = await privateRequest<PaginatedData<MaterialWithUnitConversions>>({
       url: "materials",
       params: {
         limit: Infinity,
         sort: "title",
-        ...(mainCategoryId ? { mainCategoryId } : {}),
+        ...removeEmptyParams({
+          keyword: filters.keyword,
+          materialType: filters.materialType,
+          mainCategoryId: filters.mainCategoryId,
+          subCategoryId: filters.subCategoryId,
+        }),
       },
       signal,
     });
