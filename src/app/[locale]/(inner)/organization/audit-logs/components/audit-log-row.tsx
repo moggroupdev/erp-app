@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Table } from "@mantine/core";
-import { Filter } from "lucide-react";
+import { Eye, Filter } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getAuditedTableLabel } from "@/lib/constants/audit-tables";
@@ -24,51 +24,30 @@ export type AuditLogRowGroup = {
 type AuditLogRowProps = {
   log: AuditLog;
   group: AuditLogRowGroup;
-  isOperationHovered?: boolean;
-  onOperationHover?: (operationId: string | null) => void;
   onFilterByOperationId?: (operationId: string) => void;
 };
 
 const COL_BORDER = "border-e border-gray-200";
 
-export default function AuditLogRow({
-  log,
-  group,
-  isOperationHovered = false,
-  onOperationHover,
-  onFilterByOperationId,
-}: AuditLogRowProps) {
+export default function AuditLogRow({ log, group, onFilterByOperationId }: AuditLogRowProps) {
   const { locale, translate } = useI18n();
-  const router = useRouter();
   const getLocalizedHref = useLocaleHref();
 
   const detailHref = getLocalizedHref(`/organization/audit-logs/${log.id}`);
   const stripeClass = group.stripeIndex === 1 ? "bg-gray-50" : "bg-white";
-  const cellClass = `${stripeClass} group-hover/row:bg-haze-50/40 ${COL_BORDER}`;
-  const operationCellClass = log.operationId
-    ? `align-top ${isOperationHovered ? "bg-haze-50/40" : stripeClass}`
-    : `align-top ${stripeClass} group-hover/row:bg-haze-50/40`;
+  const cellClass = `${stripeClass} ${COL_BORDER}`;
 
   return (
-    <Table.Tr
-      className="group/row cursor-pointer text-gray-600"
-      data-operation-id={log.operationId ?? undefined}
-      onMouseEnter={() => {
-        if (log.operationId) onOperationHover?.(log.operationId);
-      }}
-      onMouseLeave={(e) => {
-        if (!log.operationId) return;
-        const related = e.relatedTarget;
-        if (related instanceof Element && related.closest(`[data-operation-id="${log.operationId}"]`)) {
-          return;
-        }
-        onOperationHover?.(null);
-      }}
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest("a, button")) return;
-        router.push(detailHref);
-      }}
-    >
+    <Table.Tr className="text-gray-600">
+      <Table.Td className={cellClass} w={0}>
+        <Link
+          href={detailHref}
+          title={translate("View details", "عرض التفاصيل")}
+          className="inline-flex rounded-lg bg-haze-50 p-1.5 text-haze-600 transition-colors hover:bg-haze-100"
+        >
+          <Eye size={14} />
+        </Link>
+      </Table.Td>
       <Table.Td className={cellClass}>{formatDateAndTime(log.createdAt, locale)}</Table.Td>
       <Table.Td className={cellClass}>
         {log.actorName ? (
@@ -100,7 +79,7 @@ export default function AuditLogRow({
       {group.showOperationCell && (
         <Table.Td
           rowSpan={group.rowSpan > 1 ? group.rowSpan : undefined}
-          className={operationCellClass}
+          className={`align-top ${stripeClass}`}
         >
           {log.operationId ? (
             <div className="flex items-center gap-1.5">
