@@ -54,6 +54,9 @@ export default function PriceEntriesTable({
                 <Table.Th className="text-gray-600">
                   {translate(`Unit Price (${translation.currency})`, `سعر الوحدة (${translation.currency})`)}
                 </Table.Th>
+                <Table.Th className="text-gray-600">
+                  {translate(`Total Amount (${translation.currency})`, `الإجمالي (${translation.currency})`)}
+                </Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -100,6 +103,9 @@ export default function PriceEntriesTable({
                   <Table.Td>{unitLabel}</Table.Td>
                   <Table.Td>{formatQuantity(row.quantityOrdered)}</Table.Td>
                   <Table.Td className="font-semibold text-gray-800">{formatMoney(row.unitPrice)}</Table.Td>
+                  <Table.Td className="font-semibold text-gray-800">
+                    {formatMoney(row.unitPrice * row.quantityOrdered)}
+                  </Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
