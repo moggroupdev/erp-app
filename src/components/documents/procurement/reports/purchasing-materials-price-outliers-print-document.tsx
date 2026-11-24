@@ -3,11 +3,7 @@ import { PrintDetail, PrintSectionHeading, PrintTable } from "../../components";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
-import {
-  getPriceOutlierCauseLabel,
-  PRICE_OUTLIER_CAUSE_VALUES,
-  type PriceOutlierCause,
-} from "@/lib/constants/enums/derived/price-outlier-causes";
+import type { PriceOutlierCause } from "@/lib/constants/enums/derived/price-outlier-causes";
 import type { Locale } from "@/lib/i18n/types";
 import type { PurchasingMaterialsPriceOutlierRow, PurchasingMaterialsPriceOutlierSummary } from "@/types/reports";
 import { formatSensitivityLabel } from "@/app/[locale]/(inner)/reports/purchasing-materials/components/sensitivity";
@@ -55,9 +51,6 @@ export default function PurchasingMaterialsPriceOutliersPrintDocument({
         ) : null}
         {endDate ? <PrintDetail label={translate("End Date", "تاريخ النهاية")} value={formatDate(endDate, locale)} /> : null}
         <PrintDetail label={translate("Sensitivity", "الحساسية")} value={formatSensitivityLabel(threshold, locale)} />
-        {cause ? (
-          <PrintDetail label={translate("Likely cause", "السبب المحتمل")} value={getPriceOutlierCauseLabel(cause, locale)} />
-        ) : null}
         <PrintDetail label={translate("Outlier cases", "حالات الانحراف")} value={String(summary.flaggedCount)} />
         <PrintDetail label={translate("Materials affected", "المواد المتأثرة")} value={String(summary.materialsAffected)} />
       </section>
@@ -74,19 +67,19 @@ export default function PurchasingMaterialsPriceOutliersPrintDocument({
         />
         <PrintTable
           tableClassName="text-[9px]"
-          columnWidths={["3%", "18%", "7%", "10%", "10%", "8%", "10%", "10%", "10%", "6%", "8%"]}
+          columnWidths={["3%", "17%", "6%", "10%", "10%", "8%", "11%", "10%", "10%", "8%", "7%"]}
           headers={[
             "#",
             translate("Material", "المادة"),
             translate("Code", "الكود"),
             translate("MPO Number", "رقم أمر التوريد"),
             translate("Invoice Number", "رقم الفاتورة"),
+            translate("Addition Permit", "إذن الإضافة"),
             translate("Date", "التاريخ"),
             translate("Supplier", "المورد"),
             translate(`Entered price (${currency})`, `السعر المدخل (${currency})`),
             translate(`Neighbour median (${currency})`, `وسيط الجوار (${currency})`),
             translate("Ratio", "النسبة"),
-            translate("Likely cause", "السبب"),
           ]}
           rows={rows.map((row, index) => [
             String(index + 1),
@@ -94,14 +87,14 @@ export default function PurchasingMaterialsPriceOutliersPrintDocument({
             row.materialCode,
             row.orderCode,
             row.invoiceNumbers?.join(", ") || "-",
+            row.inventoryTransactionLegacyNumbers.join(", ") || "-",
             formatDate(row.orderDate, locale),
             row.supplierName,
             formatPriceWithUnit(row.enteredUnitPrice, row.enteredUnit, locale),
             formatPriceWithUnit(row.referenceMedian, row.enteredUnit, locale),
             formatRatio(row.ratio),
-            getPriceOutlierCauseLabel(row.cause, locale),
           ])}
-          monoColumnIndexes={[2, 3, 4]}
+          monoColumnIndexes={[2, 3, 4, 5]}
           emptyLabel={
             cause
               ? translate("No outliers match the selected cause.", "لا توجد انحرافات تطابق السبب المحدد.")
