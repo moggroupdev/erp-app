@@ -25,6 +25,10 @@ const rolesApi = {
   async update({ privateRequest, id, dto }: { privateRequest: PrivateRequest; id: string; dto: UpdateRoleDto }) {
     return await privateRequest<Role>({ method: "PUT", url: `roles/${id}`, data: dto });
   },
+
+  async delete({ privateRequest, id }: { privateRequest: PrivateRequest; id: string }) {
+    return await privateRequest<void>({ method: "DELETE", url: `roles/${id}` });
+  },
 };
 
 export default rolesApi;

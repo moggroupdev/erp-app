@@ -15,7 +15,10 @@ export type RoleWithCreator = Role & { createdBy: { id: string; name: string } }
 
 export type RoleWithPermissions = Role & { permissions: Permission[] };
 
-export type RoleWithCreatorWithPermissions = RoleWithCreator & { permissions: Permission[] };
+export type RoleWithCreatorWithPermissions = RoleWithCreator & {
+  permissions: Permission[];
+  assignedUserCount: number;
+};
 
 // ==================== DTOs ====================
 
