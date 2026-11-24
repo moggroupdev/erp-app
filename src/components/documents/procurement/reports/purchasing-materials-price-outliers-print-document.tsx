@@ -67,7 +67,7 @@ export default function PurchasingMaterialsPriceOutliersPrintDocument({
         />
         <PrintTable
           tableClassName="text-[9px]"
-          columnWidths={["3%", "17%", "6%", "10%", "10%", "8%", "11%", "10%", "10%", "8%", "7%"]}
+          columnWidths={["3%", "16%", "6%", "10%", "10%", "8%", "11%", "9%", "11%", "9%", "7%"]}
           headers={[
             "#",
             translate("Material", "المادة"),
