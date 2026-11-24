@@ -29,7 +29,7 @@ import MaterialTypeModal from "./components/material-type-modal";
 import DeleteMaterialModal from "./components/delete-material-modal";
 import MergeMaterialModal from "./components/merge-material-modal";
 import RestoreMaterialModal from "../components/restore-material-modal";
-import MaterialDetails from "./components/material-details";
+import MaterialOverview from "./components/material-overview";
 import MaterialBomSection from "./components/material-bom-section";
 import MaterialBomUsagesSection from "./components/material-bom-usages-section";
 import MaterialUnitConversionsSection from "./components/material-unit-conversions-section";
@@ -115,8 +115,7 @@ export default function Page() {
   const [restoreModalOpened, { open: openRestoreModal, close: closeRestoreModal }] = useDisclosure(false);
 
   const showActiveActionsMenu =
-    !isDeleted &&
-    (canUpdateMaterial || canDeleteMaterial || canMergeMaterials || canSetMaterialType || canSetMarketPrice);
+    !isDeleted && (canUpdateMaterial || canDeleteMaterial || canMergeMaterials || canSetMaterialType || canSetMarketPrice);
   const showDeletedActionsMenu = isDeleted && canRestoreMaterial;
   const showActionsMenu = showActiveActionsMenu || showDeletedActionsMenu;
 
@@ -240,9 +239,10 @@ export default function Page() {
               material={{ code: material.code, title: material.title }}
             />
 
-            <MaterialDetails
+            <MaterialOverview
               material={material}
               lastPurchasePrice={canReadLastPurchasePrice ? (lastPurchasePriceQuery.data ?? null) : undefined}
+              lastPurchasePriceLoading={lastPurchasePriceQuery.isFetching && !lastPurchasePriceQuery.data}
             />
 
             {supportsUnitConversions(material.materialType) && <MaterialUnitConversionsSection material={material} />}
