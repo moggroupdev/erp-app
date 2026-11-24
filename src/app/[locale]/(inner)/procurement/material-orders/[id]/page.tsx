@@ -37,6 +37,7 @@ import PrintDocument from "@/components/ui/print-document";
 import MaterialPurchaseOrderPrintDocument from "@/components/documents/procurement/mpos/material-purchase-order-print-document";
 import OrderDetails from "./components/order-details";
 import ItemRequisitionAllocationsModal from "./components/item-requisition-allocations-modal";
+import UpdateOrderItemModal from "./components/update-order-item-modal";
 import OrderInvoicesSection from "@/components/global/sections/order-invoices";
 
 const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خامات" };
@@ -55,6 +56,7 @@ export default function Page() {
   const canAddSupplierInvoice = useHasPermission(PERMISSIONS.ADD_SUPPLIER_INVOICE);
   const canAddReceipt = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_RECEIPT);
   const canUpdateOrder = useHasPermission(PERMISSIONS.UPDATE_MATERIAL_PURCHASE_ORDER);
+  const canCorrectOrderItem = useHasPermission(PERMISSIONS.CORRECT_MATERIAL_PURCHASE_ORDER_ITEM);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -198,6 +200,9 @@ export default function Page() {
                         </Table.Th>
                         <Table.Th>{translate("Requisitions", "طلبات الشراء")}</Table.Th>
                         <Table.Th>{translate("Quotation", "عرض السعر")}</Table.Th>
+                        {canCorrectOrderItem && !order.cancelledAt && (
+                          <Table.Th>{translate("Actions", "إجراءات")}</Table.Th>
+                        )}
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -281,6 +286,15 @@ export default function Page() {
                                       <EmptyValue />
                                     )}
                                   </Table.Td>
+                                  {canCorrectOrderItem && !order.cancelledAt && (
+                                    <Table.Td>
+                                      <UpdateOrderItemModal
+                                        order={order}
+                                        item={item}
+                                        excludeMaterialCodes={order.items.map((row) => row.materialCode)}
+                                      />
+                                    </Table.Td>
+                                  )}
                                 </Table.Tr>
                               </>
                             )}
@@ -296,6 +310,7 @@ export default function Page() {
                         <Table.Th>{formatMoney(subtotal)}</Table.Th>
                         <Table.Th />
                         <Table.Th />
+                        {canCorrectOrderItem && !order.cancelledAt && <Table.Th />}
                       </Table.Tr>
                       <Table.Tr className="font-medium text-gray-800">
                         <Table.Th colSpan={7} className="text-end">
@@ -304,6 +319,7 @@ export default function Page() {
                         <Table.Th>{formatMoney(vat)}</Table.Th>
                         <Table.Th />
                         <Table.Th />
+                        {canCorrectOrderItem && !order.cancelledAt && <Table.Th />}
                       </Table.Tr>
                       <Table.Tr className="font-semibold text-gray-900">
                         <Table.Th colSpan={7} className="text-end">
@@ -315,6 +331,7 @@ export default function Page() {
                         <Table.Th>{formatMoney(grandTotal)}</Table.Th>
                         <Table.Th />
                         <Table.Th />
+                        {canCorrectOrderItem && !order.cancelledAt && <Table.Th />}
                       </Table.Tr>
                     </Table.Tfoot>
                   </Table>

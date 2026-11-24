@@ -7,10 +7,12 @@ import type {
   MaterialPurchaseOrder,
   MaterialPurchaseOrderDetailed,
   MaterialPurchaseOrderItem,
+  MaterialPurchaseOrderItemUpdateContext,
   MaterialPurchaseOrderWithSupplier,
   MaterialPurchaseReceipt,
   MaterialPurchaseReceiptDetailed,
   UpdateMaterialPurchaseOrderDto,
+  UpdateMaterialPurchaseOrderItemDto,
 } from "@/types/material-purchase-order";
 
 const materialPurchaseOrdersApi = {
@@ -40,6 +42,41 @@ const materialPurchaseOrdersApi = {
     return await privateRequest<MaterialPurchaseOrder & { items: MaterialPurchaseOrderItem[] }>({
       method: "PATCH",
       url: `material-purchase-orders/${id}`,
+      data: dto,
+    });
+  },
+
+  async getItemUpdateContext({
+    privateRequest,
+    orderId,
+    itemId,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    orderId: string;
+    itemId: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialPurchaseOrderItemUpdateContext>({
+      url: `material-purchase-orders/${orderId}/items/${itemId}/update-context`,
+      signal,
+    });
+  },
+
+  async updateItem({
+    privateRequest,
+    orderId,
+    itemId,
+    dto,
+  }: {
+    privateRequest: PrivateRequest;
+    orderId: string;
+    itemId: string;
+    dto: UpdateMaterialPurchaseOrderItemDto;
+  }) {
+    return await privateRequest<MaterialPurchaseOrder & { item: MaterialPurchaseOrderItem }>({
+      method: "PATCH",
+      url: `material-purchase-orders/${orderId}/items/${itemId}`,
       data: dto,
     });
   },
