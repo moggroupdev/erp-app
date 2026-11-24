@@ -32,8 +32,8 @@ export default function PrintMaterialsModal({
   const { data: categoriesData, helpers } = useMaterialCategories();
   const printDate = formatDate(new Date(), locale);
 
-  const [includeQuantity, setIncludeQuantity] = useState(true);
-  const [includeUnitPrice, setIncludeUnitPrice] = useState(true);
+  const [includeQuantity, setIncludeQuantity] = useState(false);
+  const [includeUnitPrice, setIncludeUnitPrice] = useState(false);
   const [includeSubcategory, setIncludeSubcategory] = useState(true);
   const [includeEmptyQuantityColumn, setIncludeEmptyQuantityColumn] = useState(false);
   const [ignoreFilters, setIgnoreFilters] = useState(false);
@@ -89,8 +89,8 @@ export default function PrintMaterialsModal({
   function handleClose() {
     close();
     setTimeout(() => {
-      setIncludeQuantity(true);
-      setIncludeUnitPrice(true);
+      setIncludeQuantity(false);
+      setIncludeUnitPrice(false);
       setIncludeSubcategory(true);
       setIncludeEmptyQuantityColumn(false);
       setIgnoreFilters(false);
