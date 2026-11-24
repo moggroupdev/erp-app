@@ -24,27 +24,53 @@ export type AuditLogRowGroup = {
 type AuditLogRowProps = {
   log: AuditLog;
   group: AuditLogRowGroup;
+  isOperationHovered?: boolean;
+  onOperationHover?: (operationId: string | null) => void;
   onFilterByOperationId?: (operationId: string) => void;
 };
 
-export default function AuditLogRow({ log, group, onFilterByOperationId }: AuditLogRowProps) {
+const COL_BORDER = "border-e border-gray-200";
+
+export default function AuditLogRow({
+  log,
+  group,
+  isOperationHovered = false,
+  onOperationHover,
+  onFilterByOperationId,
+}: AuditLogRowProps) {
   const { locale, translate } = useI18n();
   const router = useRouter();
   const getLocalizedHref = useLocaleHref();
 
   const detailHref = getLocalizedHref(`/organization/audit-logs/${log.id}`);
   const stripeClass = group.stripeIndex === 1 ? "bg-gray-50" : "bg-white";
+  const cellClass = `${stripeClass} group-hover/row:bg-haze-50/40 ${COL_BORDER}`;
+  const operationCellClass = log.operationId
+    ? `align-top ${isOperationHovered ? "bg-haze-50/40" : stripeClass}`
+    : `align-top ${stripeClass} group-hover/row:bg-haze-50/40`;
 
   return (
     <Table.Tr
-      className="cursor-pointer text-gray-600"
+      className="group/row cursor-pointer text-gray-600"
+      data-operation-id={log.operationId ?? undefined}
+      onMouseEnter={() => {
+        if (log.operationId) onOperationHover?.(log.operationId);
+      }}
+      onMouseLeave={(e) => {
+        if (!log.operationId) return;
+        const related = e.relatedTarget;
+        if (related instanceof Element && related.closest(`[data-operation-id="${log.operationId}"]`)) {
+          return;
+        }
+        onOperationHover?.(null);
+      }}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest("a, button")) return;
         router.push(detailHref);
       }}
     >
-      <Table.Td className={stripeClass}>{formatDateAndTime(log.createdAt, locale)}</Table.Td>
-      <Table.Td className={stripeClass}>
+      <Table.Td className={cellClass}>{formatDateAndTime(log.createdAt, locale)}</Table.Td>
+      <Table.Td className={cellClass}>
         {log.actorName ? (
           log.actorUserId ? (
             <ProtectedLink
@@ -61,11 +87,11 @@ export default function AuditLogRow({ log, group, onFilterByOperationId }: Audit
           <span className="text-gray-400">-</span>
         )}
       </Table.Td>
-      <Table.Td className={stripeClass}>
+      <Table.Td className={cellClass}>
         <AuditActionLabel action={log.action} />
       </Table.Td>
-      <Table.Td className={stripeClass}>{getAuditedTableLabel(log.tableName, locale)}</Table.Td>
-      <Table.Td className={`font-semibold text-gray-800 ${stripeClass}`}>
+      <Table.Td className={cellClass}>{getAuditedTableLabel(log.tableName, locale)}</Table.Td>
+      <Table.Td className={`font-semibold text-gray-800 ${cellClass}`}>
         <div className="flex items-center gap-1.5">
           <span className="font-mono">{log.recordId}</span>
           <CopyButton text={log.recordId} />
@@ -74,7 +100,7 @@ export default function AuditLogRow({ log, group, onFilterByOperationId }: Audit
       {group.showOperationCell && (
         <Table.Td
           rowSpan={group.rowSpan > 1 ? group.rowSpan : undefined}
-          className={`align-top ${stripeClass}`}
+          className={operationCellClass}
         >
           {log.operationId ? (
             <div className="flex items-center gap-1.5">

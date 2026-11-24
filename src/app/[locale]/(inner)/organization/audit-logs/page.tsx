@@ -233,6 +233,8 @@ export default function Page() {
     [paginatedLogs?.data],
   );
 
+  const [hoveredOperationId, setHoveredOperationId] = useState<string | null>(null);
+
   return (
     <LayoutBox
       header={{
@@ -360,11 +362,11 @@ export default function Page() {
               <Table className="text-nowrap" verticalSpacing="xs">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{translate("Time", "الوقت")}</Table.Th>
-                    <Table.Th>{translate("Actor", "المستخدم")}</Table.Th>
-                    <Table.Th>{translate("Action", "الإجراء")}</Table.Th>
-                    <Table.Th>{translate("Table", "الجدول")}</Table.Th>
-                    <Table.Th>{translate("Record", "السجل")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Time", "الوقت")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Actor", "المستخدم")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Action", "الإجراء")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Table", "الجدول")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Record", "السجل")}</Table.Th>
                     <Table.Th>{translate("Operation", "العملية")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -374,6 +376,8 @@ export default function Page() {
                       key={log.id}
                       log={log}
                       group={operationGroups[index]}
+                      isOperationHovered={!!log.operationId && hoveredOperationId === log.operationId}
+                      onOperationHover={setHoveredOperationId}
                       onFilterByOperationId={setOperationIdFilter}
                     />
                   ))}
