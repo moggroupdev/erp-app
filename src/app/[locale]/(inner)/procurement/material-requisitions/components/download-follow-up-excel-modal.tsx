@@ -48,6 +48,7 @@ export default function DownloadFollowUpExcelModal({
         from: from!,
         to: to!,
         approvedOnly,
+        locale,
       }),
     onSuccess: () => {
       close();
