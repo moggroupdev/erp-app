@@ -289,14 +289,16 @@ const reportsApi = {
       privateRequest,
       from,
       to,
+      approvedOnly = false,
     }: {
       privateRequest: PrivateRequest;
       from: string;
       to: string;
+      approvedOnly?: boolean;
     }) {
       return await privateRequest<null>({
         url: "reports/purchasing-materials/requisition-follow-up/excel",
-        params: { from, to },
+        params: { from, to, ...(approvedOnly ? { approvedOnly: true } : {}) },
         download: true,
         filename: "requisition-follow-up.xlsx",
       });
