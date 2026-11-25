@@ -63,6 +63,34 @@ export type LegacyIssuePermitNeighbors = {
   next: LegacyIssuePermitNeighbor | null;
 };
 
+/** Flat row from `GET /legacy-issue-permits/items-with-notes` for print. */
+export type LegacyIssuePermitNotedItem = {
+  itemId: string;
+  sequenceOrder: number;
+  notes: string;
+  materialCode: string | null;
+  materialTitle: string | null;
+  unitOfMeasurementSelected: MaterialUnit | null;
+  quantity: number | null;
+  issuePermitId: string;
+  issuePermitNumber: string;
+  date: Date;
+  isSst: boolean;
+  isCancelled: boolean;
+  permitType: LegacyIssuePermitType;
+};
+
+export type LegacyIssuePermitNotedItemsFilters = {
+  from?: string;
+  to?: string;
+  permitType?: LegacyIssuePermitType;
+  productionSubDepartment?: ProductionSubDepartment;
+  isSst?: boolean;
+  isCancelled?: boolean;
+  customerId?: string;
+  creatorId?: string;
+};
+
 // ==================== DTOs ====================
 
 export type CreateLegacyIssuePermitItemDto = {

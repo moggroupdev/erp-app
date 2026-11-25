@@ -1,5 +1,6 @@
 import type { Dictionary, PrivateRequest } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import type {
   CreateLegacyIssuePermitDto,
   CreateLegacyIssuePermitItemDto,
@@ -7,6 +8,8 @@ import type {
   LegacyIssuePermitDetailed,
   LegacyIssuePermitItem,
   LegacyIssuePermitNeighbors,
+  LegacyIssuePermitNotedItem,
+  LegacyIssuePermitNotedItemsFilters,
   ReorderLegacyIssuePermitItemsDto,
   UpdateLegacyIssuePermitDto,
   UpdateLegacyIssuePermitItemDto,
@@ -33,6 +36,31 @@ const legacyIssuePermitsApi = {
     return await privateRequest<PaginatedData<LegacyIssuePermit>>({
       url: "legacy-issue-permits",
       params,
+      signal,
+    });
+  },
+
+  async listNotedItems({
+    privateRequest,
+    filters = {},
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    filters?: LegacyIssuePermitNotedItemsFilters;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<LegacyIssuePermitNotedItem[]>({
+      url: "legacy-issue-permits/items-with-notes",
+      params: removeEmptyParams({
+        from: filters.from,
+        to: filters.to,
+        permitType: filters.permitType,
+        productionSubDepartment: filters.productionSubDepartment,
+        isSst: filters.isSst,
+        isCancelled: filters.isCancelled,
+        customerId: filters.customerId,
+        creatorId: filters.creatorId,
+      }),
       signal,
     });
   },

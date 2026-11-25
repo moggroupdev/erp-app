@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useDisclosure } from "@mantine/hooks";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import useDebouncedState from "@/hooks/use-debounced-state";
@@ -24,7 +25,7 @@ import {
 } from "@/lib/constants/enums/legacy-issue-permit-types";
 import { type LegacyIssuePermit } from "@/types/legacy-issue-permit";
 import { Badge, Menu, Select, Table, TextInput } from "@mantine/core";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -33,6 +34,7 @@ import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
+import PrintNotedItemsModal from "./components/print-noted-items-modal";
 
 const PAGE_TITLE = { en: "Legacy Issue Permits", ar: "أذونات الصرف المرحلية" };
 
@@ -114,6 +116,9 @@ export default function Page() {
 
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
+  const [printNotedItemsOpened, { open: openPrintNotedItems, close: closePrintNotedItems }] =
+    useDisclosure(false);
+
   useEffect(() => {
     router.replace(`?` + new URLSearchParams(removeEmptyParams(urlParams)), { scroll: false });
 
@@ -139,6 +144,10 @@ export default function Page() {
           <div className="flex gap-3">
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
+              <Menu.Item leftSection={<Printer size={14} />} onClick={openPrintNotedItems}>
+                {translate("Print items with notes", "طباعة البنود ذات الملاحظات")}
+              </Menu.Item>
+              {canCreatePermit && <Menu.Divider />}
               {canCreatePermit && (
                 <Menu.Item
                   component={Link}
@@ -292,6 +301,8 @@ export default function Page() {
           </>
         ))
       )}
+
+      <PrintNotedItemsModal opened={printNotedItemsOpened} close={closePrintNotedItems} />
     </LayoutBox>
   );
 }
