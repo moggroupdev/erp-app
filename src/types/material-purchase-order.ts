@@ -169,6 +169,7 @@ export type UpdateMaterialPurchaseOrderItemDto = {
   quantityOrdered: number;
   unitPrice: number;
   notes: string | null;
+  updateCompletedAt?: boolean;
 };
 
 export type MaterialPurchaseOrderItemUpdateContext = {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, Button, NumberInput, Textarea, TextInput } from "@mantine/core";
+import { Alert, Button, Checkbox, NumberInput, Textarea, TextInput } from "@mantine/core";
 import { AlertTriangle, FilePenLine, FileText, Package } from "lucide-react";
 import Modal from "@/components/ui/modal";
 import DataSelect from "@/components/ui/data-select";
@@ -42,6 +42,7 @@ export default function UpdateOrderItemModal({
   const [quantityOrdered, setQuantityOrdered] = useState<number | "">("");
   const [unitPrice, setUnitPrice] = useState<number | "">("");
   const [notes, setNotes] = useState("");
+  const [updateCompletedAt, setUpdateCompletedAt] = useState(false);
   const [validationError, setValidationError] = useState("");
 
   const {
@@ -71,6 +72,7 @@ export default function UpdateOrderItemModal({
     setQuantityOrdered(context.item.quantityOrdered);
     setUnitPrice(context.item.unitPrice);
     setNotes(context.item.notes ?? "");
+    setUpdateCompletedAt(false);
     setValidationError("");
   }, [opened, context, item.material]);
 
@@ -107,6 +109,7 @@ export default function UpdateOrderItemModal({
           quantityOrdered: Number(quantityOrdered),
           unitPrice: Number(unitPrice),
           notes: notes.trim() || null,
+          updateCompletedAt,
         },
       });
     },
@@ -127,6 +130,7 @@ export default function UpdateOrderItemModal({
     setQuantityOrdered("");
     setUnitPrice("");
     setNotes("");
+    setUpdateCompletedAt(false);
     setValidationError("");
     updateItem.reset();
   }
@@ -381,6 +385,18 @@ export default function UpdateOrderItemModal({
                 </div>
               </dl>
             </div>
+
+            <Checkbox
+              checked={updateCompletedAt}
+              onChange={(event) => setUpdateCompletedAt(event.currentTarget.checked)}
+              label={translate("Update completion time", "تحديث وقت الاكتمال")}
+              description={translate(
+                "When checked, the order is marked completed if every line is fully received, and completion is cleared otherwise. Leave unchecked to keep the current completion time.",
+                "عند التحديد، يُعلَّم الأمر مكتملاً إذا استُلمت كل البنود بالكامل، وإلا يُمسح الاكتمال. اتركه بدون تحديد للإبقاء على وقت الاكتمال الحالي.",
+              )}
+              radius="md"
+              disabled={isBlocked || updateItem.isPending}
+            />
 
             {error && <ErrorAlert error={error} />}
 
