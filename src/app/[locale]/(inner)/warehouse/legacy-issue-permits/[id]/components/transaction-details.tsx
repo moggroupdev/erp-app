@@ -137,7 +137,14 @@ export default function TransactionDetails({
 
   return (
     <EntityDetails
-      title={<SstPermitNumber number={transaction.issuePermitNumber} isSst={transaction.isSst} />}
+      title={transaction.issuePermitNumber}
+      titleAside={
+        transaction.isSst ? (
+          <Badge size="sm" variant="light" color="plum" radius="md">
+            SST
+          </Badge>
+        ) : undefined
+      }
       icon={History}
       headerEnd={headerEnd}
       rows={rows}

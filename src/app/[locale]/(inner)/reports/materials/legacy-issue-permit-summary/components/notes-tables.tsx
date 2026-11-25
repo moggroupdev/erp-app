@@ -1,9 +1,8 @@
 "use client";
 
-import { Table } from "@mantine/core";
+import { Badge, Table } from "@mantine/core";
 import { StickyNote } from "lucide-react";
 import ProtectedLink from "@/components/ui/protected-link";
-import SstPermitNumber from "@/components/ui/sst-permit-number";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getLegacyIssuePermitTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-types";
@@ -38,13 +37,20 @@ export function HeaderNotesTable({ data }: { data: LegacyIssuePermitSummaryHeade
               {data.map((row) => (
                 <Table.Tr key={row.id} className="text-gray-600">
                   <Table.Td className="font-medium whitespace-nowrap text-gray-800">
-                    <ProtectedLink
-                      permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
-                      href={`/warehouse/legacy-issue-permits/${row.id}`}
-                      className="text-haze-700 hover:underline"
-                    >
-                      <SstPermitNumber number={row.issuePermitNumber} isSst={row.isSst} />
-                    </ProtectedLink>
+                    <div className="flex items-center gap-1.5">
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
+                        href={`/warehouse/legacy-issue-permits/${row.id}`}
+                        className="text-haze-700 font-mono hover:underline"
+                      >
+                        {row.issuePermitNumber}
+                      </ProtectedLink>
+                      {row.isSst && (
+                        <Badge size="sm" variant="light" color="plum" radius="md">
+                          SST
+                        </Badge>
+                      )}
+                    </div>
                   </Table.Td>
                   <Table.Td className="whitespace-nowrap">{formatDate(row.date, locale)}</Table.Td>
                   <Table.Td className="whitespace-nowrap">{getLegacyIssuePermitTypeLabel(row.permitType, locale)}</Table.Td>
@@ -86,13 +92,20 @@ export function LineNotesTable({ data }: { data: LegacyIssuePermitSummaryLineNot
               {data.map((row) => (
                 <Table.Tr key={row.itemId} className="text-gray-600">
                   <Table.Td className="font-medium whitespace-nowrap text-gray-800">
-                    <ProtectedLink
-                      permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
-                      href={`/warehouse/legacy-issue-permits/${row.issuePermitId}`}
-                      className="text-haze-700 hover:underline"
-                    >
-                      <SstPermitNumber number={row.issuePermitNumber} isSst={row.isSst} />
-                    </ProtectedLink>
+                    <div className="flex items-center gap-1.5">
+                      <ProtectedLink
+                        permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
+                        href={`/warehouse/legacy-issue-permits/${row.issuePermitId}`}
+                        className="text-haze-700 font-mono hover:underline"
+                      >
+                        {row.issuePermitNumber}
+                      </ProtectedLink>
+                      {row.isSst && (
+                        <Badge size="sm" variant="light" color="plum" radius="md">
+                          SST
+                        </Badge>
+                      )}
+                    </div>
                   </Table.Td>
                   <Table.Td className="whitespace-nowrap">{formatDate(row.date, locale)}</Table.Td>
                   <Table.Td className="whitespace-nowrap">
