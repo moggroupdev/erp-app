@@ -11,6 +11,7 @@ import { type LegacyIssuePermitDetailed } from "@/types/legacy-issue-permit";
 import { Badge } from "@mantine/core";
 import { History } from "lucide-react";
 import EntityDetails, { CreatorLink, EmptyValue, type DetailRow } from "@/components/ui/entity-details";
+import SstPermitNumber from "@/components/ui/sst-permit-number";
 
 export default function TransactionDetails({
   transaction,
@@ -24,9 +25,7 @@ export default function TransactionDetails({
   const rows: DetailRow[] = [
     {
       key: translate("Issue Permit Number", "رقم إذن الصرف"),
-      value: transaction.issuePermitNumber,
-      mono: true,
-      copyText: transaction.issuePermitNumber,
+      value: <SstPermitNumber number={transaction.issuePermitNumber} isSst={transaction.isSst} />,
     },
     {
       key: translate("Issue Permit Date", "تاريخ إذن الصرف"),
@@ -137,6 +136,11 @@ export default function TransactionDetails({
   ];
 
   return (
-    <EntityDetails title={transaction.issuePermitNumber} icon={History} headerEnd={headerEnd} rows={rows} />
+    <EntityDetails
+      title={<SstPermitNumber number={transaction.issuePermitNumber} isSst={transaction.isSst} />}
+      icon={History}
+      headerEnd={headerEnd}
+      rows={rows}
+    />
   );
 }

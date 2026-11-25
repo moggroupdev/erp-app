@@ -60,6 +60,7 @@ export default function IssuePermitChart({
     }),
     quantity: entry.displayQuantity!,
     issuePermitNumber: entry.issuePermitNumber,
+    isSst: entry.isSst,
   }));
 
   return (
@@ -87,7 +88,9 @@ export default function IssuePermitChart({
               formatter={(value) => [formatQuantity(Number(value ?? 0)), quantityLabel]}
               labelFormatter={(label, payload) => {
                 const number = payload?.[0]?.payload?.issuePermitNumber as string | undefined;
-                return number ? `${label} · ${number}` : String(label);
+                const isSst = payload?.[0]?.payload?.isSst as boolean | undefined;
+                if (!number) return String(label);
+                return isSst ? `${label} · ${number} (SST)` : `${label} · ${number}`;
               }}
               contentStyle={{ borderRadius: 10, border: "1px solid #e7e5e4", direction: dir }}
             />

@@ -3,14 +3,12 @@
 import { Table } from "@mantine/core";
 import { StickyNote } from "lucide-react";
 import ProtectedLink from "@/components/ui/protected-link";
+import SstPermitNumber from "@/components/ui/sst-permit-number";
 import { useI18n } from "@/lib/i18n/hooks";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getLegacyIssuePermitTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-types";
 import { formatDate } from "@/lib/helpers/date-formaters";
-import type {
-  LegacyIssuePermitSummaryHeaderNote,
-  LegacyIssuePermitSummaryLineNote,
-} from "@/types/reports";
+import type { LegacyIssuePermitSummaryHeaderNote, LegacyIssuePermitSummaryLineNote } from "@/types/reports";
 import ReportCard from "./report-card";
 
 export function HeaderNotesTable({ data }: { data: LegacyIssuePermitSummaryHeaderNote[] }) {
@@ -39,20 +37,18 @@ export function HeaderNotesTable({ data }: { data: LegacyIssuePermitSummaryHeade
             <Table.Tbody>
               {data.map((row) => (
                 <Table.Tr key={row.id} className="text-gray-600">
-                  <Table.Td className="whitespace-nowrap font-medium text-gray-800">
+                  <Table.Td className="font-medium whitespace-nowrap text-gray-800">
                     <ProtectedLink
                       permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
                       href={`/warehouse/legacy-issue-permits/${row.id}`}
                       className="text-haze-700 hover:underline"
                     >
-                      {row.issuePermitNumber}
+                      <SstPermitNumber number={row.issuePermitNumber} isSst={row.isSst} />
                     </ProtectedLink>
                   </Table.Td>
                   <Table.Td className="whitespace-nowrap">{formatDate(row.date, locale)}</Table.Td>
-                  <Table.Td className="whitespace-nowrap">
-                    {getLegacyIssuePermitTypeLabel(row.permitType, locale)}
-                  </Table.Td>
-                  <Table.Td className="max-w-md whitespace-pre-wrap break-words text-gray-800">{row.notes}</Table.Td>
+                  <Table.Td className="whitespace-nowrap">{getLegacyIssuePermitTypeLabel(row.permitType, locale)}</Table.Td>
+                  <Table.Td className="max-w-md wrap-break-word whitespace-pre-wrap text-gray-800">{row.notes}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -89,13 +85,13 @@ export function LineNotesTable({ data }: { data: LegacyIssuePermitSummaryLineNot
             <Table.Tbody>
               {data.map((row) => (
                 <Table.Tr key={row.itemId} className="text-gray-600">
-                  <Table.Td className="whitespace-nowrap font-medium text-gray-800">
+                  <Table.Td className="font-medium whitespace-nowrap text-gray-800">
                     <ProtectedLink
                       permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
                       href={`/warehouse/legacy-issue-permits/${row.issuePermitId}`}
                       className="text-haze-700 hover:underline"
                     >
-                      {row.issuePermitNumber}
+                      <SstPermitNumber number={row.issuePermitNumber} isSst={row.isSst} />
                     </ProtectedLink>
                   </Table.Td>
                   <Table.Td className="whitespace-nowrap">{formatDate(row.date, locale)}</Table.Td>
@@ -112,7 +108,7 @@ export function LineNotesTable({ data }: { data: LegacyIssuePermitSummaryLineNot
                       translate("Note only", "ملاحظة فقط")
                     )}
                   </Table.Td>
-                  <Table.Td className="max-w-md whitespace-pre-wrap break-words text-gray-800">{row.notes}</Table.Td>
+                  <Table.Td className="max-w-md wrap-break-word whitespace-pre-wrap text-gray-800">{row.notes}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

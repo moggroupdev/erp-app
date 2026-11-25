@@ -31,9 +31,9 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
-import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
+import SstPermitNumber from "@/components/ui/sst-permit-number";
 
 const PAGE_TITLE = { en: "Legacy Issue Permits", ar: "أذونات الصرف المرحلية" };
 
@@ -230,11 +230,10 @@ export default function Page() {
                             href={`/warehouse/legacy-issue-permits/${transaction.id}?${new URLSearchParams(
                               removeEmptyParams({ sortBy, keyword: debouncedKeyword }),
                             )}`}
-                            className="font-mono hover:underline"
+                            className="hover:underline"
                           >
-                            {transaction.issuePermitNumber}
+                            <SstPermitNumber number={transaction.issuePermitNumber} isSst={transaction.isSst} />
                           </ProtectedLink>
-                          <CopyButton text={transaction.issuePermitNumber} />
 
                           {transaction.isCancelled && (
                             <Badge size="sm" variant="light" color="clay" radius="md">

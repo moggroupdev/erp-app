@@ -5,7 +5,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useMemo } from "react";
 import { Badge, Table } from "@mantine/core";
 import { Table2 } from "lucide-react";
-import CopyButton from "@/components/ui/copy-button";
+import SstPermitNumber from "@/components/ui/sst-permit-number";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import {
@@ -83,11 +83,10 @@ export default function IssuePermitEntriesTable({ data }: { data: TableEntry[] }
                         <ProtectedLink
                           permission={PERMISSIONS.READ_LEGACY_ISSUE_PERMITS}
                           href={`/warehouse/legacy-issue-permits/${row.issuePermitId}`}
-                          className="font-mono font-medium text-gray-800 hover:underline"
+                          className="font-medium text-gray-800 hover:underline"
                         >
-                          {row.issuePermitNumber}
+                          <SstPermitNumber number={row.issuePermitNumber} isSst={row.isSst} />
                         </ProtectedLink>
-                        <CopyButton text={row.issuePermitNumber} />
                         {row.isCancelled && (
                           <Badge size="sm" variant="light" color="clay" radius="sm">
                             {translate("Cancelled", "ملغي")}

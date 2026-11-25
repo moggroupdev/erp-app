@@ -1,5 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "../components";
+import SstPermitNumber from "@/components/ui/sst-permit-number";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatBaseQuantityForDisplay } from "@/lib/helpers/format-quantity";
 import { getLegacyIssuePermitTypeLabel } from "@/lib/constants/enums/legacy-issue-permit-types";
@@ -186,7 +187,7 @@ export default function LegacyIssuePermitSummaryPrintDocument({
             translate("Notes", "الملاحظات"),
           ]}
           rows={data.headerNotes.map((row) => [
-            row.issuePermitNumber,
+            <SstPermitNumber key={row.id} number={row.issuePermitNumber} isSst={row.isSst} />,
             formatDate(row.date, locale),
             getLegacyIssuePermitTypeLabel(row.permitType, locale),
             row.notes,
@@ -205,7 +206,7 @@ export default function LegacyIssuePermitSummaryPrintDocument({
             translate("Notes", "الملاحظات"),
           ]}
           rows={data.lineNotes.map((row) => [
-            row.issuePermitNumber,
+            <SstPermitNumber key={row.itemId} number={row.issuePermitNumber} isSst={row.isSst} />,
             formatDate(row.date, locale),
             row.materialCode ?? translate("Note only", "ملاحظة فقط"),
             row.notes,

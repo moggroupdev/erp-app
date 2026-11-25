@@ -173,6 +173,7 @@ export type LegacyIssuePermitSummaryDataQualityNote = {
 export type LegacyIssuePermitSummaryHeaderNote = {
   id: string;
   issuePermitNumber: string;
+  isSst: boolean;
   date: string;
   permitType: LegacyIssuePermitType;
   notes: string;
@@ -182,6 +183,7 @@ export type LegacyIssuePermitSummaryLineNote = {
   itemId: string;
   issuePermitId: string;
   issuePermitNumber: string;
+  isSst: boolean;
   date: string;
   materialCode: string | null;
   notes: string;
@@ -209,6 +211,7 @@ export type MaterialsIssuePermitHistoryEntry = {
   issuePermitItemId: string;
   issuePermitId: string;
   issuePermitNumber: string;
+  isSst: boolean;
   date: string;
   productionSubDepartment: ProductionSubDepartment | null;
   creatorId: string;
