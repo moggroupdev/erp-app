@@ -19,8 +19,9 @@ import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { getProductionSubDepartmentLabel } from "@/lib/constants/enums/production-sub-departments";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type MaterialPurchaseRequisitionListItem } from "@/types/material-purchase-requisition";
+import { useDisclosure } from "@mantine/hooks";
 import { Menu, Table, TextInput } from "@mantine/core";
-import { Plus, Search, X } from "lucide-react";
+import { Download, Plus, Search, X } from "lucide-react";
 import ProtectedLink from "@/components/ui/protected-link";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
@@ -34,6 +35,7 @@ import ActionsMenu from "@/components/ui/actions-menu";
 import { EmptyValue } from "@/components/ui/entity-details";
 import PreGoLiveBadge from "@/components/global/pre-go-live-badge";
 import { getRequisitionStatus, getRequisitionStatusLabel } from "./helpers";
+import DownloadFollowUpExcelModal from "./components/download-follow-up-excel-modal";
 
 const PAGE_TITLE = { en: "Material Purchase Requisitions", ar: "طلبات شراء الخامات" };
 
@@ -49,6 +51,10 @@ export default function Page() {
   const getLocalizedHref = useLocaleHref();
   const privateRequest = usePrivateRequest();
   const canAddRequisition = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_REQUISITION);
+  const canDownloadFollowUpExcel = useHasPermission(
+    PERMISSIONS.DOWNLOAD_MATERIAL_PURCHASING_REQUISITION_FOLLOW_UP_REPORT,
+  );
+  const [followUpExcelOpened, { open: openFollowUpExcel, close: closeFollowUpExcel }] = useDisclosure(false);
 
   const [activePage, setActivePage] = useState(parseInt(urlSearchParams.get("page") || "1"));
   const {
@@ -120,11 +126,17 @@ export default function Page() {
                   {translate("Create purchase requisition", "إنشاء طلب شراء")}
                 </Menu.Item>
               )}
+              {canDownloadFollowUpExcel && (
+                <Menu.Item leftSection={<Download size={14} />} onClick={openFollowUpExcel}>
+                  {translate("Download follow-up Excel", "تنزيل تقرير المتابعة إكسل")}
+                </Menu.Item>
+              )}
             </ActionsMenu>
           </div>
         ),
       }}
     >
+      <DownloadFollowUpExcelModal opened={followUpExcelOpened} close={closeFollowUpExcel} />
       <TextInput
         value={keyword}
         onChange={(e) => setPendingKeyword(e.currentTarget.value)}

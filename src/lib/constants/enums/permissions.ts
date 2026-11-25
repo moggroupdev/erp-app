@@ -67,6 +67,7 @@ export const PERMISSION_VALUES = [
   "read_material_purchasing_price_outliers_report",
   "read_material_purchasing_average_price_gaps_report",
   "read_material_purchasing_requisition_follow_up_report",
+  "download_material_purchasing_requisition_follow_up_report",
   "read_material_purchasing_requisition_history_report",
   "read_accounting_supplier_invoices_report",
   "add_product",
@@ -928,6 +929,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
       ar: "عرض تقرير متابعة طلبات الشراء",
     },
   },
+  download_material_purchasing_requisition_follow_up_report: {
+    value: "download_material_purchasing_requisition_follow_up_report",
+    label: {
+      en: "Download Purchase Requisition Follow-up Excel",
+      ar: "تحميل تقرير متابعة طلبات الشراء إكسل",
+    },
+  },
   read_material_purchasing_requisition_history_report: {
     value: "read_material_purchasing_requisition_history_report",
     label: {
@@ -1123,6 +1131,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_material_purchasing_price_outliers_report",
       "read_material_purchasing_average_price_gaps_report",
       "read_material_purchasing_requisition_follow_up_report",
+      "download_material_purchasing_requisition_follow_up_report",
       "read_material_purchasing_requisition_history_report",
       "read_accounting_supplier_invoices_report",
     ],

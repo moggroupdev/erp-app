@@ -285,6 +285,27 @@ const reportsApi = {
       });
     },
 
+    async downloadRequisitionFollowUpExcel({
+      privateRequest,
+      from,
+      to,
+      approvedOnly = false,
+      locale,
+    }: {
+      privateRequest: PrivateRequest;
+      from: string;
+      to: string;
+      approvedOnly?: boolean;
+      locale: "en" | "ar";
+    }) {
+      return await privateRequest<null>({
+        url: "reports/purchasing-materials/requisition-follow-up/excel",
+        params: { from, to, ...(approvedOnly ? { approvedOnly: true } : {}) },
+        download: true,
+        filename: buildRequisitionFollowUpExcelFilename({ from, to, approvedOnly, locale }),
+      });
+    },
+
     async getRequisitionHistory({
       privateRequest,
       materialCode,
@@ -330,5 +351,38 @@ const reportsApi = {
     },
   },
 };
+
+function buildRequisitionFollowUpExcelFilename({
+  from,
+  to,
+  approvedOnly,
+  locale,
+}: {
+  from: string;
+  to: string;
+  approvedOnly: boolean;
+  locale: "en" | "ar";
+}): string {
+  const title =
+    locale === "ar"
+      ? approvedOnly
+        ? "متابعة طلبات الشراء المعتمدة"
+        : "متابعة طلبات الشراء"
+      : approvedOnly
+        ? "Approved Purchase Requisition Follow-up"
+        : "Purchase Requisition Follow-up";
+  const range = locale === "ar" ? `من ${from} إلى ${to}` : `from ${from} to ${to}`;
+  return sanitizeDownloadFilename(`${title} - ${range}.xlsx`);
+}
+
+function sanitizeDownloadFilename(value: string): string {
+  return value
+    .trim()
+    .replace(/[<>:"/\\|?*\u0000-\u001f]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/\s+/g, " ")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 180);
+}
 
 export default reportsApi;
