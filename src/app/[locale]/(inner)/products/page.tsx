@@ -21,7 +21,7 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { type Product, type ProductWithDimensions } from "@/types/product";
-import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
+import { Badge, Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
 import { Download, Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
@@ -279,7 +279,7 @@ export default function Page() {
                     <Table.Th>{translate("Product Name", "اسم المنتج")}</Table.Th>
                     <Table.Th>{translate("Code", "الكود")}</Table.Th>
                     <Table.Th>
-                      {translate("Standard Dimensions", "الأبعاد النمطية")} ({translation.productDimensionUnit})
+                      {translate("Dimensions", "الأبعاد")} ({translation.productDimensionUnit})
                     </Table.Th>
                     <Table.Th>{translate("Main Category", "الفئة الرئيسية")}</Table.Th>
                     <Table.Th>{translate("Subcategory", "الفئة الفرعية")}</Table.Th>
@@ -291,8 +291,8 @@ export default function Page() {
                   {paginatedProducts.data.map((product) => {
                     const categories = getCategoryLabels(product.subCategoryId);
                     const dimensions = showAllDimensions
-                      ? [...product.dimensions].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
-                      : product.dimensions.filter((dimension) => dimension.isDefault);
+                      ? [...product.dimensions].sort((a, b) => Number(b.isStandard) - Number(a.isStandard))
+                      : product.dimensions.filter((dimension) => dimension.isStandard);
                     return (
                       <Table.Tr key={product.code} className="text-gray-600">
                         <Table.Td className="align-top font-semibold text-gray-800">
@@ -314,7 +314,14 @@ export default function Page() {
                           {dimensions.length > 0 ? (
                             <div className="flex flex-col gap-1">
                               {dimensions.map((dimension) => (
-                                <span key={dimension.id}>{formatDimensionLabel(dimension)}</span>
+                                <span key={dimension.id} className="inline-flex items-center gap-1.5">
+                                  <span>{formatDimensionLabel(dimension)}</span>
+                                  {dimension.isStandard && (
+                                    <Badge size="xs" variant="light" color="haze" radius="md">
+                                      {translate("Standard", "نمطي")}
+                                    </Badge>
+                                  )}
+                                </span>
                               ))}
                             </div>
                           ) : (

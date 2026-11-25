@@ -5,6 +5,7 @@ import type {
   MaterialUnitConversion,
   MaterialWithUnitConversions,
   MaterialWithCreatorAndUnitConversions,
+  MaterialLastPurchasePrice,
   DeletedMaterial,
   CreateMaterialDto,
   UpdateMaterialDto,
@@ -20,6 +21,14 @@ import type {
   MergeMaterialDto,
 } from "@/types/material";
 import type { MaterialType } from "@/lib/constants/enums/material-types";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
+
+export type MaterialsPrintFilters = {
+  keyword?: string;
+  materialType?: string | null;
+  mainCategoryId?: string | null;
+  subCategoryId?: string | null;
+};
 
 const materialsApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateMaterialDto }) {
@@ -53,18 +62,23 @@ const materialsApi = {
   async listAllToPrint({
     privateRequest,
     signal,
-    mainCategoryId,
+    filters = {},
   }: {
     privateRequest: PrivateRequest;
     signal?: AbortSignal;
-    mainCategoryId?: string;
+    filters?: MaterialsPrintFilters;
   }) {
     const result = await privateRequest<PaginatedData<MaterialWithUnitConversions>>({
       url: "materials",
       params: {
         limit: Infinity,
         sort: "title",
-        ...(mainCategoryId ? { mainCategoryId } : {}),
+        ...removeEmptyParams({
+          keyword: filters.keyword,
+          materialType: filters.materialType,
+          mainCategoryId: filters.mainCategoryId,
+          subCategoryId: filters.subCategoryId,
+        }),
       },
       signal,
     });
@@ -74,6 +88,18 @@ const materialsApi = {
 
   async get({ privateRequest, code, signal }: { privateRequest: PrivateRequest; code: string; signal?: AbortSignal }) {
     return await privateRequest<MaterialWithCreatorAndUnitConversions>({ url: `materials/${code}`, signal });
+  },
+
+  async getLastPurchasePrice({
+    privateRequest,
+    code,
+    signal,
+  }: {
+    privateRequest: PrivateRequest;
+    code: string;
+    signal?: AbortSignal;
+  }) {
+    return await privateRequest<MaterialLastPurchasePrice>({ url: `materials/${code}/last-purchase-price`, signal });
   },
 
   async update({ privateRequest, code, dto }: { privateRequest: PrivateRequest; code: string; dto: UpdateMaterialDto }) {

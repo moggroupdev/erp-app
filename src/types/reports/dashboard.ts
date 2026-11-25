@@ -31,6 +31,7 @@ export type DashboardStock = {
 export type DashboardRecentLegacyIssuePermit = {
   id: string;
   issuePermitNumber: string;
+  isSst: boolean;
   date: string;
   productionSubDepartment: string | null;
   isCancelled: boolean;

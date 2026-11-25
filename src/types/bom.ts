@@ -80,7 +80,7 @@ export type Bom = {
   depth: number | null;
   diameter: number | null;
   height: number;
-  isDefault: boolean;
+  isStandard: boolean;
   notes: string | null;
   product: {
     code: string;

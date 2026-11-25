@@ -256,6 +256,7 @@ export default function Page() {
   const [maintenanceOrderType, setMaintenanceOrderType] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [hasMultipleCustomers, setHasMultipleCustomers] = useState(false);
+  const [isSst, setIsSst] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ItemDraftRow[]>([createEmptyRow()]);
@@ -309,6 +310,7 @@ export default function Page() {
             : null,
           customerId: showsCustomerFields && !hasMultipleCustomers ? customerId : null,
           hasMultipleCustomers: showsCustomerFields ? hasMultipleCustomers : false,
+          isSst,
           isCancelled,
           notes: notes.trim() || null,
           items: rows.map((row) => ({
@@ -343,6 +345,7 @@ export default function Page() {
       maintenanceOrderType !== null ||
       customerId !== null ||
       hasMultipleCustomers ||
+      isSst ||
       isCancelled ||
       notes.trim() !== "" ||
       rows.length > 1 ||
@@ -360,6 +363,7 @@ export default function Page() {
       maintenanceOrderType,
       customerId,
       hasMultipleCustomers,
+      isSst,
       isCancelled,
       notes,
       rows,
@@ -526,14 +530,29 @@ export default function Page() {
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <TextInput
-            value={issuePermitNumber}
-            onChange={(e) => setIssuePermitNumber(e.target.value)}
-            label={translate("Issue Permit Number", "رقم إذن الصرف")}
-            placeholder={translate("Enter issue permit number", "أدخل رقم إذن الصرف")}
-            required
-            radius="md"
-          />
+          <div className="flex flex-col gap-2">
+            <TextInput
+              value={issuePermitNumber}
+              onChange={(e) => setIssuePermitNumber(e.target.value)}
+              label={translate("Issue Permit Number", "رقم إذن الصرف")}
+              placeholder={translate("Enter issue permit number", "أدخل رقم إذن الصرف")}
+              required
+              radius="md"
+            />
+            <Checkbox
+              checked={isSst}
+              onChange={(e) => setIsSst(e.currentTarget.checked)}
+              label={translate("SST issue permit", "إذن صرف SST")}
+            />
+            {isSst && (
+              <p className="text-xs text-gray-500">
+                {translate(
+                  "Saved as the paper number with an automatic -1, -2, … suffix.",
+                  "يُحفظ برقم الورقة مع لاحقة تلقائية -1، -2، …",
+                )}
+              </p>
+            )}
+          </div>
           <DatePickerInput
             value={date}
             onChange={setDate}

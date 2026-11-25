@@ -152,7 +152,10 @@ export default function Page() {
                     disabled={isNeighborsFetching || !previous}
                     title={
                       previous
-                        ? translate(`Previous: ${previous.issuePermitNumber}`, `السابق: ${previous.issuePermitNumber}`)
+                        ? translate(
+                            `Previous: ${previous.issuePermitNumber}${previous.isSst ? " (SST)" : ""}`,
+                            `السابق: ${previous.issuePermitNumber}${previous.isSst ? " (SST)" : ""}`,
+                          )
                         : translate("Previous permit", "الإذن السابق")
                     }
                     onClick={() => previous && navigateToNeighbor(previous.id)}
@@ -168,7 +171,10 @@ export default function Page() {
                     disabled={isNeighborsFetching || !next}
                     title={
                       next
-                        ? translate(`Next: ${next.issuePermitNumber}`, `التالي: ${next.issuePermitNumber}`)
+                        ? translate(
+                            `Next: ${next.issuePermitNumber}${next.isSst ? " (SST)" : ""}`,
+                            `التالي: ${next.issuePermitNumber}${next.isSst ? " (SST)" : ""}`,
+                          )
                         : translate("Next permit", "الإذن التالي")
                     }
                     onClick={() => next && navigateToNeighbor(next.id)}

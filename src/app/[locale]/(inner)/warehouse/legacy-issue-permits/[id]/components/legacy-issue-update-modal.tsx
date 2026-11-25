@@ -22,6 +22,7 @@ import SelectLegacyIssuePermitType from "@/components/global/selections/enum-bas
 import SelectLegacyIssuePermitMaintenanceOrderType from "@/components/global/selections/enum-based/select-legacy-issue-permit-maintenance-order-type";
 import DatePickerInput from "@/components/ui/date-picker-input";
 import { dateTimePickerValueToIso, toDatePickerValue } from "@/lib/helpers/datetime-picker";
+import { toSstPaperNumber } from "@/lib/helpers/legacy-issue-permit-number";
 
 export default function LegacyIssuePermitUpdateModal({
   opened,
@@ -49,6 +50,7 @@ export default function LegacyIssuePermitUpdateModal({
   const [maintenanceOrderType, setMaintenanceOrderType] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [hasMultipleCustomers, setHasMultipleCustomers] = useState(false);
+  const [isSst, setIsSst] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
   const [notes, setNotes] = useState("");
 
@@ -78,7 +80,9 @@ export default function LegacyIssuePermitUpdateModal({
 
   useEffect(() => {
     if (!opened) return;
-    setIssuePermitNumber(transaction.issuePermitNumber);
+    setIssuePermitNumber(
+      transaction.isSst ? toSstPaperNumber(transaction.issuePermitNumber) : transaction.issuePermitNumber,
+    );
     setIssueOrderNumber(transaction.issueOrderNumber || "");
     setIssueOrderDate(transaction.issueOrderDate ? toDatePickerValue(transaction.issueOrderDate) : null);
     setDate(toDatePickerValue(transaction.date));
@@ -90,6 +94,7 @@ export default function LegacyIssuePermitUpdateModal({
     setMaintenanceOrderType(transaction.maintenanceOrderType);
     setCustomerId(transaction.customer?.id ?? null);
     setHasMultipleCustomers(transaction.hasMultipleCustomers);
+    setIsSst(transaction.isSst);
     setIsCancelled(transaction.isCancelled);
     setNotes(transaction.notes || "");
     setValidationError("");
@@ -115,6 +120,7 @@ export default function LegacyIssuePermitUpdateModal({
             : null,
           customerId: showsCustomerFields && !hasMultipleCustomers ? customerId : null,
           hasMultipleCustomers: showsCustomerFields ? hasMultipleCustomers : false,
+          isSst,
           isCancelled,
           notes: notes.trim() || null,
         },
@@ -172,8 +178,12 @@ export default function LegacyIssuePermitUpdateModal({
     }, 250);
   }
 
+  const originalPaperNumber = transaction.isSst
+    ? toSstPaperNumber(transaction.issuePermitNumber)
+    : transaction.issuePermitNumber;
+
   const isDataChanged =
-    issuePermitNumber.trim() !== transaction.issuePermitNumber ||
+    issuePermitNumber.trim() !== originalPaperNumber ||
     (issueOrderNumber.trim() || null) !== (transaction.issueOrderNumber || null) ||
     (transaction.issueOrderDate ? dateTimePickerValueToIso(toDatePickerValue(transaction.issueOrderDate)) : null) !==
       dateTimePickerValueToIso(issueOrderDate) ||
@@ -186,6 +196,7 @@ export default function LegacyIssuePermitUpdateModal({
     (maintenanceOrderType || null) !== (transaction.maintenanceOrderType || null) ||
     (customerId || null) !== (transaction.customer?.id || null) ||
     hasMultipleCustomers !== transaction.hasMultipleCustomers ||
+    isSst !== transaction.isSst ||
     isCancelled !== transaction.isCancelled ||
     (notes.trim() || null) !== transaction.notes;
 
@@ -202,14 +213,34 @@ export default function LegacyIssuePermitUpdateModal({
     <Modal opened={opened} onClose={handleClose} title={translate("Edit Issue Permit", "تعديل إذن الصرف")} size="xl">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <TextInput
-            value={issuePermitNumber}
-            onChange={(e) => setIssuePermitNumber(e.target.value)}
-            label={translate("Issue Permit Number", "رقم إذن الصرف")}
-            placeholder={translate("Enter issue permit number", "أدخل رقم إذن الصرف")}
-            required
-            radius="md"
-          />
+          <div className="flex flex-col gap-2">
+            <TextInput
+              value={issuePermitNumber}
+              onChange={(e) => setIssuePermitNumber(e.target.value)}
+              label={translate("Issue Permit Number", "رقم إذن الصرف")}
+              placeholder={translate("Enter issue permit number", "أدخل رقم إذن الصرف")}
+              required
+              radius="md"
+            />
+            <Checkbox
+              checked={isSst}
+              onChange={(e) => setIsSst(e.currentTarget.checked)}
+              label={translate("SST issue permit", "إذن صرف SST")}
+            />
+            {isSst && (
+              <p className="text-xs text-gray-500">
+                {transaction.isSst && issuePermitNumber.trim() === originalPaperNumber
+                  ? translate(
+                      `Saved as ${transaction.issuePermitNumber}. Changing the paper number assigns a new -N suffix.`,
+                      `محفوظ كـ ${transaction.issuePermitNumber}. تغيير رقم الورقة يعيّن لاحقة -N جديدة.`,
+                    )
+                  : translate(
+                      "Saved as the paper number with an automatic -1, -2, … suffix.",
+                      "يُحفظ برقم الورقة مع لاحقة تلقائية -1، -2، …",
+                    )}
+              </p>
+            )}
+          </div>
           <DatePickerInput
             value={date}
             onChange={setDate}

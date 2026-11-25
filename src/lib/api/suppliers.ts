@@ -10,6 +10,13 @@ import type {
   CreateSupplierAddressDto,
   CreateSupplierContactPersonDto,
 } from "@/types/supplier";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
+
+export type SuppliersPrintFilters = {
+  keyword?: string;
+  classification?: string | null;
+  blacklisted?: boolean;
+};
 
 const suppliersApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateSupplierDto }) {
@@ -28,10 +35,26 @@ const suppliersApi = {
     return await privateRequest<PaginatedData<Supplier>>({ url: "suppliers", params, signal });
   },
 
-  async listAllToPrint({ privateRequest, signal }: { privateRequest: PrivateRequest; signal?: AbortSignal }) {
+  async listAllToPrint({
+    privateRequest,
+    signal,
+    filters = {},
+  }: {
+    privateRequest: PrivateRequest;
+    signal?: AbortSignal;
+    filters?: SuppliersPrintFilters;
+  }) {
     const result = await privateRequest<PaginatedData<Supplier>>({
       url: "suppliers",
-      params: { limit: Infinity, sort: "name" },
+      params: {
+        limit: Infinity,
+        sort: "name",
+        ...removeEmptyParams({
+          keyword: filters.keyword,
+          classification: filters.classification,
+          blacklisted: filters.blacklisted ? "true" : "",
+        }),
+      },
       signal,
     });
 

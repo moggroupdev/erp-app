@@ -100,6 +100,7 @@ export default function PurchasingMaterialsPriceHistoryPrintDocument({
             translate("Unit of Measurement", "وحدة القياس"),
             translate("Qty", "الكمية"),
             translate(`Unit Price (${currency})`, `سعر الوحدة (${currency})`),
+            translate(`Total Amount (${currency})`, `الإجمالي (${currency})`),
           ]}
           rows={sortedEntries.map((row, index) => [
             String(index + 1),
@@ -110,6 +111,7 @@ export default function PurchasingMaterialsPriceHistoryPrintDocument({
             unitLabel,
             formatQuantity(row.quantityOrdered),
             formatMoney(row.unitPrice),
+            formatMoney(row.unitPrice * row.quantityOrdered),
           ])}
           monoColumnIndexes={[1, 2]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}

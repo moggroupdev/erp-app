@@ -32,6 +32,7 @@ import {
 } from "@/lib/constants/enums/production-sub-departments";
 import useHasPermission from "@/hooks/use-has-permission";
 import ProtectedLink from "@/components/ui/protected-link";
+import SstPermitNumber from "@/components/ui/sst-permit-number";
 import type { DashboardPeriod, DashboardPeriodStats, DashboardQuickStats } from "@/types/reports";
 import DashboardPanel from "./dashboard-panel";
 import StatusDistribution from "./status-distribution";
@@ -430,7 +431,7 @@ function RecentPermits({ permits }: { permits: DashboardQuickStats["recentLegacy
                 <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                   <div className="min-w-0">
                     <p className="group-hover:text-haze-800 truncate text-sm font-semibold text-gray-800">
-                      {permit.issuePermitNumber}
+                      <SstPermitNumber number={permit.issuePermitNumber} isSst={permit.isSst} />
                     </p>
                     <p className="truncate text-xs text-gray-500">
                       {departmentLabel(permit.productionSubDepartment, locale, translate)}

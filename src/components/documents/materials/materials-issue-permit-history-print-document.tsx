@@ -1,5 +1,6 @@
 import { useI18n } from "@/lib/i18n/hooks";
 import { PrintDetail, PrintSectionHeading, PrintTable } from "../components";
+import SstPermitNumber from "@/components/ui/sst-permit-number";
 import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
@@ -123,9 +124,14 @@ export default function MaterialsIssuePermitHistoryPrintDocument({
                 : row.permitType === LEGACY_ISSUE_PERMIT_TYPES.MAINTENANCE_ORDER
                   ? row.maintenanceOrderNumber
                   : getLegacyIssuePermitTypeLabel(row.permitType, locale);
-            const permitNumber = row.isCancelled
-              ? `${row.issuePermitNumber} (${translate("Cancelled", "ملغي")})`
-              : row.issuePermitNumber;
+            const permitNumber = (
+              <span className="inline-flex items-center gap-1.5">
+                <SstPermitNumber number={row.issuePermitNumber} isSst={row.isSst} />
+                {row.isCancelled ? (
+                  <span>({translate("Cancelled", "ملغي")})</span>
+                ) : null}
+              </span>
+            );
 
             return [
               String(index + 1),
@@ -139,7 +145,7 @@ export default function MaterialsIssuePermitHistoryPrintDocument({
               row.notes?.trim() || "-",
             ];
           })}
-          monoColumnIndexes={[1, 5]}
+          monoColumnIndexes={[5]}
           emptyLabel={translate("No data available", "لا توجد بيانات")}
         />
       </section>

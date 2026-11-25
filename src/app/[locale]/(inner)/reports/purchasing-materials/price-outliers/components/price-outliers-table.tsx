@@ -46,6 +46,9 @@ export default function PriceOutliersTable({
                 <Table.Th className="text-gray-600">{translate("Code", "الكود")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("MPO Number", "رقم أمر التوريد")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Invoice Number", "رقم الفاتورة")}</Table.Th>
+                <Table.Th className="text-gray-600">
+                  {translate("Addition Permit", "إذن الإضافة")}
+                </Table.Th>
                 <Table.Th className="text-gray-600">{translate("Date", "التاريخ")}</Table.Th>
                 <Table.Th className="text-gray-600">{translate("Supplier", "المورد")}</Table.Th>
                 <Table.Th className="text-gray-600">
@@ -105,6 +108,20 @@ export default function PriceOutliersTable({
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-gray-600">{row.invoiceNumbers.join(", ")}</span>
                         <CopyButton text={row.invoiceNumbers.join(", ")} />
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </Table.Td>
+                  <Table.Td>
+                    {row.inventoryTransactionLegacyNumbers.length > 0 ? (
+                      <div className="flex max-w-64 flex-wrap gap-1.5">
+                        {row.inventoryTransactionLegacyNumbers.map((legacyNumber) => (
+                          <div key={legacyNumber} className="flex items-center gap-1">
+                            <span className="font-mono text-xs text-gray-600">{legacyNumber}</span>
+                            <CopyButton text={legacyNumber} />
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <span className="text-gray-400">-</span>

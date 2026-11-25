@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading } from "../components";
+import { PrintAppliedFilters, PrintSectionHeading } from "../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabelText } from "@/lib/helpers/format-dimension-label";
 import {
@@ -14,7 +14,7 @@ function countDimensions(list: ProductWithDimensions[]) {
 }
 
 function sortDimensions(dimensions: ProductDimension[]) {
-  return [...dimensions].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+  return [...dimensions].sort((a, b) => Number(b.isStandard) - Number(a.isStandard));
 }
 
 /**
@@ -44,7 +44,7 @@ type ProductBlock = {
   code: string;
   title: string;
   subcategory: string;
-  dimensions: { key: string; label: string }[];
+  dimensions: { key: string; label: string; isStandard: boolean }[];
 };
 
 /** Split blocks into two columns with roughly equal dimension-row heights. */
@@ -145,8 +145,9 @@ export default function DepartmentProductsPrintDocument({
             ? dimensions.map((dimension) => ({
                 key: `${product.code}-${dimension.id}`,
                 label: formatDimensionLabelText(dimension),
+                isStandard: dimension.isStandard,
               }))
-            : [{ key: product.code, label: "-" }],
+            : [{ key: product.code, label: "-", isStandard: false }],
       };
     });
   }
@@ -214,7 +215,14 @@ export default function DepartmentProductsPrintDocument({
                     </td>
                   )}
                   <td className={`${cellBorder({ isLastCol: false, isLastRow, bottomTone })} py-1`}>
-                    {dimension.label}
+                    <span className="inline-flex items-center gap-1">
+                      <span>{dimension.label}</span>
+                      {dimension.isStandard && (
+                        <span className="rounded bg-haze-50 px-1 py-0.5 text-[7px] font-medium text-haze-700">
+                          {translate("Standard", "نمطي")}
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className={`${cellBorder({ isLastCol: true, isLastRow, bottomTone })} py-1`}>&nbsp;</td>
                 </tr>
@@ -265,29 +273,7 @@ export default function DepartmentProductsPrintDocument({
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
-      {hasFilters && (
-        <>
-          <section className="flex break-inside-avoid flex-col gap-2.5">
-            <p className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
-              {translate("Applied filters", "الفلاتر المطبقة")}
-            </p>
-            <div
-              className={`grid gap-x-6 gap-y-3 ${
-                appliedFilters.length === 1
-                  ? "grid-cols-1"
-                  : appliedFilters.length === 2
-                    ? "grid-cols-2"
-                    : "grid-cols-2 sm:grid-cols-4"
-              }`}
-            >
-              {appliedFilters.map((filter) => (
-                <PrintDetail key={`${filter.label}-${filter.value}`} label={filter.label} value={filter.value} />
-              ))}
-            </div>
-          </section>
-          <hr className="border-gray-300" />
-        </>
-      )}
+      <PrintAppliedFilters filters={appliedFilters} />
 
       {groups.map((group) => (
         <section key={group.mainCategory.id} className="mb-6 space-y-2.5">

@@ -163,21 +163,6 @@ const productsApi = {
     });
   },
 
-  async setDefaultDimension({
-    privateRequest,
-    code,
-    dimensionId,
-  }: {
-    privateRequest: PrivateRequest;
-    code: string;
-    dimensionId: string;
-  }) {
-    return await privateRequest<ProductDimension>({
-      method: "PUT",
-      url: `products/${code}/dimensions/${dimensionId}/default`,
-    });
-  },
-
   // ========================= Production Routes =========================
 
   async setProductionRoutes({

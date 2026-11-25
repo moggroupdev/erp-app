@@ -40,12 +40,13 @@ export default function ProductDimensionModal({
   const [depth, setDepth] = useState<number | string>("");
   const [diameter, setDiameter] = useState<number | string>("");
   const [height, setHeight] = useState<number | string>("");
-  const [isDefault, setIsDefault] = useState(false);
+  const [isStandard, setIsStandard] = useState(false);
   const [notes, setNotes] = useState("");
 
   const isEditMode = !!dimensionToUpdate;
 
   const initialEditNotes = dimensionToUpdate?.notes ?? null;
+  const initialEditIsStandard = dimensionToUpdate?.isStandard ?? false;
 
   function reset() {
     setMode("rectangular");
@@ -53,7 +54,7 @@ export default function ProductDimensionModal({
     setDepth("");
     setDiameter("");
     setHeight("");
-    setIsDefault(isFirstDimension);
+    setIsStandard(isFirstDimension);
     setNotes("");
   }
 
@@ -67,12 +68,12 @@ export default function ProductDimensionModal({
       setDepth(dimensionToUpdate.depth ?? "");
       setDiameter(dimensionToUpdate.diameter ?? "");
       setHeight(dimensionToUpdate.height);
-      setIsDefault(dimensionToUpdate.isDefault);
+      setIsStandard(dimensionToUpdate.isStandard);
       setNotes(dimensionToUpdate.notes || "");
       return;
     }
 
-    setIsDefault(isFirstDimension);
+    setIsStandard(isFirstDimension);
     setNotes("");
   }, [opened, isFirstDimension, dimensionToUpdate]);
 
@@ -87,7 +88,7 @@ export default function ProductDimensionModal({
           depth: isRectangular ? Number(depth) : null,
           diameter: isRectangular ? null : Number(diameter),
           height: Number(height),
-          isDefault: isFirstDimension || isDefault,
+          isStandard,
           notes: notes.trim() || null,
         },
       });
@@ -95,7 +96,7 @@ export default function ProductDimensionModal({
     onSuccess: async (dimension) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(productCode) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.dimensions(productCode) });
-      if (isFirstDimension || isDefault) await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
+      if (isStandard) await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
       onCreated?.(dimension);
       handleClose();
     },
@@ -108,13 +109,19 @@ export default function ProductDimensionModal({
         privateRequest,
         code: productCode,
         dimensionId: dimensionToUpdate.id,
-        dto: { notes: notes.trim() || null },
+        dto: {
+          isStandard,
+          notes: notes.trim() || null,
+        },
       });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(productCode) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.products.dimensions(productCode) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.boms.detail(dimensionToUpdate!.id) });
+      if (isStandard !== initialEditIsStandard) {
+        await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
+      }
       handleClose();
     },
   });
@@ -163,12 +170,12 @@ export default function ProductDimensionModal({
   }
 
   const title = isEditMode
-    ? translate("Edit Dimension Notes", "تعديل ملاحظات المقاس")
+    ? translate("Edit Dimension", "تعديل المقاس")
     : translate("Add New Dimension", "إضافة مقاس جديد");
   const unit = translation.productDimensionUnit;
 
   const isReadyToSubmit = isEditMode
-    ? (notes.trim() || null) !== initialEditNotes
+    ? (notes.trim() || null) !== initialEditNotes || isStandard !== initialEditIsStandard
     : height !== "" && (mode === "rectangular" ? length !== "" && depth !== "" : diameter !== "");
 
   return (
@@ -255,14 +262,11 @@ export default function ProductDimensionModal({
           autosize
         />
 
-        {!isEditMode && (
-          <Checkbox
-            checked={isFirstDimension || isDefault}
-            onChange={(e) => setIsDefault(e.currentTarget.checked)}
-            label={translate("Set as default dimension", "تعيين كمقاس افتراضي")}
-            disabled={isFirstDimension}
-          />
-        )}
+        <Checkbox
+          checked={isStandard}
+          onChange={(e) => setIsStandard(e.currentTarget.checked)}
+          label={translate("Standard dimension", "مقاس نمطي")}
+        />
 
         <div className="flex gap-2">
           <Button onClick={handleClose} variant="light" color="dark" radius="md" fullWidth>

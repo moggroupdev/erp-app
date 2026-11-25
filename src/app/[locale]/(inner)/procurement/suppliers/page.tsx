@@ -17,10 +17,10 @@ import { staleTimes } from "@/lib/constants/stale-times";
 import removeEmptyParams from "@/lib/helpers/remove-empty-params";
 import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { type Supplier } from "@/types/supplier";
-import { formatDate, formatDateAndTime } from "@/lib/helpers/date-formaters";
+import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { Checkbox, Menu, Table, TextInput } from "@mantine/core";
 import PermissionGuard from "@/components/guards/permission";
-import { Pencil, Plus, Search, X } from "lucide-react";
+import { Pencil, Plus, Printer, Search, X } from "lucide-react";
 import LayoutBox from "@/components/ui/layout-box";
 import LoadingSection from "@/components/ui/sections/loading";
 import ErrorSection from "@/components/ui/sections/error";
@@ -31,11 +31,10 @@ import CopyButton from "@/components/ui/copy-button";
 import ProtectedLink from "@/components/ui/protected-link";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
-import PrintDocument from "@/components/ui/print-document";
-import SuppliersListPrintDocument from "@/components/documents/procurement/suppliers/suppliers-list-print-document";
 import SupplierModal from "@/components/global/data-modals/supplier-modal";
 import SelectSupplierClassification from "@/components/global/selections/enum-based/select-supplier-classification";
 import { getSupplierClassificationLabel } from "@/lib/constants/enums/supplier-classifications";
+import PrintSuppliersModal from "./components/print-suppliers-modal";
 
 const PAGE_TITLE = { en: "Suppliers", ar: "الموردون" };
 
@@ -43,7 +42,6 @@ const SUPPLIERS_PER_PAGE = 25;
 
 export default function Page() {
   const { locale, translate } = useI18n();
-  const printDate = formatDate(new Date(), locale);
 
   useDocumentTitle(translate(PAGE_TITLE.en, PAGE_TITLE.ar), "dashboard");
 
@@ -101,14 +99,6 @@ export default function Page() {
     placeholderData: keepPreviousData,
   });
 
-  // Only used for printing
-  const { data: allSuppliers, refetch: fetchAllSuppliers } = useQuery({
-    queryKey: queryKeys.suppliers.list({ limit: "list-all-to-print" }),
-    queryFn: ({ signal }) => suppliersApi.listAllToPrint({ privateRequest, signal }),
-    staleTime: staleTimes.suppliers,
-    enabled: false, // Disabled by default, will be enabled when the print button is clicked
-  });
-
   const errorMessage = error ? getErrorMessage(locale, error) : "";
 
   useEffect(() => {
@@ -131,6 +121,7 @@ export default function Page() {
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
   const [supplierToUpdate, setSupplierToUpdate] = useState<Supplier | null>(null);
+  const [printModalOpened, { open: openPrintModal, close: closePrintModal }] = useDisclosure(false);
 
   function handleOpenUpdateModal(supplier: Supplier) {
     setSupplierToUpdate(supplier);
@@ -147,15 +138,9 @@ export default function Page() {
             <RefetchButton isFetching={isFetching} onRefetch={() => refetch()} />
             <ActionsMenu>
               {canPrintSuppliersList && (
-                <PrintDocument
-                  buttonType="menu"
-                  title={translate(`Suppliers List - ${printDate}`, `قائمة الموردين - ${printDate}`)}
-                  onBeforePrint={async () => {
-                    if (!allSuppliers) await fetchAllSuppliers();
-                  }}
-                >
-                  {allSuppliers && <SuppliersListPrintDocument suppliers={allSuppliers} />}
-                </PrintDocument>
+                <Menu.Item leftSection={<Printer size={14} />} onClick={openPrintModal}>
+                  {translate("Print Suppliers List", "طباعة قائمة الموردين")}
+                </Menu.Item>
               )}
               {canPrintSuppliersList && canAddSupplier && <Menu.Divider />}
               {canAddSupplier && (
@@ -291,6 +276,16 @@ export default function Page() {
           </>
         ))
       )}
+
+      <PrintSuppliersModal
+        opened={printModalOpened}
+        close={closePrintModal}
+        filters={{
+          keyword: debouncedKeyword,
+          classification: classificationFilter,
+          blacklisted: blacklistedFilter,
+        }}
+      />
 
       <SupplierModal
         opened={modalOpened}

@@ -2,10 +2,11 @@
 
 import ProtectedLink from "@/components/ui/protected-link";
 import Link from "next/link";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Menu, Table } from "@mantine/core";
-import { Pencil, Plus } from "lucide-react";
+import { Alert, Menu, Table } from "@mantine/core";
+import { AlertTriangle, FilePenLine, Pencil, Plus } from "lucide-react";
 import { useI18n, useLocaleHref } from "@/lib/i18n/hooks";
 import useDocumentTitle from "@/hooks/use-document-title";
 import usePrivateRequest from "@/hooks/use-private-request";
@@ -37,6 +38,7 @@ import PrintDocument from "@/components/ui/print-document";
 import MaterialPurchaseOrderPrintDocument from "@/components/documents/procurement/mpos/material-purchase-order-print-document";
 import OrderDetails from "./components/order-details";
 import ItemRequisitionAllocationsModal from "./components/item-requisition-allocations-modal";
+import UpdateOrderItemModal from "./components/update-order-item-modal";
 import OrderInvoicesSection from "@/components/global/sections/order-invoices";
 
 const PAGE_TITLE = { en: "Materials Purchase Order", ar: "أمر توريد خامات" };
@@ -55,6 +57,8 @@ export default function Page() {
   const canAddSupplierInvoice = useHasPermission(PERMISSIONS.ADD_SUPPLIER_INVOICE);
   const canAddReceipt = useHasPermission(PERMISSIONS.ADD_MATERIAL_PURCHASE_RECEIPT);
   const canUpdateOrder = useHasPermission(PERMISSIONS.UPDATE_MATERIAL_PURCHASE_ORDER);
+  const canCorrectOrderItem = useHasPermission(PERMISSIONS.CORRECT_MATERIAL_PURCHASE_ORDER_ITEM);
+  const [correctionMode, setCorrectionMode] = useState(false);
 
   function getMainCategoryTitle(subCategoryId: string) {
     const sub = helpers.getMaterialCategorySubById(subCategoryId);
@@ -115,6 +119,7 @@ export default function Page() {
   const subtotal = order ? Number(order.totalAmount) : 0;
   const vat = subtotal * VAT_RATE;
   const grandTotal = subtotal + vat;
+  const showCorrection = canCorrectOrderItem && !!order && !order.cancelledAt && correctionMode;
 
   return (
     <LayoutBox
@@ -153,6 +158,21 @@ export default function Page() {
                   <MaterialPurchaseOrderPrintDocument order={order} />
                 </PrintDocument>
               )}
+              {canCorrectOrderItem && order && !order.cancelledAt && (
+                <>
+                  <Menu.Divider />
+                  <Menu.Label>{translate("Danger Zone", "منطقة الخطر")}</Menu.Label>
+                  <Menu.Item
+                    color="clay"
+                    leftSection={<FilePenLine size={14} />}
+                    onClick={() => setCorrectionMode((current) => !current)}
+                  >
+                    {correctionMode
+                      ? translate("Exit correction mode", "إنهاء وضع التصحيح")
+                      : translate("Correction mode", "وضع التصحيح")}
+                  </Menu.Item>
+                </>
+              )}
             </ActionsMenu>
           </div>
         ),
@@ -177,6 +197,17 @@ export default function Page() {
             <section className="mt-4 flex flex-col gap-4">
               <h4 className="text-lg font-semibold text-gray-900">{translate("Items", "البنود")}</h4>
 
+              {showCorrection && (
+                <Alert radius="md" color="ochre" variant="light" icon={<AlertTriangle size={16} />}>
+                  <p className="text-sm">
+                    {translate(
+                      "Corrections rewrite the linked receipt and inventory lines.",
+                      "التصحيح يعيد كتابة بنود الاستلام وإذن الإضافة المرتبطة.",
+                    )}
+                  </p>
+                </Alert>
+              )}
+
               {order.items.length === 0 ? (
                 <EmptySection message={translate("No items in this order", "لا توجد بنود في هذا الأمر")} />
               ) : (
@@ -198,6 +229,7 @@ export default function Page() {
                         </Table.Th>
                         <Table.Th>{translate("Requisitions", "طلبات الشراء")}</Table.Th>
                         <Table.Th>{translate("Quotation", "عرض السعر")}</Table.Th>
+                        {showCorrection && <Table.Th>{translate("Actions", "إجراءات")}</Table.Th>}
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
@@ -281,6 +313,15 @@ export default function Page() {
                                       <EmptyValue />
                                     )}
                                   </Table.Td>
+                                  {showCorrection && (
+                                    <Table.Td>
+                                      <UpdateOrderItemModal
+                                        order={order}
+                                        item={item}
+                                        excludeMaterialCodes={order.items.map((row) => row.materialCode)}
+                                      />
+                                    </Table.Td>
+                                  )}
                                 </Table.Tr>
                               </>
                             )}
@@ -296,6 +337,7 @@ export default function Page() {
                         <Table.Th>{formatMoney(subtotal)}</Table.Th>
                         <Table.Th />
                         <Table.Th />
+                        {showCorrection && <Table.Th />}
                       </Table.Tr>
                       <Table.Tr className="font-medium text-gray-800">
                         <Table.Th colSpan={7} className="text-end">
@@ -304,17 +346,16 @@ export default function Page() {
                         <Table.Th>{formatMoney(vat)}</Table.Th>
                         <Table.Th />
                         <Table.Th />
+                        {showCorrection && <Table.Th />}
                       </Table.Tr>
                       <Table.Tr className="font-semibold text-gray-900">
                         <Table.Th colSpan={7} className="text-end">
-                          {translate(
-                            `Grand Total (${translation.currency})`,
-                            `الإجمالي الكلي (${translation.currency})`,
-                          )}
+                          {translate(`Grand Total (${translation.currency})`, `الإجمالي الكلي (${translation.currency})`)}
                         </Table.Th>
                         <Table.Th>{formatMoney(grandTotal)}</Table.Th>
                         <Table.Th />
                         <Table.Th />
+                        {showCorrection && <Table.Th />}
                       </Table.Tr>
                     </Table.Tfoot>
                   </Table>

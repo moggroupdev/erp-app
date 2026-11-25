@@ -1,5 +1,5 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintDetail, PrintSectionHeading, PrintTable } from "../components";
+import { PrintAppliedFilters, PrintSectionHeading, PrintTable } from "../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatDimensionLabel } from "@/lib/helpers/format-dimension-label";
 import { getProductSourceTypeLabel } from "@/lib/constants/enums/product-source-types";
@@ -12,7 +12,7 @@ function countDimensions(list: ProductWithDimensions[]) {
 }
 
 function sortDimensions(dimensions: ProductDimension[]) {
-  return [...dimensions].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+  return [...dimensions].sort((a, b) => Number(b.isStandard) - Number(a.isStandard));
 }
 
 export default function ProductsListPrintDocument({
@@ -58,7 +58,7 @@ export default function ProductsListPrintDocument({
     translate("Code", "الكود"),
     translate("Product Name", "اسم المنتج"),
     ...(includeSubcategory ? [translate("Subcategory", "الفئة الفرعية")] : []),
-    translate("Standard Dimensions", "الأبعاد النمطية") + ` (${translation.productDimensionUnit})`,
+    translate("Dimensions", "الأبعاد") + ` (${translation.productDimensionUnit})`,
     translate("Source Type", "نوع المصدر"),
   ];
 
@@ -71,7 +71,14 @@ export default function ProductsListPrintDocument({
     return (
       <div className="flex flex-col gap-1">
         {sortDimensions(dimensions).map((dimension) => (
-          <span key={dimension.id}>{formatDimensionLabel(dimension)}</span>
+          <span key={dimension.id} className="inline-flex items-center gap-1.5">
+            <span>{formatDimensionLabel(dimension)}</span>
+            {dimension.isStandard && (
+              <span className="rounded bg-haze-50 px-1 py-0.5 text-[9px] font-medium text-haze-700">
+                {translate("Standard", "نمطي")}
+              </span>
+            )}
+          </span>
         ))}
       </div>
     );
@@ -142,29 +149,7 @@ export default function ProductsListPrintDocument({
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
-      {hasFilters && (
-        <>
-          <section className="flex break-inside-avoid flex-col gap-2.5">
-            <p className="text-[10px] font-semibold tracking-wide text-gray-500 uppercase">
-              {translate("Applied filters", "الفلاتر المطبقة")}
-            </p>
-            <div
-              className={`grid gap-x-6 gap-y-3 ${
-                appliedFilters.length === 1
-                  ? "grid-cols-1"
-                  : appliedFilters.length === 2
-                    ? "grid-cols-2"
-                    : "grid-cols-2 sm:grid-cols-4"
-              }`}
-            >
-              {appliedFilters.map((filter) => (
-                <PrintDetail key={`${filter.label}-${filter.value}`} label={filter.label} value={filter.value} />
-              ))}
-            </div>
-          </section>
-          <hr className="border-gray-300" />
-        </>
-      )}
+      <PrintAppliedFilters filters={appliedFilters} />
 
       {groups.map((group) => (
         <section key={group.mainCategory.id} className="mb-6 space-y-2.5">

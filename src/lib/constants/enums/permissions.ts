@@ -9,6 +9,7 @@ export const PERMISSION_VALUES = [
   "add_user",
   "read_users",
   "lookup_users",
+  "print_users_list",
   "update_user",
   "delete_user",
   "add_role",
@@ -29,6 +30,7 @@ export const PERMISSION_VALUES = [
   "read_customers",
   "update_customer",
   "merge_customers",
+  "print_customers_list",
   "read_contracts",
   "add_legacy_contract",
   "update_legacy_contract",
@@ -83,6 +85,7 @@ export const PERMISSION_VALUES = [
   "read_material_purchase_orders",
   "add_material_purchase_order",
   "update_material_purchase_order",
+  "correct_material_purchase_order_item",
   "add_material_purchase_receipt",
   "read_supplier_invoices",
   "add_supplier_invoice",
@@ -194,6 +197,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Lookup Users",
       ar: "البحث عن المستخدمين",
+    },
+  },
+  print_users_list: {
+    value: "print_users_list",
+    label: {
+      en: "Print Users List",
+      ar: "طباعة قائمة المستخدمين",
     },
   },
   update_user: {
@@ -418,6 +428,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Merge Customers",
       ar: "دمج العملاء",
+    },
+  },
+  print_customers_list: {
+    value: "print_customers_list",
+    label: {
+      en: "Print Customers List",
+      ar: "طباعة قائمة العملاء",
     },
   },
   read_inquiries: {
@@ -678,6 +695,13 @@ export const PERMISSION_LABELS: LocalizedEntity<Permission> = {
     label: {
       en: "Update Material Purchase Order",
       ar: "تحديث أمر توريد مواد",
+    },
+  },
+  correct_material_purchase_order_item: {
+    value: "correct_material_purchase_order_item",
+    label: {
+      en: "Correct Material Purchase Order Item",
+      ar: "تصحيح بند أمر توريد مواد",
     },
   },
   add_material_purchase_receipt: {
@@ -971,6 +995,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "add_user",
       "read_users",
       "lookup_users",
+      "print_users_list",
       "update_user",
       "delete_user",
       "add_role",
@@ -992,6 +1017,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_customers",
       "update_customer",
       "merge_customers",
+      "print_customers_list",
       "read_contracts",
       "add_legacy_contract",
       "update_legacy_contract",
@@ -1072,6 +1098,7 @@ export const PERMISSION_DOMAIN_GROUPS: PermissionDomainGroup[] = [
       "read_material_purchase_orders",
       "add_material_purchase_order",
       "update_material_purchase_order",
+      "correct_material_purchase_order_item",
       "add_material_purchase_receipt",
       "read_supplier_invoices",
       "add_supplier_invoice",

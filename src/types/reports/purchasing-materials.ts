@@ -377,6 +377,7 @@ export type PurchasingMaterialsPriceOutlierRow = {
   supplierId: string;
   supplierName: string;
   invoiceNumbers: string[];
+  inventoryTransactionLegacyNumbers: string[];
   enteredUnit: MaterialUnit;
   enteredUnitPrice: number;
   referenceMedian: number | null;

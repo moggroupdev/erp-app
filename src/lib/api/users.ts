@@ -1,6 +1,13 @@
 import type { PrivateRequest, Dictionary } from "@/types/api";
 import type { PaginatedData } from "@/types/global";
 import type { User, UserWithCreator, CreateUserDto, UpdateUserDto } from "@/types/user";
+import removeEmptyParams from "@/lib/helpers/remove-empty-params";
+
+export type UsersPrintFilters = {
+  keyword?: string;
+  departmentId?: string | null;
+  roleId?: string | null;
+};
 
 const usersApi = {
   async create({ privateRequest, dto }: { privateRequest: PrivateRequest; dto: CreateUserDto }) {
@@ -17,6 +24,32 @@ const usersApi = {
     signal: AbortSignal;
   }) {
     return await privateRequest<PaginatedData<User>>({ url: "users", params, signal });
+  },
+
+  async listAllToPrint({
+    privateRequest,
+    signal,
+    filters = {},
+  }: {
+    privateRequest: PrivateRequest;
+    signal?: AbortSignal;
+    filters?: UsersPrintFilters;
+  }) {
+    const result = await privateRequest<PaginatedData<User>>({
+      url: "users",
+      params: {
+        limit: Infinity,
+        sort: "name",
+        ...removeEmptyParams({
+          keyword: filters.keyword,
+          departmentId: filters.departmentId,
+          roleId: filters.roleId,
+        }),
+      },
+      signal,
+    });
+
+    return result.data;
   },
 
   async lookup({

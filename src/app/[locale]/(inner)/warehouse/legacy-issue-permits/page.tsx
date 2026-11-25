@@ -31,7 +31,6 @@ import ErrorSection from "@/components/ui/sections/error";
 import EmptySection from "@/components/ui/sections/empty";
 import PaginationHandler from "@/components/ui/pagination-handler";
 import NoResultsSection from "@/components/ui/sections/no-results";
-import CopyButton from "@/components/ui/copy-button";
 import RefetchButton from "@/components/ui/refetch-button";
 import ActionsMenu from "@/components/ui/actions-menu";
 
@@ -234,8 +233,11 @@ export default function Page() {
                           >
                             {transaction.issuePermitNumber}
                           </ProtectedLink>
-                          <CopyButton text={transaction.issuePermitNumber} />
-
+                          {transaction.isSst && (
+                            <Badge size="sm" variant="light" color="plum" radius="md">
+                              SST
+                            </Badge>
+                          )}
                           {transaction.isCancelled && (
                             <Badge size="sm" variant="light" color="clay" radius="md">
                               {translate("Cancelled", "ملغي")}

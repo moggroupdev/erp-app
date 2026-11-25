@@ -1,8 +1,9 @@
 import { useI18n } from "@/lib/i18n/hooks";
-import { PrintSectionHeading, PrintTable } from "../components";
+import { PrintAppliedFilters, PrintSectionHeading, PrintTable } from "../components";
 import { formatDateAndTime } from "@/lib/helpers/date-formaters";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { formatQuantity } from "@/lib/helpers/format-quantity";
+import { getMaterialTypeLabel } from "@/lib/constants/enums/material-types";
 import { getMaterialUnitLabel } from "@/lib/constants/enums/material-units";
 import type { Material } from "@/types/material";
 import type { MaterialCategoryMain, MaterialCategorySub } from "@/types/categories";
@@ -11,28 +12,26 @@ export default function MaterialsListPrintDocument({
   materials,
   mainCategories,
   getSubCategory,
-  heading,
-  includeQuantity = true,
-  includeUnitPrice = true,
+  includeQuantity = false,
+  includeUnitPrice = false,
   includeSubcategory = true,
   includeEmptyQuantityColumn = false,
-  showMainCategoryHeadings = true,
+  appliedFilters = [],
 }: {
   materials: Material[];
   mainCategories: MaterialCategoryMain[];
   getSubCategory: (id: string) => MaterialCategorySub | null;
-  heading?: string;
   includeQuantity?: boolean;
   includeUnitPrice?: boolean;
   includeSubcategory?: boolean;
   includeEmptyQuantityColumn?: boolean;
-  showMainCategoryHeadings?: boolean;
+  appliedFilters?: { label: string; value: string }[];
 }) {
+  const hasFilters = appliedFilters.length > 0;
   const { locale, translate, translation } = useI18n();
   const currency = translation.currency;
   const logoSrc = typeof window !== "undefined" ? `${window.location.origin}/images/logo.png` : "/images/logo.png";
   const printedAt = formatDateAndTime(new Date(), locale);
-  const documentHeading = heading ?? translate("All Materials", "جميع المواد");
 
   // Group materials by main category
   const groups: { mainCategory: MaterialCategoryMain; materials: Material[] }[] = [];
@@ -56,8 +55,8 @@ export default function MaterialsListPrintDocument({
 
   const headers = [
     translate("Code", "الكود"),
-    translate("Legacy Code", "الكود السابق"),
     translate("Material Name", "اسم المادة"),
+    translate("Material Type", "نوع المادة"),
     ...(includeSubcategory ? [translate("Subcategory", "الفئة الفرعية")] : []),
     translate("Unit", "الوحدة"),
     ...(includeQuantity ? [translate("Qty", "الكمية")] : []),
@@ -80,8 +79,8 @@ export default function MaterialsListPrintDocument({
   function materialRows(list: Material[]): string[][] {
     return sortMaterials(list).map((m) => [
       m.code,
-      m.legacyCode || "-",
       m.title,
+      getMaterialTypeLabel(m.materialType, locale),
       ...(includeSubcategory ? [getSubCategory(m.subCategoryId)?.title ?? "-"] : []),
       getMaterialUnitLabel(m.unitOfMeasurement, locale),
       ...(includeQuantity ? [formatQuantity(m.quantity)] : []),
@@ -90,8 +89,9 @@ export default function MaterialsListPrintDocument({
     ]);
   }
 
-  const noWrapIndexes = [0, 1];
-  let nextCol = 3;
+  const noWrapIndexes = [0];
+  let nextCol = 2; // after code + name
+  noWrapIndexes.push(nextCol++); // material type
   if (includeSubcategory) noWrapIndexes.push(nextCol++);
   noWrapIndexes.push(nextCol++); // unit
   if (includeQuantity) noWrapIndexes.push(nextCol++);
@@ -105,23 +105,27 @@ export default function MaterialsListPrintDocument({
           <p className="text-[10px] font-medium tracking-wide text-gray-500 uppercase">
             {translate("Materials List", "قائمة المواد")}
           </p>
-          <h1 className="text-2xl font-semibold">{documentHeading}</h1>
+          <h1 className="text-2xl font-semibold">
+            {hasFilters
+              ? translate("Selected Materials", "المواد المحددة")
+              : translate("All Materials", "جميع المواد")}
+          </h1>
           <p className="text-[10px] text-gray-500">{printedAt}</p>
         </div>
         <img src={logoSrc} alt="" width={60} height={60} className="h-[60px] w-[60px] shrink-0 rounded object-contain" />
       </header>
 
+      <PrintAppliedFilters filters={appliedFilters} />
+
       {groups.map((group) => (
         <section key={group.mainCategory.id} className="mb-4 space-y-2.5">
-          {showMainCategoryHeadings && (
-            <div className="w-full break-after-avoid rounded-md bg-gray-100 px-3 py-2 text-center">
-              <h2 className="text-sm font-semibold text-gray-900">{group.mainCategory.title}</h2>
-            </div>
-          )}
+          <div className="w-full break-after-avoid rounded-md bg-gray-100 px-3 py-2 text-center">
+            <h2 className="text-sm font-semibold text-gray-900">{group.mainCategory.title}</h2>
+          </div>
           <PrintTable
             headers={headers}
             rows={materialRows(group.materials)}
-            monoColumnIndexes={[0, 1]}
+            monoColumnIndexes={[0]}
             noWrapIndexes={noWrapIndexes}
             tableClassName="break-before-avoid text-[8px] [&_thead_tr]:text-[8px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
@@ -144,13 +148,20 @@ export default function MaterialsListPrintDocument({
           <PrintTable
             headers={headers}
             rows={materialRows(uncategorized)}
-            monoColumnIndexes={[0, 1]}
+            monoColumnIndexes={[0]}
             noWrapIndexes={noWrapIndexes}
             tableClassName="break-before-avoid text-[8px] [&_thead_tr]:text-[8px]"
             emptyLabel={translate("No materials", "لا توجد مواد")}
           />
         </section>
       )}
+
+      <footer className="mt-1 flex break-inside-avoid items-center justify-between gap-4 border-t border-gray-300 pt-3 text-[10px] text-gray-700">
+        <span className="font-semibold tracking-wide uppercase">{translate("Document Total", "إجمالي المستند")}</span>
+        <span>
+          <span className="font-semibold text-gray-900">{materials.length}</span> {translate("materials", "مادة")}
+        </span>
+      </footer>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Button, Table, TextInput } from "@mantine/core";
@@ -30,7 +30,7 @@ import DatePickerInput from "@/components/ui/date-picker-input";
 import SelectAuditAction from "@/components/global/selections/enum-based/select-audit-action";
 import SelectUser from "@/components/global/selections/remote-based/select-user";
 import SelectAuditedTable from "./components/select-audited-table";
-import AuditLogRow from "./components/audit-log-row";
+import AuditLogRow, { type AuditLogRowGroup } from "./components/audit-log-row";
 
 const PAGE_TITLE = { en: "Audit Logs", ar: "سجلات التدقيق" };
 
@@ -38,6 +38,48 @@ const LOGS_PER_PAGE = 50;
 
 function hasActiveFilters(filters: Record<string, string | null>) {
   return Object.entries(filters).some(([key, value]) => key !== "page" && !!value);
+}
+
+/** Mark consecutive same-operationId runs for rowspan merging and alternating stripe bands. */
+function annotateOperationGroups(logs: AuditLog[]): AuditLogRowGroup[] {
+  const groups: AuditLogRowGroup[] = [];
+  let stripeIndex: 0 | 1 = 0;
+  let i = 0;
+
+  while (i < logs.length) {
+    const operationId = logs[i].operationId;
+
+    if (!operationId) {
+      groups.push({ rowSpan: 1, showOperationCell: true, stripeIndex });
+      stripeIndex = stripeIndex === 0 ? 1 : 0;
+      i += 1;
+      continue;
+    }
+
+    let j = i + 1;
+    while (j < logs.length && logs[j].operationId === operationId) {
+      j += 1;
+    }
+
+    const runLength = j - i;
+    groups.push({
+      rowSpan: runLength,
+      showOperationCell: true,
+      stripeIndex,
+    });
+    for (let k = i + 1; k < j; k += 1) {
+      groups.push({
+        rowSpan: 1,
+        showOperationCell: false,
+        stripeIndex,
+      });
+    }
+
+    stripeIndex = stripeIndex === 0 ? 1 : 0;
+    i = j;
+  }
+
+  return groups;
 }
 
 export default function Page() {
@@ -186,6 +228,11 @@ export default function Page() {
 
   const filtersActive = hasActiveFilters(urlFilters);
 
+  const operationGroups = useMemo(
+    () => (paginatedLogs?.data ? annotateOperationGroups(paginatedLogs.data) : []),
+    [paginatedLogs?.data],
+  );
+
   return (
     <LayoutBox
       header={{
@@ -310,20 +357,26 @@ export default function Page() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <Table className="text-nowrap" verticalSpacing="xs" highlightOnHover>
+              <Table className="text-nowrap" verticalSpacing="xs">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>{translate("Time", "الوقت")}</Table.Th>
-                    <Table.Th>{translate("Actor", "المستخدم")}</Table.Th>
-                    <Table.Th>{translate("Action", "الإجراء")}</Table.Th>
-                    <Table.Th>{translate("Table", "الجدول")}</Table.Th>
-                    <Table.Th>{translate("Record", "السجل")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200" w={0} />
+                    <Table.Th className="border-e border-gray-200">{translate("Time", "الوقت")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Actor", "المستخدم")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Action", "الإجراء")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Table", "الجدول")}</Table.Th>
+                    <Table.Th className="border-e border-gray-200">{translate("Record", "السجل")}</Table.Th>
                     <Table.Th>{translate("Operation", "العملية")}</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {paginatedLogs.data.map((log) => (
-                    <AuditLogRow key={log.id} log={log} />
+                  {paginatedLogs.data.map((log, index) => (
+                    <AuditLogRow
+                      key={log.id}
+                      log={log}
+                      group={operationGroups[index]}
+                      onFilterByOperationId={setOperationIdFilter}
+                    />
                   ))}
                 </Table.Tbody>
               </Table>

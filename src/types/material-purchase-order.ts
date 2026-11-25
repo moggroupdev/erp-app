@@ -163,6 +163,37 @@ export type CreateMaterialPurchaseOrderDto = {
 
 export type UpdateMaterialPurchaseOrderDto = Omit<CreateMaterialPurchaseOrderDto, "supplierId">;
 
+export type UpdateMaterialPurchaseOrderItemDto = {
+  materialCode: string;
+  unitOfMeasurementSelected: MaterialUnit;
+  quantityOrdered: number;
+  unitPrice: number;
+  notes: string | null;
+  updateCompletedAt?: boolean;
+};
+
+export type MaterialPurchaseOrderItemUpdateContext = {
+  orderCode: string;
+  cancelled: boolean;
+  hasSupplierInvoice: boolean;
+  receiptLineCount: number;
+  linkedReceipt: {
+    receiptCode: string;
+    quantityReceived: number;
+    quantityRejected: number;
+    unitOfMeasurementSelected: MaterialUnit;
+    inventoryTransactionCode: string | null;
+  } | null;
+  item: {
+    id: string;
+    materialCode: string;
+    unitOfMeasurementSelected: MaterialUnit;
+    quantityOrdered: number;
+    unitPrice: number;
+    notes: string | null;
+  };
+};
+
 // =============== Material Purchase Receipts ===============
 
 export type MaterialPurchaseReceipt = {

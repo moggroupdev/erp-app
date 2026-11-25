@@ -18,6 +18,7 @@ export type LegacyIssuePermit = {
   maintenanceOrderType: LegacyIssuePermitMaintenanceOrderType | null;
   customerId: string | null;
   hasMultipleCustomers: boolean;
+  isSst: boolean;
   isCancelled: boolean;
   notes: string | null;
   createdAt: Date;
@@ -54,6 +55,7 @@ export type LegacyIssuePermitDetailed = Omit<LegacyIssuePermit, "creatorId" | "c
 export type LegacyIssuePermitNeighbor = {
   id: string;
   issuePermitNumber: string;
+  isSst: boolean;
 };
 
 export type LegacyIssuePermitNeighbors = {
@@ -83,6 +85,7 @@ export type CreateLegacyIssuePermitDto = {
   maintenanceOrderType: LegacyIssuePermitMaintenanceOrderType | null;
   customerId: string | null;
   hasMultipleCustomers?: boolean;
+  isSst?: boolean;
   isCancelled?: boolean;
   notes: string | null;
   items: CreateLegacyIssuePermitItemDto[];

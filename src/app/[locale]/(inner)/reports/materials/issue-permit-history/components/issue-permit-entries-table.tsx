@@ -5,7 +5,6 @@ import { PERMISSIONS } from "@/lib/constants/enums/permissions";
 import { useMemo } from "react";
 import { Badge, Table } from "@mantine/core";
 import { Table2 } from "lucide-react";
-import CopyButton from "@/components/ui/copy-button";
 import { useI18n } from "@/lib/i18n/hooks";
 import { getMaterialUnitLabel, type MaterialUnit } from "@/lib/constants/enums/material-units";
 import {
@@ -87,7 +86,11 @@ export default function IssuePermitEntriesTable({ data }: { data: TableEntry[] }
                         >
                           {row.issuePermitNumber}
                         </ProtectedLink>
-                        <CopyButton text={row.issuePermitNumber} />
+                        {row.isSst && (
+                          <Badge size="sm" variant="light" color="plum" radius="sm">
+                            SST
+                          </Badge>
+                        )}
                         {row.isCancelled && (
                           <Badge size="sm" variant="light" color="clay" radius="sm">
                             {translate("Cancelled", "ملغي")}
