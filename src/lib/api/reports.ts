@@ -285,6 +285,23 @@ const reportsApi = {
       });
     },
 
+    async downloadRequisitionFollowUpExcel({
+      privateRequest,
+      from,
+      to,
+    }: {
+      privateRequest: PrivateRequest;
+      from: string;
+      to: string;
+    }) {
+      return await privateRequest<null>({
+        url: "reports/purchasing-materials/requisition-follow-up/excel",
+        params: { from, to },
+        download: true,
+        filename: "requisition-follow-up.xlsx",
+      });
+    },
+
     async getRequisitionHistory({
       privateRequest,
       materialCode,
